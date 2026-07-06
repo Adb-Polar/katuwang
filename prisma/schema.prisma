@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  TEACHER_MODERATOR
+  STUDENT_TUTOR
+  STUDENT_LEARNER
+}
+
+enum GradeLevel {
+  GRADE_7
+  GRADE_8
+  GRADE_9
+  GRADE_10
+  GRADE_11
+  GRADE_12
+}
+
+enum TutorStatus {
+  PENDING      // Registered, no assessments taken yet
+  PARTIAL      // Some subjects certified, others pending
+  CERTIFIED    // All applied subjects passed
+  REJECTED     // Failed all assessments
+}
+
+enum SubjectArea {
+  MATH
+  ENGLISH
+  SCIENCE
+  FILIPINO
+  ARALING_PANLIPUNAN
+  TLE
+  MAPEH
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  anonymousId   String    @unique   // TUT-0001 or STU-0001
+  fullName      String
+  email         String    @unique
+  password      String                  // bcrypt hash
+  role          Role
+  gradeLevel    GradeLevel
+  section       String
+  contactInfo   String?
+  consentGiven  Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Tutor-specific
+  tutorProfile  TutorProfile?
+
+  // Relations
+  sessions      Session[]
+  assessments   Assessment[]
+
+  @@map("users")
+}
+
+// ─── Tutor Profile ────────────────────────────────────────────────────────────
+
+model TutorProfile {
+  id              String      @id @default(cuid())
+  userId          String      @unique
+  user            User        @relation(fields: [userId], references: [id])
+  status          TutorStatus @default(PENDING)
+  
+  // Subjects the tutor applied for (multi-select at registration)
+  appliedSubjects SubjectApplication[]
+  
+  // Availability schedule (stored as JSON: [{day, startTime, endTime}])
+  availability    Json
+
+  @@map("tutor_profiles")
+}
+
+// ─── Subject Application (per-subject certification tracking) ─────────────────
+
+model SubjectApplication {
+  id              String      @id @default(cuid())
+  tutorProfileId  String
+  tutorProfile    TutorProfile @relation(fields: [tutorProfileId], references: [id])
+  subject         SubjectArea
+  certified       Boolean     @default(false)
+  attemptedAt     DateTime?
+  certifiedAt     DateTime?
+
+  @@unique([tutorProfileId, subject])
+  @@map("subject_applications")
+}
+
+// ─── ID Counter (for sequential anonymous IDs) ────────────────────────────────
+
+model IdCounter {
+  role    String  @id  // "TUTOR" or "LEARNER"
+  count   Int     @default(0)
+
+  @@map("id_counters")
+}
+
+// ─── Session (NextAuth / JWT fallback stub) ───────────────────────────────────
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+
+  @@map("sessions")
+}
+
+// ─── Assessment (Sprint 2 stub) ──────────────────────────────────────────────
+
+model Assessment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@map("assessments")
+}

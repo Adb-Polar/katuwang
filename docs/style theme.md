@@ -1,9 +1,7 @@
-@import "tailwindcss";
-@plugin "daisyui";
-
+```css
 @plugin "daisyui/theme" {
   name: "katuwang theme";
-  default: true;
+  default: false;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(98% 0.002 247.839);
@@ -35,12 +33,4 @@
   --depth: 0;
   --noise: 0;
 }
-
-@theme inline {
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-body {
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-}
+```

@@ -1,0 +1,57 @@
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+export const metadata = {
+  title: "Moderator Dashboard | Katuwang",
+};
+
+export default async function ModeratorDashboard() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "TEACHER_MODERATOR" && session.user.role !== "ADMIN") {
+    redirect("/unauthorized");
+  }
+
+  return (
+    <main className="min-h-screen bg-base-200 text-base-content font-sans p-4 md:p-6">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <header className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card-body flex-row justify-between items-center p-6">
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold tracking-tight">Moderator Dashboard</h1>
+              <p className="text-xs text-base-content/60">
+                Audit matches, monitor tutor exams, and manage reports.
+              </p>
+            </div>
+            <span className="badge badge-info text-white font-semibold py-3 px-3">
+              Teacher Moderator
+            </span>
+          </div>
+        </header>
+
+        <section className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card-body gap-4 p-6">
+            <h2 className="card-title text-sm font-bold">Moderator Panel</h2>
+            <p className="text-xs text-base-content/70">
+              Welcome, {session.user.fullName}. You can review matching logs and flag inappropriate contents.
+            </p>
+            <div className="card-actions pt-2">
+              <Link
+                href="/api/auth/signout"
+                className="btn btn-neutral btn-outline btn-sm text-error hover:btn-error hover:text-white transition text-xs"
+              >
+                Log Out
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
