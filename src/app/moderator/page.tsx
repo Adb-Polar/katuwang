@@ -25,13 +25,9 @@ export default async function ModeratorDashboard() {
           <div className="card-body flex-row justify-between items-center p-6">
             <div className="space-y-1">
               <h1 className="text-xl font-bold tracking-tight">Moderator Dashboard</h1>
-              <p className="text-xs text-base-content/60">
-                Audit matches, monitor tutor exams, and manage reports.
-              </p>
+              <p className="text-xs text-base-content/60">Audit matches, monitor tutor exams, and manage reports.</p>
             </div>
-            <span className="badge badge-info text-white font-semibold py-3 px-3">
-              Teacher Moderator
-            </span>
+            <span className="badge badge-info text-white font-semibold py-3 px-3">Teacher Moderator</span>
           </div>
         </header>
 

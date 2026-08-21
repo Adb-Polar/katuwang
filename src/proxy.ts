@@ -11,25 +11,15 @@ export default withAuth(
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    if (
-      pathname.startsWith("/moderator") &&
-      token?.role !== "TEACHER_MODERATOR" &&
-      token?.role !== "ADMIN"
-    ) {
+    if (pathname.startsWith("/moderator") && token?.role !== "TEACHER_MODERATOR" && token?.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    if (
-      pathname.startsWith("/tutor") &&
-      token?.role !== "STUDENT_TUTOR"
-    ) {
+    if (pathname.startsWith("/tutor") && token?.role !== "STUDENT_TUTOR") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    if (
-      pathname.startsWith("/learner") &&
-      token?.role !== "STUDENT_LEARNER"
-    ) {
+    if (pathname.startsWith("/learner") && token?.role !== "STUDENT_LEARNER") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
@@ -37,18 +27,12 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,  // Must be authenticated
+      authorized: ({ token }) => !!token, // Must be authenticated
     },
-  }
+  },
 );
 
 // Apply proxy (middleware) to these routes
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/moderator/:path*",
-    "/tutor/:path*",
-    "/learner/:path*",
-  ],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/moderator/:path*", "/tutor/:path*", "/learner/:path*"],
 };

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { BookOpen, AlertCircle } from "lucide-react";
+import KatuwangIcon from "../symbols/icon";
 
 const GRADE_LEVELS = [
   { value: "GRADE_7", label: "Grade 7" },
@@ -18,7 +20,8 @@ export default function LearnerRegisterForm() {
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
-    fullName: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -28,9 +31,7 @@ export default function LearnerRegisterForm() {
     consentGiven: false,
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
     const value = target.type === "checkbox" ? target.checked : target.value;
     setForm((prev) => ({ ...prev, [target.name]: value }));
@@ -67,9 +68,7 @@ export default function LearnerRegisterForm() {
       }
 
       // Redirect to login with success message
-      router.push(
-        `/login?registered=true&id=${encodeURIComponent(data.anonymousId)}`
-      );
+      router.push(`/login?registered=true&id=${encodeURIComponent(data.anonymousId)}`);
     } catch {
       setError("A network error occurred. Please check your connection.");
     } finally {
@@ -83,45 +82,56 @@ export default function LearnerRegisterForm() {
         {/* Card Header */}
         <div className="flex flex-col items-center gap-1 mb-2 text-center">
           <div className="flex items-center gap-1.5 justify-center mb-1">
-            <div className="p-1 bg-primary/10 rounded-lg text-primary border border-primary/20">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                <path d="M6 6h10" />
-                <path d="M6 10h10" />
-                <path d="M13 14h3" />
-              </svg>
-            </div>
-            <h2 className="text-xs font-black tracking-wider uppercase text-base-content">Katuwang</h2>
+            <KatuwangIcon />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-primary">Learner Registration</h1>
+          <h1 className="text-xl font-bold [word-spacing:-0.2em]">
+            Sign Up to find <span className="text-primary">Katuwang</span>
+          </h1>
           <p className="text-xs text-base-content/60">Create your Student Learner account</p>
         </div>
         {error && (
           <div className="alert alert-error text-xs py-3">
-            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <AlertCircle className="stroke-current shrink-0 h-4 w-4" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Full Name */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-semibold text-xs text-base-content/75">
-                Full Name <span className="text-error">*</span>
-              </span>
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              required
-              placeholder="Your full name (kept private)"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
-            />
+          {/* First Name & Last Name */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="form-control w-full">
+              <label className="label py-1">
+                <span className="label-text font-semibold text-xs text-base-content/75">
+                  First Name <span className="text-error">*</span>
+                </span>
+              </label>
+              <input
+                type="text"
+                name="firstName"
+                value={form.firstName}
+                onChange={handleChange}
+                required
+                placeholder="First name"
+                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              />
+            </div>
+
+            <div className="form-control w-full">
+              <label className="label py-1">
+                <span className="label-text font-semibold text-xs text-base-content/75">
+                  Last Name <span className="text-error">*</span>
+                </span>
+              </label>
+              <input
+                type="text"
+                name="lastName"
+                value={form.lastName}
+                onChange={handleChange}
+                required
+                placeholder="Last name"
+                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              />
+            </div>
           </div>
 
           {/* Email */}
@@ -250,10 +260,9 @@ export default function LearnerRegisterForm() {
               className="checkbox checkbox-primary checkbox-xs mt-0.5"
             />
             <label htmlFor="consent" className="cursor-pointer select-none leading-relaxed">
-              I confirm that a parent or guardian has consented to this
-              registration. Personal information collected is used solely for
-              academic support purposes in accordance with RA 10173 (Data Privacy
-              Act of 2012). <span className="text-error">*</span>
+              I confirm that a parent or guardian has consented to this registration. Personal information collected is
+              used solely for academic support purposes in accordance with RA 10173 (Data Privacy Act of 2012).{" "}
+              <span className="text-error">*</span>
             </label>
           </div>
 

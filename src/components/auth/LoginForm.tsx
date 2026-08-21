@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { BookOpen, CheckCircle, AlertCircle, Check, Eye, EyeOff } from "lucide-react";
+import KatuwangIcon from "../symbols/icon";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -18,27 +20,19 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
 
-  // Show success message from registration redirect
-  useEffect(() => {
-    if (params.get("registered") === "true") {
-      const id = params.get("id");
-      const role = params.get("role");
-      if (role === "tutor") {
-        setSuccessMsg(
-          `Account created! Your tutor ID is ${id}. Please log in — you'll be prompted to take your qualifying assessment(s) before being matched with learners.`
-        );
-      } else {
-        setSuccessMsg(
-          `Account created! Your learner ID is ${id}. Please log in to start requesting tutoring sessions.`
-        );
-      }
-    }
-  }, [params]);
+  // Derive success message from registration redirect query parameters
+  const isRegistered = params.get("registered") === "true";
+  const id = params.get("id");
+  const role = params.get("role");
+  const successMsg = isRegistered
+    ? role === "tutor"
+      ? `Account created! Your tutor ID is ${id}. Please log in — you'll be prompted to take your qualifying assessment(s) before being matched with learners.`
+      : `Account created! Your learner ID is ${id}. Please log in to start requesting tutoring sessions.`
+    : "";
 
   // Handle Form Submission using NextAuth
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -79,26 +73,17 @@ export default function LoginForm() {
         {/* Card Header */}
         <div className="flex flex-col items-center gap-1 mb-2 text-center">
           <div className="flex items-center gap-1.5 justify-center mb-1">
-            <div className="p-1 bg-primary/10 rounded-lg text-primary border border-primary/20">
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z" />
-                <path d="M6 6h10" />
-                <path d="M6 10h10" />
-                <path d="M13 14h3" />
-              </svg>
-            </div>
-            <h2 className="text-xs font-black tracking-wider uppercase text-base-content">Katuwang</h2>
+            <KatuwangIcon />
+            {/*<h2 className="text-xs font-sans font-black tracking-wider uppercase text-base-content">Katuwang</h2>*/}
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-base-content">Welcome Back</h1>
+          <h1 className="text-xl font-bold text-base-content">Welcome Back</h1>
           <p className="text-xs text-base-content/60">Sign in to your account</p>
         </div>
 
         {/* Success Msg (Redirect from register) */}
         {successMsg && (
-          <div className="alert alert-success py-3 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div className="alert alert-success py-3 text-xs ">
+            <CheckCircle className="stroke-current shrink-0 h-4 w-4" />
             <span>{successMsg}</span>
           </div>
         )}
@@ -106,9 +91,7 @@ export default function LoginForm() {
         {/* Alert Notification */}
         {error && (
           <div className="alert alert-error py-3 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <AlertCircle className="stroke-current shrink-0 h-4 w-4" />
             <span>{error}</span>
           </div>
         )}
@@ -117,14 +100,10 @@ export default function LoginForm() {
           /* Successful Login State Animation */
           <div className="flex flex-col items-center justify-center p-6 space-y-4 text-center">
             <div className="w-12 h-12 rounded-full bg-success/20 text-success flex items-center justify-center">
-              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
+              <Check className="w-6 h-6" strokeWidth={3} />
             </div>
             <h3 className="text-base font-bold">Verification Successful</h3>
-            <p className="text-xs text-base-content/60">
-              Preparing your portal dashboard. Redirecting...
-            </p>
+            <p className="text-xs text-base-content/60">Preparing your portal dashboard. Redirecting...</p>
             <span className="loading loading-ring loading-md text-success"></span>
           </div>
         ) : (
@@ -155,16 +134,6 @@ export default function LoginForm() {
                 <label className="label py-1">
                   <span className="label-text font-semibold text-xs text-base-content/75">Password</span>
                 </label>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert("Password reset instructions sent.");
-                  }}
-                  className="link link-hover text-[10px] text-primary"
-                >
-                  Forgot Password?
-                </a>
               </div>
               <div className="relative">
                 <input
@@ -179,37 +148,32 @@ export default function LoginForm() {
                   disabled={loading}
                   required
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                      <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                      <line x1="2" y1="2" x2="22" y2="22" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+            <div className="flex justify-end text-xs font-medium hover:underline text-neutral">
+              <a
+                href="#"
+                onClick={() => {
+                  alert("kunawri may forgot pass");
+                }}
+              >
+                Forgot password
+              </a>
             </div>
 
             {/* Remember Me Checkbox */}
             <div className="form-control">
               <label className="label justify-start gap-2 cursor-pointer py-1">
-                <input
-                  type="checkbox"
-                  className="checkbox checkbox-primary checkbox-xs"
-                  disabled={loading}
-                />
+                <input type="checkbox" className="checkbox checkbox-primary checkbox-xs" disabled={loading} />
                 <span className="label-text text-xs text-base-content/60 select-none">Keep me signed in</span>
               </label>
             </div>
@@ -231,12 +195,12 @@ export default function LoginForm() {
             </button>
 
             {/* Social Login Separator */}
-            <div className="divider text-[10px] text-base-content/40 my-4 uppercase tracking-wider">
+            {/*<div className="divider text-[10px] text-base-content/40 my-4 uppercase tracking-wider">
               Or choose social authorization
-            </div>
+            </div>*/}
 
             {/* Social Login Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            {/*<div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
                 onClick={() => alert("Google Sign-In requested.")}
@@ -272,22 +236,16 @@ export default function LoginForm() {
                 </svg>
                 <span>GitHub</span>
               </button>
-            </div>
+            </div>*/}
           </form>
         )}
 
         {/* Registration Redirection Links */}
-        <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">
+        <div className="text-center  text-xs text-base-content/50 border-t border-base-200 pt-4">
           <span>New to Katuwang? </span>
-          <div className="mt-2 flex items-center justify-center gap-2">
-            <Link href="/register/learner" className="link link-primary font-semibold">
-              Sign up as Student
-            </Link>
-            <span className="text-base-content/30">|</span>
-            <Link href="/register/tutor" className="link link-secondary font-semibold">
-              Sign up as Mentor
-            </Link>
-          </div>
+          <Link className="text-primary font-bold hover:underline" href={"/register"}>
+            Register
+          </Link>
         </div>
       </div>
     </div>

@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
           anonymousId: user.anonymousId,
           email: user.email,
           role: user.role,
-          fullName: user.fullName,
+          fullName: `${user.firstName} ${user.lastName}`.trim(),
         };
       },
     }),
