@@ -15,7 +15,11 @@ export const commonRegisterSchema = z.object({
     .min(1, "Last name is required.")
     .max(50, "Last name cannot exceed 50 characters.")
     .trim(),
-  email: z.string().email("Invalid email address.").trim().lowercase(),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.string().email("Invalid email address.")),
   password: z.string().min(8, "Password must be at least 8 characters."),
   gradeLevel: z.nativeEnum(GradeLevel, {
     message: "Invalid grade level.",
