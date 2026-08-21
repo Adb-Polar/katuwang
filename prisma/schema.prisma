@@ -23,7 +23,6 @@ model Session {
 
 enum Role {
   ADMIN
-  TEACHER_MODERATOR
   STUDENT_TUTOR
   STUDENT_LEARNER
 }

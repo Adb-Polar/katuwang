@@ -85,7 +85,6 @@ Defines the permissions and roles of users on the platform.
 | Value | Description |
 | :--- | :--- |
 | `ADMIN` | Platform administrators with full system access. |
-| `TEACHER_MODERATOR` | School faculty/teachers supervising tutoring activities and moderating content. |
 | `STUDENT_TUTOR` | Qualified students certified to tutor in one or more subjects. |
 | `STUDENT_LEARNER` | Students registered to receive tutoring support. |
 

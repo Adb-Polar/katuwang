@@ -26,13 +26,12 @@
 
 ## 1. Overview
 
-Katuwang has **four user roles**, each with its own registration path and permissions:
+Katuwang has **three user roles**, each with its own registration path and permissions:
 
 | Role | ID Format | Registers Via | Notes |
 |---|---|---|---|
 | Student Learner | `STU-0001` | Public registration form | Immediate access after signup |
 | Student Tutor | `TUT-0001` | Public registration form | Account created but **locked** until subject assessment(s) passed |
-| Teacher Moderator | Admin-created | Admin dashboard | No self-registration |
 | Administrator | Seeded / Admin-created | Admin dashboard | No self-registration |
 
 The registration and login system is built on three layers:
@@ -107,7 +106,6 @@ datasource db {
 
 enum Role {
   ADMIN
-  TEACHER_MODERATOR
   STUDENT_TUTOR
   STUDENT_LEARNER
 }
@@ -316,7 +314,7 @@ declare module "next-auth" {
     user: {
       id: string;
       anonymousId: string;
-      role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+      role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
       fullName: string;
       email: string;
     };
@@ -325,7 +323,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -334,7 +332,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -1579,14 +1577,6 @@ export default withAuth(
     }
 
     if (
-      pathname.startsWith("/moderator") &&
-      token?.role !== "TEACHER_MODERATOR" &&
-      token?.role !== "ADMIN"
-    ) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
-
-    if (
       pathname.startsWith("/tutor") &&
       token?.role !== "STUDENT_TUTOR"
     ) {
@@ -1614,7 +1604,6 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/admin/:path*",
-    "/moderator/:path*",
     "/tutor/:path*",
     "/learner/:path*",
   ],
@@ -1643,7 +1632,6 @@ export default async function DashboardPage() {
 
   const roleRedirects: Record<string, string> = {
     ADMIN: "/admin",
-    TEACHER_MODERATOR: "/moderator",
     STUDENT_TUTOR: "/tutor",
     STUDENT_LEARNER: "/learner",
   };

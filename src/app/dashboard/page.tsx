@@ -11,7 +11,6 @@ export default async function DashboardPage() {
 
   const roleRedirects: Record<string, string> = {
     ADMIN: "/admin",
-    TEACHER_MODERATOR: "/moderator",
     STUDENT_TUTOR: "/tutor",
     STUDENT_LEARNER: "/learner",
   };

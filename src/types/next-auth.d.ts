@@ -5,7 +5,7 @@ declare module "next-auth" {
     user: {
       id: string;
       anonymousId: string;
-      role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+      role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
       fullName: string;
       email: string;
     };
@@ -14,7 +14,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -23,7 +23,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }

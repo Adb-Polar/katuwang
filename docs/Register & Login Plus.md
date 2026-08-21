@@ -181,7 +181,6 @@ In Katuwang, different users should see different things:
 |---|---|
 | Student Learner | Their own sessions, tutoring requests |
 | Student Tutor | Their sessions, matched learners |
-| Teacher Moderator | Analytics, all sessions |
 | Administrator | Everything |
 
 RBAC means: instead of checking permissions item by item, you assign a **role** to each user and then define what each role is allowed to do. The user's role is stored in the database and included in their JWT session token — so the server can check it on every request.
@@ -376,13 +375,12 @@ katuwang/
 
 ## 1. Overview
 
-Katuwang has **four user roles**, each with its own registration path and permissions:
+Katuwang has **three user roles**, each with its own registration path and permissions:
 
 | Role | ID Format | Registers Via | Notes |
 |---|---|---|---|
 | Student Learner | `STU-0001` | Public registration form | Immediate access after signup |
 | Student Tutor | `TUT-0001` | Public registration form | Account created but **locked** until subject assessment(s) passed |
-| Teacher Moderator | Admin-created | Admin dashboard | No self-registration |
 | Administrator | Seeded / Admin-created | Admin dashboard | No self-registration |
 
 The registration and login system is built on three layers:
@@ -474,7 +472,6 @@ datasource db {
 
 enum Role {
   ADMIN
-  TEACHER_MODERATOR
   STUDENT_TUTOR
   STUDENT_LEARNER
 }
@@ -527,7 +524,7 @@ model User {
   // IMPORTANT: This stores the BCRYPT HASH, never the real password
 
   role          Role
-  // One of: ADMIN, TEACHER_MODERATOR, STUDENT_TUTOR, STUDENT_LEARNER
+  // One of: ADMIN, STUDENT_TUTOR, STUDENT_LEARNER
 
   gradeLevel    GradeLevel
   section       String
@@ -815,7 +812,7 @@ declare module "next-auth" {
     user: {
       id: string;
       anonymousId: string;      // e.g., "TUT-0001" or "STU-0023"
-      role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+      role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
       fullName: string;
       email: string;
     };
@@ -824,7 +821,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -833,7 +830,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "TEACHER_MODERATOR" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -2206,15 +2203,6 @@ export default withAuth(
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 
-    // ── Teacher Moderator routes (Admins can also access) ──────────────────
-    if (
-      pathname.startsWith("/moderator") &&
-      token?.role !== "TEACHER_MODERATOR" &&
-      token?.role !== "ADMIN"
-    ) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
-
     // ── Tutor-only routes ──────────────────────────────────────────────────
     if (pathname.startsWith("/tutor") && token?.role !== "STUDENT_TUTOR") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
@@ -2243,7 +2231,6 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/admin/:path*",
-    "/moderator/:path*",
     "/tutor/:path*",
     "/learner/:path*",
   ],
@@ -2278,7 +2265,6 @@ export default async function DashboardPage() {
   // Map each role to its dedicated area
   const roleRedirects: Record<string, string> = {
     ADMIN: "/admin",
-    TEACHER_MODERATOR: "/moderator",
     STUDENT_TUTOR: "/tutor",
     STUDENT_LEARNER: "/learner",
   };

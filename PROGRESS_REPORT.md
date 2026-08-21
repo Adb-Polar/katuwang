@@ -37,7 +37,7 @@
 1. **Student Privacy by Design:** Implements double-blind sequential anonymous identities (`STU-XXXX` for learners and `TUT-XXXX` for tutors) to safeguard student personal information in compliance with the **Philippine Data Privacy Act of 2012 (RA 10173)**.
 2. **Competency-Based Quality Assurance:** Ensures tutors can only host classes in subjects where they have achieved certified qualification status.
 3. **Structured Peer Tutoring:** Facilitates 1-on-1 and small-group tutoring sessions with automated scheduling conflict detection, enrollment tracking, and capacity management.
-4. **Multi-Tiered Role Governance:** Provides tailored portals and access control for four distinct stakeholder roles: Student Learners, Student Tutors, Teacher Moderators, and Administrators.
+4. **Multi-Tiered Role Governance:** Provides tailored portals and access control for three distinct stakeholder roles: Student Learners, Student Tutors, and Administrators.
 
 ---
 
@@ -138,7 +138,7 @@ The platform follows a modern full-stack monolithic architecture using the **Nex
 |---|---|---|
 | `/tutor` | `STUDENT_TUTOR` | Anonymous ID badge, Tutor Certification Status badge (`PENDING`, `PARTIAL`, `CERTIFIED`), list of applied subjects with exam statuses, integrated Class Scheduling & Management component, Account metadata card. |
 | `/learner` | `STUDENT_LEARNER` | Anonymous ID badge, Request Session call-to-action, Upcoming Tutoring Sessions card, Account metadata card. |
-| `/admin` | `ADMIN` | System administrator dashboard, moderator provisioning interface stubs, platform-wide matching telemetry. |
+| `/admin` | `ADMIN` | System administrator dashboard, user management interface stubs, platform-wide matching telemetry. |
 
 ---
 
@@ -273,10 +273,9 @@ erDiagram
 | **Tutor Class Creation API** | Pending | Zod validation, certification enforcement, past date & overlap protection. |
 | **Tutor Class Update & Delete API** | Pending | Partial updates, enrollment-based capacity restrictions, safe delete checks. |
 | **Learner Portal UI Baseline** | Pending | Dashboard layout with anonymous ID badge and quick links. |
-| **Moderator & Admin Portal Baselines**| Pending | Secured role-based views with user greetings and signout. |
+| **Admin Portal Baseline** | Pending | Secured role-based views with user greetings and signout. |
 | **Diagnostic Assessment Engine** | Sprint 2 | Stub models created (`Assessment`); interactive quiz UI pending. |
 | **Learner Class Browsing & Enrollment**| Sprint 3 | Enrollment model ready; learner discovery and booking UI pending. |
-| **Teacher Moderator Audit Logs** | Sprint 4 | Moderator portal scaffolded; detailed logs & flagging table pending. |
 
 ---
 
@@ -303,7 +302,6 @@ katuwang/
 │   │   ├── dashboard/page.tsx       # Smart role-based dashboard router
 │   │   ├── learner/page.tsx         # Student Learner dashboard portal
 │   │   ├── login/page.tsx           # User login page
-│   │   ├── moderator/page.tsx       # Teacher Moderator dashboard portal
 │   │   ├── page.tsx                 # Root landing navigation
 │   │   ├── register/                # Registration portal (Learner, Tutor, Hub)
 │   │   ├── tutor/page.tsx           # Student Tutor dashboard portal

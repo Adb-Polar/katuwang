@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
             <div className="space-y-1">
               <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
               <p className="text-xs text-base-content/60">
-                Manage system configurations, user logs, and moderator accounts.
+                Manage system configurations, user logs, and platform reports.
               </p>
             </div>
             <span className="badge badge-error text-white font-semibold py-3 px-3">
@@ -39,7 +39,7 @@ export default async function AdminDashboard() {
           <div className="card-body gap-4 p-6">
             <h2 className="card-title text-sm font-bold">Admin Privileges</h2>
             <p className="text-xs text-base-content/70">
-              Welcome, {session.user.fullName}. You have full access to create moderators and view overall matching statistics.
+              Welcome, {session.user.fullName}. You have full access to manage users and view overall matching statistics.
             </p>
             <div className="card-actions pt-2">
               <Link
