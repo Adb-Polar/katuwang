@@ -7,6 +7,8 @@
 - Do not commit anything 
 - Do not push anything
 - If asked to commit ask for confirmation
+- database modification needs confirmation
+- tables should be normalize 3NF
 
 ## 🚀 Common Commands
 

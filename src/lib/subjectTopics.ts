@@ -1,0 +1,61 @@
+import { SubjectArea } from "@prisma/client";
+
+export const SUBJECT_TOPICS: Record<SubjectArea, string[]> = {
+  MATH: [
+    "Whole Numbers & Operations",
+    "Fractions & Decimals",
+    "Algebraic Expressions",
+    "Linear Equations & Inequalities",
+    "Geometry & Measurement",
+    "Statistics & Probability",
+    "Trigonometry",
+    "Functions & Graphing",
+  ],
+  ENGLISH: [
+    "Grammar & Sentence Structure",
+    "Reading Comprehension",
+    "Vocabulary Building",
+    "Essay & Paragraph Writing",
+    "Literature Analysis",
+    "Public Speaking & Oral Communication",
+    "Research Writing",
+  ],
+  SCIENCE: [
+    "Scientific Method & Inquiry",
+    "Cell Biology & Genetics",
+    "Chemical Reactions & Matter",
+    "Force, Motion & Energy",
+    "Ecosystems & the Environment",
+    "Earth & Space Science",
+    "Human Body Systems",
+  ],
+  FILIPINO: [
+    "Balarila (Gramatika)",
+    "Pagbasa at Pag-unawa",
+    "Panitikang Pilipino",
+    "Pagsulat ng Sanaysay",
+    "Pagsasalin",
+    "Retorika at Pampublikong Pagsasalita",
+  ],
+  ARALING_PANLIPUNAN: [
+    "Kasaysayan ng Pilipinas",
+    "Heograpiya",
+    "Ekonomiks",
+    "Sibika at Pamahalaan",
+    "Kultura at Lipunan",
+    "Kasalukuyang Pangyayari (Current Events)",
+  ],
+  TLE: [
+    "Computer Basics & ICT",
+    "Home Economics",
+    "Agri-Fishery Arts",
+    "Industrial Arts",
+    "Entrepreneurship",
+  ],
+  MAPEH: [
+    "Music Theory & Appreciation",
+    "Visual Arts",
+    "Physical Education & Sports",
+    "Health Education",
+  ],
+};

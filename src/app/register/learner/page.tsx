@@ -1,4 +1,4 @@
-import LearnerRegisterForm from "@/components/auth/LearnerRegisterForm";
+import RegisterForm from "@/components/auth/RegisterForm";
 import Link from "next/link";
 import AuthLayout from "@/components/auth/AuthLayout";
 
@@ -11,7 +11,7 @@ export default function LearnerRegisterPage() {
   return (
     <AuthLayout>
       <div className="w-full space-y-4">
-        <LearnerRegisterForm />
+        <RegisterForm type="LEARNER" />
         <div className="text-center text-xs text-base-content/60">
           Already have an account?{" "}
           <Link href="/login" className="link link-primary font-semibold">

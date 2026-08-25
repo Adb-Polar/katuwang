@@ -105,8 +105,6 @@ async function registerTutor(data: TutorRegisterInput) {
     gradeLevel,
     section,
     contactInfo,
-    subjects,
-    availability,
     consentGiven,
   } = data;
 
@@ -140,27 +138,13 @@ async function registerTutor(data: TutorRegisterInput) {
         contactInfo: contactInfo || null,
         consentGiven,
         tutorProfile: {
-          create: {
-            status: "PENDING",
-            availability: availability,
-            appliedSubjects: {
-              create: subjects.map((subject) => ({
-                subject,
-                certified: false,
-              })),
-            },
-          },
+          create: {},
         },
       },
       select: {
         anonymousId: true,
         email: true,
         role: true,
-        tutorProfile: {
-          select: {
-            appliedSubjects: { select: { subject: true } },
-          },
-        },
       },
     });
 
@@ -170,11 +154,8 @@ async function registerTutor(data: TutorRegisterInput) {
   return NextResponse.json(
     {
       message:
-        "Registration successful. You must complete a qualifying assessment for each subject before you can be matched with learners.",
+        "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.",
       anonymousId: user.anonymousId,
-      pendingAssessments: user.tutorProfile?.appliedSubjects.map(
-        (s) => s.subject
-      ),
     },
     { status: 201 }
   );

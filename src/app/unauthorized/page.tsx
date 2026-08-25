@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import AuthLayout from "@/components/auth/AuthLayout";
 
 export const metadata = {
   title: "Access Denied | Katuwang",
@@ -8,13 +9,13 @@ export const metadata = {
 
 export default function UnauthorizedPage() {
   return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-base-200 p-4">
-      <div className="card bg-base-100 max-w-md w-full shadow-2xl border border-base-200">
+    <AuthLayout>
+      <div className="card bg-base-100 shadow-2xl border border-base-200">
         <div className="card-body gap-5 text-center items-center p-8">
           <div className="w-16 h-16 rounded-full bg-error/15 text-error flex items-center justify-center">
             <AlertTriangle className="w-8 h-8" />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-base-content">Access Denied</h1>
+          <h1 className="font-serif text-xl font-semibold tracking-tight text-base-content">Access Denied</h1>
           <p className="text-xs text-base-content/60 leading-relaxed">
             You do not have the required permissions to access this page. Please make sure you are logged into the correct account.
           </p>
@@ -28,6 +29,6 @@ export default function UnauthorizedPage() {
           </div>
         </div>
       </div>
-    </main>
+    </AuthLayout>
   );
 }

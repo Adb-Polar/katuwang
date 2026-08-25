@@ -5,11 +5,10 @@ export const createClassSchema = z.object({
   subject: z.nativeEnum(SubjectArea, {
     message: "Invalid subject area.",
   }),
-  topic: z
-    .string()
-    .min(2, "Topic must be at least 2 characters.")
-    .max(100, "Topic cannot exceed 100 characters.")
-    .trim(),
+  topics: z
+    .array(z.string().trim().min(1, "Topic cannot be empty."))
+    .min(1, "Please select at least one topic.")
+    .max(10, "You can select up to 10 topics."),
   description: z
     .string()
     .max(500, "Description cannot exceed 500 characters.")

@@ -19,8 +19,6 @@ function baseTutor(overrides: Record<string, unknown> = {}) {
   return {
     ...baseLearner(),
     type: "TUTOR",
-    subjects: ["MATH"],
-    availability: [{ day: "Monday", startTime: "08:00", endTime: "09:00" }],
     ...overrides,
   };
 }
@@ -80,30 +78,6 @@ describe("registerSchema", () => {
   it("allows empty contactInfo", () => {
     const result = registerSchema.safeParse(baseLearner({ contactInfo: "" }));
     expect(result.success).toBe(true);
-  });
-
-  it("defaults tutor subjects/availability to empty arrays when omitted", () => {
-    const { subjects, availability, ...rest } = baseTutor();
-    const result = registerSchema.safeParse(rest);
-    expect(result.success).toBe(true);
-    if (result.success && result.data.type === "TUTOR") {
-      expect(result.data.subjects).toEqual([]);
-      expect(result.data.availability).toEqual([]);
-    }
-  });
-
-  it("rejects an invalid subject area for tutors", () => {
-    const result = registerSchema.safeParse(baseTutor({ subjects: ["HISTORY"] }));
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects malformed availability time strings", () => {
-    const result = registerSchema.safeParse(
-      baseTutor({
-        availability: [{ day: "Monday", startTime: "8am", endTime: "09:00" }],
-      })
-    );
-    expect(result.success).toBe(false);
   });
 
   it("rejects an unknown registration type", () => {

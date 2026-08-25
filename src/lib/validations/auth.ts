@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { GradeLevel, SubjectArea } from "@prisma/client";
+import { GradeLevel } from "@prisma/client";
 
 /**
  * Shared registration fields validation schema.
@@ -43,17 +43,6 @@ export const learnerRegisterSchema = commonRegisterSchema.extend({
  */
 export const tutorRegisterSchema = commonRegisterSchema.extend({
   type: z.literal("TUTOR"),
-  subjects: z.array(z.nativeEnum(SubjectArea)).optional().default([]),
-  availability: z
-    .array(
-      z.object({
-        day: z.string().min(1, "Day is required."),
-        startTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid start time format (HH:MM)."),
-        endTime: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Invalid end time format (HH:MM)."),
-      })
-    )
-    .optional()
-    .default([]),
 });
 
 /**

@@ -6,25 +6,18 @@ datasource db {
   provider = "mysql"
 }
 
-// ─── Session (NextAuth / JWT fallback stub) ───────────────────────────────────
-
-model Session {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@map("sessions")
-}
-
-// ─── Assessment (Sprint 2 stub) ──────────────────────────────────────────────
-
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Role {
   ADMIN
   STUDENT_TUTOR
   STUDENT_LEARNER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
 }
 
 enum GradeLevel {
@@ -36,11 +29,9 @@ enum GradeLevel {
   GRADE_12
 }
 
-enum TutorStatus {
-  PENDING // Registered, no assessments taken yet
-  PARTIAL // Some subjects certified, others pending
-  CERTIFIED // All applied subjects passed
-  REJECTED // Failed all assessments
+enum TopicCertificationStatus {
+  PENDING // Assessment requested, not yet graded
+  CERTIFIED // Tutor passed the topic assessment
 }
 
 enum SubjectArea {
@@ -57,6 +48,7 @@ enum ClassStatus {
   SCHEDULED
   COMPLETED
   CANCELLED
+  SUSPENDED
 }
 
 // ─── User ────────────────────────────────────────────────────────────────────
@@ -73,6 +65,12 @@ model User {
   section      String
   contactInfo  String?
   consentGiven Boolean    @default(false)
+
+  // Moderation
+  status          AccountStatus @default(ACTIVE)
+  statusReason    String?       @db.Text
+  statusUpdatedAt DateTime?
+
   // Misc
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
@@ -81,9 +79,6 @@ model User {
   tutorProfile TutorProfile?
 
   // Relations
-  sessions     Session[]
-  assessments  Assessment[]
-  tutorClasses TutorClass[]      @relation("TutorCreatedClasses")
   enrollments  ClassEnrollment[] @relation("LearnerEnrollments")
 
   @@map("users")
@@ -92,33 +87,50 @@ model User {
 // ─── Tutor Profile ────────────────────────────────────────────────────────────
 
 model TutorProfile {
-  id     String      @id @default(cuid())
-  userId String      @unique
-  user   User        @relation(fields: [userId], references: [id])
-  status TutorStatus @default(PENDING)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
 
-  // Subjects the tutor applied for (multi-select at registration)
-  appliedSubjects SubjectApplication[]
+  // Per-topic assessment requests/certifications, requested once a tutor is teaching a topic
+  topicCertifications TopicCertification[]
 
-  // Availability schedule (stored as JSON: [{day, startTime, endTime}])
-  availability Json
+  // Availability schedule (1 row per weekly slot)
+  availability Availability[]
+
+  // Classes created by this tutor
+  classes TutorClass[]
 
   @@map("tutor_profiles")
 }
 
-// ─── Subject Application (per-subject certification tracking) ─────────────────
+// ─── Availability (weekly slots for a tutor) ───────────────────────────────────
 
-model SubjectApplication {
+model Availability {
   id             String       @id @default(cuid())
   tutorProfileId String
-  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id])
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  day            String
+  startTime      String
+  endTime        String
+
+  @@map("availabilities")
+}
+
+// ─── Topic Certification (per-topic assessment request/certification) ─────────
+// A row only exists once a tutor has requested an assessment for that topic.
+
+model TopicCertification {
+  id             String                    @id @default(cuid())
+  tutorProfileId String
+  tutorProfile   TutorProfile              @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
   subject        SubjectArea
-  certified      Boolean      @default(false)
-  attemptedAt    DateTime?
+  topic          String
+  status         TopicCertificationStatus  @default(PENDING)
+  requestedAt    DateTime                  @default(now())
   certifiedAt    DateTime?
 
-  @@unique([tutorProfileId, subject])
-  @@map("subject_applications")
+  @@unique([tutorProfileId, subject, topic])
+  @@map("topic_certifications")
 }
 
 // ─── ID Counter (for sequential anonymous IDs) ────────────────────────────────
@@ -130,35 +142,39 @@ model IdCounter {
   @@map("id_counters")
 }
 
-model Assessment {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
-
-  @@map("assessments")
-}
-
 // ─── Tutor Class ─────────────────────────────────────────────────────────────
 
 model TutorClass {
-  id          String      @id @default(cuid())
-  tutorId     String
-  tutor       User        @relation("TutorCreatedClasses", fields: [tutorId], references: [id], onDelete: Cascade)
-  subject     SubjectArea
-  topic       String
-  description String?     @db.Text
-  scheduledAt DateTime
-  duration    Int         // duration in minutes (e.g. 60, 90)
-  maxStudents Int         @default(1) // Support for 1-on-1 or small group tutoring
-  meetingLink String?
-  status      ClassStatus @default(SCHEDULED)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String       @id @default(cuid())
+  tutorProfileId String
+  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject        SubjectArea
+  description    String?      @db.Text
+  scheduledAt    DateTime
+  duration       Int          // duration in minutes (e.g. 60, 90)
+  maxStudents    Int          @default(1) // Support for 1-on-1 or small group tutoring
+  meetingLink    String?
+  status          ClassStatus @default(SCHEDULED)
+  suspendedReason String?     @db.Text
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
+  topics      ClassTopic[]
   enrollments ClassEnrollment[]
 
   @@map("tutor_classes")
+}
+
+// ─── Class Topic (1 row per subtopic selected for a class) ───────────────────
+
+model ClassTopic {
+  id      String     @id @default(cuid())
+  classId String
+  class   TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  topic   String
+
+  @@unique([classId, topic])
+  @@map("class_topics")
 }
 
 // ─── Class Enrollment ────────────────────────────────────────────────────────

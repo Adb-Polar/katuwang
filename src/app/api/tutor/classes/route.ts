@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
+import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -13,15 +14,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!tutorProfile) {
+      return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
+    }
+
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
     const classes = await prisma.tutorClass.findMany({
       where: {
-        tutorId: session.user.id,
+        tutorProfileId: tutorProfile.id,
         ...(status ? { status: status as any } : {}),
       },
       include: {
+        topics: true,
         enrollments: {
           include: {
             learner: {
@@ -40,7 +51,9 @@ export async function GET(req: NextRequest) {
       orderBy: { scheduledAt: "asc" },
     });
 
-    return NextResponse.json(classes);
+    return NextResponse.json(
+      classes.map((c) => ({ ...c, topics: c.topics.map((t) => t.topic) }))
+    );
   } catch (error) {
     console.error("Error fetching tutor classes:", error);
     return NextResponse.json(
@@ -59,6 +72,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!tutorProfile) {
+      return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
+    }
+
     const body = await req.json();
     const result = createClassSchema.safeParse(body);
 
@@ -69,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     const {
       subject,
-      topic,
+      topics,
       description,
       scheduledAt,
       duration,
@@ -77,20 +99,12 @@ export async function POST(req: NextRequest) {
       meetingLink,
     } = result.data;
 
-    // 1. Verify tutor certification for the chosen subject
-    const profile = await prisma.tutorProfile.findUnique({
-      where: { userId: session.user.id },
-      include: {
-        appliedSubjects: {
-          where: { subject, certified: true },
-        },
-      },
-    });
-
-    if (!profile || profile.appliedSubjects.length === 0) {
+    // Ensure every selected topic belongs to the chosen subject's predefined list
+    const validTopics = SUBJECT_TOPICS[subject];
+    if (topics.some((t) => !validTopics.includes(t))) {
       return NextResponse.json(
-        { error: `You are not certified to tutor in ${subject}.` },
-        { status: 403 }
+        { error: `One or more selected topics are not valid for ${subject}.` },
+        { status: 400 }
       );
     }
 
@@ -105,10 +119,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Overlap Conflict Detection Logic
+    // 1. Overlap Conflict Detection Logic
     const scheduledClasses = await prisma.tutorClass.findMany({
       where: {
-        tutorId: session.user.id,
+        tutorProfileId: tutorProfile.id,
         status: "SCHEDULED",
       },
     });
@@ -126,12 +140,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Create the class
+    // 2. Create the class
     const newClass = await prisma.tutorClass.create({
       data: {
-        tutorId: session.user.id,
+        tutorProfileId: tutorProfile.id,
         subject,
-        topic,
+        topics: { create: topics.map((topic) => ({ topic })) },
         description: description || null,
         scheduledAt: start,
         duration,
@@ -139,9 +153,13 @@ export async function POST(req: NextRequest) {
         meetingLink: meetingLink || null,
         status: "SCHEDULED",
       },
+      include: { topics: true },
     });
 
-    return NextResponse.json(newClass, { status: 201 });
+    return NextResponse.json(
+      { ...newClass, topics: newClass.topics.map((t) => t.topic) },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating tutor class:", error);
     return NextResponse.json(

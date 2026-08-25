@@ -2,22 +2,41 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, AlertCircle } from "lucide-react";
-import KatuwangIcon from "../symbols/icon";
+import BrandMark from "@/components/ui/BrandMark";
+import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import FormField from "@/components/ui/FormField";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
-const GRADE_LEVELS = [
-  { value: "GRADE_7", label: "Grade 7" },
-  { value: "GRADE_8", label: "Grade 8" },
-  { value: "GRADE_9", label: "Grade 9" },
-  { value: "GRADE_10", label: "Grade 10" },
-  { value: "GRADE_11", label: "Grade 11" },
-  { value: "GRADE_12", label: "Grade 12" },
-];
+type RegisterType = "LEARNER" | "TUTOR";
 
-export default function LearnerRegisterForm() {
+const ROLE_COPY: Record<RegisterType, { heading: React.ReactNode; subheading: string; buttonLabel: string; border: string }> = {
+  LEARNER: {
+    heading: (
+      <>
+        Sign Up to find <span className="text-primary">Katuwang</span>
+      </>
+    ),
+    subheading: "Create your Student Learner account",
+    buttonLabel: "Create Learner Account",
+    border: "border-secondary/20",
+  },
+  TUTOR: {
+    heading: (
+      <>
+        Sign Up to be a <span className="text-primary">Katuwang</span>
+      </>
+    ),
+    subheading: "Apply as a Peer Tutor mentor on Katuwang",
+    buttonLabel: "Create Tutor Account",
+    border: "border-accent/30",
+  },
+};
+
+export default function RegisterForm({ type }: { type: RegisterType }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const copy = ROLE_COPY[type];
 
   const [form, setForm] = useState({
     firstName: "",
@@ -57,7 +76,7 @@ export default function LearnerRegisterForm() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "LEARNER", ...form }),
+        body: JSON.stringify({ type, ...form }),
       });
 
       const data = await res.json();
@@ -67,8 +86,8 @@ export default function LearnerRegisterForm() {
         return;
       }
 
-      // Redirect to login with success message
-      router.push(`/login?registered=true&id=${encodeURIComponent(data.anonymousId)}`);
+      const roleParam = type === "TUTOR" ? "&role=tutor" : "";
+      router.push(`/login?registered=true&id=${encodeURIComponent(data.anonymousId)}${roleParam}`);
     } catch {
       setError("A network error occurred. Please check your connection.");
     } finally {
@@ -77,34 +96,21 @@ export default function LearnerRegisterForm() {
   };
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200 w-full">
+    <div className={`card bg-base-100 shadow-sm border ${copy.border} w-full`}>
       <div className="card-body gap-5 p-6 md:p-8">
         {/* Card Header */}
-        <div className="flex flex-col items-center gap-1 mb-2 text-center">
-          <div className="flex items-center gap-1.5 justify-center mb-1">
-            <KatuwangIcon />
-          </div>
-          <h1 className="text-xl font-bold [word-spacing:-0.2em]">
-            Sign Up to find <span className="text-primary">Katuwang</span>
-          </h1>
-          <p className="text-xs text-base-content/60">Create your Student Learner account</p>
+        <div className="flex flex-col items-center gap-2 mb-2 text-center">
+          <BrandMark />
+          <h1 className="font-serif text-xl font-semibold [word-spacing:-0.2em]">{copy.heading}</h1>
+          <p className="text-xs text-base-content/60">{copy.subheading}</p>
         </div>
-        {error && (
-          <div className="alert alert-error text-xs py-3">
-            <AlertCircle className="stroke-current shrink-0 h-4 w-4" />
-            <span>{error}</span>
-          </div>
-        )}
+
+        <FeedbackBanner variant="error" message={error || null} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* First Name & Last Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">
-                  First Name <span className="text-error">*</span>
-                </span>
-              </label>
+            <FormField label="First Name" required>
               <input
                 type="text"
                 name="firstName"
@@ -114,14 +120,9 @@ export default function LearnerRegisterForm() {
                 placeholder="First name"
                 className="input input-bordered input-sm w-full focus:input-primary text-xs"
               />
-            </div>
+            </FormField>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">
-                  Last Name <span className="text-error">*</span>
-                </span>
-              </label>
+            <FormField label="Last Name" required>
               <input
                 type="text"
                 name="lastName"
@@ -131,16 +132,10 @@ export default function LearnerRegisterForm() {
                 placeholder="Last name"
                 className="input input-bordered input-sm w-full focus:input-primary text-xs"
               />
-            </div>
+            </FormField>
           </div>
 
-          {/* Email */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-semibold text-xs text-base-content/75">
-                Email Address <span className="text-error">*</span>
-              </span>
-            </label>
+          <FormField label="Email Address" required>
             <input
               type="email"
               name="email"
@@ -150,16 +145,11 @@ export default function LearnerRegisterForm() {
               placeholder="you@example.com"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"
             />
-          </div>
+          </FormField>
 
           {/* Grade Level & Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">
-                  Grade Level <span className="text-error">*</span>
-                </span>
-              </label>
+            <FormField label="Grade Level" required>
               <select
                 name="gradeLevel"
                 value={form.gradeLevel}
@@ -174,14 +164,9 @@ export default function LearnerRegisterForm() {
                   </option>
                 ))}
               </select>
-            </div>
+            </FormField>
 
-            <div className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">
-                  Section <span className="text-error">*</span>
-                </span>
-              </label>
+            <FormField label="Section" required>
               <input
                 type="text"
                 name="section"
@@ -191,16 +176,10 @@ export default function LearnerRegisterForm() {
                 placeholder="e.g., Rizal"
                 className="input input-bordered input-sm w-full focus:input-primary text-xs"
               />
-            </div>
+            </FormField>
           </div>
 
-          {/* Contact Info */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-semibold text-xs text-base-content/75">
-                Contact Info <span className="label-text-alt text-base-content/40">(optional)</span>
-              </span>
-            </label>
+          <FormField label="Contact Info" hint="Optional — phone or guardian contact">
             <input
               type="text"
               name="contactInfo"
@@ -209,15 +188,9 @@ export default function LearnerRegisterForm() {
               placeholder="Phone or guardian contact"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"
             />
-          </div>
+          </FormField>
 
-          {/* Password */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-semibold text-xs text-base-content/75">
-                Password <span className="text-error">*</span>
-              </span>
-            </label>
+          <FormField label="Password" required>
             <input
               type="password"
               name="password"
@@ -228,15 +201,9 @@ export default function LearnerRegisterForm() {
               placeholder="At least 8 characters"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"
             />
-          </div>
+          </FormField>
 
-          {/* Confirm Password */}
-          <div className="form-control w-full">
-            <label className="label py-1">
-              <span className="label-text font-semibold text-xs text-base-content/75">
-                Confirm Password <span className="text-error">*</span>
-              </span>
-            </label>
+          <FormField label="Confirm Password" required>
             <input
               type="password"
               name="confirmPassword"
@@ -246,7 +213,7 @@ export default function LearnerRegisterForm() {
               placeholder="Repeat your password"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"
             />
-          </div>
+          </FormField>
 
           {/* Consent Checkbox */}
           <div className="alert alert-info bg-info/10 border-info/20 text-base-content text-xs p-4 flex gap-3 items-start">
@@ -277,7 +244,7 @@ export default function LearnerRegisterForm() {
                 <span>Creating account...</span>
               </>
             ) : (
-              <span>Create Learner Account</span>
+              <span>{copy.buttonLabel}</span>
             )}
           </button>
         </form>

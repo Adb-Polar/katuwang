@@ -1,31 +1,38 @@
 @import "tailwindcss";
 @plugin "daisyui";
 
+/*
+  Palette: three roles, three functional colors — not decoration.
+  primary  = brand teal, used app-wide (buttons/links/focus) and as the Admin portal accent
+  secondary = ube violet, the Learner role color (nav accent, learner-owned ID badges)
+  accent    = marigold gold, the Tutor role color (nav accent, tutor-owned ID badges)
+  warning is pulled toward orange-red (hue ~45) so it never collides with the gold accent (hue ~80).
+*/
 @plugin "daisyui/theme" {
   name: "katuwang theme";
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(98% 0.002 247.839);
-  --color-base-200: oklch(96% 0.003 264.542);
-  --color-base-300: oklch(92% 0.006 264.531);
-  --color-base-content: oklch(21% 0.034 264.665);
-  --color-primary: oklch(69% 0.17 162.48);
-  --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: oklch(0% 0 0);
-  --color-secondary-content: oklch(100% 0 0);
-  --color-accent: oklch(62% 0.265 303.9);
-  --color-accent-content: oklch(97% 0.014 308.299);
-  --color-neutral: oklch(37% 0.034 259.733);
-  --color-neutral-content: oklch(98% 0.002 247.839);
-  --color-info: oklch(68% 0.169 237.323);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(72% 0.219 149.579);
-  --color-success-content: oklch(98% 0.018 155.826);
-  --color-warning: oklch(70% 0.213 47.604);
-  --color-warning-content: oklch(98% 0.016 73.684);
-  --color-error: oklch(65% 0.241 354.308);
-  --color-error-content: oklch(97% 0.014 343.198);
+  --color-base-100: oklch(99% 0.003 80);
+  --color-base-200: oklch(97% 0.005 80);
+  --color-base-300: oklch(93% 0.008 80);
+  --color-base-content: oklch(24% 0.02 258);
+  --color-primary: oklch(40% 0.09 174);
+  --color-primary-content: oklch(98% 0.01 174);
+  --color-secondary: oklch(48% 0.16 300);
+  --color-secondary-content: oklch(98% 0.02 300);
+  --color-accent: oklch(76% 0.14 80);
+  --color-accent-content: oklch(24% 0.05 80);
+  --color-neutral: oklch(27% 0.035 258);
+  --color-neutral-content: oklch(97% 0.005 258);
+  --color-info: oklch(62% 0.12 230);
+  --color-info-content: oklch(97% 0.01 230);
+  --color-success: oklch(63% 0.13 152);
+  --color-success-content: oklch(97% 0.01 152);
+  --color-warning: oklch(70% 0.16 45);
+  --color-warning-content: oklch(22% 0.03 45);
+  --color-error: oklch(58% 0.19 22);
+  --color-error-content: oklch(98% 0.01 22);
   --radius-selector: 0.25rem;
   --radius-field: 0.5rem;
   --radius-box: 0.5rem;
@@ -36,20 +43,21 @@
   --noise: 0;
 }
 
-:root {
-  font-size: 20px;
-}
-
-
 @theme inline {
-  --font-sans: var(--font-elms-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-elms-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
 }
 
-body {
-  font-family: var(--font-elms-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-elms-sans), ui-sans-serif, system-ui, sans-serif;
+/*
+  Type scale contract (co-located with the one non-default token it adds):
+  text-2xs = badge/meta/micro-label text only (status pills, ID chips, timestamps)
+  text-xs  = dense UI body: form labels, buttons, table cells
+  text-sm  = default body copy
+  text-base/text-lg = section and card titles (font-sans, bold)
+  text-xl and up, with font-serif = page-level H1 only — never blanket-applied to h2-h6
+*/
+@theme {
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
 }

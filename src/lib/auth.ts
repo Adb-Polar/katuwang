@@ -33,6 +33,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Incorrect password.");
         }
 
+        if (user.status === "SUSPENDED") {
+          throw new Error("Your account has been suspended. Contact an administrator for details.");
+        }
+
+        if (user.status === "BANNED") {
+          throw new Error("Your account has been banned.");
+        }
+
         return {
           id: user.id,
           anonymousId: user.anonymousId,

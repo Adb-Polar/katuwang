@@ -103,7 +103,6 @@ describe("POST /api/register", () => {
             anonymousId: "TUT-0001",
             email: "tutor@example.com",
             role: "STUDENT_TUTOR",
-            tutorProfile: { appliedSubjects: [{ subject: "MATH" }] },
           }),
         },
       })
@@ -114,15 +113,12 @@ describe("POST /api/register", () => {
         ...validLearner,
         type: "TUTOR",
         email: "tutor@example.com",
-        subjects: ["MATH"],
-        availability: [{ day: "Monday", startTime: "08:00", endTime: "09:00" }],
       })
     );
 
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.anonymousId).toBe("TUT-0001");
-    expect(json.pendingAssessments).toEqual(["MATH"]);
   });
 
   it("returns 500 when an unexpected error occurs", async () => {

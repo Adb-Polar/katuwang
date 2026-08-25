@@ -30,8 +30,20 @@ export async function PATCH(
       return NextResponse.json({ error: "Class not found." }, { status: 404 });
     }
 
-    if (existingClass.tutorId !== session.user.id) {
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
+
+    if (existingClass.status === "SUSPENDED") {
+      return NextResponse.json(
+        { error: "This class was suspended by an administrator and can't be modified." },
+        { status: 403 }
+      );
     }
 
     const body = await req.json();
@@ -48,7 +60,7 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const updates = result.data;
+    const { topics, ...updates } = result.data;
 
     // 1. Capacity validation if updating maxStudents
     if (updates.maxStudents !== undefined) {
@@ -78,7 +90,7 @@ export async function PATCH(
 
         const otherClasses = await prisma.tutorClass.findMany({
           where: {
-            tutorId: session.user.id,
+            tutorProfileId: tutorProfile.id,
             status: "SCHEDULED",
             id: { not: classId },
           },
@@ -105,10 +117,17 @@ export async function PATCH(
       data: {
         ...updates,
         ...(body.status ? { status: body.status } : {}),
+        ...(topics
+          ? { topics: { deleteMany: {}, create: topics.map((topic) => ({ topic })) } }
+          : {}),
       },
+      include: { topics: true },
     });
 
-    return NextResponse.json(updatedClass);
+    return NextResponse.json({
+      ...updatedClass,
+      topics: updatedClass.topics.map((t) => t.topic),
+    });
   } catch (error) {
     console.error("Error updating tutor class:", error);
     return NextResponse.json(
@@ -143,7 +162,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Class not found." }, { status: 404 });
     }
 
-    if (existingClass.tutorId !== session.user.id) {
+    const tutorProfile = await prisma.tutorProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+
+    if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 

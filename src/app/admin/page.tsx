@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import PageHeader from "@/components/ui/PageHeader";
+import StatusBadge from "@/components/ui/StatusBadge";
 
 export const metadata = {
   title: "Admin Dashboard | Katuwang",
@@ -10,48 +11,50 @@ export const metadata = {
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
-    redirect("/login");
-  }
-
-  if (session.user.role !== "ADMIN") {
-    redirect("/unauthorized");
-  }
+  const [learnerCount, tutorCount, flaggedAccountCount, activeClassCount] = await Promise.all([
+    prisma.user.count({ where: { role: "STUDENT_LEARNER" } }),
+    prisma.user.count({ where: { role: "STUDENT_TUTOR" } }),
+    prisma.user.count({ where: { status: { not: "ACTIVE" } } }),
+    prisma.tutorClass.count({ where: { status: "SCHEDULED" } }),
+  ]);
 
   return (
-    <main className="min-h-screen bg-base-200 text-base-content font-sans p-4 md:p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="card bg-base-100 shadow-md border border-base-200">
-          <div className="card-body flex-row justify-between items-center p-6">
-            <div className="space-y-1">
-              <h1 className="text-xl font-bold tracking-tight">Admin Dashboard</h1>
-              <p className="text-xs text-base-content/60">
-                Manage system configurations, user logs, and platform reports.
-              </p>
-            </div>
-            <span className="badge badge-error text-white font-semibold py-3 px-3">
-              Admin
-            </span>
-          </div>
-        </header>
+    <div className="space-y-6">
+      <PageHeader
+        eyebrow="Admin Portal"
+        title="Admin Dashboard"
+        subtitle="Manage system configurations, user logs, and platform reports."
+        actions={<StatusBadge tone="error" label="Admin" size="sm" />}
+      />
 
-        <section className="card bg-base-100 shadow-md border border-base-200">
-          <div className="card-body gap-4 p-6">
-            <h2 className="card-title text-sm font-bold">Admin Privileges</h2>
-            <p className="text-xs text-base-content/70">
-              Welcome, {session.user.fullName}. You have full access to manage users and view overall matching statistics.
-            </p>
-            <div className="card-actions pt-2">
-              <Link
-                href="/api/auth/signout"
-                className="btn btn-neutral btn-outline btn-sm text-error hover:btn-error hover:text-white transition text-xs"
-              >
-                Log Out
-              </Link>
-            </div>
-          </div>
-        </section>
+      <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto flex-wrap">
+        <div className="stat py-4">
+          <div className="stat-title text-2xs">Learners</div>
+          <div className="stat-value text-lg font-serif">{learnerCount}</div>
+        </div>
+        <div className="stat py-4">
+          <div className="stat-title text-2xs">Tutors</div>
+          <div className="stat-value text-lg font-serif">{tutorCount}</div>
+        </div>
+        <div className="stat py-4">
+          <div className="stat-title text-2xs">Flagged Accounts</div>
+          <div className="stat-value text-lg font-serif">{flaggedAccountCount}</div>
+        </div>
+        <div className="stat py-4">
+          <div className="stat-title text-2xs">Active Classes</div>
+          <div className="stat-value text-lg font-serif">{activeClassCount}</div>
+        </div>
       </div>
-    </main>
+
+      <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-4 p-6">
+          <h2 className="card-title text-sm font-bold">Admin Privileges</h2>
+          <p className="text-xs text-base-content/70">
+            Welcome, {session!.user.fullName}. Use the Users and Classes tabs to review and moderate accounts and
+            scheduled sessions.
+          </p>
+        </div>
+      </section>
+    </div>
   );
 }

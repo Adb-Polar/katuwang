@@ -1,11 +1,22 @@
 import type { Metadata } from "next";
-import { Elms_Sans } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/providers/SessionProvider";
 
-const elmsSans = Elms_Sans({
-  variable: "--font-elms-sans",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+});
+
+const plexMono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin"],
+  weight: ["500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -22,9 +33,9 @@ export default function RootLayout({
     <html
       lang="en"
       data-theme="katuwang theme"
-      className={`${elmsSans.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${manrope.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         <AuthProvider>
           {children}
         </AuthProvider>
