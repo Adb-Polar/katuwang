@@ -49,6 +49,7 @@ enum ClassStatus {
   COMPLETED
   CANCELLED
   SUSPENDED
+  BANNED
 }
 
 // ─── User ────────────────────────────────────────────────────────────────────
@@ -70,6 +71,7 @@ model User {
   status          AccountStatus @default(ACTIVE)
   statusReason    String?       @db.Text
   statusUpdatedAt DateTime?
+  statusExpiresAt DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
 
   // Misc
   createdAt    DateTime   @default(now())
@@ -80,6 +82,7 @@ model User {
 
   // Relations
   enrollments  ClassEnrollment[] @relation("LearnerEnrollments")
+  auditLogs    AuditLog[]
 
   @@map("users")
 }
@@ -156,6 +159,7 @@ model TutorClass {
   meetingLink    String?
   status          ClassStatus @default(SCHEDULED)
   suspendedReason String?     @db.Text
+  suspendedUntil  DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -189,4 +193,29 @@ model ClassEnrollment {
 
   @@unique([classId, learnerId])
   @@map("class_enrollments")
+}
+
+// ─── Audit Log (admin moderation action history) ──────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String
+  targetType String
+  targetId   String
+  reason     String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// ─── Platform Setting (admin-configurable boolean flags) ──────────────────────
+
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
 }

@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, userFindUnique, userUpdate } = vi.hoisted(() => ({
+const { getServerSessionMock, userFindUnique, userUpdate, auditLogCreate } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
+  auditLogCreate: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -14,6 +15,9 @@ vi.mock("next-auth", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: { findUnique: userFindUnique, update: userUpdate },
+    auditLog: { create: auditLogCreate },
+    $transaction: (fn: (tx: unknown) => unknown) =>
+      fn({ user: { update: userUpdate }, auditLog: { create: auditLogCreate } }),
   },
 }));
 
@@ -84,6 +88,54 @@ describe("PATCH /api/admin/users/[userId]", () => {
         where: { id: "u1" },
         data: expect.objectContaining({ status: "SUSPENDED", statusReason: "Reported by learner" }),
       })
+    );
+    expect(auditLogCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          adminId: "admin1",
+          action: "USER_STATUS_CHANGE",
+          targetType: "USER",
+          targetId: "u1",
+          reason: "Reported by learner",
+        }),
+      })
+    );
+  });
+
+  it("computes statusExpiresAt from durationDays when suspending", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    userFindUnique.mockResolvedValue({ id: "u1", role: "STUDENT_TUTOR" });
+    userUpdate.mockResolvedValue({ id: "u1", status: "SUSPENDED" });
+
+    const before = Date.now();
+    await patch({ status: "SUSPENDED", durationDays: 5 });
+    const call = userUpdate.mock.calls[0][0];
+    const expiresAt = call.data.statusExpiresAt as Date;
+
+    expect(expiresAt).toBeInstanceOf(Date);
+    expect(expiresAt.getTime()).toBeGreaterThanOrEqual(before + 5 * 24 * 60 * 60 * 1000 - 1000);
+    expect(expiresAt.getTime()).toBeLessThanOrEqual(before + 5 * 24 * 60 * 60 * 1000 + 5000);
+  });
+
+  it("leaves statusExpiresAt null for an indefinite suspension", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    userFindUnique.mockResolvedValue({ id: "u1", role: "STUDENT_TUTOR" });
+    userUpdate.mockResolvedValue({ id: "u1", status: "SUSPENDED" });
+
+    await patch({ status: "SUSPENDED" });
+    expect(userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ statusExpiresAt: null }) })
+    );
+  });
+
+  it("clears statusExpiresAt when banning", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    userFindUnique.mockResolvedValue({ id: "u1", role: "STUDENT_TUTOR" });
+    userUpdate.mockResolvedValue({ id: "u1", status: "BANNED" });
+
+    await patch({ status: "BANNED", durationDays: 5 });
+    expect(userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ statusExpiresAt: null }) })
     );
   });
 });

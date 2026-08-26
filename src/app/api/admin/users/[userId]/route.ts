@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateUserStatusSchema } from "@/lib/validations/admin";
+import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { computeExpiresAt } from "@/lib/moderation";
 
 // ─── PATCH: Suspend, Ban, or Reactivate a Learner/Tutor Account ───────────────
 export async function PATCH(
@@ -38,22 +40,39 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { status, reason } = result.data;
+    const { status, reason, durationDays } = result.data;
+    const statusExpiresAt = status === "SUSPENDED" ? computeExpiresAt(durationDays) : null;
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: {
-        status,
-        statusReason: reason || null,
-        statusUpdatedAt: new Date(),
-      },
-      select: {
-        id: true,
-        anonymousId: true,
-        status: true,
-        statusReason: true,
-        statusUpdatedAt: true,
-      },
+    const updatedUser = await prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: {
+          status,
+          statusReason: reason || null,
+          statusUpdatedAt: new Date(),
+          statusExpiresAt,
+        },
+        select: {
+          id: true,
+          anonymousId: true,
+          status: true,
+          statusReason: true,
+          statusUpdatedAt: true,
+          statusExpiresAt: true,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          adminId: session.user.id,
+          action: AUDIT_ACTIONS.USER_STATUS_CHANGE,
+          targetType: AUDIT_TARGET_TYPES.USER,
+          targetId: userId,
+          reason: reason || null,
+        },
+      });
+
+      return updated;
     });
 
     return NextResponse.json(updatedUser);

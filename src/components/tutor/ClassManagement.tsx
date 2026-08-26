@@ -38,7 +38,7 @@ interface TutorClass {
   duration: number;
   maxStudents: number;
   meetingLink: string | null;
-  status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED";
+  status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   enrollments: Enrollment[];
 }
 

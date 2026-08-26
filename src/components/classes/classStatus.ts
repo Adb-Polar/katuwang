@@ -1,4 +1,4 @@
-export type ClassLifecycleStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED";
+export type ClassLifecycleStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
 
 export function getClassStatusBadge(
   status: ClassLifecycleStatus,
@@ -10,5 +10,6 @@ export function getClassStatusBadge(
   }
   if (status === "COMPLETED") return { tone: "info", label: "Completed" };
   if (status === "SUSPENDED") return { tone: "error", label: "Suspended" };
+  if (status === "BANNED") return { tone: "error", label: "Banned" };
   return { tone: "error", label: "Cancelled" };
 }

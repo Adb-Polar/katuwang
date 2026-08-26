@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
-import { useFetchList } from "@/hooks/useFetchList";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
+import Pagination from "@/components/ui/Pagination";
+
+const PAGE_SIZE = 10;
 
 interface AdminUser {
   id: string;
@@ -21,6 +24,17 @@ interface AdminUser {
   status: AccountStatus;
   statusReason: string | null;
   statusUpdatedAt: string | null;
+  statusExpiresAt: string | null;
+}
+
+function formatExpiry(dateStr: string) {
+  return new Date(dateStr).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
@@ -29,26 +43,51 @@ const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
   BANNED: "error",
 };
 
+const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
+  all: "",
+  learners: "STUDENT_LEARNER",
+  tutors: "STUDENT_TUTOR",
+};
+
 export default function UserManagementTable() {
-  const { data: users, loading, error, setError, refetch } = useFetchList<AdminUser>(
-    "/api/admin/users",
-    "Could not retrieve users."
-  );
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "learners" | "tutors">("all");
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<AccountStatus | "">("");
   const [target, setTarget] = useState<AdminUser | null>(null);
   const [status, setStatus] = useState<AccountStatus>("ACTIVE");
   const [reason, setReason] = useState("");
+  const [durationDays, setDurationDays] = useState<string>("");
   const [saving, setSaving] = useState(false);
 
-  const learners = users.filter((u) => u.role === "STUDENT_LEARNER");
-  const tutors = users.filter((u) => u.role === "STUDENT_TUTOR");
-  const displayed = activeTab === "learners" ? learners : activeTab === "tutors" ? tutors : users;
+  const {
+    data: users,
+    total,
+    page,
+    setPage,
+    loading,
+    error,
+    setError,
+    refetch,
+  } = usePaginatedList<AdminUser>(
+    "/api/admin/users",
+    "users",
+    {
+      ...(TAB_ROLE[activeTab] ? { role: TAB_ROLE[activeTab] } : {}),
+      ...(statusFilter ? { status: statusFilter } : {}),
+      ...(search.trim() ? { q: search.trim() } : {}),
+    },
+    PAGE_SIZE,
+    "Could not retrieve users."
+  );
+
+  const displayed = users;
 
   const openModal = (user: AdminUser) => {
     setTarget(user);
     setStatus(user.status);
     setReason("");
+    setDurationDays("");
     setError("");
   };
 
@@ -59,12 +98,20 @@ export default function UserManagementTable() {
       const res = await fetch(`/api/admin/users/${target.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, reason }),
+        body: JSON.stringify({
+          status,
+          reason,
+          ...(status === "SUSPENDED" && durationDays ? { durationDays: Number(durationDays) } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update account.");
 
-      setSuccess(`${target.anonymousId} is now ${status}.`);
+      setSuccess(
+        status === "SUSPENDED" && data.statusExpiresAt
+          ? `${target.anonymousId} is now SUSPENDED until ${formatExpiry(data.statusExpiresAt)}.`
+          : `${target.anonymousId} is now ${status}.`
+      );
       setTarget(null);
       refetch();
       setTimeout(() => setSuccess(""), 4000);
@@ -86,13 +133,33 @@ export default function UserManagementTable() {
 
           <Tabs
             tabs={[
-              { key: "all", label: "All", count: users.length },
-              { key: "learners", label: "Learners", count: learners.length },
-              { key: "tutors", label: "Tutors", count: tutors.length },
+              { key: "all", label: "All" },
+              { key: "learners", label: "Learners" },
+              { key: "tutors", label: "Tutors" },
             ]}
             active={activeTab}
             onChange={(key) => setActiveTab(key as "all" | "learners" | "tutors")}
           />
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, or ID..."
+              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+            />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as AccountStatus | "")}
+              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+            >
+              <option value="">All Statuses</option>
+              <option value="ACTIVE">Active</option>
+              <option value="SUSPENDED">Suspended</option>
+              <option value="BANNED">Banned</option>
+            </select>
+          </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-10">
@@ -129,6 +196,11 @@ export default function UserManagementTable() {
                       </td>
                       <td>
                         <StatusBadge tone={STATUS_TONE[u.status]} label={u.status} size="xs" />
+                        {u.status === "SUSPENDED" && u.statusExpiresAt && (
+                          <div className="text-2xs text-base-content/50 mt-1">
+                            Until {formatExpiry(u.statusExpiresAt)}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <button
@@ -147,6 +219,8 @@ export default function UserManagementTable() {
               )}
             </div>
           )}
+
+          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
         </div>
       </section>
 
@@ -178,6 +252,20 @@ export default function UserManagementTable() {
                   <option value="BANNED">Banned</option>
                 </select>
               </FormField>
+
+              {status === "SUSPENDED" && (
+                <FormField label="Duration (days)" hint="Leave blank for an indefinite suspension">
+                  <input
+                    type="number"
+                    min={1}
+                    max={365}
+                    value={durationDays}
+                    onChange={(e) => setDurationDays(e.target.value)}
+                    placeholder="e.g. 5"
+                    className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                  />
+                </FormField>
+              )}
 
               <FormField label="Reason" hint="Optional — shown for your own records">
                 <textarea

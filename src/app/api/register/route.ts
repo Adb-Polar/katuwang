@@ -4,13 +4,19 @@ import { prisma } from "@/lib/prisma";
 import { generateAnonymousId } from "@/lib/idGenerator";
 import { Role } from "@prisma/client";
 import { registerSchema, LearnerRegisterInput, TutorRegisterInput } from "@/lib/validations/auth";
+import { getSetting } from "@/lib/settings";
 
 // ─── Registration Handler ─────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
+    const registrationOpen = await getSetting("registrationOpen");
+    if (!registrationOpen) {
+      return NextResponse.json({ error: "Registration is currently closed." }, { status: 403 });
+    }
+
     const body = await req.json();
-    
+
     // Validate request body using Zod schema
     const result = registerSchema.safeParse(body);
     

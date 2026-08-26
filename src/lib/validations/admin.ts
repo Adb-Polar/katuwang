@@ -5,15 +5,34 @@ export const updateUserStatusSchema = z.object({
     message: "Invalid account status.",
   }),
   reason: z.string().trim().max(500, "Reason cannot exceed 500 characters.").optional().or(z.literal("")),
+  durationDays: z.number().int().positive().max(365, "Duration cannot exceed 365 days.").optional(),
 });
 
 export type UpdateUserStatusInput = z.infer<typeof updateUserStatusSchema>;
 
 export const updateClassStatusSchema = z.object({
-  status: z.enum(["SCHEDULED", "SUSPENDED"], {
+  status: z.enum(["SCHEDULED", "SUSPENDED", "BANNED"], {
     message: "Invalid class status.",
   }),
   reason: z.string().trim().max(500, "Reason cannot exceed 500 characters.").optional().or(z.literal("")),
+  durationDays: z.number().int().positive().max(365, "Duration cannot exceed 365 days.").optional(),
 });
 
 export type UpdateClassStatusInput = z.infer<typeof updateClassStatusSchema>;
+
+export const reviewCertificationSchema = z.object({
+  status: z.enum(["CERTIFIED", "REJECTED"], {
+    message: "Invalid certification decision.",
+  }),
+});
+
+export type ReviewCertificationInput = z.infer<typeof reviewCertificationSchema>;
+
+export const updatePlatformSettingSchema = z.object({
+  key: z.enum(["requireCertificationForClassCreation", "registrationOpen"], {
+    message: "Invalid setting key.",
+  }),
+  value: z.boolean({ message: "Value must be a boolean." }),
+});
+
+export type UpdatePlatformSettingInput = z.infer<typeof updatePlatformSettingSchema>;

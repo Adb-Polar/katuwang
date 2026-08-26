@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { userFindUnique, userCreate, transactionMock } = vi.hoisted(() => ({
+const { userFindUnique, userCreate, transactionMock, platformSettingFindUnique } = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   userCreate: vi.fn(),
   transactionMock: vi.fn(),
+  platformSettingFindUnique: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -13,6 +14,7 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: userFindUnique,
       create: userCreate,
     },
+    platformSetting: { findUnique: platformSettingFindUnique },
     $transaction: transactionMock,
   },
 }));
@@ -51,6 +53,15 @@ const validLearner = {
 describe("POST /api/register", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    platformSettingFindUnique.mockResolvedValue(null);
+  });
+
+  it("returns 403 when registration is closed", async () => {
+    platformSettingFindUnique.mockResolvedValue({ key: "registrationOpen", value: "false" });
+
+    const res = await POST(makeRequest(validLearner));
+    expect(res.status).toBe(403);
+    expect(userFindUnique).not.toHaveBeenCalled();
   });
 
   it("returns 400 for invalid input", async () => {

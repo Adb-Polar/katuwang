@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { getSetting } from "@/lib/settings";
 
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -106,6 +107,24 @@ export async function POST(req: NextRequest) {
         { error: `One or more selected topics are not valid for ${subject}.` },
         { status: 400 }
       );
+    }
+
+    // If enabled, only allow topics the tutor holds a CERTIFIED certification for
+    const requireCertification = await getSetting("requireCertificationForClassCreation");
+    if (requireCertification) {
+      const certifiedTopics = await prisma.topicCertification.findMany({
+        where: { tutorProfileId: tutorProfile.id, subject, status: "CERTIFIED" },
+        select: { topic: true },
+      });
+      const certifiedTopicSet = new Set(certifiedTopics.map((c) => c.topic));
+      const uncertifiedTopics = topics.filter((t) => !certifiedTopicSet.has(t));
+
+      if (uncertifiedTopics.length > 0) {
+        return NextResponse.json(
+          { error: `You are not certified for: ${uncertifiedTopics.join(", ")}.` },
+          { status: 400 }
+        );
+      }
     }
 
     const start = new Date(scheduledAt);

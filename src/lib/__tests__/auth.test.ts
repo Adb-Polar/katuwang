@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { userFindUnique } = vi.hoisted(() => ({
+const { userFindUnique, userUpdate } = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
+  userUpdate: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: {
       findUnique: userFindUnique,
+      update: userUpdate,
     },
   },
 }));
@@ -88,6 +90,57 @@ describe("auth authorize()", () => {
     await expect(
       authorize({ email: "juan@example.com", password: "password123" })
     ).rejects.toThrow(/suspended/i);
+  });
+
+  it("auto-reactivates and allows login when a suspension has expired", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "SUSPENDED",
+      statusExpiresAt: new Date(Date.now() - 1000),
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    const result = await authorize({ email: "juan@example.com", password: "password123" });
+
+    expect(userUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "1" },
+        data: expect.objectContaining({ status: "ACTIVE", statusExpiresAt: null }),
+      })
+    );
+    expect(result).toEqual({
+      id: "1",
+      anonymousId: "STU-0001",
+      email: "juan@example.com",
+      role: "STUDENT_LEARNER",
+      fullName: "Juan Dela Cruz",
+    });
+  });
+
+  it("still blocks login when a suspension has a future expiry", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "SUSPENDED",
+      statusExpiresAt: new Date(Date.now() + 100000),
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow(/suspended/i);
+    expect(userUpdate).not.toHaveBeenCalled();
   });
 
   it("throws when the account is banned", async () => {

@@ -3,8 +3,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateClassStatusSchema } from "@/lib/validations/admin";
+import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { computeExpiresAt } from "@/lib/moderation";
 
-// ─── PATCH: Suspend or Reinstate a Class ───────────────────────────────────────
+// ─── PATCH: Suspend, Ban, or Reinstate a Class ─────────────────────────────────
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ classId: string }> }
@@ -34,7 +36,7 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { status, reason } = result.data;
+    const { status, reason, durationDays } = result.data;
 
     if (status === "SUSPENDED" && existingClass.status !== "SCHEDULED") {
       return NextResponse.json(
@@ -43,19 +45,43 @@ export async function PATCH(
       );
     }
 
-    if (status === "SCHEDULED" && existingClass.status !== "SUSPENDED") {
+    if (status === "BANNED" && !["SCHEDULED", "SUSPENDED"].includes(existingClass.status)) {
       return NextResponse.json(
-        { error: "Only a suspended class can be reinstated." },
+        { error: "Only a scheduled or suspended class can be banned." },
         { status: 400 }
       );
     }
 
-    const updatedClass = await prisma.tutorClass.update({
-      where: { id: classId },
-      data: {
-        status,
-        suspendedReason: status === "SUSPENDED" ? reason || null : null,
-      },
+    if (status === "SCHEDULED" && !["SUSPENDED", "BANNED"].includes(existingClass.status)) {
+      return NextResponse.json(
+        { error: "Only a suspended or banned class can be reinstated." },
+        { status: 400 }
+      );
+    }
+
+    const isModerated = status === "SUSPENDED" || status === "BANNED";
+
+    const updatedClass = await prisma.$transaction(async (tx) => {
+      const updated = await tx.tutorClass.update({
+        where: { id: classId },
+        data: {
+          status,
+          suspendedReason: isModerated ? reason || null : null,
+          suspendedUntil: status === "SUSPENDED" ? computeExpiresAt(durationDays) : null,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          adminId: session.user.id,
+          action: AUDIT_ACTIONS.CLASS_STATUS_CHANGE,
+          targetType: AUDIT_TARGET_TYPES.CLASS,
+          targetId: classId,
+          reason: isModerated ? reason || null : null,
+        },
+      });
+
+      return updated;
     });
 
     return NextResponse.json(updatedClass);

@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { getServerSessionMock, findManyMock } = vi.hoisted(() => ({
+const { getServerSessionMock, findManyMock, updateManyMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findManyMock: vi.fn(),
+  updateManyMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -13,6 +14,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorClass: {
       findMany: findManyMock,
+      updateMany: updateManyMock,
     },
   },
 }));
@@ -22,6 +24,7 @@ import { GET } from "@/app/api/classes/route";
 describe("GET /api/classes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    updateManyMock.mockResolvedValue({ count: 0 });
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -77,6 +80,9 @@ describe("GET /api/classes", () => {
           ],
         },
       })
+    );
+    expect(updateManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { status: "SCHEDULED", suspendedReason: null, suspendedUntil: null } })
     );
   });
 

@@ -57,4 +57,21 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     expect(json.error).toMatch(/suspended/i);
     expect(classUpdate).not.toHaveBeenCalled();
   });
+
+  it("returns 403 when the class was banned by an admin", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "BANNED",
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+
+    const res = await patch({ status: "SCHEDULED" });
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error).toMatch(/banned/i);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
 });

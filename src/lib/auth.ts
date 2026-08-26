@@ -33,6 +33,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Incorrect password.");
         }
 
+        if (user.status === "SUSPENDED" && user.statusExpiresAt && user.statusExpiresAt <= new Date()) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { status: "ACTIVE", statusReason: null, statusUpdatedAt: new Date(), statusExpiresAt: null },
+          });
+          user.status = "ACTIVE";
+        }
+
         if (user.status === "SUSPENDED") {
           throw new Error("Your account has been suspended. Contact an administrator for details.");
         }

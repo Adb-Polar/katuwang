@@ -39,9 +39,9 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
-    if (existingClass.status === "SUSPENDED") {
+    if (existingClass.status === "SUSPENDED" || existingClass.status === "BANNED") {
       return NextResponse.json(
-        { error: "This class was suspended by an administrator and can't be modified." },
+        { error: "This class was suspended or banned by an administrator and can't be modified." },
         { status: 403 }
       );
     }

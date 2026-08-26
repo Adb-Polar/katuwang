@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { reinstateExpiredClasses } from "@/lib/moderation";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
 export async function POST(
@@ -15,6 +16,8 @@ export async function POST(
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
+
+    await reinstateExpiredClasses();
 
     const existingClass = await prisma.tutorClass.findUnique({
       where: { id: classId },

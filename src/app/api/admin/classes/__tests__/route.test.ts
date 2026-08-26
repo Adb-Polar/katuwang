@@ -1,8 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 
-const { getServerSessionMock, findManyMock } = vi.hoisted(() => ({
+const { getServerSessionMock, findManyMock, countMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findManyMock: vi.fn(),
+  countMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -11,24 +13,29 @@ vi.mock("next-auth", () => ({
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    tutorClass: { findMany: findManyMock },
+    tutorClass: { findMany: findManyMock, count: countMock },
   },
 }));
 
 import { GET } from "@/app/api/admin/classes/route";
 
+function makeRequest(query = "") {
+  return new NextRequest(`http://localhost/api/admin/classes${query}`);
+}
+
 describe("GET /api/admin/classes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    countMock.mockResolvedValue(0);
   });
 
   it("returns 401 when unauthenticated", async () => {
     getServerSessionMock.mockResolvedValue(null);
-    const res = await GET();
+    const res = await GET(makeRequest());
     expect(res.status).toBe(401);
   });
 
-  it("returns 200 with flattened topics/tutor", async () => {
+  it("returns 200 with flattened topics/tutor and pagination metadata", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     findManyMock.mockResolvedValue([
       {
@@ -39,11 +46,13 @@ describe("GET /api/admin/classes", () => {
         _count: { enrollments: 2 },
       },
     ]);
+    countMock.mockResolvedValue(1);
 
-    const res = await GET();
+    const res = await GET(makeRequest());
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json).toEqual([
+    expect(json.total).toBe(1);
+    expect(json.classes).toEqual([
       {
         id: "c1",
         subject: "MATH",
@@ -52,5 +61,17 @@ describe("GET /api/admin/classes", () => {
         _count: { enrollments: 2 },
       },
     ]);
+  });
+
+  it("filters by subject and status when provided", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+
+    await GET(makeRequest("?subject=MATH&status=SUSPENDED"));
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ subject: "MATH", status: "SUSPENDED" }),
+      })
+    );
   });
 });

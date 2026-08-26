@@ -1,14 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, tutorClassFindUnique, enrollmentFindUnique, enrollmentCreate, enrollmentDelete } =
-  vi.hoisted(() => ({
-    getServerSessionMock: vi.fn(),
-    tutorClassFindUnique: vi.fn(),
-    enrollmentFindUnique: vi.fn(),
-    enrollmentCreate: vi.fn(),
-    enrollmentDelete: vi.fn(),
-  }));
+const {
+  getServerSessionMock,
+  tutorClassFindUnique,
+  tutorClassUpdateMany,
+  enrollmentFindUnique,
+  enrollmentCreate,
+  enrollmentDelete,
+} = vi.hoisted(() => ({
+  getServerSessionMock: vi.fn(),
+  tutorClassFindUnique: vi.fn(),
+  tutorClassUpdateMany: vi.fn(),
+  enrollmentFindUnique: vi.fn(),
+  enrollmentCreate: vi.fn(),
+  enrollmentDelete: vi.fn(),
+}));
 
 vi.mock("next-auth", () => ({
   getServerSession: getServerSessionMock,
@@ -18,6 +25,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorClass: {
       findUnique: tutorClassFindUnique,
+      updateMany: tutorClassUpdateMany,
     },
     classEnrollment: {
       findUnique: enrollmentFindUnique,
@@ -48,6 +56,7 @@ const futureClass = {
 describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tutorClassUpdateMany.mockResolvedValue({ count: 0 });
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {
@@ -112,6 +121,21 @@ describe("POST /api/classes/[classId]/enroll", () => {
     const json = await res.json();
     expect(json.error).toMatch(/already enrolled/i);
     expect(enrollmentCreate).not.toHaveBeenCalled();
+  });
+
+  it("lazily reinstates expired class suspensions before checking eligibility", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
+
+    await POST(makeRequest("POST"), makeParams());
+    expect(tutorClassUpdateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: "SUSPENDED" }),
+        data: { status: "SCHEDULED", suspendedReason: null, suspendedUntil: null },
+      })
+    );
   });
 
   it("returns 201 on successful enrollment", async () => {
