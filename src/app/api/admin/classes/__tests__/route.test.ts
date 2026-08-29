@@ -74,4 +74,14 @@ describe("GET /api/admin/classes", () => {
       })
     );
   });
+
+  it("orders by createdAt since classes no longer have a single scheduledAt", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+
+    await GET(makeRequest());
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: "desc" } })
+    );
+  });
 });

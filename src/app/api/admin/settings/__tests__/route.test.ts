@@ -77,6 +77,15 @@ describe("PATCH /api/admin/settings", () => {
     expect(res.status).toBe(400);
   });
 
+  it("accepts the matchingEnabled key", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    platformSettingUpsert.mockResolvedValue({ key: "matchingEnabled", value: "false" });
+
+    const res = await PATCH(makeRequest({ key: "matchingEnabled", value: false }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ key: "matchingEnabled", value: false });
+  });
+
   it("upserts the setting and returns the boolean value", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     platformSettingUpsert.mockResolvedValue({ key: "registrationOpen", value: "false" });

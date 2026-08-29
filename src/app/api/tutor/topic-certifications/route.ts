@@ -23,12 +23,35 @@ export async function GET() {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const certifications = await prisma.topicCertification.findMany({
-      where: { tutorProfileId: tutorProfile.id },
-      orderBy: { requestedAt: "desc" },
-    });
+    const [certifications, classes] = await Promise.all([
+      prisma.topicCertification.findMany({
+        where: { tutorProfileId: tutorProfile.id },
+        orderBy: { requestedAt: "desc" },
+      }),
+      prisma.tutorClass.findMany({
+        where: { tutorProfileId: tutorProfile.id },
+        select: { id: true, subject: true, status: true, topics: { select: { topic: true } } },
+      }),
+    ]);
 
-    return NextResponse.json(certifications);
+    // Map "SUBJECT::topic" -> the tutor's own classes covering that topic, so the
+    // Assessments page can show where each certification is actually being used.
+    const classesByTopic = new Map<string, { id: string; subject: string; status: string }[]>();
+    for (const c of classes) {
+      for (const t of c.topics) {
+        const key = `${c.subject}::${t.topic}`;
+        const existing = classesByTopic.get(key) ?? [];
+        existing.push({ id: c.id, subject: c.subject, status: c.status });
+        classesByTopic.set(key, existing);
+      }
+    }
+
+    return NextResponse.json(
+      certifications.map((c) => ({
+        ...c,
+        usedInClasses: classesByTopic.get(`${c.subject}::${c.topic}`) ?? [],
+      }))
+    );
   } catch (error) {
     console.error("Error fetching topic certifications:", error);
     return NextResponse.json(

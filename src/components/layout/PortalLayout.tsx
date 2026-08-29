@@ -57,7 +57,7 @@ export default function PortalLayout({
         </div>
 
         <main className="flex-1 p-4 md:p-8">
-          <div className="max-w-5xl mx-auto w-full">{children}</div>
+          <div className="max-w-7xl mx-auto w-full">{children}</div>
         </main>
       </div>
 
@@ -117,7 +117,7 @@ export default function PortalLayout({
               )}
             </div>
             <Link
-              href="/api/auth/signout"
+              href="/logout"
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-error/80 hover:bg-error/10 hover:text-error transition-colors"
             >
               <LogOut className="w-4 h-4" />

@@ -1,0 +1,244 @@
+```mermaid
+erDiagram
+
+        Role {
+            ADMIN ADMIN
+STUDENT_TUTOR STUDENT_TUTOR
+STUDENT_LEARNER STUDENT_LEARNER
+        }
+    
+
+
+        AccountStatus {
+            ACTIVE ACTIVE
+SUSPENDED SUSPENDED
+BANNED BANNED
+        }
+    
+
+
+        GradeLevel {
+            GRADE_7 GRADE_7
+GRADE_8 GRADE_8
+GRADE_9 GRADE_9
+GRADE_10 GRADE_10
+GRADE_11 GRADE_11
+GRADE_12 GRADE_12
+        }
+    
+
+
+        TopicCertificationStatus {
+            PENDING PENDING
+CERTIFIED CERTIFIED
+        }
+    
+
+
+        SubjectArea {
+            MATH MATH
+ENGLISH ENGLISH
+SCIENCE SCIENCE
+FILIPINO FILIPINO
+ARALING_PANLIPUNAN ARALING_PANLIPUNAN
+TLE TLE
+MAPEH MAPEH
+        }
+    
+
+
+        ClassStatus {
+            SCHEDULED SCHEDULED
+COMPLETED COMPLETED
+CANCELLED CANCELLED
+SUSPENDED SUSPENDED
+BANNED BANNED
+        }
+    
+
+
+        SessionStatus {
+            SCHEDULED SCHEDULED
+COMPLETED COMPLETED
+CANCELLED CANCELLED
+        }
+    
+
+
+        TopicRequestStatus {
+            OPEN OPEN
+FULFILLED FULFILLED
+CANCELLED CANCELLED
+        }
+    
+  "users" {
+    String id "🗝️"
+    String anonymousId 
+    String firstName 
+    String lastName 
+    String email 
+    String password 
+    Role role 
+    GradeLevel gradeLevel 
+    String section 
+    String contactInfo "❓"
+    Boolean consentGiven 
+    AccountStatus status 
+    String statusReason "❓"
+    DateTime statusUpdatedAt "❓"
+    DateTime statusExpiresAt "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "tutor_profiles" {
+    String id "🗝️"
+    String userId 
+    }
+  
+
+  "availabilities" {
+    String id "🗝️"
+    String tutorProfileId 
+    String day 
+    String startTime 
+    String endTime 
+    }
+  
+
+  "topic_certifications" {
+    String id "🗝️"
+    String tutorProfileId 
+    SubjectArea subject 
+    String topic 
+    TopicCertificationStatus status 
+    DateTime requestedAt 
+    DateTime certifiedAt "❓"
+    }
+  
+
+  "id_counters" {
+    String role "🗝️"
+    Int count 
+    }
+  
+
+  "tutor_classes" {
+    String id "🗝️"
+    String tutorProfileId 
+    SubjectArea subject 
+    GradeLevel gradeLevel "❓"
+    String description "❓"
+    Int maxStudents 
+    String building "❓"
+    String room "❓"
+    String meetingLink "❓"
+    Boolean published 
+    ClassStatus status 
+    String suspendedReason "❓"
+    DateTime suspendedUntil "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "class_topics" {
+    String id "🗝️"
+    String classId 
+    String topic 
+    }
+  
+
+  "class_sessions" {
+    String id "🗝️"
+    String classId 
+    String topic 
+    DateTime scheduledAt 
+    Int duration 
+    SessionStatus status 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "class_enrollments" {
+    String id "🗝️"
+    String classId 
+    String learnerId 
+    DateTime enrolledAt 
+    }
+  
+
+  "topic_requests" {
+    String id "🗝️"
+    String learnerId 
+    SubjectArea subject 
+    GradeLevel gradeLevel 
+    String note "❓"
+    TopicRequestStatus status 
+    String fulfilledClassId "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "topic_request_topics" {
+    String id "🗝️"
+    String requestId 
+    String topic 
+    }
+  
+
+  "topic_request_slots" {
+    String id "🗝️"
+    String requestId 
+    String day 
+    String startTime 
+    String endTime 
+    }
+  
+
+  "audit_logs" {
+    String id "🗝️"
+    String adminId 
+    String action 
+    String targetType 
+    String targetId 
+    String reason "❓"
+    DateTime createdAt 
+    }
+  
+
+  "platform_settings" {
+    String key "🗝️"
+    String value 
+    DateTime updatedAt 
+    }
+  
+    "users" |o--|| "Role" : "enum:role"
+    "users" |o--|| "GradeLevel" : "enum:gradeLevel"
+    "users" |o--|| "AccountStatus" : "enum:status"
+    "tutor_profiles" |o--|| "users" : "user"
+    "availabilities" }o--|| "tutor_profiles" : "tutorProfile"
+    "topic_certifications" }o--|| "tutor_profiles" : "tutorProfile"
+    "topic_certifications" |o--|| "SubjectArea" : "enum:subject"
+    "topic_certifications" |o--|| "TopicCertificationStatus" : "enum:status"
+    "tutor_classes" }o--|| "tutor_profiles" : "tutorProfile"
+    "tutor_classes" |o--|| "SubjectArea" : "enum:subject"
+    "tutor_classes" |o--|o "GradeLevel" : "enum:gradeLevel"
+    "tutor_classes" |o--|| "ClassStatus" : "enum:status"
+    "class_topics" }o--|| "tutor_classes" : "class"
+    "class_sessions" }o--|| "tutor_classes" : "class"
+    "class_sessions" |o--|| "SessionStatus" : "enum:status"
+    "class_enrollments" }o--|| "tutor_classes" : "class"
+    "class_enrollments" }o--|| "users" : "learner"
+    "topic_requests" }o--|| "users" : "learner"
+    "topic_requests" |o--|| "SubjectArea" : "enum:subject"
+    "topic_requests" |o--|| "GradeLevel" : "enum:gradeLevel"
+    "topic_requests" |o--|| "TopicRequestStatus" : "enum:status"
+    "topic_requests" }o--|o "tutor_classes" : "fulfilledClass"
+    "topic_request_topics" }o--|| "topic_requests" : "request"
+    "topic_request_slots" }o--|| "topic_requests" : "request"
+    "audit_logs" }o--|| "users" : "admin"
+```

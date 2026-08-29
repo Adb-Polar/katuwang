@@ -42,6 +42,7 @@ Admin-configurable boolean flags stored in `PlatformSetting`:
 
 - **`registrationOpen`** — toggles whether new learner/tutor registrations are accepted (`POST /api/register` checks this and returns `403` when closed). Defaults to `true`.
 - **`requireCertificationForClassCreation`** — when enabled, tutors may only create a class covering topics they hold a `CERTIFIED` `TopicCertification` for. Defaults to `false`.
+- **`matchingEnabled`** — when disabled, the learner "Find a Class" matcher (`POST /api/learner/match`), topic requests (`/api/learner/topic-requests`), and the tutor request queue (`/api/tutor/topic-requests`) all return `403`. Defaults to `true`.
 
 (`GET`/`PATCH /api/admin/settings`)
 
@@ -147,7 +148,7 @@ Update one platform setting (upserts into `PlatformSetting`).
 
 **Body**
 ```json
-{ "key": "registrationOpen" | "requireCertificationForClassCreation", "value": true }
+{ "key": "registrationOpen" | "requireCertificationForClassCreation" | "matchingEnabled", "value": true }
 ```
 **200** → `{ key, value }`.
 **400** → invalid key or non-boolean value.

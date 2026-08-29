@@ -1,13 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, tutorProfileFindUnique, topicCertificationFindMany, topicCertificationUpsert } =
-  vi.hoisted(() => ({
-    getServerSessionMock: vi.fn(),
-    tutorProfileFindUnique: vi.fn(),
-    topicCertificationFindMany: vi.fn(),
-    topicCertificationUpsert: vi.fn(),
-  }));
+const {
+  getServerSessionMock,
+  tutorProfileFindUnique,
+  topicCertificationFindMany,
+  topicCertificationUpsert,
+  tutorClassFindMany,
+} = vi.hoisted(() => ({
+  getServerSessionMock: vi.fn(),
+  tutorProfileFindUnique: vi.fn(),
+  topicCertificationFindMany: vi.fn(),
+  topicCertificationUpsert: vi.fn(),
+  tutorClassFindMany: vi.fn(),
+}));
 
 vi.mock("next-auth", () => ({
   getServerSession: getServerSessionMock,
@@ -17,6 +23,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
     topicCertification: { findMany: topicCertificationFindMany, upsert: topicCertificationUpsert },
+    tutorClass: { findMany: tutorClassFindMany },
   },
 }));
 
@@ -54,11 +61,47 @@ describe("GET /api/tutor/topic-certifications", () => {
     topicCertificationFindMany.mockResolvedValue([
       { id: "c1", subject: "MATH", topic: "Algebraic Expressions", status: "PENDING" },
     ]);
+    tutorClassFindMany.mockResolvedValue([]);
 
     const res = await GET();
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json).toHaveLength(1);
+  });
+
+  it("attaches usedInClasses when a certification's topic matches one of the tutor's classes", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicCertificationFindMany.mockResolvedValue([
+      { id: "c1", subject: "MATH", topic: "Algebraic Expressions", status: "CERTIFIED" },
+    ]);
+    tutorClassFindMany.mockResolvedValue([
+      {
+        id: "cls1",
+        subject: "MATH",
+        status: "SCHEDULED",
+        topics: [{ topic: "Algebraic Expressions" }],
+      },
+    ]);
+
+    const res = await GET();
+    const json = await res.json();
+    expect(json[0].usedInClasses).toEqual([{ id: "cls1", subject: "MATH", status: "SCHEDULED" }]);
+  });
+
+  it("returns an empty usedInClasses array when no class covers the certified topic", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicCertificationFindMany.mockResolvedValue([
+      { id: "c1", subject: "MATH", topic: "Algebraic Expressions", status: "CERTIFIED" },
+    ]);
+    tutorClassFindMany.mockResolvedValue([
+      { id: "cls1", subject: "SCIENCE", scheduledAt: new Date(), status: "SCHEDULED", topics: [{ topic: "Cells" }] },
+    ]);
+
+    const res = await GET();
+    const json = await res.json();
+    expect(json[0].usedInClasses).toEqual([]);
   });
 });
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createClassSchema } from "@/lib/validations/class";
+import { classDetailsSchema } from "@/lib/validations/class";
 
 
 export async function PATCH(
@@ -20,6 +20,8 @@ export async function PATCH(
     const existingClass = await prisma.tutorClass.findUnique({
       where: { id: classId },
       include: {
+        topics: { select: { topic: true } },
+        sessions: { select: { topic: true } },
         _count: {
           select: { enrollments: true },
         },
@@ -53,8 +55,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid class status." }, { status: 400 });
     }
 
-    // Validate using Zod (partial update)
-    const result = createClassSchema.partial().safeParse(body);
+    // Validate using Zod (partial update — class-level fields only, not sessions)
+    const result = classDetailsSchema.partial().safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
       return NextResponse.json({ error: errorMsg }, { status: 400 });
@@ -62,7 +64,7 @@ export async function PATCH(
 
     const { topics, ...updates } = result.data;
 
-    // 1. Capacity validation if updating maxStudents
+    // Capacity validation if updating maxStudents
     if (updates.maxStudents !== undefined) {
       if (updates.maxStudents < existingClass._count.enrollments) {
         return NextResponse.json(
@@ -72,56 +74,43 @@ export async function PATCH(
       }
     }
 
-    // 2. Schedule conflict validation if updating scheduledAt or duration
-    if (updates.scheduledAt || updates.duration !== undefined) {
-      const newStart = updates.scheduledAt ? new Date(updates.scheduledAt) : new Date(existingClass.scheduledAt);
-      const newDuration = updates.duration !== undefined ? updates.duration : existingClass.duration;
-      const newEnd = new Date(newStart.getTime() + newDuration * 60 * 1000);
+    // Block removing a topic that's currently used by one of the class's sessions
+    if (topics) {
+      const currentTopics = existingClass.topics.map((t) => t.topic);
+      const removedTopics = currentTopics.filter((t) => !topics.includes(t));
+      const usedTopics = new Set(existingClass.sessions.map((s) => s.topic));
+      const blockedRemovals = removedTopics.filter((t) => usedTopics.has(t));
 
-      // Check conflict if class is still active (SCHEDULED)
-      const targetStatus = body.status || existingClass.status;
-      if (targetStatus === "SCHEDULED") {
-        if (newStart.getTime() < Date.now()) {
-          return NextResponse.json(
-            { error: "Cannot schedule a class in the past." },
-            { status: 400 }
-          );
-        }
-
-        const otherClasses = await prisma.tutorClass.findMany({
-          where: {
-            tutorProfileId: tutorProfile.id,
-            status: "SCHEDULED",
-            id: { not: classId },
-          },
-        });
-
-        const hasConflict = otherClasses.some((other) => {
-          const otherStart = new Date(other.scheduledAt).getTime();
-          const otherEnd = otherStart + other.duration * 60 * 1000;
-          return newStart.getTime() < otherEnd && newEnd.getTime() > otherStart;
-        });
-
-        if (hasConflict) {
-          return NextResponse.json(
-            { error: "Time conflict detected: You already have another class scheduled during this time." },
-            { status: 409 }
-          );
-        }
+      if (blockedRemovals.length > 0) {
+        return NextResponse.json(
+          { error: `Cannot remove topic(s) currently used by a session: ${blockedRemovals.join(", ")}.` },
+          { status: 400 }
+        );
       }
     }
 
-    // 3. Apply updates to the database
-    const updatedClass = await prisma.tutorClass.update({
-      where: { id: classId },
-      data: {
-        ...updates,
-        ...(body.status ? { status: body.status } : {}),
-        ...(topics
-          ? { topics: { deleteMany: {}, create: topics.map((topic) => ({ topic })) } }
-          : {}),
-      },
-      include: { topics: true },
+    // Cancelling/completing the whole class cascades to every still-SCHEDULED session
+    const newStatus = body.status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | undefined;
+
+    const updatedClass = await prisma.$transaction(async (tx) => {
+      if (newStatus === "CANCELLED" || newStatus === "COMPLETED") {
+        await tx.classSession.updateMany({
+          where: { classId, status: "SCHEDULED" },
+          data: { status: newStatus },
+        });
+      }
+
+      return tx.tutorClass.update({
+        where: { id: classId },
+        data: {
+          ...updates,
+          ...(newStatus ? { status: newStatus } : {}),
+          ...(topics
+            ? { topics: { deleteMany: {}, create: topics.map((topic) => ({ topic })) } }
+            : {}),
+        },
+        include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
+      });
     });
 
     return NextResponse.json({

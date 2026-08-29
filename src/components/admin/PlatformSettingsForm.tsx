@@ -18,6 +18,11 @@ const SETTING_META: Record<string, { label: string; description: string }> = {
     label: "Registration open",
     description: "When disabled, new learner and tutor registrations are rejected.",
   },
+  matchingEnabled: {
+    label: "Class matching & topic requests",
+    description:
+      "When disabled, the learner 'Find a Class' matcher and topic requests (and the tutor request queue) are turned off.",
+  },
 };
 
 export default function PlatformSettingsForm() {

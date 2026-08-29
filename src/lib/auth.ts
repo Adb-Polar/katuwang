@@ -86,6 +86,7 @@ export const authOptions: NextAuthOptions = {
 
   pages: {
     signIn: "/login",           // Custom login page
+    signOut: "/logout",         // Custom, app-styled sign-out confirmation
     error: "/login",            // Redirect auth errors to login page
   },
 

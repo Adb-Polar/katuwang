@@ -2,6 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator erd {
+  provider                  = "prisma-erd-generator"
+  output                    = "../docs/erd.md"
+  includeRelationFromFields = true
+}
+
 datasource db {
   provider = "mysql"
 }
@@ -52,6 +58,18 @@ enum ClassStatus {
   BANNED
 }
 
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum TopicRequestStatus {
+  OPEN // Awaiting a tutor response
+  FULFILLED // A tutor has attached a class for this request
+  CANCELLED // Withdrawn by the learner
+}
+
 // ─── User ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -74,15 +92,16 @@ model User {
   statusExpiresAt DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
 
   // Misc
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Tutor-specific
   tutorProfile TutorProfile?
 
   // Relations
-  enrollments  ClassEnrollment[] @relation("LearnerEnrollments")
-  auditLogs    AuditLog[]
+  enrollments   ClassEnrollment[] @relation("LearnerEnrollments")
+  auditLogs     AuditLog[]
+  topicRequests TopicRequest[]    @relation("LearnerTopicRequests")
 
   @@map("users")
 }
@@ -123,13 +142,13 @@ model Availability {
 // A row only exists once a tutor has requested an assessment for that topic.
 
 model TopicCertification {
-  id             String                    @id @default(cuid())
+  id             String                   @id @default(cuid())
   tutorProfileId String
-  tutorProfile   TutorProfile              @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  tutorProfile   TutorProfile             @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
   subject        SubjectArea
   topic          String
-  status         TopicCertificationStatus  @default(PENDING)
-  requestedAt    DateTime                  @default(now())
+  status         TopicCertificationStatus @default(PENDING)
+  requestedAt    DateTime                 @default(now())
   certifiedAt    DateTime?
 
   @@unique([tutorProfileId, subject, topic])
@@ -148,23 +167,27 @@ model IdCounter {
 // ─── Tutor Class ─────────────────────────────────────────────────────────────
 
 model TutorClass {
-  id             String       @id @default(cuid())
-  tutorProfileId String
-  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  subject        SubjectArea
-  description    String?      @db.Text
-  scheduledAt    DateTime
-  duration       Int          // duration in minutes (e.g. 60, 90)
-  maxStudents    Int          @default(1) // Support for 1-on-1 or small group tutoring
-  meetingLink    String?
-  status          ClassStatus @default(SCHEDULED)
-  suspendedReason String?     @db.Text
+  id              String       @id @default(cuid())
+  tutorProfileId  String
+  tutorProfile    TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject         SubjectArea
+  gradeLevel      GradeLevel? // optional target grade for this class; null = open to any grade
+  description     String?      @db.Text
+  maxStudents     Int          @default(1) // Support for 1-on-1 or small group tutoring
+  building        String? // in-person location, optional and independent of meetingLink
+  room            String?
+  meetingLink     String?
+  published       Boolean      @default(true) // unpublished classes are hidden from learner browsing/enrollment, but keep their sessions/enrollments
+  status          ClassStatus  @default(SCHEDULED)
+  suspendedReason String?      @db.Text
   suspendedUntil  DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  topics      ClassTopic[]
-  enrollments ClassEnrollment[]
+  topics            ClassTopic[]
+  sessions          ClassSession[]
+  enrollments       ClassEnrollment[]
+  fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
 
   @@map("tutor_classes")
 }
@@ -181,6 +204,25 @@ model ClassTopic {
   @@map("class_topics")
 }
 
+// ─── Class Session (1 row per individual meeting within a class) ─────────────
+// `topic` must be one of the parent class's ClassTopic.topic values —
+// enforced in application code, not a DB constraint (see ClassTopic above).
+
+model ClassSession {
+  id          String        @id @default(cuid())
+  classId     String
+  class       TutorClass    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  topic       String
+  scheduledAt DateTime
+  duration    Int // duration in minutes (e.g. 60, 90)
+  status      SessionStatus @default(SCHEDULED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([classId])
+  @@map("class_sessions")
+}
+
 // ─── Class Enrollment ────────────────────────────────────────────────────────
 
 model ClassEnrollment {
@@ -193,6 +235,50 @@ model ClassEnrollment {
 
   @@unique([classId, learnerId])
   @@map("class_enrollments")
+}
+
+// ─── Topic Request (learner-posted demand when no class fits) ─────────────────
+// Topics and preferred time slots are child rows (3NF), mirroring ClassTopic and Availability.
+
+model TopicRequest {
+  id               String             @id @default(cuid())
+  learnerId        String
+  learner          User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
+  subject          SubjectArea
+  gradeLevel       GradeLevel
+  note             String?            @db.Text
+  status           TopicRequestStatus @default(OPEN)
+  fulfilledClassId String?
+  fulfilledClass   TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  topics TopicRequestTopic[]
+  slots  TopicRequestSlot[]
+
+  @@index([status, subject])
+  @@map("topic_requests")
+}
+
+model TopicRequestTopic {
+  id        String       @id @default(cuid())
+  requestId String
+  request   TopicRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  topic     String
+
+  @@unique([requestId, topic])
+  @@map("topic_request_topics")
+}
+
+model TopicRequestSlot {
+  id        String       @id @default(cuid())
+  requestId String
+  request   TopicRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  day       String // "MONDAY".."SUNDAY", same convention as Availability
+  startTime String // "HH:MM" 24h
+  endTime   String
+
+  @@map("topic_request_slots")
 }
 
 // ─── Audit Log (admin moderation action history) ──────────────────────────────

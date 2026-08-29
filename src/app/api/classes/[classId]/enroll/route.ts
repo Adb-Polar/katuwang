@@ -22,6 +22,7 @@ export async function POST(
     const existingClass = await prisma.tutorClass.findUnique({
       where: { id: classId },
       include: {
+        sessions: true,
         _count: { select: { enrollments: true } },
       },
     });
@@ -30,16 +31,19 @@ export async function POST(
       return NextResponse.json({ error: "Class not found." }, { status: 404 });
     }
 
-    if (existingClass.status !== "SCHEDULED") {
+    if (existingClass.status !== "SCHEDULED" || !existingClass.published) {
       return NextResponse.json(
         { error: "This class is no longer accepting enrollments." },
         { status: 400 }
       );
     }
 
-    if (new Date(existingClass.scheduledAt).getTime() < Date.now()) {
+    const hasUpcomingSession = existingClass.sessions.some(
+      (s) => s.status === "SCHEDULED" && new Date(s.scheduledAt).getTime() > Date.now()
+    );
+    if (!hasUpcomingSession) {
       return NextResponse.json(
-        { error: "Cannot enroll in a class that has already started." },
+        { error: "This class has no upcoming sessions to enroll in." },
         { status: 400 }
       );
     }

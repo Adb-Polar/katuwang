@@ -29,7 +29,7 @@ export const reviewCertificationSchema = z.object({
 export type ReviewCertificationInput = z.infer<typeof reviewCertificationSchema>;
 
 export const updatePlatformSettingSchema = z.object({
-  key: z.enum(["requireCertificationForClassCreation", "registrationOpen"], {
+  key: z.enum(["requireCertificationForClassCreation", "registrationOpen", "matchingEnabled"], {
     message: "Invalid setting key.",
   }),
   value: z.boolean({ message: "Value must be a boolean." }),

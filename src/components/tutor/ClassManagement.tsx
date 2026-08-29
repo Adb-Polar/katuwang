@@ -1,25 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Trash2 } from "lucide-react";
 import { SubjectArea } from "@prisma/client";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { useFetchList } from "@/hooks/useFetchList";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
-import ClassDetailsModalBase from "@/components/classes/ClassDetailsModalBase";
-import EnrolledLearnersTable from "@/components/classes/EnrolledLearnersTable";
 
 interface Learner {
   id: string;
   anonymousId: string;
-  firstName: string;
-  lastName: string;
   gradeLevel: string;
   section: string;
 }
@@ -29,25 +26,44 @@ interface Enrollment {
   learner: Learner;
 }
 
+interface ClassSession {
+  scheduledAt: string;
+  duration: number;
+  status: "SCHEDULED" | "COMPLETED" | "CANCELLED";
+}
+
 interface TutorClass {
   id: string;
   subject: SubjectArea;
+  gradeLevel: string | null;
   topics: string[];
   description: string | null;
-  scheduledAt: string;
-  duration: number;
+  sessions: ClassSession[];
   maxStudents: number;
   meetingLink: string | null;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
+  published: boolean;
   enrollments: Enrollment[];
 }
 
-type PendingAction = { type: "cancel" | "complete" | "delete"; classId: string } | null;
+interface SessionRow {
+  key: string;
+  topic: string;
+  scheduledAt: string;
+  duration: number;
+}
+
+let rowIdCounter = 0;
+function newRowKey() {
+  rowIdCounter += 1;
+  return `row-${rowIdCounter}`;
+}
 
 const ALL_SUBJECTS = Object.values(SubjectArea);
 
 export default function ClassManagement() {
-  const { data: classes, loading, error, setError, refetch: fetchClasses } = useFetchList<TutorClass>(
+  const router = useRouter();
+  const { data: classes, loading, error, refetch: fetchClasses } = useFetchList<TutorClass>(
     "/api/tutor/classes",
     "Could not retrieve classes."
   );
@@ -57,22 +73,21 @@ export default function ClassManagement() {
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<"active" | "history">("active");
 
-  // Modals state
+  // Modal state
   const [isScheduleOpen, setIsScheduleOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<TutorClass | null>(null);
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const [actionLoading, setActionLoading] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
     subject: "",
+    gradeLevel: "",
     description: "",
-    scheduledAt: "",
-    duration: 60,
     maxStudents: 1,
+    building: "",
+    room: "",
     meetingLink: "",
   });
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [sessionRows, setSessionRows] = useState<SessionRow[]>([]);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
 
@@ -86,6 +101,35 @@ export default function ClassManagement() {
     setSelectedTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]));
   };
 
+  const addSessionRow = () => {
+    setSessionRows((prev) => [
+      ...prev,
+      { key: newRowKey(), topic: selectedTopics[0] ?? "", scheduledAt: "", duration: 60 },
+    ]);
+  };
+
+  const removeSessionRow = (key: string) => {
+    setSessionRows((prev) => prev.filter((r) => r.key !== key));
+  };
+
+  const updateSessionRow = (key: string, field: "topic" | "scheduledAt" | "duration", value: string | number) => {
+    setSessionRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
+  };
+
+  const resetForm = () => {
+    setForm({
+      subject: "",
+      gradeLevel: "",
+      description: "",
+      maxStudents: 1,
+      building: "",
+      room: "",
+      meetingLink: "",
+    });
+    setSelectedTopics([]);
+    setSessionRows([]);
+  };
+
   const handleCreateClass = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
@@ -95,18 +139,23 @@ export default function ClassManagement() {
       // Basic client validation
       if (!form.subject) throw new Error("Please select a subject.");
       if (selectedTopics.length === 0) throw new Error("Please select at least one topic.");
-      if (!form.scheduledAt) throw new Error("Please select a scheduled date and time.");
-
-      // Convert datetime to ISO string
-      const isoDate = new Date(form.scheduledAt).toISOString();
+      if (sessionRows.length === 0) throw new Error("Please add at least one session.");
+      if (sessionRows.some((r) => !r.topic || !r.scheduledAt)) {
+        throw new Error("Every session needs a topic and a date/time.");
+      }
 
       const res = await fetch("/api/tutor/classes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          gradeLevel: form.gradeLevel || null,
           topics: selectedTopics,
-          scheduledAt: isoDate,
+          sessions: sessionRows.map((r) => ({
+            topic: r.topic,
+            scheduledAt: new Date(r.scheduledAt).toISOString(),
+            duration: r.duration,
+          })),
         }),
       });
 
@@ -117,73 +166,14 @@ export default function ClassManagement() {
 
       setSuccess("Class scheduled successfully!");
       setIsScheduleOpen(false);
-      // Reset form
-      setForm({
-        subject: "",
-        description: "",
-        scheduledAt: "",
-        duration: 60,
-        maxStudents: 1,
-        meetingLink: "",
-      });
-      setSelectedTopics([]);
+      resetForm();
       fetchClasses();
       setTimeout(() => setSuccess(""), 4000);
-    } catch (err: any) {
-      setFormError(err.message || "An error occurred.");
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "An error occurred.");
     } finally {
       setFormLoading(false);
     }
-  };
-
-  const handleUpdateStatus = async (classId: string, status: "COMPLETED" | "CANCELLED") => {
-    try {
-      const res = await fetch(`/api/tutor/classes/${classId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update class.");
-
-      setSuccess(`Class marked as ${status.toLowerCase()} successfully!`);
-      setSelectedClass(null);
-      fetchClasses();
-      setTimeout(() => setSuccess(""), 4000);
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  const handleDeleteClass = async (classId: string) => {
-    try {
-      const res = await fetch(`/api/tutor/classes/${classId}`, {
-        method: "DELETE",
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete class.");
-
-      setSuccess("Class deleted successfully!");
-      setSelectedClass(null);
-      fetchClasses();
-      setTimeout(() => setSuccess(""), 4000);
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  const handleConfirmPendingAction = async () => {
-    if (!pendingAction) return;
-    setActionLoading(true);
-    if (pendingAction.type === "delete") {
-      await handleDeleteClass(pendingAction.classId);
-    } else {
-      await handleUpdateStatus(pendingAction.classId, pendingAction.type === "cancel" ? "CANCELLED" : "COMPLETED");
-    }
-    setActionLoading(false);
-    setPendingAction(null);
   };
 
   // Filter classes
@@ -242,16 +232,17 @@ export default function ClassManagement() {
                 <ClassCard
                   key={c.id}
                   subject={c.subject}
+                  gradeLevel={c.gradeLevel}
                   topics={c.topics}
                   verifiedTopics={verifiedTopicsFor(c.subject)}
                   description={c.description}
-                  scheduledAt={c.scheduledAt}
-                  duration={c.duration}
+                  sessions={c.sessions}
                   status={c.status}
+                  published={c.published}
                   enrolledCount={c.enrollments.length}
                   maxStudents={c.maxStudents}
                   activeLabel="Active"
-                  onClick={() => setSelectedClass(c)}
+                  onClick={() => router.push(`/tutor/classes/${c.id}`)}
                 />
               ))}
             </div>
@@ -262,11 +253,12 @@ export default function ClassManagement() {
       {/* MODAL 1: SCHEDULE CLASS */}
       {isScheduleOpen && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-md p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
+          <div className="modal-box max-w-lg p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
             <button
               onClick={() => {
                 setIsScheduleOpen(false);
                 setFormError("");
+                resetForm();
               }}
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             >
@@ -289,6 +281,22 @@ export default function ClassManagement() {
                   {ALL_SUBJECTS.map((sub) => (
                     <option key={sub} value={sub}>
                       {sub}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
+
+              <FormField label="Target Grade" hint="Optional — helps matching. Leave as 'Any grade' if it's open to all.">
+                <select
+                  name="gradeLevel"
+                  value={form.gradeLevel}
+                  onChange={handleInputChange}
+                  className="select select-bordered select-sm w-full focus:select-primary text-xs"
+                >
+                  <option value="">Any grade</option>
+                  {GRADE_LEVELS.map((g) => (
+                    <option key={g.value} value={g.value}>
+                      {g.label}
                     </option>
                   ))}
                 </select>
@@ -326,34 +334,84 @@ export default function ClassManagement() {
                 />
               </FormField>
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField label="Scheduled At" required>
+              <FormField label={`Sessions${sessionRows.length > 0 ? ` (${sessionRows.length})` : ""}`} required hint="Each session covers one topic from the ones selected above.">
+                {!form.subject || selectedTopics.length === 0 ? (
+                  <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
+                    Select a subject and at least one topic first.
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {sessionRows.map((row) => (
+                      <div key={row.key} className="flex items-center gap-1.5 border border-base-200 rounded-lg p-2">
+                        <select
+                          value={row.topic}
+                          onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
+                          className="select select-bordered select-xs text-2xs flex-1 min-w-0"
+                        >
+                          {selectedTopics.map((t) => (
+                            <option key={t} value={t}>
+                              {t}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="datetime-local"
+                          value={row.scheduledAt}
+                          onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
+                          className="input input-bordered input-xs text-2xs"
+                        />
+                        <select
+                          value={row.duration}
+                          onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
+                          className="select select-bordered select-xs text-2xs"
+                        >
+                          <option value={30}>30m</option>
+                          <option value={45}>45m</option>
+                          <option value={60}>60m</option>
+                          <option value={90}>90m</option>
+                          <option value={120}>120m</option>
+                        </select>
+                        <button
+                          type="button"
+                          onClick={() => removeSessionRow(row.key)}
+                          className="btn btn-ghost btn-xs text-error shrink-0 cursor-pointer"
+                          aria-label="Remove session"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={addSessionRow}
+                      className="btn btn-ghost btn-xs text-2xs font-bold gap-1 cursor-pointer"
+                    >
+                      <Plus className="h-3 w-3" /> Add Session
+                    </button>
+                  </div>
+                )}
+              </FormField>
+
+              <FormField label="Location" hint="Optional — for an in-person class">
+                <div className="flex items-center gap-1.5">
                   <input
-                    type="datetime-local"
-                    name="scheduledAt"
-                    value={form.scheduledAt}
+                    type="text"
+                    name="building"
+                    value={form.building}
                     onChange={handleInputChange}
-                    required
+                    placeholder="Building"
                     className="input input-bordered input-sm w-full focus:input-primary text-xs"
                   />
-                </FormField>
-
-                <FormField label="Duration" required>
-                  <select
-                    name="duration"
-                    value={form.duration}
+                  <input
+                    type="text"
+                    name="room"
+                    value={form.room}
                     onChange={handleInputChange}
-                    required
-                    className="select select-bordered select-sm w-full focus:select-primary text-xs"
-                  >
-                    <option value={30}>30 mins</option>
-                    <option value={45}>45 mins</option>
-                    <option value={60}>60 mins</option>
-                    <option value={90}>90 mins</option>
-                    <option value={120}>120 mins</option>
-                  </select>
-                </FormField>
-              </div>
+                    placeholder="Room"
+                    className="input input-bordered input-sm w-32 shrink-0 focus:input-primary text-xs"
+                  />
+                </div>
+              </FormField>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField label="Max Capacity" required>
@@ -387,6 +445,7 @@ export default function ClassManagement() {
                   onClick={() => {
                     setIsScheduleOpen(false);
                     setFormError("");
+                    resetForm();
                   }}
                   className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
                 >
@@ -401,81 +460,6 @@ export default function ClassManagement() {
         </div>
       )}
 
-      {/* MODAL 2: CLASS DETAILS & ACTIONS */}
-      {selectedClass && (
-        <ClassDetailsModalBase
-          subject={selectedClass.subject}
-          topics={selectedClass.topics}
-          verifiedTopics={verifiedTopicsFor(selectedClass.subject)}
-          scheduledAt={selectedClass.scheduledAt}
-          duration={selectedClass.duration}
-          meetingLink={selectedClass.meetingLink}
-          description={selectedClass.description}
-          onClose={() => setSelectedClass(null)}
-          belowDescription={
-            <EnrolledLearnersTable enrollments={selectedClass.enrollments} maxStudents={selectedClass.maxStudents} />
-          }
-          actions={
-            <div className="modal-action pt-2 flex flex-wrap gap-2 justify-between items-center w-full">
-              <div>
-                {selectedClass.status === "SCHEDULED" && selectedClass.enrollments.length === 0 && (
-                  <button
-                    onClick={() => setPendingAction({ type: "delete", classId: selectedClass.id })}
-                    className="btn btn-error btn-outline btn-sm text-xs gap-1 cursor-pointer"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete Class
-                  </button>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSelectedClass(null)}
-                  className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
-                >
-                  Close
-                </button>
-
-                {selectedClass.status === "SCHEDULED" && (
-                  <>
-                    <button
-                      onClick={() => setPendingAction({ type: "cancel", classId: selectedClass.id })}
-                      className="btn btn-error btn-sm text-xs gap-1 cursor-pointer"
-                    >
-                      <XCircle className="h-3.5 w-3.5" />
-                      Cancel Class
-                    </button>
-                    <button
-                      onClick={() => setPendingAction({ type: "complete", classId: selectedClass.id })}
-                      className="btn btn-success btn-sm text-xs gap-1 cursor-pointer"
-                    >
-                      <CheckCircle className="h-3.5 w-3.5" />
-                      Complete Class
-                    </button>
-                  </>
-                )}
-              </div>
-            </div>
-          }
-        />
-      )}
-
-      <ConfirmDialog
-        open={pendingAction !== null}
-        title={
-          pendingAction?.type === "delete"
-            ? "Delete this class?"
-            : `Mark this class as ${pendingAction?.type === "cancel" ? "cancelled" : "completed"}?`
-        }
-        description={pendingAction?.type === "delete" ? "This cannot be undone." : undefined}
-        confirmLabel={pendingAction?.type === "delete" ? "Delete" : "Confirm"}
-        tone={pendingAction?.type === "delete" || pendingAction?.type === "cancel" ? "danger" : "default"}
-        loading={actionLoading}
-        onConfirm={handleConfirmPendingAction}
-        onCancel={() => setPendingAction(null)}
-      />
     </div>
   );
 }

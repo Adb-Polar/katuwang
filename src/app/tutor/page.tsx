@@ -1,10 +1,11 @@
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { CheckCircle2, Circle } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import TopicCertificationList, { TaughtTopic } from "@/components/tutor/TopicCertificationList";
+import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
@@ -29,8 +30,10 @@ export default async function TutorDashboard() {
   const classes = tutorProfile?.classes ?? [];
   const certifications = tutorProfile?.topicCertifications ?? [];
 
+  const openRequestCount = await prisma.topicRequest.count({ where: { status: "OPEN" } });
+
   // Distinct (subject, topic) pairs the tutor currently teaches, across all their classes.
-  const taughtTopics: TaughtTopic[] = Array.from(
+  const taughtTopics = Array.from(
     new Map(
       classes.flatMap((c) => c.topics.map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }]))
     ).values()
@@ -67,6 +70,10 @@ export default async function TutorDashboard() {
           <div className="stat-title text-2xs">Pending Requests</div>
           <div className="stat-value text-lg font-serif">{pendingCount}</div>
         </div>
+        <Link href="/tutor/requests" className="stat py-4 hover:bg-base-200/40 transition-colors">
+          <div className="stat-title text-2xs">Open Topic Requests</div>
+          <div className="stat-value text-lg font-serif">{openRequestCount}</div>
+        </Link>
       </div>
 
       {/* Onboarding Checklist */}
@@ -88,26 +95,7 @@ export default async function TutorDashboard() {
         </div>
       </section>
 
-      {/* Topics & Certifications */}
-      <section className="card bg-base-100 shadow-md border border-base-200">
-        <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Topics & Verification</h2>
-          <p className="text-xs text-base-content/60">
-            Once you&apos;re teaching a topic, you can request an assessment for it. Passing verifies your knowledge
-            with a badge learners can see — assessment grading is rolling out, so requests may stay pending for a
-            while.
-          </p>
-
-          <TopicCertificationList
-            taughtTopics={taughtTopics}
-            initialCertifications={certifications.map((c) => ({
-              subject: c.subject,
-              topic: c.topic,
-              status: c.status,
-            }))}
-          />
-        </div>
-      </section>
+      <AssessmentsSummaryCard certifiedCount={certifiedCount} pendingCount={pendingCount} />
     </div>
   );
 }

@@ -1,7 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import ProfileEditForm from "@/components/profile/ProfileEditForm";
 
 export const metadata = {
   title: "Profile | Katuwang",
@@ -9,6 +11,11 @@ export const metadata = {
 
 export default async function LearnerProfilePage() {
   const session = await getServerSession(authOptions);
+
+  const user = await prisma.user.findUnique({
+    where: { id: session!.user.id },
+    select: { contactInfo: true, section: true },
+  });
 
   return (
     <div className="space-y-6">
@@ -35,6 +42,22 @@ export default async function LearnerProfilePage() {
               <span className="font-semibold text-secondary">Student Learner</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-4">
+          <h2 className="card-title text-sm font-bold">Edit Profile</h2>
+          <p className="text-xs text-base-content/60">
+            You can update your section and contact info yourself. Name, email, and grade level changes require an
+            admin.
+          </p>
+          <div className="divider my-0"></div>
+          <ProfileEditForm
+            endpoint="/api/learner/profile"
+            initialContactInfo={user?.contactInfo ?? ""}
+            initialSection={user?.section ?? ""}
+          />
         </div>
       </section>
     </div>

@@ -1,12 +1,17 @@
 import { prisma } from "@/lib/prisma";
 
-export const PLATFORM_SETTING_KEYS = ["requireCertificationForClassCreation", "registrationOpen"] as const;
+export const PLATFORM_SETTING_KEYS = [
+  "requireCertificationForClassCreation",
+  "registrationOpen",
+  "matchingEnabled",
+] as const;
 
 export type PlatformSettingKey = (typeof PLATFORM_SETTING_KEYS)[number];
 
 const DEFAULTS: Record<PlatformSettingKey, boolean> = {
   requireCertificationForClassCreation: false,
   registrationOpen: true,
+  matchingEnabled: true,
 };
 
 export async function getSetting(key: PlatformSettingKey): Promise<boolean> {

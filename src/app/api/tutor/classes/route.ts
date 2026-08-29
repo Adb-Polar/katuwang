@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { ClassStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 import { getSetting } from "@/lib/settings";
+import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -30,18 +32,17 @@ export async function GET(req: NextRequest) {
     const classes = await prisma.tutorClass.findMany({
       where: {
         tutorProfileId: tutorProfile.id,
-        ...(status ? { status: status as any } : {}),
+        ...(status && status in ClassStatus ? { status: status as ClassStatus } : {}),
       },
       include: {
         topics: true,
+        sessions: { orderBy: { scheduledAt: "asc" } },
         enrollments: {
           include: {
             learner: {
               select: {
                 id: true,
                 anonymousId: true,
-                firstName: true,
-                lastName: true,
                 gradeLevel: true,
                 section: true,
               },
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { scheduledAt: "asc" },
+      orderBy: { createdAt: "desc" },
     });
 
     return NextResponse.json(
@@ -64,7 +65,7 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// ─── POST: Create a New Class ────────────────────────────────────────────────
+// ─── POST: Create a New Class (with its initial sessions) ─────────────────────
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -90,21 +91,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const {
-      subject,
-      topics,
-      description,
-      scheduledAt,
-      duration,
-      maxStudents,
-      meetingLink,
-    } = result.data;
+    const { subject, gradeLevel, topics, description, maxStudents, building, room, meetingLink, sessions } =
+      result.data;
 
     // Ensure every selected topic belongs to the chosen subject's predefined list
     const validTopics = SUBJECT_TOPICS[subject];
     if (topics.some((t) => !validTopics.includes(t))) {
       return NextResponse.json(
         { error: `One or more selected topics are not valid for ${subject}.` },
+        { status: 400 }
+      );
+    }
+
+    // Every session's topic must be one of the class's chosen topics
+    if (sessions.some((s) => !topics.includes(s.topic))) {
+      return NextResponse.json(
+        { error: "Every session's topic must be one of the class's selected topics." },
         { status: 400 }
       );
     }
@@ -127,52 +129,61 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const start = new Date(scheduledAt);
-    const end = new Date(start.getTime() + duration * 60 * 1000);
+    const parsedSessions = sessions.map((s) => ({
+      topic: s.topic,
+      start: new Date(s.scheduledAt),
+      duration: s.duration,
+    }));
 
-    // Prevent scheduling classes in the past
-    if (start.getTime() < Date.now()) {
+    // Prevent scheduling any session in the past
+    if (parsedSessions.some((s) => s.start.getTime() < Date.now())) {
       return NextResponse.json(
-        { error: "Cannot schedule a class in the past." },
+        { error: "Cannot schedule a session in the past." },
         { status: 400 }
       );
     }
 
-    // 1. Overlap Conflict Detection Logic
-    const scheduledClasses = await prisma.tutorClass.findMany({
-      where: {
-        tutorProfileId: tutorProfile.id,
-        status: "SCHEDULED",
-      },
-    });
-
-    const hasConflict = scheduledClasses.some((existing) => {
-      const existingStart = new Date(existing.scheduledAt).getTime();
-      const existingEnd = existingStart + existing.duration * 60 * 1000;
-      return start.getTime() < existingEnd && end.getTime() > existingStart;
-    });
-
-    if (hasConflict) {
+    // Sessions submitted together must not overlap each other
+    if (hasInternalOverlap(parsedSessions.map((s) => ({ scheduledAt: s.start, duration: s.duration })))) {
       return NextResponse.json(
-        { error: "Time conflict detected: You already have a class scheduled during this time." },
+        { error: "Two or more of the submitted sessions overlap each other." },
         { status: 409 }
       );
     }
 
-    // 2. Create the class
+    // Each session must not overlap any of the tutor's existing sessions (any class)
+    for (const s of parsedSessions) {
+      const end = new Date(s.start.getTime() + s.duration * 60 * 1000);
+      const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
+      if (conflict) {
+        return NextResponse.json(
+          { error: "Time conflict detected: You already have a session scheduled during this time." },
+          { status: 409 }
+        );
+      }
+    }
+
     const newClass = await prisma.tutorClass.create({
       data: {
         tutorProfileId: tutorProfile.id,
         subject,
+        gradeLevel: gradeLevel ?? null,
         topics: { create: topics.map((topic) => ({ topic })) },
         description: description || null,
-        scheduledAt: start,
-        duration,
         maxStudents,
+        building: building || null,
+        room: room || null,
         meetingLink: meetingLink || null,
         status: "SCHEDULED",
+        sessions: {
+          create: parsedSessions.map((s) => ({
+            topic: s.topic,
+            scheduledAt: s.start,
+            duration: s.duration,
+          })),
+        },
       },
-      include: { topics: true },
+      include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
     });
 
     return NextResponse.json(

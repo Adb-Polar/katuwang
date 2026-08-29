@@ -1,0 +1,244 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { Plus, Clock, X } from "lucide-react";
+import { useFetchList } from "@/hooks/useFetchList";
+import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import FormField from "@/components/ui/FormField";
+import StatusBadge from "@/components/ui/StatusBadge";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import MatchCriteriaFields, {
+  MatchCriteriaValue,
+  EMPTY_CRITERIA,
+  criteriaToBody,
+} from "@/components/learner/MatchCriteriaFields";
+
+interface TopicRequest {
+  id: string;
+  subject: string;
+  gradeLevel: string;
+  note: string | null;
+  status: "OPEN" | "FULFILLED" | "CANCELLED";
+  createdAt: string;
+  topics: string[];
+  slots: { day: string; startTime: string; endTime: string }[];
+  fulfilledClass: { id: string; subject: string; nextSessionAt: string | null; tutorAnonymousId: string } | null;
+}
+
+const STATUS_TONE = {
+  OPEN: { tone: "info", label: "Open" },
+  FULFILLED: { tone: "success", label: "Class offered" },
+  CANCELLED: { tone: "neutral", label: "Cancelled" },
+} as const;
+
+export default function TopicRequestManager({ defaultGrade }: { defaultGrade: string }) {
+  const { data: requests, loading, error, setError, refetch } = useFetchList<TopicRequest>(
+    "/api/learner/topic-requests",
+    "Could not load your requests."
+  );
+
+  const [showForm, setShowForm] = useState(false);
+  const [criteria, setCriteria] = useState<MatchCriteriaValue>({ ...EMPTY_CRITERIA, gradeLevel: defaultGrade });
+  const [note, setNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [cancelId, setCancelId] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState(false);
+
+  const resetForm = () => {
+    setCriteria({ ...EMPTY_CRITERIA, gradeLevel: defaultGrade });
+    setNote("");
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!criteria.subject) return setError("Please choose a subject.");
+    if (criteria.topics.length === 0) return setError("Please choose at least one topic.");
+    if (!criteria.gradeLevel) return setError("Please choose a grade level.");
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/learner/topic-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...criteriaToBody(criteria), note }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not post your request.");
+      setSuccess("Request posted. Tutors teaching this subject can now respond.");
+      setShowForm(false);
+      resetForm();
+      refetch();
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not post your request.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const confirmCancel = async () => {
+    if (!cancelId) return;
+    setCancelling(true);
+    setError("");
+    try {
+      const res = await fetch(`/api/learner/topic-requests/${cancelId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "CANCELLED" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not cancel the request.");
+      setCancelId(null);
+      refetch();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not cancel the request.");
+    } finally {
+      setCancelling(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <FeedbackBanner variant="success" message={success || null} />
+      <FeedbackBanner variant="error" message={error || null} />
+
+      <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-4">
+          <div className="flex items-center justify-between">
+            <h2 className="card-title text-sm font-bold">Your topic requests</h2>
+            <button
+              onClick={() => {
+                setShowForm((v) => !v);
+                setError("");
+              }}
+              className="btn btn-primary btn-sm text-xs gap-1"
+            >
+              {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {showForm ? "Close" : "New request"}
+            </button>
+          </div>
+          <p className="text-xs text-base-content/60">
+            Post what you want to learn and when you&apos;re free. A tutor can attach a class, then you review and enroll.
+          </p>
+
+          {showForm && (
+            <form onSubmit={submit} className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20">
+              <MatchCriteriaFields value={criteria} onChange={setCriteria} />
+              <FormField label="Note" hint="Optional — anything a tutor should know.">
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                  placeholder="e.g. I struggle with word problems the most."
+                />
+              </FormField>
+              <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
+                {submitting ? <span className="loading loading-spinner loading-xs" /> : "Post request"}
+              </button>
+            </form>
+          )}
+
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <span className="loading loading-spinner loading-md text-primary" />
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
+              You haven&apos;t posted any requests yet.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {requests.map((r) => {
+                const meta = STATUS_TONE[r.status];
+                return (
+                  <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
+                          {r.subject}
+                        </span>
+                        <span className="text-base-content/50">{r.gradeLevel.replace("_", " ")}</span>
+                        <StatusBadge tone={meta.tone} label={meta.label} size="xs" />
+                      </div>
+                      {r.status === "OPEN" && (
+                        <button
+                          onClick={() => setCancelId(r.id)}
+                          className="btn btn-ghost btn-xs text-error text-2xs"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      {r.topics.map((t) => (
+                        <span key={t} className="badge badge-outline badge-sm text-2xs py-2.5">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+
+                    {r.slots.length > 0 && (
+                      <div className="flex items-center gap-1.5 text-2xs text-base-content/60 flex-wrap">
+                        <Clock className="h-3 w-3 shrink-0" />
+                        {r.slots.map((s, i) => (
+                          <span key={i}>
+                            {s.day[0] + s.day.slice(1).toLowerCase()} {s.startTime}–{s.endTime}
+                            {i < r.slots.length - 1 ? "," : ""}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
+
+                    {r.status === "FULFILLED" && r.fulfilledClass && (
+                      <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
+                        <span className="text-2xs text-base-content/70">
+                          {r.fulfilledClass.tutorAnonymousId} offered a class
+                          {r.fulfilledClass.nextSessionAt
+                            ? ` · next ${new Date(r.fulfilledClass.nextSessionAt).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}`
+                            : ""}
+                        </span>
+                        <Link
+                          href={`/learner/classes/${r.fulfilledClass.id}`}
+                          className="btn btn-success btn-xs text-2xs"
+                        >
+                          Review &amp; enroll
+                        </Link>
+                      </div>
+                    )}
+
+                    <p className="text-2xs text-base-content/40">
+                      Posted {new Date(r.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <ConfirmDialog
+        open={cancelId !== null}
+        title="Cancel this request?"
+        description="Tutors will no longer see it. You can always post a new one."
+        confirmLabel="Cancel request"
+        cancelLabel="Keep it"
+        tone="danger"
+        loading={cancelling}
+        onConfirm={confirmCancel}
+        onCancel={() => setCancelId(null)}
+      />
+    </div>
+  );
+}

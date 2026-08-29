@@ -48,7 +48,10 @@ function makeParams(classId = "c1") {
 const futureClass = {
   id: "c1",
   status: "SCHEDULED",
-  scheduledAt: new Date(Date.now() + 60 * 60 * 1000),
+  published: true,
+  sessions: [
+    { id: "s1", status: "SCHEDULED", scheduledAt: new Date(Date.now() + 60 * 60 * 1000), duration: 60 },
+  ],
   maxStudents: 2,
   _count: { enrollments: 0 },
 };
@@ -85,17 +88,29 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(json.error).toMatch(/no longer accepting enrollments/i);
   });
 
-  it("returns 400 when the class has already started", async () => {
+  it("returns 400 when the class is unpublished", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
+    tutorClassFindUnique.mockResolvedValue({ ...futureClass, published: false });
+
+    const res = await POST(makeRequest("POST"), makeParams());
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toMatch(/no longer accepting enrollments/i);
+  });
+
+  it("returns 400 when the class has no upcoming sessions", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     tutorClassFindUnique.mockResolvedValue({
       ...futureClass,
-      scheduledAt: new Date(Date.now() - 60 * 60 * 1000),
+      sessions: [
+        { id: "s1", status: "SCHEDULED", scheduledAt: new Date(Date.now() - 60 * 60 * 1000), duration: 60 },
+      ],
     });
 
     const res = await POST(makeRequest("POST"), makeParams());
     expect(res.status).toBe(400);
     const json = await res.json();
-    expect(json.error).toMatch(/already started/i);
+    expect(json.error).toMatch(/no upcoming sessions/i);
   });
 
   it("returns 409 when the class is full", async () => {

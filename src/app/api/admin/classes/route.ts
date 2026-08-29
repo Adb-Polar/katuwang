@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           topics: true,
+          sessions: { orderBy: { scheduledAt: "asc" } },
           tutorProfile: {
             select: {
               user: { select: { id: true, anonymousId: true, firstName: true, lastName: true } },
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
           },
           _count: { select: { enrollments: true } },
         },
-        orderBy: { scheduledAt: "desc" },
+        orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
