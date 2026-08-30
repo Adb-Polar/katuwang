@@ -9,6 +9,7 @@
 - If asked to commit ask for confirmation
 - database modification needs confirmation
 - tables should be normalize 3NF
+- every plan should be written on /docs/plans/{plan overview name}.md
 
 ## 🚀 Common Commands
 

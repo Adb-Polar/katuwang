@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SubjectArea } from "@prisma/client";
-import { getCachedClasses, setCachedClasses } from "@/lib/classBrowserCache";
+import { usePaginatedList } from "@/hooks/usePaginatedList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import ClassCard from "@/components/classes/ClassCard";
@@ -31,66 +30,34 @@ interface TutorClass {
   _count: { enrollments: number };
 }
 
-interface ClassesResponse {
-  classes: TutorClass[];
-  page: number;
-  pageSize: number;
-  total: number;
-  counts: { browse: number; mine: number };
-}
-
 /**
  * Renders one scope of the learner's class lists:
  *  - "browse" — enrollable classes the learner isn't in yet (`/learner/classes`)
  *  - "mine"   — the learner's enrolled classes (`/learner/my-classes`)
+ *
+ * Page + page size live in the URL (`?<scope>Page=`, `?<scope>Size=`) via
+ * `usePaginatedList`, so navigating into a class and pressing Back restores the
+ * exact page the learner was on.
  */
 export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const router = useRouter();
-  const [page, setPage] = useState(1);
-  const [data, setData] = useState<ClassesResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    const key = `${scope}:${page}:${PAGE_SIZE}`;
-
-    async function load() {
-      const cached = getCachedClasses<ClassesResponse>(key);
-      if (cached) {
-        if (!cancelled) {
-          setData(cached);
-          setError("");
-          setLoading(false);
-        }
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/classes?scope=${scope}&page=${page}&pageSize=${PAGE_SIZE}`);
-        if (!res.ok) throw new Error("Could not retrieve classes.");
-        const json: ClassesResponse = await res.json();
-        setCachedClasses(key, json);
-        if (!cancelled) {
-          setData(json);
-          setError("");
-        }
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not retrieve classes.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [scope, page]);
-
-  const classes = data?.classes ?? [];
-  const total = data?.total ?? 0;
+  const {
+    data: classes,
+    total,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
+    loading,
+    error,
+  } = usePaginatedList<TutorClass>(
+    "/api/classes",
+    "classes",
+    { scope },
+    PAGE_SIZE,
+    "Could not retrieve classes.",
+    scope
+  );
 
   return (
     <div className="space-y-6">
@@ -134,7 +101,14 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                   />
                 ))}
               </div>
-              <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={total}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                pageSizeOptions={[12, 24, 48, 96]}
+              />
             </>
           )}
         </div>

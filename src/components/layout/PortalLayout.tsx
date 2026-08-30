@@ -106,8 +106,10 @@ export default function PortalLayout({
 
           {/* Account footer */}
           <div className="p-4 border-t border-base-200 space-y-3">
-            <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg bg-base-200/60">
-              <span className="text-2xs text-base-content/50">Anonymous ID</span>
+            <div className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg bg-base-300 border border-base-content/10">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/70">
+                Anonymous ID
+              </span>
               {idRole ? (
                 <AnonymousIdBadge id={anonymousId} role={idRole} showIcon />
               ) : (

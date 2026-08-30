@@ -1,0 +1,6 @@
+Learner
+ - check if class schedule confict detection exist
+
+Tutor
+ [Good] Schedule detection on class creation
+ [] Schedule detection on request accept
