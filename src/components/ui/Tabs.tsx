@@ -20,10 +20,16 @@ export default function Tabs({
           key={tab.key}
           type="button"
           onClick={() => onChange(tab.key)}
-          className={`tab tab-sm text-xs font-semibold ${active === tab.key ? "tab-active font-bold" : ""}`}
+          className={`tab tab-sm h-auto min-h-8 py-1.5 text-xs font-semibold leading-tight whitespace-normal ${
+            active === tab.key ? "tab-active font-bold" : ""
+          }`}
         >
-          {tab.label}
-          {tab.count !== undefined && ` (${tab.count})`}
+          <span className="flex flex-col items-center">
+            <span>{tab.label}</span>
+            {tab.count !== undefined && (
+              <span className="text-2xs font-normal opacity-60">({tab.count})</span>
+            )}
+          </span>
         </button>
       ))}
     </div>

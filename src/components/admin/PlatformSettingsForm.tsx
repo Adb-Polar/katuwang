@@ -21,7 +21,12 @@ const SETTING_META: Record<string, { label: string; description: string }> = {
   matchingEnabled: {
     label: "Class matching & topic requests",
     description:
-      "When disabled, the learner 'Find a Class' matcher and topic requests (and the tutor request queue) are turned off.",
+      "When disabled, the learner 'Auto Match' matcher and topic requests (and the tutor request queue) are turned off.",
+  },
+  showTutorRealNames: {
+    label: "Show tutor real names to learners",
+    description:
+      "When enabled, learners see a tutor's real name and section on the tutor profile page. Leave OFF to keep the double-blind anonymity required by RA 10173 (Data Privacy Act).",
   },
 };
 

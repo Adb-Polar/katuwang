@@ -6,12 +6,14 @@ const {
   tutorClassGroupBy,
   topicCertificationGroupBy,
   classEnrollmentCount,
+  classEnrollmentFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   userGroupBy: vi.fn(),
   tutorClassGroupBy: vi.fn(),
   topicCertificationGroupBy: vi.fn(),
   classEnrollmentCount: vi.fn(),
+  classEnrollmentFindMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -23,7 +25,7 @@ vi.mock("@/lib/prisma", () => ({
     user: { groupBy: userGroupBy },
     tutorClass: { groupBy: tutorClassGroupBy },
     topicCertification: { groupBy: topicCertificationGroupBy },
-    classEnrollment: { count: classEnrollmentCount },
+    classEnrollment: { count: classEnrollmentCount, findMany: classEnrollmentFindMany },
   },
 }));
 
@@ -36,6 +38,7 @@ describe("GET /api/admin/reports", () => {
     tutorClassGroupBy.mockResolvedValue([]);
     topicCertificationGroupBy.mockResolvedValue([]);
     classEnrollmentCount.mockResolvedValue(0);
+    classEnrollmentFindMany.mockResolvedValue([]);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -53,13 +56,21 @@ describe("GET /api/admin/reports", () => {
   it("returns flattened breakdown counts", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     userGroupBy.mockResolvedValueOnce([{ role: "STUDENT_LEARNER", _count: { _all: 5 } }]);
-    classEnrollmentCount.mockResolvedValueOnce(10).mockResolvedValueOnce(3);
+    classEnrollmentCount.mockResolvedValueOnce(10);
+    classEnrollmentFindMany.mockResolvedValueOnce([
+      { enrolledAt: new Date() },
+      { enrolledAt: new Date() },
+      { enrolledAt: new Date() },
+    ]);
 
     const res = await GET();
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.usersByRole).toEqual([{ role: "STUDENT_LEARNER", count: 5 }]);
-    expect(json.enrollments).toEqual({ total: 10, last30Days: 3 });
+    expect(json.enrollments.total).toBe(10);
+    expect(json.enrollments.last30Days).toBe(3);
+    expect(json.enrollments.byDay).toHaveLength(30);
+    expect(json.enrollments.byDay.reduce((s: number, d: { count: number }) => s + d.count, 0)).toBe(3);
   });
 
   it("returns 500 on unexpected error", async () => {

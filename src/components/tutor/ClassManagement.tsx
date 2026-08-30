@@ -43,6 +43,8 @@ interface TutorClass {
   meetingLink: string | null;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
+  suspendedReason: string | null;
+  suspendedUntil: string | null;
   enrollments: Enrollment[];
 }
 
@@ -176,9 +178,15 @@ export default function ClassManagement() {
     }
   };
 
-  // Filter classes
-  const activeClasses = classes.filter((c) => c.status === "SCHEDULED");
-  const pastClasses = classes.filter((c) => c.status !== "SCHEDULED");
+  // A SUSPENDED class stays in "Active" while the suspension is still in effect
+  // (no end date, or the end date is in the future) so the tutor keeps seeing it
+  // with its reason. BANNED and expired suspensions fall through to History.
+  const isCurrentlySuspended = (c: TutorClass) =>
+    c.status === "SUSPENDED" && (!c.suspendedUntil || new Date(c.suspendedUntil) > new Date());
+  const isActive = (c: TutorClass) => c.status === "SCHEDULED" || isCurrentlySuspended(c);
+
+  const activeClasses = classes.filter(isActive);
+  const pastClasses = classes.filter((c) => !isActive(c));
 
   const displayedClasses = activeTab === "active" ? activeClasses : pastClasses;
 
@@ -239,6 +247,7 @@ export default function ClassManagement() {
                   sessions={c.sessions}
                   status={c.status}
                   published={c.published}
+                  suspendedReason={c.suspendedReason}
                   enrolledCount={c.enrollments.length}
                   maxStudents={c.maxStudents}
                   activeLabel="Active"

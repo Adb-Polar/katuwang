@@ -27,22 +27,14 @@ export default async function EditClassPage({
     where: { id: classId },
     include: {
       topics: true,
-      sessions: { select: { topic: true } },
+      sessions: { orderBy: { scheduledAt: "asc" } },
       enrollments: { select: { id: true } },
     },
   });
 
   if (!tutorClass || tutorClass.tutorProfileId !== tutorProfile.id) notFound();
 
-  if (tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED") {
-    return (
-      <div className="space-y-6">
-        <div className="alert alert-warning text-xs">
-          <span>This class was suspended or banned by an administrator and can&apos;t be modified.</span>
-        </div>
-      </div>
-    );
-  }
+  const locked = tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED";
 
   const verifiedTopics = tutorProfile.topicCertifications
     .filter((c) => c.subject === tutorClass.subject)
@@ -65,6 +57,17 @@ export default async function EditClassPage({
       building={tutorClass.building}
       room={tutorClass.room}
       meetingLink={tutorClass.meetingLink}
+      classTopics={tutorClass.topics.map((t) => t.topic)}
+      sessions={tutorClass.sessions.map((s) => ({
+        id: s.id,
+        topic: s.topic,
+        scheduledAt: s.scheduledAt.toISOString(),
+        duration: s.duration,
+        status: s.status,
+      }))}
+      locked={locked}
+      suspendedReason={tutorClass.suspendedReason}
+      suspendedUntil={tutorClass.suspendedUntil?.toISOString() ?? null}
     />
   );
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { Prisma, SubjectArea, GradeLevel } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
@@ -27,13 +28,38 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE)
     );
 
+    // Browse-scope filters (privacy-safe: subject/topic text + anonymised tutor ID only).
+    const q = searchParams.get("q")?.trim() || "";
+    const subjectParam = searchParams.get("subject");
+    const gradeParam = searchParams.get("gradeLevel");
+
+    const browseFilters: Prisma.TutorClassWhereInput = {
+      ...(subjectParam && subjectParam in SubjectArea ? { subject: subjectParam as SubjectArea } : {}),
+      ...(gradeParam && gradeParam in GradeLevel ? { gradeLevel: gradeParam as GradeLevel } : {}),
+      ...(q
+        ? {
+            OR: [
+              { topics: { some: { topic: { contains: q } } } },
+              { tutorProfile: { user: { anonymousId: { contains: q } } } },
+            ],
+          }
+        : {}),
+    };
+    const hasBrowseFilters = Object.keys(browseFilters).length > 0;
+
     const browseWhere = browseClassesWhere(session.user.id);
     const mineWhere = myClassesWhere(session.user.id);
-    const where = scope === "mine" ? mineWhere : browseWhere;
+    const filteredBrowse = scope === "browse" && hasBrowseFilters;
+    const where = scope === "mine"
+      ? mineWhere
+      : filteredBrowse
+      ? { AND: [browseWhere, browseFilters] }
+      : browseWhere;
 
-    const [browseCount, mineCount, rows] = await Promise.all([
+    const [browseCount, mineCount, filteredCount, rows] = await Promise.all([
       prisma.tutorClass.count({ where: browseWhere }),
       prisma.tutorClass.count({ where: mineWhere }),
+      filteredBrowse ? prisma.tutorClass.count({ where }) : Promise.resolve(0),
       prisma.tutorClass.findMany({
         where,
         include: learnerClassInclude(session.user.id),
@@ -47,7 +73,7 @@ export async function GET(req: NextRequest) {
       classes: rows.map(toLearnerClassDTO),
       page,
       pageSize,
-      total: scope === "mine" ? mineCount : browseCount,
+      total: scope === "mine" ? mineCount : filteredBrowse ? filteredCount : browseCount,
       counts: { browse: browseCount, mine: mineCount },
     });
   } catch (error) {

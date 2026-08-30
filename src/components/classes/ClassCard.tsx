@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, BadgeCheck, Layers, EyeOff } from "lucide-react";
+import { Calendar, Clock, Users, BadgeCheck, Layers, EyeOff, AlertTriangle } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 
@@ -18,6 +18,7 @@ export default function ClassCard({
   sessions,
   status,
   published = true,
+  suspendedReason,
   enrolledCount,
   maxStudents,
   activeLabel,
@@ -35,6 +36,8 @@ export default function ClassCard({
   status: ClassLifecycleStatus;
   /** Tutor-only: whether the class is visible to learners. Defaults to true (learner-facing cards never see unpublished classes). */
   published?: boolean;
+  /** Tutor-only: admin's reason when the class is SUSPENDED/BANNED; surfaced on the card. */
+  suspendedReason?: string | null;
   enrolledCount: number;
   maxStudents: number;
   activeLabel: string;
@@ -61,24 +64,32 @@ export default function ClassCard({
       })
     : null;
 
+  const isModerated = status === "SUSPENDED" || status === "BANNED";
+
   const cardClassName = `card border cursor-pointer transition duration-200 text-xs p-4 space-y-3 block ${
-    published
+    isModerated
+      ? "bg-error/5 hover:bg-error/10 border-error/30"
+      : published
       ? "bg-base-200/30 hover:bg-base-200/50 border-base-300"
       : "bg-warning/5 hover:bg-warning/10 border-warning/30"
   }`;
 
+  const MAX_TOPICS = 3;
+  const shownTopics = topics.slice(0, MAX_TOPICS);
+  const overflowCount = topics.length - shownTopics.length;
+
   const inner = (
     <>
       <div className="flex justify-between items-start gap-2">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="badge badge-neutral text-2xs font-bold tracking-wide uppercase px-2 py-2">{subject}</span>
+        <div className="min-w-0">
+          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subject}</h3>
           {gradeLevel && (
-            <span className="badge badge-ghost text-2xs font-semibold px-2 py-2">
+            <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">
               {gradeLevel.replace("_", " ")}
-            </span>
+            </p>
           )}
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 shrink-0">
           {!published && (
             <span className="badge badge-warning badge-outline text-2xs font-semibold uppercase tracking-wide gap-1 py-2">
               <EyeOff className="h-3 w-3" />
@@ -91,7 +102,7 @@ export default function ClassCard({
 
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-1">
-          {topics.map((topic) => (
+          {shownTopics.map((topic) => (
             <span
               key={topic}
               className="badge badge-outline badge-sm text-2xs font-semibold gap-1 py-2.5"
@@ -100,13 +111,18 @@ export default function ClassCard({
               {topic}
             </span>
           ))}
+          {overflowCount > 0 && (
+            <span className="badge badge-ghost badge-sm text-2xs font-semibold py-2.5">
+              +{overflowCount} more
+            </span>
+          )}
         </div>
         {description && <p className="text-base-content/60 line-clamp-2 leading-relaxed">{description}</p>}
       </div>
 
       <div className="divider my-0 opacity-40"></div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-base-content/70">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-base-content/70">
         {nextSession ? (
           <>
             <div className="flex items-center gap-1">
@@ -134,6 +150,13 @@ export default function ClassCard({
           </span>
         </div>
       </div>
+
+      {isModerated && suspendedReason && (
+        <p className="flex items-start gap-1 text-2xs text-error/90 leading-relaxed">
+          <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+          <span>{suspendedReason}</span>
+        </p>
+      )}
     </>
   );
 

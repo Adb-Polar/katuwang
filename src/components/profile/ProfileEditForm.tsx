@@ -48,28 +48,32 @@ export default function ProfileEditForm({
       <FeedbackBanner variant="error" message={error || null} />
       <FeedbackBanner variant="success" message={success || null} />
 
-      <FormField label="Section" required hint="Your current class section.">
+      <FormField label="Section" required hint="Your current class section." orientation="horizontal">
         <input
           type="text"
           value={section}
           onChange={(e) => setSection(e.target.value)}
-          className="input input-bordered input-sm text-xs"
+          className="input input-bordered input-md text-sm w-full"
           required
         />
       </FormField>
 
-      <FormField label="Contact Info" hint="Optional. Visible only to you and admins.">
+      <FormField
+        label="Contact Info"
+        hint="Optional. Visible only to you and admins."
+        orientation="horizontal"
+      >
         <input
           type="text"
           value={contactInfo}
           onChange={(e) => setContactInfo(e.target.value)}
-          className="input input-bordered input-sm text-xs"
+          className="input input-bordered input-md text-sm w-full"
           placeholder="e.g. phone number or Messenger handle"
         />
       </FormField>
 
-      <button type="submit" disabled={saving} className="btn btn-primary btn-sm text-xs font-bold cursor-pointer">
-        {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save Changes"}
+      <button type="submit" disabled={saving} className="btn btn-primary btn-md text-sm font-bold cursor-pointer">
+        {saving ? <span className="loading loading-spinner loading-sm"></span> : "Save Changes"}
       </button>
     </form>
   );

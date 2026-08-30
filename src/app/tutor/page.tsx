@@ -1,11 +1,21 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, AlertTriangle, CalendarClock } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
+
+function fmt(d: Date) {
+  return d.toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
@@ -20,7 +30,7 @@ export default async function TutorDashboard() {
       tutorProfile: {
         include: {
           topicCertifications: true,
-          classes: { include: { topics: true } },
+          classes: { include: { topics: true, _count: { select: { enrollments: true } } } },
         },
       },
     },
@@ -30,7 +40,31 @@ export default async function TutorDashboard() {
   const classes = tutorProfile?.classes ?? [];
   const certifications = tutorProfile?.topicCertifications ?? [];
 
-  const openRequestCount = await prisma.topicRequest.count({ where: { status: "OPEN" } });
+  const now = new Date();
+  const [openRequestCount, upcomingSessions] = await Promise.all([
+    prisma.topicRequest.count({ where: { status: "OPEN" } }),
+    tutorProfile
+      ? prisma.classSession.findMany({
+          where: {
+            status: "SCHEDULED",
+            scheduledAt: { gt: now },
+            class: { tutorProfileId: tutorProfile.id },
+          },
+          orderBy: { scheduledAt: "asc" },
+          take: 5,
+          select: {
+            id: true,
+            topic: true,
+            scheduledAt: true,
+            duration: true,
+            class: { select: { id: true, subject: true } },
+          },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const enrolledLearnerCount = classes.reduce((sum, c) => sum + c._count.enrollments, 0);
+  const isModerated = user?.status !== "ACTIVE";
 
   // Distinct (subject, topic) pairs the tutor currently teaches, across all their classes.
   const taughtTopics = Array.from(
@@ -47,17 +81,37 @@ export default async function TutorDashboard() {
     { label: "Schedule your first class", done: classes.length > 0 },
     { label: "Request a topic assessment", done: certifications.length > 0 },
   ];
+  const onboardingComplete = steps.every((s) => s.done);
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Tutor Portal"
         title="Manage your tutoring"
-        subtitle="Track your onboarding progress, classes, and verified topics."
+        subtitle="Track your classes, sessions, and verified topics."
         actions={<AnonymousIdBadge id={session!.user.anonymousId} role="TUTOR" size="md" showIcon />}
       />
 
-      <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto">
+      {isModerated && (
+        <div className="rounded-xl border border-error/30 bg-error/10 p-4 space-y-1.5">
+          <div className="flex items-center gap-2 text-error font-bold text-sm">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            Your account is {user?.status === "BANNED" ? "banned" : "suspended"}
+          </div>
+          {user?.statusReason && (
+            <p className="text-xs text-base-content/80">
+              <span className="font-semibold">Reason:</span> {user.statusReason}
+            </p>
+          )}
+          <p className="text-xs text-base-content/70">
+            {user?.statusExpiresAt
+              ? `In effect until ${fmt(user.statusExpiresAt)}.`
+              : "In effect indefinitely. Contact an administrator for details."}
+          </p>
+        </div>
+      )}
+
+      <div className="stats stats-vertical sm:stats-horizontal bg-base-100 shadow-md border border-base-200 w-full">
         <div className="stat py-4">
           <div className="stat-title text-2xs">Topics Taught</div>
           <div className="stat-value text-lg font-serif">{taughtTopics.length}</div>
@@ -66,17 +120,53 @@ export default async function TutorDashboard() {
           <div className="stat-title text-2xs">Verified Topics</div>
           <div className="stat-value text-lg font-serif">{certifiedCount}</div>
         </div>
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Pending Requests</div>
-          <div className="stat-value text-lg font-serif">{pendingCount}</div>
-        </div>
+        <Link href="/tutor/students" className="stat py-4 hover:bg-base-200/40 transition-colors">
+          <div className="stat-title text-2xs">Enrolled Learners</div>
+          <div className="stat-value text-lg font-serif">{enrolledLearnerCount}</div>
+        </Link>
         <Link href="/tutor/requests" className="stat py-4 hover:bg-base-200/40 transition-colors">
           <div className="stat-title text-2xs">Open Topic Requests</div>
           <div className="stat-value text-lg font-serif">{openRequestCount}</div>
         </Link>
       </div>
 
-      {/* Onboarding Checklist */}
+      <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-3">
+          <h2 className="card-title text-sm font-bold flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            Upcoming sessions
+          </h2>
+          {upcomingSessions.length === 0 ? (
+            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+              No scheduled sessions across your classes.
+            </p>
+          ) : (
+            <ul className="divide-y divide-base-200">
+              {upcomingSessions.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    href={`/tutor/classes/${s.class.id}`}
+                    className="flex items-center justify-between gap-3 py-2.5 text-xs hover:bg-base-200/40 -mx-2 px-2 rounded"
+                  >
+                    <div className="min-w-0">
+                      <span className="badge badge-neutral badge-sm text-2xs font-bold uppercase mr-2">
+                        {s.class.subject}
+                      </span>
+                      <span className="text-base-content/80">{s.topic}</span>
+                    </div>
+                    <span className="text-base-content/60 shrink-0">
+                      {fmt(s.scheduledAt)} · {s.duration}m
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      {/* Onboarding Checklist — hidden once every step is done */}
+      {!onboardingComplete && (
       <section className="card bg-base-100 shadow-md border border-base-200">
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold">Getting Started</h2>
@@ -94,6 +184,7 @@ export default async function TutorDashboard() {
           </ul>
         </div>
       </section>
+      )}
 
       <AssessmentsSummaryCard certifiedCount={certifiedCount} pendingCount={pendingCount} />
     </div>

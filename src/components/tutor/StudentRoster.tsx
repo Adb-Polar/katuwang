@@ -39,6 +39,7 @@ const GRADE_LEVELS: GradeLevel[] = [
 
 export default function StudentRoster() {
   const router = useRouter();
+  const [q, setQ] = useState("");
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | "">("");
   const [section, setSection] = useState("");
   const [subject, setSubject] = useState<SubjectArea | "">("");
@@ -54,6 +55,7 @@ export default function StudentRoster() {
     "/api/tutor/students",
     "students",
     {
+      ...(q.trim() ? { q: q.trim() } : {}),
       ...(gradeLevel ? { gradeLevel } : {}),
       ...(section.trim() ? { section: section.trim() } : {}),
       ...(subject ? { subject } : {}),
@@ -66,7 +68,16 @@ export default function StudentRoster() {
     <div className="space-y-4">
       <FeedbackBanner variant="error" message={error || null} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <FormField label="Search">
+          <input
+            type="text"
+            className="input input-bordered input-sm text-xs"
+            placeholder="Anonymous ID, e.g. STU-0007"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+          />
+        </FormField>
         <FormField label="Grade Level">
           <select
             className="select select-bordered select-sm text-xs"

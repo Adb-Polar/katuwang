@@ -87,6 +87,23 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     expect(classUpdate).not.toHaveBeenCalled();
   });
 
+  it("returns 403 when the class belongs to a different tutor (no roster/edit leak)", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp-other",
+      status: "SCHEDULED",
+      _count: { enrollments: 2 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+
+    const res = await patch({ description: "hijack" });
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error).toMatch(/forbidden/i);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when reducing capacity below current enrollment count", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     classFindUnique.mockResolvedValue({

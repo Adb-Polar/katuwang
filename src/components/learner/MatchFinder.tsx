@@ -96,17 +96,26 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
       <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card bg-base-100 shadow-md border border-base-200">
-        <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">What do you need help with?</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="card-body gap-5 p-6 sm:p-8">
+          <div>
+            <h2 className="card-title text-base font-bold">What do you need help with?</h2>
+            <p className="text-xs text-base-content/60 mt-1">
+              Pick a subject and topics, add the times you&apos;re free, and we&apos;ll rank the open classes that fit.
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <MatchCriteriaFields
               value={criteria}
               onChange={setCriteria}
               gradeHint="Prefilled from your profile — change it if this class is for a different level."
             />
-            <button type="submit" disabled={loading} className="btn btn-primary btn-sm text-xs gap-1.5">
-              {loading ? <span className="loading loading-spinner loading-xs" /> : <Sparkles className="h-4 w-4" />}
-              Find classes
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary btn-md text-sm gap-2 w-full sm:w-auto"
+            >
+              {loading ? <span className="loading loading-spinner loading-sm" /> : <Sparkles className="h-4 w-4" />}
+              Auto Match
             </button>
           </form>
         </div>

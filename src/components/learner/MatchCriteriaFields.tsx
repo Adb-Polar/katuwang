@@ -46,36 +46,53 @@ export default function MatchCriteriaFields({
     set({ slots: value.slots.map((s, idx) => (idx === i ? { ...s, ...patch } : s)) });
 
   return (
-    <div className="space-y-3.5">
-      <FormField label="Subject" required>
-        <select
-          className="select select-bordered select-sm w-full text-xs"
-          value={value.subject}
-          onChange={(e) => onChange({ ...value, subject: e.target.value, topics: [] })}
-        >
-          <option value="">Select subject</option>
-          {ALL_SUBJECTS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </FormField>
+    <div className="space-y-5">
+      <div className="grid sm:grid-cols-2 gap-4">
+        <FormField label="Subject" required>
+          <select
+            className="select select-bordered select-md w-full text-sm"
+            value={value.subject}
+            onChange={(e) => onChange({ ...value, subject: e.target.value, topics: [] })}
+          >
+            <option value="">Select subject</option>
+            {ALL_SUBJECTS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </FormField>
+
+        <FormField label="Grade level" hint={gradeHint}>
+          <select
+            className="select select-bordered select-md w-full text-sm"
+            value={value.gradeLevel}
+            onChange={(e) => set({ gradeLevel: e.target.value })}
+          >
+            <option value="">Any grade</option>
+            {GRADE_LEVELS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      </div>
 
       <FormField
         label={`Topics${value.topics.length > 0 ? ` (${value.topics.length} selected)` : ""}`}
         required
       >
         {!value.subject ? (
-          <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
+          <div className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
             Select a subject to see its topics.
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto border border-base-200 rounded-lg p-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto border border-base-200 rounded-lg p-2.5">
             {SUBJECT_TOPICS[value.subject as SubjectArea].map((topic) => (
               <label
                 key={topic}
-                className="flex items-center gap-1.5 text-2xs cursor-pointer p-1 rounded hover:bg-base-200/50"
+                className="flex items-center gap-1.5 text-xs cursor-pointer p-1.5 rounded hover:bg-base-200/50"
               >
                 <input
                   type="checkbox"
@@ -90,57 +107,46 @@ export default function MatchCriteriaFields({
         )}
       </FormField>
 
-      <FormField label="Grade level" hint={gradeHint}>
-        <select
-          className="select select-bordered select-sm w-full text-xs"
-          value={value.gradeLevel}
-          onChange={(e) => set({ gradeLevel: e.target.value })}
-        >
-          <option value="">Any grade</option>
-          {GRADE_LEVELS.map((g) => (
-            <option key={g.value} value={g.value}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-      </FormField>
-
       <FormField label="Preferred times" hint="Optional — helps rank classes that fit your week.">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {value.slots.map((slot, i) => (
-            <div key={i} className="flex items-center gap-1.5 border border-base-200 rounded-lg p-2">
-              <select
-                value={slot.day}
-                onChange={(e) => updateSlot(i, { day: e.target.value })}
-                className="select select-bordered select-xs text-2xs flex-1 min-w-0"
-              >
-                {DAYS.map((d) => (
-                  <option key={d} value={d}>
-                    {d[0] + d.slice(1).toLowerCase()}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="time"
-                value={slot.startTime}
-                onChange={(e) => updateSlot(i, { startTime: e.target.value })}
-                className="input input-bordered input-xs text-2xs"
-              />
-              <span className="text-2xs text-base-content/50">to</span>
-              <input
-                type="time"
-                value={slot.endTime}
-                onChange={(e) => updateSlot(i, { endTime: e.target.value })}
-                className="input input-bordered input-xs text-2xs"
-              />
-              <button
-                type="button"
-                onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
-                className="btn btn-ghost btn-xs text-error shrink-0"
-                aria-label="Remove time slot"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+            <div key={i} className="rounded-lg border border-base-300 bg-base-100 p-3 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <select
+                  value={slot.day}
+                  onChange={(e) => updateSlot(i, { day: e.target.value })}
+                  className="select select-bordered select-sm text-xs w-full"
+                >
+                  {DAYS.map((d) => (
+                    <option key={d} value={d}>
+                      {d[0] + d.slice(1).toLowerCase()}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
+                  className="btn btn-ghost btn-sm text-error shrink-0"
+                  aria-label="Remove time slot"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="time"
+                  value={slot.startTime}
+                  onChange={(e) => updateSlot(i, { startTime: e.target.value })}
+                  className="input input-bordered input-sm text-xs w-full"
+                />
+                <span className="text-xs text-base-content/50 shrink-0">to</span>
+                <input
+                  type="time"
+                  value={slot.endTime}
+                  onChange={(e) => updateSlot(i, { endTime: e.target.value })}
+                  className="input input-bordered input-sm text-xs w-full"
+                />
+              </div>
             </div>
           ))}
           <button
@@ -148,9 +154,9 @@ export default function MatchCriteriaFields({
             onClick={() =>
               set({ slots: [...value.slots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }] })
             }
-            className="btn btn-ghost btn-xs text-2xs font-bold gap-1"
+            className="btn btn-outline btn-sm text-xs gap-1 w-full"
           >
-            <Plus className="h-3 w-3" /> Add time slot
+            <Plus className="h-3.5 w-3.5" /> Add time slot
           </button>
         </div>
       </FormField>

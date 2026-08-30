@@ -118,6 +118,22 @@ describe("GET /api/tutor/students", () => {
     );
   });
 
+  it("matches the q param against the learner's anonymous ID", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classEnrollmentFindMany.mockResolvedValue([]);
+
+    await GET(makeRequest("?q=STU-0007"));
+
+    expect(classEnrollmentFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          learner: { anonymousId: { contains: "STU-0007" } },
+        }),
+      })
+    );
+  });
+
   it("paginates the grouped, distinct-learner list", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });

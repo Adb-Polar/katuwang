@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -204,6 +205,12 @@ export default function ClassModerationTable() {
                           )}
                         </td>
                         <td className="flex gap-2 justify-end">
+                          <Link
+                            href={`/admin/classes/${c.id}`}
+                            className="btn btn-ghost btn-xs text-2xs font-bold cursor-pointer"
+                          >
+                            View
+                          </Link>
                           {c.status === "SCHEDULED" && (
                             <button
                               onClick={() => {

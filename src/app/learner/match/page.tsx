@@ -5,7 +5,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import MatchFinder from "@/components/learner/MatchFinder";
 
 export const metadata = {
-  title: "Find a Class | Katuwang",
+  title: "Auto Match | Katuwang",
 };
 
 export default async function LearnerMatchPage() {
@@ -19,7 +19,7 @@ export default async function LearnerMatchPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Learner Portal"
-        title="Find a class"
+        title="Auto Match"
         subtitle="Tell us what you need and we'll rank the open classes that fit best."
       />
       <MatchFinder defaultGrade={me?.gradeLevel ?? ""} />

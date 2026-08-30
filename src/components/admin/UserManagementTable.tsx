@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -50,6 +51,7 @@ const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
 };
 
 export default function UserManagementTable() {
+  const router = useRouter();
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "learners" | "tutors">("all");
   const [search, setSearch] = useState("");
@@ -65,6 +67,8 @@ export default function UserManagementTable() {
     total,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     loading,
     error,
     setError,
@@ -169,7 +173,7 @@ export default function UserManagementTable() {
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
                 <thead>
-                  <tr className="text-2xs">
+                  <tr className="text-xs">
                     <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
@@ -180,7 +184,11 @@ export default function UserManagementTable() {
                 </thead>
                 <tbody>
                   {displayed.map((u) => (
-                    <tr key={u.id} className="text-xs">
+                    <tr
+                      key={u.id}
+                      onClick={() => router.push(`/admin/users/${u.id}`)}
+                      className="text-sm cursor-pointer hover:bg-base-200/40"
+                    >
                       <td>
                         <AnonymousIdBadge
                           id={u.anonymousId}
@@ -204,7 +212,10 @@ export default function UserManagementTable() {
                       </td>
                       <td>
                         <button
-                          onClick={() => openModal(u)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openModal(u);
+                          }}
                           className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
                         >
                           Manage
@@ -215,12 +226,18 @@ export default function UserManagementTable() {
                 </tbody>
               </table>
               {displayed.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-xs">No accounts found.</div>
+                <div className="text-center py-8 text-base-content/40 italic text-sm">No accounts found.</div>
               )}
             </div>
           )}
 
-          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </div>
       </section>
 

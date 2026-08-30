@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Clock, X } from "lucide-react";
+import { Plus, Clock, X, Pencil } from "lucide-react";
 import { useFetchList } from "@/hooks/useFetchList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -46,9 +46,49 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   const [cancelId, setCancelId] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState(false);
 
+  // Inline edit of an existing OPEN request
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editCriteria, setEditCriteria] = useState<MatchCriteriaValue>(EMPTY_CRITERIA);
+  const [editNote, setEditNote] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const resetForm = () => {
     setCriteria({ ...EMPTY_CRITERIA, gradeLevel: defaultGrade });
     setNote("");
+  };
+
+  const startEdit = (r: TopicRequest) => {
+    setError("");
+    setEditId(r.id);
+    setEditCriteria({ subject: r.subject, topics: r.topics, gradeLevel: r.gradeLevel, slots: r.slots });
+    setEditNote(r.note ?? "");
+  };
+
+  const saveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!editCriteria.subject) return setError("Please choose a subject.");
+    if (editCriteria.topics.length === 0) return setError("Please choose at least one topic.");
+    if (!editCriteria.gradeLevel) return setError("Please choose a grade level.");
+
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`/api/learner/topic-requests/${editId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...criteriaToBody(editCriteria), note: editNote }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not save your changes.");
+      setEditId(null);
+      refetch();
+      setSuccess("Request updated.");
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save your changes.");
+    } finally {
+      setSavingEdit(false);
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
@@ -153,6 +193,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             <div className="space-y-3">
               {requests.map((r) => {
                 const meta = STATUS_TONE[r.status];
+                const editing = editId === r.id;
                 return (
                   <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
                     <div className="flex items-start justify-between gap-2">
@@ -163,16 +204,58 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         <span className="text-base-content/50">{r.gradeLevel.replace("_", " ")}</span>
                         <StatusBadge tone={meta.tone} label={meta.label} size="xs" />
                       </div>
-                      {r.status === "OPEN" && (
-                        <button
-                          onClick={() => setCancelId(r.id)}
-                          className="btn btn-ghost btn-xs text-error text-2xs"
-                        >
-                          Cancel
-                        </button>
+                      {r.status === "OPEN" && !editing && (
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={() => startEdit(r)}
+                            className="btn btn-ghost btn-xs text-2xs gap-1"
+                          >
+                            <Pencil className="h-3 w-3" />
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => setCancelId(r.id)}
+                            className="btn btn-ghost btn-xs text-error text-2xs"
+                          >
+                            Cancel
+                          </button>
+                        </div>
                       )}
                     </div>
 
+                    {editing ? (
+                      <form
+                        onSubmit={saveEdit}
+                        className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20 mt-1"
+                      >
+                        <MatchCriteriaFields value={editCriteria} onChange={setEditCriteria} />
+                        <FormField label="Note" hint="Optional — anything a tutor should know.">
+                          <textarea
+                            value={editNote}
+                            onChange={(e) => setEditNote(e.target.value)}
+                            className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                            placeholder="e.g. I struggle with word problems the most."
+                          />
+                        </FormField>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="submit"
+                            disabled={savingEdit}
+                            className="btn btn-primary btn-sm text-xs"
+                          >
+                            {savingEdit ? <span className="loading loading-spinner loading-xs" /> : "Save changes"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEditId(null)}
+                            className="btn btn-ghost btn-sm text-xs"
+                          >
+                            Discard
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
                     <div className="flex flex-wrap gap-1">
                       {r.topics.map((t) => (
                         <span key={t} className="badge badge-outline badge-sm text-2xs py-2.5">
@@ -194,6 +277,8 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
+                      </>
+                    )}
 
                     {r.status === "FULFILLED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">

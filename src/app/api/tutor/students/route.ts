@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
     const section = searchParams.get("section")?.trim() || "";
     const subject = searchParams.get("subject");
     const classId = searchParams.get("classId");
+    const q = searchParams.get("q")?.trim() || "";
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
 
@@ -51,11 +52,12 @@ export async function GET(req: NextRequest) {
         ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
         ...(classId ? { id: classId } : {}),
       },
-      ...(gradeLevel || section
+      ...(gradeLevel || section || q
         ? {
             learner: {
               ...(gradeLevel && gradeLevel in GradeLevel ? { gradeLevel: gradeLevel as GradeLevel } : {}),
               ...(section ? { section: { contains: section } } : {}),
+              ...(q ? { anonymousId: { contains: q } } : {}),
             },
           }
         : {}),

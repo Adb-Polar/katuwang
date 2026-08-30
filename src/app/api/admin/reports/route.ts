@@ -12,7 +12,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const DAYS = 30;
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - (DAYS - 1));
 
     const [
       usersByRole,
@@ -22,7 +25,7 @@ export async function GET() {
       classesByStatus,
       certificationsByStatus,
       totalEnrollments,
-      recentEnrollments,
+      recentEnrollmentRows,
     ] = await Promise.all([
       prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
       prisma.user.groupBy({ by: ["gradeLevel"], _count: { _all: true } }),
@@ -31,8 +34,27 @@ export async function GET() {
       prisma.tutorClass.groupBy({ by: ["status"], _count: { _all: true } }),
       prisma.topicCertification.groupBy({ by: ["status"], _count: { _all: true } }),
       prisma.classEnrollment.count(),
-      prisma.classEnrollment.count({ where: { enrolledAt: { gte: thirtyDaysAgo } } }),
+      prisma.classEnrollment.findMany({
+        where: { enrolledAt: { gte: since } },
+        select: { enrolledAt: true },
+      }),
     ]);
+
+    // Bucket the last 30 days of enrollments into a zero-filled daily series.
+    const dayKey = (d: Date) =>
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
+    const byDay = new Map<string, number>();
+    for (let i = 0; i < DAYS; i++) {
+      const d = new Date(since);
+      d.setDate(since.getDate() + i);
+      byDay.set(dayKey(d), 0);
+    }
+    for (const row of recentEnrollmentRows) {
+      const key = dayKey(new Date(row.enrolledAt));
+      if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
+    }
+    const enrollmentsByDay = Array.from(byDay, ([date, count]) => ({ date, count }));
 
     return NextResponse.json({
       usersByRole: usersByRole.map((r) => ({ role: r.role, count: r._count._all })),
@@ -41,7 +63,11 @@ export async function GET() {
       classesBySubject: classesBySubject.map((r) => ({ subject: r.subject, count: r._count._all })),
       classesByStatus: classesByStatus.map((r) => ({ status: r.status, count: r._count._all })),
       certificationsByStatus: certificationsByStatus.map((r) => ({ status: r.status, count: r._count._all })),
-      enrollments: { total: totalEnrollments, last30Days: recentEnrollments },
+      enrollments: {
+        total: totalEnrollments,
+        last30Days: recentEnrollmentRows.length,
+        byDay: enrollmentsByDay,
+      },
     });
   } catch (error) {
     console.error("Error fetching admin reports:", error);

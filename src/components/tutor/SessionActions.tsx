@@ -95,28 +95,32 @@ export default function SessionActions({
         <div className="flex items-center gap-1">
           <button
             onClick={() => setIsRescheduling(true)}
-            className="btn btn-ghost btn-xs cursor-pointer"
+            className="btn btn-ghost btn-xs cursor-pointer tooltip"
+            data-tip="Reschedule"
             aria-label="Reschedule session"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setPendingAction("complete")}
-            className="btn btn-ghost btn-xs text-success cursor-pointer"
+            className="btn btn-ghost btn-xs text-success cursor-pointer tooltip"
+            data-tip="Mark complete"
             aria-label="Mark session complete"
           >
             <CheckCircle className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setPendingAction("cancel")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer"
+            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            data-tip="Cancel"
             aria-label="Cancel session"
           >
             <XCircle className="h-3.5 w-3.5" />
           </button>
           <button
             onClick={() => setPendingAction("delete")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer"
+            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            data-tip="Delete"
             aria-label="Delete session"
           >
             <Trash2 className="h-3.5 w-3.5" />

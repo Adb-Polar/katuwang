@@ -85,7 +85,10 @@ export default function TopicRequestQueue() {
       ) : (
         <div className="space-y-3">
           {requests.map((r) => (
-            <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
+            <div
+              key={r.id}
+              className="border border-base-300 bg-base-200/50 rounded-xl p-4 space-y-2 text-xs"
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">

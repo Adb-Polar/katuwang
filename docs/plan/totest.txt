@@ -1,0 +1,80 @@
+================================================================
+TODO Cleanup Sprint — manual test checklist
+Plan: docs/plan/todo-cleanup-sprint.md
+Automated: pnpm exec tsc --noEmit && pnpm lint && pnpm test  (all green through Chunk 4)
+================================================================
+
+Chunk 1 — URL pagination + FormField + ID container contrast
+ [] /admin/users: go to page 2, refresh -> still page 2
+ [] /admin/users: change rows-per-page -> URL updates (?usersSize=), list resets to page 1
+ [] /admin/users + /admin/classes on same visit: page state does not collide (usersPage vs classesPage)
+ [] Any paginated list: Next/Prev then browser Back steps page 2 -> page 1
+ [] Click into a detail page then Back -> returns to the exact page you left
+ [] Anonymous ID box in portal sidebar/drawer is visibly higher-contrast
+ [] No visual change to FormFields that don't opt into orientation="horizontal"
+
+Chunk 2 — ClassCard declutter + unpublished color + session tooltips
+ [] Learner /learner/classes + tutor /tutor/classes: cards show a clear subject title, grade sublabel, no badge wall
+ [] Class with 6+ topics shows "+N more"
+ [] Unpublished class card = amber tint + "Unpublished" badge (color brought back)
+ [] ClassDetailsView + EditClassForm when unpublished: darker bg-base-300 wrapper
+ [] ClassDetailsView / EditClassForm when unpublished: active status badge hidden, only "Unpublished" shown
+ [] Hover a session action icon (reschedule/complete/cancel/delete) -> tooltip names the action
+
+Chunk 3 — sessions in edit form + suspended-class visibility
+ [] Sessions can be added/edited ONLY from /tutor/classes/[id]/edit
+ [] Detail page /tutor/classes/[id] has no "Add Session" and no per-session actions (read-only + "Manage in Edit" link)
+ [] Suspended class: /edit renders read-only with reason + "Suspended until <date>" / "Indefinite", controls disabled, no Save
+ [] Banned class: same locked treatment, "banned" wording
+ [] Tutor class list: currently-suspended class appears in Active tab with error-tone card + reason; banned/expired stay in History
+ [] Roster API for a class you don't own returns 403 (covered by test; spot-check via devtools if possible)
+
+Chunk 4 — list search/filter parity
+ [] /learner/classes: search box + subject select + grade select filter the list
+ [] /learner/classes?q=algebra&subject=MATH -> filters apply and the URL is shareable/refreshable
+ [] Filtered browse with no results shows "No classes match your filters" + Clear filters button
+ [] Browse filters do NOT appear on /learner/my-classes
+ [] Browse tab count badge stays the unfiltered total; the "N classes" line reflects the filtered count
+ [] /tutor/students: search box narrows by anonymous ID (e.g. STU-0007)
+ [] Tutor student search combines with the existing grade/section/subject filters
+
+Chunk 5 — learner match + topic requests
+ [] Nav + page title + tab metadata say "Auto Match" (was "Find a Class")
+ [] /learner/match form is roomy: subject/grade in a 2-col row, larger inputs, submit reads "Auto Match"
+ [] Preferred-time slots: full-width day select, larger time inputs, per-slot card with more breathing room
+ [] The same wider MatchCriteriaFields shows up in the "New request" form on /learner/requests
+ [] /learner/requests: OPEN request has an "Edit" button; it opens MatchCriteriaFields prefilled (subject/topics/grade/slots/note)
+ [] Saving an edit updates the request in place (topics + slots replaced); "Request updated" toast
+ [] FULFILLED / CANCELLED requests have no Edit button
+ [] API: PATCH criteria on a non-OPEN request -> 400 "Only an open request can be edited."
+ [] /tutor/requests (topic request queue): cards have a visible border + darker bg (no longer blend in)
+
+Chunk 6 — dashboards, learner header, tutor-identity setting
+ [] /learner dashboard: stat tiles (enrolled classes / sessions this week / open requests), Upcoming sessions list, Quick links — all live data
+ [] /tutor dashboard: Upcoming sessions across owned classes, Enrolled Learners stat, onboarding checklist hides once all 3 steps done
+ [] /tutor dashboard: suspended/banned tutor sees an error banner with reason + expiry (or "indefinitely")
+ [] /admin dashboard: Recent activity feed from AuditLog + "Needs attention" links (pending certs / flagged / active classes) with counts
+ [] /admin/settings: new "Show tutor real names to learners" toggle with the RA 10173 warning; defaults OFF
+ [] Toggle ON -> /learner/tutors/[id] shows the tutor's real name (page title + Tutor card) + section; toggle OFF -> only TUT-XXXX
+ [] /tutor/assessments: tab labels no longer overflow — label and (count) stack on their own lines
+
+Chunk 7 — profile redesign + admin view surfaces
+ [] /learner/profile + /tutor/profile: shared ProfileView layout — definition-list account info, prominent anon ID, larger inline (horizontal) edit fields
+ [] Profile edit still saves section + contact info; name/email/grade unchanged
+ [] /admin/users: table text is text-sm (readable), rows-per-page selector works (URL ?usersSize=), page resets to 1 on change
+ [] /admin/users: clicking a row opens /admin/users/[id]; the "Manage" button still opens the modal (no navigation)
+ [] /admin/users/[id]: real name, email, contact, role, grade/section, joined, status + reason + expiry, activity counts, recent audit entries
+ [] /admin/classes: each row has a "View" link to /admin/classes/[id]
+ [] /admin/classes/[id]: read-only ClassDetailsView with sessions, roster (anon IDs + enrolled date), tutor (anon ID + real name), meeting link, and a Moderation panel when suspended/banned
+
+Chunk 8 — admin review tooling (certs / audit log / reports)
+ [] /admin/certifications: Pending + Certified tabs; Certified tab hides Approve/Reject and shows the certified date
+ [] Certifications: search (topic / tutor ID), subject filter, sort (requested / certified / subject), pagination + rows-per-page all work and hit the API
+ [] Approve still certifies; Reject still removes (Rejected tab + persisted REJECTED come in Chunk 10)
+ [] /admin/audit-log: search (admin ID / reason / target ID), Action filter, Target-type filter; clicking Action / Target / When headers toggles sort asc/desc; paginated
+ [] /admin/reports: recharts bar charts (users by role/grade/status, classes by subject/status, certs by status) + a 30-day enrollments area chart, all themed to the OKLCH palette
+ [] Reports: each chart has a "Show data table" disclosure with the raw counts
+ [] recharts@3 added to package.json (React 19 compatible) — run pnpm install if switching branches
+
+Chunk 9 — availability keep/remove
+ [SKIPPED] Product decision deferred by user on 2026-08-30 — availability left as-is. Revisit later.

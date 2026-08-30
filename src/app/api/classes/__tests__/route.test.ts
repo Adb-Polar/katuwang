@@ -105,6 +105,34 @@ describe("GET /api/classes", () => {
     expect(updateManyMock).toHaveBeenCalled(); // reinstateExpiredClasses
   });
 
+  it("ANDs browse filters (q / subject / gradeLevel) onto the base browse where", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    countMock.mockResolvedValueOnce(30).mockResolvedValueOnce(4).mockResolvedValueOnce(2); // browse, mine, filtered
+
+    const res = await GET(makeRequest("?q=algebra&subject=MATH&gradeLevel=GRADE_9"));
+    const json = await res.json();
+
+    expect(json.total).toBe(2);
+    expect(json.counts).toEqual({ browse: 30, mine: 4 });
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          AND: [
+            expect.objectContaining({ status: "SCHEDULED", published: true }),
+            {
+              subject: "MATH",
+              gradeLevel: "GRADE_9",
+              OR: [
+                { topics: { some: { topic: { contains: "algebra" } } } },
+                { tutorProfile: { user: { anonymousId: { contains: "algebra" } } } },
+              ],
+            },
+          ],
+        },
+      })
+    );
+  });
+
   it("queries the enrolled classes for scope=mine", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     await GET(makeRequest("?scope=mine"));

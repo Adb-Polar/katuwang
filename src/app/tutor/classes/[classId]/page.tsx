@@ -1,13 +1,13 @@
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import EnrolledLearnersTable from "@/components/classes/EnrolledLearnersTable";
 import ClassManageMenu from "@/components/tutor/ClassManageMenu";
-import SessionActions from "@/components/tutor/SessionActions";
-import AddSessionModal from "@/components/tutor/AddSessionModal";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -67,15 +67,13 @@ export default async function TutorClassDetailPage({
         <>
           <div className="flex items-center justify-between">
             <h2 className="card-title text-sm font-bold">Sessions</h2>
-            {tutorClass.status === "SCHEDULED" && (
-              <AddSessionModal classId={tutorClass.id} classTopics={classTopics} />
-            )}
+            <Link href={`/tutor/classes/${tutorClass.id}/edit`} className="btn btn-ghost btn-xs text-xs gap-1">
+              <Pencil className="h-3 w-3" />
+              Manage in Edit
+            </Link>
           </div>
           <SessionsList
             sessions={tutorClass.sessions.map((s) => ({ ...s, scheduledAt: s.scheduledAt.toISOString() }))}
-            renderActions={(s) => (
-              <SessionActions classId={tutorClass.id} session={s} classTopics={classTopics} />
-            )}
           />
         </>
       }

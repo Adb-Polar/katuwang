@@ -55,7 +55,7 @@ export default function ClassDetailsView({
   const fillPct = Math.min(100, Math.round((enrolledCount / maxStudents) * 100));
 
   return (
-    <div className={`space-y-6 rounded-box ${!published ? "bg-warning/5 p-4" : ""}`}>
+    <div className={`space-y-6 rounded-box ${!published ? "bg-base-300 border border-base-content/10 p-4" : ""}`}>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <Link href={backHref} className="btn btn-ghost btn-sm text-xs gap-1.5">
           <ArrowLeft className="h-3.5 w-3.5" />
@@ -69,8 +69,9 @@ export default function ClassDetailsView({
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
             {subject}
           </span>
-          <StatusBadge tone={tone} label={label} size="sm" />
-          {!published && (
+          {published ? (
+            <StatusBadge tone={tone} label={label} size="sm" />
+          ) : (
             <span className="badge badge-warning badge-outline text-2xs font-semibold uppercase tracking-wide gap-1 py-2.5">
               <EyeOff className="h-3 w-3" />
               Unpublished

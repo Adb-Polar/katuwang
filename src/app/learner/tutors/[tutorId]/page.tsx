@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck } from "lucide-react";
+import { ArrowLeft, BadgeCheck, User } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
+import { getSetting } from "@/lib/settings";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import ClassCard from "@/components/classes/ClassCard";
@@ -20,10 +21,15 @@ export default async function LearnerTutorProfilePage({
 
   await reinstateExpiredClasses();
 
+  const showRealNames = await getSetting("showTutorRealNames");
+
   const tutor = await prisma.user.findFirst({
     where: { id: tutorId, role: "STUDENT_TUTOR" },
     select: {
       anonymousId: true,
+      firstName: true,
+      lastName: true,
+      section: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -63,10 +69,29 @@ export default async function LearnerTutorProfilePage({
 
       <PageHeader
         eyebrow="Tutor Profile"
-        title="Anonymized profile"
-        subtitle="Learners and tutors never see each other's real names or contact details."
+        title={showRealNames ? `${tutor.firstName} ${tutor.lastName}` : "Anonymized profile"}
+        subtitle={
+          showRealNames
+            ? "Real names are shown here because an administrator has enabled it."
+            : "Learners and tutors never see each other's real names or contact details."
+        }
         actions={<AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />}
       />
+
+      {showRealNames && (
+        <section className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card-body gap-2">
+            <h2 className="card-title text-sm font-bold">Tutor</h2>
+            <div className="flex items-center gap-2 text-xs text-base-content/80">
+              <User className="h-4 w-4 text-primary shrink-0" />
+              <span className="font-semibold">
+                {tutor.firstName} {tutor.lastName}
+              </span>
+              <span className="text-base-content/50">· Section {tutor.section}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="card bg-base-100 shadow-md border border-base-200">
         <div className="card-body gap-3">

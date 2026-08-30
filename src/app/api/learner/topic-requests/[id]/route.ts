@@ -2,9 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { cancelTopicRequestSchema } from "@/lib/validations/match";
+import {
+  cancelTopicRequestSchema,
+  createTopicRequestSchema,
+  type CreateTopicRequestInput,
+} from "@/lib/validations/match";
+import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 
-// ─── PATCH: Cancel one's own open topic request ─────────────────────────────
+// ─── PATCH: Cancel or edit one's own OPEN topic request ─────────────────────
+//   { status: "CANCELLED" }                                  → cancel
+//   { subject, topics, gradeLevel, preferredSlots?, note? }  → edit criteria
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -18,9 +25,14 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const result = cancelTopicRequestSchema.safeParse(body);
-    if (!result.success) {
-      const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
+    const isCancel = body && typeof body === "object" && "status" in body;
+
+    // Validate the payload before any DB work (keeps 400s ahead of 404s).
+    const parsed = isCancel
+      ? cancelTopicRequestSchema.safeParse(body)
+      : createTopicRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      const errorMsg = parsed.error.issues[0]?.message || "Invalid inputs.";
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
@@ -35,20 +47,57 @@ export async function PATCH(
 
     if (existing.status !== "OPEN") {
       return NextResponse.json(
-        { error: "Only an open request can be cancelled." },
+        { error: `Only an open request can be ${isCancel ? "cancelled" : "edited"}.` },
+        { status: 400 }
+      );
+    }
+
+    // ── Cancel ──────────────────────────────────────────────────────────────
+    if (isCancel) {
+      const updated = await prisma.topicRequest.update({
+        where: { id },
+        data: { status: "CANCELLED" },
+        select: { id: true, status: true },
+      });
+      return NextResponse.json(updated);
+    }
+
+    // ── Edit criteria ───────────────────────────────────────────────────────
+    const { subject, topics, gradeLevel, preferredSlots, note } =
+      parsed.data as CreateTopicRequestInput;
+
+    if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
+      return NextResponse.json(
+        { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
       );
     }
 
     const updated = await prisma.topicRequest.update({
       where: { id },
-      data: { status: "CANCELLED" },
+      data: {
+        subject,
+        gradeLevel,
+        note: note || null,
+        topics: {
+          deleteMany: {},
+          create: [...new Set(topics)].map((topic) => ({ topic })),
+        },
+        slots: {
+          deleteMany: {},
+          create: (preferredSlots ?? []).map((s) => ({
+            day: s.day,
+            startTime: s.startTime,
+            endTime: s.endTime,
+          })),
+        },
+      },
       select: { id: true, status: true },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
-    console.error("Error cancelling topic request:", error);
+    console.error("Error updating topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
       { status: 500 }
