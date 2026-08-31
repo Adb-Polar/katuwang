@@ -36,6 +36,10 @@ vi.mock("@/lib/settings", () => ({
   getSetting: getSettingMock,
 }));
 
+vi.mock("@/lib/idGenerator", () => ({
+  generateClassCode: vi.fn().mockResolvedValue("C-0001"),
+}));
+
 import { GET, POST } from "@/app/api/tutor/classes/route";
 
 function makeRequest(body: unknown) {
@@ -223,6 +227,7 @@ describe("POST /api/tutor/classes", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           tutorProfileId: "tp1",
+          code: "C-0001",
           subject: "MATH",
           sessions: { create: [expect.objectContaining({ topic: "Algebraic Expressions" })] },
         }),

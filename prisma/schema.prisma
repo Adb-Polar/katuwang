@@ -24,6 +24,7 @@ enum AccountStatus {
   ACTIVE
   SUSPENDED
   BANNED
+  PENDING // Awaiting admin approval (when requireRegistrationApproval is on); cannot log in
 }
 
 enum GradeLevel {
@@ -38,6 +39,7 @@ enum GradeLevel {
 enum TopicCertificationStatus {
   PENDING // Assessment requested, not yet graded
   CERTIFIED // Tutor passed the topic assessment
+  REJECTED // Assessment reviewed and not passed; tutor may re-request
 }
 
 enum SubjectArea {
@@ -79,6 +81,7 @@ model User {
   lastName     String
   email        String     @unique
   password     String // bcrypt hash
+  recoveryEmail String?   // optional backup address for password recovery
   role         Role
   gradeLevel   GradeLevel
   section      String
@@ -102,8 +105,27 @@ model User {
   enrollments   ClassEnrollment[] @relation("LearnerEnrollments")
   auditLogs     AuditLog[]
   topicRequests TopicRequest[]    @relation("LearnerTopicRequests")
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
+}
+
+// ─── Password Reset Token ─────────────────────────────────────────────────────
+// One row per issued reset request. Only the SHA-256 hash of the token is stored;
+// the raw token lives only in the emailed link. A row is single-use (`usedAt`) and
+// time-limited (`expiresAt`).
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
 
 // ─── Tutor Profile ────────────────────────────────────────────────────────────
@@ -116,27 +138,14 @@ model TutorProfile {
   // Per-topic assessment requests/certifications, requested once a tutor is teaching a topic
   topicCertifications TopicCertification[]
 
-  // Availability schedule (1 row per weekly slot)
-  availability Availability[]
-
   // Classes created by this tutor
   classes TutorClass[]
 
   @@map("tutor_profiles")
 }
 
-// ─── Availability (weekly slots for a tutor) ───────────────────────────────────
-
-model Availability {
-  id             String       @id @default(cuid())
-  tutorProfileId String
-  tutorProfile   TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  day            String
-  startTime      String
-  endTime        String
-
-  @@map("availabilities")
-}
+// Tutor availability is not stored — it is auto-derived at read time from the
+// tutor's upcoming ClassSession rows (see src/lib/derivedAvailability.ts).
 
 // ─── Topic Certification (per-topic assessment request/certification) ─────────
 // A row only exists once a tutor has requested an assessment for that topic.
@@ -150,6 +159,8 @@ model TopicCertification {
   status         TopicCertificationStatus @default(PENDING)
   requestedAt    DateTime                 @default(now())
   certifiedAt    DateTime?
+  reviewedAt     DateTime? // set when an admin certifies or rejects
+  reviewNote     String?                  @db.Text // admin feedback, primarily for a rejection
 
   @@unique([tutorProfileId, subject, topic])
   @@map("topic_certifications")
@@ -158,7 +169,7 @@ model TopicCertification {
 // ─── ID Counter (for sequential anonymous IDs) ────────────────────────────────
 
 model IdCounter {
-  role  String @id // "TUTOR" or "LEARNER"
+  role  String @id // "TUTOR", "LEARNER", or "CLASS"
   count Int    @default(0)
 
   @@map("id_counters")
@@ -168,6 +179,7 @@ model IdCounter {
 
 model TutorClass {
   id              String       @id @default(cuid())
+  code            String       @unique // human-friendly sequential code, "C-0001" (see generateClassCode)
   tutorProfileId  String
   tutorProfile    TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
   subject         SubjectArea

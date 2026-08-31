@@ -24,16 +24,35 @@ export const reviewCertificationSchema = z.object({
   status: z.enum(["CERTIFIED", "REJECTED"], {
     message: "Invalid certification decision.",
   }),
+  reviewNote: z
+    .string()
+    .trim()
+    .max(500, "Review note cannot exceed 500 characters.")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ReviewCertificationInput = z.infer<typeof reviewCertificationSchema>;
 
 export const updatePlatformSettingSchema = z.object({
   key: z.enum(
-    ["requireCertificationForClassCreation", "registrationOpen", "matchingEnabled", "showTutorRealNames"],
+    [
+      "requireCertificationForClassCreation",
+      "registrationOpen",
+      "matchingEnabled",
+      "showTutorRealNames",
+      "requireRegistrationApproval",
+    ],
     { message: "Invalid setting key." }
   ),
   value: z.boolean({ message: "Value must be a boolean." }),
 });
 
 export type UpdatePlatformSettingInput = z.infer<typeof updatePlatformSettingSchema>;
+
+export const reviewRegistrationSchema = z.object({
+  decision: z.enum(["APPROVE", "DECLINE"], { message: "Invalid decision." }),
+  reason: z.string().trim().max(500, "Reason cannot exceed 500 characters.").optional().or(z.literal("")),
+});
+
+export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;

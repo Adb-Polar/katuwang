@@ -24,9 +24,12 @@ export default function LoginForm() {
 
   // Derive success message from registration redirect query parameters
   const isRegistered = params.get("registered") === "true";
+  const isPending = params.get("pending") === "true";
   const id = params.get("id");
   const role = params.get("role");
-  const successMsg = isRegistered
+  const successMsg = isPending
+    ? `Registration received! Your ${role === "tutor" ? "tutor" : "learner"} ID is ${id}. An administrator needs to approve your account before you can sign in — you'll be able to log in once that's done.`
+    : isRegistered
     ? role === "tutor"
       ? `Account created! Your tutor ID is ${id}. Please log in — you can schedule your first class right away, then request a topic assessment once you're teaching it.`
       : `Account created! Your learner ID is ${id}. Please log in to start requesting tutoring sessions.`
@@ -145,12 +148,12 @@ export default function LoginForm() {
               </div>
             </div>
             <div className="flex justify-end text-2xs">
-              <span
-                className="text-base-content/30 cursor-not-allowed select-none"
-                title="Password recovery isn't available yet"
+              <Link
+                href="/forgot-password"
+                className="text-base-content/50 hover:text-primary hover:underline transition-colors"
               >
-                Forgot password (coming soon)
-              </span>
+                Forgot password?
+              </Link>
             </div>
 
             {/* Remember Me Checkbox */}

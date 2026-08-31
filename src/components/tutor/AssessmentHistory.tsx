@@ -4,11 +4,19 @@ export interface CertificationDetail {
   id: string;
   subject: string;
   topic: string;
-  status: "PENDING" | "CERTIFIED";
+  status: "PENDING" | "CERTIFIED" | "REJECTED";
   requestedAt: string;
   certifiedAt: string | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
   usedInClasses: { id: string; subject: string; status: string }[];
 }
+
+const STATUS_BADGE = {
+  CERTIFIED: { tone: "success", label: "Verified" },
+  REJECTED: { tone: "error", label: "Not Passed" },
+  PENDING: { tone: "warning", label: "Assessment Pending" },
+} as const;
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString(undefined, {
@@ -37,8 +45,8 @@ export default function AssessmentHistory({ certifications }: { certifications: 
               <div className="text-2xs text-base-content/50">{c.subject}</div>
             </div>
             <StatusBadge
-              tone={c.status === "CERTIFIED" ? "success" : "warning"}
-              label={c.status === "CERTIFIED" ? "Verified" : "Assessment Pending"}
+              tone={STATUS_BADGE[c.status].tone}
+              label={STATUS_BADGE[c.status].label}
               size="xs"
             />
           </div>
@@ -46,7 +54,14 @@ export default function AssessmentHistory({ certifications }: { certifications: 
           <div className="text-2xs text-base-content/50 flex flex-wrap gap-x-4 gap-y-1">
             <span>Requested {formatDate(c.requestedAt)}</span>
             {c.certifiedAt && <span>Certified {formatDate(c.certifiedAt)}</span>}
+            {c.status === "REJECTED" && c.reviewedAt && <span>Reviewed {formatDate(c.reviewedAt)}</span>}
           </div>
+
+          {c.status === "REJECTED" && c.reviewNote && (
+            <p className="text-2xs text-error/80 bg-error/5 border border-error/20 rounded-lg px-2 py-1.5">
+              <span className="font-semibold">Reviewer feedback:</span> {c.reviewNote}
+            </p>
+          )}
 
           {c.usedInClasses.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-1">

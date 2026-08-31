@@ -20,3 +20,18 @@ export async function generateAnonymousId(
   const padded = String(updated.count).padStart(4, "0");
   return `${prefix}-${padded}`;
 }
+
+/**
+ * Generates the next sequential, human-friendly class code: C-0001, C-0002 ...
+ * Uses the same atomic `IdCounter` increment as `generateAnonymousId`, upserting
+ * the `"CLASS"` counter row so it works even on a fresh database.
+ */
+export async function generateClassCode(): Promise<string> {
+  const updated = await prisma.idCounter.upsert({
+    where: { role: "CLASS" },
+    create: { role: "CLASS", count: 1 },
+    update: { count: { increment: 1 } },
+  });
+
+  return `C-${String(updated.count).padStart(4, "0")}`;
+}

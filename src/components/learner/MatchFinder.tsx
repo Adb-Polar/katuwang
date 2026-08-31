@@ -21,6 +21,7 @@ interface MatchReasons {
 
 interface MatchedClass {
   id: string;
+  code: string;
   subject: string;
   gradeLevel: string | null;
   topics: string[];
@@ -142,6 +143,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 {matches.map((m) => (
                   <div key={m.class.id} className="space-y-1.5">
                     <ClassCard
+                      code={m.class.code}
                       subject={m.class.subject}
                       gradeLevel={m.class.gradeLevel}
                       topics={m.class.topics}

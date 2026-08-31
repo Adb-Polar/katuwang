@@ -42,12 +42,19 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { status } = result.data;
+    const { status, reviewNote } = result.data;
+    const now = new Date();
 
     if (status === "REJECTED") {
-      const deleted = await prisma.$transaction(async (tx) => {
-        const removed = await tx.topicCertification.delete({
+      const rejected = await prisma.$transaction(async (tx) => {
+        const row = await tx.topicCertification.update({
           where: { id: certificationId },
+          data: {
+            status: "REJECTED",
+            reviewedAt: now,
+            reviewNote: reviewNote || null,
+            certifiedAt: null,
+          },
         });
 
         await tx.auditLog.create({
@@ -56,19 +63,20 @@ export async function PATCH(
             action: AUDIT_ACTIONS.CERTIFICATION_REJECTED,
             targetType: AUDIT_TARGET_TYPES.CERTIFICATION,
             targetId: certificationId,
+            reason: reviewNote || null,
           },
         });
 
-        return removed;
+        return row;
       });
 
-      return NextResponse.json(deleted);
+      return NextResponse.json(rejected);
     }
 
     const updated = await prisma.$transaction(async (tx) => {
       const certified = await tx.topicCertification.update({
         where: { id: certificationId },
-        data: { status: "CERTIFIED", certifiedAt: new Date() },
+        data: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null },
       });
 
       await tx.auditLog.create({

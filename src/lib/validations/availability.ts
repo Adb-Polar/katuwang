@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+// Shared weekly time-slot shape. Tutor availability is no longer hand-entered
+// (it's auto-derived from class sessions — see `src/lib/derivedAvailability.ts`),
+// but this slot schema is still the canonical shape for a learner's preferred
+// meeting windows in the matcher (`src/lib/validations/match.ts`).
+
 const DAYS = [
   "MONDAY",
   "TUESDAY",
@@ -27,35 +32,5 @@ export const availabilitySlotSchema = z
     path: ["endTime"],
   });
 
-export const updateAvailabilitySchema = z
-  .object({
-    slots: z
-      .array(availabilitySlotSchema)
-      .max(50, "You can define up to 50 availability slots."),
-  })
-  .refine(
-    (data) => {
-      const byDay = new Map<string, { startTime: string; endTime: string }[]>();
-      for (const slot of data.slots) {
-        const existing = byDay.get(slot.day) ?? [];
-        existing.push(slot);
-        byDay.set(slot.day, existing);
-      }
-
-      for (const slots of byDay.values()) {
-        const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
-        for (let i = 1; i < sorted.length; i++) {
-          if (sorted[i].startTime < sorted[i - 1].endTime) {
-            return false;
-          }
-        }
-      }
-
-      return true;
-    },
-    { message: "Availability slots on the same day cannot overlap." }
-  );
-
 export type DayOfWeek = z.infer<typeof dayEnum>;
 export type AvailabilitySlotInput = z.infer<typeof availabilitySlotSchema>;
-export type UpdateAvailabilityInput = z.infer<typeof updateAvailabilitySchema>;

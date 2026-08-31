@@ -6,6 +6,7 @@ import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 
 export default function ClassDetailsView({
   backHref,
+  code,
   subject,
   topics,
   verifiedTopics,
@@ -25,6 +26,8 @@ export default function ClassDetailsView({
   actions,
 }: {
   backHref: string;
+  /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow above the subject. */
+  code?: string | null;
   subject: string;
   topics: string[];
   /** Topics (from `topics`) the tutor has been verified for, shown with a badge. */
@@ -65,6 +68,11 @@ export default function ClassDetailsView({
       </div>
 
       <div className="space-y-2">
+        {code && (
+          <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
+            {code}
+          </p>
+        )}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
             {subject}

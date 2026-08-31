@@ -28,6 +28,11 @@ const SETTING_META: Record<string, { label: string; description: string }> = {
     description:
       "When enabled, learners see a tutor's real name and section on the tutor profile page. Leave OFF to keep the double-blind anonymity required by RA 10173 (Data Privacy Act).",
   },
+  requireRegistrationApproval: {
+    label: "Require admin approval for new registrations",
+    description:
+      "When enabled, new learner and tutor accounts are created as PENDING and cannot log in until an admin approves them from the Registrations queue.",
+  },
 };
 
 export default function PlatformSettingsForm() {

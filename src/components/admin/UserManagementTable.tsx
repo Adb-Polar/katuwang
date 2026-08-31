@@ -42,6 +42,7 @@ const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
   ACTIVE: "success",
   SUSPENDED: "warning",
   BANNED: "error",
+  PENDING: "warning",
 };
 
 const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {

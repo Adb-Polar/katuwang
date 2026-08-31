@@ -323,21 +323,34 @@ shows readable charts that match the theme, with data tables available on demand
 
 **TODO item:** Tutor "is availability still needed?"
 
-**Goal:** Resolve the open question. The feature is currently self-contained and explicitly
-"informational only … isn't yet shown to learners".
+**Goal:** Resolve the open question.
 
-**Two options — pick at implementation time with the user:**
-- **Keep + wire it in:** surface tutor availability read-only on the learner-facing tutor
-  profile page (behind the same anonymity rules), and use it to enrich match ranking in
-  `/api/learner/match` (already reads learner `preferredSlots`; add tutor-availability
-  overlap as a `reasonChip`).
-- **Remove:** delete `src/app/tutor/availability/`, `src/components/tutor/
-  AvailabilityEditor.tsx`, `src/app/api/tutor/availability/route.ts`, the nav entry, and
-  (Chunk 10-style, needs confirmation) drop the `Availability` model + `TutorProfile.
-  availability` relation in a migration.
+**Decision (2026-08-30):** Remove the hand-maintained feature **and** replace it with an
+**auto-derived** weekly schedule computed from the tutor's upcoming `SCHEDULED`
+`ClassSession` rows. Scheduling sessions *is* how a tutor now signals availability.
 
-**Verification:** Depends on the choice; if kept, availability appears where intended; if
-removed, no dead nav entry / route / dangling model.
+**Done:**
+- Deleted `src/app/tutor/availability/`, `src/components/tutor/AvailabilityEditor.tsx`,
+  `src/app/api/tutor/availability/` (+ its test), and the "Availability" nav entry in
+  `src/app/tutor/layout.tsx`. Trimmed `src/lib/validations/availability.ts` to just the
+  shared slot schema still used by the matcher.
+- New `src/lib/derivedAvailability.ts` (`deriveWeeklyAvailability`): per-session
+  `day + start..(start+duration)` windows, overlapping/adjacent windows merged per weekday,
+  Monday-first order, past/cancelled/completed ignored. Unit-tested in
+  `src/lib/__tests__/derivedAvailability.test.ts`.
+- New read-only `src/components/tutor/WeeklyScheduleView.tsx`, rendered as
+  "Typical Weekly Schedule" on `/learner/tutors/[tutorId]` and "Your weekly schedule" on the
+  tutor dashboard (`/tutor`).
+- **Schema (confirmed):** dropped `model Availability` + `TutorProfile.availability`;
+  removed `seedAvailability` from `prisma/seed.ts`. Migration:
+  `prisma migrate dev --name drop_availability`.
+- Match ranking left unchanged — the matcher already scores a class's own sessions against
+  the learner's `preferredSlots` (`scheduleFit`), so tutor-availability overlap would be
+  redundant.
+
+**Verification:** No dead nav entry / route / model. Tutor with upcoming sessions shows a
+merged weekly schedule on their dashboard and their learner-facing profile; a tutor with no
+upcoming sessions shows the empty state.
 
 ---
 
@@ -371,6 +384,27 @@ tab (deferred from Chunk 8).
 **Verification:** Admin rejects a request → tutor sees "Rejected" + reason on the
 assessments page and in history; admin Rejected tab lists it; tutor can re-request.
 
+**Status (2026-08-30): DONE — migration `20260830000000_todo_cleanup_ch9_11` applied (with Ch9 + Ch11).**
+- Schema: added `REJECTED` to `TopicCertificationStatus`; added `reviewedAt DateTime?` and
+  `reviewNote String? @db.Text` to `TopicCertification`. `npx prisma generate` run (codegen
+  only), then a hand-authored migration applied via `prisma migrate deploy`.
+- `[certificationId]` PATCH: `REJECTED` now `update`s the row (`status`, `reviewedAt`,
+  `reviewNote`, `certifiedAt: null`) instead of deleting; audit `reason` = note. `CERTIFIED`
+  also stamps `reviewedAt`. `reviewCertificationSchema` accepts optional `reviewNote`.
+- `GET /api/admin/certifications`: `?status=REJECTED` works (enum), `sort=reviewed` added,
+  REJECTED tab defaults to `reviewedAt desc`.
+- `CertificationReviewTable`: Rejected tab (Reviewed date + Note columns), custom reject
+  modal with a feedback textarea.
+- `POST /api/tutor/topic-certifications`: fetch-first guard — `CERTIFIED` returns `200`
+  unchanged; `PENDING`/`REJECTED` reopen as `PENDING` with review fields cleared.
+- Tutor UI: `TopicCertificationList` + `AssessmentHistory` render an error-tone "Not Passed"
+  badge + reviewer feedback; "Request Again" on rejected rows. `useTopicCertifications`,
+  `assessments/page.tsx` carry `reviewedAt`/`reviewNote`.
+- Seed: two tutors' pending certs converted to `REJECTED` with notes.
+- Tests: cert `[id]` reject test rewritten for update-not-delete (+ null-note case); tutor
+  cert POST tests add findUnique mock + re-request/no-downgrade cases; admin cert GET adds
+  a `status=REJECTED` ordering test. `tsc` / `lint` / 262 tests green.
+
 ## Chunk 11 — Auto-generated class codes (`C-XXXX`)
 
 **TODO item:** Tutor "Classes should also have auto generate code like C-".
@@ -392,6 +426,28 @@ backfill existing rows with generated codes in the migration or a one-off script
 
 **Verification:** New class gets a unique `C-XXXX`; visible on cards/detail; searching the
 code finds the class; seed + backfill leave no null codes.
+
+**Status (2026-08-30): DONE — see migration `20260830000000_todo_cleanup_ch9_11`.**
+- Schema: `TutorClass.code String @unique` added; `IdCounter` comment notes the `"CLASS"`
+  role. `npx prisma generate` run (codegen only). **Migration NOT yet run.** Because `code`
+  is required + unique, a non-empty DB needs a backfill (`UPDATE tutor_classes SET code =
+  CONCAT('C-', LPAD(...))` keyed off a row number) **or** `prisma migrate reset` + reseed.
+- `src/lib/idGenerator.ts`: added `generateClassCode()` — atomic `idCounter.upsert` on the
+  `"CLASS"` row → `C-0001` (`padStart(4,"0")`). Unit-tested in
+  `src/lib/__tests__/idGenerator.test.ts` (also covers `generateAnonymousId`).
+- `POST /api/tutor/classes`: generates `code` before the `create` (not a transaction — same
+  pattern as `generateAnonymousId` in registration).
+- Search: `code` added to the `q` OR in `GET /api/classes` (learner browse) and
+  `GET /api/admin/classes`; placeholders updated.
+- UI: `code` prop added to `ClassCard` + `ClassDetailsView` (mono eyebrow above the
+  subject); passed at every call site (learner browse, match results, tutor list, learner
+  tutor-profile; learner/tutor/admin detail pages). `ClassModerationTable` shows it above
+  the subject in the row.
+- `prisma/seed.ts`: seed-local `nextClassCode()` assigns codes (curated classes first from
+  `C-0001`), then the `"CLASS"` `IdCounter` is set to the final count so API-created classes
+  continue the sequence.
+- Tests updated: tutor classes POST mocks `@/lib/idGenerator`; learner + admin classes
+  route tests assert `code` in the search `OR`. `tsc` / `lint` / 267 tests green.
 
 ## Chunk 12 — Backup / recovery email + password reset flow
 
@@ -417,6 +473,32 @@ code finds the class; seed + backfill leave no null codes.
 **Verification:** User sets a recovery email; "forgot password" with either address issues a
 token; reset link sets a new password and the token can't be reused; login works with the
 new password.
+
+**Status (2026-09-01): DONE — migration `20260831000000_password_recovery` applied.**
+- Schema: `User.recoveryEmail String?`; new `model PasswordResetToken`
+  (`id, userId → User onDelete Cascade, tokenHash @unique, expiresAt, usedAt?, createdAt`,
+  `@@index([userId])`, `@@map("password_reset_tokens")`). Hand-authored migration applied via
+  `prisma migrate deploy`; `npx prisma generate` run; no drift.
+- `src/lib/passwordReset.ts`: `generateResetToken()` (32-byte hex), `hashResetToken()`
+  (SHA-256 — only the hash is stored), `RESET_TOKEN_TTL_MS` = 30 min, `resetTokenExpiry()`.
+- `src/lib/validations/passwordReset.ts`: `forgotPasswordSchema` (email, primary or
+  recovery), `resetPasswordSchema` (token + password min 8).
+- `POST /api/auth/forgot-password`: looks up `email OR recoveryEmail`; for a non-BANNED
+  match, invalidates prior unused tokens then creates a new hashed one in a `$transaction`;
+  **always** returns the same neutral 200 (no user enumeration). No mailer configured —
+  `TODO(mail)`; reset link is `console.info`-logged for dev.
+- `POST /api/auth/reset-password`: validates token by hash, rejects used/expired,
+  `bcrypt.hash(pw, 12)`, marks `usedAt` (single-use) in a `$transaction`.
+- Pages: `src/app/forgot-password/page.tsx`, `src/app/reset-password/page.tsx` (+
+  `ForgotPasswordForm`, `ResetPasswordForm`); `LoginForm` "Forgot password?" link enabled →
+  `/forgot-password`.
+- Profile: `recoveryEmail` accepted by `updateProfileSchema` + learner/tutor profile PATCH.
+- Tests: `src/app/api/auth/forgot-password/__tests__/route.test.ts` +
+  `.../reset-password/__tests__/route.test.ts` (validation 400, hashed single-use token,
+  recovery-email match, neutral no-match, banned skip, used/expired reject, 500). `tsc` /
+  `lint` / 279 tests green.
+- **Not done:** no email transport (token only logged); no rate limiting on
+  `forgot-password`; reset works for SUSPENDED accounts (only BANNED excluded).
 
 ## Chunk 13 — User registration approval queue
 
@@ -445,6 +527,39 @@ decline reason. → **confirm, then migrate.**
 **Verification:** With the toggle on, a new registration cannot log in ("awaiting
 approval"); admin approves → user logs in; admin declines → user is blocked with the reason;
 audit log records both. With the toggle off, registration behaves as today.
+
+**Status (2026-09-01): DONE — migration `20260901000000_registration_approval` applied.**
+- Schema: `PENDING` added to `enum AccountStatus`. Hand-authored migration
+  (`ALTER TABLE users MODIFY status ENUM(...)`) applied via `prisma migrate deploy`;
+  `prisma generate` run; no drift.
+- Setting: `requireRegistrationApproval` (default `false`) added to
+  `PLATFORM_SETTING_KEYS` + `DEFAULTS` (`src/lib/settings.ts`),
+  `updatePlatformSettingSchema` enum, and `SETTING_META` in `PlatformSettingsForm`. No seed
+  row needed — `getSetting` falls back to the default.
+- `POST /api/register`: reads the setting once; when on, both learner and tutor helpers
+  create the user with `status: "PENDING"` and return `201 { message: <pending copy>,
+  pendingApproval: true }`.
+- `src/lib/auth.ts` `authorize`: `PENDING` accounts are blocked at login with
+  "awaiting admin approval" (mirrors SUSPENDED/BANNED).
+- New `GET /api/admin/registrations` — paginated (`registrations` key), `q` search over
+  name/email/anon ID, `status: "PENDING"`, oldest-first. New
+  `PATCH /api/admin/registrations/[userId]` — `{ decision: "APPROVE" | "DECLINE", reason? }`:
+  approve → `ACTIVE`, decline → `BANNED` + `statusReason`; both in a `$transaction` with an
+  `AuditLog` row (`USER_APPROVED` / `USER_DECLINED`). 404 for unknown user, 400 if the row
+  is not `PENDING`.
+- `src/lib/auditLog.ts`: `USER_APPROVED`, `USER_DECLINED` added; `AuditLogTable`
+  `ACTION_LABELS` gets "Registration Approved / Declined".
+- UI: new `src/app/admin/registrations/page.tsx` + `RegistrationApprovalTable.tsx`
+  (search, paginated table, inline Approve, Decline modal with reason). Nav entry
+  ("Registrations", `UserCheck` icon) in `src/app/admin/layout.tsx`. Admin dashboard
+  (`src/app/admin/page.tsx`) gets a "Pending registrations" count + link; its
+  "Flagged accounts" count now excludes `PENDING` (`notIn ["ACTIVE", "PENDING"]`).
+- Register → login handoff: `RegisterForm` appends `&pending=true`; `LoginForm` shows the
+  approval-pending message instead of the "please log in" one.
+- Tests: `src/app/api/admin/registrations/__tests__/route.test.ts` +
+  `.../[userId]/__tests__/route.test.ts` (401/404/400/approve/decline+audit/500); register
+  route test adds the approval-on PENDING path; `auth.test.ts` adds the PENDING block.
+  `tsc` / `lint` / 292 tests green.
 
 ---
 

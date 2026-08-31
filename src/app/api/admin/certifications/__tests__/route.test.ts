@@ -73,6 +73,20 @@ describe("GET /api/admin/certifications", () => {
     );
   });
 
+  it("lists REJECTED certifications ordered by review date", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindMany.mockResolvedValue([]);
+
+    await GET(makeRequest("?status=REJECTED"));
+
+    expect(topicCertificationFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ status: "REJECTED" }),
+        orderBy: { reviewedAt: "desc" },
+      })
+    );
+  });
+
   it("filters by status=CERTIFIED, subject and q", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     topicCertificationFindMany.mockResolvedValue([]);

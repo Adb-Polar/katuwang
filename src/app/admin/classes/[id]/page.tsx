@@ -57,6 +57,7 @@ export default async function AdminClassDetailPage({
     <div className="space-y-6">
       <ClassDetailsView
         backHref="/admin/classes"
+        code={tutorClass.code}
         subject={tutorClass.subject}
         topics={topics}
         verifiedTopics={verifiedTopics}

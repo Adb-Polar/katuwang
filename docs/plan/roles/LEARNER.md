@@ -96,6 +96,7 @@ Paginated class list for the learner. Requires `role === "STUDENT_LEARNER"` (els
 **Query params** (all optional): `scope` (`browse` | `mine`, default `browse`), `page` (default `1`), `pageSize` (default `12`, max `50`).
 - `scope=browse` → `SCHEDULED` + **published** classes with an upcoming `SCHEDULED` session that the learner is **not** enrolled in.
 - `scope=mine` → every class the learner is enrolled in, any status/published state.
+- `q` (browse only) → matches the class **code**, any topic, or the tutor's anonymous ID (`contains`). `subject` / `gradeLevel` narrow further. Each class carries a `code` (`C-XXXX`).
 
 **200**
 ```json

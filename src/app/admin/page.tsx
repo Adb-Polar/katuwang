@@ -17,13 +17,22 @@ function fmt(d: Date) {
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
 
-  const [learnerCount, tutorCount, flaggedAccountCount, activeClassCount, pendingCertCount, recentLogs] =
+  const [
+    learnerCount,
+    tutorCount,
+    flaggedAccountCount,
+    activeClassCount,
+    pendingCertCount,
+    pendingRegistrationCount,
+    recentLogs,
+  ] =
     await Promise.all([
       prisma.user.count({ where: { role: "STUDENT_LEARNER" } }),
       prisma.user.count({ where: { role: "STUDENT_TUTOR" } }),
-      prisma.user.count({ where: { status: { not: "ACTIVE" } } }),
+      prisma.user.count({ where: { status: { notIn: ["ACTIVE", "PENDING"] } } }),
       prisma.tutorClass.count({ where: { status: "SCHEDULED" } }),
       prisma.topicCertification.count({ where: { status: "PENDING" } }),
+      prisma.user.count({ where: { status: "PENDING" } }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: "desc" },
         take: 8,
@@ -39,6 +48,7 @@ export default async function AdminDashboard() {
     ]);
 
   const actions = [
+    { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations" },
     { label: "Pending certifications", value: pendingCertCount, href: "/admin/certifications" },
     { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users" },
     { label: "Active classes", value: activeClassCount, href: "/admin/classes" },

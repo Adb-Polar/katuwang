@@ -7,6 +7,7 @@ import { createClassSchema } from "@/lib/validations/class";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 import { getSetting } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
+import { generateClassCode } from "@/lib/idGenerator";
 
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -163,9 +164,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const code = await generateClassCode();
+
     const newClass = await prisma.tutorClass.create({
       data: {
         tutorProfileId: tutorProfile.id,
+        code,
         subject,
         gradeLevel: gradeLevel ?? null,
         topics: { create: topics.map((topic) => ({ topic })) },

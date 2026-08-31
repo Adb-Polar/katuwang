@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, Clock, UserCircle } from "lucide-react";
+import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, UserCircle } from "lucide-react";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const TUTOR_NAV_ITEMS: NavItem[] = [
@@ -10,7 +10,6 @@ const TUTOR_NAV_ITEMS: NavItem[] = [
   { label: "Students", href: "/tutor/students", icon: <Users className="w-4 h-4" /> },
   { label: "Requests", href: "/tutor/requests", icon: <Inbox className="w-4 h-4" /> },
   { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" /> },
-  { label: "Availability", href: "/tutor/availability", icon: <Clock className="w-4 h-4" /> },
   { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" /> },
 ];
 

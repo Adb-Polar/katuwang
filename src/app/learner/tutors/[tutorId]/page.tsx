@@ -7,6 +7,8 @@ import { getSetting } from "@/lib/settings";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import ClassCard from "@/components/classes/ClassCard";
+import WeeklyScheduleView from "@/components/tutor/WeeklyScheduleView";
+import { deriveWeeklyAvailability } from "@/lib/derivedAvailability";
 
 export const metadata = {
   title: "Tutor Profile | Katuwang",
@@ -59,6 +61,16 @@ export default async function LearnerTutorProfilePage({
   }
 
   const classes = tutor.tutorProfile.classes;
+
+  const scheduleSlots = deriveWeeklyAvailability(
+    classes.flatMap((c) =>
+      c.sessions.map((s) => ({
+        scheduledAt: s.scheduledAt,
+        duration: s.duration,
+        status: s.status,
+      }))
+    )
+  );
 
   return (
     <div className="space-y-6">
@@ -121,6 +133,19 @@ export default async function LearnerTutorProfilePage({
       </section>
 
       <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-2">
+          <h2 className="card-title text-sm font-bold">Typical Weekly Schedule</h2>
+          <p className="text-2xs text-base-content/50">
+            Automatically derived from this tutor&apos;s upcoming class sessions.
+          </p>
+          <WeeklyScheduleView
+            slots={scheduleSlots}
+            emptyMessage="This tutor has no upcoming sessions scheduled."
+          />
+        </div>
+      </section>
+
+      <section className="card bg-base-100 shadow-md border border-base-200">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Published Classes ({classes.length})</h2>
           {classes.length === 0 ? (
@@ -137,6 +162,7 @@ export default async function LearnerTutorProfilePage({
                 return (
                   <ClassCard
                     key={c.id}
+                    code={c.code}
                     subject={c.subject}
                     gradeLevel={c.gradeLevel}
                     topics={topics}

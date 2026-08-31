@@ -23,6 +23,7 @@ interface ClassSession {
 
 interface TutorClass {
   id: string;
+  code: string;
   subject: SubjectArea;
   gradeLevel: string | null;
   topics: string[];
@@ -90,7 +91,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                 <input
                   type="text"
                   className="grow"
-                  placeholder="Search subject or topic..."
+                  placeholder="Search code, subject, or topic..."
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                 />
@@ -159,6 +160,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                 {classes.map((c) => (
                   <ClassCard
                     key={c.id}
+                    code={c.code}
                     subject={c.subject}
                     gradeLevel={c.gradeLevel}
                     topics={c.topics}

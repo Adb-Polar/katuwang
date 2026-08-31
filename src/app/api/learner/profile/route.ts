@@ -21,15 +21,16 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { contactInfo, section } = result.data;
+    const { contactInfo, section, recoveryEmail } = result.data;
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
         ...(contactInfo !== undefined ? { contactInfo: contactInfo || null } : {}),
         ...(section !== undefined ? { section } : {}),
+        ...(recoveryEmail !== undefined ? { recoveryEmail: recoveryEmail || null } : {}),
       },
-      select: { contactInfo: true, section: true },
+      select: { contactInfo: true, section: true, recoveryEmail: true },
     });
 
     return NextResponse.json(updated);

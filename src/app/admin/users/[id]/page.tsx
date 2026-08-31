@@ -10,7 +10,12 @@ import StatusBadge from "@/components/ui/StatusBadge";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
-const STATUS_TONE = { ACTIVE: "success", SUSPENDED: "warning", BANNED: "error" } as const;
+const STATUS_TONE = {
+  ACTIVE: "success",
+  SUSPENDED: "warning",
+  BANNED: "error",
+  PENDING: "warning",
+} as const;
 
 function fmt(d: Date) {
   return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });

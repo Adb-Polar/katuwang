@@ -7,9 +7,11 @@ export interface TopicCertification {
   tutorProfileId: string;
   subject: SubjectArea;
   topic: string;
-  status: "PENDING" | "CERTIFIED";
+  status: "PENDING" | "CERTIFIED" | "REJECTED";
   requestedAt: string;
   certifiedAt: string | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
 }
 
 export function useTopicCertifications() {

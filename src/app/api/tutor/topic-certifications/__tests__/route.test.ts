@@ -5,12 +5,14 @@ const {
   getServerSessionMock,
   tutorProfileFindUnique,
   topicCertificationFindMany,
+  topicCertificationFindUnique,
   topicCertificationUpsert,
   tutorClassFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
   topicCertificationFindMany: vi.fn(),
+  topicCertificationFindUnique: vi.fn(),
   topicCertificationUpsert: vi.fn(),
   tutorClassFindMany: vi.fn(),
 }));
@@ -22,7 +24,11 @@ vi.mock("next-auth", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
-    topicCertification: { findMany: topicCertificationFindMany, upsert: topicCertificationUpsert },
+    topicCertification: {
+      findMany: topicCertificationFindMany,
+      findUnique: topicCertificationFindUnique,
+      upsert: topicCertificationUpsert,
+    },
     tutorClass: { findMany: tutorClassFindMany },
   },
 }));
@@ -138,9 +144,10 @@ describe("POST /api/tutor/topic-certifications", () => {
     expect(topicCertificationUpsert).not.toHaveBeenCalled();
   });
 
-  it("upserts a PENDING certification request", async () => {
+  it("upserts a PENDING certification request when none exists yet", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicCertificationFindUnique.mockResolvedValue(null);
     topicCertificationUpsert.mockResolvedValue({
       id: "c1",
       tutorProfileId: "tp1",
@@ -159,7 +166,31 @@ describe("POST /api/tutor/topic-certifications", () => {
           tutorProfileId_subject_topic: { tutorProfileId: "tp1", subject: "MATH", topic: "Algebraic Expressions" },
         },
         create: expect.objectContaining({ status: "PENDING" }),
+        update: expect.objectContaining({ status: "PENDING", reviewedAt: null, reviewNote: null }),
       })
     );
+  });
+
+  it("re-opens a REJECTED certification as PENDING", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicCertificationFindUnique.mockResolvedValue({ status: "REJECTED" });
+    topicCertificationUpsert.mockResolvedValue({ id: "c1", status: "PENDING" });
+
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions" }));
+    expect(res.status).toBe(201);
+    expect(topicCertificationUpsert).toHaveBeenCalled();
+  });
+
+  it("does not downgrade a CERTIFIED certification", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicCertificationFindUnique.mockResolvedValue({ status: "CERTIFIED" });
+
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions" }));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.status).toBe("CERTIFIED");
+    expect(topicCertificationUpsert).not.toHaveBeenCalled();
   });
 });

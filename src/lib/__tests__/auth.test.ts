@@ -143,6 +143,24 @@ describe("auth authorize()", () => {
     expect(userUpdate).not.toHaveBeenCalled();
   });
 
+  it("throws when the account is awaiting approval", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "PENDING",
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow(/awaiting admin approval/i);
+  });
+
   it("throws when the account is banned", async () => {
     userFindUnique.mockResolvedValue({
       id: "1",

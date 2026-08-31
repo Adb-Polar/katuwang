@@ -21,6 +21,13 @@ export const commonRegisterSchema = z.object({
     .toLowerCase()
     .pipe(z.string().email("Invalid email address.")),
   password: z.string().min(8, "Password must be at least 8 characters."),
+  recoveryEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.string().email("Invalid recovery email address."))
+    .optional()
+    .or(z.literal("")),
   gradeLevel: z.nativeEnum(GradeLevel, {
     message: "Invalid grade level.",
   }),

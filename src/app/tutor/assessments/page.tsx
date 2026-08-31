@@ -52,6 +52,8 @@ export default async function TutorAssessmentsPage() {
     status: c.status,
     requestedAt: c.requestedAt.toISOString(),
     certifiedAt: c.certifiedAt ? c.certifiedAt.toISOString() : null,
+    reviewedAt: c.reviewedAt ? c.reviewedAt.toISOString() : null,
+    reviewNote: c.reviewNote ?? null,
     usedInClasses: classesByTopic.get(`${c.subject}::${c.topic}`) ?? [],
   }));
 
@@ -69,6 +71,7 @@ export default async function TutorAssessmentsPage() {
           subject: c.subject,
           topic: c.topic,
           status: c.status,
+          reviewNote: c.reviewNote ?? null,
         }))}
         certificationDetails={certificationDetails}
       />

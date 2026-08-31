@@ -15,6 +15,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Registration is currently closed." }, { status: 403 });
     }
 
+    const requireApproval = await getSetting("requireRegistrationApproval");
+
     const body = await req.json();
 
     // Validate request body using Zod schema
@@ -28,9 +30,9 @@ export async function POST(req: NextRequest) {
     const data = result.data;
 
     if (data.type === "LEARNER") {
-      return await registerLearner(data);
+      return await registerLearner(data, requireApproval);
     } else {
-      return await registerTutor(data);
+      return await registerTutor(data, requireApproval);
     }
   } catch (error) {
     console.error("Registration error:", error);
@@ -43,7 +45,10 @@ export async function POST(req: NextRequest) {
 
 // ─── Learner Registration Helper ──────────────────────────────────────────────
 
-async function registerLearner(data: LearnerRegisterInput) {
+const PENDING_MESSAGE =
+  "Registration received. An administrator needs to approve your account before you can sign in.";
+
+async function registerLearner(data: LearnerRegisterInput, requireApproval = false) {
   const {
     firstName,
     lastName,
@@ -83,6 +88,7 @@ async function registerLearner(data: LearnerRegisterInput) {
       section,
       contactInfo: contactInfo || null,
       consentGiven,
+      ...(requireApproval ? { status: "PENDING" as const } : {}),
     },
     select: {
       anonymousId: true,
@@ -93,8 +99,9 @@ async function registerLearner(data: LearnerRegisterInput) {
 
   return NextResponse.json(
     {
-      message: "Registration successful.",
+      message: requireApproval ? PENDING_MESSAGE : "Registration successful.",
       anonymousId: user.anonymousId,
+      pendingApproval: requireApproval,
     },
     { status: 201 }
   );
@@ -102,7 +109,7 @@ async function registerLearner(data: LearnerRegisterInput) {
 
 // ─── Tutor Registration Helper ────────────────────────────────────────────────
 
-async function registerTutor(data: TutorRegisterInput) {
+async function registerTutor(data: TutorRegisterInput, requireApproval = false) {
   const {
     firstName,
     lastName,
@@ -143,6 +150,7 @@ async function registerTutor(data: TutorRegisterInput) {
         section,
         contactInfo: contactInfo || null,
         consentGiven,
+        ...(requireApproval ? { status: "PENDING" as const } : {}),
         tutorProfile: {
           create: {},
         },
@@ -159,9 +167,11 @@ async function registerTutor(data: TutorRegisterInput) {
 
   return NextResponse.json(
     {
-      message:
-        "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.",
+      message: requireApproval
+        ? PENDING_MESSAGE
+        : "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.",
       anonymousId: user.anonymousId,
+      pendingApproval: requireApproval,
     },
     { status: 201 }
   );

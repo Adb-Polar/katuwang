@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
       ...(q
         ? {
             OR: [
+              { code: { contains: q } },
               { topics: { some: { topic: { contains: q } } } },
               { tutorProfile: { user: { anonymousId: { contains: q } } } },
             ],

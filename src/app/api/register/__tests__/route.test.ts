@@ -132,6 +132,29 @@ describe("POST /api/register", () => {
     expect(json.anonymousId).toBe("TUT-0001");
   });
 
+  it("creates a PENDING learner when approval is required", async () => {
+    platformSettingFindUnique.mockImplementation(({ where }: { where: { key: string } }) =>
+      where.key === "requireRegistrationApproval" ? { key: where.key, value: "true" } : null
+    );
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({
+      anonymousId: "STU-0001",
+      email: validLearner.email,
+      role: "STUDENT_LEARNER",
+    });
+
+    const res = await POST(makeRequest(validLearner));
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.pendingApproval).toBe(true);
+    expect(json.message).toMatch(/administrator/i);
+    expect(userCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ status: "PENDING" }),
+      })
+    );
+  });
+
   it("returns 500 when an unexpected error occurs", async () => {
     userFindUnique.mockRejectedValue(new Error("DB down"));
 

@@ -56,6 +56,7 @@ export default async function LearnerClassDetailPage({
   return (
     <ClassDetailsView
       backHref="/learner/classes"
+      code={tutorClass.code}
       subject={tutorClass.subject}
       topics={tutorClass.topics.map((t) => t.topic)}
       verifiedTopics={verifiedTopics}

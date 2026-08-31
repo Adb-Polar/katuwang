@@ -22,6 +22,8 @@ const ACTION_LABELS: Record<string, string> = {
   CLASS_STATUS_CHANGE: "Class Status Changed",
   CERTIFICATION_APPROVED: "Certification Approved",
   CERTIFICATION_REJECTED: "Certification Rejected",
+  USER_APPROVED: "Registration Approved",
+  USER_DECLINED: "Registration Declined",
 };
 
 const PAGE_SIZE = 25;

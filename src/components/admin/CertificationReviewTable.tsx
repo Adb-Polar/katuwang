@@ -25,14 +25,20 @@ interface Certification {
   id: string;
   subject: SubjectArea;
   topic: string;
-  status: "PENDING" | "CERTIFIED";
+  status: "PENDING" | "CERTIFIED" | "REJECTED";
   requestedAt: string;
   certifiedAt: string | null;
+  reviewedAt: string | null;
+  reviewNote: string | null;
   tutor: Tutor;
 }
 
-type Tab = "pending" | "certified";
-const TAB_STATUS: Record<Tab, string> = { pending: "PENDING", certified: "CERTIFIED" };
+type Tab = "pending" | "certified" | "rejected";
+const TAB_STATUS: Record<Tab, string> = {
+  pending: "PENDING",
+  certified: "CERTIFIED",
+  rejected: "REJECTED",
+};
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -52,6 +58,7 @@ export default function CertificationReviewTable() {
   const [success, setSuccess] = useState("");
   const [approveTarget, setApproveTarget] = useState<Certification | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Certification | null>(null);
+  const [rejectNote, setRejectNote] = useState("");
   const [saving, setSaving] = useState(false);
 
   const {
@@ -79,13 +86,17 @@ export default function CertificationReviewTable() {
     "certs"
   );
 
-  const review = async (certification: Certification, status: "CERTIFIED" | "REJECTED") => {
+  const review = async (
+    certification: Certification,
+    status: "CERTIFIED" | "REJECTED",
+    note?: string
+  ) => {
     setSaving(true);
     try {
       const res = await fetch(`/api/admin/certifications/${certification.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...(note?.trim() ? { reviewNote: note.trim() } : {}) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to review certification.");
@@ -97,6 +108,7 @@ export default function CertificationReviewTable() {
       );
       setApproveTarget(null);
       setRejectTarget(null);
+      setRejectNote("");
       refetch();
       setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
@@ -105,6 +117,8 @@ export default function CertificationReviewTable() {
       setSaving(false);
     }
   };
+
+  const dateLabel = tab === "certified" ? "Certified" : tab === "rejected" ? "Reviewed" : "Requested";
 
   return (
     <div className="space-y-6">
@@ -119,6 +133,7 @@ export default function CertificationReviewTable() {
             tabs={[
               { key: "pending", label: "Pending" },
               { key: "certified", label: "Certified" },
+              { key: "rejected", label: "Rejected" },
             ]}
             active={tab}
             onChange={(key) => setTab(key as Tab)}
@@ -151,6 +166,7 @@ export default function CertificationReviewTable() {
             >
               <option value="requested">Sort: Requested date</option>
               <option value="certified">Sort: Certified date</option>
+              <option value="reviewed">Sort: Reviewed date</option>
               <option value="subject">Sort: Subject</option>
             </select>
           </div>
@@ -167,7 +183,8 @@ export default function CertificationReviewTable() {
                     <th>Tutor</th>
                     <th>Subject</th>
                     <th>Topic</th>
-                    <th>{tab === "certified" ? "Certified" : "Requested"}</th>
+                    <th>{dateLabel}</th>
+                    {tab === "rejected" && <th>Note</th>}
                     {tab === "pending" && <th></th>}
                   </tr>
                 </thead>
@@ -187,8 +204,17 @@ export default function CertificationReviewTable() {
                           ? c.certifiedAt
                             ? fmt(c.certifiedAt)
                             : "—"
+                          : tab === "rejected"
+                          ? c.reviewedAt
+                            ? fmt(c.reviewedAt)
+                            : "—"
                           : fmt(c.requestedAt)}
                       </td>
+                      {tab === "rejected" && (
+                        <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
+                          {c.reviewNote || <span className="text-base-content/30 italic">No note</span>}
+                        </td>
+                      )}
                       {tab === "pending" && (
                         <td className="flex gap-2 justify-end">
                           <button
@@ -198,7 +224,10 @@ export default function CertificationReviewTable() {
                             Approve
                           </button>
                           <button
-                            onClick={() => setRejectTarget(c)}
+                            onClick={() => {
+                              setRejectNote("");
+                              setRejectTarget(c);
+                            }}
                             className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
                           >
                             Reject
@@ -213,6 +242,8 @@ export default function CertificationReviewTable() {
                 <div className="text-center py-8 text-base-content/40 italic text-sm">
                   {tab === "certified"
                     ? "No certified topics match these filters."
+                    : tab === "rejected"
+                    ? "No rejected certification requests match these filters."
                     : "No pending certification requests."}
                 </div>
               )}
@@ -244,20 +275,50 @@ export default function CertificationReviewTable() {
         onCancel={() => setApproveTarget(null)}
       />
 
-      <ConfirmDialog
-        open={rejectTarget !== null}
-        title="Reject this certification request?"
-        description={
-          rejectTarget
-            ? `The request for "${rejectTarget.topic}" will be removed. The tutor may request it again.`
-            : undefined
-        }
-        confirmLabel="Reject"
-        tone="danger"
-        loading={saving}
-        onConfirm={() => rejectTarget && review(rejectTarget, "REJECTED")}
-        onCancel={() => setRejectTarget(null)}
-      />
+      {rejectTarget && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl shadow-xl space-y-3">
+            <h3 className="font-semibold text-sm text-base-content">Reject this certification request?</h3>
+            <p className="text-xs text-base-content/60">
+              The request for &quot;{rejectTarget.topic}&quot; will be marked <strong>Rejected</strong>. The tutor
+              can see the outcome and may request it again.
+            </p>
+            <label className="form-control">
+              <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
+                Feedback for the tutor (optional)
+              </span>
+              <textarea
+                value={rejectNote}
+                onChange={(e) => setRejectNote(e.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder="e.g. Re-take after reviewing quadratic factoring."
+                className="textarea textarea-bordered text-xs w-full focus:textarea-primary"
+              />
+            </label>
+            <div className="modal-action pt-1">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setRejectTarget(null)}
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-error btn-sm"
+                onClick={() => review(rejectTarget, "REJECTED", rejectNote)}
+                disabled={saving}
+              >
+                {saving && <span className="loading loading-spinner loading-xs" />}
+                Reject
+              </button>
+            </div>
+          </div>
+          <label className="modal-backdrop" onClick={() => setRejectTarget(null)} aria-label="Close" />
+        </div>
+      )}
     </div>
   );
 }

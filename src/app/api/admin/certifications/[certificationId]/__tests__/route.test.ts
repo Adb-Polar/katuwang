@@ -102,15 +102,23 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
     );
   });
 
-  it("rejects a pending request by deleting it", async () => {
+  it("rejects a pending request by setting status REJECTED with reviewedAt and note", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING" });
-    topicCertificationDelete.mockResolvedValue({ id: "c1", status: "PENDING" });
+    topicCertificationUpdate.mockResolvedValue({ id: "c1", status: "REJECTED", reviewNote: "Re-take it" });
 
-    const res = await patch({ status: "REJECTED" });
+    const res = await patch({ status: "REJECTED", reviewNote: "Re-take it" });
     expect(res.status).toBe(200);
-    expect(topicCertificationDelete).toHaveBeenCalledWith({ where: { id: "c1" } });
-    expect(topicCertificationUpdate).not.toHaveBeenCalled();
+    const json = await res.json();
+    expect(json.status).toBe("REJECTED");
+    expect(topicCertificationDelete).not.toHaveBeenCalled();
+    expect(topicCertificationUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "c1" },
+        data: expect.objectContaining({ status: "REJECTED", reviewNote: "Re-take it" }),
+      })
+    );
+    expect(topicCertificationUpdate.mock.calls[0][0].data.reviewedAt).toBeInstanceOf(Date);
     expect(auditLogCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
@@ -118,8 +126,21 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
           action: "CERTIFICATION_REJECTED",
           targetType: "CERTIFICATION",
           targetId: "c1",
+          reason: "Re-take it",
         }),
       })
+    );
+  });
+
+  it("rejects with a null note when none is supplied", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING" });
+    topicCertificationUpdate.mockResolvedValue({ id: "c1", status: "REJECTED" });
+
+    const res = await patch({ status: "REJECTED" });
+    expect(res.status).toBe(200);
+    expect(topicCertificationUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: "REJECTED", reviewNote: null }) })
     );
   });
 });

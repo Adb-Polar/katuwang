@@ -77,6 +77,10 @@ function pad(n: number, width = 3) {
   return String(n).padStart(width, "0");
 }
 
+// Sequential class codes (mirrors generateClassCode in src/lib/idGenerator.ts).
+let classCodeSeq = 0;
+const nextClassCode = () => `C-${pad(++classCodeSeq, 4)}`;
+
 // ─── Anonymous ID helper (mirrors src/lib/idGenerator.ts) ─────────────────────
 
 async function nextAnonymousId(role: "TUTOR" | "LEARNER"): Promise<string> {
@@ -96,7 +100,13 @@ interface TutorSeed {
   lastName: string;
   gradeLevel: GradeLevel;
   section: string;
-  topicCertifications: { subject: SubjectArea; topic: string; certified: boolean }[];
+  topicCertifications: {
+    subject: SubjectArea;
+    topic: string;
+    certified: boolean;
+    rejected?: boolean;
+    reviewNote?: string;
+  }[];
 }
 
 interface LearnerSeed {
@@ -127,7 +137,13 @@ const TUTORS: TutorSeed[] = [
     section: "Bonifacio",
     topicCertifications: [
       { subject: "ENGLISH", topic: "Essay & Paragraph Writing", certified: true },
-      { subject: "ENGLISH", topic: "Grammar & Sentence Structure", certified: false },
+      {
+        subject: "ENGLISH",
+        topic: "Grammar & Sentence Structure",
+        certified: false,
+        rejected: true,
+        reviewNote: "Re-take after reviewing subject–verb agreement and clause structure.",
+      },
     ],
   },
   {
@@ -156,7 +172,15 @@ const TUTORS: TutorSeed[] = [
     lastName: "Fernandez",
     gradeLevel: "GRADE_11",
     section: "Luna",
-    topicCertifications: [{ subject: "MAPEH", topic: "Physical Education & Sports", certified: false }],
+    topicCertifications: [
+      {
+        subject: "MAPEH",
+        topic: "Physical Education & Sports",
+        certified: false,
+        rejected: true,
+        reviewNote: "Assessment incomplete — please resubmit with the practical component.",
+      },
+    ],
   },
   {
     // Stable demo account for walkthroughs/screenshots — kept last so its anonymous ID doesn't shift the others.
@@ -218,18 +242,23 @@ async function ensureTutorProfile(userId: string, topicCertifications: TutorSeed
   });
 
   for (const tc of topicCertifications) {
-    const status = tc.certified ? "CERTIFIED" : "PENDING";
+    const status = tc.certified ? "CERTIFIED" : tc.rejected ? "REJECTED" : "PENDING";
+    const certifiedAt = tc.certified ? new Date() : null;
+    const reviewedAt = tc.certified || tc.rejected ? new Date() : null;
+    const reviewNote = tc.rejected ? tc.reviewNote ?? null : null;
     await prisma.topicCertification.upsert({
       where: {
         tutorProfileId_subject_topic: { tutorProfileId: profile.id, subject: tc.subject, topic: tc.topic },
       },
-      update: { status, certifiedAt: tc.certified ? new Date() : null },
+      update: { status, certifiedAt, reviewedAt, reviewNote },
       create: {
         tutorProfileId: profile.id,
         subject: tc.subject,
         topic: tc.topic,
         status,
-        certifiedAt: tc.certified ? new Date() : null,
+        certifiedAt,
+        reviewedAt,
+        reviewNote,
       },
     });
   }
@@ -481,22 +510,6 @@ function genLearnerSeeds(count: number): LearnerSeed[] {
   }));
 }
 
-async function seedAvailability(profileId: string) {
-  await prisma.availability.deleteMany({ where: { tutorProfileId: profileId } });
-  const days = rand.sample(WEEKDAYS, rand.int(2, 5));
-  await prisma.availability.createMany({
-    data: days.map((day) => {
-      const start = rand.int(8, 17);
-      return {
-        tutorProfileId: profileId,
-        day,
-        startTime: `${pad(start, 2)}:00`,
-        endTime: `${pad(Math.min(20, start + rand.int(1, 3)), 2)}:00`,
-      };
-    }),
-  });
-}
-
 interface GeneratedClass {
   id: string;
   subject: SubjectArea;
@@ -547,6 +560,7 @@ async function createGeneratedClass(
   const created = await prisma.tutorClass.create({
     data: {
       tutorProfileId: profileId,
+      code: nextClassCode(),
       subject,
       gradeLevel: rand.chance(0.5) ? rand.pick(ALL_GRADES) : null,
       description: `${subject} session on ${topics.join(", ")}.`,
@@ -577,6 +591,12 @@ async function main() {
     where: { role: "LEARNER" },
     update: {},
     create: { role: "LEARNER", count: 0 },
+  });
+
+  await prisma.idCounter.upsert({
+    where: { role: "CLASS" },
+    update: {},
+    create: { role: "CLASS", count: 0 },
   });
 
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
@@ -655,6 +675,7 @@ async function main() {
     await prisma.tutorClass.create({
       data: {
         tutorProfileId: tutorProfile.id,
+        code: nextClassCode(),
         subject: c.subject,
         gradeLevel: c.gradeLevel ?? null,
         description: c.description,
@@ -689,8 +710,12 @@ async function main() {
     }
   }
 
-  // ── Weekly availability for every seeded tutor ──
-  for (const profileId of allProfileIds) await seedAvailability(profileId);
+  // Keep the "CLASS" counter ahead of every seeded code so API-created classes continue the sequence.
+  await prisma.idCounter.upsert({
+    where: { role: "CLASS" },
+    create: { role: "CLASS", count: classCodeSeq },
+    update: { count: classCodeSeq },
+  });
 
   // ── Procedurally generated topic requests ──
   const scheduledClasses = generatedClasses.filter((c) => c.status === "SCHEDULED");

@@ -13,7 +13,8 @@ export interface TaughtTopic {
 export interface TopicCertificationEntry {
   subject: SubjectArea;
   topic: string;
-  status: "PENDING" | "CERTIFIED";
+  status: "PENDING" | "CERTIFIED" | "REJECTED";
+  reviewNote?: string | null;
 }
 
 function keyOf(subject: string, topic: string) {
@@ -27,8 +28,8 @@ export default function TopicCertificationList({
   taughtTopics: TaughtTopic[];
   initialCertifications: TopicCertificationEntry[];
 }) {
-  const [certifications, setCertifications] = useState<Map<string, TopicCertificationEntry["status"]>>(
-    () => new Map(initialCertifications.map((c) => [keyOf(c.subject, c.topic), c.status]))
+  const [certifications, setCertifications] = useState<Map<string, TopicCertificationEntry>>(
+    () => new Map(initialCertifications.map((c) => [keyOf(c.subject, c.topic), c]))
   );
   const [requesting, setRequesting] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -45,7 +46,9 @@ export default function TopicCertificationList({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to request assessment.");
-      setCertifications((prev) => new Map(prev).set(key, data.status));
+      setCertifications((prev) =>
+        new Map(prev).set(key, { subject, topic, status: data.status, reviewNote: data.reviewNote ?? null })
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to request assessment.");
     } finally {
@@ -66,36 +69,49 @@ export default function TopicCertificationList({
       <FeedbackBanner variant="error" message={error || null} />
       {taughtTopics.map(({ subject, topic }) => {
         const key = keyOf(subject, topic);
-        const status = certifications.get(key);
+        const entry = certifications.get(key);
+        const status = entry?.status;
 
         return (
           <div
             key={key}
-            className="flex items-center justify-between p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs gap-3"
+            className="flex flex-col gap-2 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
           >
-            <div className="min-w-0">
-              <div className="font-semibold text-base-content/80 truncate">{topic}</div>
-              <div className="text-2xs text-base-content/50">{subject}</div>
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-semibold text-base-content/80 truncate">{topic}</div>
+                <div className="text-2xs text-base-content/50">{subject}</div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {status === "CERTIFIED" ? (
+                  <StatusBadge tone="success" label="Verified" size="xs" />
+                ) : status === "PENDING" ? (
+                  <StatusBadge tone="warning" label="Assessment Pending" size="xs" />
+                ) : (
+                  <>
+                    {status === "REJECTED" && <StatusBadge tone="error" label="Not Passed" size="xs" />}
+                    <button
+                      onClick={() => handleRequest(subject, topic)}
+                      disabled={requesting === key}
+                      className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                    >
+                      {requesting === key ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : status === "REJECTED" ? (
+                        "Request Again"
+                      ) : (
+                        "Request Assessment"
+                      )}
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              {status === "CERTIFIED" ? (
-                <StatusBadge tone="success" label="Verified" size="xs" />
-              ) : status === "PENDING" ? (
-                <StatusBadge tone="warning" label="Assessment Pending" size="xs" />
-              ) : (
-                <button
-                  onClick={() => handleRequest(subject, topic)}
-                  disabled={requesting === key}
-                  className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
-                >
-                  {requesting === key ? (
-                    <span className="loading loading-spinner loading-xs"></span>
-                  ) : (
-                    "Request Assessment"
-                  )}
-                </button>
-              )}
-            </div>
+            {status === "REJECTED" && entry?.reviewNote && (
+              <p className="text-2xs text-error/80 bg-error/5 border border-error/20 rounded-lg px-2 py-1.5">
+                <span className="font-semibold">Reviewer feedback:</span> {entry.reviewNote}
+              </p>
+            )}
           </div>
         );
       })}

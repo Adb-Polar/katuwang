@@ -10,6 +10,7 @@ interface SessionLike {
 }
 
 export default function ClassCard({
+  code,
   subject,
   gradeLevel,
   topics,
@@ -25,6 +26,8 @@ export default function ClassCard({
   onClick,
   href,
 }: {
+  /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow when set. */
+  code?: string | null;
   subject: string;
   /** Optional target grade (e.g. "GRADE_9"); shown as a badge when set. */
   gradeLevel?: string | null;
@@ -82,6 +85,11 @@ export default function ClassCard({
     <>
       <div className="flex justify-between items-start gap-2">
         <div className="min-w-0">
+          {code && (
+            <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
+              {code}
+            </p>
+          )}
           <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subject}</h3>
           {gradeLevel && (
             <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">

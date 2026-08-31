@@ -96,15 +96,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const certification = await prisma.topicCertification.upsert({
-      where: {
-        tutorProfileId_subject_topic: {
-          tutorProfileId: tutorProfile.id,
-          subject,
-          topic,
-        },
+    const key = {
+      tutorProfileId_subject_topic: {
+        tutorProfileId: tutorProfile.id,
+        subject,
+        topic,
       },
-      update: {},
+    };
+
+    const existing = await prisma.topicCertification.findUnique({
+      where: key,
+      select: { status: true },
+    });
+
+    // Already certified → idempotent no-op, never downgrade an earned badge.
+    if (existing?.status === "CERTIFIED") {
+      return NextResponse.json(existing, { status: 200 });
+    }
+
+    // New request, or re-requesting after a PENDING/REJECTED outcome → (re)open as PENDING.
+    const certification = await prisma.topicCertification.upsert({
+      where: key,
+      update: {
+        status: "PENDING",
+        requestedAt: new Date(),
+        reviewedAt: null,
+        reviewNote: null,
+        certifiedAt: null,
+      },
       create: {
         tutorProfileId: tutorProfile.id,
         subject,

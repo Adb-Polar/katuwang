@@ -75,6 +75,17 @@ describe("GET /api/admin/classes", () => {
     );
   });
 
+  it("matches the class code in the q search", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+
+    await GET(makeRequest("?q=C-0007"));
+    const where = findManyMock.mock.calls[0][0].where;
+    expect(where.OR).toEqual(
+      expect.arrayContaining([{ code: { contains: "C-0007" } }])
+    );
+  });
+
   it("orders by createdAt since classes no longer have a single scheduledAt", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     findManyMock.mockResolvedValue([]);

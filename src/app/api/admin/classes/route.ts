@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
       ...(q
         ? {
             OR: [
+              { code: { contains: q } },
               { topics: { some: { topic: { contains: q } } } },
               { tutorProfile: { user: { firstName: { contains: q } } } },
               { tutorProfile: { user: { lastName: { contains: q } } } },

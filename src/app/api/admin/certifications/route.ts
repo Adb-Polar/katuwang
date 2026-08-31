@@ -48,6 +48,10 @@ export async function GET(req: NextRequest) {
         ? { subject: "asc" }
         : sort === "certified"
         ? { certifiedAt: "desc" }
+        : sort === "reviewed"
+        ? { reviewedAt: "desc" }
+        : status === "REJECTED"
+        ? { reviewedAt: "desc" }
         : { requestedAt: status === "CERTIFIED" ? "desc" : "asc" };
 
     const [rows, total] = await Promise.all([

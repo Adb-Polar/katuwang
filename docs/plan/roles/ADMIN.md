@@ -19,7 +19,7 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 
 ## Class Moderation (`/admin/classes`)
 
-- **List & search all tutor classes** platform-wide — paginated, filterable by subject and status, free-text search across topic, tutor first/last name, and tutor anonymous ID.
+- **List & search all tutor classes** platform-wide — paginated, filterable by subject and status, free-text search across class code, topic, tutor first/last name, and tutor anonymous ID. Each row shows the class code above the subject.
   (`GET /api/admin/classes`)
 - **Suspend a class** — only a `SCHEDULED` class can be suspended; requires a reason and optional duration (auto-reinstates when the duration elapses, see `reinstateExpiredClasses`).
 - **Ban a class** — a `SCHEDULED` or `SUSPENDED` class can be banned (indefinite, with a reason); the owning tutor can no longer modify it.
@@ -29,12 +29,12 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 
 ## Tutor Certification Review (`/admin/certifications`)
 
-- **View pending topic certification requests** — every `PENDING` `TopicCertification` a tutor has requested, including the requesting tutor's anonymized + real identity (admin-only view retains real names for accountability).
-  (`GET /api/admin/certifications`)
-- **Approve a certification request** — marks the request `CERTIFIED` and stamps `certifiedAt`. Certified tutors are trusted to teach that specific topic (used to gate class creation when `requireCertificationForClassCreation` is enabled).
-- **Reject a certification request** — deletes the pending request outright.
+- **Review topic certification requests** — Pending / Certified / Rejected tabs, with topic + tutor-ID search, subject filter, sort, and pagination. Each row shows the requesting tutor's anonymized + real identity (admin-only view retains real names for accountability).
+  (`GET /api/admin/certifications?status=&q=&subject=&sort=&page=&pageSize=`)
+- **Approve a certification request** — marks the request `CERTIFIED`, stamps `certifiedAt` + `reviewedAt`. Certified tutors are trusted to teach that specific topic (used to gate class creation when `requireCertificationForClassCreation` is enabled).
+- **Reject a certification request** — marks the request `REJECTED`, stamps `reviewedAt`, and stores an optional `reviewNote` (feedback shown to the tutor). The row is kept (not deleted); the tutor can re-request, which reopens it as `PENDING`.
   (`PATCH /api/admin/certifications/[certificationId]`)
-- Certification decisions are recorded in the audit log.
+- Certification decisions are recorded in the audit log (the rejection note is copied to the log `reason`).
 
 ## Platform Settings (`/admin/settings`)
 
@@ -117,9 +117,12 @@ Suspend, ban, or reinstate a class.
 **500** → `{ error }`.
 
 ### `GET /api/admin/certifications`
-List all `PENDING` topic certification requests.
+List topic certification requests, filtered/sorted/paginated.
 
-**200** → array of `{ ...TopicCertification, tutor: { id, anonymousId, firstName, lastName, email } }` (real identity included — admin-only accountability view), ordered oldest-requested-first.
+**Query params** (all optional): `status` (`PENDING` default / `CERTIFIED` / `REJECTED`), `q` (topic or tutor `anonymousId`, `contains`), `subject` (`SubjectArea`), `sort` (`requested` default / `certified` / `reviewed` / `subject`), `page` (default `1`), `pageSize` (default `10`, max `100`).
+
+**200** → `{ certifications: [{ ...TopicCertification, tutor: { id, anonymousId, firstName, lastName, email } }], total, page, pageSize }` (real identity included — admin-only accountability view). `REJECTED` defaults to newest-reviewed-first.
+**401** → not an admin.
 **500** → `{ error }`.
 
 ### `PATCH /api/admin/certifications/[certificationId]`
@@ -127,13 +130,14 @@ Approve or reject a pending certification request.
 
 **Body**
 ```json
-{ "status": "CERTIFIED" | "REJECTED" }
+{ "status": "CERTIFIED" | "REJECTED", "reviewNote": "optional feedback (<=500 chars)" }
 ```
-- `CERTIFIED` → updates the record, stamps `certifiedAt`, logs `CERTIFICATION_APPROVED`.
-- `REJECTED` → deletes the record outright, logs `CERTIFICATION_REJECTED`.
+- `CERTIFIED` → sets `status`, stamps `certifiedAt` + `reviewedAt`, clears `reviewNote`, logs `CERTIFICATION_APPROVED`.
+- `REJECTED` → sets `status`, stamps `reviewedAt`, stores `reviewNote` (or `null`), clears `certifiedAt`, logs `CERTIFICATION_REJECTED` with the note as `reason`. The row is retained.
 
-**200** → the updated (or deleted) `TopicCertification`.
+**200** → the updated `TopicCertification`.
 **400** → certification is not `PENDING`, or failed validation.
+**401** → not an admin.
 **404** → certification not found.
 **500** → `{ error }`.
 

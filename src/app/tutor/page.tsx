@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
+import WeeklyScheduleView from "@/components/tutor/WeeklyScheduleView";
+import { deriveWeeklyAvailability } from "@/lib/derivedAvailability";
 
 function fmt(d: Date) {
   return d.toLocaleString(undefined, {
@@ -41,7 +43,7 @@ export default async function TutorDashboard() {
   const certifications = tutorProfile?.topicCertifications ?? [];
 
   const now = new Date();
-  const [openRequestCount, upcomingSessions] = await Promise.all([
+  const [openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
     prisma.topicRequest.count({ where: { status: "OPEN" } }),
     tutorProfile
       ? prisma.classSession.findMany({
@@ -61,7 +63,25 @@ export default async function TutorDashboard() {
           },
         })
       : Promise.resolve([]),
+    tutorProfile
+      ? prisma.classSession.findMany({
+          where: {
+            status: "SCHEDULED",
+            scheduledAt: { gt: now },
+            class: { tutorProfileId: tutorProfile.id },
+          },
+          select: { scheduledAt: true, duration: true },
+        })
+      : Promise.resolve([]),
   ]);
+
+  const scheduleSlots = deriveWeeklyAvailability(
+    weeklySessions.map((s) => ({
+      scheduledAt: s.scheduledAt,
+      duration: s.duration,
+      status: "SCHEDULED",
+    }))
+  );
 
   const enrolledLearnerCount = classes.reduce((sum, c) => sum + c._count.enrollments, 0);
   const isModerated = user?.status !== "ACTIVE";
@@ -162,6 +182,22 @@ export default async function TutorDashboard() {
               ))}
             </ul>
           )}
+        </div>
+      </section>
+
+      <section className="card bg-base-100 shadow-md border border-base-200">
+        <div className="card-body gap-2">
+          <h2 className="card-title text-sm font-bold flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            Your weekly schedule
+          </h2>
+          <p className="text-2xs text-base-content/50">
+            Auto-derived from your upcoming sessions. This is what learners see on your profile.
+          </p>
+          <WeeklyScheduleView
+            slots={scheduleSlots}
+            emptyMessage="Schedule sessions in your classes to build a weekly schedule."
+          />
         </div>
       </section>
 

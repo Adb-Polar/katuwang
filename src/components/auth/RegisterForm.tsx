@@ -87,7 +87,10 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
       }
 
       const roleParam = type === "TUTOR" ? "&role=tutor" : "";
-      router.push(`/login?registered=true&id=${encodeURIComponent(data.anonymousId)}${roleParam}`);
+      const pendingParam = data.pendingApproval ? "&pending=true" : "";
+      router.push(
+        `/login?registered=true&id=${encodeURIComponent(data.anonymousId)}${roleParam}${pendingParam}`
+      );
     } catch {
       setError("A network error occurred. Please check your connection.");
     } finally {

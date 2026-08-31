@@ -51,6 +51,7 @@ export default async function TutorClassDetailPage({
   return (
     <ClassDetailsView
       backHref="/tutor/classes"
+      code={tutorClass.code}
       subject={tutorClass.subject}
       topics={classTopics}
       verifiedTopics={verifiedTopics}

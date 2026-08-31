@@ -34,6 +34,7 @@ interface ClassSession {
 
 interface TutorClass {
   id: string;
+  code: string;
   subject: SubjectArea;
   gradeLevel: string | null;
   topics: string[];
@@ -239,6 +240,7 @@ export default function ClassManagement() {
               {displayedClasses.map((c) => (
                 <ClassCard
                   key={c.id}
+                  code={c.code}
                   subject={c.subject}
                   gradeLevel={c.gradeLevel}
                   topics={c.topics}

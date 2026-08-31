@@ -49,6 +49,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Your account has been banned.");
         }
 
+        if (user.status === "PENDING") {
+          throw new Error("Your account is awaiting admin approval. You'll be able to sign in once it's approved.");
+        }
+
         return {
           id: user.id,
           anonymousId: user.anonymousId,

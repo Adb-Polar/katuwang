@@ -123,6 +123,7 @@ describe("GET /api/classes", () => {
               subject: "MATH",
               gradeLevel: "GRADE_9",
               OR: [
+                { code: { contains: "algebra" } },
                 { topics: { some: { topic: { contains: "algebra" } } } },
                 { tutorProfile: { user: { anonymousId: { contains: "algebra" } } } },
               ],

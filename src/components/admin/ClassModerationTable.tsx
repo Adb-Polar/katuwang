@@ -23,6 +23,7 @@ interface Tutor {
 
 interface AdminClass {
   id: string;
+  code: string;
   subject: SubjectArea;
   topics: string[];
   scheduledAt: string;
@@ -126,7 +127,7 @@ export default function ClassModerationTable() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by topic or tutor..."
+              placeholder="Search by code, topic, or tutor..."
               className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
             />
             <select
@@ -178,6 +179,7 @@ export default function ClassModerationTable() {
                     return (
                       <tr key={c.id} className="text-xs">
                         <td>
+                          <div className="font-mono text-2xs font-semibold text-primary/80">{c.code}</div>
                           <div className="font-semibold text-base-content/80">{c.subject}</div>
                           <div className="text-2xs text-base-content/50">{c.topics.join(", ")}</div>
                         </td>
