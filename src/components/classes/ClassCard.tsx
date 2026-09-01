@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, BadgeCheck, Layers, EyeOff, AlertTriangle } from "lucide-react";
+import { Calendar, Clock, Users, BadgeCheck, Layers, EyeOff, AlertTriangle, GraduationCap } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 
@@ -23,6 +23,9 @@ export default function ClassCard({
   enrolledCount,
   maxStudents,
   activeLabel,
+  tutorAnonymousId,
+  tutorName,
+  tutorSection,
   onClick,
   href,
 }: {
@@ -44,6 +47,12 @@ export default function ClassCard({
   enrolledCount: number;
   maxStudents: number;
   activeLabel: string;
+  /** Learner-facing: the teaching tutor's anonymised ID. When set, a tutor line is shown. */
+  tutorAnonymousId?: string | null;
+  /** Learner-facing: the tutor's real name — shown instead of the ID when `showTutorRealNames` is on. */
+  tutorName?: string | null;
+  /** Learner-facing: the tutor's section, shown as a muted suffix when `tutorName` is set. */
+  tutorSection?: string | null;
   /** Click handler (client callers). Ignored when `href` is set. */
   onClick?: () => void;
   /** When set, the card renders as a link to this path (usable from Server Components). */
@@ -157,6 +166,17 @@ export default function ClassCard({
             {enrolledCount} / {maxStudents} Enrolled
           </span>
         </div>
+        {tutorAnonymousId && (
+          <div className="flex items-center gap-1">
+            <GraduationCap className="h-3.5 w-3.5 text-primary" />
+            <span>
+              {tutorName || tutorAnonymousId}
+              {tutorName && tutorSection && (
+                <span className="text-base-content/40"> · {tutorSection}</span>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {isModerated && suspendedReason && (

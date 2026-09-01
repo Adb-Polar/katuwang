@@ -59,3 +59,17 @@ export const SUBJECT_TOPICS: Record<SubjectArea, string[]> = {
     "Health Education",
   ],
 };
+
+/**
+ * Normalizes a user-typed topic: trims and collapses internal whitespace.
+ * Custom topics are stored verbatim (after this pass), so keep it conservative.
+ */
+export function normalizeTopic(raw: string): string {
+  return raw.trim().replace(/\s+/g, " ");
+}
+
+/** True when `topic` is one of the curated topics for `subject` (case-insensitive). */
+export function isKnownTopic(subject: SubjectArea, topic: string): boolean {
+  const t = normalizeTopic(topic).toLowerCase();
+  return (SUBJECT_TOPICS[subject] ?? []).some((k) => k.toLowerCase() === t);
+}

@@ -13,10 +13,9 @@ import {
   Lock,
   MapPin,
   EyeOff,
-  AlertTriangle,
 } from "lucide-react";
 import { SubjectArea, GradeLevel } from "@prisma/client";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, isKnownTopic, normalizeTopic } from "@/lib/subjectTopics";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -25,10 +24,7 @@ import SessionsList, { SessionSummary } from "@/components/classes/SessionsList"
 import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
-
-function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString(undefined, { dateStyle: "long", timeStyle: "short" });
-}
+import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
 
 export default function EditClassForm({
   classId,
@@ -78,6 +74,7 @@ export default function EditClassForm({
   const router = useRouter();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
+  const [customTopic, setCustomTopic] = useState("");
   const [form, setForm] = useState({
     description: description ?? "",
     maxStudents,
@@ -97,6 +94,19 @@ export default function EditClassForm({
     if (usedTopics.includes(topic)) return;
     setTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]));
   };
+
+  const addCustomTopic = () => {
+    const t = normalizeTopic(customTopic);
+    if (t.length < 2 || topics.length >= 10) return;
+    if (!topics.some((s) => s.toLowerCase() === t.toLowerCase())) setTopics((prev) => [...prev, t]);
+    setCustomTopic("");
+  };
+
+  // Curated topics for this subject, plus any custom topics already on the class.
+  const topicOptions = [
+    ...SUBJECT_TOPICS[subject],
+    ...topics.filter((t) => !isKnownTopic(subject, t)),
+  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,29 +170,13 @@ export default function EditClassForm({
         </div>
       </div>
 
-      {locked && (
-        <div className="rounded-xl border border-error/30 bg-error/10 p-4 space-y-2">
-          <div className="flex items-center gap-2 text-error font-bold text-sm">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
-            This class was {status === "BANNED" ? "banned" : "suspended"} by an administrator
-          </div>
-          <p className="text-xs text-base-content/70">
-            It can&apos;t be edited and its sessions are read-only until the moderation is lifted.
-          </p>
-          {suspendedReason && (
-            <p className="text-xs text-base-content/80">
-              <span className="font-semibold">Reason:</span> {suspendedReason}
-            </p>
-          )}
-          {status === "SUSPENDED" && (
-            <p className="text-xs text-base-content/80">
-              <span className="font-semibold">
-                {suspendedUntil ? "Suspended until:" : "Duration:"}
-              </span>{" "}
-              {suspendedUntil ? formatDateTime(suspendedUntil) : "Indefinite"}
-            </p>
-          )}
-        </div>
+      {locked && (status === "SUSPENDED" || status === "BANNED") && (
+        <ClassModerationPanel
+          status={status}
+          suspendedReason={suspendedReason}
+          suspendedUntil={suspendedUntil}
+          audience="tutor"
+        />
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
@@ -218,7 +212,7 @@ export default function EditClassForm({
                     hint="Click a topic to add or remove it. Locked topics are already used by a session."
                   >
                     <div className="flex flex-wrap gap-1.5 border border-base-300 rounded-lg bg-base-100 p-2.5">
-                      {SUBJECT_TOPICS[subject].map((topic) => {
+                      {topicOptions.map((topic) => {
                         const selected = topics.includes(topic);
                         const lockedTopic = usedTopics.includes(topic);
                         return (
@@ -246,6 +240,32 @@ export default function EditClassForm({
                         );
                       })}
                     </div>
+                    {!locked && (
+                      <div className="flex gap-2 mt-2">
+                        <input
+                          type="text"
+                          value={customTopic}
+                          onChange={(e) => setCustomTopic(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addCustomTopic();
+                            }
+                          }}
+                          placeholder="Add another topic not listed above…"
+                          maxLength={60}
+                          className="input input-bordered input-xs flex-1 text-2xs focus:input-primary"
+                        />
+                        <button
+                          type="button"
+                          onClick={addCustomTopic}
+                          disabled={normalizeTopic(customTopic).length < 2 || topics.length >= 10}
+                          className="btn btn-outline btn-xs text-2xs"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
                   </FormField>
 
                   <FormField label="Target Grade" hint="Optional — used for class matching.">

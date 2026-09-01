@@ -51,6 +51,23 @@ describe("scoreClass — hard filters", () => {
       scoreClass(baseCriteria, mkClass({ sessions: [{ scheduledAt: daysFromNow(-1), duration: 60, status: "SCHEDULED" }] }), NOW)
     ).toBeNull();
   });
+
+  it("classFormat SOLO keeps only 1-on-1 classes", () => {
+    const solo = { ...baseCriteria, classFormat: "SOLO" as const };
+    expect(scoreClass(solo, mkClass({ maxStudents: 1 }), NOW)).not.toBeNull();
+    expect(scoreClass(solo, mkClass({ maxStudents: 4 }), NOW)).toBeNull();
+  });
+
+  it("classFormat GROUP keeps only multi-seat classes", () => {
+    const group = { ...baseCriteria, classFormat: "GROUP" as const };
+    expect(scoreClass(group, mkClass({ maxStudents: 4 }), NOW)).not.toBeNull();
+    expect(scoreClass(group, mkClass({ maxStudents: 1 }), NOW)).toBeNull();
+  });
+
+  it("classFormat ANY / undefined does not filter by capacity", () => {
+    expect(scoreClass({ ...baseCriteria, classFormat: "ANY" }, mkClass({ maxStudents: 1 }), NOW)).not.toBeNull();
+    expect(scoreClass({ ...baseCriteria, classFormat: "ANY" }, mkClass({ maxStudents: 6 }), NOW)).not.toBeNull();
+  });
 });
 
 describe("scoreClass — scoring", () => {

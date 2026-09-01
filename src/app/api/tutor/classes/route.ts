@@ -4,7 +4,7 @@ import { ClassStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/subjectTopics";
 import { getSetting } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -92,20 +92,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { subject, gradeLevel, topics, description, maxStudents, building, room, meetingLink, sessions } =
+    const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
 
-    // Ensure every selected topic belongs to the chosen subject's predefined list
-    const validTopics = SUBJECT_TOPICS[subject];
-    if (topics.some((t) => !validTopics.includes(t))) {
-      return NextResponse.json(
-        { error: `One or more selected topics are not valid for ${subject}.` },
-        { status: 400 }
-      );
+    // Normalize + de-duplicate topics (case-insensitive). Custom topics that
+    // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
+    // something the catalog doesn't list yet; they're stored verbatim.
+    const canonicalByKey = new Map<string, string>();
+    for (const raw of result.data.topics) {
+      const t = normalizeTopic(raw);
+      if (t.length < 2) continue;
+      const key = t.toLowerCase();
+      if (!canonicalByKey.has(key)) canonicalByKey.set(key, t);
+    }
+    const topics = [...canonicalByKey.values()];
+    if (topics.length === 0) {
+      return NextResponse.json({ error: "Please select at least one topic." }, { status: 400 });
     }
 
-    // Every session's topic must be one of the class's chosen topics
-    if (sessions.some((s) => !topics.includes(s.topic))) {
+    // Every session's topic must resolve to one of the class's chosen topics.
+    const sessionTopics = sessions.map((s) => canonicalByKey.get(normalizeTopic(s.topic).toLowerCase()));
+    if (sessionTopics.some((t) => t === undefined)) {
       return NextResponse.json(
         { error: "Every session's topic must be one of the class's selected topics." },
         { status: 400 }
@@ -130,8 +137,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const parsedSessions = sessions.map((s) => ({
-      topic: s.topic,
+    const parsedSessions = sessions.map((s, i) => ({
+      topic: sessionTopics[i] as string,
       start: new Date(s.scheduledAt),
       duration: s.duration,
     }));

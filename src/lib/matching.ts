@@ -54,6 +54,8 @@ export interface MatchCriteria {
   topics: string[];
   gradeLevel?: GradeLevel | null;
   preferredSlots?: PreferredSlot[];
+  /** "SOLO" restricts to 1-on-1 classes, "GROUP" to multi-seat; "ANY"/undefined = no filter. */
+  classFormat?: "SOLO" | "GROUP" | "ANY";
 }
 
 export type GradeMatch = "exact" | "adjacent" | "any" | "none";
@@ -80,7 +82,7 @@ function toMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 
-function upcomingScheduledSessions(klass: ClassForMatching, now: Date): Date[] {
+export function upcomingScheduledSessions(klass: ClassForMatching, now: Date): Date[] {
   return klass.sessions
     .filter((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt).getTime() > now.getTime())
     .map((s) => new Date(s.scheduledAt))
@@ -98,7 +100,10 @@ function sessionFitsAnySlot(start: Date, slots: PreferredSlot[]): boolean {
   );
 }
 
-function gradeMatchFor(criteriaGrade: GradeLevel | null | undefined, classGrade: GradeLevel | null): GradeMatch {
+export function gradeMatchFor(
+  criteriaGrade: GradeLevel | null | undefined,
+  classGrade: GradeLevel | null
+): GradeMatch {
   if (classGrade == null) return "any";
   if (!criteriaGrade) return "none";
   const diff = Math.abs(gradeNumber(criteriaGrade) - gradeNumber(classGrade));
@@ -120,6 +125,8 @@ export function scoreClass<T extends ClassForMatching>(
   if (klass.subject !== criteria.subject) return null;
   if (klass.status !== "SCHEDULED" || !klass.published) return null;
   if (klass.enrollmentCount >= klass.maxStudents) return null;
+  if (criteria.classFormat === "SOLO" && klass.maxStudents !== 1) return null;
+  if (criteria.classFormat === "GROUP" && klass.maxStudents <= 1) return null;
 
   const upcoming = upcomingScheduledSessions(klass, now);
   if (upcoming.length === 0) return null;

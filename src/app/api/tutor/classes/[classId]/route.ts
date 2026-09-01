@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { classDetailsSchema } from "@/lib/validations/class";
+import { normalizeTopic } from "@/lib/subjectTopics";
 
 
 export async function PATCH(
@@ -62,7 +63,23 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { topics, ...updates } = result.data;
+    const { topics: rawTopics, ...updates } = result.data;
+
+    // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
+    const topics = rawTopics
+      ? [
+          ...new Map(
+            rawTopics
+              .map((t) => normalizeTopic(t))
+              .filter((t) => t.length >= 2)
+              .map((t) => [t.toLowerCase(), t] as const)
+          ).values(),
+        ]
+      : undefined;
+
+    if (rawTopics && (!topics || topics.length === 0)) {
+      return NextResponse.json({ error: "Please select at least one topic." }, { status: 400 });
+    }
 
     // Capacity validation if updating maxStudents
     if (updates.maxStudents !== undefined) {
@@ -76,8 +93,9 @@ export async function PATCH(
 
     // Block removing a topic that's currently used by one of the class's sessions
     if (topics) {
+      const keptKeys = new Set(topics.map((t) => t.toLowerCase()));
       const currentTopics = existingClass.topics.map((t) => t.topic);
-      const removedTopics = currentTopics.filter((t) => !topics.includes(t));
+      const removedTopics = currentTopics.filter((t) => !keptKeys.has(normalizeTopic(t).toLowerCase()));
       const usedTopics = new Set(existingClass.sessions.map((s) => s.topic));
       const blockedRemovals = removedTopics.filter((t) => usedTopics.has(t));
 

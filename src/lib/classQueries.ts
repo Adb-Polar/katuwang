@@ -42,7 +42,7 @@ export function learnerClassInclude(learnerId: string) {
     tutorProfile: {
       select: {
         id: true,
-        user: { select: { id: true, anonymousId: true } },
+        user: { select: { id: true, anonymousId: true, firstName: true, lastName: true, section: true } },
         topicCertifications: {
           where: { status: "CERTIFIED" as const },
           select: { subject: true, topic: true },
@@ -56,15 +56,26 @@ export function learnerClassInclude(learnerId: string) {
 
 type LearnerClassRow = Prisma.TutorClassGetPayload<{ include: ReturnType<typeof learnerClassInclude> }>;
 
-/** Flattens a class row into the anonymized DTO the learner UI consumes. */
-export function toLearnerClassDTO(klass: LearnerClassRow) {
+/**
+ * Flattens a class row into the anonymized DTO the learner UI consumes.
+ *
+ * `showRealNames` mirrors the `showTutorRealNames` platform setting: when true the
+ * tutor's real name + section are included alongside the anonymised ID, otherwise
+ * only `id` + `anonymousId` are exposed (double-blind default).
+ */
+export function toLearnerClassDTO(klass: LearnerClassRow, showRealNames = false) {
   const { tutorProfile, topics, ...rest } = klass;
+  const { id, anonymousId, firstName, lastName, section } = tutorProfile.user;
   return {
     ...rest,
     topics: topics.map((t) => t.topic),
     verifiedTopics: tutorProfile.topicCertifications
       .filter((cert) => cert.subject === rest.subject)
       .map((cert) => cert.topic),
-    tutor: { id: tutorProfile.user.id, anonymousId: tutorProfile.user.anonymousId },
+    tutor: {
+      id,
+      anonymousId,
+      ...(showRealNames ? { name: `${firstName} ${lastName}`.trim(), section } : {}),
+    },
   };
 }

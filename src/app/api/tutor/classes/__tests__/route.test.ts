@@ -135,11 +135,53 @@ describe("POST /api/tutor/classes", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns 400 for a topic not valid for the subject", async () => {
+  it("accepts a custom topic that isn't in the curated list", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    const res = await POST(makeRequest(validBody({ topics: ["Not A Real Topic"] })));
+    classCreate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+
+    const res = await POST(
+      makeRequest(
+        validBody({
+          topics: ["Competitive Math Olympiad Prep"],
+          sessions: [{ ...validSession, topic: "  competitive math   olympiad prep " }],
+        })
+      )
+    );
+    expect(res.status).toBe(201);
+    expect(classCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          topics: { create: [{ topic: "Competitive Math Olympiad Prep" }] },
+          // the session topic is normalized to the canonical class topic
+          sessions: { create: [expect.objectContaining({ topic: "Competitive Math Olympiad Prep" })] },
+        }),
+      })
+    );
+  });
+
+  it("returns 400 for a topic shorter than 2 characters", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    const res = await POST(makeRequest(validBody({ topics: ["x"] })));
     expect(res.status).toBe(400);
+  });
+
+  it("still blocks an uncertified custom topic when certification is required", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue([]);
+    const res = await POST(
+      makeRequest(
+        validBody({
+          topics: ["Brand New Custom Topic"],
+          sessions: [{ ...validSession, topic: "Brand New Custom Topic" }],
+        })
+      )
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/not certified/i);
   });
 
   it("returns 400 when a session's topic isn't one of the class's topics", async () => {

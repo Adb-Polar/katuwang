@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Link as LinkIcon, Users, BadgeCheck, EyeOff, MapPin } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
+import ClassModerationPanel from "./ClassModerationPanel";
 
 export default function ClassDetailsView({
   backHref,
@@ -13,6 +14,9 @@ export default function ClassDetailsView({
   status,
   activeLabel,
   published = true,
+  suspendedReason,
+  suspendedUntil,
+  moderationAudience = "tutor",
   maxStudents,
   enrolledCount,
   building,
@@ -36,6 +40,12 @@ export default function ClassDetailsView({
   activeLabel: string;
   /** Tutor-only: whether the class is visible to learners. Defaults to true. */
   published?: boolean;
+  /** Admin's reason when the class is SUSPENDED/BANNED; renders a moderation panel. */
+  suspendedReason?: string | null;
+  /** ISO string; null = indefinite. Shown in the moderation panel for SUSPENDED. */
+  suspendedUntil?: string | null;
+  /** Tailors the moderation panel copy. Defaults to "tutor". */
+  moderationAudience?: "tutor" | "learner";
   maxStudents: number;
   enrolledCount: number;
   building?: string | null;
@@ -98,6 +108,15 @@ export default function ClassDetailsView({
           ))}
         </div>
       </div>
+
+      {(status === "SUSPENDED" || status === "BANNED") && (
+        <ClassModerationPanel
+          status={status}
+          suspendedReason={suspendedReason}
+          suspendedUntil={suspendedUntil}
+          audience={moderationAudience}
+        />
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main column */}

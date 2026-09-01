@@ -60,7 +60,13 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   const startEdit = (r: TopicRequest) => {
     setError("");
     setEditId(r.id);
-    setEditCriteria({ subject: r.subject, topics: r.topics, gradeLevel: r.gradeLevel, slots: r.slots });
+    setEditCriteria({
+      subject: r.subject,
+      topics: r.topics,
+      gradeLevel: r.gradeLevel,
+      slots: r.slots,
+      classFormat: "",
+    });
     setEditNote(r.note ?? "");
   };
 

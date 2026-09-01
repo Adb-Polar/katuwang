@@ -17,6 +17,8 @@ export const matchCriteriaSchema = z.object({
     .array(preferredSlotSchema)
     .max(21, "You can add up to 21 preferred time slots.")
     .optional(),
+  // Auto Match only: "SOLO" = 1-on-1 (maxStudents 1), "GROUP" = maxStudents > 1.
+  classFormat: z.enum(["SOLO", "GROUP", "ANY"]).optional(),
 });
 
 export type MatchCriteriaInput = z.infer<typeof matchCriteriaSchema>;

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 import { SubjectArea } from "@prisma/client";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, isKnownTopic, normalizeTopic } from "@/lib/subjectTopics";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { useFetchList } from "@/hooks/useFetchList";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
@@ -90,6 +90,7 @@ export default function ClassManagement() {
     meetingLink: "",
   });
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [customTopic, setCustomTopic] = useState("");
   const [sessionRows, setSessionRows] = useState<SessionRow[]>([]);
   const [formLoading, setFormLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -97,12 +98,28 @@ export default function ClassManagement() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === "subject") setSelectedTopics([]);
+    if (name === "subject") {
+      setSelectedTopics([]);
+      setCustomTopic("");
+    }
   };
 
   const toggleTopic = (topic: string) => {
     setSelectedTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]));
   };
+
+  const addCustomTopic = () => {
+    const t = normalizeTopic(customTopic);
+    if (t.length < 2) return;
+    const exists = selectedTopics.some((s) => s.toLowerCase() === t.toLowerCase());
+    if (!exists && selectedTopics.length < 10) setSelectedTopics((prev) => [...prev, t]);
+    setCustomTopic("");
+  };
+
+  // Selected topics that aren't part of the curated list for this subject.
+  const customTopics = form.subject
+    ? selectedTopics.filter((t) => !isKnownTopic(form.subject as SubjectArea, t))
+    : selectedTopics;
 
   const addSessionRow = () => {
     setSessionRows((prev) => [
@@ -319,18 +336,63 @@ export default function ClassManagement() {
                     Select a subject to see available topics.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
-                    {SUBJECT_TOPICS[form.subject as SubjectArea].map((topic) => (
-                      <label key={topic} className="flex items-center gap-1.5 text-2xs cursor-pointer p-1 rounded hover:bg-base-200/50">
-                        <input
-                          type="checkbox"
-                          checked={selectedTopics.includes(topic)}
-                          onChange={() => toggleTopic(topic)}
-                          className="checkbox checkbox-xs checkbox-primary"
-                        />
-                        <span>{topic}</span>
-                      </label>
-                    ))}
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
+                      {SUBJECT_TOPICS[form.subject as SubjectArea].map((topic) => (
+                        <label key={topic} className="flex items-center gap-1.5 text-2xs cursor-pointer p-1 rounded hover:bg-base-200/50">
+                          <input
+                            type="checkbox"
+                            checked={selectedTopics.includes(topic)}
+                            onChange={() => toggleTopic(topic)}
+                            className="checkbox checkbox-xs checkbox-primary"
+                          />
+                          <span>{topic}</span>
+                        </label>
+                      ))}
+                    </div>
+
+                    {customTopics.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5">
+                        {customTopics.map((t) => (
+                          <span key={t} className="badge badge-outline badge-sm gap-1 text-2xs">
+                            {t}
+                            <button
+                              type="button"
+                              onClick={() => toggleTopic(t)}
+                              className="text-error"
+                              aria-label={`Remove ${t}`}
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={customTopic}
+                        onChange={(e) => setCustomTopic(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            addCustomTopic();
+                          }
+                        }}
+                        placeholder="Add another topic not listed above…"
+                        maxLength={60}
+                        className="input input-bordered input-xs flex-1 text-2xs focus:input-primary"
+                      />
+                      <button
+                        type="button"
+                        onClick={addCustomTopic}
+                        disabled={normalizeTopic(customTopic).length < 2 || selectedTopics.length >= 10}
+                        className="btn btn-outline btn-xs text-2xs"
+                      >
+                        Add
+                      </button>
+                    </div>
                   </div>
                 )}
               </FormField>

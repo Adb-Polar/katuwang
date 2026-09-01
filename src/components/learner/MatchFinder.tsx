@@ -30,6 +30,8 @@ interface MatchedClass {
   sessions: { scheduledAt: string; duration: number; status: "SCHEDULED" | "COMPLETED" | "CANCELLED" }[];
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
+  suspendedReason: string | null;
+  tutor: { id: string; anonymousId: string; name?: string; section?: string };
   maxStudents: number;
   _count: { enrollments: number };
 }
@@ -108,6 +110,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
             <MatchCriteriaFields
               value={criteria}
               onChange={setCriteria}
+              showFormatFilter
               gradeHint="Prefilled from your profile — change it if this class is for a different level."
             />
             <button
@@ -152,9 +155,13 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       sessions={m.class.sessions}
                       status={m.class.status}
                       published={m.class.published}
+                      suspendedReason={m.class.suspendedReason}
                       enrolledCount={m.class._count.enrollments}
                       maxStudents={m.class.maxStudents}
                       activeLabel="Open"
+                      tutorAnonymousId={m.class.tutor.anonymousId}
+                      tutorName={m.class.tutor.name}
+                      tutorSection={m.class.tutor.section}
                       onClick={() => router.push(`/learner/classes/${m.class.id}`)}
                     />
                     <ul className="text-2xs text-base-content/60 space-y-0.5 px-1">

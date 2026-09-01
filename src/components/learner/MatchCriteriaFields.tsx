@@ -17,9 +17,17 @@ export interface MatchCriteriaValue {
   topics: string[];
   gradeLevel: string;
   slots: PreferredSlot[];
+  /** Auto Match only: "" / "ANY" = any format, "SOLO" = 1-on-1, "GROUP" = group class. */
+  classFormat: string;
 }
 
-export const EMPTY_CRITERIA: MatchCriteriaValue = { subject: "", topics: [], gradeLevel: "", slots: [] };
+export const EMPTY_CRITERIA: MatchCriteriaValue = {
+  subject: "",
+  topics: [],
+  gradeLevel: "",
+  slots: [],
+  classFormat: "",
+};
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
 const ALL_SUBJECTS = Object.values(SubjectArea);
@@ -28,10 +36,13 @@ export default function MatchCriteriaFields({
   value,
   onChange,
   gradeHint,
+  showFormatFilter = false,
 }: {
   value: MatchCriteriaValue;
   onChange: (next: MatchCriteriaValue) => void;
   gradeHint?: string;
+  /** Auto Match passes this to show a 1-on-1 / Group selector; topic requests don't. */
+  showFormatFilter?: boolean;
 }) {
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
 
@@ -77,6 +88,20 @@ export default function MatchCriteriaFields({
             ))}
           </select>
         </FormField>
+
+        {showFormatFilter && (
+          <FormField label="Class format" hint="Filter by 1-on-1 or group classes.">
+            <select
+              className="select select-bordered select-md w-full text-sm"
+              value={value.classFormat}
+              onChange={(e) => set({ classFormat: e.target.value })}
+            >
+              <option value="">Any format</option>
+              <option value="SOLO">1-on-1</option>
+              <option value="GROUP">Group</option>
+            </select>
+          </FormField>
+        )}
       </div>
 
       <FormField
@@ -171,5 +196,6 @@ export function criteriaToBody(value: MatchCriteriaValue) {
     topics: value.topics,
     ...(value.gradeLevel ? { gradeLevel: value.gradeLevel } : {}),
     ...(value.slots.length > 0 ? { preferredSlots: value.slots } : {}),
+    ...(value.classFormat && value.classFormat !== "ANY" ? { classFormat: value.classFormat } : {}),
   };
 }

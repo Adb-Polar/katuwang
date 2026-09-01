@@ -132,3 +132,57 @@ Chunk 13 — user registration approval queue (2026-09-01)
  [] /admin dashboard: "Pending registrations" count + link under "Needs attention"; "Flagged accounts" stat no longer counts PENDING users
  [] /admin/audit-log: Action filter shows "Registration Approved" / "Registration Declined" and filters correctly
  [x] Automated: admin/registrations GET + [userId] PATCH route tests, register PENDING-path test, auth PENDING-block test; tsc && lint && test all green (292 tests)
+
+================================================================
+"Aug 30" batch — plan: ~/.claude/plans/check-todo-txt-aug-declarative-hanrahan.md
+No-migration items only (3 migration items deferred to a follow-up plan).
+================================================================
+
+Aug30 Chunk A — tutor identity + suspension reason on learner class surfaces (2026-09-01)
+ [] /admin/settings "Show tutor real names to learners" OFF: learner browse + my-classes + match cards and the class detail page show only TUT-XXXX (a GraduationCap line on the card)
+ [] Toggle ON: those same cards show the tutor's real name, and " · <section>"; class detail TUTOR cell shows "Name / TUT-XXXX · Section X"
+ [] Tutor-side surfaces unchanged: /tutor/classes cards and the tutor's own profile page show no tutor line
+ [] Enrolled learner opens a SUSPENDED class detail -> red ClassModerationPanel: "suspended by an administrator", reason, "Suspended until <date>" or "Indefinite"
+ [] BANNED class detail -> panel says "banned ... no longer available and enrollment is closed"
+ [] Suspended/banned class card in browse/match shows the reason line (AlertTriangle) as before
+ [] Class detail actions area: enrolled + moderated shows "Enrollment is frozen while this class is under moderation." and no Enroll/Unenroll button
+ [] Tutor EditClassForm locked panel still renders identically (now via the shared ClassModerationPanel)
+ [x] Automated: classQueries toLearnerClassDTO test (default anon-only / showRealNames / moderation scalars); classes route test mocks getSetting; tsc && lint && test green (295 tests)
+
+Aug30 Chunk B — "Completed" tab + filters on My Classes (2026-09-01)
+ [] /learner/my-classes shows Upcoming / Completed / Cancelled tabs with live count badges
+ [] Upcoming tab = SCHEDULED + SUSPENDED enrolled classes; Completed = COMPLETED only; Cancelled = CANCELLED + BANNED
+ [] Switching tabs resets to page 1 and refetches; the "N classes" line reflects the active tab
+ [] Search box + subject + grade filters now appear on My Classes too and narrow within the active tab
+ [] Tab count badges stay the per-status totals (not affected by the search box)
+ [] Empty states are tab-specific ("No completed classes yet." etc.)
+ [] Browse page (/learner/classes) still behaves exactly as before (no tabs, same filters)
+ [x] Automated: classes route tests — mine Upcoming default (SCHEDULED+SUSPENDED), status=completed + extra filter AND shape, counts.mineTabs; usePaginatedList exposes `meta`; tsc && lint && test green (296 tests)
+
+Aug30 Chunk C — personalized browse ordering (2026-09-01)
+ [] /learner/classes with NO filters: order favors classes matching your grade, your past-enrolled / open-request subjects & topics, and a sooner next session (not just newest)
+ [] Adding any filter (search / subject / grade) falls back to newest-first + normal SQL pagination
+ [] Pagination on the unfiltered browse still works (total = full browse count; page slices the ranked list)
+ [] A brand-new learner with no history sees a sensible order (soonest session, has seats, newest)
+ [] /learner/my-classes ordering unchanged (newest-first within the tab)
+ [x] Automated: src/lib/browseRanking.ts + browseRanking.test.ts (grade / interest-subject / soonness / no-session / tiebreak / purity); classes route tests — unfiltered browse has no SQL skip/take, personalization orders match ahead of newer; matching.ts exports gradeMatchFor + upcomingScheduledSessions; tsc && lint && test green (303 tests)
+
+Aug30 Chunk D — solo/group filter in Auto Match (2026-09-01)
+ [] /learner/match: a "Class format" select (Any format / 1-on-1 / Group) appears next to Grade level
+ [] "1-on-1" -> results only include classes with maxStudents === 1
+ [] "Group" -> results only include classes with maxStudents > 1
+ [] "Any format" -> no capacity filtering (unchanged behavior)
+ [] /learner/requests new-request form and the edit-request form do NOT show the format select
+ [x] Automated: matchCriteriaSchema.classFormat enum; matching.ts scoreClass SOLO/GROUP/ANY hard-filter tests; MatchCriteriaFields showFormatFilter prop + criteriaToBody emits classFormat only when set/!=ANY; tsc && lint && test green (306 tests)
+
+Aug30 Chunk E — custom / new topics when creating a class (2026-09-01)
+ [] Create-class modal (/tutor/classes): below the topic checkboxes there's an "Add another topic" input; typing a new topic + Add (or Enter) adds it as a removable chip and it counts toward the 10-topic cap
+ [] The class saves with the custom topic; a session can be assigned to it; the custom topic shows on the class card / detail like any other (no verified check)
+ [] Edit-class form shows custom topics already on the class as selectable badges and has the same "Add another topic" input (hidden when the class is locked/suspended)
+ [] Removing a custom topic that a session uses is still blocked ("Cannot remove topic(s) currently used by a session")
+ [] With "Require certification for class creation" ON: creating a class with an uncertified custom topic is still blocked ("You are not certified for: ...") — tutor must get it certified first
+ [] Topic under 2 chars or over 60 chars -> 400 validation
+ [] Duplicate topics (case-insensitive) are de-duplicated, not rejected
+ [x] Automated: subjectTopics normalizeTopic/isKnownTopic tests; tutor classes POST — accepts custom topic (normalizes session topic to canonical), 400 on <2 chars, cert-gate still blocks uncertified custom topic; classDetailsSchema topic min 2 / max 60; PATCH normalizes + dedupes; tsc && lint && test green (313 tests)
+
+Aug30 — DEFERRED (need a Prisma migration, separate plan): tutor community-vs-personal topic requests (TopicRequest.targetTutorProfileId), tutor appeal flow (new Appeal model), admin dynamic topic taxonomy (new Topic table; subjects stay the fixed SubjectArea enum).

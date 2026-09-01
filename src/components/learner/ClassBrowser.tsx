@@ -9,8 +9,16 @@ import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import Tabs from "@/components/ui/Tabs";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
+
+type MineTab = "upcoming" | "completed" | "cancelled";
+const MINE_TABS: { key: MineTab; label: string }[] = [
+  { key: "upcoming", label: "Upcoming" },
+  { key: "completed", label: "Completed" },
+  { key: "cancelled", label: "Cancelled" },
+];
 
 const PAGE_SIZE = 12;
 const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
@@ -33,6 +41,8 @@ interface TutorClass {
   maxStudents: number;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
+  suspendedReason: string | null;
+  tutor: { id: string; anonymousId: string; name?: string; section?: string };
   _count: { enrollments: number };
 }
 
@@ -41,21 +51,24 @@ interface TutorClass {
  *  - "browse" — enrollable classes the learner isn't in yet (`/learner/classes`)
  *  - "mine"   — the learner's enrolled classes (`/learner/my-classes`)
  *
- * Page, page size and (browse only) the search/subject/grade filters live in the
- * URL via `usePaginatedList`, so a filtered view is shareable and pressing Back
- * from a class detail restores the exact page + filters the learner was on.
+ * Both scopes get a search/subject/grade filter bar; "mine" also gets
+ * Upcoming / Completed / Cancelled status tabs. Page + page size live in the URL
+ * via `usePaginatedList` so Back from a class detail restores the exact page.
  */
 export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [subject, setSubject] = useState<SubjectArea | "">("");
   const [gradeLevel, setGradeLevel] = useState("");
+  const [mineTab, setMineTab] = useState<MineTab>("upcoming");
 
   const isBrowse = scope === "browse";
+  const isMine = scope === "mine";
 
   const {
     data: classes,
     total,
+    meta,
     page,
     setPage,
     pageSize,
@@ -67,16 +80,18 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
     "classes",
     {
       scope,
-      ...(isBrowse && q.trim() ? { q: q.trim() } : {}),
-      ...(isBrowse && subject ? { subject } : {}),
-      ...(isBrowse && gradeLevel ? { gradeLevel } : {}),
+      ...(isMine ? { status: mineTab } : {}),
+      ...(q.trim() ? { q: q.trim() } : {}),
+      ...(subject ? { subject } : {}),
+      ...(gradeLevel ? { gradeLevel } : {}),
     },
     PAGE_SIZE,
     "Could not retrieve classes.",
     scope
   );
 
-  const hasFilters = isBrowse && (q.trim() !== "" || subject !== "" || gradeLevel !== "");
+  const mineTabCounts = (meta.counts as { mineTabs?: Record<MineTab, number> } | undefined)?.mineTabs;
+  const hasFilters = q.trim() !== "" || subject !== "" || gradeLevel !== "";
 
   return (
     <div className="space-y-6">
@@ -84,44 +99,53 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
       <section className="card bg-base-100 shadow-md border border-base-200">
         <div className="card-body gap-4">
-          {isBrowse && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <label className="input input-bordered input-sm flex items-center gap-2 text-xs">
-                <Search className="h-3.5 w-3.5 opacity-50" />
-                <input
-                  type="text"
-                  className="grow"
-                  placeholder="Search code, subject, or topic..."
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                />
-              </label>
-              <select
-                className="select select-bordered select-sm text-xs"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
-              >
-                <option value="">All subjects</option>
-                {SUBJECTS.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="select select-bordered select-sm text-xs"
-                value={gradeLevel}
-                onChange={(e) => setGradeLevel(e.target.value)}
-              >
-                <option value="">All grades</option>
-                {GRADE_LEVELS.map((g) => (
-                  <option key={g.value} value={g.value}>
-                    {g.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {isMine && (
+            <Tabs
+              tabs={MINE_TABS.map((t) => ({
+                ...t,
+                count: mineTabCounts?.[t.key],
+              }))}
+              active={mineTab}
+              onChange={(key) => setMineTab(key as MineTab)}
+            />
           )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <label className="input input-bordered input-sm flex items-center gap-2 text-xs">
+              <Search className="h-3.5 w-3.5 opacity-50" />
+              <input
+                type="text"
+                className="grow"
+                placeholder="Search code, subject, or topic..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </label>
+            <select
+              className="select select-bordered select-sm text-xs"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+            >
+              <option value="">All subjects</option>
+              {SUBJECTS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <select
+              className="select select-bordered select-sm text-xs"
+              value={gradeLevel}
+              onChange={(e) => setGradeLevel(e.target.value)}
+            >
+              <option value="">All grades</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-10">
@@ -132,8 +156,12 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               message={
                 hasFilters
                   ? "No classes match your filters."
-                  : scope === "browse"
+                  : isBrowse
                   ? "No upcoming classes available right now."
+                  : mineTab === "completed"
+                  ? "No completed classes yet."
+                  : mineTab === "cancelled"
+                  ? "No cancelled classes."
                   : "You haven't enrolled in any classes yet."
               }
               action={
@@ -169,9 +197,13 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                     sessions={c.sessions}
                     status={c.status}
                     published={c.published}
+                    suspendedReason={c.suspendedReason}
                     enrolledCount={c._count.enrollments}
                     maxStudents={c.maxStudents}
                     activeLabel="Open"
+                    tutorAnonymousId={c.tutor.anonymousId}
+                    tutorName={c.tutor.name}
+                    tutorSection={c.tutor.section}
                     onClick={() => router.push(`/learner/classes/${c.id}`)}
                   />
                 ))}

@@ -25,6 +25,8 @@ export function usePaginatedList<T>(
 
   const [data, setData] = useState<T[]>([]);
   const [total, setTotal] = useState(0);
+  // The rest of the response body (e.g. `counts`), for callers that need tab badges.
+  const [meta, setMeta] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [version, setVersion] = useState(0);
@@ -81,6 +83,7 @@ export function usePaginatedList<T>(
         if (!cancelled) {
           setData(json[dataKey]);
           setTotal(json.total);
+          setMeta(json);
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : errorMessage);
@@ -98,6 +101,7 @@ export function usePaginatedList<T>(
   return {
     data,
     total,
+    meta,
     page,
     setPage,
     pageSize: effectivePageSize,

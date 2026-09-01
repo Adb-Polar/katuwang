@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { subject, topics, gradeLevel, preferredSlots } = result.data;
+    const { subject, topics, gradeLevel, preferredSlots, classFormat } = result.data;
 
     if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
       return NextResponse.json(
@@ -43,13 +43,16 @@ export async function POST(req: NextRequest) {
 
     await reinstateExpiredClasses();
 
-    const rows = await prisma.tutorClass.findMany({
-      where: { ...browsableOrEnrolledWhere(session.user.id), subject },
-      include: learnerClassInclude(session.user.id),
-      orderBy: { createdAt: "desc" },
-    });
+    const [rows, showRealNames] = await Promise.all([
+      prisma.tutorClass.findMany({
+        where: { ...browsableOrEnrolledWhere(session.user.id), subject },
+        include: learnerClassInclude(session.user.id),
+        orderBy: { createdAt: "desc" },
+      }),
+      getSetting("showTutorRealNames"),
+    ]);
 
-    const dtos = rows.map(toLearnerClassDTO);
+    const dtos = rows.map((r) => toLearnerClassDTO(r, showRealNames));
 
     const forMatching: (ClassForMatching & { dto: ReturnType<typeof toLearnerClassDTO> })[] = dtos
       // Don't recommend a class the learner is already enrolled in.
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
         dto: c,
       }));
 
-    const matches = rankMatches({ subject, topics, gradeLevel, preferredSlots }, forMatching)
+    const matches = rankMatches({ subject, topics, gradeLevel, preferredSlots, classFormat }, forMatching)
       .slice(0, MAX_RESULTS)
       .map((m) => ({ class: m.class.dto, score: m.score, reasons: m.reasons }));
 

@@ -23,6 +23,8 @@ export default function LearnerClassActions({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const isModerated = status === "SUSPENDED" || status === "BANNED";
+
   const handleEnroll = async () => {
     setLoading(true);
     setError("");
@@ -59,6 +61,12 @@ export default function LearnerClassActions({
   return (
     <>
       <FeedbackBanner variant="error" message={error || null} />
+
+      {isEnrolled && isModerated && (
+        <span className="text-2xs text-error/80 italic">
+          Enrollment is frozen while this class is under moderation.
+        </span>
+      )}
 
       {isEnrolled ? (
         status === "SCHEDULED" && (
