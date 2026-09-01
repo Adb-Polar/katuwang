@@ -98,7 +98,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-5 p-6 sm:p-8">
           <div>
             <h2 className="card-title text-base font-bold">What do you need help with?</h2>
@@ -126,7 +126,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
       </section>
 
       {matches !== null && (
-        <section className="card bg-base-100 shadow-md border border-base-200">
+        <section className="card kt-card">
           <div className="card-body gap-4">
             <h2 className="card-title text-sm font-bold">
               {matches.length > 0 ? `${matches.length} class${matches.length === 1 ? "" : "es"} for you` : "No matches yet"}

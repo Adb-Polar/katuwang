@@ -39,7 +39,7 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <div className="card bg-base-100 w-full max-w-md shadow-sm border border-base-200">
+    <div className="card kt-card w-full max-w-md">
       <div className="card-body gap-6">
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />

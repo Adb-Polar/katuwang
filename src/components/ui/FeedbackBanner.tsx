@@ -1,10 +1,10 @@
 import { AlertCircle, CheckCircle, Info, TriangleAlert } from "lucide-react";
 
 const VARIANTS = {
-  success: { alert: "alert-success", Icon: CheckCircle },
-  error: { alert: "alert-error", Icon: AlertCircle },
-  info: { alert: "alert-info", Icon: Info },
-  warning: { alert: "alert-warning", Icon: TriangleAlert },
+  success: { cls: "kt-alert--success", Icon: CheckCircle, icon: "text-success" },
+  error: { cls: "kt-alert--error", Icon: AlertCircle, icon: "text-error" },
+  info: { cls: "kt-alert--info", Icon: Info, icon: "text-info" },
+  warning: { cls: "kt-alert--warning", Icon: TriangleAlert, icon: "text-warning" },
 } as const;
 
 export default function FeedbackBanner({
@@ -15,12 +15,12 @@ export default function FeedbackBanner({
   message: string | null;
 }) {
   if (!message) return null;
-  const { alert, Icon } = VARIANTS[variant];
+  const { cls, Icon, icon } = VARIANTS[variant];
 
   return (
-    <div className={`alert ${alert} py-3 text-xs`}>
-      <Icon className="h-4 w-4 shrink-0" />
-      <span>{message}</span>
+    <div className={`kt-alert ${cls} text-xs`} role="status">
+      <Icon className={`h-4 w-4 shrink-0 mt-0.5 ${icon}`} />
+      <span className="text-base-content">{message}</span>
     </div>
   );
 }

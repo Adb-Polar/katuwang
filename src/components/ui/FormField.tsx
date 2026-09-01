@@ -16,23 +16,23 @@ export default function FormField({
   children: ReactNode;
 }) {
   const labelNode = (
-    <span className="label-text text-xs font-semibold text-base-content/80">
+    <span className="text-xs font-semibold text-base-content/80">
       {label}
       {required && <span className="text-error ml-0.5">*</span>}
     </span>
   );
 
   const feedback = error ? (
-    <p className="text-2xs text-error">{error}</p>
+    <p className="text-2xs text-error mt-1">{error}</p>
   ) : hint ? (
-    <p className="text-2xs text-base-content/50">{hint}</p>
+    <p className="text-2xs text-base-content/50 mt-1">{hint}</p>
   ) : null;
 
   if (orientation === "horizontal") {
     return (
-      <div className="form-control w-full gap-2 sm:flex-row sm:items-start sm:gap-3">
-        <label className="label py-0 sm:w-40 sm:shrink-0 sm:pt-2">{labelNode}</label>
-        <div className="w-full space-y-1">
+      <div className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+        <label className="sm:w-40 sm:shrink-0 sm:pt-2">{labelNode}</label>
+        <div className="w-full">
           {children}
           {feedback}
         </div>
@@ -41,8 +41,8 @@ export default function FormField({
   }
 
   return (
-    <div className="form-control w-full gap-2">
-      <label className="label py-0">{labelNode}</label>
+    <div className="w-full flex flex-col gap-1.5">
+      <label>{labelNode}</label>
       {children}
       {feedback}
     </div>

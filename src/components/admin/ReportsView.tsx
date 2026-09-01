@@ -99,7 +99,7 @@ function BarChartCard({
   const data = rows.map((r) => ({ name: labelize(r[labelKey]), count: r.count }));
 
   return (
-    <div className="card bg-base-100 shadow-md border border-base-200">
+    <div className="card kt-card">
       <div className="card-body gap-2 p-5">
         <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">{title}</h3>
         <div className="h-52 w-full">
@@ -181,7 +181,7 @@ export default function ReportsView() {
             </div>
           </div>
 
-          <div className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card kt-card">
             <div className="card-body gap-2 p-5">
               <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">
                 Enrollments — last 30 days

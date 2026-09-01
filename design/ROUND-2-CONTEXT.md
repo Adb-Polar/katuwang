@@ -65,72 +65,98 @@ and the status chip carry different colours on purpose.
 - Alerts carry a leading glyph (`i` info · `✓` success · `!` warning · `!` error)
   and a bold lead word. Field errors: red + leading `!` + heavier weight.
 
-## Composition & the Round 2 additions
+## Composition — card UI (reopened 2026-09-01 against a reference image)
 
-Shapes, rules, fills, and interaction states enter now, derived from the "legend"
-premise — not imported from another style:
+The original "flat legend, no cards, hairlines only" composition is replaced by a
+card-based dashboard, per `design/reference/Pasted image.png`. Typography and the
+two colour families carry over unchanged; the shell is new.
 
-- **No boxed cards or drop shadows.** A group is delimited by a single top
-  **hairline rule** (`1px`, `--rule` = ink at 16%) and a Fragment Mono uppercase
-  label, with content flowing beneath — like ruled entries in a printed key.
-- **Rules** are only ever thin horizontal separators (section tops, table rows,
-  list rows). Never full borders / outlines around content.
-- **Fills** appear only on: primary buttons (ink fill, canvas text), status chips
-  (role colour at ~10% tint behind the mono code), and selected form options.
-  Chips are rectangular, `2px` radius, Fragment Mono.
-- **Radius:** `2px` everywhere (printed-key feel). No pill shapes.
-- **Focus:** `outline: 2px solid` in the contextual role colour (learner violet in
-  the learner portal, etc.), `outline-offset: 2–3px`. Always visible.
-- **Inputs:** underline only (`border-bottom: 1px solid --rule`), transparent
-  background, Fragment Mono value, Apfel Grotezk `<label>` above. Focus darkens the
-  underline and shows the outline.
-- **Layout:** portal = a left vertical nav (the index to the key, Fragment Mono
-  list) + a centred content column (`max-width` ~64–72rem). Marketing and auth are
-  fully centred/symmetric. Tables left-align but keep the colour roles.
-- **Mobile:** the nav collapses into a native `<details>/<summary>` disclosure
-  (no JS). Tables reflow to stacked label/value rows using explicit markup labels.
-- **Motion:** none required; if added, ≤ 150ms opacity/transform, and gated by
+- **Cards.** Content lives in white `.card`s: `--radius-card` `.5rem`, `1px`
+  `--border`, `--shadow-card` (soft). Light-grey `--bg` page behind. Optional
+  `.card-head` = title (left) + tools/`⋯` (right). No nested cards.
+- **Sidebar** (`.sidebar`, white, `--nav-w` ≈ 15.5rem): brand row (green
+  `.brand-mark` tile + wordmark + `«` collapse), then `.nav-group`s each led by a
+  small uppercase `.label`; `.nav-item` = a letter-tile `.ic` + label; the active
+  item is a green-tint pill with green text and a solid-green tile. A `.side-promo`
+  card (green gradient, white text + white button) sits at the bottom, then
+  `.side-foot` (viewer ID + theme toggle).
+- **Top bar** (`.topbar`, sticky, blur): pill `.search` with `⌘K` `kbd`, a
+  `.spacer`, round `.icon-btn`s (help, notifications), an `.avatar` (initials in
+  the identity colour).
+- **Buttons:** `.btn` (light, bordered) default; `.btn--brand` (green) for the
+  main in-context action (Enrol, Create class, Continue); `.btn--primary` (dark
+  near-black) for the top-level page action (reference's "Export Report");
+  `.btn--danger` (red) destructive; `.btn--quiet` link-like.
+- **Badges** are pills: `●` + 3-letter code + word, tinted `--*-tint`.
+- **Inputs:** filled (`--surface`), `1px` border, `--radius`; focus = green border
+  + `3px` `--brand-tint` ring. Apfel Grotezk `<label>` above, Fragment Mono value.
+- **Radius:** `.5rem` controls · `.5rem` cards · pill on badges/search/avatar.
+- **Focus:** `2px solid var(--focus)` (green), `outline-offset 2px`. Always visible.
+- **Layout:** `.app` = `sidebar | (topbar + main)`. `.main-inner` `max-width` ≈
+  78rem, cards stacked / in `.grid-2` / `.grid-3`. Marketing + auth stay centred
+  (`.centre`, `.auth-card`). Tables left-align, reflow to stacked rows < 48rem.
+- **Mobile (< 64rem):** sidebar → `<details>` `.nav-mobile` (no JS).
+- **"Icons":** no SVG (skill ban still holds). Nav/stat/row icons are 1–2 char
+  Fragment Mono letter-tiles; a few inline text glyphs (`⌕ ⋯ ◔ ▤ ▦ ↗ ‹ ›`).
+- **Charts:** pure-CSS bar chart (`.chart .plot .bar`), pale-green bars, one
+  `data-peak` bar in solid green with a `.tip`.
+- **Motion:** ≤ 120ms colour transitions on hover, gated by
   `prefers-reduced-motion`.
 
-## Portal accent mapping
+## Brand / accent mapping
 
-- Learner portal → learner violet accents (nav active state, focus, portal label).
-- Tutor portal → tutor gold accents.
-- Admin portal → system grey / ink accents (admin belongs to neither peer).
+- **Palette = the live app theme** (`src/app/globals.css`, "katuwang theme"):
+  base-100/200/300 → surface / page / border, base-content → text; primary **teal**
+  → `--brand`; secondary **ube** → `--learner`; accent **marigold** → `--tutor`
+  (darkened for ID-text legibility); the app's info / success / warning / error → state.
+- **`--brand` (teal)** = brand + primary: sidebar active-pill, `.brand-mark`,
+  `.btn--brand`, focus ring, progress bars, chart bars, promo card. Success is a
+  separate green (`--success`); positive `.delta` uses success.
+- The **dark `.btn--primary`** is the top-level page action.
+- Identity colour appears on the viewer's ID in `.side-foot` and the `.avatar`
+  (learner → violet, tutor → gold, admin → grey), and on every `STU-`/`TUT-` token.
 
 ## Invariants (do not change without an explicit reopen)
 
-1. Two colour families with fixed jobs — identity (ink / learner / tutor / system)
-   for *who*, state (info / success / warning / error) for *what* — never mixed.
-2. Fragment Mono = notation, Apfel Grotezk = speech.
+1. Fragment Mono = notation, Apfel Grotezk = speech (see §Typography).
+2. Two colour families — identity (violet `STU`, gold `TUT`) for *who*, state
+   (info / success / warning / error / neutral) for *what* — never mixed. Green
+   `--brand` is the shared brand + primary + success colour.
 3. Every colour paired with a non-colour cue (prefix / code + word / glyph).
-4. No boxed cards / shadows; groups delimited by a hairline + mono label.
-   (Alerts and the moderation notice: a 2px coloured top rule + faint tint, no box.)
-5. `2px` radius maximum; measures in `ch`/`rem`.
+4. Card shell: white `.card`s (`.5rem` radius, soft shadow) on a light-grey page;
+   grouped sidebar with a green active-pill; sticky top bar; pill badges. See
+   §Composition.
+5. Radius: `.5rem` controls · `.5rem` cards · pill on badges/search/avatar.
+6. No pictographic SVG icons — letter-tiles / text glyphs only.
 
 ## Allowed variation
 
-Portal-specific lead colour; left-aligned dense layouts (keeping both families);
-new status codes reusing an existing state tint (info / success / warning / error
-/ neutral); tuning any colour token for contrast; content density per screen.
+Card contents and grid layout; stat/row/filter counts; which letter fills an
+`.ic`/`.tile`; new status codes reusing an existing state tint; tuning any colour
+token or shadow depth for contrast; dark-theme values; chart type.
 
 ## Prohibited normalisation
 
-No new state hue beyond info / success / warning / error; no mixing the two
-families; no card chrome, pills, or icon set replacing the code + word cue; no
-centring forced onto data tables; Apfel Grotezk never used for IDs/times/status;
-Fragment Mono never used for long body prose.
+No new state hue beyond info / success / warning / error / neutral; no mixing the
+two colour families; no SVG icon set; no nested cards; Apfel Grotezk never on
+IDs/times/status; Fragment Mono never on long body prose; data tables never
+force-centred.
 
 ## Open issues carried into Round 2 verification
 
-- Confirm every colour token (`--info --success --warning --error`, `--tutor`)
-  meets 4.5:1 at the smallest sizes actually used — amber and green on the warm
-  canvas most of all.
-- Confirm identity and state stay distinct in one row and in greyscale.
-- Confirm centred text blocks stay ≤ 60ch and left-align on dense screens.
-- Keyboard: nav disclosure, table row actions, and dialogs must be fully operable
+- Contrast at shipped sizes (target 4.5:1): badge text on its tint, `--text-mut`
+  on `--surface`, green nav-pill text, white on `--brand`.
+- Identity vs. state stay distinct in one row and in greyscale.
+- Letter-tile "icons" are a placeholder — decide keep-letters vs. icon-font vs.
+  CSS icons (no SVG) at implementation.
+- Keyboard: sidebar `<details>`, `⋯` menus, row actions, dialogs fully operable
   and focus-visible; dialogs trap focus while open and restore it on close.
+- Replace placeholder copy with real app strings.
 
-## User corrections appended at lock
+## History
 
-None. Locked as-is.
+- Locked (typography origin): Round 1 study E, 2026-09-01.
+- Reopen (a) 2026-09-01: added the semantic state colour family.
+- Reopen (b) 2026-09-01: replaced the flat legend composition with this card UI,
+  against `design/reference/Pasted image.png` (user override). Typography + the
+  two colour families kept.

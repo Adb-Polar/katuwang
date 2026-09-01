@@ -202,7 +202,7 @@ export default function EditClassForm({
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main column */}
             <div className="lg:col-span-2 space-y-6">
-              <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card kt-card">
                 <div className="card-body gap-4">
                   <h2 className="card-title text-sm font-bold">Class Info</h2>
 
@@ -318,7 +318,7 @@ export default function EditClassForm({
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card kt-card">
                 <div className="card-body gap-2">
                   <h2 className="card-title text-sm font-bold">Description</h2>
                   <textarea
@@ -330,7 +330,7 @@ export default function EditClassForm({
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card kt-card">
                 <div className="card-body gap-3">
                   <div className="flex items-center justify-between">
                     <h2 className="card-title text-sm font-bold">Sessions</h2>
@@ -352,7 +352,7 @@ export default function EditClassForm({
 
             {/* Sidebar */}
             <div className="space-y-6">
-              <div className="card bg-base-100 shadow-md border border-base-200">
+              <div className="card kt-card">
                 <div className="card-body gap-3">
                   <h2 className="card-title text-sm font-bold">At a Glance</h2>
                   <div className="flex items-center gap-2 text-xs text-base-content/70">

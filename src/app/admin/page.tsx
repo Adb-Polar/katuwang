@@ -63,27 +63,27 @@ export default async function AdminDashboard() {
         actions={<StatusBadge tone="error" label="Admin" size="sm" />}
       />
 
-      <div className="stats bg-base-100 shadow-md border border-base-200 w-full flex-wrap stats-vertical sm:stats-horizontal">
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Learners</div>
-          <div className="stat-value text-lg font-serif">{learnerCount}</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Learners</span>
+          <span className="kt-stat-value">{learnerCount}</span>
         </div>
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Tutors</div>
-          <div className="stat-value text-lg font-serif">{tutorCount}</div>
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Tutors</span>
+          <span className="kt-stat-value">{tutorCount}</span>
         </div>
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Flagged Accounts</div>
-          <div className="stat-value text-lg font-serif">{flaggedAccountCount}</div>
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Flagged Accounts</span>
+          <span className="kt-stat-value">{flaggedAccountCount}</span>
         </div>
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Active Classes</div>
-          <div className="stat-value text-lg font-serif">{activeClassCount}</div>
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Active Classes</span>
+          <span className="kt-stat-value">{activeClassCount}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card bg-base-100 shadow-md border border-base-200">
+        <section className="lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <ScrollText className="h-4 w-4 text-primary" />
@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
           </div>
         </section>
 
-        <section className="card bg-base-100 shadow-md border border-base-200">
+        <section className="card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Needs attention</h2>
             {actions.map((a) => (
@@ -129,7 +129,7 @@ export default async function AdminDashboard() {
               >
                 <span>{a.label}</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{a.value}</span>
+                  <span className="kt-badge kt-badge--neutral">{a.value}</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>

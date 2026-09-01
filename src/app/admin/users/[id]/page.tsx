@@ -108,7 +108,7 @@ export default async function AdminUserDetailPage({
         actions={<AnonymousIdBadge id={user.anonymousId} role={idRole} size="md" showIcon />}
       />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3 p-6">
           <div className="flex items-center gap-2">
             <h2 className="card-title text-sm font-bold">Status</h2>
@@ -138,7 +138,7 @@ export default async function AdminUserDetailPage({
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card bg-base-100 shadow-md border border-base-200">
+        <section className="lg:col-span-2 card kt-card">
           <div className="card-body gap-2 p-6">
             <h2 className="card-title text-sm font-bold">Account information</h2>
             <dl className="divide-y divide-base-200">
@@ -152,7 +152,7 @@ export default async function AdminUserDetailPage({
           </div>
         </section>
 
-        <section className="card bg-base-100 shadow-md border border-base-200">
+        <section className="card kt-card">
           <div className="card-body gap-2 p-6">
             <h2 className="card-title text-sm font-bold">Activity</h2>
             {counts.map((c) => (
@@ -165,7 +165,7 @@ export default async function AdminUserDetailPage({
         </section>
       </div>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3 p-6">
           <h2 className="card-title text-sm font-bold">Recent moderation history</h2>
           {auditEntries.length === 0 ? (

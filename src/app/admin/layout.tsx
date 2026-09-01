@@ -5,14 +5,14 @@ import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, History, 
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: "Users", href: "/admin/users", icon: <Users className="w-4 h-4" /> },
-  { label: "Registrations", href: "/admin/registrations", icon: <UserCheck className="w-4 h-4" /> },
-  { label: "Classes", href: "/admin/classes", icon: <CalendarClock className="w-4 h-4" /> },
-  { label: "Certifications", href: "/admin/certifications", icon: <BadgeCheck className="w-4 h-4" /> },
-  { label: "Audit Log", href: "/admin/audit-log", icon: <History className="w-4 h-4" /> },
-  { label: "Reports", href: "/admin/reports", icon: <BarChart3 className="w-4 h-4" /> },
-  { label: "Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4" /> },
+  { label: "Dashboard", href: "/admin", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
+  { label: "Users", href: "/admin/users", icon: <Users className="w-4 h-4" />, group: "Main menu" },
+  { label: "Registrations", href: "/admin/registrations", icon: <UserCheck className="w-4 h-4" />, group: "Main menu" },
+  { label: "Classes", href: "/admin/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
+  { label: "Certifications", href: "/admin/certifications", icon: <BadgeCheck className="w-4 h-4" />, group: "Review" },
+  { label: "Audit Log", href: "/admin/audit-log", icon: <History className="w-4 h-4" />, group: "Review" },
+  { label: "Reports", href: "/admin/reports", icon: <BarChart3 className="w-4 h-4" />, group: "Review" },
+  { label: "Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4" />, group: "General" },
 ];
 
 export default async function AdminLayout({
