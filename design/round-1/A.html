@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A</title>
+<style>
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Mittel.woff2") format("woff2");
+    font-weight: 500; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Fett.woff2") format("woff2");
+    font-weight: 700; font-display: swap;
+  }
+
+  :root {
+    --paper: oklch(98.5% 0.006 85);
+    --ink: oklch(23% 0.012 60);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { background: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Apfel Grotezk", system-ui, sans-serif;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding: clamp(2rem, 7vw, 6rem) clamp(1.25rem, 6vw, 5rem);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.75rem, 8vw, 6rem);
+    min-height: 100vh;
+  }
+
+  .wordmark {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    text-indent: 0.42em;
+  }
+
+  .span {
+    text-align: center;
+    max-width: 34ch;
+    margin: 0 auto;
+  }
+
+  .display {
+    font-weight: 500;
+    font-size: clamp(2.1rem, 6.4vw, 4.1rem);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    max-width: 15ch;
+  }
+
+  .pledge {
+    font-size: clamp(1.02rem, 2.4vw, 1.2rem);
+    line-height: 1.5;
+    max-width: 27ch;
+  }
+
+  .session {
+    font-size: clamp(0.95rem, 2.1vw, 1.05rem);
+    font-weight: 500;
+    line-height: 1.5;
+    letter-spacing: 0.005em;
+  }
+
+  .nav {
+    font-size: 0.78rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    white-space: pre-wrap;
+    max-width: none;
+  }
+
+  .sides {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(2.5rem, 14vw, 12rem);
+    row-gap: 1.4rem;
+    align-items: start;
+  }
+
+  .left  { text-align: right; }
+  .right { text-align: left; }
+
+  .sides p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .sides .lead {
+    font-weight: 500;
+    font-size: 1.05rem;
+  }
+
+  .action {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  @media (max-width: 640px) {
+    .sides { grid-template-columns: 1fr; row-gap: 0.5rem; }
+    .left, .right { text-align: center; }
+    .left { margin-bottom: 1.75rem; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wordmark">Katuwang</div>
+
+  <p class="span display">Learn with a peer who gets it.</p>
+
+  <div class="sides">
+    <div class="left">
+      <p class="lead">Peer tutoring · Grades 7–12</p>
+      <p>Grade 9 · Section Rizal</p>
+      <p>6 verified topics · 2 pending requests</p>
+      <p class="action">Log in</p>
+    </div>
+    <div class="right">
+      <p class="lead">Academic match and support portal</p>
+      <p>Requested 28 Aug 2026 · reviewed by admin</p>
+      <p>Open · Enrolled · Completed · Suspended</p>
+      <p class="action">Create account</p>
+    </div>
+  </div>
+
+  <p class="span pledge">You are TUT-0148. Your learner is STU-2071. Names stay hidden on both sides.</p>
+
+  <p class="span session">Tue 4:00–5:30 PM — Algebra: linear equations</p>
+
+  <p class="span nav">Dashboard   Classes   Students   Requests   Assessments   Profile</p>
+
+</body>
+</html>

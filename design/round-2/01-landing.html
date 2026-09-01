@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang — landing</title>
+<link rel="stylesheet" href="base.css">
+<script src="theme-toggle.js"></script>
+</head>
+<body>
+
+  <header class="topbar">
+    <span class="wordmark">Katuwang</span>
+    <nav aria-label="Primary">
+      <button type="button" class="theme-toggle" data-theme-toggle>theme: light</button>
+      <a href="02-auth.html">Log in</a>
+      <a class="btn btn--primary" href="02-auth.html">Create account</a>
+    </nav>
+  </header>
+
+  <main class="centre stack" style="gap: var(--s7);">
+
+    <section class="stack" style="gap: var(--s4);">
+      <p class="eyebrow">Peer tutoring · Grades 7–12</p>
+      <h1 class="hero-h1">Learn with a peer who gets it.</h1>
+      <p style="font-size: 1.05rem;">
+        Katuwang matches Grade 7–12 students with a classmate who has been checked
+        on the topic — and keeps both names hidden the whole way through.
+      </p>
+      <div class="page-actions" style="margin-top: var(--s2);">
+        <a class="btn btn--primary" href="02-auth.html">Create account</a>
+        <a class="btn btn--quiet" href="02-auth.html">Log in</a>
+      </div>
+    </section>
+
+    <section class="stack" style="gap: var(--s3);">
+      <p class="section-label">How the names stay hidden</p>
+      <ul class="key-list">
+        <li>
+          <span class="k id r-learner">STU-2071</span>
+          <span class="v">A learner asking for help. Their tutor never sees their real name.</span>
+        </li>
+        <li>
+          <span class="k id r-tutor">TUT-0148</span>
+          <span class="v">A tutor who has passed an assessment on the topic. Their learner never sees their real name.</span>
+        </li>
+        <li>
+          <span class="k r-system">reviewed by admin</span>
+          <span class="v">The platform keeps the record — assessments, moderation, and the audit log.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="stack" style="gap: var(--s3);">
+      <p class="section-label">A class, the way you would see it</p>
+      <ul class="rlist">
+        <li>
+          <span class="when">Tue 4:00–5:30 PM</span>
+          <span class="what">Algebra: linear equations</span>
+          <span class="meta"><span class="id r-tutor">TUT-0148</span> · <span class="chip chip--success"><span class="code">OPN</span>Open</span></span>
+        </li>
+        <li>
+          <span class="when">Thu 4:00–5:00 PM</span>
+          <span class="what">Algebra: slope and intercepts</span>
+          <span class="meta"><span class="id r-tutor">TUT-0148</span> · <span class="chip chip--success"><span class="code">OPN</span>Open</span></span>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="stack" style="gap: var(--s2);">
+      <p class="section-label">Academic match and support portal</p>
+      <p class="micro">
+        RA 10173 — student data protected. Real names, emails, and contact details
+        are never shared across the learner–tutor boundary.
+      </p>
+    </footer>
+
+  </main>
+
+</body>
+</html>

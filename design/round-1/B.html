@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B</title>
+<style>
+  @font-face {
+    font-family: "League Spartan";
+    src: url("fonts/LeagueSpartan-var.ttf") format("truetype");
+    font-weight: 100 900; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Mittel.woff2") format("woff2");
+    font-weight: 500; font-display: swap;
+  }
+
+  :root {
+    --paper: oklch(96.5% 0.012 95);
+    --primary: oklch(26% 0.03 42);
+    --secondary: oklch(50% 0.024 45);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--primary);
+    font-family: "Apfel Grotezk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(2.5rem, 8vw, 6.5rem) clamp(1.25rem, 6vw, 5.5rem);
+    max-width: 54rem;
+  }
+
+  .head {
+    font-family: "League Spartan", system-ui, sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-size: clamp(2.4rem, 9vw, 4.2rem);
+    line-height: 0.92;
+    margin-bottom: 0.5rem;
+  }
+
+  .subhead {
+    font-weight: 400;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: clamp(2.75rem, 8vw, 5rem);
+  }
+
+  ol { list-style: none; }
+
+  li {
+    display: grid;
+    grid-template-columns: 3.2ch 1fr;
+    column-gap: clamp(1rem, 4vw, 2.5rem);
+    padding: clamp(1.1rem, 3vw, 1.7rem) 0;
+  }
+
+  .n {
+    font-family: "Apfel Grotezk", monospace;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    color: var(--secondary);
+    line-height: 1.35;
+    padding-top: 0.35em;
+  }
+
+  .call {
+    font-family: "League Spartan", system-ui, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: clamp(1.35rem, 4.6vw, 2.5rem);
+    line-height: 1.0;
+    color: var(--primary);
+  }
+
+  .meta {
+    margin-top: 0.55rem;
+    font-weight: 400;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    color: var(--secondary);
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+  <div class="head">Katuwang</div>
+  <div class="subhead">Peer tutoring · Grades 7–12</div>
+
+  <ol>
+    <li>
+      <span class="n">01</span>
+      <div>
+        <div class="call">Learn with a peer who gets it.</div>
+        <div class="meta">Academic match and support portal</div>
+      </div>
+    </li>
+    <li>
+      <span class="n">02</span>
+      <div>
+        <div class="call">Grade 9 · Section Rizal</div>
+        <div class="meta">6 verified topics · 2 pending requests</div>
+      </div>
+    </li>
+    <li>
+      <span class="n">03</span>
+      <div>
+        <div class="call">Tue 4:00–5:30 PM — Algebra: linear equations</div>
+        <div class="meta">Dashboard   Classes   Students   Requests   Assessments   Profile</div>
+      </div>
+    </li>
+    <li>
+      <span class="n">04</span>
+      <div>
+        <div class="call">You are TUT-0148. Your learner is STU-2071. Names stay hidden on both sides.</div>
+        <div class="meta">Requested 28 Aug 2026 · reviewed by admin</div>
+      </div>
+    </li>
+    <li>
+      <span class="n">05</span>
+      <div>
+        <div class="call">Open · Enrolled · Completed · Suspended</div>
+        <div class="meta">Create account          Log in</div>
+      </div>
+    </li>
+  </ol>
+
+</body>
+</html>

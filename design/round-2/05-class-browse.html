@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang — browse classes</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .browse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: 0 var(--s6); }
+  .class-entry {
+    border-top: 1px solid var(--rule);
+    padding: var(--s4) 0 var(--s5);
+    display: flex; flex-direction: column; gap: var(--s2);
+  }
+  .class-entry .code { font-family: var(--mono); font-size: .74rem; letter-spacing: .1em; color: var(--system); }
+  .class-entry h3 a { text-decoration: none; }
+  .class-entry h3 a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
+  .class-entry .topics { display: flex; flex-wrap: wrap; gap: var(--s2); margin: var(--s1) 0; }
+  .class-entry .desc { font-size: .9rem; color: var(--ink); }
+  .class-entry .row {
+    font-family: var(--mono); font-size: .8rem; color: var(--system);
+    display: flex; flex-wrap: wrap; gap: var(--s2) var(--s4); margin-top: var(--s2);
+    align-items: center;
+  }
+  .class-entry[data-muted] { opacity: .6; }
+</style>
+<script src="theme-toggle.js"></script>
+</head>
+<body data-portal="learner">
+
+  <div class="shell">
+
+    <nav class="nav" aria-label="Learner">
+      <div class="brand">
+        <span class="wordmark">Katuwang</span>
+        <span class="portal-label">Learner</span>
+      </div>
+      <ul class="nav-list">
+        <li><a href="03-portal-dashboard.html">Dashboard</a></li>
+        <li><a href="05-class-browse.html" aria-current="page">Browse classes</a></li>
+        <li><a href="#my">My classes</a></li>
+        <li><a href="#match">Auto match</a></li>
+        <li><a href="#req">My requests</a></li>
+        <li><a href="#profile">Profile</a></li>
+      </ul>
+      <div class="nav-foot">
+        <span class="id r-learner">STU-2071</span>
+        <a href="#logout">Log out</a>
+        <button type="button" class="theme-toggle" data-theme-toggle>theme: light</button>
+      </div>
+    </nav>
+
+    <details class="nav-mobile">
+      <summary><span class="wordmark" style="font-size:.8rem;">Katuwang</span><span class="id r-learner">STU-2071</span></summary>
+      <ul class="nav-list">
+        <li><a href="03-portal-dashboard.html">Dashboard</a></li>
+        <li><a href="05-class-browse.html" aria-current="page">Browse classes</a></li>
+        <li><a href="#my">My classes</a></li>
+        <li><a href="#match">Auto match</a></li>
+        <li><a href="#req">My requests</a></li>
+        <li><a href="#profile">Profile</a></li>
+        <li><a href="#logout">Log out</a></li>
+        <li><button type="button" class="theme-toggle" data-theme-toggle>theme: light</button></li>
+      </ul>
+    </details>
+
+    <main class="main">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <div class="title-wrap">
+            <p class="eyebrow">Learner portal</p>
+            <h1>Browse classes</h1>
+            <p>Published classes open to Grade 9. Tutors are shown by ID only.</p>
+          </div>
+          <div class="page-actions">
+            <a class="btn btn--quiet" href="#my">My classes →</a>
+          </div>
+        </div>
+
+        <div class="filters">
+          <span class="field" style="margin:0; max-width: 18rem;">
+            <label for="q">Search</label>
+            <input id="q" type="search" placeholder="topic or class code">
+          </span>
+          <span class="field" style="margin:0; max-width: 12rem;">
+            <label for="subj">Subject</label>
+            <select id="subj"><option>All subjects</option><option selected>Mathematics</option><option>English</option><option>Science</option></select>
+          </span>
+          <span class="field" style="margin:0; max-width: 10rem;">
+            <label for="grade">Grade</label>
+            <select id="grade"><option selected>Grade 9</option><option>Grade 10</option></select>
+          </span>
+          <a href="#clear" class="btn btn--quiet">Clear</a>
+          <span class="micro" style="padding-bottom:.5em;">7 classes</span>
+        </div>
+
+        <div class="browse-grid">
+
+          <article class="class-entry">
+            <span class="code">MTH-9-014</span>
+            <h3><a href="06-class-detail.html">Mathematics</a> &nbsp;<span class="chip chip--ink" style="vertical-align:middle;"><span class="code">G9</span>Grade 9</span></h3>
+            <div class="topics">
+              <span class="topic topic--verified">linear equations</span>
+              <span class="topic topic--verified">slope</span>
+              <span class="topic">word problems</span>
+            </div>
+            <p class="desc">Small-group work on setting up and solving first-degree equations, twice a week.</p>
+            <div class="row">
+              <span>Tue 4:00–5:30 PM</span>
+              <span>4 / 6 seats</span>
+              <span class="id r-tutor">TUT-0148</span>
+              <span class="chip chip--success"><span class="code">OPN</span>Open</span>
+            </div>
+          </article>
+
+          <article class="class-entry">
+            <span class="code">MTH-9-021</span>
+            <h3><a href="06-class-detail.html">Mathematics</a> &nbsp;<span class="chip chip--ink" style="vertical-align:middle;"><span class="code">G9</span>Grade 9</span></h3>
+            <div class="topics">
+              <span class="topic topic--verified">fractions</span>
+              <span class="topic">ratio and proportion</span>
+            </div>
+            <p class="desc">Review clinic before the second-quarter exam. One long session on Saturdays.</p>
+            <div class="row">
+              <span>Sat 9:00–11:00 AM</span>
+              <span>6 / 6 seats</span>
+              <span class="id r-tutor">TUT-0201</span>
+              <span class="chip chip--warning"><span class="code">FUL</span>Full</span>
+            </div>
+          </article>
+
+          <article class="class-entry">
+            <span class="code">ENG-9-006</span>
+            <h3><a href="06-class-detail.html">English</a> &nbsp;<span class="chip chip--ink" style="vertical-align:middle;"><span class="code">G9</span>Grade 9</span></h3>
+            <div class="topics">
+              <span class="topic topic--verified">thesis statements</span>
+              <span class="topic">paragraph structure</span>
+            </div>
+            <p class="desc">Argumentative-essay planning: claims, evidence, and counter-arguments.</p>
+            <div class="row">
+              <span>Wed 5:00–6:00 PM</span>
+              <span>3 / 8 seats</span>
+              <span class="id r-tutor">TUT-0093</span>
+              <span class="chip chip--success"><span class="code">OPN</span>Open</span>
+            </div>
+          </article>
+
+          <article class="class-entry" data-muted>
+            <span class="code">SCI-9-003</span>
+            <h3><a href="06-class-detail.html">Science</a> &nbsp;<span class="chip chip--ink" style="vertical-align:middle;"><span class="code">G9</span>Grade 9</span></h3>
+            <div class="topics">
+              <span class="topic">photosynthesis</span>
+            </div>
+            <p class="desc">Not yet published — the tutor is still adding sessions.</p>
+            <div class="row">
+              <span>schedule pending</span>
+              <span class="id r-tutor">TUT-0177</span>
+              <span class="chip chip--neutral"><span class="code">DRF</span>Draft</span>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="pager">
+          <a href="#prev" class="btn btn--quiet" aria-disabled="true">‹ prev</a>
+          <span class="of">page 1 / 2</span>
+          <a href="#next" class="btn btn--quiet">next ›</a>
+        </div>
+
+        <div class="empty">
+          <p class="eyebrow">Empty state</p>
+          <p>No published classes match these filters yet.</p>
+          <a href="#req" class="btn">Request this topic instead</a>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+</body>
+</html>
