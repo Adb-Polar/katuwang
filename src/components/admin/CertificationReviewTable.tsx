@@ -125,7 +125,7 @@ export default function CertificationReviewTable() {
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={approveTarget || rejectTarget ? null : error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Certification Requests</h2>
 

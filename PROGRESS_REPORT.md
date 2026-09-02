@@ -143,7 +143,7 @@ The platform follows a modern full-stack monolithic architecture using the **Nex
 ---
 
 ### 3. Design System & UI/UX Styling
-- **Color Palette & Theme Tokens (`src/app/globals.css`, `docs/style theme.md`):** Configured with custom DaisyUI theme tokens using OKLCH color space for accessibility and crisp contrast.
+- **Color Palette & Theme Tokens (`src/app/globals.css`, `docs/reference/theme.md`):** Configured with custom DaisyUI theme tokens using OKLCH color space for accessibility and crisp contrast.
 - **Custom Brand Mark (`src/components/symbols/icon.tsx`):** Custom SVG icon representing the Katuwang emblem.
 - **Responsive Layouts (`src/components/auth/AuthLayout.tsx`):** Standardized, centered authentication and registration layout containers with clean borders and subtle shadows.
 
@@ -284,10 +284,18 @@ erDiagram
 ```
 katuwang/
 ├── docs/
-│   ├── database_schema.md           # Database architecture and model specifications
-│   ├── Register & Login.md          # Implementation guide for authentication
-│   ├── Register & Login Plus.md     # Detailed architecture tutorial & reference
-│   └── style theme.md               # DaisyUI & CSS design system token definitions
+│   ├── README.md                    # Docs index
+│   ├── erd.md                       # Auto-generated Prisma ERD (current schema)
+│   ├── TODO.txt / TOTEST.txt        # Flat backlog + manual test scratchpads
+│   ├── plans/                       # Implementation plans (active + historical)
+│   │   ├── README.md                # Plan index with status
+│   │   ├── ui-redesign-tailwind-port.md
+│   │   ├── todo-cleanup-sprint.md   # (+ .totest.txt manual checklist)
+│   │   └── topic-requests-v2.md
+│   ├── roles/                       # Role reference: LEARNER / TUTOR / ADMIN
+│   └── reference/
+│       ├── auth-implementation.md   # Registration & login build guide
+│       └── theme.md                 # DaisyUI OKLCH theme tokens
 ├── prisma/
 │   ├── migrations/                  # SQL migration history files
 │   ├── schema.prisma                # Core Prisma database schema

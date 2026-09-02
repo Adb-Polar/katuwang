@@ -25,7 +25,10 @@ export default function ConfirmDialog({
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl shadow-xl">
+      <div
+        className="modal-box max-w-sm p-6 kt-card"
+        style={{ boxShadow: "var(--kt-shadow-pop)" }}
+      >
         <div className="flex items-start gap-3">
           {tone === "danger" && (
             <div className="p-2 rounded-lg bg-error/10 text-error shrink-0">
@@ -33,7 +36,7 @@ export default function ConfirmDialog({
             </div>
           )}
           <div className="space-y-1">
-            <h3 className="font-semibold text-sm text-base-content">{title}</h3>
+            <h3 className="font-bold text-sm text-base-content">{title}</h3>
             {description && <p className="text-xs text-base-content/60">{description}</p>}
           </div>
         </div>

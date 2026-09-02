@@ -121,7 +121,7 @@ export default function ClassDetailsView({
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main column */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card kt-card">
             <div className="card-body gap-4">
               <h2 className="card-title text-sm font-bold">Class Info</h2>
               <div className="grid grid-cols-2 gap-4 text-xs text-base-content/80">
@@ -161,13 +161,13 @@ export default function ClassDetailsView({
           </div>
 
           {sessions && (
-            <div className="card bg-base-100 shadow-md border border-base-200">
+            <div className="card kt-card">
               <div className="card-body gap-3">{sessions}</div>
             </div>
           )}
 
           {description && (
-            <div className="card bg-base-100 shadow-md border border-base-200">
+            <div className="card kt-card">
               <div className="card-body gap-2">
                 <h2 className="card-title text-sm font-bold">Description</h2>
                 <p className="text-xs text-base-content/70 leading-relaxed">{description}</p>
@@ -176,7 +176,7 @@ export default function ClassDetailsView({
           )}
 
           {roster && (
-            <div className="card bg-base-100 shadow-md border border-base-200">
+            <div className="card kt-card">
               <div className="card-body gap-3">{roster}</div>
             </div>
           )}
@@ -184,7 +184,7 @@ export default function ClassDetailsView({
 
         {/* Sidebar */}
         <div className="space-y-6">
-          <div className="card bg-base-100 shadow-md border border-base-200">
+          <div className="card kt-card">
             <div className="card-body gap-3">
               <h2 className="card-title text-sm font-bold">At a Glance</h2>
               <div className="flex items-center gap-2 text-xs text-base-content/70">

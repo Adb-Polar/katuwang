@@ -75,23 +75,21 @@ export default async function LearnerDashboard() {
           <Link
             key={s.label}
             href={s.href}
-            className="card bg-base-100 shadow-md border border-base-200 hover:border-primary/40 transition-colors"
+            className="card kt-card kt-stat p-5 hover:border-primary/40 transition-colors"
           >
-            <div className="card-body gap-1 p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/50">
-                  {s.label}
-                </span>
-                <s.icon className="h-4 w-4 text-primary/70" />
-              </div>
-              <span className="text-2xl font-serif font-bold">{s.value}</span>
+            <div className="kt-stat-top">
+              <span className="kt-tile w-9 h-9">
+                <s.icon className="h-4 w-4" />
+              </span>
+              <span className="kt-stat-title">{s.label}</span>
             </div>
+            <span className="kt-stat-value">{s.value}</span>
           </Link>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card bg-base-100 shadow-md border border-base-200">
+        <section className="lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold">Upcoming sessions</h2>
             {upcomingSessions.length === 0 ? (
@@ -107,7 +105,7 @@ export default async function LearnerDashboard() {
                       className="flex items-center justify-between gap-3 py-2.5 text-xs hover:bg-base-200/40 -mx-2 px-2 rounded"
                     >
                       <div className="min-w-0">
-                        <span className="badge badge-neutral badge-sm text-2xs font-bold uppercase mr-2">
+                        <span className="kt-badge kt-badge--neutral uppercase mr-2">
                           {s.class.subject}
                         </span>
                         <span className="text-base-content/80">{s.topic}</span>
@@ -123,7 +121,7 @@ export default async function LearnerDashboard() {
           </div>
         </section>
 
-        <section className="card bg-base-100 shadow-md border border-base-200">
+        <section className="card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Quick links</h2>
             {[

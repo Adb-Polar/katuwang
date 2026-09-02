@@ -11,7 +11,7 @@ export const metadata = {
 export default function RegisterPage() {
   return (
     <AuthLayout>
-      <div className="card bg-base-100 w-full shadow-sm border border-base-200">
+      <div className="card kt-card w-full">
         <div className="card-body gap-6 text-center items-center p-8">
           {/* Card Header */}
           <div className="flex flex-col items-center gap-2 text-center">

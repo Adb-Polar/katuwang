@@ -1,6 +1,6 @@
 ================================================================
 TODO Cleanup Sprint — manual test checklist
-Plan: docs/plan/todo-cleanup-sprint.md
+Plan: docs/plans/todo-cleanup-sprint.md
 Automated: pnpm exec tsc --noEmit && pnpm lint && pnpm test  (all green — 292 tests, through Chunk 13)
 ================================================================
 

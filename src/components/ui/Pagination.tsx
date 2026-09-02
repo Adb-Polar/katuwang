@@ -21,7 +21,7 @@ export default function Pagination({
   if (pageCount <= 1 && !onPageSizeChange) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 font-mono">
       <span className="text-2xs text-base-content/50">
         Page {page} of {pageCount} · {total} total
       </span>
@@ -29,7 +29,7 @@ export default function Pagination({
         {onPageSizeChange && (
           <select
             aria-label="Rows per page"
-            className="select select-xs select-bordered"
+            className="select select-xs select-bordered rounded-field text-2xs"
             value={pageSize}
             onChange={(e) => onPageSizeChange(Number(e.target.value))}
           >
@@ -44,7 +44,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="btn btn-outline btn-xs"
+          className="btn btn-ghost btn-xs"
         >
           <ChevronLeft className="w-3 h-3" />
           Prev
@@ -53,7 +53,7 @@ export default function Pagination({
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= pageCount}
-          className="btn btn-outline btn-xs"
+          className="btn btn-ghost btn-xs"
         >
           Next
           <ChevronRight className="w-3 h-3" />

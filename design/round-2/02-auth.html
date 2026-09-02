@@ -9,92 +9,98 @@
 </head>
 <body>
 
-  <header class="topbar">
-    <a href="01-landing.html" style="text-decoration: none;"><span class="wordmark">Katuwang</span></a>
+  <header class="mktbar">
+    <a href="01-landing.html" style="text-decoration:none;">
+      <div class="brand-row"><span class="brand-mark">K</span><span class="brand-name">Katuwang</span></div>
+    </a>
     <nav aria-label="Primary">
       <button type="button" class="theme-toggle" data-theme-toggle>theme: light</button>
       <a href="01-landing.html">Back to home</a>
     </nav>
   </header>
 
-  <main class="centre narrow stack" style="gap: var(--s6);">
+  <main class="centre narrow stack" style="gap:var(--s5);">
 
-    <div class="stack" style="gap: var(--s2);">
+    <div class="stack" style="gap:.3rem;">
       <p class="eyebrow">Account</p>
       <h1>Sign in to Katuwang</h1>
     </div>
 
-    <div class="tabs" role="tablist" aria-label="Auth mode">
-      <a role="tab" aria-current="true" href="#login">Log in</a>
-      <a role="tab" href="#register">Create account</a>
+    <div class="auth-card stack" style="gap:var(--s4);">
+      <div class="tabs" role="tablist" aria-label="Auth mode">
+        <a role="tab" aria-current="true" href="#login">Log in</a>
+        <a role="tab" href="#register">Create account</a>
+      </div>
+
+      <form id="login" class="stack" style="gap:var(--s2);" aria-labelledby="login-h">
+        <h2 id="login-h" class="eyebrow">Log in</h2>
+
+        <div class="alert alert--error" role="alert">
+          <div><strong>Sign-in failed.</strong> Email or password is incorrect.</div>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" inputmode="email" autocomplete="username"
+                 value="student@example.edu.ph" aria-invalid="true" aria-describedby="email-err">
+          <span id="email-err" class="err">check this address and try again</span>
+        </div>
+
+        <div class="field">
+          <label for="pw">Password</label>
+          <input id="pw" type="password" autocomplete="current-password" value="............">
+          <button type="button" class="btn btn--quiet" aria-pressed="false" style="align-self:flex-start;">Show password</button>
+        </div>
+
+        <label class="inline"><input type="checkbox"> Keep me signed in</label>
+
+        <div class="page-actions" style="margin-top:var(--s3); align-items:center;">
+          <button type="submit" class="btn btn--brand">Log in</button>
+          <a class="btn btn--quiet" href="#reset">Forgot password?</a>
+        </div>
+      </form>
     </div>
 
-    <form id="login" class="stack" style="gap: var(--s2);" aria-labelledby="login-h">
-      <h2 id="login-h" class="micro" style="letter-spacing:.14em; text-transform:uppercase;">Log in</h2>
-
-      <p class="alert alert--error" role="alert">
-        <strong>Sign-in failed.</strong> Email or password is incorrect.
-      </p>
-
-      <div class="field">
-        <label for="email">Email</label>
-        <input id="email" type="email" inputmode="email" autocomplete="username"
-               value="student@example.edu.ph" aria-invalid="true" aria-describedby="email-err">
-        <span id="email-err" class="err">check this address and try again</span>
-      </div>
-
-      <div class="field">
-        <label for="pw">Password</label>
-        <input id="pw" type="password" autocomplete="current-password" value="............">
-        <button type="button" class="btn btn--quiet" aria-pressed="false" style="align-self: flex-start;">show</button>
-      </div>
-
-      <label class="inline"><input type="checkbox"> Keep me signed in</label>
-
-      <div class="page-actions" style="margin-top: var(--s3); align-items: center;">
-        <button type="submit" class="btn btn--primary">Log in</button>
-        <a class="btn btn--quiet" href="#reset">Forgot password?</a>
-      </div>
-    </form>
-
-    <section id="register" class="stack" style="gap: var(--s3);">
-      <p class="section-label">Create account — choose your side</p>
+    <div class="auth-card stack" id="register" style="gap:var(--s3);">
+      <h2 class="eyebrow">Create account — choose your side</h2>
       <label class="option-row">
         <input type="radio" name="role" checked>
         <span>
-          <span class="o-title r-learner">I want help &nbsp;·&nbsp; <span class="id">STU-XXXX</span></span><br>
+          <span class="o-title" style="color:var(--learner);">I want help &nbsp;·&nbsp; <span class="id">STU-XXXX</span></span><br>
           <span class="o-desc">You browse classes, enrol, and request topics. Tutors see only your ID, grade, and section.</span>
         </span>
       </label>
       <label class="option-row">
         <input type="radio" name="role">
         <span>
-          <span class="o-title r-tutor">I can help &nbsp;·&nbsp; <span class="id">TUT-XXXX</span></span><br>
+          <span class="o-title" style="color:var(--tutor);">I can help &nbsp;·&nbsp; <span class="id">TUT-XXXX</span></span><br>
           <span class="o-desc">You pass a topic assessment, then create and run classes. Learners see only your ID.</span>
         </span>
       </label>
-      <p class="alert alert--info">
-        <strong>Heads up.</strong> RA 10173 — a guardian consent step follows for students under 18.
-      </p>
-      <div><a class="btn btn--primary" href="#next">Continue</a></div>
-    </section>
+      <div class="alert alert--info">
+        <div><strong>Heads up.</strong> RA 10173 — a guardian consent step follows for students under 18.</div>
+      </div>
+      <div><a class="btn btn--brand" href="#next">Continue</a></div>
+    </div>
 
-    <section class="states" aria-label="Component states reference">
-      <span class="cap">Primary button — states</span>
-      <div class="row">
-        <button class="btn btn--primary">Log in</button>
-        <button class="btn btn--primary" style="background: color-mix(in oklch, var(--ink) 86%, var(--canvas));">Log in · hover</button>
-        <button class="btn btn--primary" disabled>Log in · disabled</button>
-        <button class="btn btn--primary" aria-busy="true">… working</button>
-      </div>
-      <span class="cap">Text field — states</span>
-      <div class="row">
-        <span class="field" style="margin:0;"><label for="d1">Default</label><input id="d1" type="text" placeholder="section"></span>
-        <span class="field" style="margin:0;"><label for="d2">Focus</label><input id="d2" type="text" value="Rizal" style="border-color: var(--ink); outline: 2px solid var(--focus); outline-offset: 2px;"></span>
-        <span class="field" style="margin:0;"><label for="d3">Error</label><input id="d3" type="text" value="" aria-invalid="true"><span class="err">required</span></span>
-        <span class="field" style="margin:0;"><label for="d4">Disabled</label><input id="d4" type="text" value="—" disabled></span>
-      </div>
-    </section>
+    <div class="auth-card">
+      <h2 class="eyebrow" style="margin-bottom:var(--s4);">Component states reference</h2>
+      <section class="states">
+        <span class="cap">Primary button — states</span>
+        <div class="row">
+          <button class="btn btn--brand">Log in</button>
+          <button class="btn btn--brand" disabled>Disabled</button>
+          <button class="btn btn--brand" aria-busy="true">Working…</button>
+        </div>
+        <span class="cap">Text field — states</span>
+        <div class="row">
+          <span class="field" style="margin:0;"><label for="d1">Default</label><input id="d1" type="text" placeholder="section"></span>
+          <span class="field" style="margin:0;"><label for="d2">Focus</label><input id="d2" type="text" value="Rizal" style="border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-tint);"></span>
+          <span class="field" style="margin:0;"><label for="d3">Error</label><input id="d3" type="text" value="" aria-invalid="true"><span class="err">required</span></span>
+          <span class="field" style="margin:0;"><label for="d4">Disabled</label><input id="d4" type="text" value="—" disabled></span>
+        </div>
+      </section>
+    </div>
 
   </main>
 

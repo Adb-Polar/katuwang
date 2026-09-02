@@ -10,7 +10,7 @@
 - database modification needs confirmation
 - tables should be normalize 3NF
 - every plan should be written on /docs/plans/{plan overview name}.md
-
+- All changes must be logged on Changes.txt
 ## 🚀 Common Commands
 
 This project uses **pnpm** as its package manager.

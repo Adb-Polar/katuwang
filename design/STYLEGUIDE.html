@@ -4,660 +4,332 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Katuwang — style guide</title>
+<link rel="stylesheet" href="round-2/base.css">
+<script src="round-2/theme-toggle.js"></script>
 <style>
-  @font-face { font-family:"Apfel Grotezk"; src:url("round-2/fonts/ApfelGrotezk-Regular.woff2") format("woff2"); font-weight:400; font-display:swap; }
-  @font-face { font-family:"Apfel Grotezk"; src:url("round-2/fonts/ApfelGrotezk-Mittel.woff2") format("woff2"); font-weight:500; font-display:swap; }
-  @font-face { font-family:"Apfel Grotezk"; src:url("round-2/fonts/ApfelGrotezk-Fett.woff2") format("woff2"); font-weight:700; font-display:swap; }
-  @font-face { font-family:"Fragment Mono"; src:url("round-2/fonts/FragmentMono-Regular.woff2") format("woff2"); font-weight:400; font-style:normal; font-display:swap; }
-  @font-face { font-family:"Fragment Mono"; src:url("round-2/fonts/FragmentMono-Italic.woff2") format("woff2"); font-weight:400; font-style:italic; font-display:swap; }
-
-  :root {
-    --canvas: oklch(98% 0.004 90);
-    --ink: oklch(22% 0.01 70);
-    --system: oklch(48% 0.014 265);
-    --learner: oklch(45% 0.15 300);
-    --tutor: oklch(48% 0.12 88);
-    --info: oklch(52% 0.13 245);
-    --success: oklch(50% 0.13 150);
-    --warning: oklch(60% 0.13 65);
-    --error: oklch(53% 0.21 25);
-    --rule: color-mix(in oklch, var(--ink) 16%, transparent);
-    --rule-soft: color-mix(in oklch, var(--ink) 9%, transparent);
-    --tint-ink: color-mix(in oklch, var(--ink) 6%, var(--canvas));
-    --tint-l: color-mix(in oklch, var(--learner) 12%, var(--canvas));
-    --tint-t: color-mix(in oklch, var(--tutor) 14%, var(--canvas));
-    --tint-s: color-mix(in oklch, var(--system) 12%, var(--canvas));
-    --tint-info: color-mix(in oklch, var(--info) 14%, var(--canvas));
-    --tint-success: color-mix(in oklch, var(--success) 14%, var(--canvas));
-    --tint-warning: color-mix(in oklch, var(--warning) 17%, var(--canvas));
-    --tint-error: color-mix(in oklch, var(--error) 13%, var(--canvas));
-    --mono: "Fragment Mono", ui-monospace, "SFMono-Regular", monospace;
-    --sans: "Apfel Grotezk", system-ui, -apple-system, sans-serif;
-    --s2:.5rem; --s3:.75rem; --s4:1rem; --s5:1.5rem; --s6:2rem; --s7:3rem; --s8:4rem;
-    --radius: 2px;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  html { background: var(--canvas); }
-  body {
-    background: var(--canvas); color: var(--ink);
-    font-family: var(--sans); line-height: 1.55;
-    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-    max-width: 60rem; margin: 0 auto;
-    padding: clamp(var(--s6), 8vw, var(--s8)) clamp(var(--s4), 6vw, var(--s7));
-  }
-
-  h1 { font-weight: 500; font-size: clamp(1.9rem, 5vw, 2.6rem); letter-spacing: -0.01em; line-height: 1.1; }
-  h2 { font-weight: 500; font-size: 1.15rem; letter-spacing: -0.005em; }
-  h3 { font-weight: 500; font-size: .95rem; margin-bottom: var(--s2); }
-  p { max-width: 62ch; margin-top: var(--s3); }
-  ul, ol { margin-top: var(--s3); padding-left: 1.4rem; max-width: 62ch; }
-  li { margin-top: .3rem; }
-  a { color: inherit; text-underline-offset: 3px; }
-  a:hover { text-decoration-color: var(--tutor); }
-  code, .m { font-family: var(--mono); font-size: .85em; }
-
-  .eyebrow { font-family: var(--mono); font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--system); }
-  section { margin-top: var(--s8); }
-  section > .eyebrow { padding-top: var(--s3); border-top: 1px solid var(--rule); display: block; margin-bottom: var(--s3); }
-  .lede { font-size: 1.05rem; }
-  .micro { font-size: .75rem; color: var(--system); }
-
-  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); gap: var(--s4); margin-top: var(--s4); }
-  .sw { border-top: 1px solid var(--rule); padding-top: var(--s2); display: flex; flex-direction: column; gap: .2rem; }
-  .sw .dot { font-family: var(--mono); font-size: 1.4rem; line-height: 1; }
-  .sw .name { font-family: var(--sans); font-weight: 500; font-size: .85rem; }
-  .sw .val { font-family: var(--mono); font-size: .72rem; color: var(--system); }
-  .sw .job { font-size: .8rem; color: var(--ink); }
-
-  .specimen { border-top: 1px solid var(--rule); padding: var(--s4) 0; margin-top: var(--s4); }
-  .specimen > .eyebrow { margin-bottom: var(--s3); }
-  .rowdemo { display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center; }
-
-  .id { font-family: var(--mono); font-size: .9rem; }
-  .r-learner { color: var(--learner); } .r-tutor { color: var(--tutor); } .r-system { color: var(--system); }
-  .r-info { color: var(--info); } .r-success { color: var(--success); }
-  .r-warning { color: var(--warning); } .r-error { color: var(--error); }
-
-  .chip { font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; padding: .12em .5em .16em; border-radius: var(--radius); display: inline-block; }
-  .chip .code { opacity: .75; margin-right: .5ch; }
-  .chip--ink, .chip--neutral { background: var(--tint-ink); color: var(--ink); }
-  .chip--learner { background: var(--tint-l); color: var(--learner); }
-  .chip--tutor { background: var(--tint-t); color: var(--tutor); }
-  .chip--system { background: var(--tint-s); color: var(--system); }
-  .chip--info { background: var(--tint-info); color: var(--info); }
-  .chip--success { background: var(--tint-success); color: var(--success); }
-  .chip--warning { background: var(--tint-warning); color: var(--warning); }
-  .chip--error { background: var(--tint-error); color: var(--error); }
-
-  .alert { font-family: var(--mono); font-size: .82rem; padding: var(--s4); margin-top: var(--s3); border-top: 2px solid var(--system); background: var(--tint-s); color: var(--ink); }
-  .alert strong { font-weight: 700; }
-  .alert::before { font-weight: 700; margin-right: .6ch; }
-  .alert--info { border-top-color: var(--info); background: var(--tint-info); }
-  .alert--success { border-top-color: var(--success); background: var(--tint-success); }
-  .alert--warning { border-top-color: var(--warning); background: var(--tint-warning); }
-  .alert--error { border-top-color: var(--error); background: var(--tint-error); }
-  .alert--info::before { content: "i"; color: var(--info); }
-  .alert--success::before { content: "✓"; color: var(--success); }
-  .alert--warning::before { content: "!"; color: var(--warning); }
-  .alert--error::before { content: "!"; color: var(--error); }
-  .alert--info strong { color: var(--info); }
-  .alert--success strong { color: var(--success); }
-  .alert--warning strong { color: var(--warning); }
-  .alert--error strong { color: var(--error); }
-
-  .topic { font-family: var(--mono); font-size: .78rem; color: var(--ink); padding: .1em .45em .14em; background: var(--tint-ink); border-radius: var(--radius); display: inline-block; }
-  .topic--verified::before { content: "✓ "; color: var(--success); }
-
-  .btn { font-family: var(--mono); font-size: .82rem; letter-spacing: .03em; line-height: 1; padding: .7em 1.1em; border: 1px solid var(--ink); border-radius: var(--radius); background: transparent; color: var(--ink); cursor: pointer; display: inline-flex; gap: .6ch; }
-  .btn::before { content: "["; opacity: .45; } .btn::after { content: "]"; opacity: .45; }
-  .btn--primary { background: var(--ink); color: var(--canvas); }
-  .btn--quiet { border-color: transparent; padding-inline: 0; }
-  .btn--quiet::before, .btn--quiet::after { content: none; }
-  .btn--danger { border-color: var(--error); color: var(--error); }
-  .btn--danger.btn--primary { background: var(--error); color: var(--canvas); border-color: var(--error); }
-  .btn[disabled] { color: var(--system); border-color: var(--rule); cursor: not-allowed; }
-  .btn:focus-visible, a:focus-visible { outline: 2px solid var(--tutor); outline-offset: 2px; }
-
-  .field { display: flex; flex-direction: column; gap: var(--s2); max-width: 22rem; margin-top: var(--s3); }
-  .field > label { font-family: var(--sans); font-weight: 500; font-size: .85rem; }
-  .field input { font-family: var(--mono); font-size: .9rem; color: var(--ink); background: transparent; border: 0; border-bottom: 1px solid var(--rule); padding: .5em .1em; }
-  .field input:focus { border-color: var(--ink); outline: 2px solid var(--tutor); outline-offset: 3px; }
-  .field .err { font-family: var(--mono); font-size: .76rem; color: var(--system); font-weight: 700; }
-  .field .err::before { content: "! "; }
-
-  table { width: 100%; border-collapse: collapse; font-size: .85rem; margin-top: var(--s4); }
-  th { text-align: left; font-family: var(--sans); font-weight: 500; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--system); padding: var(--s2); border-bottom: 1px solid var(--rule); }
-  td { font-family: var(--mono); padding: var(--s3) var(--s2); border-bottom: 1px solid var(--rule-soft); }
-
-  .notice { border-top: 2px solid var(--error); background: var(--tint-error); padding: var(--s4); font-family: var(--mono); font-size: .82rem; color: var(--ink); margin-top: var(--s4); }
-  .notice strong { color: var(--error); }
-  .notice strong::before { content: "! "; }
-
-  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); margin-top: var(--s4); }
-  .do-dont > div { border-top: 1px solid var(--rule); padding-top: var(--s3); }
-  .do-dont h3::before { font-family: var(--mono); margin-right: .6ch; }
-  .do h3::before { content: "do"; color: var(--tutor); }
-  .dont h3::before { content: "not"; color: var(--system); }
-  .do-dont li { font-size: .88rem; }
-  @media (max-width: 40rem) { .do-dont { grid-template-columns: 1fr; } }
-
-  pre.prompt { font-family: var(--mono); font-size: .8rem; line-height: 1.6; background: var(--tint-ink); border-radius: var(--radius); padding: var(--s4); margin-top: var(--s3); white-space: pre-wrap; overflow-wrap: anywhere; }
-
-  .toc { font-family: var(--mono); font-size: .82rem; margin-top: var(--s5); columns: 2; column-gap: var(--s6); }
+  body { max-width: 70rem; margin: 0 auto; padding: clamp(1.5rem, 5vw, 3rem); }
+  .sg-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); flex-wrap: wrap; margin-bottom: var(--s5); }
+  section { margin-top: var(--s7); display: flex; flex-direction: column; gap: var(--s4); }
+  section > h2 { font-size: 1.1rem; }
+  .sg-row { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+  .swatch { display: flex; flex-direction: column; gap: .25rem; min-width: 11rem; }
+  .swatch .chipc { height: 2.2rem; border-radius: var(--radius); border: 1px solid var(--border); }
+  .swatch .n { font-family: var(--sans); font-weight: 600; font-size: .82rem; }
+  .swatch .v { font-family: var(--mono); font-size: .68rem; color: var(--text-mut); }
+  .swatch .j { font-size: .78rem; color: var(--text-mut); }
+  .toc { columns: 2; column-gap: var(--s6); font-family: var(--mono); font-size: .82rem; }
   .toc a { display: block; padding: .2rem 0; text-decoration: none; }
-  .toc a:hover { text-decoration: underline; text-decoration-color: var(--tutor); }
-
-  :root[data-theme="dark"] {
-    --canvas: oklch(23% 0.006 265); --ink: oklch(94% 0.006 90); --system: oklch(72% 0.02 265);
-    --learner: oklch(78% 0.12 300); --tutor: oklch(80% 0.12 90);
-    --info: oklch(72% 0.13 245); --success: oklch(74% 0.14 150);
-    --warning: oklch(80% 0.13 78); --error: oklch(70% 0.19 25);
-    --rule: color-mix(in oklch, var(--ink) 22%, transparent);
-    --rule-soft: color-mix(in oklch, var(--ink) 12%, transparent);
-    --tint-ink: color-mix(in oklch, var(--ink) 8%, var(--canvas));
-    --tint-l: color-mix(in oklch, var(--learner) 20%, var(--canvas));
-    --tint-t: color-mix(in oklch, var(--tutor) 20%, var(--canvas));
-    --tint-s: color-mix(in oklch, var(--system) 18%, var(--canvas));
-    --tint-info: color-mix(in oklch, var(--info) 22%, var(--canvas));
-    --tint-success: color-mix(in oklch, var(--success) 22%, var(--canvas));
-    --tint-warning: color-mix(in oklch, var(--warning) 22%, var(--canvas));
-    --tint-error: color-mix(in oklch, var(--error) 22%, var(--canvas));
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --canvas: oklch(23% 0.006 265); --ink: oklch(94% 0.006 90); --system: oklch(72% 0.02 265);
-      --learner: oklch(78% 0.12 300); --tutor: oklch(80% 0.12 90);
-      --info: oklch(72% 0.13 245); --success: oklch(74% 0.14 150);
-      --warning: oklch(80% 0.13 78); --error: oklch(70% 0.19 25);
-      --rule: color-mix(in oklch, var(--ink) 22%, transparent);
-      --rule-soft: color-mix(in oklch, var(--ink) 12%, transparent);
-      --tint-ink: color-mix(in oklch, var(--ink) 8%, var(--canvas));
-      --tint-l: color-mix(in oklch, var(--learner) 20%, var(--canvas));
-      --tint-t: color-mix(in oklch, var(--tutor) 20%, var(--canvas));
-      --tint-s: color-mix(in oklch, var(--system) 18%, var(--canvas));
-      --tint-info: color-mix(in oklch, var(--info) 22%, var(--canvas));
-      --tint-success: color-mix(in oklch, var(--success) 22%, var(--canvas));
-      --tint-warning: color-mix(in oklch, var(--warning) 22%, var(--canvas));
-      --tint-error: color-mix(in oklch, var(--error) 22%, var(--canvas));
-    }
-  }
-
-  .guide-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s4); flex-wrap: wrap; }
-  .theme-toggle {
-    font-family: var(--mono); font-size: .78rem; letter-spacing: .03em;
-    color: var(--system); background: transparent; border: 0; padding: .3em 0; cursor: pointer;
-  }
-  .theme-toggle::before { content: "["; opacity: .45; }
-  .theme-toggle::after  { content: "]"; opacity: .45; }
-  .theme-toggle:hover { color: var(--ink); }
-  .theme-toggle:focus-visible { outline: 2px solid var(--tutor); outline-offset: 2px; border-radius: var(--radius); }
+  pre.prompt { font-family: var(--mono); font-size: .78rem; line-height: 1.6; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--s4); white-space: pre-wrap; overflow-wrap: anywhere; }
+  .demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem,1fr)); gap: var(--s4); }
 </style>
-<script>
-(function () {
-  "use strict";
-  var KEY = "katuwang-theme", root = document.documentElement;
-  function apply(t) { if (t === "light" || t === "dark") root.setAttribute("data-theme", t); else root.removeAttribute("data-theme"); }
-  var saved = null; try { saved = localStorage.getItem(KEY); } catch (e) {}
-  apply(saved);
-  function eff() {
-    var t = root.getAttribute("data-theme");
-    if (t === "light" || t === "dark") return t;
-    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  }
-  function relabel(b) {
-    var m = eff(), explicit = root.getAttribute("data-theme");
-    b.textContent = "theme: " + m + (explicit ? "" : " (auto)");
-    b.setAttribute("aria-pressed", m === "dark" ? "true" : "false");
-  }
-  function wire() {
-    var bs = document.querySelectorAll("[data-theme-toggle]");
-    Array.prototype.forEach.call(bs, function (b) {
-      relabel(b);
-      b.addEventListener("click", function () {
-        var n = eff() === "dark" ? "light" : "dark";
-        apply(n); try { localStorage.setItem(KEY, n); } catch (e) {}
-        Array.prototype.forEach.call(document.querySelectorAll("[data-theme-toggle]"), relabel);
-      });
-    });
-  }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
-})();
-</script>
 </head>
 <body>
 
-  <div class="guide-top">
-    <p class="eyebrow">Katuwang · production baseline · frozen 2026-09-01</p>
+  <div class="sg-top">
+    <div>
+      <p class="eyebrow">Katuwang · production baseline · updated 2026-09-01</p>
+      <h1>Style guide</h1>
+    </div>
     <button type="button" class="theme-toggle" data-theme-toggle>theme: light</button>
   </div>
-  <h1>The key</h1>
-  <p class="lede">
-    Katuwang replaces names with a notation — <span class="id">STU-XXXX</span>,
-    <span class="id">TUT-XXXX</span>, plus grade, section, and status. The interface
-    is the key to that notation: calm, symmetric where the screen allows, delimited
-    by hairlines like a printed legend. Colour tells you which side of the
-    double-blind a token belongs to, so a real name is never needed.
-  </p>
-  <p class="micro">
-    Governing files: <span class="m">design/ROUND-2-CONTEXT.md</span> ·
-    <span class="m">design/PRODUCTION-BASELINE.md</span> ·
-    <span class="m">design/round-2/base.css</span>. Locked Round 1 study:
-    <span class="m">design/round-1/E.html</span>.
+
+  <p class="muted" style="max-width:64ch;">
+    Direction E typography (Fragment Mono + Apfel Grotezk) on a card-based
+    dashboard shell modelled on the supplied reference, with the palette mapped to
+    the live app theme (<span class="mono">src/app/globals.css</span>): teal brand,
+    ube learner, marigold tutor. Every colour keeps a non-colour cue.
+    Authority: <span class="mono">design/ROUND-2-CONTEXT.md</span> ·
+    <span class="mono">design/PRODUCTION-BASELINE.md</span> ·
+    <span class="mono">design/round-2/base.css</span>.
   </p>
 
-  <nav class="toc" aria-label="Contents">
-    <a href="#boundary">1 · Source boundary</a>
-    <a href="#type">2 · Typography</a>
-    <a href="#colour">3 · Colour — identity + state</a>
-    <a href="#status">4 · Status vocabulary</a>
-    <a href="#composition">5 · Composition</a>
-    <a href="#spacing">6 · Spacing &amp; radius</a>
-    <a href="#components">7 · Components</a>
-    <a href="#a11y">8 · Accessibility &amp; recoverability</a>
+  <nav class="toc" aria-label="Contents" style="margin-top:var(--s5);">
+    <a href="#type">1 · Typography</a>
+    <a href="#colour">2 · Colour</a>
+    <a href="#status">3 · Status &amp; alerts</a>
+    <a href="#shell">4 · App shell</a>
+    <a href="#cards">5 · Cards &amp; stats</a>
+    <a href="#controls">6 · Buttons, badges, inputs</a>
+    <a href="#data">7 · Tables, lists, chart</a>
+    <a href="#a11y">8 · Accessibility</a>
     <a href="#rules">9 · Invariants &amp; variation</a>
-    <a href="#assets">10 · Assets &amp; licences</a>
-    <a href="#proof">11 · Proof status &amp; open issues</a>
-    <a href="#continue">12 · Continuing the work</a>
+    <a href="#assets">10 · Assets</a>
+    <a href="#continue">11 · Continuing the work</a>
   </nav>
 
-  <section id="boundary">
-    <span class="eyebrow">1 · Source boundary</span>
-    <h2>Where the form came from</h2>
-    <p><strong>Allowed evidence:</strong> the name <em>Katuwang</em> (Tagalog:
-      helper / partner); Philippine K-12, Grades 7–12; double-blind anonymity under
-      RA 10173; the sequential IDs <span class="m">STU-XXXX</span> /
-      <span class="m">TUT-XXXX</span>; peer tutoring; three roles; the Filipino
-      <em>section</em> as a named cohort; weekly recurring session windows; topic
-      assessment; admin moderation and audit trail; students on phones.</p>
-    <p><strong>Prohibited influence:</strong> SaaS/admin dashboard aesthetics,
-      edtech products, Material / Meta house styles, design galleries and UI kits,
-      DaisyUI's default look, browsing type catalogues for a look. The premise came
-      from the notation system itself, not from any existing interface.</p>
-    <p><strong>Signature relationship:</strong> colour = which side of the
-      double-blind a token is on. Identities stay hidden because the colour already
-      tells the interface everything it needs.</p>
-  </section>
-
   <section id="type">
-    <span class="eyebrow">2 · Typography</span>
-    <h2>Two faces, two jobs</h2>
-    <p><strong>Fragment Mono</strong> — Wei Huang, SIL OFL 1.1 — is
-      <em>notation</em>: IDs, dates, times, counts, capacity, status codes,
-      navigation items, audit strings, code fields, buttons.</p>
-    <p><strong>Apfel Grotezk</strong> — Collletttivo / Alexander Meyer, SIL OFL
-      1.1 — is <em>speech</em>: page titles, section labels, sentences,
-      descriptions, form labels.</p>
-
-    <div class="specimen">
-      <span class="eyebrow">notation — Fragment Mono</span>
-      <p class="m" style="font-size:1rem; margin:0;">STU-2071 · TUT-0148 · Tue 4:00–5:30 PM · 4 / 6 · 28 Aug 2026</p>
+    <h2>1 · Typography</h2>
+    <p class="muted">Two faces, fixed jobs. Do not swap them.</p>
+    <div class="card">
+      <div class="card-head"><h2>Notation — Fragment Mono</h2></div>
+      <p class="mono" style="font-size:1rem;">STU-2071 · TUT-0148 · Tue 4:00–5:30 PM · 4 / 6 · +12.8% · 28 Aug 2026</p>
+      <p class="micro" style="margin-top:.5rem;">IDs, dates, times, counts, %, status codes, capacity, meeting links, <span class="mono">kbd</span>, big stat numbers.</p>
     </div>
-    <div class="specimen">
-      <span class="eyebrow">speech — Apfel Grotezk</span>
-      <p style="margin:0; font-size:1.4rem; font-weight:500; line-height:1.15;">Learn with a peer who gets it.</p>
+    <div class="card">
+      <div class="card-head"><h2>Speech — Apfel Grotezk</h2></div>
+      <h1 style="margin:0;">Welcome back, STU-2071</h1>
       <p style="margin-top:.4rem;">Small-group practice on setting up and solving first-degree equations.</p>
+      <p class="micro" style="margin-top:.5rem;">Page &amp; card titles, nav labels, section labels, sentences, form labels, button text.</p>
     </div>
-
-    <h3 style="margin-top:var(--s5);">Scale &amp; weight</h3>
-    <ul>
-      <li>Weights: 400 / 500 / 700 only. Low contrast — hierarchy comes from size, colour role, and space.</li>
-      <li>Page title <span class="m">clamp(1.6rem, 4vw, 2.1rem)</span>, weight 500. Section label = Fragment Mono <span class="m">.72rem</span>, <span class="m">.18em</span> tracking, uppercase, system grey.</li>
-      <li>Body <span class="m">1rem / 1.55</span>. Notation blocks get generous line-height (<span class="m">1.9–2.15</span>) so each line reads as its own legend entry.</li>
-      <li>Measures in <span class="m">ch</span> / <span class="m">rem</span>. Prose capped ~60ch; centred text ≤ 60ch or it left-aligns.</li>
-      <li>Fragment Mono never sets long body prose. Apfel Grotezk never sets an ID, time, count, or status.</li>
+    <ul class="muted" style="font-size:.88rem; padding-left:1.2rem;">
+      <li>Weights 400 / 500 / 600 / 700. Headings 700, tight tracking. Body <span class="mono">.9375rem / 1.55</span>.</li>
+      <li>Fragment Mono never sets long prose; Apfel Grotezk never sets an ID, time, count, or status.</li>
     </ul>
   </section>
 
   <section id="colour">
-    <span class="eyebrow">3 · Colour — identity + state</span>
-    <h2>Two colour families</h2>
-    <p>Canvas is warm near-white <span class="m">oklch(98% 0.004 90)</span>. Colour
-      does two jobs, kept separate. <strong>Identity</strong> colours say
-      <em>which side of the double-blind</em> a token is on — only ever on IDs and
-      identity-linked labels. <strong>State</strong> colours use conventional
-      semantics (blue / green / amber / red) for lifecycle and feedback.
-      <span class="micro">(Colour rules reopened 2026-09-01 for usability; typography and
-      layout stay locked.)</span></p>
+    <h2>2 · Colour</h2>
 
-    <h3 style="margin-top:var(--s5);">Identity — who</h3>
-    <div class="swatches">
-      <div class="sw">
-        <span class="dot" style="color:var(--ink)">Aa</span>
-        <span class="name">Ink — neutral</span>
-        <span class="val">oklch(22% 0.01 70)</span>
-        <span class="job">Headings, neutral prose and data, primary buttons.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-learner">Aa</span>
-        <span class="name">Learner — violet</span>
-        <span class="val">oklch(45% 0.15 300)</span>
-        <span class="job">Only <span class="m">STU-XXXX</span> + learner-portal accent.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-tutor">Aa</span>
-        <span class="name">Tutor — gold</span>
-        <span class="val">oklch(48% 0.12 88)</span>
-        <span class="job">Only <span class="m">TUT-XXXX</span> + tutor-portal accent.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-system">Aa</span>
-        <span class="name">System — grey</span>
-        <span class="val">oklch(48% 0.014 265)</span>
-        <span class="job">Muted meta, disabled, archived (<span class="m">Completed</span>, <span class="m">Draft</span>), admin-portal accent.</span>
-      </div>
+    <h3>Brand / neutrals</h3>
+    <div class="sg-row">
+      <div class="swatch"><span class="chipc" style="background:var(--brand)"></span><span class="n">Brand teal</span><span class="v">--brand</span><span class="j">app --color-primary · active nav, brand mark, .btn--brand, focus, progress, chart, promo</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--dark-btn)"></span><span class="n">Dark primary</span><span class="v">--dark-btn</span><span class="j">app --color-neutral · .btn--primary, the top-level page action</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--bg)"></span><span class="n">Page</span><span class="v">--bg</span><span class="j">app background</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--surface)"></span><span class="n">Surface</span><span class="v">--surface</span><span class="j">cards</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--text)"></span><span class="n">Text</span><span class="v">--text</span><span class="j">headings &amp; body</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--text-mut)"></span><span class="n">Muted</span><span class="v">--text-mut</span><span class="j">secondary text</span></div>
     </div>
 
-    <h3 style="margin-top:var(--s5);">State — what is happening</h3>
-    <div class="swatches">
-      <div class="sw">
-        <span class="dot r-info">Aa</span>
-        <span class="name">Info — blue</span>
-        <span class="val">oklch(52% 0.13 245)</span>
-        <span class="job">Informational notes, <span class="m">Scheduled</span>.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-success">Aa</span>
-        <span class="name">Success — green</span>
-        <span class="val">oklch(50% 0.13 150)</span>
-        <span class="job"><span class="m">Open</span>, <span class="m">Active</span>, <span class="m">Enrolled</span>, <span class="m">Published</span>, verified topics, confirmations.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-warning">Aa</span>
-        <span class="name">Warning — amber</span>
-        <span class="val">oklch(60% 0.13 65)</span>
-        <span class="job"><span class="m">Pending</span>, <span class="m">Full</span>, needs-attention banners.</span>
-      </div>
-      <div class="sw">
-        <span class="dot r-error">Aa</span>
-        <span class="name">Error — red</span>
-        <span class="val">oklch(53% 0.21 25)</span>
-        <span class="job"><span class="m">Suspended</span>, <span class="m">Cancelled</span>, validation errors, destructive actions, moderation notices.</span>
-      </div>
+    <h3>Identity — who (only on IDs)</h3>
+    <div class="sg-row">
+      <div class="swatch"><span class="chipc" style="background:var(--learner)"></span><span class="n">Learner violet</span><span class="v">--learner</span><span class="j">STU-XXXX, avatar, option-row "I want help"</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--tutor)"></span><span class="n">Tutor gold</span><span class="v">--tutor</span><span class="j">TUT-XXXX, avatar, option-row "I can help"</span></div>
+    </div>
+    <p class="sg-row"><span class="id id--learner">STU-2071</span><span class="id id--tutor">TUT-0148</span><span class="muted mono" style="font-size:.82rem;">reviewed by admin</span></p>
+
+    <h3>State — what is happening</h3>
+    <div class="sg-row">
+      <div class="swatch"><span class="chipc" style="background:var(--info)"></span><span class="n">Info blue</span><span class="v">--info</span><span class="j">informational, SCH Scheduled</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--success)"></span><span class="n">Success green</span><span class="v">--success</span><span class="j">OPN ACT ENR PUB, verified, +delta, confirmations</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--warning)"></span><span class="n">Warning amber</span><span class="v">--warning</span><span class="j">PEN Pending, FUL Full, attention</span></div>
+      <div class="swatch"><span class="chipc" style="background:var(--error)"></span><span class="n">Error red</span><span class="v">--error</span><span class="j">SUS CAN, field errors, destructive, moderation notice</span></div>
     </div>
 
-    <h3 style="margin-top:var(--s5);">Colour still never stands alone</h3>
-    <p>Every colour is paired with a redundant non-colour cue so the interface
-      survives greyscale and colour-blindness:</p>
-    <ul>
-      <li>IDs carry the <span class="m">STU-</span> / <span class="m">TUT-</span> prefix.</li>
-      <li>Status = a 3-letter Fragment Mono code <em>and</em> the full word.</li>
-      <li>Verified topics carry a leading <span class="m">✓</span>.</li>
-      <li>Alerts carry a leading glyph (<span class="m">i ✓ ! !</span>) + a bold lead word.</li>
-      <li>Errors: red + leading <span class="m">!</span> + heavier weight + position.</li>
-    </ul>
-
-    <h3 style="margin-top:var(--s5);">Keep the two families apart</h3>
-    <ul>
-      <li>Identity colour never marks a state; state colour never marks a person.</li>
-      <li>An <span class="m">STU-XXXX</span> stays violet even in a red
-        <span class="m">SUS Suspended</span> row — the ID and the status chip carry different colours on purpose.</li>
-      <li>Tutor gold hue sits at 88 to stay clear of amber (65).</li>
-      <li>No fifth state hue. New states reuse info / success / warning / error / neutral.</li>
-    </ul>
-
-    <h3 style="margin-top:var(--s5);">Portal accent mapping</h3>
-    <ul>
-      <li>Learner portal → learner violet (nav active state, focus ring, portal label).</li>
-      <li>Tutor portal → tutor gold.</li>
-      <li>Admin portal → system grey / ink (admin belongs to neither peer).</li>
-    </ul>
+    <p class="muted" style="font-size:.88rem;">
+      <strong>Keep the families apart.</strong> Identity colour never marks a
+      state; state colour never marks a person. An <span class="id id--learner">STU-2071</span>
+      stays violet in a red <span class="badge badge--error"><span class="code">SUS</span> Suspended</span> row.
+      Brand teal and success green are separate colours.
+    </p>
   </section>
 
   <section id="status">
-    <span class="eyebrow">4 · Status vocabulary</span>
-    <h2>Codes are the system's words</h2>
-    <p>Every lifecycle state is a chip: a mono code + the word, tinted by its
-      <em>state</em> colour.</p>
-    <div class="rowdemo" style="margin-top:var(--s4);">
-      <span class="chip chip--success"><span class="code">OPN</span>Open</span>
-      <span class="chip chip--success"><span class="code">ACT</span>Active</span>
-      <span class="chip chip--success"><span class="code">ENR</span>Enrolled</span>
-      <span class="chip chip--success"><span class="code">PUB</span>Published</span>
-      <span class="chip chip--info"><span class="code">SCH</span>Scheduled</span>
-      <span class="chip chip--warning"><span class="code">PEN</span>Pending</span>
-      <span class="chip chip--warning"><span class="code">FUL</span>Full</span>
-      <span class="chip chip--error"><span class="code">SUS</span>Suspended</span>
-      <span class="chip chip--error"><span class="code">CAN</span>Cancelled</span>
-      <span class="chip chip--neutral"><span class="code">CMP</span>Completed</span>
-      <span class="chip chip--neutral"><span class="code">DRF</span>Draft</span>
+    <h2>3 · Status &amp; alerts</h2>
+    <p class="muted">Every status is a pill badge: a dot, a 3-letter code, the full word.</p>
+    <div class="card">
+      <div class="sg-row">
+        <span class="badge badge--success"><span class="code">OPN</span> Open</span>
+        <span class="badge badge--success"><span class="code">ACT</span> Active</span>
+        <span class="badge badge--success"><span class="code">ENR</span> Enrolled</span>
+        <span class="badge badge--tutor"><span class="code">PUB</span> Published</span>
+        <span class="badge badge--info"><span class="code">SCH</span> Scheduled</span>
+        <span class="badge badge--warning"><span class="code">PEN</span> Pending</span>
+        <span class="badge badge--warning"><span class="code">FUL</span> Full</span>
+        <span class="badge badge--error"><span class="code">SUS</span> Suspended</span>
+        <span class="badge badge--error"><span class="code">CAN</span> Cancelled</span>
+        <span class="badge badge--neutral"><span class="code">CMP</span> Completed</span>
+        <span class="badge badge--neutral"><span class="code">DRF</span> Draft</span>
+      </div>
+      <p class="micro" style="margin-top:var(--s3);">New states reuse an existing state tint (info / success / warning / error / neutral) — never a new hue.</p>
     </div>
-    <p class="micro">New states join with a new 3-letter code and one of the five
-      state tints (info / success / warning / error / neutral) — never a new hue.</p>
-
-    <h3 style="margin-top:var(--s5);">Alerts</h3>
-    <div class="rowdemo" style="flex-direction:column; align-items:stretch; gap:var(--s3);">
-      <div class="alert alert--info"><strong>Heads up.</strong> A guardian consent step follows for students under 18.</div>
-      <div class="alert alert--success"><strong>Enrolled.</strong> You are in Mathematics MTH-9-014. First session Tue 4:00 PM.</div>
-      <div class="alert alert--warning"><strong>1 request still open.</strong> No class yet for your Geometry topic request.</div>
-      <div class="alert alert--error"><strong>Sign-in failed.</strong> Email or password is incorrect.</div>
+    <div class="card" style="gap:var(--s3); display:flex; flex-direction:column;">
+      <div class="alert alert--info"><div><strong>Heads up.</strong> A guardian consent step follows for students under 18.</div></div>
+      <div class="alert alert--success"><div><strong>Enrolled.</strong> You are in Mathematics MTH-9-014.</div></div>
+      <div class="alert alert--warning"><div><strong>1 request still open.</strong> No class yet for your Geometry topic.</div></div>
+      <div class="alert alert--error"><div><strong>Sign-in failed.</strong> Email or password is incorrect.</div></div>
     </div>
   </section>
 
-  <section id="composition">
-    <span class="eyebrow">5 · Composition</span>
-    <h2>A legend, not a set of cards</h2>
-    <ul>
-      <li><strong>No boxed cards, no drop shadows.</strong> A group is a single top
-        hairline (<span class="m">1px</span>, ink at 16%) + a Fragment Mono
-        uppercase label + content flowing beneath.</li>
-      <li><strong>Rules</strong> are only ever thin horizontal separators — section
-        tops, table rows, list rows. Never a full border/outline around content.</li>
-      <li><strong>Fills</strong> appear only on: primary buttons (ink fill, canvas
-        text), status chips (role tint ~10–13%), selected form options.</li>
-      <li><strong>Radius <span class="m">2px</span></strong> everywhere. No pills.</li>
-      <li><strong>Portal layout:</strong> a left vertical nav (Fragment Mono list —
-        the index to the key) + a centred content column, <span class="m">max-width ~64rem</span>.</li>
-      <li><strong>Marketing &amp; auth</strong> are fully centred / symmetric.
-        <strong>Data tables</strong> left-align but keep the colour roles.</li>
-      <li><strong>Mobile:</strong> the nav collapses to a native
-        <span class="m">&lt;details&gt;/&lt;summary&gt;</span> disclosure (no JS).
-        Tables reflow to stacked label/value rows via explicit markup labels.</li>
+  <section id="shell">
+    <h2>4 · App shell</h2>
+    <ul class="muted" style="font-size:.88rem; padding-left:1.2rem;">
+      <li><strong>Sidebar</strong> — white, ~15.5rem. Brand row (green tile + wordmark + <span class="mono">«</span>), then <span class="mono">.nav-group</span>s each with an uppercase <span class="mono">.label</span>. <span class="mono">.nav-item</span> = letter-tile <span class="mono">.ic</span> + label; active = green-tint pill + green text + solid-green tile.</li>
+      <li><strong>Promo</strong> — a green gradient <span class="mono">.side-promo</span> card at the bottom with white text and a white button.</li>
+      <li><strong>Top bar</strong> — sticky, blurred. Pill <span class="mono">.search</span> with <kbd>⌘K</kbd>, round <span class="mono">.icon-btn</span>s, <span class="mono">.avatar</span> (initials in the identity colour).</li>
+      <li><strong>Mobile &lt; 64rem</strong> — sidebar collapses into a <span class="mono">&lt;details&gt;</span> <span class="mono">.nav-mobile</span>. No JS.</li>
+      <li>"Icons" are 1–2 char Fragment Mono letter-tiles plus a few text glyphs (<span class="mono">⌕ ⋯ ◔ ▤ ▦ ↗ ‹ ›</span>). No SVG.</li>
     </ul>
+    <div class="card">
+      <div class="card-head"><h2>Nav item — states</h2></div>
+      <nav class="nav-group" style="max-width:16rem;">
+        <span class="label">Main menu</span>
+        <a class="nav-item" href="#x" aria-current="page"><span class="ic">Db</span>Dashboard <span class="muted" style="margin-left:auto;">active</span></a>
+        <a class="nav-item" href="#x"><span class="ic">Bc</span>Browse classes</a>
+        <a class="nav-item" href="#x"><span class="ic">Rq</span>My requests</a>
+      </nav>
+    </div>
   </section>
 
-  <section id="spacing">
-    <span class="eyebrow">6 · Spacing &amp; radius</span>
-    <h2>One scale</h2>
-    <p class="m" style="font-size:.85rem;">
-      --s2 .5rem &nbsp; --s3 .75rem &nbsp; --s4 1rem &nbsp; --s5 1.5rem &nbsp;
-      --s6 2rem &nbsp; --s7 3rem &nbsp; --s8 4rem &nbsp;·&nbsp; --radius 2px
-    </p>
-    <p>Section gap <span class="m">--s8</span>. Group gap <span class="m">--s6</span>.
-      Within a group, rows at <span class="m">--s3</span>. Page padding
-      <span class="m">--s6</span> block, <span class="m">clamp(--s4, 5vw, --s7)</span> inline.</p>
+  <section id="cards">
+    <h2>5 · Cards &amp; stats</h2>
+    <p class="muted">White <span class="mono">.card</span>: <span class="mono">1rem</span> radius, <span class="mono">1px</span> border, soft shadow. Optional <span class="mono">.card-head</span> (title left, <span class="mono">⋯</span> / actions right). No nested cards.</p>
+    <div class="grid grid-3">
+      <div class="card stat">
+        <div class="stat-top"><span class="tile">Cl</span><span class="stat-title">Enrolled classes</span><button class="dots" type="button" aria-label="More">⋯</button></div>
+        <span class="value">128,540</span>
+        <div class="delta-row"><span class="delta" data-dir="up">+12.8%</span> from last month</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-top"><span class="tile">Se</span><span class="stat-title">Sessions this week</span><button class="dots" type="button" aria-label="More">⋯</button></div>
+        <span class="value">4,892</span>
+        <div class="delta-row"><span class="delta" data-dir="up">+8.4%</span> from last month</div>
+      </div>
+      <div class="card stat">
+        <div class="stat-top"><span class="tile">Rq</span><span class="stat-title">Open requests</span><button class="dots" type="button" aria-label="More">⋯</button></div>
+        <span class="value">1</span>
+        <div class="delta-row"><span class="delta" data-dir="down">−1</span> since last month</div>
+      </div>
+    </div>
   </section>
 
-  <section id="components">
-    <span class="eyebrow">7 · Components</span>
-    <h2>Specimens</h2>
-
-    <div class="specimen">
-      <span class="eyebrow">ID tokens</span>
-      <div class="rowdemo">
-        <span class="id r-learner">STU-2071</span>
-        <span class="id r-tutor">TUT-0148</span>
-        <span class="id r-system">admin</span>
-      </div>
-    </div>
-
-    <div class="specimen">
-      <span class="eyebrow">Topic tags</span>
-      <div class="rowdemo">
-        <span class="topic topic--verified">linear equations</span>
-        <span class="topic topic--verified">slope</span>
-        <span class="topic">word problems</span>
-      </div>
-    </div>
-
-    <div class="specimen">
-      <span class="eyebrow">Buttons — default · primary · quiet · danger · disabled</span>
-      <div class="rowdemo">
+  <section id="controls">
+    <h2>6 · Buttons, badges, inputs</h2>
+    <div class="card">
+      <div class="card-head"><h2>Buttons</h2></div>
+      <div class="sg-row">
+        <button class="btn btn--brand">Enrol</button>
+        <button class="btn btn--primary">Export report</button>
         <button class="btn">Secondary</button>
-        <button class="btn btn--primary">Create class</button>
+        <button class="btn btn--danger">Cancel class</button>
         <button class="btn btn--quiet">Forgot password?</button>
-        <button class="btn btn--danger">Suspend</button>
-        <button class="btn" disabled>Disabled</button>
+        <button class="btn btn--brand" disabled>Disabled</button>
       </div>
-      <p class="micro">Bracket glyphs are decorative <span class="m">::before/::after</span> on a real <span class="m">&lt;button&gt;</span>/<span class="m">&lt;a&gt;</span> with a text label. Focus ring: 2px solid in the portal accent colour.</p>
+      <p class="micro" style="margin-top:var(--s3);"><span class="mono">.btn--brand</span> (green) = main in-context action · <span class="mono">.btn--primary</span> (dark) = top-level page action · <span class="mono">.btn--danger</span> (red) = destructive.</p>
     </div>
-
-    <div class="specimen">
-      <span class="eyebrow">Text field — default · error</span>
-      <div class="rowdemo" style="align-items:flex-start;">
-        <span class="field" style="margin:0;">
-          <label for="g1">Section</label>
-          <input id="g1" type="text" value="Rizal">
-        </span>
-        <span class="field" style="margin:0;">
-          <label for="g2">Capacity</label>
-          <input id="g2" type="text" value="0" aria-invalid="true" aria-describedby="g2e">
-          <span class="err" id="g2e">must be at least 1</span>
-        </span>
+    <div class="card">
+      <div class="card-head"><h2>Inputs</h2></div>
+      <div class="sg-row" style="align-items:flex-start;">
+        <span class="field" style="margin:0;"><label for="i1">Section</label><input id="i1" type="text" value="Rizal"></span>
+        <span class="field" style="margin:0;"><label for="i2">Capacity</label><input id="i2" type="text" value="0" aria-invalid="true" aria-describedby="i2e"><span class="err" id="i2e">must be at least 1</span></span>
+        <span class="field" style="margin:0;"><label for="i3">Disabled</label><input id="i3" type="text" value="—" disabled></span>
       </div>
-      <p class="micro">Underline only, transparent background, Fragment Mono value, Apfel Grotezk label above.</p>
+      <p class="micro" style="margin-top:var(--s3);">Filled surface, <span class="mono">1px</span> border, <span class="mono">.5rem</span> radius. Focus = green border + <span class="mono">3px</span> green ring. Label above (Apfel), value mono.</p>
     </div>
+  </section>
 
-    <div class="specimen">
-      <span class="eyebrow">Data table row</span>
-      <table>
-        <thead><tr><th>ID</th><th>Role</th><th>Grade · Section</th><th>Status</th><th>Joined</th></tr></thead>
-        <tbody>
-          <tr><td><span class="id r-learner">STU-2071</span></td><td>L · Learner</td><td>G9 · Rizal</td><td><span class="chip chip--success"><span class="code">ACT</span>Active</span></td><td>24 Aug 2026</td></tr>
-          <tr><td><span class="id r-tutor">TUT-0201</span></td><td>T · Tutor</td><td>G12 · Luna</td><td><span class="chip chip--error"><span class="code">SUS</span>Suspended</span></td><td>19 Jun 2026</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="specimen">
-      <span class="eyebrow">Moderation notice</span>
-      <div class="notice">
-        <strong>This class was suspended by an administrator on 30 Aug 2026.</strong>
-        <div style="margin-top:.5rem;">Reason: a learner report is under review. Sessions are hidden from browse until 12 Sep 2026.</div>
+  <section id="data">
+    <h2>7 · Tables, lists, chart</h2>
+    <div class="card">
+      <div class="card-head"><h2>Recent activity</h2><a class="btn btn--quiet" href="#x">View all</a></div>
+      <div class="table-wrap">
+        <table class="data">
+          <thead><tr><th>Activity</th><th>Who</th><th>Date</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><span class="with-ic"><span class="row-ic">✓</span>Session completed</span></td><td><span class="id id--learner">STU-2071</span></td><td>Wed, 12 Jun 2026</td><td><span class="badge badge--success"><span class="code">CMP</span> Completed</span></td></tr>
+            <tr><td><span class="with-ic"><span class="row-ic">▲</span>Keywords moved up</span></td><td><span class="id id--tutor">TUT-0148</span></td><td>Tue, 11 Jun 2026</td><td><span class="badge badge--info"><span class="code">IMP</span> Improved</span></td></tr>
+            <tr><td><span class="with-ic"><span class="row-ic">!</span>Report flagged</span></td><td><span class="id id--tutor">TUT-0201</span></td><td>Sun, 09 Jun 2026</td><td><span class="badge badge--error"><span class="code">SUS</span> Suspended</span></td></tr>
+          </tbody>
+        </table>
       </div>
-      <p class="micro">Grey top rule + grey tint + <span class="m">!</span> + bold. No red.</p>
     </div>
-
-    <div class="specimen">
-      <span class="eyebrow">Also in the system (see base.css)</span>
-      <p style="margin-top:.4rem;">Stat rows, fact grids (<span class="m">.facts</span> dl), ruled lists (<span class="m">.rlist</span>), the week grid, filter bars, tabs, pagination, empty states, and the dialog pattern (paper panel, accent top rule, ink-at-45% backdrop). All follow the same hairline + mono-label + role-colour rules shown above.</p>
+    <div class="card chart">
+      <div class="card-head"><h2>Overview</h2><button class="btn btn--quiet" type="button">This year ▾</button></div>
+      <div class="plot" role="img" aria-label="Example bar chart peaking in August">
+        <div class="bar" style="height:34%"></div><div class="bar" style="height:46%"></div>
+        <div class="bar" style="height:58%"></div><div class="bar" style="height:40%"></div>
+        <div class="bar" style="height:52%"></div><div class="bar" style="height:48%"></div>
+        <div class="bar" style="height:63%"></div>
+        <div class="bar" data-peak style="height:92%"><span class="tip"><span class="t-k">Aug</span>32,480</span></div>
+        <div class="bar" style="height:70%"></div><div class="bar" style="height:66%"></div>
+        <div class="bar" style="height:44%"></div><div class="bar" style="height:55%"></div>
+      </div>
+      <div class="xaxis"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Progress rows</h2></div>
+      <div class="prow"><span class="pf">MT</span><div class="pbody"><span class="pname">Mathematics · MTH-9-014</span><span class="track"><span style="width:78%"></span></span></div><span class="pct">78%</span></div>
+      <div class="prow"><span class="pf">EN</span><div class="pbody"><span class="pname">English · ENG-9-006</span><span class="track"><span style="width:64%"></span></span></div><span class="pct">64%</span></div>
     </div>
   </section>
 
   <section id="a11y">
-    <span class="eyebrow">8 · Accessibility &amp; recoverability — fixed boundaries</span>
-    <h2>Non-negotiable</h2>
-    <ul>
-      <li>Visible focus on every interactive element: <span class="m">2px solid</span> outline in the portal accent, <span class="m">outline-offset</span> 2–3px. Never removed.</li>
-      <li>Semantic HTML first — real <span class="m">&lt;button&gt;</span>, <span class="m">&lt;a&gt;</span>, <span class="m">&lt;table&gt;</span>, <span class="m">&lt;details&gt;</span>, <span class="m">&lt;label&gt;</span>. ARIA only where native elements cannot express the behaviour.</li>
-      <li>Every colour-coded item also carries a text or code cue (§3). Verify greyscale and colour-blind rendering.</li>
-      <li>Contrast target 4.5:1 for body text at shipped sizes; re-check every state colour (<span class="m">--info · --success · --warning · --error</span>) and <span class="m">--tutor</span> at the smallest sizes and tune the token, not the role.</li>
-      <li>Keyboard: nav disclosure, table row actions, and dialogs fully operable; a dialog traps focus while open and restores it on close.</li>
-      <li>Preserve user input across validation errors, network failures, accidental dismissal, and navigation.</li>
-      <li>Respect <span class="m">prefers-reduced-motion</span>; any motion ≤ 150ms opacity/transform.</li>
-      <li>Wide content (tables, code) scrolls inside its own container; the page body never scrolls sideways.</li>
+    <h2>8 · Accessibility — fixed boundaries</h2>
+    <ul class="muted" style="font-size:.88rem; padding-left:1.2rem;">
+      <li>Visible focus on every interactive element: <span class="mono">2px</span> green outline, inputs add a <span class="mono">3px</span> ring. Never removed.</li>
+      <li>Semantic HTML first — real <span class="mono">button</span>, <span class="mono">a</span>, <span class="mono">table</span>, <span class="mono">details</span>, <span class="mono">label</span>, <span class="mono">fieldset/legend</span>. ARIA only where native can't express it.</li>
+      <li>Every colour also carries a text/code/glyph cue (§2–3). Verify greyscale and colour-blind rendering.</li>
+      <li>Contrast target 4.5:1 at shipped sizes — badge text on its tint, muted text on surface, green nav-pill text, white on <span class="mono">--brand</span>.</li>
+      <li>Keyboard: sidebar <span class="mono">&lt;details&gt;</span>, <span class="mono">⋯</span> menus, row actions, dialogs fully operable; dialog traps focus while open, restores on close.</li>
+      <li>Preserve input across validation errors, network failures, dismissal, navigation.</li>
+      <li>Respect <span class="mono">prefers-reduced-motion</span>. Tables scroll inside <span class="mono">.table-wrap</span>; the body never scrolls sideways.</li>
     </ul>
   </section>
 
   <section id="rules">
-    <span class="eyebrow">9 · Invariants &amp; allowed variation</span>
-    <h2>What is fixed, what can move</h2>
-    <div class="do-dont">
-      <div class="do">
-        <h3>Allowed variation</h3>
-        <ul>
-          <li>Portal-specific lead / nav-active colour.</li>
-          <li>Left-aligned dense layouts (keeping identity + state roles intact).</li>
-          <li>New status codes reusing an existing state tint (info / success / warning / error / neutral).</li>
-          <li>Tuning any colour token's lightness/chroma for contrast.</li>
-          <li>Content density, row counts, filter counts per screen.</li>
+    <h2>9 · Invariants &amp; allowed variation</h2>
+    <div class="demo-grid">
+      <div class="card">
+        <h3>Fixed</h3>
+        <ul class="muted" style="font-size:.86rem; padding-left:1.1rem;">
+          <li>Fragment Mono = notation, Apfel Grotezk = speech.</li>
+          <li>Identity vs. state colour families, never mixed. Brand teal ≠ success green.</li>
+          <li>Every colour + a non-colour cue.</li>
+          <li>Card shell, grouped sidebar, sticky top bar, pill badges.</li>
+          <li>Radius <span class="mono">.625 / 1rem</span>; pill on badges/search/avatar.</li>
+          <li>No SVG icons — letter-tiles / glyphs only.</li>
         </ul>
       </div>
-      <div class="dont">
-        <h3>Prohibited normalisation</h3>
-        <ul>
-          <li>A new state hue beyond info / success / warning / error.</li>
-          <li>Mixing the families — identity colour on a state, or a state colour on a person.</li>
-          <li>Card chrome, pills, boxes/borders around content, shadows.</li>
-          <li>An icon set replacing the code + word cue.</li>
-          <li>Apfel Grotezk on IDs/times/status; Fragment Mono on long prose.</li>
-          <li>Centring forced onto data tables.</li>
+      <div class="card">
+        <h3>Free to vary</h3>
+        <ul class="muted" style="font-size:.86rem; padding-left:1.1rem;">
+          <li>Card contents, grid (<span class="mono">.grid-2/3</span>), counts.</li>
+          <li>Which letter fills an <span class="mono">.ic</span>/<span class="mono">.tile</span>.</li>
+          <li>New status codes on an existing state tint.</li>
+          <li>Colour-token lightness/chroma for contrast; shadow depth.</li>
+          <li>Dark-theme values; chart type.</li>
         </ul>
       </div>
     </div>
-    <p style="margin-top:var(--s5);"><strong>Reopening conditions.</strong> Reopen
-      the locked direction only for new subject evidence, cultural harm, an
-      accessibility failure unsolvable within these rules, a changed product
-      requirement, or an explicit user override. Record the reason and the
-      authorising decision in <span class="m">PRODUCTION-BASELINE.md</span>.</p>
+    <p class="muted" style="font-size:.86rem;"><strong>Reopen</strong> the direction only for new subject evidence, cultural harm, an unsolvable accessibility failure, a changed product need, or an explicit user override. Log it in <span class="mono">PRODUCTION-BASELINE.md</span> (two reopens already recorded there).</p>
   </section>
 
   <section id="assets">
-    <span class="eyebrow">10 · Assets &amp; licences</span>
-    <h2>Fonts</h2>
-    <ul>
-      <li><strong>Fragment Mono</strong> — Wei Huang. SIL OFL 1.1. Self-hostable, redistributable with the licence. No purchase.</li>
-      <li><strong>Apfel Grotezk</strong> — Collletttivo / Alexander Meyer. SIL OFL 1.1. Same terms.</li>
-      <li>Vendored in <span class="m">design/round-2/fonts/</span>. In the real app, self-host via <span class="m">next/font/local</span> — keep the OFL files, do not swap to a Google Fonts copy.</li>
-      <li>No icon library. Cues are characters (<span class="m">✓ ! › + –</span>) and 3-letter codes.</li>
+    <h2>10 · Assets &amp; licences</h2>
+    <ul class="muted" style="font-size:.88rem; padding-left:1.2rem;">
+      <li><strong>Fragment Mono</strong> — Wei Huang. SIL OFL 1.1.</li>
+      <li><strong>Apfel Grotezk</strong> — Collletttivo / Alexander Meyer. SIL OFL 1.1.</li>
+      <li>Vendored in <span class="mono">design/round-2/fonts/</span>. In the app, self-host via <span class="mono">next/font/local</span> — keep the OFL files.</li>
+      <li>No icon library. Cues are Fragment Mono letters and text glyphs.</li>
     </ul>
   </section>
 
-  <section id="proof">
-    <span class="eyebrow">11 · Proof status &amp; open issues</span>
-    <h2>Where this stands</h2>
-    <p><strong>Proof level: Round 2 artifact system available.</strong> Seven sample
-      screens + this system, user-approved 2026-09-01 and frozen. Screens use
-      placeholder copy and show structure + states, not wired behaviour.</p>
-    <p>Open before implementation: contrast re-check at shipped sizes; greyscale /
-      colour-blind pass; keyboard behaviour for disclosure, row actions, and
-      dialogs; input preservation on real forms; replace placeholder copy with real
-      app strings. Full list in <span class="m">PRODUCTION-BASELINE.md</span>.</p>
-  </section>
-
   <section id="continue">
-    <span class="eyebrow">12 · Continuing the work</span>
-    <h2>Request more from this language</h2>
-    <p>The visual language is frozen. Further artifacts are made on request — they
-      are not generated automatically. Copyable prompts:</p>
+    <h2>11 · Continuing the work</h2>
+    <p class="muted">The system is frozen; further artifacts are made on request.</p>
 
-    <h3 style="margin-top:var(--s5);">A new screen or component</h3>
-    <pre class="prompt">Using the Katuwang visual language in design/STYLEGUIDE.html and
-design/ROUND-2-CONTEXT.md, build a sample &lt;screen/component&gt; as a
-standalone HTML file in design/round-2/. Follow the frozen rules:
-identity colours (learner violet / tutor gold) kept separate from state
-colours (info blue / success green / warning amber / error red),
-Fragment Mono for notation / Apfel Grotezk for speech, hairline-delimited
-groups (no cards), 2px radius, a non-colour cue (code + word / glyph) on
-every colour. Placeholder copy is fine; show real states.</pre>
+    <h3>A new screen or component</h3>
+    <pre class="prompt">Using the Katuwang system in design/STYLEGUIDE.html + design/ROUND-2-CONTEXT.md
++ design/round-2/base.css, build a sample &lt;screen&gt; as a standalone HTML file in
+design/round-2/. Card shell (sidebar + topbar + cards), Fragment Mono for
+notation / Apfel Grotezk for speech, brand teal (app --color-primary), identity colours
+only on IDs, every colour + a code/word/glyph cue, no SVG icons. Placeholder
+copy is fine; show real states.</pre>
 
     <h3>Adapt an approved artifact</h3>
     <pre class="prompt">Adapt design/round-2/04-admin-table.html into the &lt;certifications /
-registrations / classes&gt; moderation table. Same layout system and
-component set; change only the columns, filters, and status codes.
-Add any new status as a 3-letter code + word on an existing colour role.</pre>
+registrations&gt; table. Same shell and components; change only columns, filters,
+and status codes. Any new status reuses an existing state tint.</pre>
 
-    <h3>Revise without reopening the direction</h3>
+    <h3>Revise without reopening</h3>
     <pre class="prompt">Within the frozen Katuwang baseline (no reopen), adjust &lt;detail&gt; in
-design/round-2/&lt;file&gt;. Keep every invariant in PRODUCTION-BASELINE.md.
-If the change would need a new hue, a card, or a pill, stop and flag it
-as a reopen instead.</pre>
+design/round-2/&lt;file&gt;. Keep every invariant in PRODUCTION-BASELINE.md. If the
+change needs a new hue, a nested card, or an SVG icon, stop and flag a reopen.</pre>
 
     <h3>Continue in a new thread</h3>
-    <pre class="prompt">Context: Katuwang UI language, direction E, frozen. Read
-design/ROUND-2-CONTEXT.md and design/STYLEGUIDE.html first, then
+    <pre class="prompt">Context: Katuwang UI, direction E typography on a card shell, frozen.
+Read design/ROUND-2-CONTEXT.md and design/STYLEGUIDE.html, then
 design/round-2/base.css. Then: &lt;task&gt;.</pre>
 
-    <h3>Move it into the real app (separate decision)</h3>
-    <pre class="prompt">Port the frozen Katuwang language into the Next.js app: map base.css
-tokens onto the DaisyUI theme in src/app/globals.css, self-host the two
-OFL fonts via next/font/local, and reshape components portal by portal.
-Plan first in docs/plans/, one portal per phase, no visual change shipped
-until a phase is reviewed.</pre>
+    <h3>Port into the real app (separate decision)</h3>
+    <pre class="prompt">Port the frozen Katuwang system into the Next.js app: map base.css tokens onto
+the DaisyUI theme in src/app/globals.css, self-host the two OFL fonts via
+next/font/local, rebuild the shell + components portal by portal. Plan in
+docs/plans/, one portal per phase, no visual change shipped until reviewed.</pre>
   </section>
 
-  <p class="micro" style="margin-top:var(--s8); padding-top:var(--s3); border-top:1px solid var(--rule);">
-    Katuwang · direction E · Fragment Mono + Apfel Grotezk (SIL OFL 1.1) ·
-    frozen 2026-09-01 · this guide is rendered in its own language.
+  <p class="micro" style="margin-top:var(--s8); border-top:1px solid var(--border); padding-top:var(--s4);">
+    Katuwang · Fragment Mono + Apfel Grotezk (SIL OFL 1.1) · card shell from the
+    supplied reference · updated 2026-09-01 · rendered in its own system.
   </p>
 
 </body>

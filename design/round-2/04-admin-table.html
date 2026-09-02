@@ -8,45 +8,71 @@
 <script src="theme-toggle.js"></script>
 </head>
 <body data-portal="admin">
+<div class="app">
 
-  <div class="shell">
+  <aside class="sidebar">
+    <div class="brand-row">
+      <span class="brand-mark">K</span>
+      <span class="brand-name">Katuwang</span>
+      <button class="collapse" type="button" aria-label="Collapse sidebar">«</button>
+    </div>
 
-    <nav class="nav" aria-label="Admin">
-      <div class="brand">
-        <span class="wordmark">Katuwang</span>
-        <span class="portal-label">Admin</span>
-      </div>
-      <ul class="nav-list">
-        <li><a href="#dash">Dashboard</a></li>
-        <li><a href="04-admin-table.html" aria-current="page">Users</a></li>
-        <li><a href="#reg">Registrations</a></li>
-        <li><a href="#cls">Classes</a></li>
-        <li><a href="#cert">Certifications</a></li>
-        <li><a href="#audit">Audit log</a></li>
-        <li><a href="#reports">Reports</a></li>
-        <li><a href="#settings">Settings</a></li>
-      </ul>
-      <div class="nav-foot">
-        <span class="r-system">admin</span>
-        <a href="#logout">Log out</a>
-        <button type="button" class="theme-toggle" data-theme-toggle>theme: light</button>
-      </div>
+    <nav class="nav-group" aria-label="Main">
+      <span class="label">Main menu</span>
+      <a class="nav-item" href="#dash"><span class="ic">Db</span>Dashboard</a>
+      <a class="nav-item" href="04-admin-table.html" aria-current="page"><span class="ic">Us</span>Users</a>
+      <a class="nav-item" href="#reg"><span class="ic">Rg</span>Registrations</a>
+      <a class="nav-item" href="#cls"><span class="ic">Cl</span>Classes</a>
+    </nav>
+    <nav class="nav-group" aria-label="Review">
+      <span class="label">Review</span>
+      <a class="nav-item" href="#cert"><span class="ic">Ct</span>Certifications</a>
+      <a class="nav-item" href="#audit"><span class="ic">Au</span>Audit log</a>
+      <a class="nav-item" href="#reports"><span class="ic">Rp</span>Reports</a>
+    </nav>
+    <nav class="nav-group" aria-label="Account">
+      <span class="label">General</span>
+      <a class="nav-item" href="#settings"><span class="ic">St</span>Settings</a>
+      <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
     </nav>
 
+    <div class="side-promo">
+      <strong>4 items need review</strong>
+      <p>Pending registrations and certification requests are waiting.</p>
+      <a class="btn" href="#reg">Open review queue</a>
+    </div>
+    <div class="side-foot">
+      <span class="id">admin</span>
+      <button class="theme-toggle" type="button" data-theme-toggle>theme: light</button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" aria-label="Search" placeholder="Search users, classes, audit…">
+        <kbd>⌘K</kbd>
+      </div>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" aria-label="Help">?</button>
+      <button class="icon-btn" type="button" aria-label="Notifications">◔</button>
+      <span class="avatar" aria-hidden="true">AD</span>
+    </header>
+
     <details class="nav-mobile">
-      <summary><span class="wordmark" style="font-size:.8rem;">Katuwang</span><span class="r-system mono">Admin</span></summary>
-      <ul class="nav-list">
-        <li><a href="#dash">Dashboard</a></li>
-        <li><a href="04-admin-table.html" aria-current="page">Users</a></li>
-        <li><a href="#reg">Registrations</a></li>
-        <li><a href="#cls">Classes</a></li>
-        <li><a href="#cert">Certifications</a></li>
-        <li><a href="#audit">Audit log</a></li>
-        <li><a href="#reports">Reports</a></li>
-        <li><a href="#settings">Settings</a></li>
-        <li><a href="#logout">Log out</a></li>
-        <li><button type="button" class="theme-toggle" data-theme-toggle>theme: light</button></li>
-      </ul>
+      <summary><span class="brand-mark" style="width:1.6rem;height:1.6rem;">K</span> Katuwang · Admin</summary>
+      <nav class="nav-group">
+        <a class="nav-item" href="#dash"><span class="ic">Db</span>Dashboard</a>
+        <a class="nav-item" href="04-admin-table.html" aria-current="page"><span class="ic">Us</span>Users</a>
+        <a class="nav-item" href="#reg"><span class="ic">Rg</span>Registrations</a>
+        <a class="nav-item" href="#cls"><span class="ic">Cl</span>Classes</a>
+        <a class="nav-item" href="#cert"><span class="ic">Ct</span>Certifications</a>
+        <a class="nav-item" href="#audit"><span class="ic">Au</span>Audit log</a>
+        <a class="nav-item" href="#reports"><span class="ic">Rp</span>Reports</a>
+        <a class="nav-item" href="#settings"><span class="ic">St</span>Settings</a>
+        <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+      </nav>
     </details>
 
     <main class="main">
@@ -54,126 +80,129 @@
 
         <div class="page-header">
           <div class="title-wrap">
-            <p class="eyebrow">Admin</p>
             <h1>Users</h1>
+            <p>128 accounts · 46 learners · 79 tutors · 3 admins</p>
           </div>
           <div class="page-actions">
             <a class="btn" href="#export">Export CSV</a>
+            <a class="btn btn--primary" href="#invite">Invite admin</a>
           </div>
         </div>
 
-        <div class="tabs" role="tablist" aria-label="Filter by role">
-          <a role="tab" aria-current="true" href="#all">All</a>
-          <a role="tab" href="#learners">Learners</a>
-          <a role="tab" href="#tutors">Tutors</a>
+        <div class="card">
+          <div class="card-head">
+            <div class="tabs" role="tablist" aria-label="Filter by role">
+              <a role="tab" aria-current="true" href="#all">All</a>
+              <a role="tab" href="#learners">Learners</a>
+              <a role="tab" href="#tutors">Tutors</a>
+            </div>
+            <div class="filters">
+              <span class="field" style="margin:0; max-width:16rem;">
+                <label for="q" class="micro">Search</label>
+                <input id="q" type="search" placeholder="ID, grade, section">
+              </span>
+              <span class="field" style="margin:0; max-width:11rem;">
+                <label for="st" class="micro">Status</label>
+                <select id="st"><option>All</option><option>Active</option><option>Suspended</option><option>Pending</option></select>
+              </span>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="data">
+              <thead>
+                <tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Grade · Section</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col"><span class="cell-label">Actions</span></th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="cell-label" aria-hidden="true">User</span><span class="with-ic"><span class="row-ic">L</span><a href="#u" class="id id--learner">STU-2071</a></span></td>
+                  <td><span class="cell-label" aria-hidden="true">Role</span>Learner</td>
+                  <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G9 · Rizal</td>
+                  <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--success"><span class="code">ACT</span> Active</span></td>
+                  <td><span class="cell-label" aria-hidden="true">Joined</span>24 Aug 2026</td>
+                  <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
+                </tr>
+                <tr>
+                  <td><span class="cell-label" aria-hidden="true">User</span><span class="with-ic"><span class="row-ic">T</span><a href="#u" class="id id--tutor">TUT-0148</a></span></td>
+                  <td><span class="cell-label" aria-hidden="true">Role</span>Tutor</td>
+                  <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G11 · Mabini</td>
+                  <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--success"><span class="code">ACT</span> Active</span></td>
+                  <td><span class="cell-label" aria-hidden="true">Joined</span>02 Jul 2026</td>
+                  <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
+                </tr>
+                <tr>
+                  <td><span class="cell-label" aria-hidden="true">User</span><span class="with-ic"><span class="row-ic">T</span><a href="#u" class="id id--tutor">TUT-0201</a></span></td>
+                  <td><span class="cell-label" aria-hidden="true">Role</span>Tutor</td>
+                  <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G12 · Luna</td>
+                  <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--error"><span class="code">SUS</span> Suspended</span></td>
+                  <td><span class="cell-label" aria-hidden="true">Joined</span>19 Jun 2026</td>
+                  <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#reinstate" class="btn btn--quiet">Reinstate</a></td>
+                </tr>
+                <tr>
+                  <td><span class="cell-label" aria-hidden="true">User</span><span class="with-ic"><span class="row-ic">L</span><a href="#u" class="id id--learner">STU-2088</a></span></td>
+                  <td><span class="cell-label" aria-hidden="true">Role</span>Learner</td>
+                  <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G8 · Del Pilar</td>
+                  <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--warning"><span class="code">PEN</span> Pending</span></td>
+                  <td><span class="cell-label" aria-hidden="true">Joined</span>31 Aug 2026</td>
+                  <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#review" class="btn btn--quiet">Review</a></td>
+                </tr>
+                <tr>
+                  <td><span class="cell-label" aria-hidden="true">User</span><span class="with-ic"><span class="row-ic">L</span><a href="#u" class="id id--learner">STU-2090</a></span></td>
+                  <td><span class="cell-label" aria-hidden="true">Role</span>Learner</td>
+                  <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G10 · Bonifacio</td>
+                  <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--success"><span class="code">ACT</span> Active</span></td>
+                  <td><span class="cell-label" aria-hidden="true">Joined</span>28 Aug 2026</td>
+                  <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card-head" style="margin: var(--s4) 0 0;">
+            <span class="pager"><span>Showing 1–5 of 128</span></span>
+            <span class="pager">
+              <a href="#prev" class="btn btn--quiet" aria-disabled="true">‹ Prev</a>
+              <span>Page 1 / 26</span>
+              <a href="#next" class="btn btn--quiet">Next ›</a>
+            </span>
+          </div>
         </div>
 
-        <div class="filters">
-          <span class="field" style="margin:0; max-width: 18rem;">
-            <label for="q">Search</label>
-            <input id="q" type="search" placeholder="ID, grade, section">
-          </span>
-          <span class="field" style="margin:0; max-width: 12rem;">
-            <label for="st">Status</label>
-            <select id="st">
-              <option>All</option><option>Active</option><option>Suspended</option><option>Pending</option>
-            </select>
-          </span>
-          <span class="micro" style="padding-bottom: .5em;">128 accounts</span>
-        </div>
-
-        <div class="table-wrap">
-          <table class="data">
-            <caption>Accounts — page 1 of 6</caption>
-            <thead>
-              <tr><th scope="col">ID</th><th scope="col">Role</th><th scope="col">Grade · Section</th><th scope="col">Status</th><th scope="col">Joined</th><th scope="col"><span class="cell-label">Actions</span></th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="cell-label" aria-hidden="true">ID</span><a href="#u" class="id r-learner">STU-2071</a></td>
-                <td><span class="cell-label" aria-hidden="true">Role</span>L · Learner</td>
-                <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G9 · Rizal</td>
-                <td><span class="cell-label" aria-hidden="true">Status</span><span class="chip chip--success"><span class="code">ACT</span>Active</span></td>
-                <td><span class="cell-label" aria-hidden="true">Joined</span>24 Aug 2026</td>
-                <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
-              </tr>
-              <tr>
-                <td><span class="cell-label" aria-hidden="true">ID</span><a href="#u" class="id r-tutor">TUT-0148</a></td>
-                <td><span class="cell-label" aria-hidden="true">Role</span>T · Tutor</td>
-                <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G11 · Mabini</td>
-                <td><span class="cell-label" aria-hidden="true">Status</span><span class="chip chip--success"><span class="code">ACT</span>Active</span></td>
-                <td><span class="cell-label" aria-hidden="true">Joined</span>02 Jul 2026</td>
-                <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
-              </tr>
-              <tr>
-                <td><span class="cell-label" aria-hidden="true">ID</span><a href="#u" class="id r-tutor">TUT-0201</a></td>
-                <td><span class="cell-label" aria-hidden="true">Role</span>T · Tutor</td>
-                <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G12 · Luna</td>
-                <td><span class="cell-label" aria-hidden="true">Status</span><span class="chip chip--error"><span class="code">SUS</span>Suspended</span></td>
-                <td><span class="cell-label" aria-hidden="true">Joined</span>19 Jun 2026</td>
-                <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#reinstate" class="btn btn--quiet">Reinstate</a></td>
-              </tr>
-              <tr>
-                <td><span class="cell-label" aria-hidden="true">ID</span><a href="#u" class="id r-learner">STU-2088</a></td>
-                <td><span class="cell-label" aria-hidden="true">Role</span>L · Learner</td>
-                <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G8 · Del Pilar</td>
-                <td><span class="cell-label" aria-hidden="true">Status</span><span class="chip chip--warning"><span class="code">PEN</span>Pending</span></td>
-                <td><span class="cell-label" aria-hidden="true">Joined</span>31 Aug 2026</td>
-                <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#review" class="btn btn--quiet">Review</a></td>
-              </tr>
-              <tr>
-                <td><span class="cell-label" aria-hidden="true">ID</span><a href="#u" class="id r-learner">STU-2090</a></td>
-                <td><span class="cell-label" aria-hidden="true">Role</span>L · Learner</td>
-                <td><span class="cell-label" aria-hidden="true">Grade · Section</span>G10 · Bonifacio</td>
-                <td><span class="cell-label" aria-hidden="true">Status</span><span class="chip chip--success"><span class="code">ACT</span>Active</span></td>
-                <td><span class="cell-label" aria-hidden="true">Joined</span>28 Aug 2026</td>
-                <td><span class="cell-label" aria-hidden="true">Actions</span><a href="#moderate" class="btn btn--quiet">Manage</a></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="pager">
-          <a href="#prev" class="btn btn--quiet" aria-disabled="true">‹ prev</a>
-          <span class="of">page 1 / 6</span>
-          <a href="#next" class="btn btn--quiet">next ›</a>
-          <span class="field" style="margin:0; max-width: 9rem;">
-            <label for="rows" class="micro">rows</label>
-            <select id="rows"><option>25</option><option>50</option><option>100</option></select>
-          </span>
-        </div>
-
-        <div class="dialog-demo">
-          <p class="eyebrow">Confirm dialog — suspend</p>
-          <div class="backdrop">
-            <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-h">
-              <h2 id="dlg-h">Suspend <span class="id r-learner">STU-2071</span>?</h2>
-              <div class="field" style="margin:0;">
-                <label for="reason">Reason (shown in the audit log)</label>
-                <textarea id="reason" rows="3">Repeated no-shows reported by two tutors.</textarea>
-              </div>
-              <div class="field" style="margin:0; max-width: 12rem;">
-                <label for="dur">Duration</label>
-                <select id="dur"><option>7 days</option><option>14 days</option><option>Indefinite</option></select>
-              </div>
-              <div class="d-actions">
-                <button class="btn btn--primary btn--danger">Suspend</button>
-                <button class="btn btn--quiet">Cancel</button>
+        <div class="card">
+          <div class="card-head"><h2>Confirm dialog — suspend</h2></div>
+          <div class="dialog-demo">
+            <div class="backdrop">
+              <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-h">
+                <h2 id="dlg-h">Suspend <span class="id id--learner">STU-2071</span>?</h2>
+                <div class="field" style="margin:0;">
+                  <label for="reason">Reason (shown in the audit log)</label>
+                  <textarea id="reason" rows="3">Repeated no-shows reported by two tutors.</textarea>
+                </div>
+                <div class="field" style="margin:0; max-width:12rem;">
+                  <label for="dur">Duration</label>
+                  <select id="dur"><option>7 days</option><option>14 days</option><option>Indefinite</option></select>
+                </div>
+                <div class="d-actions">
+                  <button class="btn btn--primary btn--danger" type="button">Suspend account</button>
+                  <button class="btn btn--quiet" type="button">Cancel</button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="empty">
-          <p class="eyebrow">Empty state</p>
-          <p>No accounts match these filters.</p>
-          <a href="#clear" class="btn">Clear filters</a>
+        <div class="card">
+          <div class="empty">
+            <p class="eyebrow">Empty state</p>
+            <p>No accounts match these filters.</p>
+            <a href="#clear" class="btn">Clear filters</a>
+          </div>
         </div>
 
       </div>
     </main>
-
   </div>
 
+</div>
 </body>
 </html>

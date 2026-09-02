@@ -151,7 +151,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="flex items-center justify-between">
             <h2 className="card-title text-sm font-bold">Your topic requests</h2>

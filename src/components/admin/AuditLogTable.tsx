@@ -90,7 +90,7 @@ export default function AuditLogTable() {
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Moderation Action History</h2>
 

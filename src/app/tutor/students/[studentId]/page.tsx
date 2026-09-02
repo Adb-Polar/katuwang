@@ -58,7 +58,7 @@ export default async function TutorStudentProfilePage({
         actions={<AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="md" showIcon />}
       />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3 text-xs">
           <h2 className="card-title text-sm font-bold">Details</h2>
           <div className="divider my-0" />
@@ -71,7 +71,7 @@ export default async function TutorStudentProfilePage({
         </div>
       </section>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold">Enrolled in your classes ({enrollments.length})</h2>
           <div className="space-y-2">

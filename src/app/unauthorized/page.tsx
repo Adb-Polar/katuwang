@@ -10,7 +10,7 @@ export const metadata = {
 export default function UnauthorizedPage() {
   return (
     <AuthLayout>
-      <div className="card bg-base-100 shadow-2xl border border-base-200">
+      <div className="card kt-card">
         <div className="card-body gap-5 text-center items-center p-8">
           <div className="w-16 h-16 rounded-full bg-error/15 text-error flex items-center justify-center">
             <AlertTriangle className="w-8 h-8" />

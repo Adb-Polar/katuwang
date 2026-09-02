@@ -15,7 +15,7 @@ export default function LogoutConfirm() {
   };
 
   return (
-    <div className="card bg-base-100 shadow-2xl border border-base-200">
+    <div className="card kt-card">
       <div className="card-body gap-5 text-center items-center p-8">
         <BrandMark />
         <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center">
