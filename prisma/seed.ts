@@ -725,6 +725,22 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
       const hand = curated.get(`${subject}::${topic}`) ?? [];
       if (hand.length === 0 && perTopic === 0) continue;
 
+      // Skip rebuilding a topic whose questions are already referenced by a
+      // quiz attempt or class test — those questions are immutable and the FK
+      // would block deletion. Leave that topic's bank as-is.
+      const referenced = await prisma.assessmentQuestion.count({
+        where: {
+          subject,
+          topic,
+          OR: [
+            { attemptItems: { some: {} } },
+            { classTestItems: { some: {} } },
+            { classTestLinks: { some: {} } },
+          ],
+        },
+      });
+      if (referenced > 0) continue;
+
       // Re-runnable: clear this topic's questions first (cascades to options).
       await prisma.assessmentQuestion.deleteMany({ where: { subject, topic } });
 
@@ -786,6 +802,121 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
   }
 
   return created;
+}
+
+// ─── Class pre/post tests (demo) ────────────────────────────────────────────
+
+async function seedClassTests(): Promise<boolean> {
+  const cls = await prisma.tutorClass.findFirst({
+    where: {
+      subject: "MATH",
+      topics: { some: { topic: "Algebraic Expressions" } },
+      tutorProfile: { user: { email: "demo@tutor.test" } },
+      enrollments: { some: {} },
+    },
+    include: {
+      enrollments: { select: { learnerId: true }, orderBy: { enrolledAt: "asc" } },
+      tutorProfile: { select: { id: true, user: { select: { id: true } } } },
+    },
+  });
+  if (!cls || cls.enrollments.length === 0) return false;
+
+  // Re-runnable: drop this tutor's leftover custom questions for the topic that
+  // are no longer attached to anything (the class cascade already removed the
+  // test links / attempt items from a previous run).
+  await prisma.assessmentQuestion.deleteMany({
+    where: {
+      origin: "TUTOR",
+      ownerTutorProfileId: cls.tutorProfile.id,
+      topic: "Algebraic Expressions",
+      classTestLinks: { none: {} },
+      classTestItems: { none: {} },
+    },
+  });
+
+  const bankQs = await prisma.assessmentQuestion.findMany({
+    where: { origin: "BANK", subject: "MATH", topic: "Algebraic Expressions", active: true },
+    orderBy: { createdAt: "asc" },
+    take: 5,
+    select: { id: true, options: { select: { id: true, isCorrect: true }, orderBy: { position: "asc" } } },
+  });
+  if (bankQs.length < 5) return false;
+
+  const custom = await prisma.assessmentQuestion.create({
+    data: {
+      subject: "MATH",
+      topic: "Algebraic Expressions",
+      prompt: "What is the degree of the polynomial 4x^3 + x + 7?",
+      explanation: "The degree is the highest exponent, which is 3.",
+      origin: "TUTOR",
+      createdById: cls.tutorProfile.user.id,
+      ownerTutorProfileId: cls.tutorProfile.id,
+      options: {
+        create: [
+          { text: "3", isCorrect: true, position: 0 },
+          { text: "1", isCorrect: false, position: 1 },
+          { text: "4", isCorrect: false, position: 2 },
+          { text: "7", isCorrect: false, position: 3 },
+        ],
+      },
+    },
+    select: { id: true, options: { select: { id: true, isCorrect: true } } },
+  });
+
+  const pre = await prisma.classTest.create({
+    data: {
+      classId: cls.id,
+      kind: "PRE",
+      title: "Algebra Pre-test",
+      instructions: "A short diagnostic before we start. Answer as best you can.",
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+      questions: { create: bankQs.map((q, i) => ({ questionId: q.id, position: i })) },
+    },
+  });
+  const postSpecs = [...bankQs, custom];
+  const post = await prisma.classTest.create({
+    data: {
+      classId: cls.id,
+      kind: "POST",
+      title: "Algebra Post-test",
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+      questions: { create: postSpecs.map((q, i) => ({ questionId: q.id, position: i })) },
+    },
+  });
+
+  type QSpec = { id: string; options: { id: string; isCorrect: boolean }[] };
+  const makeAttempt = async (testId: string, learnerId: string, specs: QSpec[], correctFraction: number) => {
+    const correctUpTo = Math.round(specs.length * correctFraction);
+    const items = specs.map((q, idx) => {
+      const right = idx < correctUpTo;
+      const correctOpt = q.options.find((o) => o.isCorrect)!;
+      const wrongOpt = q.options.find((o) => !o.isCorrect) ?? correctOpt;
+      const chosen = right ? correctOpt : wrongOpt;
+      return { questionId: q.id, position: idx, selectedOptionId: chosen.id, isCorrect: right };
+    });
+    const correctCount = items.filter((i) => i.isCorrect).length;
+    await prisma.classTestAttempt.create({
+      data: {
+        classTestId: testId,
+        learnerId,
+        status: "SUBMITTED",
+        totalQuestions: items.length,
+        correctCount,
+        scorePercent: Math.round((correctCount / items.length) * 100),
+        submittedAt: new Date(),
+        items: { create: items },
+      },
+    });
+  };
+
+  const [l0, l1] = cls.enrollments.map((e) => e.learnerId);
+  await makeAttempt(pre.id, l0, bankQs, 0.4);
+  await makeAttempt(post.id, l0, postSpecs, 0.85);
+  if (l1) await makeAttempt(pre.id, l1, bankQs, 0.6);
+
+  return true;
 }
 
 async function main() {
@@ -964,6 +1095,9 @@ async function main() {
     Object.values(tutorProfiles)[0]?.id ?? null
   );
 
+  // ── Class pre/post tests (demo) ──
+  const classTestsSeeded = await seedClassTests();
+
   const tutorTotal = TUTORS.length + generatedTutorSeeds.length;
   const learnerTotal = LEARNERS.length + generatedLearnerSeeds.length;
   const classTotal = buildClasses().length + generatedClasses.length;
@@ -971,7 +1105,7 @@ async function main() {
   console.log("Seed complete.\n");
   console.log(`All dummy accounts use the password: ${DUMMY_PASSWORD}\n`);
   console.log(
-    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic)`
+    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic), class tests: ${classTestsSeeded ? "yes" : "skipped"}`
   );
   if (GEN.tutors || GEN.learners || GEN.classes || GEN.topicRequests) {
     console.log("Generated accounts use emails like gen.tutor.001@seed.katuwang.test / gen.learner.001@seed.katuwang.test");

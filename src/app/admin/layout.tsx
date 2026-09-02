@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, History, Settings, BarChart3 } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, ClipboardList, History, Settings, BarChart3 } from "lucide-react";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
@@ -11,6 +11,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Classes", href: "/admin/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
   { label: "Certifications", href: "/admin/certifications", icon: <BadgeCheck className="w-4 h-4" />, group: "Review" },
   { label: "Question Bank", href: "/admin/question-bank", icon: <FileQuestion className="w-4 h-4" />, group: "Review" },
+  { label: "Class Tests", href: "/admin/class-tests", icon: <ClipboardList className="w-4 h-4" />, group: "Review" },
   { label: "Audit Log", href: "/admin/audit-log", icon: <History className="w-4 h-4" />, group: "Review" },
   { label: "Reports", href: "/admin/reports", icon: <BarChart3 className="w-4 h-4" />, group: "Review" },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4" />, group: "General" },

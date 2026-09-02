@@ -9,6 +9,7 @@ import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import LearnerClassActions from "@/components/learner/LearnerClassActions";
 import TutorInfoTrigger from "@/components/learner/TutorInfoTrigger";
+import ClassTestsCard from "@/components/classes/ClassTestsCard";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -43,6 +44,21 @@ export default async function LearnerClassDetailPage({
         },
         _count: { select: { enrollments: true } },
         enrollments: { where: { learnerId: session!.user.id }, select: { id: true } },
+        tests: {
+          where: { status: { in: ["PUBLISHED", "CLOSED"] } },
+          orderBy: { kind: "asc" },
+          select: {
+            id: true,
+            kind: true,
+            title: true,
+            status: true,
+            _count: { select: { questions: true } },
+            attempts: {
+              where: { learnerId: session!.user.id },
+              select: { id: true, status: true, scorePercent: true, totalQuestions: true },
+            },
+          },
+        },
       },
     }),
     getSetting("showTutorRealNames"),
@@ -104,6 +120,29 @@ export default async function LearnerClassDetailPage({
             sessions={tutorClass.sessions.map((s) => ({ ...s, scheduledAt: s.scheduledAt.toISOString() }))}
           />
         </>
+      }
+      tests={
+        isEnrolled && tutorClass.tests.length > 0 ? (
+          <ClassTestsCard
+            classId={tutorClass.id}
+            audience="learner"
+            tests={tutorClass.tests.map((t) => ({
+              id: t.id,
+              kind: t.kind as "PRE" | "POST",
+              title: t.title,
+              status: t.status as "DRAFT" | "PUBLISHED" | "CLOSED",
+              questionCount: t._count.questions,
+              attempt: t.attempts[0]
+                ? {
+                    id: t.attempts[0].id,
+                    status: t.attempts[0].status as "IN_PROGRESS" | "SUBMITTED",
+                    scorePercent: t.attempts[0].scorePercent,
+                    totalQuestions: t.attempts[0].totalQuestions,
+                  }
+                : null,
+            }))}
+          />
+        ) : undefined
       }
       actions={
         <LearnerClassActions

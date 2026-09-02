@@ -84,6 +84,27 @@ enum QuestionRequestStatus {
   DISMISSED // Admin declined
 }
 
+enum QuestionOrigin {
+  BANK // Admin-authored, shared question bank (feeds certification quizzes)
+  TUTOR // Authored by a tutor for their own class tests only
+}
+
+enum ClassTestKind {
+  PRE
+  POST
+}
+
+enum ClassTestStatus {
+  DRAFT // Tutor is still building it
+  PUBLISHED // Learners can take it
+  CLOSED // No further attempts accepted
+}
+
+enum ClassTestAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
 // ─── User ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -119,10 +140,13 @@ model User {
   topicRequests       TopicRequest[]       @relation("LearnerTopicRequests")
   passwordResetTokens PasswordResetToken[]
 
-  // Assessment authoring / moderation (ADMIN only in practice)
+  // Assessment authoring / moderation (ADMIN or tutor via `authoredQuestions`)
   authoredQuestions        AssessmentQuestion[]    @relation("AuthoredQuestions")
   updatedAssessmentConfigs TopicAssessmentConfig[] @relation("UpdatedAssessmentConfigs")
   resolvedQuestionRequests QuestionRequest[]       @relation("ResolvedQuestionRequests")
+
+  // Class pre/post tests taken as an enrolled learner
+  classTestAttempts ClassTestAttempt[] @relation("LearnerClassTestAttempts")
 
   @@map("users")
 }
@@ -161,6 +185,9 @@ model TutorProfile {
   // Quiz attempts and "please add questions" requests
   assessmentAttempts AssessmentAttempt[]
   questionRequests   QuestionRequest[]
+
+  // Custom questions this tutor authored for their class tests
+  ownedQuestions AssessmentQuestion[] @relation("OwnedQuestions")
 
   @@map("tutor_profiles")
 }
@@ -221,6 +248,7 @@ model TutorClass {
   sessions          ClassSession[]
   enrollments       ClassEnrollment[]
   fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
+  tests             ClassTest[]
 
   @@map("tutor_classes")
 }
@@ -346,21 +374,27 @@ model PlatformSetting {
 // it is soft-retired via `active = false` and its content becomes immutable.
 
 model AssessmentQuestion {
-  id          String      @id @default(cuid())
-  subject     SubjectArea
-  topic       String
-  prompt      String      @db.Text
-  explanation String?     @db.Text // shown to the tutor after grading
-  active      Boolean     @default(true)
-  createdById String
-  createdBy   User        @relation("AuthoredQuestions", fields: [createdById], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String         @id @default(cuid())
+  subject             SubjectArea
+  topic               String
+  prompt              String         @db.Text
+  explanation         String?        @db.Text // shown after grading
+  active              Boolean        @default(true)
+  origin              QuestionOrigin @default(BANK)
+  createdById         String
+  createdBy           User           @relation("AuthoredQuestions", fields: [createdById], references: [id])
+  // Set only for `origin = TUTOR`: the tutor who owns this custom question.
+  ownerTutorProfileId String?
+  ownerTutorProfile   TutorProfile?  @relation("OwnedQuestions", fields: [ownerTutorProfileId], references: [id], onDelete: Cascade)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 
-  options      AssessmentOption[]
-  attemptItems AssessmentAttemptItem[]
+  options        AssessmentOption[]
+  attemptItems   AssessmentAttemptItem[]
+  classTestLinks ClassTestQuestion[]
+  classTestItems ClassTestAttemptItem[]
 
-  @@index([subject, topic, active])
+  @@index([origin, subject, topic, active])
   @@map("assessment_questions")
 }
 
@@ -372,7 +406,8 @@ model AssessmentOption {
   isCorrect  Boolean            @default(false)
   position   Int // 0-based display order
 
-  selectedInItems AssessmentAttemptItem[] @relation("SelectedOption")
+  selectedInItems     AssessmentAttemptItem[] @relation("SelectedOption")
+  classTestSelections ClassTestAttemptItem[]  @relation("ClassTestSelectedOption")
 
   @@unique([questionId, position])
   @@map("assessment_options")
@@ -457,4 +492,78 @@ model QuestionRequest {
   @@unique([tutorProfileId, subject, topic])
   @@index([status, subject])
   @@map("question_requests")
+}
+
+// ─── Class Pre/Post Test ────────────────────────────────────────────────────
+// A tutor builds one PRE and one POST test per class from bank + custom
+// questions. Diagnostic only — no pass mark. Editable while DRAFT; PUBLISHED
+// freezes the question set and lets enrolled learners take it once.
+
+model ClassTest {
+  id           String          @id @default(cuid())
+  classId      String
+  class        TutorClass      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  kind         ClassTestKind
+  title        String
+  instructions String?         @db.Text
+  status       ClassTestStatus @default(DRAFT)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  publishedAt  DateTime?
+  closedAt     DateTime?
+
+  questions ClassTestQuestion[]
+  attempts  ClassTestAttempt[]
+
+  @@unique([classId, kind])
+  @@map("class_tests")
+}
+
+model ClassTestQuestion {
+  id          String             @id @default(cuid())
+  classTestId String
+  classTest   ClassTest          @relation(fields: [classTestId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    AssessmentQuestion @relation(fields: [questionId], references: [id])
+  position    Int // 0-based display order
+
+  @@unique([classTestId, position])
+  @@unique([classTestId, questionId])
+  @@map("class_test_questions")
+}
+
+model ClassTestAttempt {
+  id             String                 @id @default(cuid())
+  classTestId    String
+  classTest      ClassTest              @relation(fields: [classTestId], references: [id], onDelete: Cascade)
+  learnerId      String
+  learner        User                   @relation("LearnerClassTestAttempts", fields: [learnerId], references: [id], onDelete: Cascade)
+  status         ClassTestAttemptStatus @default(IN_PROGRESS)
+  totalQuestions Int
+  correctCount   Int                    @default(0)
+  scorePercent   Int                    @default(0)
+  startedAt      DateTime               @default(now())
+  submittedAt    DateTime?
+
+  items ClassTestAttemptItem[]
+
+  @@unique([classTestId, learnerId])
+  @@index([learnerId])
+  @@map("class_test_attempts")
+}
+
+model ClassTestAttemptItem {
+  id               String             @id @default(cuid())
+  attemptId        String
+  attempt          ClassTestAttempt   @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         AssessmentQuestion @relation(fields: [questionId], references: [id])
+  position         Int
+  selectedOptionId String?
+  selectedOption   AssessmentOption?  @relation("ClassTestSelectedOption", fields: [selectedOptionId], references: [id], onDelete: SetNull)
+  isCorrect        Boolean?
+
+  @@unique([attemptId, position])
+  @@unique([attemptId, questionId])
+  @@map("class_test_attempt_items")
 }

@@ -34,7 +34,7 @@ export async function getTopicAssessmentStatus(
   const [counts, configs, attempts, requests, certs] = await Promise.all([
     prisma.assessmentQuestion.groupBy({
       by: ["subject", "topic"],
-      where: { active: true, subject: { in: subjects }, topic: { in: topics } },
+      where: { active: true, origin: "BANK", subject: { in: subjects }, topic: { in: topics } },
       _count: { _all: true },
     }),
     prisma.topicAssessmentConfig.findMany({

@@ -25,6 +25,7 @@ export default function ClassDetailsView({
   description,
   extraFacts,
   sessions,
+  tests,
   roster,
   sidebarExtra,
   actions,
@@ -56,6 +57,8 @@ export default function ClassDetailsView({
   extraFacts?: ReactNode;
   /** The class's Sessions card content (e.g. a <SessionsList /> plus an Add Session control). */
   sessions?: ReactNode;
+  /** Pre/post test card content, rendered below Sessions. */
+  tests?: ReactNode;
   /** Full-width content rendered below Sessions (e.g. the enrolled-learners roster). */
   roster?: ReactNode;
   /** Extra cards rendered in the right-hand sidebar, below the quick-facts card. */
@@ -163,6 +166,12 @@ export default function ClassDetailsView({
           {sessions && (
             <div className="card kt-card">
               <div className="card-body gap-3">{sessions}</div>
+            </div>
+          )}
+
+          {tests && (
+            <div className="card kt-card">
+              <div className="card-body gap-3">{tests}</div>
             </div>
           )}
 

@@ -29,7 +29,7 @@ export async function pickQuestionIds(
   }: { tutorProfileId: string; subject: SubjectArea; topic: string; count: number }
 ): Promise<string[]> {
   const pool = await tx.assessmentQuestion.findMany({
-    where: { subject, topic, active: true },
+    where: { subject, topic, active: true, origin: "BANK" },
     select: { id: true },
   });
   const poolIds = pool.map((q) => q.id);

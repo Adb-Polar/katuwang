@@ -8,6 +8,7 @@ import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import EnrolledLearnersTable from "@/components/classes/EnrolledLearnersTable";
 import ClassManageMenu from "@/components/tutor/ClassManageMenu";
+import ClassTestsCard from "@/components/classes/ClassTestsCard";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -36,6 +37,16 @@ export default async function TutorClassDetailPage({
       enrollments: {
         include: {
           learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+        },
+      },
+      tests: {
+        orderBy: { kind: "asc" },
+        select: {
+          id: true,
+          kind: true,
+          title: true,
+          status: true,
+          _count: { select: { questions: true } },
         },
       },
     },
@@ -77,6 +88,19 @@ export default async function TutorClassDetailPage({
             sessions={tutorClass.sessions.map((s) => ({ ...s, scheduledAt: s.scheduledAt.toISOString() }))}
           />
         </>
+      }
+      tests={
+        <ClassTestsCard
+          classId={tutorClass.id}
+          audience="tutor"
+          tests={tutorClass.tests.map((t) => ({
+            id: t.id,
+            kind: t.kind as "PRE" | "POST",
+            title: t.title,
+            status: t.status as "DRAFT" | "PUBLISHED" | "CLOSED",
+            questionCount: t._count.questions,
+          }))}
+        />
       }
       roster={
         <EnrolledLearnersTable

@@ -45,4 +45,18 @@ describe("pickQuestionIds", () => {
     const ids = await pickQuestionIds(tx, args);
     expect([...ids].sort()).toEqual(["q1", "q2", "q3"]);
   });
+
+  it("only draws from the admin bank (origin: BANK) — never tutor-authored questions", async () => {
+    const findMany = vi.fn().mockResolvedValue([{ id: "q1" }, { id: "q2" }, { id: "q3" }]);
+    const tx = {
+      assessmentQuestion: { findMany },
+      assessmentAttempt: { findFirst: vi.fn().mockResolvedValue(null) },
+    } as never;
+    await pickQuestionIds(tx, args);
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ origin: "BANK", active: true }),
+      })
+    );
+  });
 });

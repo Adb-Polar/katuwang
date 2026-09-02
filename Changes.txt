@@ -449,3 +449,167 @@ Verification
   `.font-bold{font-weight:var(--font-weight-bold)}` with
   `--font-weight-bold:500`.
 ================================================================================
+
+
+================================================================================
+PART 5 — FEATURE: Class pre/post tests (tutor-built, learner-taken)
+================================================================================
+
+Branch: class-pre-post-tests (off main @ a6419be). Not committed.
+
+Overview
+  A tutor builds one PRE and one POST test per class from admin-bank questions
+  and/or their own custom questions; enrolled learners take each once;
+  tutor / learner (own) / admin see results and the pre->post improvement.
+  Diagnostic only — score % + correct count, no pass/fail.
+
+--------------------------------------------------------------------------------
+5.1  DATABASE  (prisma/schema.prisma)  — migration 20260902081727_class_pre_post_tests
+--------------------------------------------------------------------------------
+
+New enums
+  QuestionOrigin          { BANK, TUTOR }
+  ClassTestKind           { PRE, POST }
+  ClassTestStatus         { DRAFT, PUBLISHED, CLOSED }
+  ClassTestAttemptStatus  { IN_PROGRESS, SUBMITTED }
+
+AssessmentQuestion — additions
+  + origin QuestionOrigin @default(BANK)   (existing rows migrate to BANK)
+  + ownerTutorProfileId String? -> TutorProfile ("OwnedQuestions", Cascade)
+  + back-relations classTestLinks[], classTestItems[]
+  index [subject,topic,active] -> [origin,subject,topic,active]
+
+New models
+  ClassTest             (class_tests)          — @@unique([classId, kind])
+  ClassTestQuestion     (class_test_questions) — ordered set; @@unique(classTestId,position) & (classTestId,questionId)
+  ClassTestAttempt      (class_test_attempts)  — @@unique([classTestId, learnerId]) (one per learner)
+  ClassTestAttemptItem  (class_test_attempt_items)
+
+New back-relations: TutorClass.tests, User.classTestAttempts
+  ("LearnerClassTestAttempts"), TutorProfile.ownedQuestions,
+  AssessmentOption.classTestSelections.
+
+Isolation: every "admin bank" query now filters origin: "BANK" so tutor
+custom questions never leak into the admin Question Bank UI, coverage counts,
+or the certification question pool. Patched:
+  src/lib/assessmentPicker.ts, src/lib/assessmentStatus.ts,
+  src/app/api/admin/assessment-questions/route.ts (GET where + POST origin),
+  src/app/api/admin/assessment-questions/coverage/route.ts,
+  src/app/api/admin/assessment-questions/[questionId]/route.ts
+    (loadQuestion -> findFirst scoped to BANK; inUse also counts classTestItems)
+
+--------------------------------------------------------------------------------
+5.2  SHARED LIBRARY
+--------------------------------------------------------------------------------
+
+New
+  src/lib/validations/classTest.ts     — createClassTestSchema,
+      updateClassTestSchema, setClassTestQuestionsSchema, classTestStatusSchema,
+      authorTutorQuestionSchema, updateTutorQuestionSchema
+  src/lib/classTestSerialize.ts        — serializeClassTestAttempt({reveal}),
+      serializeClassTest (full, with answers)
+  src/lib/classTestAccess.ts           — loadOwnedClass / loadOwnedTest /
+      loadEnrolledClass + isAccessError guard
+  src/lib/classTestResults.ts          — buildClassTestResults(testId): per-learner
+      this-test + sibling-test scores + delta, class averages, per-question rates
+
+--------------------------------------------------------------------------------
+5.3  API ROUTES (new)
+--------------------------------------------------------------------------------
+
+Tutor — build
+  tutor/classes/[classId]/tests/route.ts               GET list, POST create (409 dup kind)
+  .../tests/[testId]/route.ts                          GET full, PATCH meta (DRAFT), DELETE (DRAFT)
+  .../tests/[testId]/questions/route.ts                PUT replace ordered set (DRAFT; ids must be
+                                                       active BANK of class subject OR owned TUTOR)
+  .../tests/[testId]/status/route.ts                   PATCH PUBLISHED (>=1 q) / CLOSED
+  .../tests/[testId]/results/route.ts                  GET results
+  .../tests/[testId]/attempts/[attemptId]/route.ts     GET one learner's attempt (drill-down)
+Tutor — question sources
+  tutor/question-bank/route.ts                         GET browse admin BANK (subject/topic/q, paged)
+  tutor/questions/route.ts                             GET own custom, POST author (forces origin TUTOR
+                                                       + owner; topic must be a class topic)
+  tutor/questions/[questionId]/route.ts                PATCH / DELETE own (409 if on a published test
+                                                       or answered)
+Learner — take
+  learner/classes/[classId]/tests/route.ts             GET published tests + own attempt state
+  learner/classes/[classId]/tests/[testId]/start/route.ts  POST start/resume (403 not enrolled,
+                                                       400 not published, 409 after submit)
+  learner/class-test-attempts/[attemptId]/route.ts     GET resume (hidden answers) / review
+  learner/class-test-attempts/[attemptId]/submit/route.ts  POST grade -> SUBMITTED
+Admin — read-only
+  admin/class-tests/route.ts                           GET paginated list (subject/kind/status/q)
+  admin/class-tests/[testId]/results/route.ts          GET results
+  admin/class-tests/[testId]/attempts/[attemptId]/route.ts  GET attempt drill-down
+
+--------------------------------------------------------------------------------
+5.4  UI
+--------------------------------------------------------------------------------
+
+New
+  src/components/quiz/QuestionFormModal.tsx     — extracted from QuestionBankManager;
+      generic MCQ authoring modal (onSubmit callback, optional topic picker),
+      now shared by the admin bank and the tutor builder
+  src/components/quiz/ClassTestRunner.tsx       — learner take/review (diagnostic wording)
+  src/components/classes/ClassTestsCard.tsx     — PRE/POST rows on a class page
+      (tutor: Create/Build/Results; learner: Take/Resume/Review)
+  src/components/tutor/ClassTestBuilder.tsx     — meta form, ordered question list
+      (reorder/remove), "Add from bank" + "My questions" + "Write a question" modals,
+      Save set / Publish / Close; read-only once not DRAFT
+  src/components/tutor/ClassTestResults.tsx     — per-learner pre/post/delta table,
+      class averages, per-question correct-rate, per-attempt drill-down modal;
+      reused read-only by admin (onBack prop)
+  src/components/admin/ClassTestsTable.tsx      — paginated admin list -> results view
+  src/app/tutor/classes/[classId]/tests/[testId]/page.tsx  (+ results/page.tsx)
+  src/app/learner/classes/[classId]/tests/[testId]/page.tsx  (creates/resumes the attempt)
+  src/app/admin/class-tests/page.tsx
+
+Edited
+  src/components/classes/ClassDetailsView.tsx   — new `tests` slot below Sessions
+  src/components/admin/QuestionBankManager.tsx  — use extracted QuestionFormModal
+  src/app/tutor/classes/[classId]/page.tsx      — fetch class.tests, pass ClassTestsCard
+  src/app/learner/classes/[classId]/page.tsx    — fetch published tests + attempt, pass card
+  src/app/admin/layout.tsx                      — "Class Tests" nav (Review group)
+
+--------------------------------------------------------------------------------
+5.5  SEED  (prisma/seed.ts)
+--------------------------------------------------------------------------------
+
+  - seedQuestionBank: now skips rebuilding any topic whose questions are already
+    referenced by an attempt/class-test (FK-safe; those questions are immutable).
+  - seedClassTests(): on the demo MATH "Algebraic Expressions" class (tutor
+    demo@tutor.test, 2 enrolled learners) — a PUBLISHED PRE test (5 bank
+    questions) and PUBLISHED POST test (same 5 + 1 tutor-authored custom
+    question), with submitted attempts: learner A PRE 40% -> POST ~83%,
+    learner B PRE 60%. Re-runnable (drops the leftover custom question first).
+  - Totals line reports "class tests: yes|skipped".
+
+--------------------------------------------------------------------------------
+5.6  TESTS  (Vitest)  — 8 new files, 1 extended
+--------------------------------------------------------------------------------
+
+  api/tutor/classes/[classId]/tests/route.test.ts            — RBAC, ownership, 409 dup, create, list
+  .../tests/[testId]/questions/route.test.ts                 — DRAFT-only, 409 published, eligibility filter
+  .../tests/[testId]/status/route.test.ts                    — publish needs >=1 q; close only when published
+  api/tutor/questions/route.test.ts                          — forces origin TUTOR + owner; topic check
+  api/learner/classes/[classId]/tests/[testId]/start/route.test.ts  — 403/400/409/resume/snapshot
+  api/learner/class-test-attempts/[attemptId]/submit/route.test.ts  — grading math, 404, 409
+  api/admin/class-tests/route.test.ts                        — RBAC + list + filters
+  lib/__tests__/assessmentPicker.test.ts (extended)          — asserts origin: "BANK" filter
+  (fixed api/admin/assessment-questions/[questionId]/route.test.ts for the
+   findFirst + classTestItems _count change)
+
+--------------------------------------------------------------------------------
+5.7  VERIFICATION
+--------------------------------------------------------------------------------
+
+  npx prisma migrate dev  — applied
+  npx prisma generate     — regenerated
+  pnpm exec tsx prisma/seed.ts  — seeded (class tests: yes); re-run stable
+  pnpm exec tsc --noEmit  — clean
+  pnpm lint               — 0 errors (5 pre-existing warnings)
+  pnpm test               — 383 passing, 54 files
+  pnpm build              — compiles; all new routes/pages registered
+
+  Not committed. Not pushed.
+================================================================================
