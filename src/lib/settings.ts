@@ -6,6 +6,7 @@ export const PLATFORM_SETTING_KEYS = [
   "matchingEnabled",
   "showTutorRealNames",
   "requireRegistrationApproval",
+  "autoCertifyOnAssessmentPass",
 ] as const;
 
 export type PlatformSettingKey = (typeof PLATFORM_SETTING_KEYS)[number];
@@ -16,6 +17,7 @@ const DEFAULTS: Record<PlatformSettingKey, boolean> = {
   matchingEnabled: true,
   showTutorRealNames: false,
   requireRegistrationApproval: false,
+  autoCertifyOnAssessmentPass: false,
 };
 
 export async function getSetting(key: PlatformSettingKey): Promise<boolean> {

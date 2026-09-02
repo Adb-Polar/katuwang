@@ -52,10 +52,11 @@ export default function RegistrationApprovalTable() {
     refetch,
   } = usePaginatedList<PendingUser>(
     "/api/admin/registrations",
-    "registrations",
+    "users",
     { ...(search.trim() ? { q: search.trim() } : {}) },
     PAGE_SIZE,
-    "Could not retrieve pending registrations."
+    "Could not retrieve pending registrations.",
+    "registrations"
   );
 
   const review = async (user: PendingUser, decision: "APPROVE" | "DECLINE", declineReason = "") => {

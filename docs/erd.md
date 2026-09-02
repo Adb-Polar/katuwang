@@ -73,6 +73,22 @@ FULFILLED FULFILLED
 CANCELLED CANCELLED
         }
     
+
+
+        AssessmentAttemptStatus {
+            IN_PROGRESS IN_PROGRESS
+PASSED PASSED
+FAILED FAILED
+        }
+    
+
+
+        QuestionRequestStatus {
+            OPEN OPEN
+RESOLVED RESOLVED
+DISMISSED DISMISSED
+        }
+    
   "users" {
     String id "🗝️"
     String anonymousId 
@@ -223,6 +239,81 @@ CANCELLED CANCELLED
     DateTime updatedAt 
     }
   
+
+  "assessment_questions" {
+    String id "🗝️"
+    SubjectArea subject 
+    String topic 
+    String prompt 
+    String explanation "❓"
+    Boolean active 
+    String createdById 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "assessment_options" {
+    String id "🗝️"
+    String questionId 
+    String text 
+    Boolean isCorrect 
+    Int position 
+    }
+  
+
+  "topic_assessment_configs" {
+    String id "🗝️"
+    SubjectArea subject 
+    String topic 
+    Int questionCount 
+    Int passPercent 
+    Int minBankSize 
+    String updatedById "❓"
+    DateTime updatedAt 
+    }
+  
+
+  "assessment_attempts" {
+    String id "🗝️"
+    String tutorProfileId 
+    SubjectArea subject 
+    String topic 
+    Int attemptNo 
+    AssessmentAttemptStatus status 
+    Int questionCount 
+    Int correctCount 
+    Int scorePercent 
+    Int passPercent 
+    DateTime startedAt 
+    DateTime submittedAt "❓"
+    }
+  
+
+  "assessment_attempt_items" {
+    String id "🗝️"
+    String attemptId 
+    String questionId 
+    Int position 
+    String selectedOptionId "❓"
+    Boolean isCorrect "❓"
+    }
+  
+
+  "question_requests" {
+    String id "🗝️"
+    String tutorProfileId 
+    SubjectArea subject 
+    String topic 
+    String note "❓"
+    QuestionRequestStatus status 
+    String resolvedById "❓"
+    DateTime resolvedAt "❓"
+    String resolutionNote "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -248,4 +339,19 @@ CANCELLED CANCELLED
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
     "audit_logs" }o--|| "users" : "admin"
+    "assessment_questions" |o--|| "SubjectArea" : "enum:subject"
+    "assessment_questions" }o--|| "users" : "createdBy"
+    "assessment_options" }o--|| "assessment_questions" : "question"
+    "topic_assessment_configs" |o--|| "SubjectArea" : "enum:subject"
+    "topic_assessment_configs" }o--|o "users" : "updatedBy"
+    "assessment_attempts" }o--|| "tutor_profiles" : "tutorProfile"
+    "assessment_attempts" |o--|| "SubjectArea" : "enum:subject"
+    "assessment_attempts" |o--|| "AssessmentAttemptStatus" : "enum:status"
+    "assessment_attempt_items" }o--|| "assessment_attempts" : "attempt"
+    "assessment_attempt_items" }o--|| "assessment_questions" : "question"
+    "assessment_attempt_items" }o--|o "assessment_options" : "selectedOption"
+    "question_requests" }o--|| "tutor_profiles" : "tutorProfile"
+    "question_requests" |o--|| "SubjectArea" : "enum:subject"
+    "question_requests" |o--|| "QuestionRequestStatus" : "enum:status"
+    "question_requests" }o--|o "users" : "resolvedBy"
 ```

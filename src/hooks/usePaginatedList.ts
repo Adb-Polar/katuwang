@@ -81,7 +81,7 @@ export function usePaginatedList<T>(
         if (!res.ok) throw new Error(errorMessage);
         const json = await res.json();
         if (!cancelled) {
-          setData(json[dataKey]);
+          setData(Array.isArray(json[dataKey]) ? json[dataKey] : []);
           setTotal(json.total);
           setMeta(json);
         }

@@ -5,10 +5,25 @@ import PageHeader from "@/components/ui/PageHeader";
 import { TaughtTopic } from "@/components/tutor/TopicCertificationList";
 import { CertificationDetail } from "@/components/tutor/AssessmentHistory";
 import AssessmentsTabs from "@/components/tutor/AssessmentsTabs";
+import { getTopicAssessmentStatus, TopicAssessmentStatus } from "@/lib/assessmentStatus";
 
 export const metadata = {
   title: "Assessments | Katuwang",
 };
+
+export interface AttemptSummary {
+  id: string;
+  subject: string;
+  topic: string;
+  attemptNo: number;
+  status: "IN_PROGRESS" | "PASSED" | "FAILED";
+  questionCount: number;
+  correctCount: number;
+  scorePercent: number;
+  passPercent: number;
+  startedAt: string;
+  submittedAt: string | null;
+}
 
 export default async function TutorAssessmentsPage() {
   const session = await getServerSession(authOptions);
@@ -31,7 +46,9 @@ export default async function TutorAssessmentsPage() {
 
   const taughtTopics: TaughtTopic[] = Array.from(
     new Map(
-      classes.flatMap((c) => c.topics.map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }]))
+      classes.flatMap((c) =>
+        c.topics.map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }])
+      )
     ).values()
   );
 
@@ -57,12 +74,38 @@ export default async function TutorAssessmentsPage() {
     usedInClasses: classesByTopic.get(`${c.subject}::${c.topic}`) ?? [],
   }));
 
+  const [statusMap, attemptRows] = tutorProfile
+    ? await Promise.all([
+        getTopicAssessmentStatus(tutorProfile.id, taughtTopics),
+        prisma.assessmentAttempt.findMany({
+          where: { tutorProfileId: tutorProfile.id },
+          orderBy: { startedAt: "desc" },
+        }),
+      ])
+    : [new Map<string, TopicAssessmentStatus>(), []];
+
+  const topicStatuses: Record<string, TopicAssessmentStatus> = Object.fromEntries(statusMap);
+
+  const attempts: AttemptSummary[] = attemptRows.map((a) => ({
+    id: a.id,
+    subject: a.subject,
+    topic: a.topic,
+    attemptNo: a.attemptNo,
+    status: a.status,
+    questionCount: a.questionCount,
+    correctCount: a.correctCount,
+    scorePercent: a.scorePercent,
+    passPercent: a.passPercent,
+    startedAt: a.startedAt.toISOString(),
+    submittedAt: a.submittedAt ? a.submittedAt.toISOString() : null,
+  }));
+
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Tutor Portal"
         title="Your assessments"
-        subtitle="Request an assessment for any topic you teach, and track review status here."
+        subtitle="Take an auto-graded quiz for any topic you teach. Pass to earn a verified badge learners can see."
       />
 
       <AssessmentsTabs
@@ -74,6 +117,8 @@ export default async function TutorAssessmentsPage() {
           reviewNote: c.reviewNote ?? null,
         }))}
         certificationDetails={certificationDetails}
+        topicStatuses={topicStatuses}
+        attempts={attempts}
       />
     </div>
   );
