@@ -72,21 +72,33 @@ enum TopicRequestStatus {
   CANCELLED // Withdrawn by the learner
 }
 
+enum AssessmentAttemptStatus {
+  IN_PROGRESS // Served to the tutor, not yet submitted
+  PASSED // Submitted, score >= passPercent
+  FAILED // Submitted, score < passPercent
+}
+
+enum QuestionRequestStatus {
+  OPEN // Tutor asked admin to add questions for a topic
+  RESOLVED // Admin added questions / handled it
+  DISMISSED // Admin declined
+}
+
 // ─── User ────────────────────────────────────────────────────────────────────
 
 model User {
-  id           String     @id @default(cuid())
-  anonymousId  String     @unique // TUT-0001 or STU-0001
-  firstName    String
-  lastName     String
-  email        String     @unique
-  password     String // bcrypt hash
-  recoveryEmail String?   // optional backup address for password recovery
-  role         Role
-  gradeLevel   GradeLevel
-  section      String
-  contactInfo  String?
-  consentGiven Boolean    @default(false)
+  id            String     @id @default(cuid())
+  anonymousId   String     @unique // TUT-0001 or STU-0001
+  firstName     String
+  lastName      String
+  email         String     @unique
+  password      String // bcrypt hash
+  recoveryEmail String? // optional backup address for password recovery
+  role          Role
+  gradeLevel    GradeLevel
+  section       String
+  contactInfo   String?
+  consentGiven  Boolean    @default(false)
 
   // Moderation
   status          AccountStatus @default(ACTIVE)
@@ -102,10 +114,15 @@ model User {
   tutorProfile TutorProfile?
 
   // Relations
-  enrollments   ClassEnrollment[] @relation("LearnerEnrollments")
-  auditLogs     AuditLog[]
-  topicRequests TopicRequest[]    @relation("LearnerTopicRequests")
+  enrollments         ClassEnrollment[]    @relation("LearnerEnrollments")
+  auditLogs           AuditLog[]
+  topicRequests       TopicRequest[]       @relation("LearnerTopicRequests")
   passwordResetTokens PasswordResetToken[]
+
+  // Assessment authoring / moderation (ADMIN only in practice)
+  authoredQuestions        AssessmentQuestion[]    @relation("AuthoredQuestions")
+  updatedAssessmentConfigs TopicAssessmentConfig[] @relation("UpdatedAssessmentConfigs")
+  resolvedQuestionRequests QuestionRequest[]       @relation("ResolvedQuestionRequests")
 
   @@map("users")
 }
@@ -140,6 +157,10 @@ model TutorProfile {
 
   // Classes created by this tutor
   classes TutorClass[]
+
+  // Quiz attempts and "please add questions" requests
+  assessmentAttempts AssessmentAttempt[]
+  questionRequests   QuestionRequest[]
 
   @@map("tutor_profiles")
 }
@@ -316,4 +337,124 @@ model PlatformSetting {
   updatedAt DateTime @updatedAt
 
   @@map("platform_settings")
+}
+
+// ─── Assessment Question Bank ────────────────────────────────────────────────
+// Admin-authored single-answer multiple-choice questions, one bank per
+// (subject, topic). `topic` values come from src/lib/subjectTopics.ts.
+// A question referenced by any AssessmentAttemptItem is never hard-deleted;
+// it is soft-retired via `active = false` and its content becomes immutable.
+
+model AssessmentQuestion {
+  id          String      @id @default(cuid())
+  subject     SubjectArea
+  topic       String
+  prompt      String      @db.Text
+  explanation String?     @db.Text // shown to the tutor after grading
+  active      Boolean     @default(true)
+  createdById String
+  createdBy   User        @relation("AuthoredQuestions", fields: [createdById], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  options      AssessmentOption[]
+  attemptItems AssessmentAttemptItem[]
+
+  @@index([subject, topic, active])
+  @@map("assessment_questions")
+}
+
+model AssessmentOption {
+  id         String             @id @default(cuid())
+  questionId String
+  question   AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text       String             @db.Text
+  isCorrect  Boolean            @default(false)
+  position   Int // 0-based display order
+
+  selectedInItems AssessmentAttemptItem[] @relation("SelectedOption")
+
+  @@unique([questionId, position])
+  @@map("assessment_options")
+}
+
+// ─── Per-Topic Assessment Config ────────────────────────────────────────────
+// Optional admin override of the global defaults in src/lib/assessmentConfig.ts.
+
+model TopicAssessmentConfig {
+  id            String      @id @default(cuid())
+  subject       SubjectArea
+  topic         String
+  questionCount Int         @default(5) // questions served per attempt
+  passPercent   Int         @default(80) // % correct required to pass
+  minBankSize   Int         @default(5) // active questions required before the topic is assessable
+  updatedById   String?
+  updatedBy     User?       @relation("UpdatedAssessmentConfigs", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([subject, topic])
+  @@map("topic_assessment_configs")
+}
+
+// ─── Assessment Attempt (one quiz run) ──────────────────────────────────────
+
+model AssessmentAttempt {
+  id             String                  @id @default(cuid())
+  tutorProfileId String
+  tutorProfile   TutorProfile            @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject        SubjectArea
+  topic          String
+  attemptNo      Int // 1-based, per (tutorProfile, subject, topic)
+  status         AssessmentAttemptStatus @default(IN_PROGRESS)
+  questionCount  Int // number of items served
+  correctCount   Int                     @default(0)
+  scorePercent   Int                     @default(0)
+  passPercent    Int // threshold snapshot at start
+  startedAt      DateTime                @default(now())
+  submittedAt    DateTime?
+
+  items AssessmentAttemptItem[]
+
+  @@unique([tutorProfileId, subject, topic, attemptNo])
+  @@index([tutorProfileId, subject, topic])
+  @@index([status])
+  @@map("assessment_attempts")
+}
+
+model AssessmentAttemptItem {
+  id               String             @id @default(cuid())
+  attemptId        String
+  attempt          AssessmentAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         AssessmentQuestion @relation(fields: [questionId], references: [id])
+  position         Int // order within the attempt
+  selectedOptionId String?
+  selectedOption   AssessmentOption?  @relation("SelectedOption", fields: [selectedOptionId], references: [id], onDelete: SetNull)
+  isCorrect        Boolean? // null until graded
+
+  @@unique([attemptId, position])
+  @@unique([attemptId, questionId])
+  @@map("assessment_attempt_items")
+}
+
+// ─── Question Request (tutor asks admin to add questions for a topic) ────────
+
+model QuestionRequest {
+  id             String                @id @default(cuid())
+  tutorProfileId String
+  tutorProfile   TutorProfile          @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject        SubjectArea
+  topic          String
+  note           String?               @db.Text
+  status         QuestionRequestStatus @default(OPEN)
+  resolvedById   String?
+  resolvedBy     User?                 @relation("ResolvedQuestionRequests", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt     DateTime?
+  resolutionNote String?               @db.Text
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  @@unique([tutorProfileId, subject, topic])
+  @@index([status, subject])
+  @@map("question_requests")
 }

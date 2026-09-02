@@ -17,12 +17,19 @@ const DUMMY_PASSWORD = "password123";
 // Curated demo accounts above are always created. These add procedurally-
 // generated accounts/classes ON TOP, to reach the given totals. Example:
 //   SEED_TUTORS=100 SEED_LEARNERS=100 SEED_CLASSES=150 SEED_TOPIC_REQUESTS=40 \
-//     pnpm exec tsx prisma/seed.ts
+//   SEED_QUESTIONS_PER_TOPIC=15 pnpm exec tsx prisma/seed.ts
+//
+// SEED_QUESTIONS_PER_TOPIC fills the assessment question bank: every curated
+// (subject, topic) is stocked with this many single-answer questions (the two
+// hand-written demo topics keep their curated questions and are only topped up
+// to this count). Set it to at least the default minBankSize (5) to make a
+// topic assessable. 0 = only the two hand-written demo topics.
 const GEN = {
   tutors: Math.max(0, Number(process.env.SEED_TUTORS ?? 0) | 0),
   learners: Math.max(0, Number(process.env.SEED_LEARNERS ?? 0) | 0),
   classes: Math.max(0, Number(process.env.SEED_CLASSES ?? 0) | 0),
   topicRequests: Math.max(0, Number(process.env.SEED_TOPIC_REQUESTS ?? 0) | 0),
+  questionsPerTopic: Math.max(0, Number(process.env.SEED_QUESTIONS_PER_TOPIC ?? 0) | 0),
 };
 
 // ─── Deterministic RNG so re-runs produce the same dataset ───────────────────
@@ -579,6 +586,208 @@ async function createGeneratedClass(
 
 // ─── Main ─────────────────────────────────────────────────────────────────
 
+// ─── Assessment question bank (demo data) ──────────────────────────────────
+
+interface QSeed {
+  prompt: string;
+  explanation?: string;
+  options: [string, boolean][]; // [text, isCorrect]
+}
+
+const QUESTION_BANK: { subject: SubjectArea; topic: string; questions: QSeed[] }[] = [
+  {
+    subject: "MATH",
+    topic: "Algebraic Expressions",
+    questions: [
+      {
+        prompt: "Simplify: 3x + 5x - 2x",
+        explanation: "Combine like terms: (3 + 5 - 2)x = 6x.",
+        options: [["6x", true], ["10x", false], ["x", false], ["8x", false]],
+      },
+      {
+        prompt: "What is the coefficient of y in the expression 7 - 4y?",
+        options: [["-4", true], ["4", false], ["7", false], ["-7", false]],
+      },
+      {
+        prompt: "Evaluate 2a + 3 when a = 4.",
+        options: [["11", true], ["9", false], ["14", false], ["24", false]],
+      },
+      {
+        prompt: "Which of these is a like term to 5xy?",
+        options: [["-2xy", true], ["5x", false], ["5y", false], ["xy^2", false]],
+      },
+      {
+        prompt: "Expand: 2(x + 3)",
+        explanation: "Distribute the 2 across both terms: 2x + 6.",
+        options: [["2x + 6", true], ["2x + 3", false], ["x + 6", false], ["2x + 5", false]],
+      },
+      {
+        prompt: "Simplify: (4a + 2) + (3a - 5)",
+        options: [["7a - 3", true], ["7a + 3", false], ["7a - 7", false], ["a - 3", false]],
+      },
+    ],
+  },
+  {
+    subject: "ENGLISH",
+    topic: "Grammar & Sentence Structure",
+    questions: [
+      {
+        prompt: "Choose the correct sentence.",
+        options: [
+          ["She doesn't like coffee.", true],
+          ["She don't likes coffee.", false],
+          ["She not like coffee.", false],
+          ["She doesn't likes coffee.", false],
+        ],
+      },
+      {
+        prompt: "Identify the subject: \"The tired students finished the exam.\"",
+        options: [["students", true], ["exam", false], ["finished", false], ["tired", false]],
+      },
+      {
+        prompt: "Which word is a conjunction?",
+        options: [["because", true], ["quickly", false], ["happiness", false], ["under", false]],
+      },
+      {
+        prompt: "Pick the sentence with correct subject-verb agreement.",
+        options: [
+          ["The list of items is on the desk.", true],
+          ["The list of items are on the desk.", false],
+          ["The list of items were on the desk.", false],
+          ["The list of items been on the desk.", false],
+        ],
+      },
+      {
+        prompt: "What type of sentence is: \"Close the door.\"",
+        explanation: "It gives a command, so it is imperative.",
+        options: [["Imperative", true], ["Declarative", false], ["Interrogative", false], ["Exclamatory", false]],
+      },
+      {
+        prompt: "Choose the correctly punctuated sentence.",
+        options: [
+          ["My brother, who is a doctor, lives in Cebu.", true],
+          ["My brother who is a doctor lives in Cebu.", false],
+          ["My brother, who is a doctor lives in Cebu.", false],
+          ["My brother who is a doctor, lives in Cebu.", false],
+        ],
+      },
+    ],
+  },
+];
+
+// Procedurally-generated placeholder MCQs, used to bulk-fill the question bank
+// for topics without hand-written questions (see SEED_QUESTIONS_PER_TOPIC).
+const GEN_STEMS: ((t: string, s: string) => string)[] = [
+  (t, s) => `Which approach best supports mastery of "${t}" in ${s}?`,
+  (t) => `A learner working on "${t}" should mainly focus on:`,
+  (t) => `What is the most effective habit when studying "${t}"?`,
+  (t, s) => `In ${s}, real progress on "${t}" is shown by being able to:`,
+  (t) => `Which statement about practising "${t}" is the most accurate?`,
+];
+const GEN_CORRECT = [
+  "Apply the underlying idea to a new, unfamiliar example.",
+  "Break a hard problem into smaller, familiar steps.",
+  "Check each result against the definition or rule.",
+  "Work through examples first, then solve without help.",
+  "Explain the reasoning out loud in your own words.",
+];
+const GEN_WRONG = [
+  "Memorise an answer key without understanding it.",
+  "Skip every practice exercise.",
+  "Guess quickly and move on.",
+  "Ignore feedback from a tutor.",
+  "Assume every problem is solved the exact same way.",
+  "Rely only on the first idea that comes to mind.",
+];
+
+function genQuestionsForTopic(subject: SubjectArea, topic: string, n: number): QSeed[] {
+  const out: QSeed[] = [];
+  for (let i = 0; i < n; i++) {
+    const stem = GEN_STEMS[i % GEN_STEMS.length];
+    const correct: [string, boolean] = [GEN_CORRECT[rand.int(0, GEN_CORRECT.length - 1)], true];
+    const wrongs: [string, boolean][] = rand.sample(GEN_WRONG, 3).map((w) => [w, false]);
+    out.push({
+      prompt: `${stem(topic, subject)} (practice item ${i + 1})`,
+      explanation: "Placeholder practice question generated for the demo question bank.",
+      options: rand.sample([correct, ...wrongs], 4),
+    });
+  }
+  return out;
+}
+
+async function seedQuestionBank(adminId: string, demoTutorProfileId: string | null): Promise<number> {
+  const perTopic = GEN.questionsPerTopic;
+  const curated = new Map(QUESTION_BANK.map((s) => [`${s.subject}::${s.topic}`, s.questions]));
+  let created = 0;
+
+  for (const subject of Object.keys(SUBJECT_TOPICS) as SubjectArea[]) {
+    for (const topic of SUBJECT_TOPICS[subject]) {
+      const hand = curated.get(`${subject}::${topic}`) ?? [];
+      if (hand.length === 0 && perTopic === 0) continue;
+
+      // Re-runnable: clear this topic's questions first (cascades to options).
+      await prisma.assessmentQuestion.deleteMany({ where: { subject, topic } });
+
+      const questions = [
+        ...hand,
+        ...genQuestionsForTopic(subject, topic, Math.max(0, perTopic - hand.length)),
+      ];
+
+      for (const q of questions) {
+        await prisma.assessmentQuestion.create({
+          data: {
+            subject,
+            topic,
+            prompt: q.prompt,
+            explanation: q.explanation ?? null,
+            createdById: adminId,
+            options: {
+              create: q.options.map(([text, isCorrect], position) => ({ text, isCorrect, position })),
+            },
+          },
+        });
+        created++;
+      }
+    }
+  }
+
+  // One per-topic override so the admin UI shows a non-default config.
+  await prisma.topicAssessmentConfig.upsert({
+    where: { subject_topic: { subject: "MATH", topic: "Algebraic Expressions" } },
+    update: { questionCount: 5, passPercent: 60, minBankSize: 5, updatedById: adminId },
+    create: {
+      subject: "MATH",
+      topic: "Algebraic Expressions",
+      questionCount: 5,
+      passPercent: 60,
+      minBankSize: 5,
+      updatedById: adminId,
+    },
+  });
+
+  // One open question request for a topic with an empty bank, for the admin queue.
+  if (demoTutorProfileId) {
+    await prisma.questionRequest.upsert({
+      where: {
+        tutorProfileId_subject_topic: {
+          tutorProfileId: demoTutorProfileId,
+          subject: "MATH",
+          topic: "Trigonometry",
+        },
+      },
+      update: { status: "OPEN", note: "Please add more Trigonometry questions.", resolvedById: null, resolvedAt: null },
+      create: {
+        tutorProfileId: demoTutorProfileId,
+        subject: "MATH",
+        topic: "Trigonometry",
+        note: "Please add more Trigonometry questions.",
+      },
+    });
+  }
+
+  return created;
+}
+
 async function main() {
   // Initialize counters for both roles
   await prisma.idCounter.upsert({
@@ -602,7 +811,7 @@ async function main() {
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
 
   // Admin account
-  await prisma.user.upsert({
+  const adminUser = await prisma.user.upsert({
     where: { email: "admin@katuwang.test" },
     update: {},
     create: {
@@ -749,6 +958,12 @@ async function main() {
     });
   }
 
+  // ── Assessment question bank (demo) ──
+  const questionsCreated = await seedQuestionBank(
+    adminUser.id,
+    Object.values(tutorProfiles)[0]?.id ?? null
+  );
+
   const tutorTotal = TUTORS.length + generatedTutorSeeds.length;
   const learnerTotal = LEARNERS.length + generatedLearnerSeeds.length;
   const classTotal = buildClasses().length + generatedClasses.length;
@@ -756,7 +971,7 @@ async function main() {
   console.log("Seed complete.\n");
   console.log(`All dummy accounts use the password: ${DUMMY_PASSWORD}\n`);
   console.log(
-    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}`
+    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic)`
   );
   if (GEN.tutors || GEN.learners || GEN.classes || GEN.topicRequests) {
     console.log("Generated accounts use emails like gen.tutor.001@seed.katuwang.test / gen.learner.001@seed.katuwang.test");

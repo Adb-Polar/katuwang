@@ -42,6 +42,7 @@ export const updatePlatformSettingSchema = z.object({
       "matchingEnabled",
       "showTutorRealNames",
       "requireRegistrationApproval",
+      "autoCertifyOnAssessmentPass",
     ],
     { message: "Invalid setting key." }
   ),
