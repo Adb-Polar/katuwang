@@ -131,26 +131,26 @@ export default async function TutorDashboard() {
         </div>
       )}
 
-      <div className="stats stats-vertical sm:stats-horizontal bg-base-100 shadow-md border border-base-200 w-full">
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Topics Taught</div>
-          <div className="stat-value text-lg font-serif">{taughtTopics.length}</div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Topics Taught</span>
+          <span className="kt-stat-value">{taughtTopics.length}</span>
         </div>
-        <div className="stat py-4">
-          <div className="stat-title text-2xs">Verified Topics</div>
-          <div className="stat-value text-lg font-serif">{certifiedCount}</div>
+        <div className="card kt-card kt-stat p-4">
+          <span className="kt-stat-title">Verified Topics</span>
+          <span className="kt-stat-value">{certifiedCount}</span>
         </div>
-        <Link href="/tutor/students" className="stat py-4 hover:bg-base-200/40 transition-colors">
-          <div className="stat-title text-2xs">Enrolled Learners</div>
-          <div className="stat-value text-lg font-serif">{enrolledLearnerCount}</div>
+        <Link href="/tutor/students" className="card kt-card kt-stat p-4 hover:border-primary/40 transition-colors">
+          <span className="kt-stat-title">Enrolled Learners</span>
+          <span className="kt-stat-value">{enrolledLearnerCount}</span>
         </Link>
-        <Link href="/tutor/requests" className="stat py-4 hover:bg-base-200/40 transition-colors">
-          <div className="stat-title text-2xs">Open Topic Requests</div>
-          <div className="stat-value text-lg font-serif">{openRequestCount}</div>
+        <Link href="/tutor/requests" className="card kt-card kt-stat p-4 hover:border-primary/40 transition-colors">
+          <span className="kt-stat-title">Open Topic Requests</span>
+          <span className="kt-stat-value">{openRequestCount}</span>
         </Link>
       </div>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />
@@ -169,7 +169,7 @@ export default async function TutorDashboard() {
                     className="flex items-center justify-between gap-3 py-2.5 text-xs hover:bg-base-200/40 -mx-2 px-2 rounded"
                   >
                     <div className="min-w-0">
-                      <span className="badge badge-neutral badge-sm text-2xs font-bold uppercase mr-2">
+                      <span className="kt-badge kt-badge--neutral uppercase mr-2">
                         {s.class.subject}
                       </span>
                       <span className="text-base-content/80">{s.topic}</span>
@@ -185,7 +185,7 @@ export default async function TutorDashboard() {
         </div>
       </section>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />
@@ -203,7 +203,7 @@ export default async function TutorDashboard() {
 
       {/* Onboarding Checklist — hidden once every step is done */}
       {!onboardingComplete && (
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold">Getting Started</h2>
           <ul className="space-y-2">

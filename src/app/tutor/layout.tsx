@@ -5,12 +5,12 @@ import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, UserCircle } 
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const TUTOR_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/tutor", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: "Classes", href: "/tutor/classes", icon: <CalendarClock className="w-4 h-4" /> },
-  { label: "Students", href: "/tutor/students", icon: <Users className="w-4 h-4" /> },
-  { label: "Requests", href: "/tutor/requests", icon: <Inbox className="w-4 h-4" /> },
-  { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" /> },
-  { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" /> },
+  { label: "Dashboard", href: "/tutor", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
+  { label: "Classes", href: "/tutor/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
+  { label: "Students", href: "/tutor/students", icon: <Users className="w-4 h-4" />, group: "Main menu" },
+  { label: "Requests", href: "/tutor/requests", icon: <Inbox className="w-4 h-4" />, group: "Teaching" },
+  { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" />, group: "Teaching" },
+  { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
 ];
 
 export default async function TutorLayout({

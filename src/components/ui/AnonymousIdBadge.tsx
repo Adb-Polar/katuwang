@@ -2,21 +2,13 @@ import { ShieldCheck } from "lucide-react";
 
 /*
   Colored by the ID owner's role, not by whichever portal is currently open —
-  that's the point: a learner's ID stays violet even inside the Tutor portal's
-  roster, and vice versa. Static class strings only (Tailwind 4's content
-  scanner can't see interpolated `bg-${x}` classes).
+  a learner's ID stays violet even inside the Tutor portal's roster, and vice
+  versa. Static class strings only (Tailwind 4's content scanner can't see
+  interpolated classes); role colors come from the redesign layer in globals.css.
 */
 const ROLE_STYLES = {
-  LEARNER: {
-    bg: "bg-secondary/10",
-    text: "text-secondary",
-    border: "border-secondary/20",
-  },
-  TUTOR: {
-    bg: "bg-accent/15",
-    text: "text-accent-content",
-    border: "border-accent/30",
-  },
+  LEARNER: "bg-(--kt-tint-learner) kt-id--learner",
+  TUTOR: "bg-(--kt-tint-tutor) kt-id--tutor",
 } as const;
 
 const SIZES = {
@@ -35,10 +27,9 @@ export default function AnonymousIdBadge({
   size?: keyof typeof SIZES;
   showIcon?: boolean;
 }) {
-  const { bg, text, border } = ROLE_STYLES[role];
   return (
     <span
-      className={`inline-flex items-center rounded-full border font-mono font-semibold tracking-wide ${bg} ${text} ${border} ${SIZES[size]}`}
+      className={`inline-flex items-center rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]}`}
     >
       {showIcon && <ShieldCheck className="w-3 h-3 shrink-0" />}
       {id}

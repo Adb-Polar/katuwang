@@ -12,7 +12,7 @@ export default function ResetPasswordPage() {
     <AuthLayout>
       <Suspense
         fallback={
-          <div className="card bg-base-100 w-full max-w-md shadow-xl border border-base-200 text-center p-8">
+          <div className="card kt-card w-full max-w-md text-center p-8">
             <span className="loading loading-spinner loading-md text-primary mx-auto"></span>
             <p className="mt-4 text-xs text-base-content/60">Loading form...</p>
           </div>

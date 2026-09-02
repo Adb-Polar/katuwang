@@ -1,0 +1,451 @@
+================================================================================
+CHANGES LOG
+Session date: 2026-09-02
+Nothing committed or pushed. Prisma migration applied to the local database.
+================================================================================
+
+
+================================================================================
+PART 1 — BUG FIX: Admin "Registration Approvals" page crash
+================================================================================
+
+Symptom
+  RegistrationApprovalTable.tsx:125 threw
+  "Cannot read properties of undefined (reading 'map')" — `users` was undefined.
+
+Root cause
+  The component asked usePaginatedList for the response key "registrations", but
+  GET /api/admin/registrations returns the array under "users", so
+  json["registrations"] was undefined and setData(undefined) was stored.
+
+Files changed
+  M src/components/admin/RegistrationApprovalTable.tsx
+      - usePaginatedList dataKey "registrations" -> "users"
+      - pass "registrations" as the explicit URL-prefix `key` arg so the
+        pagination query params (registrationsPage / registrationsSize) are
+        unchanged.
+  M src/hooks/usePaginatedList.ts
+      - setData now falls back to [] when json[dataKey] is not an array, so a
+        future key mismatch degrades gracefully instead of crashing render.
+
+Verification
+  pnpm exec tsc --noEmit — clean.
+
+
+================================================================================
+PART 2 — FEATURE: Assessment-taking system (question bank + auto-graded quizzes)
+================================================================================
+
+Overview
+  Turns the previously manual "request assessment -> admin certifies" flow into
+  a real auto-graded, single-answer multiple-choice quiz backed by an
+  admin-managed question bank.
+
+  - Admin authors questions per subject + topic (topics from
+    src/lib/subjectTopics.ts) and tunes each topic's quiz.
+  - Tutor starts an assessment for a topic they teach; the system auto-selects
+    questions, serves the quiz, and auto-grades on submit.
+  - If a topic's bank is too small, the tutor asks an admin to add questions;
+    admins work these from a queue.
+  - Every attempt is persisted with the exact questions asked and the tutor's
+    answers, viewable by the tutor (their own) and admins (all).
+  - Retakes prefer questions not seen in the tutor's previous attempt
+    (best-effort; reuses when the bank is small).
+
+Locked decisions
+  - Pass outcome: new platform setting `autoCertifyOnAssessmentPass`
+    (default OFF). ON  -> passing certifies the topic immediately.
+                   OFF -> passing creates a PENDING certification carrying the
+                          score for an admin to confirm on the Certifications
+                          screen. A failing attempt marks the topic REJECTED
+                          with a retake note. An already-CERTIFIED topic is
+                          never downgraded.
+  - Question format: single-answer multiple choice only, 2-6 options, exactly
+    one correct.
+  - Retake variety: best-effort "prefer unseen questions".
+  - Quiz config: per-topic, admin-configurable (questionCount, passPercent,
+    minBankSize), falling back to global defaults.
+  - Immutability: once a question is used in an attempt, admins may only toggle
+    `active` (retire/reactivate); prompt/options/correctness become read-only.
+    Editing is unrestricted before first use. Keeps historical attempts
+    accurate without snapshot columns.
+
+--------------------------------------------------------------------------------
+2.1  DATABASE  (prisma/schema.prisma)  — all additive
+--------------------------------------------------------------------------------
+
+New enums
+  AssessmentAttemptStatus  { IN_PROGRESS, PASSED, FAILED }
+  QuestionRequestStatus    { OPEN, RESOLVED, DISMISSED }
+
+New models
+  AssessmentQuestion      (table assessment_questions)
+      subject, topic, prompt, explanation?, active, createdById -> User
+      ("AuthoredQuestions"), timestamps.
+      children: options[], attemptItems[].  @@index([subject, topic, active])
+  AssessmentOption        (table assessment_options)
+      questionId -> AssessmentQuestion (onDelete: Cascade), text, isCorrect,
+      position.  @@unique([questionId, position])
+  TopicAssessmentConfig   (table topic_assessment_configs)
+      subject, topic, questionCount(5), passPercent(80), minBankSize(5),
+      updatedById? -> User ("UpdatedAssessmentConfigs"), updatedAt.
+      @@unique([subject, topic])
+  AssessmentAttempt       (table assessment_attempts)
+      tutorProfileId -> TutorProfile (onDelete: Cascade), subject, topic,
+      attemptNo, status, questionCount, correctCount, scorePercent,
+      passPercent (snapshot at start), startedAt, submittedAt?.
+      children: items[].
+      @@unique([tutorProfileId, subject, topic, attemptNo])
+      @@index([tutorProfileId, subject, topic])  @@index([status])
+  AssessmentAttemptItem   (table assessment_attempt_items)
+      attemptId -> AssessmentAttempt (onDelete: Cascade),
+      questionId -> AssessmentQuestion, position,
+      selectedOptionId? -> AssessmentOption (onDelete: SetNull), isCorrect?.
+      @@unique([attemptId, position])  @@unique([attemptId, questionId])
+  QuestionRequest         (table question_requests)
+      tutorProfileId -> TutorProfile (onDelete: Cascade), subject, topic,
+      note?, status, resolvedById? -> User ("ResolvedQuestionRequests"),
+      resolvedAt?, resolutionNote?, timestamps.
+      @@unique([tutorProfileId, subject, topic])  (re-request reopens the row)
+      @@index([status, subject])
+
+New back-relations
+  User: authoredQuestions, updatedAssessmentConfigs, resolvedQuestionRequests
+  TutorProfile: assessmentAttempts, questionRequests
+
+Migration
+  A prisma/migrations/20260902052746_assessment_question_bank/migration.sql
+  Applied to local DB "katuwang_db" via `npx prisma migrate dev`.
+  Prisma client regenerated. No existing columns changed.
+
+  M docs/erd.md   (regenerated by prisma-erd-generator)
+
+--------------------------------------------------------------------------------
+2.2  SHARED LIBRARY CODE
+--------------------------------------------------------------------------------
+
+New
+  A src/lib/assessmentConfig.ts
+      ASSESSMENT_DEFAULTS { questionCount:5, passPercent:80, minBankSize:5 },
+      OPTION_COUNT_MIN(2), OPTION_COUNT_MAX(6),
+      resolveTopicConfig(row|null) -> merged config.
+  A src/lib/assessmentPicker.ts
+      pickQuestionIds(tx, {tutorProfileId, subject, topic, count}) ->
+      string[]. Fisher-Yates; prefers questions absent from the tutor's most
+      recent submitted attempt for the topic; tops up with repeats; returns
+      whatever is available if the pool <= count.
+  A src/lib/assessmentStatus.ts
+      getTopicAssessmentStatus(tutorProfileId, taughtTopics) ->
+      Map<"SUBJECT::topic", TopicAssessmentStatus> in one query pass:
+      bankReady, activeQuestionCount, minBankSize, inProgressAttemptId,
+      lastAttempt, submittedAttemptCount, openRequest, certificationStatus.
+  A src/lib/assessmentSerialize.ts
+      serializeAttempt(attempt, {reveal}) -> DTO. When reveal=false (tutor
+      viewing an in-progress attempt) it strips isCorrect flags, explanations,
+      per-item grades and the running score.
+  A src/lib/validations/assessment.ts   (Zod, mirrors src/lib/validations/admin.ts)
+      optionInputSchema, createAssessmentQuestionSchema (+ refine: exactly one
+      correct option), updateAssessmentQuestionSchema,
+      updateTopicAssessmentConfigSchema, startAssessmentSchema,
+      submitAssessmentSchema, requestQuestionsSchema,
+      resolveQuestionRequestSchema, + inferred *Input types.
+
+Edited
+  M src/lib/auditLog.ts
+      AUDIT_ACTIONS += QUESTION_CREATED, QUESTION_UPDATED, QUESTION_RETIRED,
+                       QUESTION_DELETED, ASSESSMENT_CONFIG_UPDATED,
+                       QUESTION_REQUEST_RESOLVED
+      AUDIT_TARGET_TYPES += QUESTION, QUESTION_REQUEST, ASSESSMENT_CONFIG
+  M src/lib/settings.ts
+      PLATFORM_SETTING_KEYS += "autoCertifyOnAssessmentPass"
+      DEFAULTS.autoCertifyOnAssessmentPass = false
+  M src/lib/validations/admin.ts
+      updatePlatformSettingSchema key enum += "autoCertifyOnAssessmentPass"
+
+--------------------------------------------------------------------------------
+2.3  API ROUTES
+--------------------------------------------------------------------------------
+
+All follow the existing convention: getServerSession RBAC -> 401
+{error:"Unauthorized."}; Zod safeParse -> 400 (first issue message);
+try/catch -> console.error + 500; multi-write in prisma.$transaction;
+peer-facing tutor data selects only { id, anonymousId } (RA 10173).
+
+Admin — question bank
+  A src/app/api/admin/assessment-questions/route.ts
+      GET   paginated list (subject, topic, active, q, page, pageSize); each
+            row includes ordered options + `inUse` (attemptItems count > 0).
+      POST  create; validates topic in SUBJECT_TOPICS[subject]; creates
+            question + options in a txn; audit QUESTION_CREATED.
+  A src/app/api/admin/assessment-questions/[questionId]/route.ts
+      GET   one question + options + inUse.
+      PATCH if inUse -> only { active } accepted (409 on content edit),
+            audit QUESTION_RETIRED when active goes true->false;
+            else full edit, options replaced in a txn, audit QUESTION_UPDATED.
+      DELETE 409 if inUse; else cascade-delete, audit QUESTION_DELETED.
+  A src/app/api/admin/assessment-questions/coverage/route.ts
+      GET   one row per curated (subject, topic): activeCount, effective
+            config, hasOverride, ready (activeCount >= minBankSize),
+            openRequests. Returns a bare array.
+
+Admin — per-topic config
+  A src/app/api/admin/assessment-configs/route.ts
+      PATCH upsert on [subject, topic]; audit ASSESSMENT_CONFIG_UPDATED.
+
+Admin — question requests
+  A src/app/api/admin/question-requests/route.ts
+      GET   paginated (status default OPEN, subject, q); tutor shown as
+            { id, anonymousId }.
+  A src/app/api/admin/question-requests/[requestId]/route.ts
+      PATCH resolve/dismiss an OPEN request; stamps resolvedById/resolvedAt;
+            audit QUESTION_REQUEST_RESOLVED.
+
+Admin — view results
+  A src/app/api/admin/assessment-attempts/route.ts
+      GET   paginated (subject, topic, status, q=tutor anonymousId); summary
+            rows with tutor { id, anonymousId }.
+  A src/app/api/admin/assessment-attempts/[attemptId]/route.ts
+      GET   full detail (reveal=true): every item's prompt, all options with
+            isCorrect, selectedOptionId, per-item isCorrect, explanation.
+
+Tutor — take assessment
+  A src/app/api/tutor/assessments/route.ts
+      GET   the caller's own attempts (summary, newest first). Bare array.
+      POST  start/resume. Resolves tutorProfile (404). Validates topic.
+            Resumes an existing IN_PROGRESS attempt (200). 409 if already
+            CERTIFIED. Loads merged config; counts active questions; if
+            < minBankSize -> 409 { error, code:"BANK_NOT_READY" }. Else txn:
+            attemptNo = max+1, pickQuestionIds, create attempt + items.
+            Returns questions with reveal=false. 201.
+  A src/app/api/tutor/assessments/[attemptId]/route.ts
+      GET   ownership check (else 404). IN_PROGRESS -> questions only;
+            submitted -> full graded review.
+  A src/app/api/tutor/assessments/[attemptId]/submit/route.ts
+      POST  ownership + IN_PROGRESS (else 409). Grades each item (unanswered /
+            mismatched option = wrong). scorePercent = round(correct/qCount*100).
+            status = scorePercent >= passPercent ? PASSED : FAILED.
+            Reads getSetting("autoCertifyOnAssessmentPass"). In a txn: updates
+            each item, updates the attempt, then upserts TopicCertification
+            (unless already CERTIFIED):
+              PASSED + autoCertify  -> CERTIFIED (certifiedAt, reviewedAt)
+              PASSED + !autoCertify -> PENDING  ("Passed assessment (N%) —
+                                                awaiting admin confirmation.")
+              FAILED                -> REJECTED ("Did not pass assessment (N%).
+                                                You may retake.")
+            No audit rows (tutor action; AuditLog.adminId is admin-only).
+            Returns the graded review (reveal=true).
+  A src/app/api/tutor/question-requests/route.ts
+      GET   the caller's own requests. Bare array.
+      POST  validates topic; upsert on [tutorProfileId, subject, topic] —
+            create OPEN, or reopen a RESOLVED/DISMISSED row to OPEN, or 200
+            no-op if already OPEN.
+
+--------------------------------------------------------------------------------
+2.4  UI — ADMIN
+--------------------------------------------------------------------------------
+
+  M src/app/admin/layout.tsx
+      Nav: new "Question Bank" item (lucide FileQuestion) in the "Review" group.
+  A src/app/admin/question-bank/page.tsx
+      Lean server component: PageHeader + <QuestionBankManager/>.
+  A src/components/admin/QuestionBankManager.tsx   ("use client")
+      Tabs: Questions | Requests (open count) | Results.
+        Questions: subject + topic selects (from SUBJECT_TOPICS); coverage
+          panel with inline per-topic config editor (questionCount /
+          passPercent / minBankSize -> PATCH /api/admin/assessment-configs);
+          "Add question" modal (prompt, explanation, 2-6 option rows with a
+          "correct" radio, add/remove); paginated table with active toggle,
+          Edit (disabled + tooltip when inUse), Delete (disabled when inUse).
+        Requests: sub-tabs Open / Resolved / Dismissed; Resolve / Dismiss with
+          optional note.
+        Results: filters (tutor id, subject, outcome); "View" opens a modal
+          (GET /api/admin/assessment-attempts/[attemptId]) listing every
+          question, all options with the correct one marked, the tutor's pick,
+          per-question tick/cross, and the explanation.
+  M src/components/admin/PlatformSettingsForm.tsx
+      SETTING_META entry for "autoCertifyOnAssessmentPass" (label + help text).
+      The toggle itself renders automatically from the settings list.
+  M src/app/admin/page.tsx
+      Dashboard: + prisma.questionRequest.count({where:{status:"OPEN"}}) in the
+      Promise.all; + "Open question requests" tile in the "Needs attention"
+      list (-> /admin/question-bank).
+
+--------------------------------------------------------------------------------
+2.5  UI — TUTOR
+--------------------------------------------------------------------------------
+
+  M src/app/tutor/assessments/page.tsx
+      Also computes getTopicAssessmentStatus(...) and loads the tutor's
+      attempts; passes `topicStatuses` and `attempts` to AssessmentsTabs.
+      Exports the AttemptSummary type. Subtitle copy updated.
+  M src/components/tutor/AssessmentsTabs.tsx
+      Threads the new props through; renames the tab
+      "Request History" -> "Assessment History" (count = attempts.length).
+  M src/components/tutor/TopicCertificationList.tsx   (reworked)
+      Per taught topic, the action is now:
+        CERTIFIED                         -> "Verified" badge
+        PENDING + last attempt PASSED     -> "Passed — awaiting confirmation"
+        in-progress attempt exists        -> "Resume assessment" (-> runner)
+        bank ready, not certified         -> "Take assessment" (POST
+                                             /api/tutor/assessments then push
+                                             to /tutor/assessments/{id});
+                                             "Retake" + "Not passed — N%" when
+                                             the last attempt FAILED;
+                                             handles 409 BANK_NOT_READY
+        bank not ready                    -> "Request questions" (POST
+                                             /api/tutor/question-requests) then
+                                             "Questions requested"; shows that
+                                             state directly if openRequest
+      Still shows REJECTED reviewer feedback when present.
+  A src/app/tutor/assessments/[attemptId]/page.tsx
+      Server component: loads the attempt with an ownership check (notFound()
+      otherwise), serializes it, renders <AssessmentQuizRunner/>.
+  A src/components/tutor/AssessmentQuizRunner.tsx   ("use client")
+      IN_PROGRESS: radio option groups per question, answered/total counter,
+      Submit (ConfirmDialog if unanswered remain) -> POST .../submit ->
+      switches to review. Review: pass/fail FeedbackBanner + score, each
+      question with the tutor's answer, the correct answer highlighted, and
+      the explanation. Also renders an already-submitted attempt read-only.
+  M src/components/tutor/AssessmentHistory.tsx
+      New `attempts` prop. Adds an "Attempts" section (attempt #, date, score,
+      PASSED/FAILED badge, Review/Resume link -> /tutor/assessments/{id}).
+      Existing certification list kept under a "Topic status" heading.
+
+  (Unchanged and still functional: GET /api/tutor/topic-certifications and the
+   useTopicCertifications hook — ClassManagement.tsx still uses it to know which
+   topics a tutor is certified for. The old POST on that route is no longer
+   wired into any UI.)
+
+--------------------------------------------------------------------------------
+2.6  SEED  (prisma/seed.ts, .env.seed)
+--------------------------------------------------------------------------------
+
+  M .env.seed
+      + SEED_QUESTIONS_PER_TOPIC=15   (documented alongside the other knobs)
+  M prisma/seed.ts
+      - Admin upsert result captured as `adminUser`.
+      - GEN.questionsPerTopic reads SEED_QUESTIONS_PER_TOPIC (default 0).
+      - QUESTION_BANK: 2 hand-written demo topics with 6 questions each
+        (MATH "Algebraic Expressions", ENGLISH "Grammar & Sentence Structure").
+      - genQuestionsForTopic(subject, topic, n): deterministic (seeded RNG)
+        placeholder MCQ generator — 5 stem templates, 4 options, exactly one
+        correct, randomised correct position; explanation marks them as demo
+        data.
+      - seedQuestionBank(adminId, demoTutorProfileId): for every curated
+        (subject, topic), clears the topic's questions then creates
+        max(perTopic, hand-written count) questions (curated first, topped up
+        with generated). Re-runnable. Returns the count.
+      - Also upserts one TopicAssessmentConfig override
+        (MATH "Algebraic Expressions": questionCount 5, passPercent 60) and one
+        OPEN QuestionRequest (MATH "Trigonometry") for the admin queue demo.
+      - Totals log line reports "bank questions: N (M / topic)".
+
+  Result of the local re-seed with SEED_QUESTIONS_PER_TOPIC=15:
+      645 questions across all 43 curated topics (15 each), 2580 options,
+      1 config override, 1 open question request.
+      Every question has exactly one correct option.
+
+--------------------------------------------------------------------------------
+2.7  TESTS  (Vitest)  — 8 new files
+--------------------------------------------------------------------------------
+
+  A src/lib/__tests__/assessmentConfig.test.ts
+      resolveTopicConfig: null -> defaults; row values used.
+  A src/lib/__tests__/assessmentPicker.test.ts
+      exactly `count`; prefers unseen; tops up with repeats when fresh pool
+      small; returns the whole pool when pool <= count.
+  A src/app/api/admin/assessment-questions/__tests__/route.test.ts
+      GET 401; inUse flag from _count; POST 401 / 400 (not exactly one
+      correct) / 400 (invalid topic) / 201 (+ ordered options + audit) / 500.
+  A src/app/api/admin/assessment-questions/[questionId]/__tests__/route.test.ts
+      PATCH 409 on content edit of an in-use question; `active` toggle allowed
+      (+ QUESTION_RETIRED audit); option replacement on a fresh question
+      (+ QUESTION_UPDATED). DELETE 409 when inUse; deletes + audits when fresh.
+  A src/app/api/admin/assessment-configs/__tests__/route.test.ts
+      401; 400 out-of-range passPercent; 400 invalid topic; upsert + audit.
+  A src/app/api/admin/question-requests/[requestId]/__tests__/route.test.ts
+      401; 404; 400 (not OPEN); 400 (invalid decision); resolve stamps admin +
+      resolvedAt + audit.
+  A src/app/api/tutor/assessments/__tests__/route.test.ts
+      401; 404 (no profile); 409 BANK_NOT_READY; 409 already CERTIFIED;
+      resumes IN_PROGRESS; 201 creates attempt with the picked items and does
+      not reveal answers.
+  A src/app/api/tutor/assessments/[attemptId]/submit/__tests__/route.test.ts
+      404 (other tutor); 409 (already submitted); both-correct -> 100% PASSED +
+      CERTIFIED when auto-certify on; PASSED + PENDING(score) when off;
+      all-wrong -> FAILED + REJECTED; no cert write when already CERTIFIED.
+
+
+================================================================================
+PART 3 — DOCS
+================================================================================
+
+  A docs/plans/assessment-taking-system.md
+      The approved implementation plan (copied from the plan-mode file per the
+      CLAUDE.md convention).
+  A Changes.txt
+      This file.
+
+
+================================================================================
+VERIFICATION (final state)
+================================================================================
+
+  npx prisma validate / format         — schema valid, formatted
+  npx prisma migrate dev               — migration applied to local DB
+  npx prisma generate                  — client regenerated
+  pnpm exec tsx prisma/seed.ts         — seeded (645 bank questions)
+  pnpm exec tsc --noEmit               — clean (exit 0)
+  pnpm lint                            — 0 errors (5 pre-existing warnings, none
+                                         in new code)
+  pnpm test                            — 352 passing, 47 files (incl. 8 new)
+  pnpm build                           — compiles; all new routes/pages
+                                         registered
+
+  Not committed. Not pushed.
+================================================================================
+
+
+================================================================================
+PART 4 — STYLE: soften global type weight (2026-09-02)
+================================================================================
+
+Committed on branch redesign/tailwind-ui.
+
+Problem
+  Apfel Grotezk (next/font/local) ships only 400 / 500 / 700 / 900 faces.
+  `font-semibold` (600) had no matching face and the CSS font-matching
+  algorithm snapped it up to 700, so every `font-semibold` / `font-bold` run
+  rendered as the heavy Fett face — "all bold letters too bold".
+
+Files changed
+  M src/app/globals.css
+      - @theme: pin --font-weight-medium / --font-weight-semibold /
+        --font-weight-bold to 500, so the font-bold / font-semibold utilities
+        (~180 uses across ~44 files) resolve to the 500 Mittel face.
+      - Route the hard-coded font-weight: 700 / 600 declarations in the .kt-*
+        component classes (card head, tiles, avatar, nav label, active nav
+        item, tabs, day label) through those tokens.
+      - Add `b, strong { font-weight: var(--font-weight-bold); }` so raw bold
+        tags follow (Tailwind preflight otherwise forces them to `bolder`).
+  M src/components/admin/ReportsView.tsx
+      - The two enrollment stat numbers inherited DaisyUI's .stat-value
+        font-weight: 800 (snaps to the 900 Satt face); add `font-medium` so
+        they match the softened scale while keeping the serif display look.
+  M src/components/layout/PortalLayout.tsx
+      - Migrate `!pb-0 !px-2` to the Tailwind v4 important-modifier syntax
+        `pb-0! px-2!`.
+  M src/app/admin/page.tsx
+      - Type the exported `metadata` as Next's `Metadata`.
+
+Tradeoff
+  Apfel has no 600 face, so `font-bold` and `font-semibold` now render at the
+  same 500 weight (they already both rendered at 700 before). To keep a
+  visible bold/semibold distinction, either leave --font-weight-bold at 700 or
+  add an ApfelGrotezk 600 weight file.
+
+Verification
+  pnpm build — compiles; production CSS bundle shows
+  `.font-bold{font-weight:var(--font-weight-bold)}` with
+  `--font-weight-bold:500`.
+================================================================================

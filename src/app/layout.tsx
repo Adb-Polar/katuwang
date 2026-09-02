@@ -1,22 +1,28 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Mono, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import AuthProvider from "@/components/providers/SessionProvider";
 
-const fraunces = Fraunces({
-  variable: "--font-fraunces",
-  subsets: ["latin"],
+// Apfel Grotezk (Collletttivo / Alexander Meyer) — SIL OFL 1.1. Display + body face.
+const apfel = localFont({
+  variable: "--font-apfel",
+  display: "swap",
+  src: [
+    { path: "./fonts/ApfelGrotezk-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ApfelGrotezk-Mittel.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/ApfelGrotezk-Fett.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/ApfelGrotezk-Satt.woff2", weight: "900", style: "normal" },
+  ],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["500", "600"],
+// Fragment Mono (Wei Huang) — SIL OFL 1.1. Notation: IDs, dates, counts, status codes.
+const fragmentMono = localFont({
+  variable: "--font-fragment-mono",
+  display: "swap",
+  src: [
+    { path: "./fonts/FragmentMono-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/FragmentMono-Italic.woff2", weight: "400", style: "italic" },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -24,21 +30,15 @@ export const metadata: Metadata = {
   description: "Academic match and support portal",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
       data-theme="katuwang theme"
-      className={`${fraunces.variable} ${manrope.variable} ${plexMono.variable} h-full antialiased`}
+      className={`${apfel.variable} ${fragmentMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      <body className="min-h-full flex flex-col font-sans bg-base-200">
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

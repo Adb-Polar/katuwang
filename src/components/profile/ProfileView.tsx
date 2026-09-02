@@ -55,7 +55,7 @@ export default function ProfileView({
         actions={<AnonymousIdBadge id={anonymousId} role={idRole} size="md" showIcon />}
       />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4 p-6">
           <h2 className="card-title text-sm font-bold">Account information</h2>
           <dl className="divide-y divide-base-200">
@@ -72,7 +72,7 @@ export default function ProfileView({
         </div>
       </section>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4 p-6">
           <h2 className="card-title text-sm font-bold">Edit profile</h2>
           <p className="text-xs text-base-content/60">

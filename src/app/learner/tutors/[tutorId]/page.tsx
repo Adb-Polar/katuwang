@@ -91,7 +91,7 @@ export default async function LearnerTutorProfilePage({
       />
 
       {showRealNames && (
-        <section className="card bg-base-100 shadow-md border border-base-200">
+        <section className="card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Tutor</h2>
             <div className="flex items-center gap-2 text-xs text-base-content/80">
@@ -105,7 +105,7 @@ export default async function LearnerTutorProfilePage({
         </section>
       )}
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold">Verified Topics</h2>
           {bySubject.size === 0 ? (
@@ -132,7 +132,7 @@ export default async function LearnerTutorProfilePage({
         </div>
       </section>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold">Typical Weekly Schedule</h2>
           <p className="text-2xs text-base-content/50">
@@ -145,7 +145,7 @@ export default async function LearnerTutorProfilePage({
         </div>
       </section>
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Published Classes ({classes.length})</h2>
           {classes.length === 0 ? (

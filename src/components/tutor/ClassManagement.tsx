@@ -214,7 +214,7 @@ export default function ClassManagement() {
       <FeedbackBanner variant="error" message={error || null} />
 
       {/* Main Section */}
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="flex justify-between items-center">
             <h2 className="card-title text-sm font-bold">Class Schedule & Management</h2>

@@ -33,6 +33,11 @@ const SETTING_META: Record<string, { label: string; description: string }> = {
     description:
       "When enabled, new learner and tutor accounts are created as PENDING and cannot log in until an admin approves them from the Registrations queue.",
   },
+  autoCertifyOnAssessmentPass: {
+    label: "Auto-certify tutors who pass an assessment",
+    description:
+      "When enabled, passing a topic assessment certifies the tutor for that topic immediately. When off, a passing assessment creates a pending certification for an admin to confirm on the Certifications screen.",
+  },
 };
 
 export default function PlatformSettingsForm() {
@@ -70,7 +75,7 @@ export default function PlatformSettingsForm() {
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Platform Settings</h2>
 

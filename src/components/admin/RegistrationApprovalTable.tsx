@@ -52,10 +52,11 @@ export default function RegistrationApprovalTable() {
     refetch,
   } = usePaginatedList<PendingUser>(
     "/api/admin/registrations",
-    "registrations",
+    "users",
     { ...(search.trim() ? { q: search.trim() } : {}) },
     PAGE_SIZE,
-    "Could not retrieve pending registrations."
+    "Could not retrieve pending registrations.",
+    "registrations"
   );
 
   const review = async (user: PendingUser, decision: "APPROVE" | "DECLINE", declineReason = "") => {
@@ -91,7 +92,7 @@ export default function RegistrationApprovalTable() {
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={declineTarget ? null : error || null} />
 
-      <section className="card bg-base-100 shadow-md border border-base-200">
+      <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Pending Registrations</h2>
 

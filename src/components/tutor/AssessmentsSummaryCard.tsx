@@ -9,7 +9,7 @@ export default function AssessmentsSummaryCard({
   pendingCount: number;
 }) {
   return (
-    <section className="card bg-base-100 shadow-md border border-base-200">
+    <section className="card kt-card">
       <div className="card-body gap-3">
         <div className="flex items-center justify-between">
           <h2 className="card-title text-sm font-bold">Assessments</h2>

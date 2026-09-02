@@ -99,7 +99,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
   };
 
   return (
-    <div className={`card bg-base-100 shadow-sm border ${copy.border} w-full`}>
+    <div className={`card kt-card w-full`}>
       <div className="card-body gap-5 p-6 md:p-8">
         {/* Card Header */}
         <div className="flex flex-col items-center gap-2 mb-2 text-center">

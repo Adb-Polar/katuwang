@@ -130,7 +130,7 @@ export default async function AdminClassDetailPage({
         }
         sidebarExtra={
           tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED" ? (
-            <div className="card bg-base-100 shadow-md border border-error/30">
+            <div className="card kt-card !border-error/40">
               <div className="card-body gap-1 p-4">
                 <h2 className="card-title text-sm font-bold text-error">Moderation</h2>
                 {tutorClass.suspendedReason && (
