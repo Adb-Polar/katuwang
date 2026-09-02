@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang — learner dashboard</title>
+<link rel="stylesheet" href="base.css">
+<script src="theme-toggle.js"></script>
+</head>
+<body data-portal="learner">
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand-row">
+      <span class="brand-mark">K</span>
+      <span class="brand-name">Katuwang</span>
+      <button class="collapse" type="button" aria-label="Collapse sidebar">«</button>
+    </div>
+
+    <nav class="nav-group" aria-label="Main">
+      <span class="label">Main menu</span>
+      <a class="nav-item" href="03-portal-dashboard.html" aria-current="page"><span class="ic">Db</span>Dashboard</a>
+      <a class="nav-item" href="05-class-browse.html"><span class="ic">Bc</span>Browse classes</a>
+      <a class="nav-item" href="#my"><span class="ic">Mc</span>My classes</a>
+    </nav>
+    <nav class="nav-group" aria-label="Tools">
+      <span class="label">Tools</span>
+      <a class="nav-item" href="#match"><span class="ic">Am</span>Auto match</a>
+      <a class="nav-item" href="#req"><span class="ic">Rq</span>My requests</a>
+    </nav>
+    <nav class="nav-group" aria-label="Account">
+      <span class="label">Account</span>
+      <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+      <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+    </nav>
+
+    <div class="side-promo">
+      <strong>Get matched faster</strong>
+      <p>Turn on Auto match to get a ranked shortlist of tutors for your topics.</p>
+      <a class="btn" href="#match">Set up Auto match</a>
+    </div>
+    <div class="side-foot">
+      <span class="id id--learner">STU-2071</span>
+      <span class="micro">Grade 9 · Section Rizal</span>
+      <button class="theme-toggle" type="button" data-theme-toggle>theme: light</button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" aria-label="Search" placeholder="Search classes, tutors, topics…">
+        <kbd>⌘K</kbd>
+      </div>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" aria-label="Help">?</button>
+      <button class="icon-btn" type="button" aria-label="Notifications">◔</button>
+      <span class="avatar" aria-hidden="true">S7</span>
+    </header>
+
+    <details class="nav-mobile">
+      <summary><span class="brand-mark" style="width:1.6rem;height:1.6rem;">K</span> Katuwang · Learner</summary>
+      <nav class="nav-group">
+        <a class="nav-item" href="03-portal-dashboard.html" aria-current="page"><span class="ic">Db</span>Dashboard</a>
+        <a class="nav-item" href="05-class-browse.html"><span class="ic">Bc</span>Browse classes</a>
+        <a class="nav-item" href="#my"><span class="ic">Mc</span>My classes</a>
+        <a class="nav-item" href="#match"><span class="ic">Am</span>Auto match</a>
+        <a class="nav-item" href="#req"><span class="ic">Rq</span>My requests</a>
+        <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+        <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+      </nav>
+    </details>
+
+    <main class="main">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <div class="title-wrap">
+            <h1>Welcome back, STU-2071</h1>
+            <p>Here's what's happening in your classes this week.</p>
+          </div>
+          <div class="page-actions">
+            <span class="datepill"><span aria-hidden="true">▦</span> Mon, 1 Sep 2026</span>
+            <a class="btn btn--primary" href="#digest">Weekly digest</a>
+          </div>
+        </div>
+
+        <div class="alert alert--warning" role="status">
+          <div><strong>1 topic request still open.</strong> No class yet for your Geometry request — try Auto match, or wait for a tutor to pick it up.</div>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card stat">
+            <div class="stat-top">
+              <span class="tile">Cl</span>
+              <span class="stat-title">Enrolled classes</span>
+              <button class="dots" type="button" aria-label="More">⋯</button>
+            </div>
+            <span class="value">2</span>
+            <div class="delta-row"><span class="delta" data-dir="up">+1</span> since last month</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-top">
+              <span class="tile">Se</span>
+              <span class="stat-title">Sessions this week</span>
+              <button class="dots" type="button" aria-label="More">⋯</button>
+            </div>
+            <span class="value">3</span>
+            <div class="delta-row"><span class="delta" data-dir="up">+2</span> vs last week</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-top">
+              <span class="tile">Rq</span>
+              <span class="stat-title">Open requests</span>
+              <button class="dots" type="button" aria-label="More">⋯</button>
+            </div>
+            <span class="value">1</span>
+            <div class="delta-row"><span class="delta" data-dir="down">−1</span> since last month</div>
+          </div>
+        </div>
+
+        <div class="card chart">
+          <div class="card-head">
+            <h2><span aria-hidden="true">▤</span> Sessions attended</h2>
+            <div class="tools">
+              <button class="btn btn--quiet" type="button">This year ▾</button>
+              <button class="dots" type="button" aria-label="More">⋯</button>
+            </div>
+          </div>
+          <div class="plot" role="img" aria-label="Sessions attended per month, peaking at 14 in August">
+            <div class="bar" style="height:34%"></div>
+            <div class="bar" style="height:41%"></div>
+            <div class="bar" style="height:58%"></div>
+            <div class="bar" style="height:37%"></div>
+            <div class="bar" style="height:52%"></div>
+            <div class="bar" style="height:46%"></div>
+            <div class="bar" style="height:63%"></div>
+            <div class="bar" data-peak style="height:92%"><span class="tip"><span class="t-k">Aug</span>14 sessions</span></div>
+            <div class="bar" style="height:70%"></div>
+            <div class="bar" style="height:66%"></div>
+            <div class="bar" style="height:44%"></div>
+            <div class="bar" style="height:55%"></div>
+          </div>
+          <div class="xaxis"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h2><span aria-hidden="true">▤</span> Class progress</h2>
+              <button class="dots" type="button" aria-label="More">⋯</button>
+            </div>
+            <div class="prow">
+              <span class="pf">MT</span>
+              <div class="pbody">
+                <span class="pname">Mathematics · MTH-9-014</span>
+                <span class="track"><span style="width:78%"></span></span>
+              </div>
+              <span class="pct">78%</span>
+            </div>
+            <div class="prow">
+              <span class="pf">EN</span>
+              <div class="pbody">
+                <span class="pname">English · ENG-9-006</span>
+                <span class="track"><span style="width:64%"></span></span>
+              </div>
+              <span class="pct">64%</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2><span aria-hidden="true">◷</span> Recent activity</h2>
+              <a class="btn btn--quiet" href="#all">View all</a>
+            </div>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr><th scope="col">Activity</th><th scope="col">Class</th><th scope="col">Date</th><th scope="col">Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cell-label" aria-hidden="true">Activity</span><span class="with-ic"><span class="row-ic">✓</span>Session attended</span></td>
+                    <td><span class="cell-label" aria-hidden="true">Class</span>MTH-9-014</td>
+                    <td><span class="cell-label" aria-hidden="true">Date</span>Tue, 26 Aug 2026</td>
+                    <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--success"><span class="code">CMP</span> Completed</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-label" aria-hidden="true">Activity</span><span class="with-ic"><span class="row-ic">+</span>Enrolled in class</span></td>
+                    <td><span class="cell-label" aria-hidden="true">Class</span>ENG-9-006</td>
+                    <td><span class="cell-label" aria-hidden="true">Date</span>Mon, 25 Aug 2026</td>
+                    <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--success"><span class="code">ENR</span> Enrolled</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="cell-label" aria-hidden="true">Activity</span><span class="with-ic"><span class="row-ic">?</span>Topic request sent</span></td>
+                    <td><span class="cell-label" aria-hidden="true">Class</span>Geometry</td>
+                    <td><span class="cell-label" aria-hidden="true">Date</span>Fri, 22 Aug 2026</td>
+                    <td><span class="cell-label" aria-hidden="true">Status</span><span class="badge badge--warning"><span class="code">PEN</span> Pending</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-head"><h2><span aria-hidden="true">▦</span> This week</h2></div>
+            <div class="week">
+              <div class="day"><span>Mon</span><span class="empty">—</span></div>
+              <div class="day"><span>Tue</span><span class="slot">4:00–5:30</span></div>
+              <div class="day"><span>Wed</span><span class="slot">5:00–6:00</span></div>
+              <div class="day"><span>Thu</span><span class="empty">—</span></div>
+              <div class="day"><span>Fri</span><span class="slot">4:30–6:00</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h2><span aria-hidden="true">↗</span> Quick links</h2></div>
+            <ul class="linklist">
+              <li><a href="05-class-browse.html">Browse classes <span aria-hidden="true">→</span></a></li>
+              <li><a href="#match">Auto match <span aria-hidden="true">→</span></a></li>
+              <li><a href="#req">My topic requests <span aria-hidden="true">→</span></a></li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+</div>
+</body>
+</html>

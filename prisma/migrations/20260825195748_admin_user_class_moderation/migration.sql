@@ -1,0 +1,9 @@
+-- AlterTable
+ALTER TABLE `tutor_classes` ADD COLUMN `suspendedReason` TEXT NULL,
+    MODIFY `status` ENUM('SCHEDULED', 'COMPLETED', 'CANCELLED', 'SUSPENDED') NOT NULL DEFAULT 'SCHEDULED';
+
+-- AlterTable
+ALTER TABLE `users` ADD COLUMN `status` ENUM('ACTIVE', 'SUSPENDED', 'BANNED') NOT NULL DEFAULT 'ACTIVE',
+    ADD COLUMN `statusReason` TEXT NULL,
+    ADD COLUMN `statusUpdatedAt` DATETIME(3) NULL;
+

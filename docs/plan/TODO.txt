@@ -1,0 +1,59 @@
+General
+ - Url based pagination
+ - contrash on botom nav bar
+ - add backup email for recovery
+ - Profile page regesign
+Learner
+ - Dashboard content
+ - Header redesign
+ - Class Card Fix(Messy and cluttered)
+ - View tutor profile need name for tutor and section and redesign
+ - browse classes no search and filter
+ - /learner/match form redesign too small rename findclass to automatch prefered time field too small
+ - need edit request for student same value timefield should me just merge and
+	- edit profile form label and input should be on the same line
+	- allow view on topic request reuse classInfo add edit info inside to edit class req
+
+Tutor
+ - dashboard content
+ - Clear class name currently its all badge cluttered
+ - Session card tooltip icons are unlear without this
+ - Add session should only be visible in edit classs
+ - Session and add session should be at edit class form
+ - Classes should also have auto generate code like C-
+ - unppublished class color is kinda off should be like more gray iguess
+ - learners enrolled class should only visible to the owner of the class
+ - in student page student can also be filtered by class add search
+ - label and input doesnt have enough gap
+ - topic request card blend in the bg add border and darker color request class should be viewed
+ - your assessment card should have a line break on  the tabs
+ - is availability still needed?
+ - profile redesign
+ - classes should still be visible when suspended and banned just show info reason of ban and suspension, sus duration, and color change to indicate status
+ - show if the assessment is rejected
+
+Admin
+ - dashboard content
+ - /admin/users table font is too small add add ajustable student number per page in pagination, should also view profile when clicking users
+ - /admin/classes classes should be viewable
+ - /admin/certification add a tab where accepted and rejected are listed add a search and filter and sort by, should be paginated
+ - /admin/audit-log search and sortby per field
+ - platform report are cluttered redesign add visual graphs
+ - /admin/setting add a user registration approval when enabled new users should be manually approved by admin before being a user needs a page where admin can approve and decline new users
+
+Aug 30
+  learner
+    - class detail must show tutor
+    - display tutor name onn class card
+    - Add a tab for completed classes also add filter
+    - browsing classes algo what to show first
+    - show reason for suspention for on the enrolled class
+    - add filter solo/group in automatch
+  Tutor
+   - add a community requests and personal request
+   - create class add other in subject allow tutor to add custom or new topics
+   - apeal button
+  Admin
+   - Add a topic edit page add topic and add subject
+
+Chunk 9 remove availability instead implement a automatic availabitly based on the classes sched

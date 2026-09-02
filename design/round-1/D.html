@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>D</title>
+<style>
+  @font-face {
+    font-family: "Young Serif";
+    src: url("fonts/YoungSerif-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "Bricolage Grotesque";
+    src: url("fonts/BricolageGrotesque-var.ttf") format("truetype");
+    font-weight: 200 800; font-display: swap;
+  }
+
+  :root {
+    --paper: oklch(97% 0.014 72);
+    --warm: oklch(24% 0.035 45);
+    --cool: oklch(52% 0.014 250);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--warm);
+    font-family: "Young Serif", Georgia, serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    padding: clamp(2.5rem, 9vw, 7rem) clamp(1.5rem, 6vw, 4rem);
+    padding-left: clamp(1.5rem, 13vw, 13rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .voice { max-width: 32ch; }
+
+  .name {
+    font-size: clamp(1.2rem, 3vw, 1.6rem);
+    letter-spacing: 0.01em;
+    margin-bottom: clamp(1.5rem, 5vw, 3rem);
+  }
+
+  .headline {
+    font-size: clamp(2.1rem, 6.6vw, 3.7rem);
+    line-height: 1.12;
+    letter-spacing: -0.005em;
+    margin-bottom: clamp(1.75rem, 5vw, 2.75rem);
+  }
+
+  .pledge {
+    font-size: clamp(1.15rem, 2.8vw, 1.5rem);
+    line-height: 1.34;
+    max-width: 30ch;
+    margin-bottom: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .cohort {
+    font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+    line-height: 1.4;
+  }
+
+  .record {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-weight: 400;
+    color: var(--cool);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.7rem;
+    line-height: 2;
+    margin-top: clamp(3.5rem, 12vw, 8rem);
+    max-width: 46ch;
+  }
+
+  .record span {
+    display: block;
+    white-space: pre-wrap;
+  }
+</style>
+</head>
+<body>
+
+  <div class="voice">
+    <div class="name">Katuwang</div>
+    <h1 class="headline">Learn with a peer who gets it.</h1>
+    <p class="pledge">You are TUT-0148. Your learner is STU-2071. Names stay hidden on both sides.</p>
+    <p class="cohort">Grade 9 · Section Rizal</p>
+  </div>
+
+  <div class="record">
+    <span>Peer tutoring · Grades 7–12</span>
+    <span>Academic match and support portal</span>
+    <span>Dashboard   Classes   Students   Requests   Assessments   Profile</span>
+    <span>6 verified topics · 2 pending requests</span>
+    <span>Tue 4:00–5:30 PM — Algebra: linear equations</span>
+    <span>Open · Enrolled · Completed · Suspended</span>
+    <span>Requested 28 Aug 2026 · reviewed by admin</span>
+    <span>Create account   Log in</span>
+  </div>
+
+</body>
+</html>

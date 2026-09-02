@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C</title>
+<style>
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("fonts/JetBrainsMono-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("fonts/JetBrainsMono-Medium.woff2") format("woff2");
+    font-weight: 500; font-display: swap;
+  }
+  @font-face {
+    font-family: "JetBrains Mono";
+    src: url("fonts/JetBrainsMono-Bold.woff2") format("woff2");
+    font-weight: 700; font-display: swap;
+  }
+
+  :root {
+    --paper: oklch(97% 0.006 210);
+    --primary: oklch(28% 0.02 220);
+    --live: oklch(46% 0.13 150);
+    --spent: oklch(57% 0.014 220);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--primary);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    padding: clamp(2rem, 7vw, 5.5rem) clamp(1.1rem, 5vw, 4rem);
+  }
+
+  .sheet {
+    width: 62ch;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .title {
+    font-weight: 700;
+    letter-spacing: 0.24em;
+    font-size: 15px;
+    margin-bottom: 2.5rem;
+    text-transform: uppercase;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 13ch 1fr;
+    column-gap: 2ch;
+    align-items: baseline;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .k {
+    color: var(--spent);
+  }
+
+  .live { color: var(--live); }
+  .spent { color: var(--spent); }
+
+  .gap { height: 1.75rem; }
+
+  .closing {
+    margin-top: 3.5rem;
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 24ch;
+  }
+</style>
+</head>
+<body>
+
+  <div class="sheet">
+    <div class="title">Katuwang</div>
+
+    <div class="row"><span class="k">portal</span><span>Academic match and support portal</span></div>
+    <div class="row"><span class="k">intake</span><span>Peer tutoring · Grades 7–12</span></div>
+    <div class="row"><span class="k">cohort</span><span>Grade 9 · Section Rizal</span></div>
+
+    <div class="gap"></div>
+
+    <div class="row"><span class="k">session</span><span class="live">Tue 4:00–5:30 PM — Algebra: linear equations</span></div>
+    <div class="row"><span class="k">identity</span><span>You are TUT-0148. Your learner is STU-2071. Names stay hidden on both sides.</span></div>
+    <div class="row"><span class="k">progress</span><span>6 verified topics · 2 pending requests</span></div>
+    <div class="row"><span class="k">states</span><span><span class="live">Open</span> · Enrolled · <span class="spent">Completed</span> · Suspended</span></div>
+
+    <div class="gap"></div>
+
+    <div class="row"><span class="k">nav</span><span>Dashboard   Classes   Students   Requests   Assessments   Profile</span></div>
+    <div class="row"><span class="k">log</span><span class="spent">Requested 28 Aug 2026 · reviewed by admin</span></div>
+    <div class="row"><span class="k">actions</span><span>Create account   /   Log in</span></div>
+
+    <div class="closing">Learn with a peer who gets it.</div>
+  </div>
+
+</body>
+</html>

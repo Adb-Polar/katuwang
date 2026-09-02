@@ -1,0 +1,245 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/*
+  Palette: three roles, three functional colors — not decoration.
+  primary  = brand teal, used app-wide (buttons/links/focus) and as the Admin portal accent
+  secondary = ube violet, the Learner role color (nav accent, learner-owned ID badges)
+  accent    = marigold gold, the Tutor role color (nav accent, tutor-owned ID badges)
+  warning is pulled toward orange-red (hue ~45) so it never collides with the gold accent (hue ~80).
+*/
+@plugin "daisyui/theme" {
+  name: "katuwang theme";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(99% 0.003 80);
+  --color-base-200: oklch(97% 0.005 80);
+  --color-base-300: oklch(93% 0.008 80);
+  --color-base-content: oklch(24% 0.02 258);
+  --color-primary: oklch(40% 0.09 174);
+  --color-primary-content: oklch(98% 0.01 174);
+  --color-secondary: oklch(48% 0.16 300);
+  --color-secondary-content: oklch(98% 0.02 300);
+  --color-accent: oklch(76% 0.14 80);
+  --color-accent-content: oklch(24% 0.05 80);
+  --color-neutral: oklch(27% 0.035 258);
+  --color-neutral-content: oklch(97% 0.005 258);
+  --color-info: oklch(62% 0.12 230);
+  --color-info-content: oklch(97% 0.01 230);
+  --color-success: oklch(63% 0.13 152);
+  --color-success-content: oklch(97% 0.01 152);
+  --color-warning: oklch(70% 0.16 45);
+  --color-warning-content: oklch(22% 0.03 45);
+  --color-error: oklch(58% 0.19 22);
+  --color-error-content: oklch(98% 0.01 22);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.5rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme inline {
+  /* Redesign: Apfel Grotezk = speech (sans + display), Fragment Mono = notation.
+     --font-serif kept pointing at the display face so existing `font-serif`
+     headings render Apfel until they are swept to `font-sans`. */
+  --font-sans: var(--font-apfel), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-apfel), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-fragment-mono), ui-monospace, "SFMono-Regular", monospace;
+}
+
+/*
+  Type scale contract (co-located with the one non-default token it adds):
+  text-2xs = badge/meta/micro-label text only (status pills, ID chips, timestamps)
+  text-xs  = dense UI body: form labels, buttons, table cells
+  text-sm  = default body copy
+  text-base/text-lg = section and card titles (font-sans, bold)
+  text-xl and up, with font-serif = page-level H1 only — never blanket-applied to h2-h6
+*/
+@theme {
+  --text-2xs: 0.6875rem;
+  --text-2xs--line-height: 1rem;
+}
+
+/* ============================================================================
+   Redesign layer — direction E typography on a card shell.
+   Tokens derived from the DaisyUI theme above (single source of truth for hue).
+   Authority: design/STYLEGUIDE.html, design/ROUND-2-CONTEXT.md.
+   Class names are literal so the Tailwind 4 content scanner keeps them.
+   ========================================================================= */
+:root {
+  --kt-border: var(--color-base-300, oklch(93% 0.008 80));
+  --kt-shadow-card: 0 1px 2px oklch(0% 0 0 / 0.04), 0 1px 3px oklch(0% 0 0 / 0.05);
+  --kt-shadow-pop: 0 8px 24px oklch(0% 0 0 / 0.12), 0 2px 6px oklch(0% 0 0 / 0.06);
+  --kt-radius-box: var(--radius-box, 0.5rem);
+  --kt-radius-field: var(--radius-field, 0.5rem);
+
+  --kt-tint-primary: color-mix(in oklch, var(--color-primary) 12%, var(--color-base-100));
+  --kt-tint-learner: color-mix(in oklch, var(--color-secondary) 12%, var(--color-base-100));
+  --kt-tint-tutor: color-mix(in oklch, var(--color-accent) 24%, var(--color-base-100));
+  --kt-tint-info: color-mix(in oklch, var(--color-info) 14%, var(--color-base-100));
+  --kt-tint-success: color-mix(in oklch, var(--color-success) 16%, var(--color-base-100));
+  --kt-tint-warning: color-mix(in oklch, var(--color-warning) 20%, var(--color-base-100));
+  --kt-tint-error: color-mix(in oklch, var(--color-error) 13%, var(--color-base-100));
+  --kt-tint-neutral: color-mix(in oklch, var(--color-base-content) 6%, var(--color-base-100));
+
+  /* the accent is a light marigold used as a fill; darken it for use as ID text */
+  --kt-tutor-text: oklch(50% 0.12 80);
+  --kt-warning-text: color-mix(in oklch, var(--color-warning) 80%, black);
+  --kt-muted: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  --kt-faint: color-mix(in oklch, var(--color-base-content) 42%, transparent);
+}
+
+body { background: var(--color-base-200); }
+
+/* soften DaisyUI's default card shadow everywhere it is still used */
+.card { box-shadow: var(--kt-shadow-card); }
+
+@layer components {
+  .kt-card {
+    background: var(--color-base-100);
+    border: 1px solid var(--kt-border);
+    border-radius: var(--kt-radius-box);
+    box-shadow: var(--kt-shadow-card);
+  }
+  .kt-card-body { padding: 1.25rem; display: flex; flex-direction: column; }
+  .kt-card-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 0.75rem; margin-bottom: 1rem;
+  }
+  .kt-card-head > h2, .kt-card-head > h3 {
+    font-size: 1rem; font-weight: 700; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  .kt-badge {
+    display: inline-flex; align-items: center; gap: 0.4ch;
+    font-family: var(--font-mono); font-size: 0.72rem; line-height: 1;
+    padding: 0.3em 0.62em; border-radius: 999px; white-space: nowrap;
+    background: var(--kt-tint-neutral); color: var(--kt-muted);
+  }
+  .kt-badge::before { content: "●"; font-size: 0.6em; }
+  .kt-badge .kt-code { opacity: 0.7; }
+  .kt-badge--info { background: var(--kt-tint-info); color: var(--color-info); }
+  .kt-badge--success { background: var(--kt-tint-success); color: var(--color-success); }
+  .kt-badge--warning { background: var(--kt-tint-warning); color: var(--kt-warning-text); }
+  .kt-badge--error { background: var(--kt-tint-error); color: var(--color-error); }
+  .kt-badge--neutral { background: var(--kt-tint-neutral); color: var(--kt-muted); }
+  .kt-badge--learner { background: var(--kt-tint-learner); color: var(--color-secondary); }
+  .kt-badge--tutor { background: var(--kt-tint-tutor); color: var(--kt-tutor-text); }
+
+  .kt-id { font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.01em; white-space: nowrap; }
+  .kt-id--learner { color: var(--color-secondary); }
+  .kt-id--tutor { color: var(--kt-tutor-text); }
+
+  .kt-tile {
+    display: grid; place-items: center; flex: none;
+    border-radius: var(--kt-radius-field);
+    background: var(--kt-tint-primary); color: var(--color-primary);
+    font-family: var(--font-mono); font-weight: 700;
+  }
+  .kt-letter-tile {
+    width: 2.4rem; height: 2.4rem; flex: none; display: grid; place-items: center;
+    border-radius: 0.6rem; background: var(--color-base-200); color: var(--kt-muted);
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+  }
+
+  .kt-alert {
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    border: 1px solid var(--kt-border); border-left-width: 3px;
+    border-radius: var(--kt-radius-field);
+    padding: 0.75rem 1rem; font-size: 0.84rem; background: var(--color-base-100);
+  }
+  .kt-alert--info { border-left-color: var(--color-info); background: var(--kt-tint-info); }
+  .kt-alert--success { border-left-color: var(--color-success); background: var(--kt-tint-success); }
+  .kt-alert--warning { border-left-color: var(--color-warning); background: var(--kt-tint-warning); }
+  .kt-alert--error { border-left-color: var(--color-error); background: var(--kt-tint-error); }
+
+  .kt-sidebar { background: var(--color-base-100); border-right: 1px solid var(--kt-border); }
+  .kt-nav-label {
+    font-size: 0.66rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--kt-faint); padding: 0 0.5rem 0.4rem;
+  }
+  .kt-nav-item {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.55rem 0.5rem; border-radius: var(--kt-radius-field);
+    font-size: 0.875rem; font-weight: 500; color: var(--kt-muted); text-decoration: none;
+  }
+  .kt-nav-item:hover { background: var(--color-base-200); color: var(--color-base-content); }
+  .kt-nav-item .kt-ic {
+    width: 1.5rem; height: 1.5rem; flex: none; display: grid; place-items: center;
+    border-radius: 0.45rem; background: var(--color-base-200); color: var(--kt-muted);
+    font-family: var(--font-mono); font-size: 0.68rem; text-transform: uppercase;
+  }
+  .kt-nav-item[data-active="true"] { background: var(--kt-tint-primary); color: var(--color-primary); font-weight: 600; }
+  .kt-nav-item[data-active="true"] .kt-ic { background: var(--color-primary); color: var(--color-primary-content); }
+
+  .kt-promo {
+    border-radius: var(--kt-radius-box); padding: 1rem;
+    background: linear-gradient(160deg, var(--color-primary), color-mix(in oklch, var(--color-primary) 68%, black));
+    color: var(--color-primary-content);
+    display: flex; flex-direction: column; gap: 0.5rem; text-align: center;
+  }
+
+  .kt-topbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.75rem clamp(1rem, 4vw, 2rem);
+    background: color-mix(in oklch, var(--color-base-200) 85%, transparent);
+    backdrop-filter: saturate(180%) blur(6px);
+    border-bottom: 1px solid var(--kt-border);
+  }
+  .kt-search {
+    flex: 1; max-width: 26rem; display: flex; align-items: center; gap: 0.5rem;
+    background: var(--color-base-100); border: 1px solid var(--kt-border);
+    border-radius: 999px; padding: 0.5rem 0.9rem; font-size: 0.85rem; color: var(--kt-muted);
+  }
+  .kt-search input { border: 0; background: none; flex: 1; font: inherit; color: var(--color-base-content); outline: none; }
+  .kt-icon-btn {
+    width: 2.1rem; height: 2.1rem; display: grid; place-items: center; flex: none;
+    border-radius: 999px; border: 1px solid var(--kt-border); background: var(--color-base-100);
+    color: var(--kt-muted); cursor: pointer;
+  }
+  .kt-icon-btn:hover { color: var(--color-base-content); }
+  .kt-avatar {
+    width: 2.1rem; height: 2.1rem; flex: none; border-radius: 999px; display: grid; place-items: center;
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700;
+    background: var(--kt-tint-tutor); color: var(--kt-tutor-text);
+  }
+
+  .kt-stat { display: flex; flex-direction: column; gap: 0.75rem; }
+  .kt-stat-top { display: flex; align-items: center; gap: 0.75rem; }
+  .kt-stat-top .kt-tile { width: 2.25rem; height: 2.25rem; font-size: 0.8rem; }
+  .kt-stat-title { font-size: 0.85rem; font-weight: 500; color: var(--kt-muted); }
+  .kt-stat-value { font-family: var(--font-mono); font-size: 1.9rem; letter-spacing: -0.02em; }
+  .kt-delta {
+    font-family: var(--font-mono); font-size: 0.72rem; padding: 0.12em 0.5em; border-radius: 999px;
+    background: var(--kt-tint-success); color: var(--color-success);
+  }
+  .kt-delta::before { content: "\25B2 "; font-size: 0.8em; }
+  .kt-delta[data-dir="down"] { background: var(--kt-tint-error); color: var(--color-error); }
+  .kt-delta[data-dir="down"]::before { content: "\25BC "; }
+
+  .kt-tabs { display: inline-flex; gap: 0.15rem; background: var(--color-base-200); border-radius: var(--kt-radius-field); padding: 0.25rem; }
+  .kt-tab {
+    font-size: 0.8rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 0.4rem;
+    color: var(--kt-muted); background: none; border: 0; cursor: pointer;
+  }
+  .kt-tab[data-active="true"] { background: var(--color-base-100); color: var(--color-base-content); box-shadow: var(--kt-shadow-card); }
+
+  .kt-chart-plot { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.5rem; align-items: end; height: 12rem; }
+  .kt-chart-bar { background: var(--kt-tint-primary); border-radius: 0.35rem 0.35rem 0 0; min-height: 4px; }
+  .kt-chart-bar[data-peak="true"] { background: var(--color-primary); }
+
+  .kt-week { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
+  .kt-day {
+    background: var(--color-base-200); border-radius: var(--kt-radius-field);
+    padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; min-height: 5rem;
+  }
+  .kt-day > span:first-child { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--kt-faint); }
+  .kt-slot { font-family: var(--font-mono); font-size: 0.76rem; background: var(--kt-tint-primary); color: var(--color-primary); border-radius: 0.4rem; padding: 0.15rem 0.4rem; }
+}

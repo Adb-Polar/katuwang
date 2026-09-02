@@ -1,0 +1,188 @@
+================================================================
+TODO Cleanup Sprint — manual test checklist
+Plan: docs/plan/todo-cleanup-sprint.md
+Automated: pnpm exec tsc --noEmit && pnpm lint && pnpm test  (all green — 292 tests, through Chunk 13)
+================================================================
+
+Chunk 1 — URL pagination + FormField + ID container contrast
+ [] /admin/users: go to page 2, refresh -> still page 2
+ [] /admin/users: change rows-per-page -> URL updates (?usersSize=), list resets to page 1
+ [] /admin/users + /admin/classes on same visit: page state does not collide (usersPage vs classesPage)
+ [] Any paginated list: Next/Prev then browser Back steps page 2 -> page 1
+ [] Click into a detail page then Back -> returns to the exact page you left
+ [] Anonymous ID box in portal sidebar/drawer is visibly higher-contrast
+ [] No visual change to FormFields that don't opt into orientation="horizontal"
+
+Chunk 2 — ClassCard declutter + unpublished color + session tooltips
+ [] Learner /learner/classes + tutor /tutor/classes: cards show a clear subject title, grade sublabel, no badge wall
+ [] Class with 6+ topics shows "+N more"
+ [] Unpublished class card = amber tint + "Unpublished" badge (color brought back)
+ [] ClassDetailsView + EditClassForm when unpublished: darker bg-base-300 wrapper
+ [] ClassDetailsView / EditClassForm when unpublished: active status badge hidden, only "Unpublished" shown
+ [] Hover a session action icon (reschedule/complete/cancel/delete) -> tooltip names the action
+
+Chunk 3 — sessions in edit form + suspended-class visibility
+ [] Sessions can be added/edited ONLY from /tutor/classes/[id]/edit
+ [] Detail page /tutor/classes/[id] has no "Add Session" and no per-session actions (read-only + "Manage in Edit" link)
+ [] Suspended class: /edit renders read-only with reason + "Suspended until <date>" / "Indefinite", controls disabled, no Save
+ [] Banned class: same locked treatment, "banned" wording
+ [] Tutor class list: currently-suspended class appears in Active tab with error-tone card + reason; banned/expired stay in History
+ [] Roster API for a class you don't own returns 403 (covered by test; spot-check via devtools if possible)
+
+Chunk 4 — list search/filter parity
+ [] /learner/classes: search box + subject select + grade select filter the list
+ [] /learner/classes?q=algebra&subject=MATH -> filters apply and the URL is shareable/refreshable
+ [] Filtered browse with no results shows "No classes match your filters" + Clear filters button
+ [] Browse filters do NOT appear on /learner/my-classes
+ [] Browse tab count badge stays the unfiltered total; the "N classes" line reflects the filtered count
+ [] /tutor/students: search box narrows by anonymous ID (e.g. STU-0007)
+ [] Tutor student search combines with the existing grade/section/subject filters
+
+Chunk 5 — learner match + topic requests
+ [] Nav + page title + tab metadata say "Auto Match" (was "Find a Class")
+ [] /learner/match form is roomy: subject/grade in a 2-col row, larger inputs, submit reads "Auto Match"
+ [] Preferred-time slots: full-width day select, larger time inputs, per-slot card with more breathing room
+ [] The same wider MatchCriteriaFields shows up in the "New request" form on /learner/requests
+ [] /learner/requests: OPEN request has an "Edit" button; it opens MatchCriteriaFields prefilled (subject/topics/grade/slots/note)
+ [] Saving an edit updates the request in place (topics + slots replaced); "Request updated" toast
+ [] FULFILLED / CANCELLED requests have no Edit button
+ [] API: PATCH criteria on a non-OPEN request -> 400 "Only an open request can be edited."
+ [] /tutor/requests (topic request queue): cards have a visible border + darker bg (no longer blend in)
+
+Chunk 6 — dashboards, learner header, tutor-identity setting
+ [] /learner dashboard: stat tiles (enrolled classes / sessions this week / open requests), Upcoming sessions list, Quick links — all live data
+ [] /tutor dashboard: Upcoming sessions across owned classes, Enrolled Learners stat, onboarding checklist hides once all 3 steps done
+ [] /tutor dashboard: suspended/banned tutor sees an error banner with reason + expiry (or "indefinitely")
+ [] /admin dashboard: Recent activity feed from AuditLog + "Needs attention" links (pending certs / flagged / active classes) with counts
+ [] /admin/settings: new "Show tutor real names to learners" toggle with the RA 10173 warning; defaults OFF
+ [] Toggle ON -> /learner/tutors/[id] shows the tutor's real name (page title + Tutor card) + section; toggle OFF -> only TUT-XXXX
+ [] /tutor/assessments: tab labels no longer overflow — label and (count) stack on their own lines
+
+Chunk 7 — profile redesign + admin view surfaces
+ [] /learner/profile + /tutor/profile: shared ProfileView layout — definition-list account info, prominent anon ID, larger inline (horizontal) edit fields
+ [] Profile edit still saves section + contact info; name/email/grade unchanged
+ [] /admin/users: table text is text-sm (readable), rows-per-page selector works (URL ?usersSize=), page resets to 1 on change
+ [] /admin/users: clicking a row opens /admin/users/[id]; the "Manage" button still opens the modal (no navigation)
+ [] /admin/users/[id]: real name, email, contact, role, grade/section, joined, status + reason + expiry, activity counts, recent audit entries
+ [] /admin/classes: each row has a "View" link to /admin/classes/[id]
+ [] /admin/classes/[id]: read-only ClassDetailsView with sessions, roster (anon IDs + enrolled date), tutor (anon ID + real name), meeting link, and a Moderation panel when suspended/banned
+
+Chunk 8 — admin review tooling (certs / audit log / reports)
+ [] /admin/certifications: Pending + Certified tabs; Certified tab hides Approve/Reject and shows the certified date
+ [] Certifications: search (topic / tutor ID), subject filter, sort (requested / certified / subject), pagination + rows-per-page all work and hit the API
+ [] Approve still certifies; Reject now persists REJECTED (see Chunk 10)
+ [] /admin/audit-log: search (admin ID / reason / target ID), Action filter, Target-type filter; clicking Action / Target / When headers toggles sort asc/desc; paginated
+ [] /admin/reports: recharts bar charts (users by role/grade/status, classes by subject/status, certs by status) + a 30-day enrollments area chart, all themed to the OKLCH palette
+ [] Reports: each chart has a "Show data table" disclosure with the raw counts
+ [] recharts@3 added to package.json (React 19 compatible) — run pnpm install if switching branches
+
+Chunk 9 — availability: removed + auto-derived from class sessions (2026-08-30)
+ [] Tutor nav no longer has an "Availability" entry; /tutor/availability 404s
+ [] /tutor dashboard shows "Your weekly schedule" — merged windows from upcoming SCHEDULED sessions, Monday-first; empty state when no upcoming sessions
+ [] /learner/tutors/[tutorId] shows "Typical Weekly Schedule" derived from that tutor's published-class sessions
+ [] Overlapping / back-to-back sessions on one weekday collapse into a single window
+ [x] Migration 20260830000000_todo_cleanup_ch9_11 applied: `availabilities` table dropped (357 rows), no drift
+
+Chunk 10 — rejected assessment state (2026-08-30)
+ [x] Same migration: REJECTED enum value + reviewedAt + reviewNote columns added to topic_certifications
+ [] Admin rejects a PENDING request via /admin/certifications: optional feedback textarea in the reject modal; row is NOT deleted
+ [] /admin/certifications has a Rejected tab showing Reviewed date + Note column; sort "Reviewed date" works; REJECTED tab defaults to newest-reviewed-first
+ [] Rejecting writes an AuditLog CERTIFICATION_REJECTED with the note as `reason`; approving stamps reviewedAt too
+ [] Tutor /tutor/assessments: rejected topic shows error-tone "Not Passed" badge + reviewer feedback on both "Topics You Teach" and "Request History"; "Request Again" button reopens it as PENDING
+ [] Re-requesting a REJECTED topic (POST /api/tutor/topic-certifications) → 201 PENDING, review fields cleared; re-requesting a CERTIFIED topic → 200, unchanged
+ [] Admin re-review guard still 400s on a non-PENDING row (rejected rows can't be re-rejected without a tutor re-request)
+ [] Seed: Jose Reyes (Grammar & Sentence Structure) and Liza Fernandez (Physical Education & Sports) come through as REJECTED with review notes
+
+Chunk 11 — auto-generated class codes C-XXXX (2026-08-30)
+ [x] Same migration: tutor_classes.code backfilled C-0001..C-0164 (ordered by createdAt), NOT NULL + unique; IdCounter CLASS=164; 0 null codes
+ [] Creating a class (POST /api/tutor/classes) assigns a unique C-000N; two quick creates get consecutive codes
+ [] Code shows as a mono eyebrow on ClassCard (learner browse, match results, tutor list, learner tutor-profile) and on ClassDetailsView (learner/tutor/admin detail pages)
+ [] /admin/classes table shows the code above the subject; searching the code (?q=C-0007) finds the class
+ [] Learner browse search (?q=C-0007) matches on code too; placeholder text updated
+ [] Seed: every seeded class has a code (curated first: C-0001…), IdCounter "CLASS" left at the last seeded number so API-created classes continue the sequence
+ [] generateClassCode uses the same atomic IdCounter increment as anonymous IDs (upsert, works on a fresh DB)
+
+Chunk 12 — backup recovery email + password reset flow (2026-09-01)
+ [x] Migration 20260831000000_password_recovery applied: users.recoveryEmail column + password_reset_tokens table (tokenHash unique, userId index, FK cascade); no drift; prisma generate run
+ [] /register + /learner/profile + /tutor/profile: can set/update a recovery email; it saves; blank clears it
+ [] Login page "Forgot password?" link is enabled and goes to /forgot-password (no longer "coming soon")
+ [] /forgot-password: submitting any email (match or not) shows the same neutral "if an account matches..." message — no enumeration
+ [] Dev: for a real account the reset link is printed to the server log ([password-reset] link for user ...); no mail is actually sent (TODO(mail))
+ [] Requesting a reset with the account's recoveryEmail (not the primary) also issues a token
+ [] A second reset request invalidates the first link (earlier unused tokens get usedAt stamped)
+ [] Banned account: forgot-password returns the neutral message but issues NO token
+ [] /reset-password?token=<raw>: setting a new password (>=8 chars) succeeds, then login works with the new password
+ [] Reusing the same reset link a second time -> 400 "This reset link is invalid or has expired."
+ [] A token older than 30 min -> 400 invalid/expired
+ [] /reset-password with a bogus/short password -> 400 validation before any DB lookup
+ [x] Automated: forgot-password + reset-password route tests added; pnpm exec tsc --noEmit && pnpm lint && pnpm test all green (279 tests)
+
+Chunk 13 — user registration approval queue (2026-09-01)
+ [x] Migration 20260901000000_registration_approval applied: PENDING added to AccountStatus enum on users.status; no drift; prisma generate run
+ [] /admin/settings: new "Require admin approval for new registrations" toggle, defaults OFF
+ [] Toggle OFF: registering a learner/tutor works exactly as before (redirect to /login?registered=true, can log in immediately)
+ [] Toggle ON: registering creates the account as PENDING; the register form lands on /login with the "an administrator needs to approve" message (not the normal "please log in" one)
+ [] Toggle ON: trying to log in as that PENDING user -> "Your account is awaiting admin approval..." error, no session
+ [] Admin nav has a "Registrations" entry (UserCheck icon) between Users and Classes -> /admin/registrations
+ [] /admin/registrations: lists PENDING accounts oldest-first (name, email, role, grade/section, requested date); search by name/email/anon ID narrows the list; paginated + rows-per-page
+ [] Approve -> user becomes ACTIVE, drops off the queue, can now log in; AuditLog USER_APPROVED row written
+ [] Decline -> modal with optional reason; user becomes BANNED with that reason as statusReason; AuditLog USER_DECLINED row (reason = note)
+ [] Reviewing an already-approved/declined (non-PENDING) user via the API -> 400 "This account is not awaiting approval."
+ [] Roster/list APIs unaffected: PENDING users do NOT appear in /admin/users default list unless status=PENDING is passed
+ [] /admin dashboard: "Pending registrations" count + link under "Needs attention"; "Flagged accounts" stat no longer counts PENDING users
+ [] /admin/audit-log: Action filter shows "Registration Approved" / "Registration Declined" and filters correctly
+ [x] Automated: admin/registrations GET + [userId] PATCH route tests, register PENDING-path test, auth PENDING-block test; tsc && lint && test all green (292 tests)
+
+================================================================
+"Aug 30" batch — plan: ~/.claude/plans/check-todo-txt-aug-declarative-hanrahan.md
+No-migration items only (3 migration items deferred to a follow-up plan).
+================================================================
+
+Aug30 Chunk A — tutor identity + suspension reason on learner class surfaces (2026-09-01)
+ [] /admin/settings "Show tutor real names to learners" OFF: learner browse + my-classes + match cards and the class detail page show only TUT-XXXX (a GraduationCap line on the card)
+ [] Toggle ON: those same cards show the tutor's real name, and " · <section>"; class detail TUTOR cell shows "Name / TUT-XXXX · Section X"
+ [] Tutor-side surfaces unchanged: /tutor/classes cards and the tutor's own profile page show no tutor line
+ [] Enrolled learner opens a SUSPENDED class detail -> red ClassModerationPanel: "suspended by an administrator", reason, "Suspended until <date>" or "Indefinite"
+ [] BANNED class detail -> panel says "banned ... no longer available and enrollment is closed"
+ [] Suspended/banned class card in browse/match shows the reason line (AlertTriangle) as before
+ [] Class detail actions area: enrolled + moderated shows "Enrollment is frozen while this class is under moderation." and no Enroll/Unenroll button
+ [] Tutor EditClassForm locked panel still renders identically (now via the shared ClassModerationPanel)
+ [x] Automated: classQueries toLearnerClassDTO test (default anon-only / showRealNames / moderation scalars); classes route test mocks getSetting; tsc && lint && test green (295 tests)
+
+Aug30 Chunk B — "Completed" tab + filters on My Classes (2026-09-01)
+ [] /learner/my-classes shows Upcoming / Completed / Cancelled tabs with live count badges
+ [] Upcoming tab = SCHEDULED + SUSPENDED enrolled classes; Completed = COMPLETED only; Cancelled = CANCELLED + BANNED
+ [] Switching tabs resets to page 1 and refetches; the "N classes" line reflects the active tab
+ [] Search box + subject + grade filters now appear on My Classes too and narrow within the active tab
+ [] Tab count badges stay the per-status totals (not affected by the search box)
+ [] Empty states are tab-specific ("No completed classes yet." etc.)
+ [] Browse page (/learner/classes) still behaves exactly as before (no tabs, same filters)
+ [x] Automated: classes route tests — mine Upcoming default (SCHEDULED+SUSPENDED), status=completed + extra filter AND shape, counts.mineTabs; usePaginatedList exposes `meta`; tsc && lint && test green (296 tests)
+
+Aug30 Chunk C — personalized browse ordering (2026-09-01)
+ [] /learner/classes with NO filters: order favors classes matching your grade, your past-enrolled / open-request subjects & topics, and a sooner next session (not just newest)
+ [] Adding any filter (search / subject / grade) falls back to newest-first + normal SQL pagination
+ [] Pagination on the unfiltered browse still works (total = full browse count; page slices the ranked list)
+ [] A brand-new learner with no history sees a sensible order (soonest session, has seats, newest)
+ [] /learner/my-classes ordering unchanged (newest-first within the tab)
+ [x] Automated: src/lib/browseRanking.ts + browseRanking.test.ts (grade / interest-subject / soonness / no-session / tiebreak / purity); classes route tests — unfiltered browse has no SQL skip/take, personalization orders match ahead of newer; matching.ts exports gradeMatchFor + upcomingScheduledSessions; tsc && lint && test green (303 tests)
+
+Aug30 Chunk D — solo/group filter in Auto Match (2026-09-01)
+ [] /learner/match: a "Class format" select (Any format / 1-on-1 / Group) appears next to Grade level
+ [] "1-on-1" -> results only include classes with maxStudents === 1
+ [] "Group" -> results only include classes with maxStudents > 1
+ [] "Any format" -> no capacity filtering (unchanged behavior)
+ [] /learner/requests new-request form and the edit-request form do NOT show the format select
+ [x] Automated: matchCriteriaSchema.classFormat enum; matching.ts scoreClass SOLO/GROUP/ANY hard-filter tests; MatchCriteriaFields showFormatFilter prop + criteriaToBody emits classFormat only when set/!=ANY; tsc && lint && test green (306 tests)
+
+Aug30 Chunk E — custom / new topics when creating a class (2026-09-01)
+ [] Create-class modal (/tutor/classes): below the topic checkboxes there's an "Add another topic" input; typing a new topic + Add (or Enter) adds it as a removable chip and it counts toward the 10-topic cap
+ [] The class saves with the custom topic; a session can be assigned to it; the custom topic shows on the class card / detail like any other (no verified check)
+ [] Edit-class form shows custom topics already on the class as selectable badges and has the same "Add another topic" input (hidden when the class is locked/suspended)
+ [] Removing a custom topic that a session uses is still blocked ("Cannot remove topic(s) currently used by a session")
+ [] With "Require certification for class creation" ON: creating a class with an uncertified custom topic is still blocked ("You are not certified for: ...") — tutor must get it certified first
+ [] Topic under 2 chars or over 60 chars -> 400 validation
+ [] Duplicate topics (case-insensitive) are de-duplicated, not rejected
+ [x] Automated: subjectTopics normalizeTopic/isKnownTopic tests; tutor classes POST — accepts custom topic (normalizes session topic to canonical), 400 on <2 chars, cert-gate still blocks uncertified custom topic; classDetailsSchema topic min 2 / max 60; PATCH normalizes + dedupes; tsc && lint && test green (313 tests)
+
+Aug30 — DEFERRED (need a Prisma migration, separate plan): tutor community-vs-personal topic requests (TopicRequest.targetTutorProfileId), tutor appeal flow (new Appeal model), admin dynamic topic taxonomy (new Topic table; subjects stay the fixed SubjectArea enum).

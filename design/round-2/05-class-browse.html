@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang — browse classes</title>
+<link rel="stylesheet" href="base.css">
+<script src="theme-toggle.js"></script>
+<style>
+  .class-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: var(--s5); }
+  .class-card { display: flex; flex-direction: column; gap: var(--s3); }
+  .class-card .cc-top { display: flex; align-items: flex-start; gap: var(--s3); }
+  .class-card .cc-tile { width: 2.4rem; height: 2.4rem; flex: none; border-radius: .6rem; background: var(--brand-tint); color: var(--brand-strong); display: grid; place-items: center; font-family: var(--mono); font-size: .72rem; font-weight: 700; }
+  .class-card .cc-code { font-family: var(--mono); font-size: .72rem; color: var(--text-faint); }
+  .class-card .cc-topics { display: flex; flex-wrap: wrap; gap: var(--s2); }
+  .class-card .cc-desc { font-size: .86rem; color: var(--text-mut); }
+  .class-card .cc-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); padding-top: var(--s3); border-top: 1px solid var(--border-soft); font-family: var(--mono); font-size: .78rem; color: var(--text-mut); }
+  .class-card .cc-foot .grow { flex: 1; }
+  .class-card[data-muted] { opacity: .65; }
+</style>
+</head>
+<body data-portal="learner">
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand-row">
+      <span class="brand-mark">K</span><span class="brand-name">Katuwang</span>
+      <button class="collapse" type="button" aria-label="Collapse sidebar">«</button>
+    </div>
+    <nav class="nav-group" aria-label="Main">
+      <span class="label">Main menu</span>
+      <a class="nav-item" href="03-portal-dashboard.html"><span class="ic">Db</span>Dashboard</a>
+      <a class="nav-item" href="05-class-browse.html" aria-current="page"><span class="ic">Bc</span>Browse classes</a>
+      <a class="nav-item" href="#my"><span class="ic">Mc</span>My classes</a>
+    </nav>
+    <nav class="nav-group" aria-label="Tools">
+      <span class="label">Tools</span>
+      <a class="nav-item" href="#match"><span class="ic">Am</span>Auto match</a>
+      <a class="nav-item" href="#req"><span class="ic">Rq</span>My requests</a>
+    </nav>
+    <nav class="nav-group" aria-label="Account">
+      <span class="label">Account</span>
+      <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+      <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+    </nav>
+    <div class="side-promo">
+      <strong>Get matched faster</strong>
+      <p>Turn on Auto match for a ranked shortlist of tutors for your topics.</p>
+      <a class="btn" href="#match">Set up Auto match</a>
+    </div>
+    <div class="side-foot">
+      <span class="id id--learner">STU-2071</span>
+      <span class="micro">Grade 9 · Section Rizal</span>
+      <button class="theme-toggle" type="button" data-theme-toggle>theme: light</button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search" placeholder="Search classes, tutors, topics…"><kbd>⌘K</kbd></div>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" aria-label="Help">?</button>
+      <button class="icon-btn" type="button" aria-label="Notifications">◔</button>
+      <span class="avatar" aria-hidden="true">S7</span>
+    </header>
+
+    <details class="nav-mobile">
+      <summary><span class="brand-mark" style="width:1.6rem;height:1.6rem;">K</span> Katuwang · Learner</summary>
+      <nav class="nav-group">
+        <a class="nav-item" href="03-portal-dashboard.html"><span class="ic">Db</span>Dashboard</a>
+        <a class="nav-item" href="05-class-browse.html" aria-current="page"><span class="ic">Bc</span>Browse classes</a>
+        <a class="nav-item" href="#my"><span class="ic">Mc</span>My classes</a>
+        <a class="nav-item" href="#match"><span class="ic">Am</span>Auto match</a>
+        <a class="nav-item" href="#req"><span class="ic">Rq</span>My requests</a>
+        <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+        <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+      </nav>
+    </details>
+
+    <main class="main">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <div class="title-wrap">
+            <h1>Browse classes</h1>
+            <p>Published classes open to Grade 9. Tutors are shown by ID only.</p>
+          </div>
+          <div class="page-actions"><a class="btn btn--quiet" href="#my">My classes →</a></div>
+        </div>
+
+        <div class="card">
+          <div class="filters">
+            <span class="field" style="margin:0; max-width:16rem;">
+              <label for="q" class="micro">Search</label>
+              <input id="q" type="search" placeholder="topic or class code">
+            </span>
+            <span class="field" style="margin:0; max-width:12rem;">
+              <label for="subj" class="micro">Subject</label>
+              <select id="subj"><option>All subjects</option><option selected>Mathematics</option><option>English</option><option>Science</option></select>
+            </span>
+            <span class="field" style="margin:0; max-width:10rem;">
+              <label for="grade" class="micro">Grade</label>
+              <select id="grade"><option selected>Grade 9</option><option>Grade 10</option></select>
+            </span>
+            <a href="#clear" class="btn btn--quiet">Clear</a>
+            <span class="spacer"></span>
+            <span class="micro">7 classes</span>
+          </div>
+        </div>
+
+        <div class="class-grid">
+
+          <article class="card class-card">
+            <div class="cc-top">
+              <span class="cc-tile">MT</span>
+              <div style="flex:1;">
+                <span class="cc-code">MTH-9-014</span>
+                <h3><a href="06-class-detail.html">Mathematics</a></h3>
+              </div>
+              <span class="badge badge--neutral"><span class="code">G9</span> Grade 9</span>
+            </div>
+            <div class="cc-topics">
+              <span class="topic topic--verified">linear equations</span>
+              <span class="topic topic--verified">slope</span>
+              <span class="topic">word problems</span>
+            </div>
+            <p class="cc-desc">Small-group work on setting up and solving first-degree equations, twice a week.</p>
+            <div class="cc-foot">
+              <span>Tue 4:00–5:30 PM</span>
+              <span>4 / 6 seats</span>
+              <span class="id id--tutor">TUT-0148</span>
+              <span class="grow"></span>
+              <span class="badge badge--success"><span class="code">OPN</span> Open</span>
+              <a class="btn btn--brand" href="06-class-detail.html">Enrol</a>
+            </div>
+          </article>
+
+          <article class="card class-card">
+            <div class="cc-top">
+              <span class="cc-tile">MT</span>
+              <div style="flex:1;">
+                <span class="cc-code">MTH-9-021</span>
+                <h3><a href="06-class-detail.html">Mathematics</a></h3>
+              </div>
+              <span class="badge badge--neutral"><span class="code">G9</span> Grade 9</span>
+            </div>
+            <div class="cc-topics">
+              <span class="topic topic--verified">fractions</span>
+              <span class="topic">ratio and proportion</span>
+            </div>
+            <p class="cc-desc">Review clinic before the second-quarter exam. One long session on Saturdays.</p>
+            <div class="cc-foot">
+              <span>Sat 9:00–11:00 AM</span>
+              <span>6 / 6 seats</span>
+              <span class="id id--tutor">TUT-0201</span>
+              <span class="grow"></span>
+              <span class="badge badge--warning"><span class="code">FUL</span> Full</span>
+              <button class="btn" type="button" disabled>Enrol</button>
+            </div>
+          </article>
+
+          <article class="card class-card">
+            <div class="cc-top">
+              <span class="cc-tile">EN</span>
+              <div style="flex:1;">
+                <span class="cc-code">ENG-9-006</span>
+                <h3><a href="06-class-detail.html">English</a></h3>
+              </div>
+              <span class="badge badge--neutral"><span class="code">G9</span> Grade 9</span>
+            </div>
+            <div class="cc-topics">
+              <span class="topic topic--verified">thesis statements</span>
+              <span class="topic">paragraph structure</span>
+            </div>
+            <p class="cc-desc">Argumentative-essay planning: claims, evidence, and counter-arguments.</p>
+            <div class="cc-foot">
+              <span>Wed 5:00–6:00 PM</span>
+              <span>3 / 8 seats</span>
+              <span class="id id--tutor">TUT-0093</span>
+              <span class="grow"></span>
+              <span class="badge badge--success"><span class="code">OPN</span> Open</span>
+              <a class="btn btn--brand" href="06-class-detail.html">Enrol</a>
+            </div>
+          </article>
+
+          <article class="card class-card" data-muted>
+            <div class="cc-top">
+              <span class="cc-tile">SC</span>
+              <div style="flex:1;">
+                <span class="cc-code">SCI-9-003</span>
+                <h3><a href="06-class-detail.html">Science</a></h3>
+              </div>
+              <span class="badge badge--neutral"><span class="code">G9</span> Grade 9</span>
+            </div>
+            <div class="cc-topics"><span class="topic">photosynthesis</span></div>
+            <p class="cc-desc">Not yet published — the tutor is still adding sessions.</p>
+            <div class="cc-foot">
+              <span>schedule pending</span>
+              <span class="id id--tutor">TUT-0177</span>
+              <span class="grow"></span>
+              <span class="badge badge--neutral"><span class="code">DRF</span> Draft</span>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="pager" style="justify-content:center;">
+          <a href="#prev" class="btn btn--quiet" aria-disabled="true">‹ Prev</a>
+          <span>Page 1 / 2</span>
+          <a href="#next" class="btn btn--quiet">Next ›</a>
+        </div>
+
+        <div class="card">
+          <div class="empty">
+            <p class="eyebrow">Empty state</p>
+            <p>No published classes match these filters yet.</p>
+            <a href="#req" class="btn btn--brand">Request this topic instead</a>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+</div>
+</body>
+</html>

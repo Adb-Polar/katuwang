@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E</title>
+<style>
+  @font-face {
+    font-family: "Fragment Mono";
+    src: url("fonts/FragmentMono-Regular.woff2") format("woff2");
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: "Fragment Mono";
+    src: url("fonts/FragmentMono-Italic.woff2") format("woff2");
+    font-weight: 400; font-style: italic; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Regular.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Mittel.woff2") format("woff2");
+    font-weight: 500; font-display: swap;
+  }
+  @font-face {
+    font-family: "Apfel Grotezk";
+    src: url("fonts/ApfelGrotezk-Fett.woff2") format("woff2");
+    font-weight: 700; font-display: swap;
+  }
+
+  :root {
+    --paper: oklch(98% 0.004 90);
+    --ink: oklch(22% 0.01 70);
+    --learner: oklch(46% 0.15 300);
+    --tutor: oklch(50% 0.10 76);
+    --system: oklch(55% 0.014 265);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { background: var(--paper); }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Apfel Grotezk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    padding: clamp(2.75rem, 9vw, 7rem) clamp(1.25rem, 6vw, 3rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: clamp(1.9rem, 5.5vw, 3.1rem);
+  }
+
+  .block { max-width: 40rem; width: 100%; }
+
+  .wordmark {
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+    font-size: 0.95rem;
+  }
+
+  .portal {
+    font-weight: 400;
+    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+  }
+
+  .headline {
+    font-weight: 500;
+    font-size: clamp(1.85rem, 5.4vw, 3rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    max-width: 18ch;
+    margin: 0 auto;
+  }
+
+  .intake {
+    font-weight: 400;
+    font-size: 0.92rem;
+    letter-spacing: 0.04em;
+  }
+
+  .key {
+    font-family: "Fragment Mono", ui-monospace, monospace;
+    font-size: clamp(0.9rem, 2.1vw, 1rem);
+    line-height: 2.15;
+    max-width: 52ch;
+    margin: 0 auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .key p { white-space: pre-wrap; }
+
+  .learner { color: var(--learner); }
+  .tutor   { color: var(--tutor); }
+  .system  { color: var(--system); }
+
+  .actions {
+    font-family: "Fragment Mono", ui-monospace, monospace;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+
+  <div class="block wordmark">Katuwang</div>
+  <div class="block portal">Academic match and support portal</div>
+
+  <h1 class="block headline">Learn with a peer who gets it.</h1>
+
+  <div class="block intake">Peer tutoring · Grades 7–12</div>
+
+  <div class="block key">
+    <p>You are <span class="tutor">TUT-0148</span>. Your learner is <span class="learner">STU-2071</span>. Names stay hidden on both sides.</p>
+    <p>Grade 9 · Section Rizal</p>
+    <p>Tue 4:00–5:30 PM — Algebra: linear equations</p>
+    <p><span class="tutor">6 verified topics</span> · <span class="system">2 pending requests</span></p>
+    <p>Open · <span class="learner">Enrolled</span> · <span class="system">Completed</span> · <span class="system">Suspended</span></p>
+    <p>Dashboard   Classes   Students   Requests   Assessments   Profile</p>
+    <p class="system">Requested 28 Aug 2026 · reviewed by admin</p>
+  </div>
+
+  <div class="block actions">Create account     Log in</div>
+
+</body>
+</html>

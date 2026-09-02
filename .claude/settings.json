@@ -1,0 +1,11 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "bencium-controlled-ux-designer@bencium-marketplace": true,
+    "bencium-innovative-ux-designer@bencium-marketplace": true,
+    "design-audit@bencium-marketplace": true,
+    "typography@bencium-marketplace": true,
+    "relationship-design@bencium-marketplace": true,
+    "bencium-impact-designer@bencium-marketplace": true
+  }
+}

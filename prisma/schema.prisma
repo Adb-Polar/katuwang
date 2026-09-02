@@ -1,0 +1,319 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider                  = "prisma-erd-generator"
+  output                    = "../docs/erd.md"
+  includeRelationFromFields = true
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  STUDENT_TUTOR
+  STUDENT_LEARNER
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
+  PENDING // Awaiting admin approval (when requireRegistrationApproval is on); cannot log in
+}
+
+enum GradeLevel {
+  GRADE_7
+  GRADE_8
+  GRADE_9
+  GRADE_10
+  GRADE_11
+  GRADE_12
+}
+
+enum TopicCertificationStatus {
+  PENDING // Assessment requested, not yet graded
+  CERTIFIED // Tutor passed the topic assessment
+  REJECTED // Assessment reviewed and not passed; tutor may re-request
+}
+
+enum SubjectArea {
+  MATH
+  ENGLISH
+  SCIENCE
+  FILIPINO
+  ARALING_PANLIPUNAN
+  TLE
+  MAPEH
+}
+
+enum ClassStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  SUSPENDED
+  BANNED
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum TopicRequestStatus {
+  OPEN // Awaiting a tutor response
+  FULFILLED // A tutor has attached a class for this request
+  CANCELLED // Withdrawn by the learner
+}
+
+// ─── User ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String     @id @default(cuid())
+  anonymousId  String     @unique // TUT-0001 or STU-0001
+  firstName    String
+  lastName     String
+  email        String     @unique
+  password     String // bcrypt hash
+  recoveryEmail String?   // optional backup address for password recovery
+  role         Role
+  gradeLevel   GradeLevel
+  section      String
+  contactInfo  String?
+  consentGiven Boolean    @default(false)
+
+  // Moderation
+  status          AccountStatus @default(ACTIVE)
+  statusReason    String?       @db.Text
+  statusUpdatedAt DateTime?
+  statusExpiresAt DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
+
+  // Misc
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Tutor-specific
+  tutorProfile TutorProfile?
+
+  // Relations
+  enrollments   ClassEnrollment[] @relation("LearnerEnrollments")
+  auditLogs     AuditLog[]
+  topicRequests TopicRequest[]    @relation("LearnerTopicRequests")
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+// ─── Password Reset Token ─────────────────────────────────────────────────────
+// One row per issued reset request. Only the SHA-256 hash of the token is stored;
+// the raw token lives only in the emailed link. A row is single-use (`usedAt`) and
+// time-limited (`expiresAt`).
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// ─── Tutor Profile ────────────────────────────────────────────────────────────
+
+model TutorProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Per-topic assessment requests/certifications, requested once a tutor is teaching a topic
+  topicCertifications TopicCertification[]
+
+  // Classes created by this tutor
+  classes TutorClass[]
+
+  @@map("tutor_profiles")
+}
+
+// Tutor availability is not stored — it is auto-derived at read time from the
+// tutor's upcoming ClassSession rows (see src/lib/derivedAvailability.ts).
+
+// ─── Topic Certification (per-topic assessment request/certification) ─────────
+// A row only exists once a tutor has requested an assessment for that topic.
+
+model TopicCertification {
+  id             String                   @id @default(cuid())
+  tutorProfileId String
+  tutorProfile   TutorProfile             @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject        SubjectArea
+  topic          String
+  status         TopicCertificationStatus @default(PENDING)
+  requestedAt    DateTime                 @default(now())
+  certifiedAt    DateTime?
+  reviewedAt     DateTime? // set when an admin certifies or rejects
+  reviewNote     String?                  @db.Text // admin feedback, primarily for a rejection
+
+  @@unique([tutorProfileId, subject, topic])
+  @@map("topic_certifications")
+}
+
+// ─── ID Counter (for sequential anonymous IDs) ────────────────────────────────
+
+model IdCounter {
+  role  String @id // "TUTOR", "LEARNER", or "CLASS"
+  count Int    @default(0)
+
+  @@map("id_counters")
+}
+
+// ─── Tutor Class ─────────────────────────────────────────────────────────────
+
+model TutorClass {
+  id              String       @id @default(cuid())
+  code            String       @unique // human-friendly sequential code, "C-0001" (see generateClassCode)
+  tutorProfileId  String
+  tutorProfile    TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  subject         SubjectArea
+  gradeLevel      GradeLevel? // optional target grade for this class; null = open to any grade
+  description     String?      @db.Text
+  maxStudents     Int          @default(1) // Support for 1-on-1 or small group tutoring
+  building        String? // in-person location, optional and independent of meetingLink
+  room            String?
+  meetingLink     String?
+  published       Boolean      @default(true) // unpublished classes are hidden from learner browsing/enrollment, but keep their sessions/enrollments
+  status          ClassStatus  @default(SCHEDULED)
+  suspendedReason String?      @db.Text
+  suspendedUntil  DateTime? // set when SUSPENDED with a duration; null = indefinite or not suspended
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  topics            ClassTopic[]
+  sessions          ClassSession[]
+  enrollments       ClassEnrollment[]
+  fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
+
+  @@map("tutor_classes")
+}
+
+// ─── Class Topic (1 row per subtopic selected for a class) ───────────────────
+
+model ClassTopic {
+  id      String     @id @default(cuid())
+  classId String
+  class   TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  topic   String
+
+  @@unique([classId, topic])
+  @@map("class_topics")
+}
+
+// ─── Class Session (1 row per individual meeting within a class) ─────────────
+// `topic` must be one of the parent class's ClassTopic.topic values —
+// enforced in application code, not a DB constraint (see ClassTopic above).
+
+model ClassSession {
+  id          String        @id @default(cuid())
+  classId     String
+  class       TutorClass    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  topic       String
+  scheduledAt DateTime
+  duration    Int // duration in minutes (e.g. 60, 90)
+  status      SessionStatus @default(SCHEDULED)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([classId])
+  @@map("class_sessions")
+}
+
+// ─── Class Enrollment ────────────────────────────────────────────────────────
+
+model ClassEnrollment {
+  id         String     @id @default(cuid())
+  classId    String
+  class      TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  learnerId  String
+  learner    User       @relation("LearnerEnrollments", fields: [learnerId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime   @default(now())
+
+  @@unique([classId, learnerId])
+  @@map("class_enrollments")
+}
+
+// ─── Topic Request (learner-posted demand when no class fits) ─────────────────
+// Topics and preferred time slots are child rows (3NF), mirroring ClassTopic and Availability.
+
+model TopicRequest {
+  id               String             @id @default(cuid())
+  learnerId        String
+  learner          User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
+  subject          SubjectArea
+  gradeLevel       GradeLevel
+  note             String?            @db.Text
+  status           TopicRequestStatus @default(OPEN)
+  fulfilledClassId String?
+  fulfilledClass   TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  topics TopicRequestTopic[]
+  slots  TopicRequestSlot[]
+
+  @@index([status, subject])
+  @@map("topic_requests")
+}
+
+model TopicRequestTopic {
+  id        String       @id @default(cuid())
+  requestId String
+  request   TopicRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  topic     String
+
+  @@unique([requestId, topic])
+  @@map("topic_request_topics")
+}
+
+model TopicRequestSlot {
+  id        String       @id @default(cuid())
+  requestId String
+  request   TopicRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  day       String // "MONDAY".."SUNDAY", same convention as Availability
+  startTime String // "HH:MM" 24h
+  endTime   String
+
+  @@map("topic_request_slots")
+}
+
+// ─── Audit Log (admin moderation action history) ──────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation(fields: [adminId], references: [id])
+  action     String
+  targetType String
+  targetId   String
+  reason     String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// ─── Platform Setting (admin-configurable boolean flags) ──────────────────────
+
+model PlatformSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("platform_settings")
+}

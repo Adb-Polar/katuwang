@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang — create a class</title>
+<link rel="stylesheet" href="base.css">
+<script src="theme-toggle.js"></script>
+</head>
+<body data-portal="tutor">
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand-row">
+      <span class="brand-mark">K</span><span class="brand-name">Katuwang</span>
+      <button class="collapse" type="button" aria-label="Collapse sidebar">«</button>
+    </div>
+    <nav class="nav-group" aria-label="Main">
+      <span class="label">Main menu</span>
+      <a class="nav-item" href="#dash"><span class="ic">Db</span>Dashboard</a>
+      <a class="nav-item" href="#classes" aria-current="page"><span class="ic">Cl</span>Classes</a>
+      <a class="nav-item" href="#students"><span class="ic">Sd</span>Students</a>
+    </nav>
+    <nav class="nav-group" aria-label="Tools">
+      <span class="label">Teaching</span>
+      <a class="nav-item" href="#requests"><span class="ic">Rq</span>Requests</a>
+      <a class="nav-item" href="#assessments"><span class="ic">As</span>Assessments</a>
+    </nav>
+    <nav class="nav-group" aria-label="Account">
+      <span class="label">Account</span>
+      <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+      <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+    </nav>
+    <div class="side-promo">
+      <strong>2 topics unverified</strong>
+      <p>Request an assessment to open more classes to your learners.</p>
+      <a class="btn" href="#assessments">Request assessment</a>
+    </div>
+    <div class="side-foot">
+      <span class="id id--tutor">TUT-0148</span>
+      <span class="micro">6 verified topics</span>
+      <button class="theme-toggle" type="button" data-theme-toggle>theme: light</button>
+    </div>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <div class="search"><span aria-hidden="true">⌕</span><input type="search" aria-label="Search" placeholder="Search classes, students, requests…"><kbd>⌘K</kbd></div>
+      <span class="spacer"></span>
+      <button class="icon-btn" type="button" aria-label="Help">?</button>
+      <button class="icon-btn" type="button" aria-label="Notifications">◔</button>
+      <span class="avatar" aria-hidden="true">T8</span>
+    </header>
+
+    <details class="nav-mobile">
+      <summary><span class="brand-mark" style="width:1.6rem;height:1.6rem;">K</span> Katuwang · Tutor</summary>
+      <nav class="nav-group">
+        <a class="nav-item" href="#dash"><span class="ic">Db</span>Dashboard</a>
+        <a class="nav-item" href="#classes" aria-current="page"><span class="ic">Cl</span>Classes</a>
+        <a class="nav-item" href="#students"><span class="ic">Sd</span>Students</a>
+        <a class="nav-item" href="#requests"><span class="ic">Rq</span>Requests</a>
+        <a class="nav-item" href="#assessments"><span class="ic">As</span>Assessments</a>
+        <a class="nav-item" href="#profile"><span class="ic">Pr</span>Profile</a>
+        <a class="nav-item" href="#logout"><span class="ic">Lo</span>Log out</a>
+      </nav>
+    </details>
+
+    <main class="main">
+      <div class="main-inner">
+
+        <a href="06-class-detail.html" class="btn btn--quiet" style="align-self:flex-start;">‹ Class MTH-9-014</a>
+
+        <div class="page-header">
+          <div class="title-wrap">
+            <h1>Create a class</h1>
+            <p>You can create classes for topics you have passed an assessment on.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form class="stack" style="gap:var(--s6);">
+
+            <fieldset>
+              <legend>Subject &amp; topics</legend>
+              <div class="field">
+                <label for="subject">Subject</label>
+                <select id="subject"><option selected>Mathematics</option><option>English</option><option>Science</option></select>
+              </div>
+              <div class="field" style="max-width:12rem;">
+                <label for="tgrade">Target grade</label>
+                <select id="tgrade"><option>Grade 8</option><option selected>Grade 9</option><option>Grade 10</option></select>
+              </div>
+              <div class="field">
+                <span id="topics-label" style="font-family:var(--sans); font-size:.82rem; font-weight:600;">Topics you are verified on</span>
+                <div class="checkgrid" role="group" aria-labelledby="topics-label">
+                  <label class="inline"><input type="checkbox" checked> linear equations</label>
+                  <label class="inline"><input type="checkbox" checked> slope</label>
+                  <label class="inline"><input type="checkbox"> systems of equations</label>
+                  <label class="inline"><input type="checkbox"> word problems</label>
+                </div>
+                <span class="hint">✓ marks a topic an assessor has verified. Others need an assessment first.</span>
+              </div>
+              <div class="field">
+                <label for="custom">Add a custom topic</label>
+                <input id="custom" type="text" placeholder="e.g. exponents">
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Description</legend>
+              <div class="field" style="max-width:none;">
+                <label for="desc">What learners can expect</label>
+                <textarea id="desc" rows="4">Small-group practice on setting up and solving first-degree equations. Bring your own problems; we work through them together.</textarea>
+                <span class="hint">180 / 500 characters</span>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Sessions</legend>
+
+              <div class="session-row">
+                <span class="field" style="margin:0;">
+                  <label for="s1t">Topic</label>
+                  <select id="s1t"><option selected>linear equations</option><option>slope</option></select>
+                </span>
+                <span class="field" style="margin:0;">
+                  <label for="s1d">Date</label>
+                  <input id="s1d" type="date" value="2026-09-02">
+                </span>
+                <span class="field" style="margin:0;">
+                  <label for="s1s">Start</label>
+                  <input id="s1s" type="time" value="16:00">
+                </span>
+                <span class="field" style="margin:0; max-width:8rem;">
+                  <label for="s1l">Length</label>
+                  <select id="s1l"><option>60 min</option><option selected>90 min</option></select>
+                </span>
+              </div>
+
+              <div class="session-row">
+                <span class="field" style="margin:0;">
+                  <label for="s2t">Topic</label>
+                  <select id="s2t"><option>linear equations</option><option selected>slope</option></select>
+                </span>
+                <span class="field" style="margin:0;">
+                  <label for="s2d">Date</label>
+                  <input id="s2d" type="date" value="2026-09-04" aria-invalid="true" aria-describedby="s2d-err">
+                  <span class="err" id="s2d-err">must be on or after the first session</span>
+                </span>
+                <span class="field" style="margin:0;">
+                  <label for="s2s">Start</label>
+                  <input id="s2s" type="time" value="16:00">
+                </span>
+                <span class="field" style="margin:0; max-width:8rem;">
+                  <label for="s2l">Length</label>
+                  <select id="s2l"><option selected>60 min</option><option>90 min</option></select>
+                </span>
+              </div>
+
+              <div style="margin-top:var(--s3); display:flex; gap:var(--s3);">
+                <button type="button" class="btn">+ Add session</button>
+                <button type="button" class="btn btn--quiet">Remove last</button>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Logistics</legend>
+              <div class="field" style="max-width:10rem;">
+                <label for="cap">Capacity</label>
+                <input id="cap" type="number" value="6" min="1" max="20">
+              </div>
+              <div class="field"><label for="bldg">Building</label><input id="bldg" type="text" value="Main Building"></div>
+              <div class="field" style="max-width:12rem;"><label for="room">Room</label><input id="room" type="text" value="214"></div>
+              <div class="field"><label for="link">Meeting link (optional)</label><input id="link" type="url" value="https://meet.example/mth-9-014"></div>
+              <label class="inline"><input type="checkbox"> Publish now (visible in browse once approved)</label>
+            </fieldset>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn--brand">Create class</button>
+              <a href="06-class-detail.html" class="btn btn--quiet">Cancel</a>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Add-session dialog</h2></div>
+          <div class="dialog-demo">
+            <div class="backdrop">
+              <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="as-h">
+                <h2 id="as-h">Add a session</h2>
+                <div class="field" style="margin:0;">
+                  <label for="as-t">Topic</label>
+                  <select id="as-t"><option>linear equations</option><option>slope</option></select>
+                </div>
+                <div class="session-row" style="border:0; padding:0;">
+                  <span class="field" style="margin:0;"><label for="as-d">Date</label><input id="as-d" type="date"></span>
+                  <span class="field" style="margin:0;"><label for="as-s">Start</label><input id="as-s" type="time"></span>
+                  <span class="field" style="margin:0; max-width:8rem;"><label for="as-l">Length</label><select id="as-l"><option>60 min</option><option>90 min</option></select></span>
+                </div>
+                <div class="d-actions">
+                  <button class="btn btn--brand" type="button">Add</button>
+                  <button class="btn btn--quiet" type="button">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h2>Component states</h2></div>
+          <section class="states" aria-label="Component states reference">
+            <span class="cap">Text field</span>
+            <div class="row">
+              <span class="field" style="margin:0;"><label for="x1">Default</label><input id="x1" type="text" placeholder="value"></span>
+              <span class="field" style="margin:0;"><label for="x2">Focus</label><input id="x2" type="text" value="16:00" style="border-color:var(--brand); box-shadow:0 0 0 3px var(--brand-tint);"></span>
+              <span class="field" style="margin:0;"><label for="x3">Error</label><input id="x3" type="text" value="0" aria-invalid="true"><span class="err">must be at least 1</span></span>
+              <span class="field" style="margin:0;"><label for="x4">Disabled</label><input id="x4" type="text" value="—" disabled></span>
+            </div>
+            <span class="cap">Button</span>
+            <div class="row">
+              <button class="btn btn--brand" type="button">Create class</button>
+              <button class="btn btn--primary" type="button">Dark primary</button>
+              <button class="btn" type="button">Secondary</button>
+              <button class="btn btn--brand" type="button" disabled>Disabled</button>
+              <button class="btn btn--brand" type="button" aria-busy="true">Working…</button>
+              <button class="btn btn--quiet" type="button">Quiet / link</button>
+            </div>
+            <span class="cap">Alerts</span>
+            <div class="row" style="flex-direction:column; align-items:stretch;">
+              <div class="alert alert--info"><div><strong>Heads up.</strong> A guardian consent step follows for students under 18.</div></div>
+              <div class="alert alert--success"><div><strong>Saved.</strong> Your class draft was saved.</div></div>
+              <div class="alert alert--warning"><div><strong>Check the second session.</strong> Its date is before the first.</div></div>
+              <div class="alert alert--error"><div><strong>Could not publish.</strong> Add at least one session first.</div></div>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+Learner
+ - check if class schedule confict detection exist
+
+Tutor
+ [Good] Schedule detection on class creation
+ [] Schedule detection on request accept
+ [] What happen if u unpublish class with enrolled student
+ [] What happen if u suspend or baned classes with enrolled students
