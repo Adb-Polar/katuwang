@@ -5,8 +5,9 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
 };
 

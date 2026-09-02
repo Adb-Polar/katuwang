@@ -98,7 +98,7 @@ export default function PortalLayout({
           <BrandMark />
           <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
         </div>
-        <span className="kt-nav-label !pb-0 !px-2 text-primary">{portalLabel}</span>
+        <span className="kt-nav-label pb-0! px-2! text-primary">{portalLabel}</span>
         <div className="flex-1">{navTree}</div>
         <div className="kt-promo">
           <strong className="font-sans font-bold text-sm">Fully anonymous</strong>

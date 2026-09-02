@@ -404,3 +404,48 @@ VERIFICATION (final state)
 
   Not committed. Not pushed.
 ================================================================================
+
+
+================================================================================
+PART 4 — STYLE: soften global type weight (2026-09-02)
+================================================================================
+
+Committed on branch redesign/tailwind-ui.
+
+Problem
+  Apfel Grotezk (next/font/local) ships only 400 / 500 / 700 / 900 faces.
+  `font-semibold` (600) had no matching face and the CSS font-matching
+  algorithm snapped it up to 700, so every `font-semibold` / `font-bold` run
+  rendered as the heavy Fett face — "all bold letters too bold".
+
+Files changed
+  M src/app/globals.css
+      - @theme: pin --font-weight-medium / --font-weight-semibold /
+        --font-weight-bold to 500, so the font-bold / font-semibold utilities
+        (~180 uses across ~44 files) resolve to the 500 Mittel face.
+      - Route the hard-coded font-weight: 700 / 600 declarations in the .kt-*
+        component classes (card head, tiles, avatar, nav label, active nav
+        item, tabs, day label) through those tokens.
+      - Add `b, strong { font-weight: var(--font-weight-bold); }` so raw bold
+        tags follow (Tailwind preflight otherwise forces them to `bolder`).
+  M src/components/admin/ReportsView.tsx
+      - The two enrollment stat numbers inherited DaisyUI's .stat-value
+        font-weight: 800 (snaps to the 900 Satt face); add `font-medium` so
+        they match the softened scale while keeping the serif display look.
+  M src/components/layout/PortalLayout.tsx
+      - Migrate `!pb-0 !px-2` to the Tailwind v4 important-modifier syntax
+        `pb-0! px-2!`.
+  M src/app/admin/page.tsx
+      - Type the exported `metadata` as Next's `Metadata`.
+
+Tradeoff
+  Apfel has no 600 face, so `font-bold` and `font-semibold` now render at the
+  same 500 weight (they already both rendered at 700 before). To keep a
+  visible bold/semibold distinction, either leave --font-weight-bold at 700 or
+  add an ApfelGrotezk 600 weight file.
+
+Verification
+  pnpm build — compiles; production CSS bundle shows
+  `.font-bold{font-weight:var(--font-weight-bold)}` with
+  `--font-weight-bold:500`.
+================================================================================
