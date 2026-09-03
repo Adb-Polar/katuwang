@@ -1,17 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, UserCircle } from "lucide-react";
+import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, Bell, UserCircle } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
-
-const TUTOR_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/tutor", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
-  { label: "Classes", href: "/tutor/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
-  { label: "Students", href: "/tutor/students", icon: <Users className="w-4 h-4" />, group: "Main menu" },
-  { label: "Requests", href: "/tutor/requests", icon: <Inbox className="w-4 h-4" />, group: "Teaching" },
-  { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" />, group: "Teaching" },
-  { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
-];
 
 export default async function TutorLayout({
   children,
@@ -27,6 +19,20 @@ export default async function TutorLayout({
   if (session.user.role !== "STUDENT_TUTOR") {
     redirect("/unauthorized");
   }
+
+  const unreadCount = await prisma.notification.count({
+    where: { userId: session.user.id, readAt: null },
+  });
+
+  const TUTOR_NAV_ITEMS: NavItem[] = [
+    { label: "Dashboard", href: "/tutor", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
+    { label: "Classes", href: "/tutor/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
+    { label: "Students", href: "/tutor/students", icon: <Users className="w-4 h-4" />, group: "Main menu" },
+    { label: "Requests", href: "/tutor/requests", icon: <Inbox className="w-4 h-4" />, group: "Teaching" },
+    { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" />, group: "Teaching" },
+    { label: "Notifications", href: "/tutor/notifications", icon: <Bell className="w-4 h-4" />, group: "Teaching", badge: unreadCount },
+    { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
+  ];
 
   return (
     <PortalLayout

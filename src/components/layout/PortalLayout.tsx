@@ -12,6 +12,8 @@ export interface NavItem {
   icon: React.ReactNode;
   /** sidebar section this item belongs under; items keep first-seen group order */
   group?: string;
+  /** unread count shown as a small badge after the label; omitted/0 renders nothing */
+  badge?: number;
 }
 
 type PortalAccent = "primary" | "secondary" | "accent";
@@ -67,6 +69,9 @@ export default function PortalLayout({
             >
               <span className="kt-ic">{item.icon}</span>
               {item.label}
+              {!!item.badge && item.badge > 0 && (
+                <span className="badge badge-error badge-xs ml-auto">{item.badge > 99 ? "99+" : item.badge}</span>
+              )}
             </Link>
           ))}
         </div>

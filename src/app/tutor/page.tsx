@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CheckCircle2, Circle, AlertTriangle, CalendarClock } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
@@ -44,7 +45,16 @@ export default async function TutorDashboard() {
 
   const now = new Date();
   const [openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
-    prisma.topicRequest.count({ where: { status: "OPEN" } }),
+    tutorProfile
+      ? prisma.topicCertification
+          .findMany({
+            where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" },
+            select: { subject: true, topic: true },
+          })
+          .then((certifiedTopics) =>
+            prisma.topicRequest.count({ where: tutorPoolWhere(tutorProfile.id, certifiedTopics) })
+          )
+      : Promise.resolve(0),
     tutorProfile
       ? prisma.classSession.findMany({
           where: {

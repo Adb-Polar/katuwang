@@ -36,11 +36,11 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
   - Only the owning tutor may edit; a class suspended or banned by an admin cannot be modified.
   - Capacity cannot be reduced below the current enrollment count.
   - A topic cannot be removed from the class while one of its sessions still uses that topic.
-  - Setting the class to `CANCELLED` or `COMPLETED` **cascades**: every still-`SCHEDULED` session is bulk-updated to match, in the same transaction.
+  - Setting the class to `CANCELLED` or `COMPLETED` **cascades**: every still-`SCHEDULED` session is bulk-updated to match, in the same transaction. It also cascades to any topic request accepted into this class (see [[learner-role]] Topic Requests): `COMPLETED` → linked `ACCEPTED`/`ENROLLED` requests become `FULFILLED` (learner notified); `CANCELLED` → they re-open (`→ OPEN`, unlinked, learner notified).
   (`PATCH /api/tutor/classes/[classId]`)
 - **Publish / unpublish a class** — toggle whether a `SCHEDULED` class is visible to learners for browsing/enrollment, without touching its sessions or existing enrollments. An unpublished class shows as "Draft" to the tutor.
   (`PATCH /api/tutor/classes/[classId]` with `{ "published": boolean }`)
-- **Delete a class** — only allowed if no learners are enrolled; otherwise the tutor must cancel instead of delete. Cascade-deletes all of its sessions.
+- **Delete a class** — only allowed if no learners are enrolled; otherwise the tutor must cancel instead of delete. Cascade-deletes all of its sessions. If the class was accepted from a topic request (still `ACCEPTED`, not yet enrolled), that request re-opens (`→ OPEN`, unlinked, learner notified) before the class is deleted.
   (`DELETE /api/tutor/classes/[classId]`)
 - **View class details** — clicking a class opens a dedicated fullscreen detail page (`/tutor/classes/[classId]`, server-rendered directly from Prisma with an ownership check — 404s if the class doesn't belong to the requesting tutor), showing the full session list (with per-session reschedule/complete/cancel/delete controls and an Add Session action), description, and enrolled learners' roster (anonymized — `anonymousId`, grade level, section only). A **Manage Class** menu (top-right, next to the back link) groups Edit Class Info, Publish/Unpublish, Finish Class, Cancel Class, and (when eligible) Delete Class — kept behind one menu instead of standing buttons so destructive actions aren't one accidental click away.
 - **View a student's profile** — clicking a learner in the roster (on this page or on the Students page below) opens a dedicated fullscreen page (`/tutor/students/[studentId]`, server-rendered from Prisma; 404s unless that learner is enrolled in one of the requesting tutor's classes): `anonymousId`, grade level, section, and the full breakdown of every class/subject/topic they're enrolled in **with this tutor** (each row links to that class). Still never shows real name, email, or contact info.
@@ -54,12 +54,16 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
 
 ## Topic Requests (`/tutor/requests`)
 
-- **View open topic requests** — learners' `OPEN` requests for help on a topic, anonymized (`anonymousId`, grade level, section only). Each shows the subject, requested topics, preferred weekly time windows, an optional note, and when it was posted. Paginated.
-  (`GET /api/tutor/topic-requests`)
-- Filterable by `subject`; by default the list is scoped to subjects the tutor teaches (has a class in) or holds any `TopicCertification` for. Pass `mine=false` (or pick an explicit subject) to see all open requests.
-- **Respond by attaching a class** — pick one of your `SCHEDULED` classes in the same subject; the request flips to `FULFILLED` and links that class. The learner is **not** enrolled — they get a "Review & enroll" prompt and choose for themselves. If you have no suitable class, create one first from `/tutor/classes`.
-  (`POST /api/tutor/topic-requests/[id]/fulfill`)
-- The tutor dashboard (`/tutor`) shows the count of open requests with a link here.
+Two tabs on one page:
+
+- **Open to me** (`tab=open`, default) — `OPEN` requests you're eligible to accept: every request **directed** at you specifically (pinned first, badged "Directed to you"), plus every **public** request (no directed tutor) in a subject/topic you hold a `CERTIFIED` certification for. Each row is anonymized (`anonymousId`, grade level, section only) and shows the subject, requested topics, preferred weekly time windows, an optional note, and when it was posted. Paginated, filterable by `subject`.
+  (`GET /api/tutor/topic-requests?tab=open`)
+- **Accept & create class** — accepting a request opens the full class-creation form, pre-filled from the request (subject locked to the request's subject; topics pre-checked to the overlap between the request's topics and your `CERTIFIED` topics in that subject — topics you aren't certified for can't be checked; target grade and description seeded from the request; first session date pre-filled from the request's first preferred time slot, resolved to its next occurrence). Submitting **auto-creates a full `SCHEDULED`, published `TutorClass`** (same past-date/overlap validation as `POST /api/tutor/classes`), sets the request to `ACCEPTED` and links it to the new class, and notifies the learner. The learner is **not** auto-enrolled — they review and enroll themselves.
+  (`POST /api/tutor/topic-requests/[id]/accept`)
+- **Accepted by me** (`tab=accepted`) — every request you've accepted that's still linked to its class (`ACCEPTED` = learner hasn't enrolled yet; `ENROLLED` = they have), showing the linked class, its next session, and enrollment count.
+  (`GET /api/tutor/topic-requests?tab=accepted`)
+- **A request re-opens automatically** if you cancel or delete the linked class (`→ OPEN`, unlinked, learner notified) — it goes back into the open pool for any eligible tutor, not just you. **A request is marked `FULFILLED`** (terminal) if you complete the linked class (learner notified). If the learner cancels an `ACCEPTED` request, it's withdrawn on their end but **the class you created is kept** — only the link is cleared.
+- The tutor dashboard (`/tutor`) shows the count of requests you can act on ("Open to me" pool), linking here.
 - Gated by the `matchingEnabled` platform setting.
 
 ## Assessments (`/tutor/assessments`)
@@ -72,6 +76,13 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
 - Certifications are reviewed and approved/rejected by an **ADMIN** (see [[admin-role]]); the tutor cannot self-approve.
 - Being `CERTIFIED` in a topic is what unlocks teaching it when `requireCertificationForClassCreation` is enabled, and is surfaced to learners in the class browser as a "verified topic" signal.
 - The dashboard (`/tutor`) shows only a summary (verified/pending counts with a link) — the full request UI and history live on this dedicated page.
+
+## Notifications (`/tutor/notifications`)
+
+- A **Notifications** sidebar item (bell icon) shows an unread-count badge, sourced from `Notification` rows addressed to you.
+- The page lists every notification, newest first (icon by type, message, relative time, unread dot), each linking to the relevant page (e.g. `/tutor/requests` for a newly-directed request). Visiting the page marks everything read; a "Mark all read" button does the same on demand.
+- Notification types you'll see: `TOPIC_REQUEST_DIRECTED` (a learner directed a request specifically at you).
+  (`GET /api/notifications`, `POST /api/notifications/read`)
 
 ## Availability (auto-derived)
 
@@ -261,6 +272,22 @@ Aggregate roster of every distinct learner enrolled in any of the tutor's classe
 > Availability has no API. It is derived in-process from the tutor's `ClassSession`
 > rows whenever the dashboard or a learner tutor-profile page renders.
 
+### `GET /api/notifications`
+The caller's own notifications, newest first, capped at 50. Any authenticated role (not gated to tutors).
+
+**200** → `{ notifications: [{ id, type, message, link, readAt, createdAt }], unreadCount }`.
+**401** → not authenticated.
+**500** → `{ error }`.
+
+### `POST /api/notifications/read`
+Mark notifications read.
+
+**Body**: `{ "ids"?: string[] }` — omitted/empty marks **all** of the caller's unread notifications read; otherwise only the given ids.
+
+**200** → `{ unreadCount }`.
+**401** → not authenticated.
+**500** → `{ error }`.
+
 ### `PATCH /api/tutor/profile`
 Update the tutor's own self-service profile fields.
 
@@ -276,28 +303,35 @@ Update the tutor's own self-service profile fields.
 **500** → `{ error }`.
 
 ### `GET /api/tutor/topic-requests`
-List `OPEN` learner topic requests. Requires `role === "STUDENT_TUTOR"` (`401`); `404` if no `TutorProfile`; `403` when `matchingEnabled` is off.
+List topic requests the tutor can act on or has already accepted. Requires `role === "STUDENT_TUTOR"` (`401`); `404` if no `TutorProfile`; `403` when `matchingEnabled` is off.
 
-**Query params** (all optional): `subject` (`SubjectArea` enum), `mine` (default `"true"` — scope to subjects the tutor teaches or is certified for; `"false"` for all), `page` (default `1`), `pageSize` (default `10`, max `100`).
+**Query params** (all optional): `tab` (`"open"` default | `"accepted"`), `subject` (`SubjectArea` enum), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
-**200** → `{ requests: [{ id, subject, gradeLevel, note, createdAt, topics: string[], slots: [{ day, startTime, endTime }], learner: { anonymousId, gradeLevel, section } }], total, page, pageSize }` — anonymized, no real name/email.
+**200** (`tab=open`) → `{ requests: [{ id, subject, gradeLevel, note, createdAt, topics: string[], slots: [{ day, startTime, endTime }], learner: { anonymousId, gradeLevel, section }, directed: boolean }], total, page, pageSize }` — `OPEN` requests directed at this tutor, or public in a subject/topic they hold a `CERTIFIED` cert for; directed rows sorted first.
+**200** (`tab=accepted`) → `{ requests: [{ id, subject, gradeLevel, status: "ACCEPTED" | "ENROLLED", topics: string[], learner: {...}, class: { id, nextSessionAt, enrolledCount, maxStudents } | null }], total, page, pageSize }` — requests this tutor has accepted, still linked to their class.
 **500** → `{ error }`.
 
-### `POST /api/tutor/topic-requests/[id]/fulfill`
-Attach one of the tutor's classes to an `OPEN` request. Does **not** enroll the learner.
+### `POST /api/tutor/topic-requests/[id]/accept`
+Accept an `OPEN` request by auto-creating a full class from it. Does **not** enroll the learner. Replaces the old "attach an existing class" flow.
 
-**Body**: `{ "classId": "string" }`.
-- The class must belong to the caller, be `SCHEDULED`, and share the request's `subject`.
-- The request must be `OPEN`.
+**Body**: the same shape as `POST /api/tutor/classes` (`acceptTopicRequestSchema = createClassSchema`) — `subject, gradeLevel, topics, description, maxStudents, building, room, meetingLink, sessions`.
+- The request must be `OPEN` and the tutor must be eligible for it (directed at them, or public + certified — same rule as the `tab=open` list) — `403` otherwise.
+- `subject` must equal the request's `subject` (`400` otherwise).
+- **Every submitted topic must have a `CERTIFIED` `TopicCertification`** for this tutor in that subject — a hard rule that applies regardless of the `requireCertificationForClassCreation` platform setting.
+- Same past-date, internal-overlap, and cross-class-overlap checks as `POST /api/tutor/classes`.
+- On success (one transaction): creates the `TutorClass` (+topics+sessions, `published: true`), sets the request to `ACCEPTED` + `fulfilledClassId`, and notifies the learner (`TOPIC_REQUEST_ACCEPTED`, linking to the new class).
 
-**200** → `{ id, status: "FULFILLED", fulfilledClassId }`.
-**400** → request not open, class not scheduled, subject mismatch, or validation error.
-**401** → not a tutor. **403** → class isn't the caller's, or matching disabled. **404** → request or tutor profile not found.
+**201** → `{ request: { id, status: "ACCEPTED", fulfilledClassId }, classId }`.
+**400** → request not `OPEN`, subject mismatch, uncertified topic(s), invalid session topic, past date, or validation error.
+**401** → not a tutor. **403** → not eligible for this request, or matching disabled. **404** → request or tutor profile not found.
+**409** → time conflict (internal overlap or against an existing session).
 **500** → `{ error }`.
 
 ## What Tutors Cannot Do
 
 - Cannot browse or enroll in classes (that's the learner's role).
+- Cannot accept a topic request for a topic they don't hold a `CERTIFIED` certification for — this rule applies even when `requireCertificationForClassCreation` is off.
+- Cannot see or accept a request directed at another tutor, or a public request outside their certified topics.
 - Cannot approve their own certification requests.
 - Cannot modify a class once an admin has suspended or banned it.
 - Cannot reduce a class's capacity below its current enrollment count.

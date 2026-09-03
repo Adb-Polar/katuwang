@@ -34,12 +34,26 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     expect(res.status).toBe(404);
   });
 
-  it("400 when the request is not open", async () => {
+  it("400 when cancelling a request in a terminal state", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "FULFILLED" });
     const res = await PATCH(makeRequest({ status: "CANCELLED" }), { params });
     expect(res.status).toBe(400);
     expect(updateMock).not.toHaveBeenCalled();
+  });
+
+  it("cancels an ACCEPTED request and nulls fulfilledClassId (class kept)", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "ACCEPTED" });
+    updateMock.mockResolvedValue({ id: "r1", status: "CANCELLED" });
+    const res = await PATCH(makeRequest({ status: "CANCELLED" }), { params });
+    expect(res.status).toBe(200);
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: "r1" },
+        data: { status: "CANCELLED", fulfilledClassId: null },
+      })
+    );
   });
 
   it("400 for a status other than CANCELLED", async () => {
@@ -55,7 +69,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     const res = await PATCH(makeRequest({ status: "CANCELLED" }), { params });
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "r1" }, data: { status: "CANCELLED" } })
+      expect.objectContaining({ where: { id: "r1" }, data: { status: "CANCELLED", fulfilledClassId: null } })
     );
   });
 

@@ -4,7 +4,6 @@ import { NextRequest } from "next/server";
 const {
   getServerSessionMock,
   tutorProfileFindUnique,
-  tutorClassFindMany,
   topicCertFindMany,
   topicRequestCount,
   topicRequestFindMany,
@@ -12,7 +11,6 @@ const {
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
-  tutorClassFindMany: vi.fn(),
   topicCertFindMany: vi.fn(),
   topicRequestCount: vi.fn(),
   topicRequestFindMany: vi.fn(),
@@ -23,7 +21,6 @@ vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
-    tutorClass: { findMany: tutorClassFindMany },
     topicCertification: { findMany: topicCertFindMany },
     topicRequest: { count: topicRequestCount, findMany: topicRequestFindMany },
   },
@@ -43,8 +40,7 @@ describe("GET /api/tutor/topic-requests", () => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(true);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    tutorClassFindMany.mockResolvedValue([{ subject: "MATH" }]);
-    topicCertFindMany.mockResolvedValue([]);
+    topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
     topicRequestCount.mockResolvedValue(1);
     topicRequestFindMany.mockResolvedValue([
       {
@@ -56,6 +52,7 @@ describe("GET /api/tutor/topic-requests", () => {
         topics: [{ topic: "Algebraic Expressions" }],
         slots: [],
         learner: { anonymousId: "STU-0001", gradeLevel: "GRADE_9", section: "Rizal" },
+        directedTutorProfileId: null,
       },
     ]);
   });
@@ -77,25 +74,74 @@ describe("GET /api/tutor/topic-requests", () => {
     expect((await GET(req())).status).toBe(404);
   });
 
-  it("returns anonymized open requests, filtered to the tutor's subjects by default", async () => {
+  it("tab=open returns anonymized requests scoped to the tutor's certified pool, directed flagged", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    const res = await GET(req());
+    const res = await GET(req("http://localhost/api/tutor/topic-requests?tab=open"));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.requests[0].learner).toEqual({ anonymousId: "STU-0001", gradeLevel: "GRADE_9", section: "Rizal" });
     expect(json.requests[0].topics).toEqual(["Algebraic Expressions"]);
+    expect(json.requests[0].directed).toBe(false);
     expect(topicRequestFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: expect.objectContaining({ status: "OPEN", subject: { in: ["MATH"] } }),
+        where: expect.objectContaining({ status: "OPEN" }),
       })
     );
   });
 
-  it("filters by an explicit subject query param", async () => {
+  it("tab=open flags a request directed at this tutor", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    await GET(req("http://localhost/api/tutor/topic-requests?subject=SCIENCE"));
+    topicRequestFindMany.mockResolvedValue([
+      {
+        id: "r1",
+        subject: "MATH",
+        gradeLevel: "GRADE_9",
+        note: null,
+        createdAt: new Date(),
+        topics: [{ topic: "Algebraic Expressions" }],
+        slots: [],
+        learner: { anonymousId: "STU-0001", gradeLevel: "GRADE_9", section: "Rizal" },
+        directedTutorProfileId: "tp1",
+      },
+    ]);
+    const res = await GET(req());
+    const json = await res.json();
+    expect(json.requests[0].directed).toBe(true);
+  });
+
+  it("filters open requests by an explicit subject query param", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    await GET(req("http://localhost/api/tutor/topic-requests?tab=open&subject=SCIENCE"));
     expect(topicRequestFindMany).toHaveBeenCalledWith(
       expect.objectContaining({ where: expect.objectContaining({ subject: "SCIENCE" }) })
     );
+  });
+
+  it("tab=accepted scopes to requests accepted into this tutor's classes", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicRequestFindMany.mockResolvedValue([
+      {
+        id: "r2",
+        subject: "MATH",
+        gradeLevel: "GRADE_9",
+        status: "ACCEPTED",
+        topics: [{ topic: "Algebraic Expressions" }],
+        learner: { anonymousId: "STU-0002", gradeLevel: "GRADE_9", section: "Luna" },
+        fulfilledClass: { id: "c1", sessions: [], _count: { enrollments: 0 }, maxStudents: 3 },
+      },
+    ]);
+
+    const res = await GET(req("http://localhost/api/tutor/topic-requests?tab=accepted"));
+    expect(res.status).toBe(200);
+    expect(topicRequestFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          status: { in: ["ACCEPTED", "ENROLLED"] },
+          fulfilledClass: { tutorProfileId: "tp1" },
+        }),
+      })
+    );
+    const json = await res.json();
+    expect(json.requests[0].class).toEqual({ id: "c1", nextSessionAt: null, enrolledCount: 0, maxStudents: 3 });
   });
 });

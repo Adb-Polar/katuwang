@@ -55,7 +55,11 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Weighted scoring algorithm (subject, grade compatibility, availability) | ✅ | `src/lib/matching.ts` → `rankMatches()`, called from `POST /api/learner/match` |
 | Learner-submitted tutor/topic request (fallback when no match) | ✅ | `TopicRequest`, `TopicRequestTopic`, `TopicRequestSlot` models; `/learner/requests` |
 | Preferred setup selection (1-on-1 vs. group) in request | ✅ | `MatchCriteria.classFormat: "SOLO" \| "GROUP" \| "ANY"` in `src/lib/matching.ts`, applied in the match-ranking API |
-| Tutor fulfills an open topic request | ✅ | `POST /api/tutor/topic-requests/[id]/fulfill`, `FulfillRequestModal.tsx` |
+| Tutor accepts an open topic request (auto-creates a class) | ✅ | `POST /api/tutor/topic-requests/[id]/accept`, `AcceptRequestModal.tsx` (replaces the old `/fulfill` route, removed 2026-09-03 by `docs/plans/topic-requests-v2.md`) |
+| Public vs. directed (tutor-specific) topic requests | ✅ | `TopicRequest.directedTutorProfileId`; landed 2026-09-03 via `docs/plans/topic-requests-v2.md` |
+| Request lifecycle (OPEN → ACCEPTED → ENROLLED → FULFILLED, re-open on cancel) | ✅ | `TopicRequestStatus` enum, enroll/unenroll + class status hooks |
+| In-app notifications (directed request, accepted, re-opened, fulfilled) | ✅ | new `Notification` model, `/api/notifications`, badge in `PortalLayout` |
+| Admin moderation of topic requests | ✅ | `/admin/topic-requests`, `TopicRequestModerationTable.tsx` |
 | Admin can toggle matching availability | ✅ | `matchingEnabled` platform setting |
 
 ## 4. Assessment Module
@@ -67,8 +71,8 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Per-topic assessment config (question count, pass %, min bank size) | ✅ | `TopicAssessmentConfig` |
 | Tutor can request more questions be added for a topic | ✅ | `QuestionRequest` model, `/api/admin/question-requests`, `/admin` review UI |
 | Admin certifies/rejects a tutor's topic request | ✅ | `TopicCertificationStatus`, `/api/admin/certifications` |
-| **Learner pre-test (before a session)** | ❌ | No learner-facing assessment entity; `AssessmentAttempt` is scoped to `TutorProfile` only |
-| **Learner post-test (after a session, to measure progress)** | ❌ | Same — no `learnerId` anywhere in the assessment schema, no pre/post pairing, no progress-delta reporting |
+| **Learner pre-test (before a session)** | ⚠️ | Not on `main` — `AssessmentAttempt` there is scoped to `TutorProfile` only. **Built and committed on the unmerged branch `class-pre-post-tests` (commit `1b6662c`)**: `ClassTest`/`ClassTestQuestion`/`ClassTestAttempt(+Item)` models, tutor builder UI, learner take/resume/review flow, admin read-only results. See `docs/reference/decisions.md`. |
+| **Learner post-test (after a session, to measure progress)** | ⚠️ | Same branch/commit as above — includes pre→post score-gain reporting for tutor/learner/admin. Diagnostic only (no pass/fail), per thesis delimitation. |
 
 ## 5. Chatbot Assistant Module
 
@@ -111,10 +115,11 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 |---|---|
 | 1. User Management | ✅ Complete |
 | 2. Session Management | ✅ Complete |
-| 3. Tutor Matching | ✅ Complete |
-| 4. Assessment | ⚠️ Half done — tutor qualification assessment is fully built; **learner pre/post-test is missing entirely** |
+| 3. Tutor Matching | ✅ Complete (Topic Requests v2 — directed requests, accept-to-class, notifications, admin moderation — landed 2026-09-03) |
+| 4. Assessment | ⚠️ Tutor qualification assessment is complete on `main`; learner pre/post-test is built but **sitting unmerged** on `class-pre-post-tests` |
 | 5. Chatbot Assistant | ❌ Not started |
 | 6. Analytics Dashboard | ✅ Complete |
-**Biggest gaps to close next:** (1) Chatbot Assistant module (whole module, 0% built), (2) Learner pre-/post-test assessment flow.
+
+**Biggest gaps to close next:** (1) Chatbot Assistant module (whole module, 0% built), (2) decide whether/when to merge `class-pre-post-tests` — the learner pre/post-test work already exists, it's just not on `main`.
 
 **Note on roles:** the thesis reference document names a 4th "Teacher Moderator" role, but the team decided to ship with 3 roles only (Learner, Tutor, Admin). Treat the reference doc's mentions of Teacher Moderator / Moderator Portal as stale, not a missing feature.

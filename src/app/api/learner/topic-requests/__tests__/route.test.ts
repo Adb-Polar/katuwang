@@ -1,17 +1,38 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, findManyMock, countMock, createMock, getSettingMock } = vi.hoisted(() => ({
+const {
+  getServerSessionMock,
+  findManyMock,
+  countMock,
+  createMock,
+  getSettingMock,
+  userFindFirstMock,
+  notificationCreateMock,
+} = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findManyMock: vi.fn(),
   countMock: vi.fn(),
   createMock: vi.fn(),
   getSettingMock: vi.fn(),
+  userFindFirstMock: vi.fn(),
+  notificationCreateMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { topicRequest: { findMany: findManyMock, count: countMock, create: createMock } },
+  prisma: {
+    topicRequest: { findMany: findManyMock, count: countMock, create: createMock },
+    user: { findFirst: userFindFirstMock },
+    tutorProfile: { findUnique: vi.fn() },
+    notification: { create: notificationCreateMock },
+    $transaction: (fn: (tx: unknown) => unknown) =>
+      fn({
+        topicRequest: { create: createMock },
+        tutorProfile: { findUnique: vi.fn().mockResolvedValue({ userId: "T1" }) },
+        notification: { create: notificationCreateMock },
+      }),
+  },
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 
@@ -25,7 +46,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const learner = { user: { id: "L1", role: "STUDENT_LEARNER" } };
+const learner = { user: { id: "L1", role: "STUDENT_LEARNER", anonymousId: "STU-0001" } };
 const validBody = { subject: "MATH", topics: ["Algebraic Expressions"], gradeLevel: "GRADE_9" };
 
 const dbRow = {
@@ -37,6 +58,7 @@ const dbRow = {
   createdAt: new Date(),
   topics: [{ topic: "Algebraic Expressions" }],
   slots: [],
+  directedTutor: null,
   fulfilledClass: null,
 };
 
@@ -56,6 +78,7 @@ describe("GET /api/learner/topic-requests", () => {
     expect(findManyMock).toHaveBeenCalledWith(expect.objectContaining({ where: { learnerId: "L1" } }));
     const json = await res.json();
     expect(json[0].topics).toEqual(["Algebraic Expressions"]);
+    expect(json[0].directedTo).toBeNull();
   });
 });
 
@@ -94,6 +117,32 @@ describe("POST /api/learner/topic-requests", () => {
     expect(createMock).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ learnerId: "L1", subject: "MATH", gradeLevel: "GRADE_9" }),
+      })
+    );
+    expect(notificationCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("400 when directedTutorId does not resolve to a real tutor", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    userFindFirstMock.mockResolvedValue(null);
+    const res = await POST(makeRequest({ ...validBody, directedTutorId: "bad-id" }));
+    expect(res.status).toBe(400);
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it("directedTutorId path creates the request and notifies the tutor", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" } });
+    createMock.mockResolvedValue({ ...dbRow, directedTutor: { user: { anonymousId: "TUT-0001" } } });
+
+    const res = await POST(makeRequest({ ...validBody, directedTutorId: "T1" }));
+    expect(res.status).toBe(201);
+    expect(createMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ directedTutorProfileId: "tp1" }) })
+    );
+    expect(notificationCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ userId: "T1", type: "TOPIC_REQUEST_DIRECTED" }),
       })
     );
   });

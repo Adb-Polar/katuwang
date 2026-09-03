@@ -1,5 +1,5 @@
 import PageHeader from "@/components/ui/PageHeader";
-import TopicRequestQueue from "@/components/tutor/TopicRequestQueue";
+import TopicRequestBrowser from "@/components/tutor/TopicRequestBrowser";
 
 export const metadata = {
   title: "Topic Requests | Katuwang",
@@ -11,9 +11,9 @@ export default function TutorRequestsPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Topic requests"
-        subtitle="Learners asking for help. Attach one of your classes to respond."
+        subtitle="Accept a request to auto-create a class for it — certification required per topic."
       />
-      <TopicRequestQueue />
+      <TopicRequestBrowser />
     </div>
   );
 }

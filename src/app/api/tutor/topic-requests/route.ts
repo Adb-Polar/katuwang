@@ -4,10 +4,14 @@ import { Prisma, SubjectArea } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
+import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-// ─── GET: Open topic requests a tutor can respond to ─────────────────────────
+// ─── GET: Topic requests a tutor can act on ──────────────────────────────────
+//   tab=open     (default) — OPEN requests this tutor is eligible to accept
+//                             (directed to them, or public in a certified subject/topic)
+//   tab=accepted — requests this tutor has already accepted, with the linked class
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -30,30 +34,77 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
+    const tab = searchParams.get("tab") === "accepted" ? "accepted" : "open";
     const subject = searchParams.get("subject");
-    const mine = searchParams.get("mine") !== "false"; // default: only my subjects
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
 
-    const where: Prisma.TopicRequestWhereInput = { status: "OPEN" };
+    if (tab === "accepted") {
+      const where: Prisma.TopicRequestWhereInput = {
+        status: { in: ["ACCEPTED", "ENROLLED"] },
+        fulfilledClass: { tutorProfileId: tutorProfile.id },
+        ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      };
 
-    if (subject && subject in SubjectArea) {
-      where.subject = subject as SubjectArea;
-    } else if (mine) {
-      const [classSubjects, certSubjects] = await Promise.all([
-        prisma.tutorClass.findMany({
-          where: { tutorProfileId: tutorProfile.id },
-          select: { subject: true },
-          distinct: ["subject"],
-        }),
-        prisma.topicCertification.findMany({
-          where: { tutorProfileId: tutorProfile.id },
-          select: { subject: true },
-          distinct: ["subject"],
+      const [total, requests] = await Promise.all([
+        prisma.topicRequest.count({ where }),
+        prisma.topicRequest.findMany({
+          where,
+          include: {
+            topics: { select: { topic: true } },
+            learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+            fulfilledClass: {
+              select: {
+                id: true,
+                sessions: {
+                  where: { status: "SCHEDULED" },
+                  orderBy: { scheduledAt: "asc" },
+                  take: 1,
+                  select: { scheduledAt: true },
+                },
+                _count: { select: { enrollments: true } },
+                maxStudents: true,
+              },
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+          skip: (page - 1) * pageSize,
+          take: pageSize,
         }),
       ]);
-      const subjects = [...new Set([...classSubjects, ...certSubjects].map((r) => r.subject))];
-      where.subject = { in: subjects.length > 0 ? subjects : ["__none__" as SubjectArea] };
+
+      return NextResponse.json({
+        requests: requests.map((r) => ({
+          id: r.id,
+          subject: r.subject,
+          gradeLevel: r.gradeLevel,
+          status: r.status,
+          topics: r.topics.map((t) => t.topic),
+          learner: r.learner,
+          class: r.fulfilledClass
+            ? {
+                id: r.fulfilledClass.id,
+                nextSessionAt: r.fulfilledClass.sessions[0]?.scheduledAt ?? null,
+                enrolledCount: r.fulfilledClass._count.enrollments,
+                maxStudents: r.fulfilledClass.maxStudents,
+              }
+            : null,
+        })),
+        total,
+        page,
+        pageSize,
+      });
+    }
+
+    // ── tab=open ────────────────────────────────────────────────────────────
+    const certifiedTopics = await prisma.topicCertification.findMany({
+      where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" },
+      select: { subject: true, topic: true },
+    });
+
+    let where = tutorPoolWhere(tutorProfile.id, certifiedTopics);
+    if (subject && subject in SubjectArea) {
+      where = { ...where, subject: subject as SubjectArea };
     }
 
     const [total, requests] = await Promise.all([
@@ -65,7 +116,7 @@ export async function GET(req: NextRequest) {
           slots: { select: { day: true, startTime: true, endTime: true } },
           learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ directedTutorProfileId: "desc" }, { createdAt: "asc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
@@ -81,6 +132,7 @@ export async function GET(req: NextRequest) {
         topics: r.topics.map((t) => t.topic),
         slots: r.slots,
         learner: r.learner,
+        directed: r.directedTutorProfileId === tutorProfile.id,
       })),
       total,
       page,

@@ -1,11 +1,22 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, classFindUnique, classUpdate, auditLogCreate } = vi.hoisted(() => ({
+const {
+  getServerSessionMock,
+  classFindUnique,
+  classUpdate,
+  auditLogCreate,
+  topicRequestFindMany,
+  topicRequestUpdate,
+  notificationCreate,
+} = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
   classUpdate: vi.fn(),
   auditLogCreate: vi.fn(),
+  topicRequestFindMany: vi.fn(),
+  topicRequestUpdate: vi.fn(),
+  notificationCreate: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -17,7 +28,12 @@ vi.mock("@/lib/prisma", () => ({
     tutorClass: { findUnique: classFindUnique, update: classUpdate },
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
-      fn({ tutorClass: { update: classUpdate }, auditLog: { create: auditLogCreate } }),
+      fn({
+        tutorClass: { update: classUpdate },
+        auditLog: { create: auditLogCreate },
+        topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
+        notification: { create: notificationCreate },
+      }),
   },
 }));
 
@@ -38,6 +54,7 @@ function patch(body: unknown, classId = "c1") {
 describe("PATCH /api/admin/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    topicRequestFindMany.mockResolvedValue([]);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -122,6 +139,23 @@ describe("PATCH /api/admin/classes/[classId]", () => {
 
     expect(suspendedUntil).toBeInstanceOf(Date);
     expect(suspendedUntil.getTime()).toBeGreaterThanOrEqual(before + 5 * 24 * 60 * 60 * 1000 - 1000);
+  });
+
+  it("re-opens linked topic requests and notifies learners when a class is banned", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    classFindUnique.mockResolvedValue({ id: "c1", status: "SCHEDULED" });
+    classUpdate.mockResolvedValue({ id: "c1", status: "BANNED" });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+
+    const res = await patch({ status: "BANNED", reason: "policy violation" });
+    expect(res.status).toBe(200);
+    expect(topicRequestUpdate).toHaveBeenCalledWith({
+      where: { id: "r1" },
+      data: { status: "OPEN", fulfilledClassId: null },
+    });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
+    );
   });
 
   it("returns 400 when banning a completed class", async () => {

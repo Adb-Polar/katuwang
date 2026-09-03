@@ -26,6 +26,17 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - **Reinstate a class** — a `SUSPENDED` or `BANNED` class can be returned to `SCHEDULED`.
   (`PATCH /api/admin/classes/[classId]`)
 - All class moderation actions are recorded in the audit log.
+- **Banning** a class re-opens any topic request still linked to it (`status in ACCEPTED, ENROLLED` → `OPEN`, `fulfilledClassId` nulled, learner notified) in the same transaction.
+
+## Topic Request Moderation (`/admin/topic-requests`)
+
+- **List & search all topic requests** platform-wide — paginated, filterable by status, subject, and `scope` (`public` vs `directed`), free-text search across the learner's name/anonymous ID and topic text. Each row shows the learner (anonymized + real name, admin accountability view), the directed-to tutor (if any), and the linked class summary (if any).
+  (`GET /api/admin/topic-requests`)
+- **Close a request** — set a non-terminal request to `CANCELLED` with an optional reason; nulls `fulfilledClassId` (the class, if any, is left alone — only the link is cleared). Learner is notified.
+- **Re-open a request** — set a `CANCELLED` or `ACCEPTED` request back to `OPEN`; nulls `fulfilledClassId`. Learner is notified.
+  (`PATCH /api/admin/topic-requests/[id]`)
+- All actions are recorded in the audit log (`TOPIC_REQUEST_STATUS_CHANGE` / `TOPIC_REQUEST`).
+- A `TutorClass` an admin **bans** also re-opens any topic request still linked to it (`→ OPEN`, unlinked, learner notified) — see Class Moderation below.
 
 ## Tutor Certification Review (`/admin/certifications`)
 
@@ -114,6 +125,32 @@ Suspend, ban, or reinstate a class.
 **200** → updated `TutorClass`.
 **400** → invalid state transition or failed validation.
 **404** → class not found.
+**500** → `{ error }`.
+
+### `GET /api/admin/topic-requests`
+List/search all topic requests platform-wide.
+
+**Query params** (all optional): `q` (learner first/last name, anonymous ID, or topic text), `status` (`TopicRequestStatus` enum), `subject` (`SubjectArea` enum), `scope` (`"public"` | `"directed"`), `page`, `pageSize` (same defaults as users).
+
+**200** → `{ requests: [{ id, subject, gradeLevel, note, status, createdAt, topics: string[], learner: { id, anonymousId, firstName, lastName }, directedTo: { anonymousId } | null, fulfilledClass: { id, code, status, nextSessionAt } | null }], total, page, pageSize }` — real learner name included (admin-only accountability view).
+**401** → not an admin.
+**500** → `{ error }`.
+
+### `PATCH /api/admin/topic-requests/[id]`
+Close or re-open a topic request.
+
+**Body**
+```json
+{ "status": "OPEN" | "CANCELLED", "reason": "string (≤500 chars, optional)" }
+```
+- `CANCELLED` allowed from any non-terminal status (`400` if already `CANCELLED`/`FULFILLED`).
+- `OPEN` allowed only from `CANCELLED` or `ACCEPTED` (`400` otherwise).
+- Always nulls `fulfilledClassId` (the linked class, if any, is left alone).
+- Writes an `AuditLog` entry (`TOPIC_REQUEST_STATUS_CHANGE` / `TOPIC_REQUEST`) and notifies the learner, all in one transaction.
+
+**200** → `{ id, status }`.
+**400** → invalid state transition or failed validation.
+**401** → not an admin. **404** → request not found.
 **500** → `{ error }`.
 
 ### `GET /api/admin/certifications`

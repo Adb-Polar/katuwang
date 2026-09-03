@@ -5,12 +5,14 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { createTopicRequestSchema } from "@/lib/validations/match";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { notify } from "@/lib/notifications";
 
 const MAX_OPEN_REQUESTS = 10;
 
 const requestInclude = {
   topics: { select: { topic: true } },
   slots: { select: { day: true, startTime: true, endTime: true } },
+  directedTutor: { select: { user: { select: { anonymousId: true } } } },
   fulfilledClass: {
     select: {
       id: true,
@@ -35,6 +37,7 @@ function serialize(r: {
   createdAt: Date;
   topics: { topic: string }[];
   slots: { day: string; startTime: string; endTime: string }[];
+  directedTutor: { user: { anonymousId: string } } | null;
   fulfilledClass:
     | {
         id: string;
@@ -53,6 +56,7 @@ function serialize(r: {
     createdAt: r.createdAt,
     topics: r.topics.map((t) => t.topic),
     slots: r.slots,
+    directedTo: r.directedTutor ? { anonymousId: r.directedTutor.user.anonymousId } : null,
     fulfilledClass: r.fulfilledClass
       ? {
           id: r.fulfilledClass.id,
@@ -110,13 +114,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { subject, topics, gradeLevel, preferredSlots, note } = result.data;
+    const { subject, topics, gradeLevel, preferredSlots, note, directedTutorId } = result.data;
 
     if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
       );
+    }
+
+    let directedTutorProfileId: string | null = null;
+    if (directedTutorId) {
+      const directedTutor = await prisma.user.findFirst({
+        where: { id: directedTutorId, role: "STUDENT_TUTOR" },
+        select: { tutorProfile: { select: { id: true } } },
+      });
+      if (!directedTutor || !directedTutor.tutorProfile) {
+        return NextResponse.json({ error: "The selected tutor could not be found." }, { status: 400 });
+      }
+      directedTutorProfileId = directedTutor.tutorProfile.id;
     }
 
     const openCount = await prisma.topicRequest.count({
@@ -129,22 +145,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const created = await prisma.topicRequest.create({
-      data: {
-        learnerId: session.user.id,
-        subject,
-        gradeLevel,
-        note: note || null,
-        topics: { create: [...new Set(topics)].map((topic) => ({ topic })) },
-        slots: {
-          create: (preferredSlots ?? []).map((s) => ({
-            day: s.day,
-            startTime: s.startTime,
-            endTime: s.endTime,
-          })),
+    const created = await prisma.$transaction(async (tx) => {
+      const request = await tx.topicRequest.create({
+        data: {
+          learnerId: session.user.id,
+          subject,
+          gradeLevel,
+          note: note || null,
+          directedTutorProfileId,
+          topics: { create: [...new Set(topics)].map((topic) => ({ topic })) },
+          slots: {
+            create: (preferredSlots ?? []).map((s) => ({
+              day: s.day,
+              startTime: s.startTime,
+              endTime: s.endTime,
+            })),
+          },
         },
-      },
-      include: requestInclude,
+        include: requestInclude,
+      });
+
+      if (directedTutorProfileId) {
+        const directedTutorProfile = await tx.tutorProfile.findUnique({
+          where: { id: directedTutorProfileId },
+          select: { userId: true },
+        });
+        if (directedTutorProfile) {
+          await notify(
+            tx,
+            directedTutorProfile.userId,
+            "TOPIC_REQUEST_DIRECTED",
+            `${session.user.anonymousId} directed a topic request to you (${subject}).`,
+            "/tutor/requests"
+          );
+        }
+      }
+
+      return request;
     });
 
     return NextResponse.json(serialize(created), { status: 201 });

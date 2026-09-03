@@ -69,6 +69,8 @@ CANCELLED CANCELLED
 
         TopicRequestStatus {
             OPEN OPEN
+ACCEPTED ACCEPTED
+ENROLLED ENROLLED
 FULFILLED FULFILLED
 CANCELLED CANCELLED
         }
@@ -201,6 +203,7 @@ DISMISSED DISMISSED
     String note "❓"
     TopicRequestStatus status 
     String fulfilledClassId "❓"
+    String directedTutorProfileId "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
@@ -314,6 +317,17 @@ DISMISSED DISMISSED
     DateTime updatedAt 
     }
   
+
+  "notifications" {
+    String id "🗝️"
+    String userId 
+    String type 
+    String message 
+    String link "❓"
+    DateTime readAt "❓"
+    DateTime createdAt 
+    }
+  
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -336,6 +350,7 @@ DISMISSED DISMISSED
     "topic_requests" |o--|| "GradeLevel" : "enum:gradeLevel"
     "topic_requests" |o--|| "TopicRequestStatus" : "enum:status"
     "topic_requests" }o--|o "tutor_classes" : "fulfilledClass"
+    "topic_requests" }o--|o "tutor_profiles" : "directedTutor"
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
     "audit_logs" }o--|| "users" : "admin"
@@ -354,4 +369,5 @@ DISMISSED DISMISSED
     "question_requests" |o--|| "SubjectArea" : "enum:subject"
     "question_requests" |o--|| "QuestionRequestStatus" : "enum:status"
     "question_requests" }o--|o "users" : "resolvedBy"
+    "notifications" }o--|| "users" : "user"
 ```

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { SubjectArea, GradeLevel } from "@prisma/client";
 import { availabilitySlotSchema } from "@/lib/validations/availability";
+import { createClassSchema } from "@/lib/validations/class";
 
 // A learner's preferred meeting window — same shape/rules as a tutor availability slot.
 export const preferredSlotSchema = availabilitySlotSchema;
@@ -32,6 +33,8 @@ export const createTopicRequestSchema = matchCriteriaSchema.extend({
     .trim()
     .optional()
     .or(z.literal("")),
+  // Present → the request is directed at one specific tutor; absent → public (every eligible tutor sees it).
+  directedTutorId: z.string().trim().min(1, "Invalid tutor.").optional(),
 });
 
 export type CreateTopicRequestInput = z.infer<typeof createTopicRequestSchema>;
@@ -41,9 +44,8 @@ export const cancelTopicRequestSchema = z.object({
   status: z.literal("CANCELLED"),
 });
 
-// A tutor attaching one of their classes to an open request.
-export const fulfillTopicRequestSchema = z.object({
-  classId: z.string().trim().min(1, "A class is required."),
-});
+// A tutor accepting a request: the body IS a class-creation payload (the accept
+// route auto-creates a full class from it).
+export const acceptTopicRequestSchema = createClassSchema;
 
-export type FulfillTopicRequestInput = z.infer<typeof fulfillTopicRequestSchema>;
+export type AcceptTopicRequestInput = z.infer<typeof acceptTopicRequestSchema>;

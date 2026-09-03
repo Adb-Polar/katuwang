@@ -25,6 +25,7 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 - **Verified topics** — topics the teaching tutor holds a `CERTIFIED` `TopicCertification` for are flagged separately, letting learners identify vetted tutors for a given topic.
 - **View class details** — clicking a class opens a dedicated fullscreen detail page (`/learner/classes/[classId]`, server-rendered directly from Prisma — 404s unless the class is currently browsable or the learner is enrolled in it), showing the full session list (read-only — date, topic, duration, status per session), description, and the tutor's anonymized ID.
 - **View the tutor's profile** — clicking the tutor's anonymous ID badge opens a dedicated fullscreen page (`/learner/tutors/[tutorId]`, server-rendered from Prisma — 404s if the id isn't a tutor): their `anonymousId`, their verified (`CERTIFIED`) topics grouped by subject, and **every one of their `published` classes** as clickable cards (each links to that class's detail page). Never shows real name, email, or contact info.
+- **Request a topic from this tutor** — a "Request a topic from this tutor" button on that same profile page opens the same criteria form used on `/learner/requests`, but submits with `directedTutorId` set so the request is **directed**: only that tutor sees it (see Topic Requests below).
 
 ## Enrollment (`/learner/classes/[classId]`)
 
@@ -44,12 +45,32 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 
 ## Topic Requests (`/learner/requests`)
 
-- **Post a topic request** — when nothing fits, record what you want to learn: subject, topics (validated against the subject's topic list), grade level, optional preferred time windows, and an optional note. Tutors teaching that subject see it in their request queue.
+- **Post a topic request** — when nothing fits, record what you want to learn: subject, topics (validated against the subject's topic list), grade level, optional preferred time windows, and an optional note. A request is either:
+  - **Public** (default) — every tutor certified in at least one of your requested topics can see it.
+  - **Directed** — submit with `directedTutorId` (or use "Request a topic from this tutor" on a tutor's profile page) so only that one tutor sees it. That tutor gets a notification.
   (`GET`/`POST /api/learner/topic-requests`)
 - Up to 10 `OPEN` requests at a time.
-- **Cancel a request** — withdraw one of your own `OPEN` requests. The row is kept (status `CANCELLED`), not deleted.
+- **Status lifecycle** (`TopicRequestStatus`):
+
+  | Status | Meaning | What you see |
+  |---|---|---|
+  | `OPEN` | Posted, unclaimed | "Waiting for a tutor" + Cancel |
+  | `ACCEPTED` | A tutor accepted it and created a class for it | "A class was created — Review & enroll" + Cancel |
+  | `ENROLLED` | You enrolled in that class | "Enrolled — class in progress" |
+  | `FULFILLED` | The linked class was completed | "Completed" (terminal) |
+  | `CANCELLED` | Withdrawn by you or closed by an admin | "Cancelled" (terminal) |
+
+- **Cancel a request** — withdraw one of your own `OPEN` or `ACCEPTED` requests. The row is kept (status `CANCELLED`), not deleted. Cancelling an `ACCEPTED` request unlinks it from the class (`fulfilledClassId` cleared) but **the class itself is kept** — the tutor isn't forced to delete it.
   (`PATCH /api/learner/topic-requests/[id]` with `{ "status": "CANCELLED" }`)
-- **When a tutor responds** — the request flips to `FULFILLED` and links the class the tutor attached. Your requests page then shows a "Review & enroll" link to that class's detail page. You are **not** auto-enrolled — you decide.
+- **When a tutor accepts your request** — they build a full class from it (subject/topics/schedule pre-filled), and the request flips to `ACCEPTED`, linked to that class. Your requests page shows a "Review & enroll" link to the class's detail page. You are **not** auto-enrolled — you decide. Enrolling flips the request to `ENROLLED`; unenrolling flips it back to `ACCEPTED`.
+- **If the tutor cancels the linked class** — your request automatically re-opens (`→ OPEN`, unlinked) and you get a notification. **If the tutor completes the class** — your request is marked `FULFILLED` (terminal) and you get a notification.
+
+## Notifications (`/learner/notifications`)
+
+- A **Notifications** sidebar item (bell icon) shows an unread-count badge, sourced from `Notification` rows addressed to you.
+- The page lists every notification, newest first (icon by type, message, relative time, unread dot), each linking to the relevant page (e.g. the class you can now enroll in). Visiting the page marks everything read; a "Mark all read" button does the same on demand.
+- Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed).
+  (`GET /api/notifications`, `POST /api/notifications/read`)
 
 ## Profile (`/learner/profile`)
 
@@ -161,7 +182,7 @@ Rank browsable classes against match criteria. Requires `role === "STUDENT_LEARN
 ### `GET /api/learner/topic-requests`
 List the caller's own topic requests, newest first.
 
-**200** → array of `{ id, subject, gradeLevel, note, status, createdAt, topics: string[], slots: [{ day, startTime, endTime }], fulfilledClass: { id, subject, nextSessionAt, tutorAnonymousId } | null }`.
+**200** → array of `{ id, subject, gradeLevel, note, status, createdAt, topics: string[], slots: [{ day, startTime, endTime }], directedTo: { anonymousId } | null, fulfilledClass: { id, subject, nextSessionAt, tutorAnonymousId } | null }`. `status` is one of `OPEN | ACCEPTED | ENROLLED | FULFILLED | CANCELLED`.
 **401** → not a learner.
 **500** → `{ error }`.
 
@@ -175,23 +196,42 @@ Create a topic request. `403` when `matchingEnabled` is off.
   "topics": ["string (1–10, each in SUBJECT_TOPICS[subject])"],
   "gradeLevel": "GradeLevel enum (required)",
   "preferredSlots": [{ "day": "MONDAY", "startTime": "15:00", "endTime": "17:00" }],
-  "note": "string (≤500 chars, optional)"
+  "note": "string (≤500 chars, optional)",
+  "directedTutorId": "string (optional — the tutor's User id; omit for a public request)"
 }
 ```
+- When `directedTutorId` is given, it must resolve to a real `STUDENT_TUTOR` with a `TutorProfile` (`400` otherwise); the request's `directedTutorProfileId` is set and that tutor gets a `TOPIC_REQUEST_DIRECTED` notification, in the same transaction as the create.
 
 **201** → the created request (same shape as the GET entries).
-**400** → invalid topic for subject, or validation error. **401** → not a learner. **403** → matching disabled.
+**400** → invalid topic for subject, invalid `directedTutorId`, or validation error. **401** → not a learner. **403** → matching disabled.
 **409** → `{ error }` when the learner already has 10 `OPEN` requests.
 **500** → `{ error }`.
 
 ### `PATCH /api/learner/topic-requests/[id]`
-Cancel one of the caller's own `OPEN` requests.
+Cancel one of the caller's own `OPEN` or `ACCEPTED` requests, or edit an `OPEN` request's criteria.
 
-**Body**: `{ "status": "CANCELLED" }` (the only accepted value).
+**Body**: `{ "status": "CANCELLED" }` to cancel — the only accepted value; edit uses the same body shape as `POST` (minus `directedTutorId`, which can't be changed after creation).
+- Cancelling an `ACCEPTED` request nulls `fulfilledClassId` — the class the tutor created is **kept**, just unlinked.
 
-**200** → `{ id, status: "CANCELLED" }`.
-**400** → body invalid, or the request isn't `OPEN`.
+**200** → `{ id, status }` (cancel) or the updated request (edit).
+**400** → body invalid, the request is in a terminal state (cancel), or not `OPEN` (edit).
 **401** → not a learner. **404** → request not found or not the caller's.
+**500** → `{ error }`.
+
+### `GET /api/notifications`
+The caller's own notifications, newest first, capped at 50. Any authenticated role (not gated to learners).
+
+**200** → `{ notifications: [{ id, type, message, link, readAt, createdAt }], unreadCount }`.
+**401** → not authenticated.
+**500** → `{ error }`.
+
+### `POST /api/notifications/read`
+Mark notifications read.
+
+**Body**: `{ "ids"?: string[] }` — omitted/empty marks **all** of the caller's unread notifications read; otherwise only the given ids.
+
+**200** → `{ unreadCount }`.
+**401** → not authenticated.
 **500** → `{ error }`.
 
 ### `PATCH /api/learner/profile`

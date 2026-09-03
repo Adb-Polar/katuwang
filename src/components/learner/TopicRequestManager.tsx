@@ -19,16 +19,19 @@ interface TopicRequest {
   subject: string;
   gradeLevel: string;
   note: string | null;
-  status: "OPEN" | "FULFILLED" | "CANCELLED";
+  status: "OPEN" | "ACCEPTED" | "ENROLLED" | "FULFILLED" | "CANCELLED";
   createdAt: string;
   topics: string[];
   slots: { day: string; startTime: string; endTime: string }[];
+  directedTo: { anonymousId: string } | null;
   fulfilledClass: { id: string; subject: string; nextSessionAt: string | null; tutorAnonymousId: string } | null;
 }
 
 const STATUS_TONE = {
-  OPEN: { tone: "info", label: "Open" },
-  FULFILLED: { tone: "success", label: "Class offered" },
+  OPEN: { tone: "info", label: "Waiting for a tutor" },
+  ACCEPTED: { tone: "success", label: "Class created" },
+  ENROLLED: { tone: "success", label: "Enrolled" },
+  FULFILLED: { tone: "neutral", label: "Completed" },
   CANCELLED: { tone: "neutral", label: "Cancelled" },
 } as const;
 
@@ -209,16 +212,21 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         </span>
                         <span className="text-base-content/50">{r.gradeLevel.replace("_", " ")}</span>
                         <StatusBadge tone={meta.tone} label={meta.label} size="xs" />
+                        <span className="badge badge-outline badge-sm text-2xs">
+                          {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}
+                        </span>
                       </div>
-                      {r.status === "OPEN" && !editing && (
+                      {!editing && (r.status === "OPEN" || r.status === "ACCEPTED") && (
                         <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            onClick={() => startEdit(r)}
-                            className="btn btn-ghost btn-xs text-2xs gap-1"
-                          >
-                            <Pencil className="h-3 w-3" />
-                            Edit
-                          </button>
+                          {r.status === "OPEN" && (
+                            <button
+                              onClick={() => startEdit(r)}
+                              className="btn btn-ghost btn-xs text-2xs gap-1"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              Edit
+                            </button>
+                          )}
                           <button
                             onClick={() => setCancelId(r.id)}
                             className="btn btn-ghost btn-xs text-error text-2xs"
@@ -286,10 +294,10 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                       </>
                     )}
 
-                    {r.status === "FULFILLED" && r.fulfilledClass && (
+                    {r.status === "ACCEPTED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
                         <span className="text-2xs text-base-content/70">
-                          {r.fulfilledClass.tutorAnonymousId} offered a class
+                          {r.fulfilledClass.tutorAnonymousId} created a class
                           {r.fulfilledClass.nextSessionAt
                             ? ` · next ${new Date(r.fulfilledClass.nextSessionAt).toLocaleDateString(undefined, {
                                 month: "short",
@@ -306,6 +314,24 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                           Review &amp; enroll
                         </Link>
                       </div>
+                    )}
+
+                    {r.status === "ENROLLED" && r.fulfilledClass && (
+                      <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
+                        <span className="text-2xs text-base-content/70">
+                          Enrolled with {r.fulfilledClass.tutorAnonymousId} — class in progress.
+                        </span>
+                        <Link
+                          href={`/learner/classes/${r.fulfilledClass.id}`}
+                          className="btn btn-ghost btn-xs text-2xs"
+                        >
+                          View class
+                        </Link>
+                      </div>
+                    )}
+
+                    {r.status === "FULFILLED" && (
+                      <p className="text-2xs text-base-content/40 italic">Completed ✓</p>
                     )}
 
                     <p className="text-2xs text-base-content/40">

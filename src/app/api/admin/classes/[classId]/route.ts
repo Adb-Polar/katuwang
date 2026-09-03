@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { updateClassStatusSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { computeExpiresAt } from "@/lib/moderation";
+import { notify } from "@/lib/notifications";
 
 // ─── PATCH: Suspend, Ban, or Reinstate a Class ─────────────────────────────────
 export async function PATCH(
@@ -80,6 +81,27 @@ export async function PATCH(
           reason: isModerated ? reason || null : null,
         },
       });
+
+      if (status === "BANNED") {
+        const linkedRequests = await tx.topicRequest.findMany({
+          where: { fulfilledClassId: classId, status: { in: ["ACCEPTED", "ENROLLED"] } },
+          select: { id: true, learnerId: true, subject: true },
+        });
+
+        for (const r of linkedRequests) {
+          await tx.topicRequest.update({
+            where: { id: r.id },
+            data: { status: "OPEN", fulfilledClassId: null },
+          });
+          await notify(
+            tx,
+            r.learnerId,
+            "TOPIC_REQUEST_REOPENED",
+            `Your ${r.subject} class was removed by an administrator. Your request is open again.`,
+            "/learner/requests"
+          );
+        }
+      }
 
       return updated;
     });

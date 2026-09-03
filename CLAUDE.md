@@ -18,7 +18,7 @@
 - database modification needs confirmation
 - tables should be normalize 3NF
 - every plan should be written on /docs/plans/{plan overview name}.md
-- All changes must be logged on Changes.txt
+- All changes must be logged on Changes.md
 - When a decision diverges from the thesis reference doc (a role, a feature, a scope cut), log it in `docs/reference/decisions.md` and update `docs/feature-checklist.md` in the same change — don't let them go stale
 ## 🚀 Common Commands
 

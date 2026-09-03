@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
 import { ArrowLeft, BadgeCheck, User } from "lucide-react";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
@@ -8,6 +10,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import ClassCard from "@/components/classes/ClassCard";
 import WeeklyScheduleView from "@/components/tutor/WeeklyScheduleView";
+import RequestTopicButton from "@/components/learner/RequestTopicButton";
 import { deriveWeeklyAvailability } from "@/lib/derivedAvailability";
 
 export const metadata = {
@@ -24,6 +27,10 @@ export default async function LearnerTutorProfilePage({
   await reinstateExpiredClasses();
 
   const showRealNames = await getSetting("showTutorRealNames");
+  const session = await getServerSession(authOptions);
+  const me = session
+    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { gradeLevel: true } })
+    : null;
 
   const tutor = await prisma.user.findFirst({
     where: { id: tutorId, role: "STUDENT_TUTOR" },
@@ -87,7 +94,17 @@ export default async function LearnerTutorProfilePage({
             ? "Real names are shown here because an administrator has enabled it."
             : "Learners and tutors never see each other's real names or contact details."
         }
-        actions={<AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />
+            <RequestTopicButton
+              tutorId={tutorId}
+              tutorAnonymousId={tutor.anonymousId}
+              defaultGrade={me?.gradeLevel ?? undefined}
+              verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
+            />
+          </div>
+        }
       />
 
       {showRealNames && (

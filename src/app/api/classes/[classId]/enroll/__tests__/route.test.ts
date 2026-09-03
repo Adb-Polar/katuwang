@@ -8,6 +8,7 @@ const {
   enrollmentFindUnique,
   enrollmentCreate,
   enrollmentDelete,
+  topicRequestUpdateMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorClassFindUnique: vi.fn(),
@@ -15,6 +16,7 @@ const {
   enrollmentFindUnique: vi.fn(),
   enrollmentCreate: vi.fn(),
   enrollmentDelete: vi.fn(),
+  topicRequestUpdateMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -31,6 +33,9 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: enrollmentFindUnique,
       create: enrollmentCreate,
       delete: enrollmentDelete,
+    },
+    topicRequest: {
+      updateMany: topicRequestUpdateMany,
     },
   },
 }));
@@ -60,6 +65,7 @@ describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
+    topicRequestUpdateMany.mockResolvedValue({ count: 0 });
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {
@@ -164,6 +170,10 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(enrollmentCreate).toHaveBeenCalledWith({
       data: { classId: "c1", learnerId: "l1" },
     });
+    expect(topicRequestUpdateMany).toHaveBeenCalledWith({
+      where: { fulfilledClassId: "c1", learnerId: "l1", status: "ACCEPTED" },
+      data: { status: "ENROLLED" },
+    });
   });
 });
 
@@ -220,5 +230,9 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
     const res = await DELETE(makeRequest("DELETE"), makeParams());
     expect(res.status).toBe(200);
     expect(enrollmentDelete).toHaveBeenCalledWith({ where: { id: "e1" } });
+    expect(topicRequestUpdateMany).toHaveBeenCalledWith({
+      where: { fulfilledClassId: "c1", learnerId: "l1", status: "ENROLLED" },
+      data: { status: "ACCEPTED" },
+    });
   });
 });

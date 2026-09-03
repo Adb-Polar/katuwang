@@ -70,6 +70,11 @@ export async function POST(
       data: { classId, learnerId: session.user.id },
     });
 
+    await prisma.topicRequest.updateMany({
+      where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" },
+      data: { status: "ENROLLED" },
+    });
+
     return NextResponse.json(enrollment, { status: 201 });
   } catch (error) {
     console.error("Error enrolling in class:", error);
@@ -121,6 +126,11 @@ export async function DELETE(
 
     await prisma.classEnrollment.delete({
       where: { id: existingEnrollment.id },
+    });
+
+    await prisma.topicRequest.updateMany({
+      where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" },
+      data: { status: "ACCEPTED" },
     });
 
     return NextResponse.json({ message: "Unenrolled successfully." });

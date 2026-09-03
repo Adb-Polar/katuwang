@@ -26,6 +26,7 @@ export default async function AdminDashboard() {
     pendingCertCount,
     pendingRegistrationCount,
     openQuestionRequestCount,
+    openTopicRequestCount,
     recentLogs,
   ] =
     await Promise.all([
@@ -36,6 +37,7 @@ export default async function AdminDashboard() {
       prisma.topicCertification.count({ where: { status: "PENDING" } }),
       prisma.user.count({ where: { status: "PENDING" } }),
       prisma.questionRequest.count({ where: { status: "OPEN" } }),
+      prisma.topicRequest.count({ where: { status: "OPEN" } }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: "desc" },
         take: 8,
@@ -54,6 +56,7 @@ export default async function AdminDashboard() {
     { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations" },
     { label: "Pending certifications", value: pendingCertCount, href: "/admin/certifications" },
     { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/question-bank" },
+    { label: "Open topic requests", value: openTopicRequestCount, href: "/admin/topic-requests" },
     { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users" },
     { label: "Active classes", value: activeClassCount, href: "/admin/classes" },
   ];

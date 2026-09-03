@@ -9,9 +9,9 @@ import {
 } from "@/lib/validations/match";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
 
-// ─── PATCH: Cancel or edit one's own OPEN topic request ─────────────────────
-//   { status: "CANCELLED" }                                  → cancel
-//   { subject, topics, gradeLevel, preferredSlots?, note? }  → edit criteria
+// ─── PATCH: Cancel or edit one's own topic request ───────────────────────────
+//   { status: "CANCELLED" }                                  → cancel (from OPEN or ACCEPTED)
+//   { subject, topics, gradeLevel, preferredSlots?, note? }  → edit criteria (OPEN only)
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -45,24 +45,30 @@ export async function PATCH(
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
     }
 
-    if (existing.status !== "OPEN") {
-      return NextResponse.json(
-        { error: `Only an open request can be ${isCancel ? "cancelled" : "edited"}.` },
-        { status: 400 }
-      );
-    }
-
     // ── Cancel ──────────────────────────────────────────────────────────────
     if (isCancel) {
+      if (existing.status !== "OPEN" && existing.status !== "ACCEPTED") {
+        return NextResponse.json(
+          { error: "Only an open or accepted request can be cancelled." },
+          { status: 400 }
+        );
+      }
       const updated = await prisma.topicRequest.update({
         where: { id },
-        data: { status: "CANCELLED" },
+        data: { status: "CANCELLED", fulfilledClassId: null },
         select: { id: true, status: true },
       });
       return NextResponse.json(updated);
     }
 
-    // ── Edit criteria ───────────────────────────────────────────────────────
+    // ── Edit criteria (OPEN only) ───────────────────────────────────────────
+    if (existing.status !== "OPEN") {
+      return NextResponse.json(
+        { error: "Only an open request can be edited." },
+        { status: 400 }
+      );
+    }
+
     const { subject, topics, gradeLevel, preferredSlots, note } =
       parsed.data as CreateTopicRequestInput;
 

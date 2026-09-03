@@ -12,6 +12,49 @@ Format: newest first.
 
 ---
 
+## Learner pre-/post-test assessment exists — on an unmerged branch
+
+**Status:** Not a divergence — this is a "don't re-derive from scratch" note.
+`docs/feature-checklist.md` previously said the learner pre-/post-test
+assessment (thesis module 4) was entirely unbuilt. That was true of `main`
+but not of the repo: it's fully built and committed on branch
+`class-pre-post-tests` (commit `1b6662c`, "Add class pre/post tests
+(tutor-built, learner-taken)") — `ClassTest`/`ClassTestQuestion`/
+`ClassTestAttempt(+Item)` models, a tutor test-builder UI, learner
+take/resume/review flow, admin read-only results, and pre→post score-gain
+reporting. It has its own committed migration
+(`prisma/migrations/20260902081727_class_pre_post_tests/`).
+
+**Implication for agents:** before telling someone this feature needs to be
+built, check `git log --all --oneline | grep -i "pre.post"` / `git branch -a`
+first — it may already exist unmerged. Don't duplicate the work.
+
+---
+
+## Topic-requests-v2 rollout caused local dev-DB drift cleanup (2026-09-03)
+
+**What happened:** while implementing `docs/plans/topic-requests-v2.md`, the
+build agent found the shared local dev database (`katuwang_db`) had drift
+from the `class-pre-post-tests` branch above — its `ClassTest*` tables and
+two `assessment_questions` columns had been applied directly to the DB
+outside a tracked migration on `main`. Reconciling schema drift via
+`prisma migrate diff` against `main`'s `schema.prisma` **dropped those 4
+stray tables and 2 stray columns** from the live local DB as a side effect.
+
+**Why this is not data loss:** that branch's code and its own migration file
+are untouched in git — checking it out and running `prisma migrate deploy`
++ reseeding fully restores the schema. Only ephemeral local dev/test data in
+those tables was lost, not anything committed.
+
+**Why this note exists:** the project owner said "acknowledge and move on"
+when this was reported (2026-09-03), i.e. no action needed — but a DB
+schema change of that shape (dropping tables outside the plan being
+executed) should be confirmed with a human *before* it happens, not reported
+after. If you find drift like this again, stop and ask rather than
+resolving it unilaterally, even mid-task.
+
+---
+
 ## 3 roles only — "Teacher Moderator" dropped
 
 **Decision:** The platform ships with exactly 3 user roles —

@@ -726,6 +726,17 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
       if (hand.length === 0 && perTopic === 0) continue;
 
       // Re-runnable: clear this topic's questions first (cascades to options).
+      // A question already used in an AssessmentAttemptItem is FK-locked, so
+      // clear those attempt items first (the attempt row itself is untouched).
+      const staleQuestions = await prisma.assessmentQuestion.findMany({
+        where: { subject, topic },
+        select: { id: true },
+      });
+      if (staleQuestions.length > 0) {
+        await prisma.assessmentAttemptItem.deleteMany({
+          where: { questionId: { in: staleQuestions.map((q) => q.id) } },
+        });
+      }
       await prisma.assessmentQuestion.deleteMany({ where: { subject, topic } });
 
       const questions = [
@@ -919,6 +930,149 @@ async function main() {
     }
   }
 
+  // ── Curated demo topic requests + notifications (always created, independent
+  // of the SEED_TOPIC_REQUESTS knob) — gives the tutor "Accepted by me" tab and
+  // the admin moderation page real data out of the box. Also clears any
+  // leftover Notification rows for seeded users so this script is re-runnable.
+  await prisma.notification.deleteMany({ where: { userId: { in: [...allLearnerIds, ...Object.values(tutorUsers).map((u) => u.id)] } } });
+
+  // 1) A directed OPEN request: Juan → Maria (MATH, certified in "Algebraic Expressions").
+  //    Maria gets a TOPIC_REQUEST_DIRECTED notification.
+  const juan = learnerUsers["juan.delacruz@katuwang.test"];
+  const maria = tutorUsers["maria.santos@katuwang.test"];
+  const mariaProfile = tutorProfiles["maria.santos@katuwang.test"];
+  if (juan && maria && mariaProfile) {
+    await prisma.topicRequest.create({
+      data: {
+        learnerId: juan.id,
+        subject: "MATH",
+        gradeLevel: juan.gradeLevel,
+        note: "Struggling with distributing and combining like terms.",
+        status: "OPEN",
+        directedTutorProfileId: mariaProfile.id,
+        topics: { create: [{ topic: "Algebraic Expressions" }] },
+        slots: { create: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }] },
+      },
+    });
+    await prisma.notification.create({
+      data: {
+        userId: maria.id,
+        type: "TOPIC_REQUEST_DIRECTED",
+        message: `${juan.anonymousId} directed a topic request to you (MATH).`,
+        link: "/tutor/requests",
+      },
+    });
+  }
+
+  // 2) An ACCEPTED request: Carla asks jose.reyes (ENGLISH), who creates a class for it.
+  //    Carla is not enrolled yet — she sees "Review & enroll".
+  const carla = learnerUsers["carla.mendoza@katuwang.test"];
+  const jose = tutorUsers["jose.reyes@katuwang.test"];
+  const joseProfile = tutorProfiles["jose.reyes@katuwang.test"];
+  if (carla && jose && joseProfile) {
+    const acceptedClass = await prisma.tutorClass.create({
+      data: {
+        tutorProfileId: joseProfile.id,
+        code: nextClassCode(),
+        subject: "ENGLISH",
+        gradeLevel: carla.gradeLevel,
+        description: "Created from Carla's topic request.",
+        maxStudents: 3,
+        status: "SCHEDULED",
+        published: true,
+        topics: { create: [{ topic: "Essay & Paragraph Writing" }] },
+        sessions: { create: [{ topic: "Essay & Paragraph Writing", scheduledAt: inDays(4, 14), duration: 60 }] },
+      },
+    });
+    await prisma.topicRequest.create({
+      data: {
+        learnerId: carla.id,
+        subject: "ENGLISH",
+        gradeLevel: carla.gradeLevel,
+        note: "Need help structuring a 5-paragraph essay.",
+        status: "ACCEPTED",
+        fulfilledClassId: acceptedClass.id,
+        topics: { create: [{ topic: "Essay & Paragraph Writing" }] },
+      },
+    });
+    await prisma.notification.create({
+      data: {
+        userId: carla.id,
+        type: "TOPIC_REQUEST_ACCEPTED",
+        message: "A tutor created a class for your ENGLISH request. Review it and enroll.",
+        link: `/learner/classes/${acceptedClass.id}`,
+      },
+    });
+  }
+
+  // 3) An ENROLLED request: Miguel asks paolo.garcia (SCIENCE), accepted AND enrolled.
+  const miguel = learnerUsers["miguel.torres@katuwang.test"];
+  const paolo = tutorUsers["paolo.garcia@katuwang.test"];
+  const paoloProfile = tutorProfiles["paolo.garcia@katuwang.test"];
+  if (miguel && paolo && paoloProfile) {
+    const enrolledClass = await prisma.tutorClass.create({
+      data: {
+        tutorProfileId: paoloProfile.id,
+        code: nextClassCode(),
+        subject: "SCIENCE",
+        gradeLevel: miguel.gradeLevel,
+        description: "Created from Miguel's topic request.",
+        maxStudents: 2,
+        status: "SCHEDULED",
+        published: true,
+        topics: { create: [{ topic: "Chemical Reactions & Matter" }] },
+        sessions: { create: [{ topic: "Chemical Reactions & Matter", scheduledAt: inDays(2, 13), duration: 60 }] },
+        enrollments: { create: [{ learnerId: miguel.id }] },
+      },
+    });
+    await prisma.topicRequest.create({
+      data: {
+        learnerId: miguel.id,
+        subject: "SCIENCE",
+        gradeLevel: miguel.gradeLevel,
+        note: "Want to review balancing chemical equations.",
+        status: "ENROLLED",
+        fulfilledClassId: enrolledClass.id,
+        topics: { create: [{ topic: "Chemical Reactions & Matter" }] },
+      },
+    });
+    await prisma.notification.create({
+      data: {
+        userId: miguel.id,
+        type: "TOPIC_REQUEST_ACCEPTED",
+        message: "A tutor created a class for your SCIENCE request. Review it and enroll.",
+        link: `/learner/classes/${enrolledClass.id}`,
+        readAt: new Date(),
+      },
+    });
+  }
+
+  // A couple of extra read/unread notifications so the demo learner/tutor
+  // notification pages aren't empty even without the accept/direct flows above.
+  const demoLearner = learnerUsers["demo@learner.test"];
+  const demoTutor = tutorUsers["demo@tutor.test"];
+  if (demoLearner) {
+    await prisma.notification.create({
+      data: {
+        userId: demoLearner.id,
+        type: "TOPIC_REQUEST_REOPENED",
+        message: "Your MATH topic request is open again — the linked class was cancelled.",
+        link: "/learner/requests",
+      },
+    });
+  }
+  if (demoTutor) {
+    await prisma.notification.create({
+      data: {
+        userId: demoTutor.id,
+        type: "TOPIC_REQUEST_DIRECTED",
+        message: "A learner directed a topic request to you.",
+        link: "/tutor/requests",
+        readAt: new Date(),
+      },
+    });
+  }
+
   // Keep the "CLASS" counter ahead of every seeded code so API-created classes continue the sequence.
   await prisma.idCounter.upsert({
     where: { role: "CLASS" },
@@ -934,6 +1088,12 @@ async function main() {
     const topics = rand.sample(SUBJECT_TOPICS[subject], rand.int(1, 3));
     const slotDays = rand.sample(WEEKDAYS, rand.int(0, 3));
 
+    // ~10% of requests are directed at one specific tutor certified in this subject.
+    const directedCandidates = Object.entries(tutorProfiles).filter(([email]) =>
+      (certifiedByProfile.get(tutorProfiles[email].id) ?? []).some((c) => c.subject === subject)
+    );
+    const directed = rand.chance(0.1) && directedCandidates.length > 0 ? rand.pick(directedCandidates) : undefined;
+
     // ~12% of requests are already answered with a matching-subject class.
     const match = rand.chance(0.12)
       ? scheduledClasses.find((c) => c.subject === subject)
@@ -947,6 +1107,7 @@ async function main() {
         note: rand.chance(0.4) ? rand.pick(REQUEST_NOTES) : null,
         status: match ? "FULFILLED" : "OPEN",
         fulfilledClassId: match?.id ?? null,
+        directedTutorProfileId: match ? null : directed?.[1].id ?? null,
         topics: { create: topics.map((topic) => ({ topic })) },
         slots: {
           create: slotDays.map((day) => {

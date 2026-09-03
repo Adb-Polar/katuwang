@@ -1,17 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, UserCircle } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, Bell, UserCircle } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
-
-const LEARNER_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/learner", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
-  { label: "Browse Classes", href: "/learner/classes", icon: <BookOpen className="w-4 h-4" />, group: "Main menu" },
-  { label: "My Classes", href: "/learner/my-classes", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
-  { label: "Auto Match", href: "/learner/match", icon: <Sparkles className="w-4 h-4" />, group: "Tools" },
-  { label: "My Requests", href: "/learner/requests", icon: <Inbox className="w-4 h-4" />, group: "Tools" },
-  { label: "Profile", href: "/learner/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
-];
 
 export default async function LearnerLayout({
   children,
@@ -27,6 +19,20 @@ export default async function LearnerLayout({
   if (session.user.role !== "STUDENT_LEARNER") {
     redirect("/unauthorized");
   }
+
+  const unreadCount = await prisma.notification.count({
+    where: { userId: session.user.id, readAt: null },
+  });
+
+  const LEARNER_NAV_ITEMS: NavItem[] = [
+    { label: "Dashboard", href: "/learner", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
+    { label: "Browse Classes", href: "/learner/classes", icon: <BookOpen className="w-4 h-4" />, group: "Main menu" },
+    { label: "My Classes", href: "/learner/my-classes", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
+    { label: "Auto Match", href: "/learner/match", icon: <Sparkles className="w-4 h-4" />, group: "Tools" },
+    { label: "My Requests", href: "/learner/requests", icon: <Inbox className="w-4 h-4" />, group: "Tools" },
+    { label: "Notifications", href: "/learner/notifications", icon: <Bell className="w-4 h-4" />, group: "Tools", badge: unreadCount },
+    { label: "Profile", href: "/learner/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
+  ];
 
   return (
     <PortalLayout

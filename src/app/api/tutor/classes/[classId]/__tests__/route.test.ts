@@ -7,14 +7,22 @@ const {
   tutorProfileFindUnique,
   classUpdate,
   classFindMany,
+  classDelete,
   sessionUpdateMany,
+  topicRequestFindMany,
+  topicRequestUpdate,
+  notificationCreate,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
   classUpdate: vi.fn(),
   classFindMany: vi.fn(),
+  classDelete: vi.fn(),
   sessionUpdateMany: vi.fn(),
+  topicRequestFindMany: vi.fn(),
+  topicRequestUpdate: vi.fn(),
+  notificationCreate: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -27,13 +35,15 @@ vi.mock("@/lib/prisma", () => ({
     tutorProfile: { findUnique: tutorProfileFindUnique },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        tutorClass: { update: classUpdate },
+        tutorClass: { update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
+        topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
+        notification: { create: notificationCreate },
       }),
   },
 }));
 
-import { PATCH } from "@/app/api/tutor/classes/[classId]/route";
+import { PATCH, DELETE } from "@/app/api/tutor/classes/[classId]/route";
 
 function makeRequest(body: unknown) {
   return new NextRequest("http://localhost/api/tutor/classes/c1", {
@@ -51,6 +61,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionUpdateMany.mockResolvedValue({ count: 0 });
+    topicRequestFindMany.mockResolvedValue([]);
   });
 
   it("returns 403 when the class was suspended by an admin", async () => {
@@ -226,5 +237,80 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     const res = await patch({ description: "Updated description" });
     expect(res.status).toBe(200);
     expect(sessionUpdateMany).not.toHaveBeenCalled();
+  });
+
+  it("COMPLETED cascades linked ACCEPTED/ENROLLED topic requests to FULFILLED and notifies the learner", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "SCHEDULED",
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classUpdate.mockResolvedValue({ id: "c1", status: "COMPLETED", topics: [], sessions: [] });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+
+    const res = await patch({ status: "COMPLETED" });
+    expect(res.status).toBe(200);
+    expect(topicRequestUpdate).toHaveBeenCalledWith({ where: { id: "r1" }, data: { status: "FULFILLED" } });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_FULFILLED" }) })
+    );
+  });
+
+  it("CANCELLED cascades linked ACCEPTED/ENROLLED topic requests back to OPEN, unlinks, and notifies", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "SCHEDULED",
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classUpdate.mockResolvedValue({ id: "c1", status: "CANCELLED", topics: [], sessions: [] });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+
+    const res = await patch({ status: "CANCELLED" });
+    expect(res.status).toBe(200);
+    expect(topicRequestUpdate).toHaveBeenCalledWith({
+      where: { id: "r1" },
+      data: { status: "OPEN", fulfilledClassId: null },
+    });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
+    );
+  });
+});
+
+describe("DELETE /api/tutor/classes/[classId]", () => {
+  function del(classId = "c1") {
+    return DELETE(new NextRequest("http://localhost/api/tutor/classes/c1", { method: "DELETE" }), {
+      params: Promise.resolve({ classId }),
+    });
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    topicRequestFindMany.mockResolvedValue([]);
+  });
+
+  it("re-opens a linked ACCEPTED request before deleting the class", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+    classDelete.mockResolvedValue({ id: "c1" });
+
+    const res = await del();
+    expect(res.status).toBe(200);
+    expect(topicRequestUpdate).toHaveBeenCalledWith({
+      where: { id: "r1" },
+      data: { status: "OPEN", fulfilledClassId: null },
+    });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
+    );
+    expect(classDelete).toHaveBeenCalledWith({ where: { id: "c1" } });
   });
 });

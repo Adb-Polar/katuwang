@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { classDetailsSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
+import { notify } from "@/lib/notifications";
 
 
 export async function PATCH(
@@ -118,7 +119,7 @@ export async function PATCH(
         });
       }
 
-      return tx.tutorClass.update({
+      const result = await tx.tutorClass.update({
         where: { id: classId },
         data: {
           ...updates,
@@ -129,6 +130,41 @@ export async function PATCH(
         },
         include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
       });
+
+      // Cascade to any topic request that was accepted into this class.
+      if (newStatus === "COMPLETED" || newStatus === "CANCELLED") {
+        const linkedRequests = await tx.topicRequest.findMany({
+          where: { fulfilledClassId: classId, status: { in: ["ACCEPTED", "ENROLLED"] } },
+          select: { id: true, learnerId: true, subject: true },
+        });
+
+        for (const r of linkedRequests) {
+          if (newStatus === "COMPLETED") {
+            await tx.topicRequest.update({ where: { id: r.id }, data: { status: "FULFILLED" } });
+            await notify(
+              tx,
+              r.learnerId,
+              "TOPIC_REQUEST_FULFILLED",
+              `Your ${r.subject} class was completed.`,
+              `/learner/classes/${classId}`
+            );
+          } else {
+            await tx.topicRequest.update({
+              where: { id: r.id },
+              data: { status: "OPEN", fulfilledClassId: null },
+            });
+            await notify(
+              tx,
+              r.learnerId,
+              "TOPIC_REQUEST_REOPENED",
+              `Your ${r.subject} class was cancelled. Your request is open again.`,
+              "/learner/requests"
+            );
+          }
+        }
+      }
+
+      return result;
     });
 
     return NextResponse.json({
@@ -186,8 +222,27 @@ export async function DELETE(
       );
     }
 
-    await prisma.tutorClass.delete({
-      where: { id: classId },
+    await prisma.$transaction(async (tx) => {
+      const linkedRequests = await tx.topicRequest.findMany({
+        where: { fulfilledClassId: classId, status: "ACCEPTED" },
+        select: { id: true, learnerId: true, subject: true },
+      });
+
+      for (const r of linkedRequests) {
+        await tx.topicRequest.update({
+          where: { id: r.id },
+          data: { status: "OPEN", fulfilledClassId: null },
+        });
+        await notify(
+          tx,
+          r.learnerId,
+          "TOPIC_REQUEST_REOPENED",
+          `Your ${r.subject} class was cancelled. Your request is open again.`,
+          "/learner/requests"
+        );
+      }
+
+      await tx.tutorClass.delete({ where: { id: classId } });
     });
 
     return NextResponse.json({ message: "Class deleted successfully." });

@@ -68,8 +68,10 @@ enum SessionStatus {
 
 enum TopicRequestStatus {
   OPEN // Awaiting a tutor response
-  FULFILLED // A tutor has attached a class for this request
-  CANCELLED // Withdrawn by the learner
+  ACCEPTED // A tutor created a class for this request; learner not yet enrolled
+  ENROLLED // The learner enrolled in the created class
+  FULFILLED // The created class was completed
+  CANCELLED // Withdrawn by the learner or closed by an admin
 }
 
 enum AssessmentAttemptStatus {
@@ -124,6 +126,8 @@ model User {
   updatedAssessmentConfigs TopicAssessmentConfig[] @relation("UpdatedAssessmentConfigs")
   resolvedQuestionRequests QuestionRequest[]       @relation("ResolvedQuestionRequests")
 
+  notifications Notification[]
+
   @@map("users")
 }
 
@@ -161,6 +165,9 @@ model TutorProfile {
   // Quiz attempts and "please add questions" requests
   assessmentAttempts AssessmentAttempt[]
   questionRequests   QuestionRequest[]
+
+  // Topic requests directed specifically at this tutor
+  directedTopicRequests TopicRequest[] @relation("DirectedTopicRequests")
 
   @@map("tutor_profiles")
 }
@@ -274,22 +281,25 @@ model ClassEnrollment {
 // Topics and preferred time slots are child rows (3NF), mirroring ClassTopic and Availability.
 
 model TopicRequest {
-  id               String             @id @default(cuid())
-  learnerId        String
-  learner          User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
-  subject          SubjectArea
-  gradeLevel       GradeLevel
-  note             String?            @db.Text
-  status           TopicRequestStatus @default(OPEN)
-  fulfilledClassId String?
-  fulfilledClass   TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
+  id                      String             @id @default(cuid())
+  learnerId               String
+  learner                 User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
+  subject                 SubjectArea
+  gradeLevel              GradeLevel
+  note                    String?            @db.Text
+  status                  TopicRequestStatus @default(OPEN)
+  fulfilledClassId        String?
+  fulfilledClass          TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
+  directedTutorProfileId  String?
+  directedTutor           TutorProfile?      @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id], onDelete: SetNull)
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
 
   topics TopicRequestTopic[]
   slots  TopicRequestSlot[]
 
   @@index([status, subject])
+  @@index([directedTutorProfileId, status])
   @@map("topic_requests")
 }
 
@@ -457,4 +467,20 @@ model QuestionRequest {
   @@unique([tutorProfileId, subject, topic])
   @@index([status, subject])
   @@map("question_requests")
+}
+
+// ─── Notification (per-user, DB-backed) ────────────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String // TOPIC_REQUEST_DIRECTED | TOPIC_REQUEST_ACCEPTED | TOPIC_REQUEST_REOPENED | TOPIC_REQUEST_FULFILLED
+  message   String    @db.Text
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@map("notifications")
 }
