@@ -79,9 +79,9 @@ Two tabs on one page:
 
 ## Notifications (`/tutor/notifications`)
 
-- A **Notifications** sidebar item (bell icon) shows an unread-count badge, sourced from `Notification` rows addressed to you.
-- The page lists every notification, newest first (icon by type, message, relative time, unread dot), each linking to the relevant page (e.g. `/tutor/requests` for a newly-directed request). Visiting the page marks everything read; a "Mark all read" button does the same on demand.
-- Notification types you'll see: `TOPIC_REQUEST_DIRECTED` (a learner directed a request specifically at you).
+- A **Notifications** sidebar item (bell icon) shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both refresh on navigation.
+- The page (and the dropdown) list notifications newest first (icon by type, message, relative time, unread dot). Clicking a row marks **just that one** read and follows its link if it has one; a "Mark all read" button clears the rest.
+- Notification types you'll see: `TOPIC_REQUEST_DIRECTED` (a learner directed a request specifically at you), `CERTIFICATION_CERTIFIED` / `CERTIFICATION_REJECTED` (an admin reviewed your topic certification — links to `/tutor/assessments`), `QUESTION_REQUEST_RESOLVED` / `QUESTION_REQUEST_DISMISSED` (an admin acted on your "please add questions" request), `CLASS_ENROLLMENT_NEW` / `CLASS_ENROLLMENT_DROPPED` (a learner, shown by `STU-xxxx`, joined or left one of your classes).
   (`GET /api/notifications`, `POST /api/notifications/read`)
 
 ## Availability (auto-derived)
@@ -273,7 +273,7 @@ Aggregate roster of every distinct learner enrolled in any of the tutor's classe
 > rows whenever the dashboard or a learner tutor-profile page renders.
 
 ### `GET /api/notifications`
-The caller's own notifications, newest first, capped at 50. Any authenticated role (not gated to tutors).
+The caller's own notifications, newest first, capped at 50. Optional `?take=N` clamps the page size to `1..50` (the topbar bell dropdown uses `?take=8`). Any authenticated role (not gated to tutors).
 
 **200** → `{ notifications: [{ id, type, message, link, readAt, createdAt }], unreadCount }`.
 **401** → not authenticated.

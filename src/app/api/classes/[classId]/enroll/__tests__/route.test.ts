@@ -9,6 +9,7 @@ const {
   enrollmentCreate,
   enrollmentDelete,
   topicRequestUpdateMany,
+  notificationCreate,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorClassFindUnique: vi.fn(),
@@ -17,6 +18,7 @@ const {
   enrollmentCreate: vi.fn(),
   enrollmentDelete: vi.fn(),
   topicRequestUpdateMany: vi.fn(),
+  notificationCreate: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -37,6 +39,15 @@ vi.mock("@/lib/prisma", () => ({
     topicRequest: {
       updateMany: topicRequestUpdateMany,
     },
+    notification: {
+      create: notificationCreate,
+    },
+    $transaction: (fn: (tx: unknown) => unknown) =>
+      fn({
+        classEnrollment: { create: enrollmentCreate, delete: enrollmentDelete },
+        topicRequest: { updateMany: topicRequestUpdateMany },
+        notification: { create: notificationCreate },
+      }),
   },
 }));
 
@@ -52,6 +63,8 @@ function makeParams(classId = "c1") {
 
 const futureClass = {
   id: "c1",
+  code: "C-0001",
+  subject: "MATH",
   status: "SCHEDULED",
   published: true,
   sessions: [
@@ -59,7 +72,10 @@ const futureClass = {
   ],
   maxStudents: 2,
   _count: { enrollments: 0 },
+  tutorProfile: { userId: "tutorU1" },
 };
+
+const learner = { user: { id: "l1", role: "STUDENT_LEARNER", anonymousId: "STU-0001" } };
 
 describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
@@ -159,8 +175,8 @@ describe("POST /api/classes/[classId]/enroll", () => {
     );
   });
 
-  it("returns 201 on successful enrollment", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
+  it("returns 201 on successful enrollment and notifies the tutor", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
     tutorClassFindUnique.mockResolvedValue(futureClass);
     enrollmentFindUnique.mockResolvedValue(null);
     enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
@@ -174,6 +190,9 @@ describe("POST /api/classes/[classId]/enroll", () => {
       where: { fulfilledClassId: "c1", learnerId: "l1", status: "ACCEPTED" },
       data: { status: "ENROLLED" },
     });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "tutorU1", type: "CLASS_ENROLLMENT_NEW" }) })
+    );
   });
 });
 
@@ -221,8 +240,8 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
     expect(enrollmentDelete).not.toHaveBeenCalled();
   });
 
-  it("returns 200 on successful unenrollment", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
+  it("returns 200 on successful unenrollment and notifies the tutor", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
     tutorClassFindUnique.mockResolvedValue(futureClass);
     enrollmentFindUnique.mockResolvedValue({ id: "e1" });
     enrollmentDelete.mockResolvedValue({ id: "e1" });
@@ -234,5 +253,8 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
       where: { fulfilledClassId: "c1", learnerId: "l1", status: "ENROLLED" },
       data: { status: "ACCEPTED" },
     });
+    expect(notificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "tutorU1", type: "CLASS_ENROLLMENT_DROPPED" }) })
+    );
   });
 });

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { updateClassStatusSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { computeExpiresAt } from "@/lib/moderation";
-import { notify } from "@/lib/notifications";
+import { notify, notifyMany } from "@/lib/notifications";
 
 // ─── PATCH: Suspend, Ban, or Reinstate a Class ─────────────────────────────────
 export async function PATCH(
@@ -101,6 +101,24 @@ export async function PATCH(
             "/learner/requests"
           );
         }
+
+        // Notify every other enrolled learner (browse-enrolled, not request-linked).
+        const linkedLearnerIds = new Set(linkedRequests.map((r) => r.learnerId));
+        const enrolments = await tx.classEnrollment.findMany({
+          where: { classId },
+          select: { learnerId: true },
+        });
+        const targets = enrolments
+          .map((e) => e.learnerId)
+          .filter((id) => !linkedLearnerIds.has(id));
+
+        await notifyMany(
+          tx,
+          targets,
+          "CLASS_CANCELLED",
+          `Your ${updated.subject} class (${updated.code}) was removed by an administrator.`,
+          "/learner/my-classes"
+        );
       }
 
       return updated;

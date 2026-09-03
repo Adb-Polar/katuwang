@@ -1,8 +1,8 @@
-import type { TopicAssessmentConfig } from "@prisma/client";
-
 /**
- * Global fallback tuning for a topic assessment, used whenever no
- * TopicAssessmentConfig row exists for a (subject, topic) pair.
+ * Platform-wide fallback tuning for topic assessments. The live values are
+ * stored as `PlatformSetting` rows and read via `getAssessmentConfig()` in
+ * `src/lib/settings.ts`; these are the defaults used when a row is missing or
+ * unparseable.
  */
 export const ASSESSMENT_DEFAULTS = {
   questionCount: 5, // questions served per attempt
@@ -18,14 +18,3 @@ export type ResolvedTopicConfig = {
   passPercent: number;
   minBankSize: number;
 };
-
-/** Merge a TopicAssessmentConfig row (or null) with the global defaults. */
-export function resolveTopicConfig(
-  row: Pick<TopicAssessmentConfig, "questionCount" | "passPercent" | "minBankSize"> | null
-): ResolvedTopicConfig {
-  return {
-    questionCount: row?.questionCount ?? ASSESSMENT_DEFAULTS.questionCount,
-    passPercent: row?.passPercent ?? ASSESSMENT_DEFAULTS.passPercent,
-    minBankSize: row?.minBankSize ?? ASSESSMENT_DEFAULTS.minBankSize,
-  };
-}

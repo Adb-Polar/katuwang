@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import DevLoginBoard, { type DevUser } from "@/components/dev/DevLoginBoard";
@@ -34,12 +35,17 @@ export default async function DevLoginPage() {
   return (
     <div className="min-h-screen bg-base-200 p-6">
       <div className="mx-auto max-w-8xl space-y-4">
-        <div>
-          <h1 className="font-serif text-2xl font-semibold text-base-content">Dev Quick Login</h1>
-          <p className="text-xs text-base-content/60">
-            Click any account to sign in as them. Not available in production. Password used:{" "}
-            <code className="rounded bg-base-300 px-1">{DEV_PASSWORD}</code>
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="font-serif text-2xl font-semibold text-base-content">Dev Quick Login</h1>
+            <p className="text-xs text-base-content/60">
+              Click any account to sign in as them. Not available in production. Password used:{" "}
+              <code className="rounded bg-base-300 px-1">{DEV_PASSWORD}</code>
+            </p>
+          </div>
+          <Link href="/dev" className="btn btn-outline btn-sm shrink-0">
+            ← Data Factory
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">

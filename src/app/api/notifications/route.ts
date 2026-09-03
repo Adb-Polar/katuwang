@@ -6,7 +6,8 @@ import { prisma } from "@/lib/prisma";
 const MAX_NOTIFICATIONS = 50;
 
 // ─── GET: The caller's own notifications, newest first ──────────────────────
-export async function GET() {
+//   ?take=N  — clamp the page size (1..MAX_NOTIFICATIONS); the bell dropdown asks for 8
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -14,11 +15,17 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
+    const takeParam = Number(new URL(req.url).searchParams.get("take"));
+    const take =
+      Number.isFinite(takeParam) && takeParam > 0
+        ? Math.min(Math.floor(takeParam), MAX_NOTIFICATIONS)
+        : MAX_NOTIFICATIONS;
+
     const [notifications, unreadCount] = await Promise.all([
       prisma.notification.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
-        take: MAX_NOTIFICATIONS,
+        take,
       }),
       prisma.notification.count({
         where: { userId: session.user.id, readAt: null },

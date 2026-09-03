@@ -41,6 +41,8 @@ export default async function TutorLayout({
       portalLabel="Tutor Portal"
       accent="accent"
       idRole="TUTOR"
+      unreadCount={unreadCount}
+      notificationsHref="/tutor/notifications"
     >
       {children}
     </PortalLayout>

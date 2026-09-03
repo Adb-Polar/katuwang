@@ -143,7 +143,7 @@ describe("auth authorize()", () => {
     expect(userUpdate).not.toHaveBeenCalled();
   });
 
-  it("throws when the account is awaiting approval", async () => {
+  it("throws the ACCOUNT_PENDING sentinel when the account is awaiting approval", async () => {
     userFindUnique.mockResolvedValue({
       id: "1",
       email: "juan@example.com",
@@ -158,7 +158,7 @@ describe("auth authorize()", () => {
 
     await expect(
       authorize({ email: "juan@example.com", password: "password123" })
-    ).rejects.toThrow(/awaiting admin approval/i);
+    ).rejects.toThrow("ACCOUNT_PENDING");
   });
 
   it("throws when the account is banned", async () => {

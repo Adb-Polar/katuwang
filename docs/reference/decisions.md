@@ -100,6 +100,27 @@ dated "resolved" note or delete it) and `docs/feature-checklist.md` together.
 
 ---
 
+## Notification system — scoped out of the 2026-09-04 expansion
+
+The notification expansion (Changes.md Part 18) deliberately did **not** build:
+
+- **Session reminders** ("your class starts in 1h") — needs a scheduler /
+  cron / queue. The app has no such infrastructure (no polling, no SSE, no
+  background jobs) and no request-driven trigger point.
+- **Assessment-unlocked** ("a topic you requested now has enough questions")
+  — fires as a side effect of an admin adding bank questions over time, not
+  from a single request. The narrower `QUESTION_REQUEST_RESOLVED` (admin
+  explicitly resolves the tutor's request) covers the realistic case.
+- **Declined-registration delivery** — `REGISTRATION_REJECTED` is a reserved
+  type but no row is written: a declined applicant is set `BANNED` in the
+  same transaction and can never authenticate to see it. Tracked in
+  `docs/TODO.txt`.
+
+These are infrastructure gaps, not thesis divergences — no scope was cut
+against the spec.
+
+---
+
 ## How to add a new entry here
 
 When a decision is made that contradicts or supersedes something in the

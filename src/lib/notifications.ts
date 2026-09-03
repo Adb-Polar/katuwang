@@ -4,10 +4,27 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 type NotifyClient = Pick<PrismaClient, "notification"> | Prisma.TransactionClient;
 
 export type NotificationType =
+  // topic requests
   | "TOPIC_REQUEST_DIRECTED"
   | "TOPIC_REQUEST_ACCEPTED"
   | "TOPIC_REQUEST_REOPENED"
-  | "TOPIC_REQUEST_FULFILLED";
+  | "TOPIC_REQUEST_FULFILLED"
+  // registration moderation ("REGISTRATION_REJECTED" is reserved but not delivered —
+  // a declined applicant is BANNED in the same transaction and can never sign in)
+  | "REGISTRATION_APPROVED"
+  | "REGISTRATION_REJECTED"
+  // topic certification review
+  | "CERTIFICATION_CERTIFIED"
+  | "CERTIFICATION_REJECTED"
+  // question-bank requests
+  | "QUESTION_REQUEST_RESOLVED"
+  | "QUESTION_REQUEST_DISMISSED"
+  // class enrolment (tutor-facing)
+  | "CLASS_ENROLLMENT_NEW"
+  | "CLASS_ENROLLMENT_DROPPED"
+  // class lifecycle (learner-facing)
+  | "CLASS_CANCELLED"
+  | "CLASS_COMPLETED";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

@@ -8,7 +8,7 @@ const {
   attemptAggregate,
   attemptCreate,
   certFindUnique,
-  configFindUnique,
+  platformSettingFindMany,
   questionCount,
   pickQuestionIdsMock,
 } = vi.hoisted(() => ({
@@ -18,7 +18,7 @@ const {
   attemptAggregate: vi.fn(),
   attemptCreate: vi.fn(),
   certFindUnique: vi.fn(),
-  configFindUnique: vi.fn(),
+  platformSettingFindMany: vi.fn(),
   questionCount: vi.fn(),
   pickQuestionIdsMock: vi.fn(),
 }));
@@ -30,7 +30,7 @@ vi.mock("@/lib/prisma", () => ({
     tutorProfile: { findUnique: tutorProfileFindUnique },
     assessmentAttempt: { findFirst: attemptFindFirst, aggregate: attemptAggregate, create: attemptCreate },
     topicCertification: { findUnique: certFindUnique },
-    topicAssessmentConfig: { findUnique: configFindUnique },
+    platformSetting: { findMany: platformSettingFindMany },
     assessmentQuestion: { count: questionCount },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
@@ -80,7 +80,7 @@ describe("POST /api/tutor/assessments", () => {
     vi.clearAllMocks();
     attemptFindFirst.mockResolvedValue(null);
     certFindUnique.mockResolvedValue(null);
-    configFindUnique.mockResolvedValue(null);
+    platformSettingFindMany.mockResolvedValue([]);
     attemptAggregate.mockResolvedValue({ _max: { attemptNo: null } });
   });
 

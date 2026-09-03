@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { startAssessmentSchema } from "@/lib/validations/assessment";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
-import { resolveTopicConfig } from "@/lib/assessmentConfig";
+import { getAssessmentConfig } from "@/lib/settings";
 import { pickQuestionIds } from "@/lib/assessmentPicker";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 
@@ -107,10 +107,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const configRow = await prisma.topicAssessmentConfig.findUnique({
-      where: { subject_topic: { subject, topic } },
-    });
-    const config = resolveTopicConfig(configRow);
+    const config = await getAssessmentConfig();
 
     const activeCount = await prisma.assessmentQuestion.count({
       where: { subject, topic, active: true },

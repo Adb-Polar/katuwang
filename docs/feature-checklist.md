@@ -59,6 +59,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Public vs. directed (tutor-specific) topic requests | ✅ | `TopicRequest.directedTutorProfileId`; landed 2026-09-03 via `docs/plans/topic-requests-v2.md` |
 | Request lifecycle (OPEN → ACCEPTED → ENROLLED → FULFILLED, re-open on cancel) | ✅ | `TopicRequestStatus` enum, enroll/unenroll + class status hooks |
 | In-app notifications (directed request, accepted, re-opened, fulfilled) | ✅ | new `Notification` model, `/api/notifications`, badge in `PortalLayout` |
+| In-app notifications — cross-module events | ✅ | expanded 2026-09-04 (Changes.md Part 18): `REGISTRATION_APPROVED`, `CERTIFICATION_CERTIFIED/REJECTED`, `QUESTION_REQUEST_RESOLVED/DISMISSED`, `CLASS_ENROLLMENT_NEW/DROPPED`, `CLASS_CANCELLED/COMPLETED`; topbar bell dropdown + unread dot in `PortalLayout`; per-row read-on-click; Admin portal at parity (`/admin/notifications`) |
 | Admin moderation of topic requests | ✅ | `/admin/topic-requests`, `TopicRequestModerationTable.tsx` |
 | Admin can toggle matching availability | ✅ | `matchingEnabled` platform setting |
 
@@ -67,8 +68,8 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Feature | Status | Notes |
 |---|---|---|
 | Tutor qualifying assessment (must pass before teaching a topic) | ✅ | `TopicCertification`, `AssessmentAttempt`/`AssessmentAttemptItem`, `AssessmentQuizRunner.tsx`, `/tutor/assessments` |
-| Admin-authored question bank per subject/topic | ✅ | `AssessmentQuestion`/`AssessmentOption`, `/admin/question-bank`, `QuestionBankManager.tsx` |
-| Per-topic assessment config (question count, pass %, min bank size) | ✅ | `TopicAssessmentConfig` |
+| Admin-authored question bank per subject/topic | ✅ | `AssessmentQuestion`/`AssessmentOption`, `/admin/assessment/question-bank`, `QuestionBankManager.tsx` (subject → topic → questions drill-down) |
+| Global assessment config (question count, pass %, min bank size) | ✅ | One platform-wide set on **Settings → Assessment**; stored as `PlatformSetting` rows, read via `getAssessmentConfig()`. Replaced per-`(subject, topic)` `TopicAssessmentConfig`, which was dropped entirely on 2026-09-03 — see `docs/plans/global-assessment-config.md`. |
 | Tutor can request more questions be added for a topic | ✅ | `QuestionRequest` model, `/api/admin/question-requests`, `/admin` review UI |
 | Admin certifies/rejects a tutor's topic request | ✅ | `TopicCertificationStatus`, `/api/admin/certifications` |
 | **Learner pre-test (before a session)** | ⚠️ | Not on `main` — `AssessmentAttempt` there is scoped to `TutorProfile` only. **Built and committed on the unmerged branch `class-pre-post-tests` (commit `1b6662c`)**: `ClassTest`/`ClassTestQuestion`/`ClassTestAttempt(+Item)` models, tutor builder UI, learner take/resume/review flow, admin read-only results. See `docs/reference/decisions.md`. |

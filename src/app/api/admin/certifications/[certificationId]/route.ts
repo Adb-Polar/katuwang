@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reviewCertificationSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { notify } from "@/lib/notifications";
 
 // ─── PATCH: Approve or Reject a Pending Topic Certification ───────────────────
 export async function PATCH(
@@ -20,7 +21,13 @@ export async function PATCH(
 
     const certification = await prisma.topicCertification.findUnique({
       where: { id: certificationId },
-      select: { id: true, status: true },
+      select: {
+        id: true,
+        status: true,
+        subject: true,
+        topic: true,
+        tutorProfile: { select: { userId: true } },
+      },
     });
 
     if (!certification) {
@@ -67,6 +74,16 @@ export async function PATCH(
           },
         });
 
+        await notify(
+          tx,
+          certification.tutorProfile.userId,
+          "CERTIFICATION_REJECTED",
+          `Your certification for ${certification.subject} · ${certification.topic} wasn't approved.${
+            reviewNote ? ` Note: ${reviewNote}` : ""
+          }`,
+          "/tutor/assessments"
+        );
+
         return row;
       });
 
@@ -87,6 +104,14 @@ export async function PATCH(
           targetId: certificationId,
         },
       });
+
+      await notify(
+        tx,
+        certification.tutorProfile.userId,
+        "CERTIFICATION_CERTIFIED",
+        `You're now certified to teach ${certification.subject} · ${certification.topic}. You can create classes for it.`,
+        "/tutor/assessments"
+      );
 
       return certified;
     });

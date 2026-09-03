@@ -9,6 +9,8 @@ const {
   topicRequestFindMany,
   topicRequestUpdate,
   notificationCreate,
+  notificationCreateMany,
+  enrollmentFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
@@ -17,6 +19,8 @@ const {
   topicRequestFindMany: vi.fn(),
   topicRequestUpdate: vi.fn(),
   notificationCreate: vi.fn(),
+  notificationCreateMany: vi.fn(),
+  enrollmentFindMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -31,8 +35,9 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         tutorClass: { update: classUpdate },
         auditLog: { create: auditLogCreate },
+        classEnrollment: { findMany: enrollmentFindMany },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
-        notification: { create: notificationCreate },
+        notification: { create: notificationCreate, createMany: notificationCreateMany },
       }),
   },
 }));
@@ -55,6 +60,7 @@ describe("PATCH /api/admin/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     topicRequestFindMany.mockResolvedValue([]);
+    enrollmentFindMany.mockResolvedValue([]);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -155,6 +161,22 @@ describe("PATCH /api/admin/classes/[classId]", () => {
     });
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
+    );
+  });
+
+  it("fans CLASS_CANCELLED out to browse-enrolled learners when a class is banned, skipping request-linked ones", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    classFindUnique.mockResolvedValue({ id: "c1", status: "SCHEDULED" });
+    classUpdate.mockResolvedValue({ id: "c1", status: "BANNED", code: "C-0001", subject: "MATH" });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+    enrollmentFindMany.mockResolvedValue([{ learnerId: "L1" }, { learnerId: "L2" }]);
+
+    const res = await patch({ status: "BANNED", reason: "policy violation" });
+    expect(res.status).toBe(200);
+    expect(notificationCreateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [expect.objectContaining({ userId: "L2", type: "CLASS_CANCELLED" })],
+      })
     );
   });
 

@@ -73,6 +73,13 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 - **View moderation action history** — the most recent 200 `AuditLog` entries (user status changes, class status changes, certification approvals/rejections), each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp.
   (`GET /api/admin/audit-log`)
 
+## Notifications (`/admin/notifications`)
+
+- A **Notifications** sidebar item (bell icon, under "Review") shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both refresh on navigation.
+- The page (and the dropdown) list notifications newest first. Clicking a row marks **just that one** read and follows its link if it has one; a "Mark all read" button clears the rest.
+- The moderation actions an admin performs (approve registration, review certification, resolve a question request, ban a class) send notifications to the **affected tutor or learner**, not to admins — so an admin's own list is usually empty today. The page + count exist for parity and for future admin-directed notifications.
+  (`GET /api/notifications`, `POST /api/notifications/read` — not admin-gated)
+
 ## API Reference
 
 All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.

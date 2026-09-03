@@ -1,6 +1,6 @@
 import { SubjectArea, TopicCertificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { resolveTopicConfig } from "@/lib/assessmentConfig";
+import { getAssessmentConfig } from "@/lib/settings";
 
 export interface TopicAssessmentStatus {
   bankReady: boolean;
@@ -31,15 +31,13 @@ export async function getTopicAssessmentStatus(
   const subjects = [...new Set(taughtTopics.map((t) => t.subject))];
   const topics = [...new Set(taughtTopics.map((t) => t.topic))];
 
-  const [counts, configs, attempts, requests, certs] = await Promise.all([
+  const [counts, cfg, attempts, requests, certs] = await Promise.all([
     prisma.assessmentQuestion.groupBy({
       by: ["subject", "topic"],
       where: { active: true, subject: { in: subjects }, topic: { in: topics } },
       _count: { _all: true },
     }),
-    prisma.topicAssessmentConfig.findMany({
-      where: { subject: { in: subjects }, topic: { in: topics } },
-    }),
+    getAssessmentConfig(),
     prisma.assessmentAttempt.findMany({
       where: { tutorProfileId, subject: { in: subjects }, topic: { in: topics } },
       orderBy: { attemptNo: "desc" },
@@ -56,7 +54,6 @@ export async function getTopicAssessmentStatus(
   ]);
 
   const countMap = new Map(counts.map((c) => [keyOf(c.subject, c.topic), c._count._all]));
-  const configMap = new Map(configs.map((c) => [keyOf(c.subject, c.topic), c]));
   const requestSet = new Set(requests.map((r) => keyOf(r.subject, r.topic)));
   const certMap = new Map(certs.map((c) => [keyOf(c.subject, c.topic), c.status]));
 
@@ -69,7 +66,6 @@ export async function getTopicAssessmentStatus(
   for (const { subject, topic } of taughtTopics) {
     const k = keyOf(subject, topic);
     const activeQuestionCount = countMap.get(k) ?? 0;
-    const cfg = resolveTopicConfig(configMap.get(k) ?? null);
     const topicAttempts = attemptsByKey.get(k) ?? [];
     const inProgress = topicAttempts.find((a) => a.status === "IN_PROGRESS");
     const submitted = topicAttempts.filter((a) => a.status !== "IN_PROGRESS");

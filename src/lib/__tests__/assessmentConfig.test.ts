@@ -1,14 +1,44 @@
-import { describe, it, expect } from "vitest";
-import { ASSESSMENT_DEFAULTS, resolveTopicConfig } from "@/lib/assessmentConfig";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-describe("resolveTopicConfig", () => {
-  it("returns the global defaults when the row is null", () => {
-    expect(resolveTopicConfig(null)).toEqual(ASSESSMENT_DEFAULTS);
+const findMany = vi.fn();
+vi.mock("@/lib/prisma", () => ({
+  prisma: { platformSetting: { findMany: (...a: unknown[]) => findMany(...a) } },
+}));
+
+import { ASSESSMENT_DEFAULTS } from "@/lib/assessmentConfig";
+import { getAssessmentConfig } from "@/lib/settings";
+
+describe("getAssessmentConfig", () => {
+  beforeEach(() => findMany.mockReset());
+
+  it("returns the global defaults when no rows exist", async () => {
+    findMany.mockResolvedValue([]);
+    await expect(getAssessmentConfig()).resolves.toEqual(ASSESSMENT_DEFAULTS);
   });
 
-  it("uses the row's values when present", () => {
-    expect(
-      resolveTopicConfig({ questionCount: 8, passPercent: 60, minBankSize: 12 })
-    ).toEqual({ questionCount: 8, passPercent: 60, minBankSize: 12 });
+  it("uses stored values when present", async () => {
+    findMany.mockResolvedValue([
+      { key: "assessmentQuestionCount", value: "8" },
+      { key: "assessmentPassPercent", value: "60" },
+      { key: "assessmentMinBankSize", value: "12" },
+    ]);
+    await expect(getAssessmentConfig()).resolves.toEqual({
+      questionCount: 8,
+      passPercent: 60,
+      minBankSize: 12,
+    });
+  });
+
+  it("falls back to a default for an unparseable or non-positive value", async () => {
+    findMany.mockResolvedValue([
+      { key: "assessmentQuestionCount", value: "not-a-number" },
+      { key: "assessmentPassPercent", value: "0" },
+      { key: "assessmentMinBankSize", value: "7" },
+    ]);
+    await expect(getAssessmentConfig()).resolves.toEqual({
+      questionCount: ASSESSMENT_DEFAULTS.questionCount,
+      passPercent: ASSESSMENT_DEFAULTS.passPercent,
+      minBankSize: 7,
+    });
   });
 });

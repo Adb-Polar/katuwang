@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { classDetailsSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
-import { notify } from "@/lib/notifications";
+import { notify, notifyMany } from "@/lib/notifications";
 
 
 export async function PATCH(
@@ -162,6 +162,27 @@ export async function PATCH(
             );
           }
         }
+
+        // Notify every other enrolled learner (those who joined by browsing, not
+        // via a topic request — the request-linked ones are covered just above).
+        const linkedLearnerIds = new Set(linkedRequests.map((r) => r.learnerId));
+        const enrolments = await tx.classEnrollment.findMany({
+          where: { classId },
+          select: { learnerId: true },
+        });
+        const targets = enrolments
+          .map((e) => e.learnerId)
+          .filter((id) => !linkedLearnerIds.has(id));
+
+        await notifyMany(
+          tx,
+          targets,
+          newStatus === "COMPLETED" ? "CLASS_COMPLETED" : "CLASS_CANCELLED",
+          newStatus === "COMPLETED"
+            ? `Your ${result.subject} class (${result.code}) has been completed.`
+            : `Your ${result.subject} class (${result.code}) was cancelled by the tutor.`,
+          "/learner/my-classes"
+        );
       }
 
       return result;

@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, findUniqueMock, updateMock, auditCreateMock } = vi.hoisted(() => ({
+const { getServerSessionMock, findUniqueMock, updateMock, auditCreateMock, notificationCreateMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findUniqueMock: vi.fn(),
   updateMock: vi.fn(),
   auditCreateMock: vi.fn(),
+  notificationCreateMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
@@ -13,7 +14,11 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     user: { findUnique: findUniqueMock },
     $transaction: (fn: (tx: unknown) => unknown) =>
-      fn({ user: { update: updateMock }, auditLog: { create: auditCreateMock } }),
+      fn({
+        user: { update: updateMock },
+        auditLog: { create: auditCreateMock },
+        notification: { create: notificationCreateMock },
+      }),
   },
 }));
 
@@ -74,6 +79,9 @@ describe("PATCH /api/admin/registrations/[userId]", () => {
     expect(auditCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ action: "USER_APPROVED", targetType: "USER", targetId: "U1" }) })
     );
+    expect(notificationCreateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "U1", type: "REGISTRATION_APPROVED" }) })
+    );
   });
 
   it("declines -> BANNED with the reason + USER_DECLINED audit entry", async () => {
@@ -89,6 +97,7 @@ describe("PATCH /api/admin/registrations/[userId]", () => {
     expect(auditCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ action: "USER_DECLINED", reason: "Not a real student" }) })
     );
+    expect(notificationCreateMock).not.toHaveBeenCalled();
   });
 
   it("500 when the update throws", async () => {

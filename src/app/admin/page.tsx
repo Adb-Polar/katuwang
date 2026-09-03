@@ -55,7 +55,7 @@ export default async function AdminDashboard() {
   const actions = [
     { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations" },
     { label: "Pending certifications", value: pendingCertCount, href: "/admin/certifications" },
-    { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/question-bank" },
+    { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/assessment/requests" },
     { label: "Open topic requests", value: openTopicRequestCount, href: "/admin/topic-requests" },
     { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users" },
     { label: "Active classes", value: activeClassCount, href: "/admin/classes" },

@@ -19,6 +19,8 @@
 - tables should be normalize 3NF
 - every plan should be written on /docs/plans/{plan overview name}.md
 - All changes must be logged on Changes.md
+- When a `docs/TODO.txt` item is finished, **delete** its lines from `docs/TODO.txt` — do not leave it in place annotated with "DONE". The Changes.md entry is the permanent record.
+- Every change must also update `docs/TOTEST.txt`: add a `[ ]` line for anything that needs manual/in-app verification (something tests don't cover — a UI flow, a redirect, a schedule/permission edge case). Tick `[Good]` / note findings when verified. Skip only for pure docs changes.
 - When a decision diverges from the thesis reference doc (a role, a feature, a scope cut), log it in `docs/reference/decisions.md` and update `docs/feature-checklist.md` in the same change — don't let them go stale
 ## 🚀 Common Commands
 

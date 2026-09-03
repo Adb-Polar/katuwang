@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reviewRegistrationSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { notify } from "@/lib/notifications";
 
 // ─── PATCH: Approve or Decline a Pending Registration ─────────────────────────
 export async function PATCH(
@@ -63,6 +64,18 @@ export async function PATCH(
           reason: reason || null,
         },
       });
+
+      // Notify the applicant on approval. A declined applicant is set BANNED
+      // above and can never sign in, so no notification is written for that path.
+      if (approved) {
+        await notify(
+          tx,
+          userId,
+          "REGISTRATION_APPROVED",
+          "Your account has been approved. Welcome to Katuwang!",
+          "/dashboard"
+        );
+      }
 
       return u;
     });

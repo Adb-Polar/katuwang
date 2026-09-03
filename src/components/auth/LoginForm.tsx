@@ -55,6 +55,10 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
+        if (result.error === "ACCOUNT_PENDING") {
+          router.push("/pending-approval");
+          return;
+        }
         setError(result.error);
         setLoading(false);
       } else {

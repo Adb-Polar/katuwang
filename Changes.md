@@ -15,6 +15,17 @@
 | [5](#part-5) | **Topic Requests v2 — public/directed, accept-to-class, notifications, admin moderation** | Richer request lifecycle: a request is public or directed to one tutor; a tutor accepts by auto-creating a full class (CERTIFIED topics only); the request tracks OPEN → ACCEPTED → ENROLLED → FULFILLED and re-opens if the linked class is cancelled/banned. Adds a real DB-backed notification system and an Admin "Topic Requests" moderation page. | `TopicRequestStatus` gains `ACCEPTED`/`ENROLLED`, `TopicRequest.directedTutorProfileId`, new `Notification` model (migration `20260903000000_topic_requests_directed_and_notifications`, applied non-destructively around dev-DB drift); new libs `notifications.ts` + `topicRequestVisibility.ts`; new/changed routes across `learner/topic-requests`, `tutor/topic-requests/[id]/accept` (replaces `/fulfill`), `classes/[classId]/enroll`, `tutor|admin/classes/[classId]`, `admin/topic-requests`, `notifications`; notification nav badge + pages in learner/tutor portals; `AcceptRequestModal` + shared `ClassScheduleFields`; seed demo data; 51 test files / 382 tests passing. |
 | [6](#part-6) | **Dependency security bump (`pnpm audit` fixes)** | `pnpm audit` found 54 vulnerabilities (1 critical, 30 high, 22 moderate, 1 low). Bumped direct deps and pinned transitive ones to close all of them. | `next` 16.2.9→16.2.12, `next-auth` 4.24.14→4.24.15 (fixes a **critical** email-normalizer homoglyph auth bypass plus a high-severity `getToken()` issue and a moderate OAuth-cookie issue), `mariadb` 3.5.3→3.5.4; 15 transitive packages pinned via `pnpm.overrides` (`mysql2`, `hono`, `@hono/node-server`, `js-yaml`, `fast-uri`, `brace-expansion` 1.x/5.x, `postcss`, `browserslist`, `nanoid`, `deepmerge-ts`, `uuid` 8→11, `valibot`, `sharp` — most are dev-tooling/Prisma-CLI-internal, `sharp`/`uuid`/`mariadb` are runtime). `pnpm audit` now reports 0 vulnerabilities; `tsc`/`lint`/`test` (382/382)/`build` all verified green after the bump. Not requested as part of any task in progress at the time — done opportunistically by an agent mid-unrelated-task; flagged to the project owner before committing. |
 | [7](#part-7) | **Email mailer (Nodemailer + SMTP) + password-reset email** | The password-reset flow was complete except for delivery — `forgot-password` only `console.info`'d the link (`TODO(mail)`). Added a provider-agnostic mailer and wired the reset email; unconfigured environments keep the console-log behaviour. | New `src/lib/mail.ts`: `+nodemailer` (pinned `^7` for the next-auth peer range) `+@types/nodemailer`; `globalThis`-cached SMTP transporter mirroring `src/lib/prisma.ts`, all config from env (`SMTP_HOST/PORT/USER/PASS/SECURE`, `MAIL_FROM`), `isMailConfigured()`, `sendMail()` (logs + no-ops when unconfigured), `renderPasswordResetEmail()` (minimal inline-HTML + plain-text, no templating deps, expiry copy derived from `RESET_TOKEN_TTL_MS`). `forgot-password/route.ts` sends the link via its own try/catch so a send failure never breaks the neutral anti-enumeration 200; reset URL base is `NEXTAUTH_URL ?? req.nextUrl.origin`. Tests: new `src/lib/__tests__/mail.test.ts` (7) + 2 forgot-password cases (link emailed with raw token; neutral 200 on send failure) — 52 files / 391 passing. Docs: `README.md` env block + Email section (Brevo single-sender / Gmail App Password / Mailpit); `todo-cleanup-sprint.md` + `feature-checklist.md` updated. Not committed. |
+| [8](#part-8-docs) | **Docs — Module 01 completed answer set** | Filled-in answer document for the IT 124 Module 01 "System Design Refinement" learning module, answering every item (1–47) plus the group final requirement, grounded entirely in the existing repo design docs. | Added `docs/to-submit/IT124_M01_D3_System-Design-Refinement_ANSWERS_Katuwang.md`. No code or schema changes. Panel recommendations reconstructed from `docs/reference/decisions.md` + `docs/feature-checklist.md` (topic-request lifecycle, Teacher Moderator drop, missing UI states); own-project answers cite `erd.md`, `matching.ts`, `schema.prisma`, `topic-requests-v2.md`, role docs. |
+| [10](#part-10) | **Dev tooling — Data Factory page + API** | A dev-only `/dev` page for spawning throwaway test data (users, classes, enrolments, topic requests) against the current DB without re-running the seed script. Mirrors the existing `/dev/login` pattern; hard-404s in production. | New `src/app/api/dev/route.ts` (`GET` snapshot + `POST` discriminated `action`: `createUsers` / `createClass` / `enroll` / `createTopicRequests` / `wipeDevData`), `src/app/dev/page.tsx`, `src/components/dev/DevDataFactory.tsx` (client forms + activity log), `docs/plans/dev-data-factory.md`; `/dev/login` cross-linked. All accounts use `password123` + `@dev.test` emails; `wipeDevData` removes only `@dev.test` users (drops `TutorProfile` first, then cascades). No schema/migration change. New files pass `eslint` + `tsc`. Not committed. |
+| [9](#part-9-docs) | **Docs — Module 01 answered copy as .docx, in the original module layout** | Same IT 124 Module 01 module, but rebuilt as a Word `.docx` that reproduces the **source PDF's house format** (Bicol University title block, info table, callout boxes, activity grids, answer sheet, score summary, rubric) with every answerable field filled from the Katuwang codebase. No "Teacher Moderator" anywhere. | Added `docs/to-submit/IT124_M01_D3_System-Design-Refinement_Learning-Module_Katuwang-answered.docx`, generated by a one-off `python3.14` + `python-docx` script (kept in session scratchpad, not committed). The three panel recommendations threaded through the module are **reconstructed** as: (1) schema had no per-topic tutor-certification lifecycle → `TopicCertification` entity; (2) architecture diagram didn't show RA 10173 double-blind enforcement → anonymous-ID layer (`IdCounter` / `generateAnonymousId()`) in a layered modular monolith; (3) matching results screen had no low/no-match empty state → "Post a topic request" fallback CTA. Objective items answered; Part II own-project answers cite `schema.prisma` (`TopicRequest`, `ClassEnrollment`), `matching.ts`, `src/lib/auth.ts`, `src/lib/mail.ts`. No code, schema, or migration changes. Not committed. |
+| [11](#part-11) | **Admin UI improvements (TODO.txt open items)** | Four UI-only tasks from `docs/TODO.txt`: (1) question bank redesigned as a subject → topic → questions drill-down; (2) question bank / requests / results split into three routes under a new "Assessment" sidebar group; (3) `/admin/topic-requests` learner, directed-tutor and linked-class cells now link to their detail pages, plus a rows-per-page selector; (4) removed the "Fully anonymous" promo card from the portal sidebar. No schema change. | `QuestionBankManager` gains an `only` prop (renders one panel, no tab bar) + a `Breadcrumb` helper; `QuestionsTab` replaced its two `<select>`s with a 3-level drill-down (subject cards → topic list → questions table, each level showing coverage/`ready` badges). New pages `src/app/admin/assessment/{question-bank,requests,results}/page.tsx`; old `/admin/question-bank` now `redirect()`s to `/admin/assessment/question-bank`; admin nav adds an "Assessment" group and drops the old "Review" entry; dashboard stat link repointed. `admin/topic-requests` API `directedTo` now includes the tutor `user.id`; `TopicRequestModerationTable` wraps the three cells in `next/link` and passes `onPageSizeChange` to `Pagination`. `PortalLayout` drops the `.kt-promo` block; `.kt-promo` CSS removed from `globals.css`. `tsc` + `lint` clean, 391/391 tests pass. Line 56 (sort buttons on all table headers) and the assessment-config relocation half of the question-bank item were **deferred** per the owner. Not committed. |
+| [12](#part-12) | **UI fix — mobile nav is now a slide-in drawer** | The mobile portal navigation was a `<details>` dropdown popup (absolutely-positioned card under the menu button). Replaced with a proper left-edge drawer: backdrop + `<aside>` that slides in via `translate-x`, closes on backdrop / `X` / `Escape` / navigation, locks body scroll. Desktop sidebar unchanged. | `src/components/layout/PortalLayout.tsx` only: `menuOpen` state replaces `<details>/<summary>`; `fixed inset-0 bg-black/40` backdrop + `fixed inset-y-0 left-0 w-72 max-w-[82vw]` drawer reusing `kt-sidebar` styling; pathname-change close done by adjusting state during render (no effect); `useEffect` only for Escape + scroll-lock. All `lg:hidden`. `eslint` + `tsc` clean for the file. Not committed. |
+| [14](#part-14) | **Pending-approval page for unapproved logins** | A PENDING account that tries to sign in is now sent to a dedicated `/pending-approval` page instead of getting a red inline error on the login form. | `auth.ts` `authorize` throws the sentinel `"ACCOUNT_PENDING"` for `status === "PENDING"` (was a prose message); `LoginForm` intercepts `result.error === "ACCOUNT_PENDING"` and `router.push("/pending-approval")` instead of `setError`. New `src/app/pending-approval/page.tsx` — public (not under the `proxy.ts` matcher), `AuthLayout` + `card kt-card`, clock icon, explanatory copy, "Back to sign in" link. `src/lib/__tests__/auth.test.ts` updated to assert the sentinel. `tsc` + `lint` clean, 391/391 tests. Not committed. |
+| [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
+| [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
+| [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [18](#part-18) | **Notification system expansion — cross-module events, topbar bell dropdown + unread dot, admin parity** | Part 5's notification system only fired for topic-request events, had no Admin surface, and its topbar bell was dead. Adds 10 new `NotificationType` values wired across registration approval, certification review, question-request outcomes, and class enrol/lifecycle; turns the bell into a dropdown panel with a red unread dot; per-row read-on-click replaces "mark all on page open"; Admin gets a Notifications nav item + page + count. | **No schema change** (`Notification.type` is free-text). New trigger `notify()`/`notifyMany()` calls inside existing `$transaction`s in `admin/registrations/[userId]`, `admin/certifications/[certificationId]`, `admin/question-requests/[requestId]`, `classes/[classId]/enroll` (POST+DELETE now wrapped in `$transaction`), `tutor/classes/[classId]`, `admin/classes/[classId]` (last two fan out to all enrolled learners, de-duped against the topic-request path). `GET /api/notifications` gains `?take`. New `notificationMeta.tsx` (shared icons/format) + `NotificationBell.tsx` (client dropdown). `PortalLayout` gains `unreadCount`/`notificationsHref` props. `.kt-icon-btn` made `position: relative`. New `src/app/admin/notifications/page.tsx`; admin nav item under "Review". 7 route test files updated; `tsc`/`lint` clean, 398/398 tests. Not committed. |
+| [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 
 ---
 
@@ -513,3 +524,518 @@ base now prefers `NEXTAUTH_URL` so links are correct behind a reverse proxy.
 
 Manual end-to-end (Mailpit / unconfigured / dead-port) not yet run in this environment —
 steps are in the plan file. Not committed. Not pushed.
+
+---
+
+<a id="part-8-docs"></a>
+
+# Part 8 — Docs: Module 01 completed answer set
+
+**File:** `docs/to-submit/IT124_M01_D3_System-Design-Refinement_ANSWERS_Katuwang.md` (new)
+
+Completed answer document for the IT 124 Capstone 2 Learning Module 01
+("System Design Refinement"). Covers:
+
+- **Activity 1** (Items 1–8) — term matching + true/false, with rationale.
+- **Activity 2** (Items 9–14) — the request-status scenario, plus the
+  "your own project" items answered from the topic-requests-v2 schema refinement.
+- **Activity 3** (Items 15–17) — offline-risk analysis, a four-part justification
+  for Katuwang's double-blind anonymity design, and a visibility-of-system-status
+  heuristic gap on the assessment quiz runner.
+- **Final Assessment** Part I (18–32), Part II (33–42, Cooperative Loan scenario +
+  own-project), Part III essays (43–47), and the Part I answer grid.
+- **Final Group Requirement** — finalized architecture / ERD-change table /
+  Level 1 DFD subprocess / design justification, presentation outline, group ID
+  block (member names from the thesis title page), rubric self-check.
+
+The three "panel recommendations" threaded through the module are **reconstructed**
+from `docs/reference/decisions.md` and `docs/feature-checklist.md` (topic-request
+lifecycle gap, Teacher Moderator vs. Admin overlap, missing empty/in-progress/
+notification UI states) — flagged in the doc as replace-with-your-panel-sheet.
+
+Also generated `IT124_M01_D3_System-Design-Refinement_ANSWERS_Katuwang.docx` (Word
+2007+) from the same markdown via a one-off `python3.14` + `python-docx` converter
+script (kept in the session scratchpad, not in the repo).
+
+No code, schema, or migration changes. Not committed.
+
+<a id="part-9-docs"></a>
+
+# Part 9 — Docs: Module 01 answered copy as .docx (original module layout)
+
+**File:** `docs/to-submit/IT124_M01_D3_System-Design-Refinement_Learning-Module_Katuwang-answered.docx` (new)
+
+A Word `.docx` rebuild of the IT 124 Capstone 2 Learning Module 01 that keeps the
+**source PDF layout** (`IT124_M01_D3_..._v02.pdf`) rather than the flat answer-sheet
+form of Part 8: Bicol University title block, course/module info table, "Performance
+Standard" / "The System" / "Scenario" / "Your Final Requirement" callout boxes,
+Activity 1 matching grid, the Part I answer sheet, the score-summary table, and the
+group-presentation rubric are all reproduced. Every answerable field is filled in
+(shown in green "Answer:" runs), grounded in the Katuwang codebase.
+
+The three "panel recommendations" threaded through the module are **reconstructed**
+(the doc leaves the group-identification member rows blank for the team to fill):
+
+- **Schema** — proposal modelled "tutor" as a flag with no record of which topics a
+  tutor was approved to teach. Resolution: `TopicCertification` entity, one row per
+  `(tutorProfileId, subject, topic)`, `status` enum `PENDING -> CERTIFIED/REJECTED`,
+  review/timestamp audit fields, unique key, cascade on the `TutorProfile` FK.
+- **Architecture** — diagram did not show how RA 10173 double-blind anonymity is
+  enforced. Resolution: anonymous-ID layer (`IdCounter` + atomic
+  `generateAnonymousId()`), peer-facing queries select only `id`/`anonymousId`,
+  RBAC at the edge in `src/proxy.ts`, inside a layered (n-tier) modular monolith.
+- **UI/UX** — the learner "Find a Tutor" results screen had no low/no-match empty
+  state. Resolution: explicit "No strong match yet" state with a primary
+  "Post a topic request" CTA (error prevention + user control).
+
+No "Teacher Moderator" role, portal, or wording appears anywhere in the document.
+
+Own-project answers cite `prisma/schema.prisma` (`TopicRequest`, `ClassEnrollment`,
+`TopicCertification`), `src/lib/matching.ts`, `src/lib/idGenerator.ts`,
+`src/lib/auth.ts`, `src/lib/mail.ts`. Generated by a one-off `python3.14` +
+`python-docx` script kept in the session scratchpad (not in the repo).
+
+No code, schema, or migration changes. Not committed.
+
+<a id="part-10"></a>
+
+# Part 10 — Dev tooling: Data Factory page + API
+
+**Files:**
+- **A** `src/app/api/dev/route.ts` — dev-only factory API (`GET` snapshot, `POST` actions). Hard-404s when `NODE_ENV === "production"`.
+- **A** `src/app/dev/page.tsx` — `/dev` hub, server component, dev-only.
+- **A** `src/components/dev/DevDataFactory.tsx` — client UI (forms + activity log).
+- **A** `docs/plans/dev-data-factory.md` — plan.
+- **M** `src/app/dev/login/page.tsx` — cross-link to `/dev`.
+
+### What it does
+
+A page at `/dev` for spawning throwaway test data against the **current** database
+without re-running `prisma/seed.ts`. Mirrors the existing `/dev/login` pattern
+(dev-only, `NODE_ENV` guard, no auth, not in any nav). `POST /api/dev` takes a
+discriminated `action`:
+
+- `createUsers` — 1–50 learners / tutors / admins, random PH names, `@dev.test`
+  emails, password `password123`, anonymous IDs via `generateAnonymousId`, tutor
+  profiles auto-created for tutors (admins get an `ADM-DEV-*` id, not a counter id).
+- `createClass` — pick a tutor (or first available), subject, K topics from
+  `SUBJECT_TOPICS`, N auto-generated sessions (future, or past for `COMPLETED`),
+  `code` via `generateClassCode`; `SCHEDULED` / `COMPLETED` / `CANCELLED`.
+- `enroll` — one named learner or N random unenrolled learners into a class,
+  capped at `maxStudents` (409 when full).
+- `createTopicRequests` — 1–40 `OPEN` requests from random existing learners.
+- `wipeDevData` — deletes every `@dev.test` user in a transaction; drops their
+  `TutorProfile` first (that FK has no cascade) so their classes / certifications /
+  attempts tear down, then the user delete cascades enrolments / requests /
+  notifications. Seed accounts (`*.katuwang.test`) are untouched.
+
+`GET /api/dev` returns live counts + tutor/learner/class lists for the form
+dropdowns.
+
+### Notes / scope
+
+- No new Prisma models, no migration, no schema change.
+- No divergence from the thesis reference — this is dev tooling only, so
+  `docs/reference/decisions.md` / `feature-checklist.md` were not touched.
+- New files pass `eslint` and `tsc --noEmit`. **Pre-existing, unrelated** type
+  errors currently exist in `src/components/admin/QuestionBankManager.tsx` (an
+  in-progress edit in the working tree from other work, not from this change).
+
+---
+
+<a id="part-11"></a>
+
+# Part 11 — Admin UI improvements (TODO.txt open items)
+
+Worked the UI-only open items at the bottom of `docs/TODO.txt`. Two items were
+deferred per the owner: line 56 ("all tables add a sort button on the table
+header" — no shared table component, most lists are server-paginated so it needs
+API work) and the "assessment configuration should be on the setting assessment
+tab" half of the question-bank redesign (the TODO sentence is cut off).
+
+### Files
+
+- **M** `src/components/admin/QuestionBankManager.tsx`
+  - `QuestionBankManager` takes an optional `only?: "questions" | "requests" | "results"`.
+    When set it renders just that panel and hides the tab bar (`active = only ?? tab`).
+  - New `Breadcrumb` helper (clickable crumb trail).
+  - `QuestionsTab` no longer has the two `<select>` dropdowns. It is now a 3-level
+    drill-down driven by `selSubject` / `selTopic` state:
+    1. **Subjects** — a plain bordered `divide-y` list (matching level 2), each row
+       shows topic count, active-question total, an `X/Y ready` badge and an
+       open-request badge.
+    2. **Topics** — list for the chosen subject, each row shows `active / minBankSize`
+       (or `Ready · N`) and a request badge; breadcrumb back to Subjects.
+    3. **Questions** — the existing coverage panel + add/edit/retire/delete table,
+       with a breadcrumb back to Subjects / the subject.
+- **A** `src/app/admin/assessment/question-bank/page.tsx` — `<QuestionBankManager only="questions" />`
+- **A** `src/app/admin/assessment/requests/page.tsx` — `<QuestionBankManager only="requests" />`
+- **A** `src/app/admin/assessment/results/page.tsx` — `<QuestionBankManager only="results" />`
+- **M** `src/app/admin/question-bank/page.tsx` — now just `redirect("/admin/assessment/question-bank")`.
+- **M** `src/app/admin/layout.tsx` — nav gains an "Assessment" group (Question Bank /
+  Requests / Results); the old "Question Bank" entry under "Review" is removed.
+- **M** `src/app/admin/page.tsx` — "Open question requests" stat links to
+  `/admin/assessment/requests`.
+- **M** `src/app/api/admin/topic-requests/route.ts` — `directedTutor` select +
+  `directedTo` payload now include the tutor's `user.id`.
+- **M** `src/components/admin/TopicRequestModerationTable.tsx` — learner cell,
+  "Directed to" cell and "Linked class" cell are wrapped in `next/link`
+  (`/admin/users/[id]`, `/admin/users/[id]`, `/admin/classes/[id]`); the table
+  now destructures `pageSize` / `setPageSize` and passes `onPageSizeChange` to
+  `Pagination` (rows-per-page selector).
+- **M** `src/components/layout/PortalLayout.tsx` — removed the "Fully anonymous"
+  `.kt-promo` card from the sidebar.
+- **M** `src/app/globals.css` — removed the now-unused `.kt-promo` rule.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings
+elsewhere), `pnpm test` 391/391. No visual check — the browser extension was not
+connected this session; new routes were smoke-tested via curl (all resolve to the
+auth redirect, no 404/500).
+
+### Scope
+
+UI + one additive API field only. No schema change, no migration. No thesis
+divergence, so `docs/reference/decisions.md` / `feature-checklist.md` untouched.
+Not committed.
+- Not committed.
+
+<a id="part-12"></a>
+
+# Part 12 — UI fix: mobile portal nav is now a slide-in drawer
+
+**File:** **M** `src/components/layout/PortalLayout.tsx`
+
+The mobile navigation was a `<details>`/`<summary>` popup — an absolutely-positioned
+card that dropped down below the menu button (`absolute left-0 top-full … w-64
+kt-card`). Replaced it with a proper left-edge drawer:
+
+- Topbar menu button toggles `menuOpen` state (was a `<summary>`).
+- Full-viewport backdrop (`fixed inset-0 bg-black/40`) fades in; click to close.
+- The drawer `<aside>` (`fixed inset-y-0 left-0 w-72 max-w-[82vw]`) slides in via
+  `-translate-x-full → translate-x-0` with `transition-transform duration-300`,
+  reusing the desktop `kt-sidebar` styling (brand, portal label, nav tree,
+  anonymous ID, log-out) plus a close (`X`) button.
+- Closes on: backdrop click, `X`, `Escape`, or navigating (pathname change handled
+  by adjusting state during render — no effect, satisfies
+  `react-hooks/set-state-in-effect`). Body scroll is locked while open.
+- Everything is `lg:hidden`; the desktop sticky sidebar is unchanged.
+
+`eslint` + `tsc` clean for this file. Not committed.
+
+---
+
+<a id="part-13"></a>
+
+# Part 13 — Dev fix: Data Factory "Create users" now goes through the real registration path
+
+### Symptom
+
+The `/dev` Data Factory's **Create users** action called `prisma.user.create`
+directly — it inserted rows that *looked* like accounts but never ran the actual
+signup logic. Any invariant or side-effect the real flow owns (and anything added
+to it later) was silently skipped for dev-spawned users.
+
+### Fix
+
+- **New `src/lib/registration.ts`** — extracted the account-creation core out of
+  the route into `registerAccount(input)`: dup-email check, bcrypt hash, anonymous
+  ID, `status: PENDING` when approval is required, and the user + `tutorProfile`
+  transaction for tutors. Returns `{ ok, anonymousId, role, pendingApproval }` or
+  `{ ok: false, code: "DUPLICATE_EMAIL" }` (no `NextResponse` — it's HTTP-agnostic).
+- **`src/app/api/register/route.ts`** — now a thin wrapper: settings gate + Zod
+  parse + `registerAccount()` + HTTP shaping. Identical status codes / messages /
+  response shape; all 7 route tests unchanged and green.
+- **`src/app/api/dev/route.ts` `createUsers`** — learners and tutors are created
+  via `registerAccount()` so they get the same anonymous ID, tutor profile and
+  invariants a public signup produces. `ADMIN` keeps its direct create
+  (registration has no admin path) with the `ADM-DEV-<stamp>-<i>` ID. `@dev.test`
+  emails and `password123` unchanged, so `wipeDevData` and `/dev/login` still work.
+- **PENDING toggle** — new `pending` flag on the `createUsers` action (checkbox
+  "Create as PENDING (needs admin approval)" in `DevDataFactory`, hidden for the
+  ADMIN role). When set, learners/tutors are created `status: PENDING` via
+  `registerAccount({ requireApproval: true })` so they appear in **Admin →
+  Registration Approvals** (`/api/admin/registrations` filters `status: "PENDING"`);
+  they can't sign in until approved. Default off — dev users stay immediately
+  active for quick login.
+
+`tsc` clean; full suite 391/391. Not committed.
+
+---
+
+<a id="part-14"></a>
+
+# Part 14 — Pending-approval page for unapproved logins
+
+### Before
+
+A `PENDING` account (registered, not yet approved by an admin) that submitted the
+login form got a red inline error banner: *"Your account is awaiting admin
+approval…"*. Functional, but easy to miss and visually the same as a wrong
+password.
+
+### After
+
+The login attempt now routes to a dedicated **`/pending-approval`** page.
+
+**Files**
+
+- **M** `src/lib/auth.ts` — the `status === "PENDING"` branch in `authorize()`
+  now `throw new Error("ACCOUNT_PENDING")` (a stable sentinel) instead of a prose
+  message. The SUSPENDED / BANNED branches are unchanged.
+- **M** `src/components/auth/LoginForm.tsx` — `handleSubmit` checks
+  `result.error === "ACCOUNT_PENDING"` first and does
+  `router.push("/pending-approval")` (no error banner, no `setLoading(false)` —
+  we're navigating away). All other `result.error` values still render inline.
+- **A** `src/app/pending-approval/page.tsx` — server component, public route
+  (not in the `src/proxy.ts` matcher, so no auth required to view it). Uses
+  `AuthLayout` + `card kt-card` to match the login/forgot-password screens:
+  `BrandMark`, a warning-toned clock icon, two short paragraphs, and a
+  "Back to sign in" link to `/login`.
+- **M** `src/lib/__tests__/auth.test.ts` — the "awaiting approval" case now
+  asserts `.rejects.toThrow("ACCOUNT_PENDING")`.
+
+### Notes / scope
+
+- The registration flow is unchanged — it still redirects to
+  `/login?registered=true&pending=true&id=…` so the new user sees their anonymous
+  ID once on the login screen. Only the *login attempt* by an already-registered
+  pending account was rerouted.
+- No schema change. `tsc` + `lint` clean (5 pre-existing warnings elsewhere),
+  `pnpm test` 391/391. No thesis divergence — `decisions.md` /
+  `feature-checklist.md` untouched. Not committed.
+
+---
+
+<a id="part-15"></a>
+
+# Part 15 — Global assessment config (replaces per-topic config)
+
+**Plan:** `docs/plans/global-assessment-config.md`
+**TODO source:** "Assessment settings should not be by topic but one settings for
+all subject and topic and put it in the assessment option" + the cut-off
+"assessment configuration should be on the setting assessment tab" line.
+
+### Before
+
+Every `(subject, topic)` pair could carry a `TopicAssessmentConfig` row
+overriding the three defaults (`questionCount` 5 / `passPercent` 80 /
+`minBankSize` 5). Admins edited them per topic in `CoveragePanel` inside the
+question-bank drill-down.
+
+### After
+
+One platform-wide value per field, applied to every subject and topic, edited on
+**Admin → Settings** in a new "Assessment" card. `CoveragePanel` is read-only and
+links there.
+
+### Storage — no migration
+
+Three string-valued rows in the existing key/value `platform_settings` table:
+`assessmentQuestionCount`, `assessmentPassPercent`, `assessmentMinBankSize`.
+Missing / unparseable / non-positive → fall back to `ASSESSMENT_DEFAULTS`.
+
+`TopicAssessmentConfig` (model + `topic_assessment_configs` table +
+`User.updatedAssessmentConfigs` relation) is left **dormant** — nothing reads or
+writes it. Dropping it needs its own migration + DB-modification confirmation
+(tracked in the plan file).
+
+### Files
+
+- **M** `src/lib/assessmentConfig.ts` — dropped `resolveTopicConfig(row)` and the
+  `TopicAssessmentConfig` type import; kept `ASSESSMENT_DEFAULTS`,
+  `OPTION_COUNT_MIN/MAX`, `ResolvedTopicConfig`.
+- **M** `src/lib/settings.ts` — new `ASSESSMENT_SETTING_KEYS` +
+  `getAssessmentConfig(): Promise<ResolvedTopicConfig>` (one `findMany`, parsed,
+  defaulted).
+- **M** `src/lib/assessmentStatus.ts` — dropped `topicAssessmentConfig.findMany`
+  from the `Promise.all`; one resolved `cfg` for every topic.
+- **M** `src/app/api/admin/assessment-questions/coverage/route.ts` — same; every
+  coverage row carries the same global `config`; `hasOverride` field removed.
+- **M** `src/app/api/tutor/assessments/route.ts` — quiz start uses
+  `getAssessmentConfig()`.
+- **M** `src/app/api/admin/assessment-configs/route.ts` — repurposed: `GET`
+  returns `{ questionCount, passPercent, minBankSize }`; `PATCH` takes any subset
+  of those three, upserts the `PlatformSetting` rows + one `ASSESSMENT_CONFIG_UPDATED`
+  audit row (`targetId: "global"`). URL kept.
+- **M** `src/lib/validations/assessment.ts` — `updateTopicAssessmentConfigSchema`
+  → `updateGlobalAssessmentConfigSchema` (no subject/topic; three optional ints;
+  `.refine` at least one present).
+- **M** `src/components/admin/PlatformSettingsForm.tsx` — split into "General" and
+  "Assessment" cards; the Assessment card holds the `autoCertifyOnAssessmentPass`
+  toggle + three number inputs saved on blur via `/api/admin/assessment-configs`.
+- **M** `src/components/admin/QuestionBankManager.tsx` — `CoverageRow` loses
+  `hasOverride`; `CoveragePanel` is a read-only readiness strip with a
+  "Change in Settings → Assessment" link (no inputs / save).
+- **M** `src/app/admin/settings/page.tsx` — subtitle mentions assessment tuning.
+- **M** `prisma/seed.ts` — the `topicAssessmentConfig.upsert` is replaced by
+  `platformSetting` upserts for the three keys (`assessmentPassPercent = 60` so
+  the UI shows a non-default).
+- **M** tests — `src/lib/__tests__/assessmentConfig.test.ts` (now
+  `getAssessmentConfig`), `src/app/api/admin/assessment-configs/__tests__/route.test.ts`
+  (global GET/PATCH), `src/app/api/tutor/assessments/__tests__/route.test.ts`
+  (mock `platformSetting.findMany` instead of `topicAssessmentConfig.findUnique`).
+- **M** `docs/feature-checklist.md` — the per-topic-config row rewritten as the
+  global config; question-bank path updated to `/admin/assessment/question-bank`.
+- **A** `docs/plans/global-assessment-config.md`.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` 394/394. No visual check — dev server not running this session.
+Not committed.
+
+---
+
+<a id="part-16"></a>
+
+# Part 16 — Process: TODO pruning + mandatory TOTEST updates
+
+`CLAUDE.md` "### Warning" list gained two rules:
+
+- Finished `docs/TODO.txt` items are **deleted** from the file, not annotated with
+  "DONE" — the `Changes.md` entry is the permanent record.
+- Every non-docs change must add `[ ]` lines to `docs/TOTEST.txt` for anything
+  needing manual/in-app verification (flows tests don't cover), ticked when done.
+
+Applied retroactively:
+
+- **`docs/TODO.txt`** — the four finished 2026-09-03 items (question-bank
+  drill-down + config relocation, topic-request clickable cells + pagination,
+  sidebar promo-card removal, global assessment config) removed. What remains:
+  bulk question import, tutor appeal button, admin topic/subject management,
+  topic-requests-v2, "sort button on every table" (was annotated DEFERRED, now a
+  plain open item), "drop the dormant `TopicAssessmentConfig` table" (new
+  follow-up), full notification system.
+- **`docs/TOTEST.txt`** — manual-test checklist items added for Parts 11, 14, 15.
+
+Docs/process only. Not committed.
+
+---
+
+<a id="part-17"></a>
+
+# Part 17 — Schema: drop the dormant `TopicAssessmentConfig`
+
+Part 15 replaced the per-`(subject, topic)` assessment config with one global
+set but left the old model in the schema, unread. This removes it.
+
+### Changes
+
+- **`prisma/schema.prisma`**
+  - deleted `model TopicAssessmentConfig` (+ `@@map("topic_assessment_configs")`,
+    `@@unique([subject, topic])`), replaced by a comment pointing at
+    `getAssessmentConfig()` / the plan.
+  - deleted `User.updatedAssessmentConfigs` (the `"UpdatedAssessmentConfigs"`
+    relation).
+- **dev DB** — `npx prisma db push --accept-data-loss`. This dropped
+  `topic_assessment_configs` (2 rows: the seed's demo override + one more). Used
+  `db push` rather than `migrate dev` because the local migration history is
+  already drifted — `20260902081727_class_pre_post_tests` is applied to the DB
+  but exists only on the unmerged `class-pre-post-tests` branch, so `migrate dev`
+  demanded a full-database reset. No migration file was written.
+- `npx prisma generate` re-run so the client no longer exposes
+  `prisma.topicAssessmentConfig`.
+
+### Verification
+
+`grep` finds no `topicAssessmentConfig` / `TopicAssessmentConfig` in `src/`
+(only the schema comment). `pnpm exec tsc --noEmit` clean, `pnpm lint` clean
+(5 pre-existing warnings), `pnpm test` 394/394.
+
+### Docs
+
+`docs/plans/global-assessment-config.md` follow-up section marked done;
+`docs/feature-checklist.md` note updated; the TODO item deleted from
+`docs/TODO.txt`.
+
+### Not committed.
+
+---
+
+<a id="part-18"></a>
+
+# Part 18 — Feature: Notification system expansion — cross-module events, topbar bell dropdown + unread dot, admin parity
+
+The DB-backed notification system from Part 5 only fired for topic-request
+events, had no Admin surface, and its topbar bell was a dead button. This
+expands event coverage across modules, wires the bell into a dropdown panel
+with a live unread dot, brings the Admin portal to parity, and switches the
+notifications page from "mark everything read on open" to per-row read.
+
+**No schema change** — `Notification.type` is free-text; all new values are
+additive. No migration, no `db push`.
+
+### Changes
+
+- **`src/lib/notifications.ts`** — `NotificationType` union widened by 10 values:
+  `REGISTRATION_APPROVED`, `REGISTRATION_REJECTED` (reserved, not delivered —
+  a declined applicant is BANNED in the same transaction and can never sign in),
+  `CERTIFICATION_CERTIFIED` / `CERTIFICATION_REJECTED`,
+  `QUESTION_REQUEST_RESOLVED` / `QUESTION_REQUEST_DISMISSED`,
+  `CLASS_ENROLLMENT_NEW` / `CLASS_ENROLLMENT_DROPPED`,
+  `CLASS_CANCELLED` / `CLASS_COMPLETED`. Helper signatures unchanged.
+  `prisma/schema.prisma` `type` comment refreshed (comment only).
+- **New trigger sites** (each inside the route's existing `$transaction`):
+  - `admin/registrations/[userId]` PATCH → `REGISTRATION_APPROVED` to the
+    applicant on approval (nothing on decline).
+  - `admin/certifications/[certificationId]` PATCH → `CERTIFICATION_CERTIFIED` /
+    `CERTIFICATION_REJECTED` to the tutor (both branches; `findUnique` select
+    widened for `subject`/`topic`/`tutorProfile.userId`).
+  - `admin/question-requests/[requestId]` PATCH → `QUESTION_REQUEST_RESOLVED` /
+    `_DISMISSED` to the requesting tutor (`findUnique` select widened).
+  - `classes/[classId]/enroll` POST/DELETE → `CLASS_ENROLLMENT_NEW` / `_DROPPED`
+    to the class tutor, message names the learner's `STU-xxxx`. **Both handlers
+    now wrap their paired writes + notify in `prisma.$transaction`** (were bare
+    sequential writes); class `findUnique` widened for `code`/`subject`/
+    `tutorProfile.userId`.
+  - `tutor/classes/[classId]` PATCH (COMPLETED/CANCELLED) and
+    `admin/classes/[classId]` PATCH (BANNED) → `notifyMany` fan-out of
+    `CLASS_COMPLETED` / `CLASS_CANCELLED` to every enrolled learner, de-duping
+    learners already covered by the `TOPIC_REQUEST_*` path.
+- **`src/app/api/notifications/route.ts`** — `GET` takes `req`; optional `?take`
+  clamped to `1..50` (bell asks for `?take=8`). `POST /api/notifications/read`
+  unchanged (per-id already supported).
+- **`src/components/notifications/notificationMeta.tsx`** (new) — shared
+  `NotificationRow`, `relativeTime`, `TYPE_ICON` (all 14 types), `FALLBACK_ICON`,
+  extracted from `NotificationList` so the bell and the list share them.
+- **`src/components/notifications/NotificationBell.tsx`** (new, client) —
+  replaces the dead topbar bell button. Red dot when `unreadCount > 0`; click
+  opens a dropdown (fetches `?take=8`), row click marks that one read
+  (`{ids:[id]}`) + `router.refresh()` + navigates, header "Mark all read",
+  footer "View all". Closes on outside-click / Escape / navigation.
+- **`src/components/notifications/NotificationList.tsx`** — no longer
+  auto-marks-all-read on mount; each row is a `<button>` that marks itself read
+  on click (and navigates if it has a link); "Mark all read" kept.
+- **`src/components/layout/PortalLayout.tsx`** — new `unreadCount` +
+  `notificationsHref` props; renders `<NotificationBell/>`. Existing numeric
+  `NavItem.badge` on the sidebar "Notifications" item kept on all portals.
+- **`src/app/globals.css`** — `.kt-icon-btn { position: relative }` so the dot
+  anchors to the bell.
+- **Layouts** — tutor & learner pass the two new props (already computed
+  `unreadCount`). `admin/layout.tsx` now computes `unreadCount`, adds a
+  "Notifications" nav item (group "Review") with the badge, passes the props.
+  New `src/app/admin/notifications/page.tsx` mirrors the tutor/learner page.
+- **Tests** — 7 route test files updated (`notifications`, `admin/registrations`,
+  `admin/certifications`, `admin/question-requests`, `classes/.../enroll`,
+  `tutor/classes`, `admin/classes`): `$transaction` tx mocks gain
+  `notification` / `classEnrollment`, `findUnique` mock shapes widened,
+  assertions added for each new notify call + the fan-out de-dup.
+  `NotificationBell` / `NotificationList` have no test harness (no `.tsx`
+  tests in the repo) → `docs/TOTEST.txt`.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` 398/398 (was 394 + 4 new cases).
+
+### Docs
+
+`docs/plans/notification-system-expansion.md` (plan); `docs/TODO.txt` — "Full
+notification system" line removed, a `REGISTRATION_REJECTED` delivery follow-up
+added; `docs/TOTEST.txt` — manual-check block added; `docs/feature-checklist.md`
+Notifications row updated; `docs/reference/decisions.md` — out-of-scope note
+(session reminders / assessment-unlocked / rejected-registration delivery).
+
+### Not committed.

@@ -65,17 +65,20 @@ export const updateAssessmentQuestionSchema = z
 
 export type UpdateAssessmentQuestionInput = z.infer<typeof updateAssessmentQuestionSchema>;
 
-// ─── Per-topic config (admin) ───────────────────────────────────────────────
+// ─── Global assessment config (admin) ──────────────────────────────────────
+// One platform-wide value per field; applies to every subject and topic.
 
-export const updateTopicAssessmentConfigSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, { message: "Invalid subject area." }),
-  topic: z.string().trim().min(1, "Topic is required."),
-  questionCount: z.coerce.number().int().min(1, "At least 1 question.").max(50, "At most 50 questions.").optional(),
-  passPercent: z.coerce.number().int().min(1, "Pass mark must be 1-100.").max(100, "Pass mark must be 1-100.").optional(),
-  minBankSize: z.coerce.number().int().min(1, "At least 1.").max(200, "At most 200.").optional(),
-});
+export const updateGlobalAssessmentConfigSchema = z
+  .object({
+    questionCount: z.coerce.number().int().min(1, "At least 1 question.").max(50, "At most 50 questions.").optional(),
+    passPercent: z.coerce.number().int().min(1, "Pass mark must be 1-100.").max(100, "Pass mark must be 1-100.").optional(),
+    minBankSize: z.coerce.number().int().min(1, "At least 1.").max(200, "At most 200.").optional(),
+  })
+  .refine((d) => d.questionCount !== undefined || d.passPercent !== undefined || d.minBankSize !== undefined, {
+    message: "Provide at least one setting to update.",
+  });
 
-export type UpdateTopicAssessmentConfigInput = z.infer<typeof updateTopicAssessmentConfigSchema>;
+export type UpdateGlobalAssessmentConfigInput = z.infer<typeof updateGlobalAssessmentConfigSchema>;
 
 // ─── Taking an assessment (tutor) ───────────────────────────────────────────
 

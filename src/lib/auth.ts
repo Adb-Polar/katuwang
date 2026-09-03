@@ -50,7 +50,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (user.status === "PENDING") {
-          throw new Error("Your account is awaiting admin approval. You'll be able to sign in once it's approved.");
+          // Sentinel — LoginForm redirects this to the /pending-approval page
+          // instead of showing it as an inline error.
+          throw new Error("ACCOUNT_PENDING");
         }
 
         return {

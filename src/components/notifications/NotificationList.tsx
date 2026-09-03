@@ -2,37 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Bell, CheckCheck, Inbox, UserPlus, PartyPopper, RefreshCw } from "lucide-react";
+import { Bell, CheckCheck, Inbox } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-
-interface NotificationRow {
-  id: string;
-  type: string;
-  message: string;
-  link: string | null;
-  readAt: string | null;
-  createdAt: string;
-}
-
-const TYPE_ICON: Record<string, React.ReactNode> = {
-  TOPIC_REQUEST_DIRECTED: <UserPlus className="h-4 w-4 text-info" />,
-  TOPIC_REQUEST_ACCEPTED: <PartyPopper className="h-4 w-4 text-success" />,
-  TOPIC_REQUEST_REOPENED: <RefreshCw className="h-4 w-4 text-warning" />,
-  TOPIC_REQUEST_FULFILLED: <CheckCheck className="h-4 w-4 text-success" />,
-};
-
-function relativeTime(iso: string) {
-  const diffMs = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
-}
+import {
+  NotificationRow,
+  TYPE_ICON,
+  FALLBACK_ICON,
+  relativeTime,
+} from "@/components/notifications/notificationMeta";
 
 export default function NotificationList() {
   const router = useRouter();
@@ -55,21 +32,23 @@ export default function NotificationList() {
         setLoading(false);
       }
     })();
-    // Auto mark-all-read on mount — matches the badge clearing once viewed.
-    (async () => {
-      try {
-        await fetch("/api/notifications/read", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
-        });
-        router.refresh();
-      } catch {
-        // non-fatal — sidebar badge will just stay stale until next load
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const markOneRead = async (id: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, readAt: n.readAt ?? new Date().toISOString() } : n))
+    );
+    try {
+      await fetch("/api/notifications/read", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: [id] }),
+      });
+      router.refresh();
+    } catch {
+      setError("Could not update notification.");
+    }
+  };
 
   const markAllRead = async () => {
     setMarking(true);
@@ -120,33 +99,31 @@ export default function NotificationList() {
             </div>
           ) : (
             <ul className="divide-y divide-base-200">
-              {notifications.map((n) => {
-                const content = (
-                  <div
-                    className={`flex items-start gap-3 py-3 px-2 -mx-2 rounded-lg text-xs ${
-                      n.link ? "hover:bg-base-200/40" : ""
-                    } ${!n.readAt ? "bg-primary/5" : ""}`}
+              {notifications.map((n) => (
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      markOneRead(n.id);
+                      if (n.link) router.push(n.link);
+                    }}
+                    className="block w-full text-left"
                   >
-                    <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? <Bell className="h-4 w-4 text-base-content/40" />}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-base-content/80">{n.message}</p>
-                      <p className="text-2xs text-base-content/40 mt-0.5">{relativeTime(n.createdAt)}</p>
+                    <div
+                      className={`flex items-start gap-3 py-3 px-2 -mx-2 rounded-lg text-xs hover:bg-base-200/40 ${
+                        !n.readAt ? "bg-primary/5" : ""
+                      }`}
+                    >
+                      <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? FALLBACK_ICON}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-base-content/80">{n.message}</p>
+                        <p className="text-2xs text-base-content/40 mt-0.5">{relativeTime(n.createdAt)}</p>
+                      </div>
+                      {!n.readAt && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" aria-hidden="true" />}
                     </div>
-                    {!n.readAt && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" aria-hidden="true" />}
-                  </div>
-                );
-                return (
-                  <li key={n.id}>
-                    {n.link ? (
-                      <Link href={n.link} className="block">
-                        {content}
-                      </Link>
-                    ) : (
-                      content
-                    )}
-                  </li>
-                );
-              })}
+                  </button>
+                </li>
+              ))}
             </ul>
           )}
         </div>

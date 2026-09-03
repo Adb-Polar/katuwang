@@ -265,18 +265,6 @@ DISMISSED DISMISSED
     }
   
 
-  "topic_assessment_configs" {
-    String id "🗝️"
-    SubjectArea subject 
-    String topic 
-    Int questionCount 
-    Int passPercent 
-    Int minBankSize 
-    String updatedById "❓"
-    DateTime updatedAt 
-    }
-  
-
   "assessment_attempts" {
     String id "🗝️"
     String tutorProfileId 
@@ -357,8 +345,6 @@ DISMISSED DISMISSED
     "assessment_questions" |o--|| "SubjectArea" : "enum:subject"
     "assessment_questions" }o--|| "users" : "createdBy"
     "assessment_options" }o--|| "assessment_questions" : "question"
-    "topic_assessment_configs" |o--|| "SubjectArea" : "enum:subject"
-    "topic_assessment_configs" }o--|o "users" : "updatedBy"
     "assessment_attempts" }o--|| "tutor_profiles" : "tutorProfile"
     "assessment_attempts" |o--|| "SubjectArea" : "enum:subject"
     "assessment_attempts" |o--|| "AssessmentAttemptStatus" : "enum:status"

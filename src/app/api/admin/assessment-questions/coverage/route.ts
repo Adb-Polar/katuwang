@@ -4,7 +4,7 @@ import { SubjectArea } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
-import { resolveTopicConfig } from "@/lib/assessmentConfig";
+import { getAssessmentConfig } from "@/lib/settings";
 
 const keyOf = (subject: string, topic: string) => `${subject}::${topic}`;
 
@@ -19,13 +19,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const [counts, configs, openRequests] = await Promise.all([
+    const [counts, config, openRequests] = await Promise.all([
       prisma.assessmentQuestion.groupBy({
         by: ["subject", "topic"],
         where: { active: true },
         _count: { _all: true },
       }),
-      prisma.topicAssessmentConfig.findMany(),
+      getAssessmentConfig(),
       prisma.questionRequest.groupBy({
         by: ["subject", "topic"],
         where: { status: "OPEN" },
@@ -34,20 +34,17 @@ export async function GET() {
     ]);
 
     const countMap = new Map(counts.map((c) => [keyOf(c.subject, c.topic), c._count._all]));
-    const configMap = new Map(configs.map((c) => [keyOf(c.subject, c.topic), c]));
     const requestMap = new Map(openRequests.map((r) => [keyOf(r.subject, r.topic), r._count._all]));
 
     const coverage = (Object.keys(SUBJECT_TOPICS) as SubjectArea[]).flatMap((subject) =>
       SUBJECT_TOPICS[subject].map((topic) => {
         const k = keyOf(subject, topic);
         const activeCount = countMap.get(k) ?? 0;
-        const config = resolveTopicConfig(configMap.get(k) ?? null);
         return {
           subject,
           topic,
           activeCount,
           config,
-          hasOverride: configMap.has(k),
           ready: activeCount >= config.minBankSize,
           openRequests: requestMap.get(k) ?? 0,
         };

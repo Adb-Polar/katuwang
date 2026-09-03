@@ -11,7 +11,7 @@ export default function AdminSettingsPage() {
       <PageHeader
         eyebrow="Admin Portal"
         title="Platform Settings"
-        subtitle="Toggle platform-wide behavior for registration and class creation."
+        subtitle="Toggle platform-wide behavior for registration and class creation, and tune the assessment settings applied to every subject and topic."
       />
       <PlatformSettingsForm />
     </div>

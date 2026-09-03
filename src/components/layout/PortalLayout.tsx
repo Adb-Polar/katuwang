@@ -1,10 +1,12 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, HelpCircle, LogOut, Menu, Search } from "lucide-react";
+import { HelpCircle, LogOut, Menu, Search, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 export interface NavItem {
   label: string;
@@ -24,6 +26,10 @@ interface PortalLayoutProps {
   portalLabel: string;
   accent: PortalAccent;
   idRole?: "LEARNER" | "TUTOR";
+  /** unread notification count — drives the topbar bell dot; refreshed on navigation */
+  unreadCount?: number;
+  /** portal-specific notifications page, e.g. "/tutor/notifications" */
+  notificationsHref?: string;
   children: React.ReactNode;
 }
 
@@ -34,9 +40,33 @@ export default function PortalLayout({
   anonymousId,
   portalLabel,
   idRole,
+  unreadCount = 0,
+  notificationsHref = "/dashboard",
   children,
 }: PortalLayoutProps) {
   const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the mobile drawer on navigation (adjust state during render — no effect).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setMenuOpen(false);
+  }
+
+  // Lock body scroll and wire Escape-to-close while the drawer is open.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
 
   const isActive = (href: string) =>
     PORTAL_ROOTS.includes(href)
@@ -105,12 +135,6 @@ export default function PortalLayout({
         </div>
         <span className="kt-nav-label pb-0! px-2! text-primary">{portalLabel}</span>
         <div className="flex-1">{navTree}</div>
-        <div className="kt-promo">
-          <strong className="font-sans font-bold text-sm">Fully anonymous</strong>
-          <p className="text-xs opacity-90">
-            Names stay hidden across the learner–tutor line. Every session is moderated.
-          </p>
-        </div>
         <div className="flex flex-col gap-3 px-2 pb-1">
           <div className="flex items-center justify-between gap-2">
             <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/45">
@@ -125,20 +149,16 @@ export default function PortalLayout({
       {/* content column */}
       <div className="flex flex-col min-w-0">
         <header className="kt-topbar">
-          {/* mobile nav */}
-          <details className="lg:hidden relative [&_summary::-webkit-details-marker]:hidden">
-            <summary className="list-none btn btn-ghost btn-sm btn-square" aria-label="Menu">
-              <Menu className="w-5 h-5" />
-            </summary>
-            <div className="absolute left-0 top-full mt-2 w-64 kt-card p-3 z-30 flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <BrandMark size="sm" />
-                <span className="font-sans font-bold text-sm">Katuwang</span>
-              </div>
-              {navTree}
-              {logoutLink}
-            </div>
-          </details>
+          {/* mobile drawer toggle */}
+          <button
+            type="button"
+            className="lg:hidden btn btn-ghost btn-sm btn-square"
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            <Menu className="w-5 h-5" />
+          </button>
 
           <BrandMark size="sm" />
 
@@ -155,9 +175,7 @@ export default function PortalLayout({
           <button type="button" className="kt-icon-btn" aria-label="Help">
             <HelpCircle className="w-4 h-4" />
           </button>
-          <button type="button" className="kt-icon-btn" aria-label="Notifications">
-            <Bell className="w-4 h-4" />
-          </button>
+          <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           <span className="kt-avatar" aria-hidden="true">
             {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
           </span>
@@ -167,6 +185,50 @@ export default function PortalLayout({
           <div className="max-w-7xl mx-auto w-full">{children}</div>
         </main>
       </div>
+
+      {/* mobile drawer */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 lg:hidden ${
+          menuOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation menu"
+        aria-hidden={!menuOpen}
+        className={`kt-sidebar fixed inset-y-0 left-0 z-50 flex w-72 max-w-[82vw] flex-col gap-6 overflow-y-auto p-3 shadow-xl transition-transform duration-300 ease-out lg:hidden ${
+          menuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+          <div className="flex items-center justify-between gap-3 px-2 pt-1">
+            <div className="flex items-center gap-3">
+              <BrandMark />
+              <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm btn-square"
+              aria-label="Close menu"
+              onClick={() => setMenuOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <span className="kt-nav-label pb-0! px-2! text-primary">{portalLabel}</span>
+          <div className="flex-1">{navTree}</div>
+          <div className="flex flex-col gap-3 px-2 pb-1">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/45">
+                Anonymous ID
+              </span>
+              {idNode}
+            </div>
+            {logoutLink}
+          </div>
+        </aside>
     </div>
   );
 }

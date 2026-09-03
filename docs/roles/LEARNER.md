@@ -67,9 +67,9 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 
 ## Notifications (`/learner/notifications`)
 
-- A **Notifications** sidebar item (bell icon) shows an unread-count badge, sourced from `Notification` rows addressed to you.
-- The page lists every notification, newest first (icon by type, message, relative time, unread dot), each linking to the relevant page (e.g. the class you can now enroll in). Visiting the page marks everything read; a "Mark all read" button does the same on demand.
-- Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed).
+- A **Notifications** sidebar item (bell icon) shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both are sourced from `Notification` rows addressed to you and refresh on navigation.
+- The page (and the dropdown) list notifications newest first (icon by type, message, relative time, unread dot). Clicking a row marks **just that one** read and follows its link if it has one; a "Mark all read" button clears the rest.
+- Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed), `REGISTRATION_APPROVED` (your account was approved), `CLASS_CANCELLED` / `CLASS_COMPLETED` (a class you were enrolled in — sent to browse-enrolled learners; request-linked learners get the `TOPIC_REQUEST_*` one instead).
   (`GET /api/notifications`, `POST /api/notifications/read`)
 
 ## Profile (`/learner/profile`)
@@ -219,7 +219,7 @@ Cancel one of the caller's own `OPEN` or `ACCEPTED` requests, or edit an `OPEN` 
 **500** → `{ error }`.
 
 ### `GET /api/notifications`
-The caller's own notifications, newest first, capped at 50. Any authenticated role (not gated to learners).
+The caller's own notifications, newest first, capped at 50. Optional `?take=N` clamps the page size to `1..50` (the topbar bell dropdown uses `?take=8`). Any authenticated role (not gated to learners).
 
 **200** → `{ notifications: [{ id, type, message, link, readAt, createdAt }], unreadCount }`.
 **401** → not authenticated.

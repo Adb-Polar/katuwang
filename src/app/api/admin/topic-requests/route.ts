@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
         include: {
           topics: { select: { topic: true } },
           learner: { select: { id: true, anonymousId: true, firstName: true, lastName: true } },
-          directedTutor: { select: { user: { select: { anonymousId: true } } } },
+          directedTutor: { select: { user: { select: { id: true, anonymousId: true } } } },
           fulfilledClass: {
             select: {
               id: true,
@@ -78,7 +78,9 @@ export async function GET(req: NextRequest) {
         createdAt: r.createdAt,
         topics: r.topics.map((t) => t.topic),
         learner: r.learner,
-        directedTo: r.directedTutor ? { anonymousId: r.directedTutor.user.anonymousId } : null,
+        directedTo: r.directedTutor
+          ? { id: r.directedTutor.user.id, anonymousId: r.directedTutor.user.anonymousId }
+          : null,
         fulfilledClass: r.fulfilledClass
           ? {
               id: r.fulfilledClass.id,

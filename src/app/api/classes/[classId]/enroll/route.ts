@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
+import { notify } from "@/lib/notifications";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
 export async function POST(
@@ -24,6 +25,7 @@ export async function POST(
       include: {
         sessions: true,
         _count: { select: { enrollments: true } },
+        tutorProfile: { select: { userId: true } },
       },
     });
 
@@ -66,13 +68,25 @@ export async function POST(
       );
     }
 
-    const enrollment = await prisma.classEnrollment.create({
-      data: { classId, learnerId: session.user.id },
-    });
+    const enrollment = await prisma.$transaction(async (tx) => {
+      const created = await tx.classEnrollment.create({
+        data: { classId, learnerId: session.user.id },
+      });
 
-    await prisma.topicRequest.updateMany({
-      where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" },
-      data: { status: "ENROLLED" },
+      await tx.topicRequest.updateMany({
+        where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" },
+        data: { status: "ENROLLED" },
+      });
+
+      await notify(
+        tx,
+        existingClass.tutorProfile.userId,
+        "CLASS_ENROLLMENT_NEW",
+        `${session.user.anonymousId} enrolled in your ${existingClass.subject} class (${existingClass.code}).`,
+        `/tutor/classes/${classId}`
+      );
+
+      return created;
     });
 
     return NextResponse.json(enrollment, { status: 201 });
@@ -100,6 +114,12 @@ export async function DELETE(
 
     const existingClass = await prisma.tutorClass.findUnique({
       where: { id: classId },
+      select: {
+        status: true,
+        code: true,
+        subject: true,
+        tutorProfile: { select: { userId: true } },
+      },
     });
 
     if (!existingClass) {
@@ -124,13 +144,23 @@ export async function DELETE(
       );
     }
 
-    await prisma.classEnrollment.delete({
-      where: { id: existingEnrollment.id },
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.classEnrollment.delete({
+        where: { id: existingEnrollment.id },
+      });
 
-    await prisma.topicRequest.updateMany({
-      where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" },
-      data: { status: "ACCEPTED" },
+      await tx.topicRequest.updateMany({
+        where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" },
+        data: { status: "ACCEPTED" },
+      });
+
+      await notify(
+        tx,
+        existingClass.tutorProfile.userId,
+        "CLASS_ENROLLMENT_DROPPED",
+        `${session.user.anonymousId} left your ${existingClass.subject} class (${existingClass.code}).`,
+        `/tutor/classes/${classId}`
+      );
     });
 
     return NextResponse.json({ message: "Unenrolled successfully." });

@@ -6,3 +6,48 @@ Tutor
  [] Schedule detection on request accept
  [] What happen if u unpublish class with enrolled student
  [] What happen if u suspend or baned classes with enrolled students
+
+Admin (2026-09-03 session)
+ [] Question bank drill-down: subject list -> topic list -> questions table;
+    breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)
+ [] Assessment pages: /admin/assessment/{question-bank,requests,results} each
+    load, sidebar "Assessment" group highlights correctly, old
+    /admin/question-bank redirects (Part 11)
+ [] /admin/topic-requests: learner / directed-tutor / linked-class cells are
+    links to the right detail pages; rows-per-page selector changes page size (Part 11)
+ [] Settings -> Assessment: change Questions per attempt / Pass % / Min bank
+    size, blur to save, reload to confirm persisted; CoveragePanel in question
+    bank shows the new values read-only (Part 15)
+ [] Tutor starts an assessment -> served question count + pass mark reflect the
+    global settings, BANK_NOT_READY fires below the global min bank size (Part 15)
+ [] After dropping topic_assessment_configs (Part 17): app boots, Settings ->
+    Assessment loads, question-bank coverage + tutor quiz start still work
+    (no lingering prisma.topicAssessmentConfig call)
+
+Auth (2026-09-03 session)
+ [] Log in with a PENDING account -> lands on /pending-approval (not an inline
+    error); "Back to sign in" returns to /login (Part 14)
+
+Notifications (2026-09-04 session — Changes.md Part 18)
+ [] Topbar bell: click opens the dropdown; outside-click, Escape, and navigating
+    all close it — check in learner, tutor, and admin portals
+ [] Red dot shows on the bell when unread > 0; after clicking a dropdown row (or
+    "Mark all read") and the page refreshes, the dot + sidebar badge update
+ [] Dropdown row WITH a link -> marks that one read AND navigates; row WITHOUT a
+    link -> marks read, no navigation; "View all" opens the notifications page
+ [] Notifications page: opening it no longer marks everything read; clicking one
+    row marks just that row; "Mark all read" still clears all; sidebar badge +
+    bell dot both update without a manual reload
+ [] /admin/notifications renders; "Notifications" appears in the admin sidebar
+    under "Review" and highlights when active
+ [] Admin approves a pending registration -> the applicant sees
+    REGISTRATION_APPROVED after logging in; declining sends no notification
+ [] Admin certifies / rejects a topic certification -> the tutor is notified,
+    link lands on /tutor/assessments
+ [] Admin resolves / dismisses a question request -> the requesting tutor is
+    notified
+ [] Learner enrols in a class -> that class's tutor sees CLASS_ENROLLMENT_NEW
+    naming the learner's STU-xxxx; learner unenrols -> CLASS_ENROLLMENT_DROPPED
+ [] Tutor completes / cancels a class, or admin bans it -> every enrolled
+    learner is notified once; a learner who joined via a topic request gets only
+    the TOPIC_REQUEST_* notification (no duplicate CLASS_* one)

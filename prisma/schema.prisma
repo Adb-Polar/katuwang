@@ -122,9 +122,8 @@ model User {
   passwordResetTokens PasswordResetToken[]
 
   // Assessment authoring / moderation (ADMIN only in practice)
-  authoredQuestions        AssessmentQuestion[]    @relation("AuthoredQuestions")
-  updatedAssessmentConfigs TopicAssessmentConfig[] @relation("UpdatedAssessmentConfigs")
-  resolvedQuestionRequests QuestionRequest[]       @relation("ResolvedQuestionRequests")
+  authoredQuestions        AssessmentQuestion[] @relation("AuthoredQuestions")
+  resolvedQuestionRequests QuestionRequest[]    @relation("ResolvedQuestionRequests")
 
   notifications Notification[]
 
@@ -388,23 +387,12 @@ model AssessmentOption {
   @@map("assessment_options")
 }
 
-// ─── Per-Topic Assessment Config ────────────────────────────────────────────
-// Optional admin override of the global defaults in src/lib/assessmentConfig.ts.
-
-model TopicAssessmentConfig {
-  id            String      @id @default(cuid())
-  subject       SubjectArea
-  topic         String
-  questionCount Int         @default(5) // questions served per attempt
-  passPercent   Int         @default(80) // % correct required to pass
-  minBankSize   Int         @default(5) // active questions required before the topic is assessable
-  updatedById   String?
-  updatedBy     User?       @relation("UpdatedAssessmentConfigs", fields: [updatedById], references: [id], onDelete: SetNull)
-  updatedAt     DateTime    @updatedAt
-
-  @@unique([subject, topic])
-  @@map("topic_assessment_configs")
-}
+// ─── Assessment config ─────────────────────────────────────────────────────
+// One platform-wide set of assessment settings (questionCount / passPercent /
+// minBankSize), stored as `PlatformSetting` rows and read via
+// `getAssessmentConfig()` in src/lib/settings.ts. The old per-(subject, topic)
+// `TopicAssessmentConfig` model was dropped 2026-09-03 — see
+// docs/plans/global-assessment-config.md.
 
 // ─── Assessment Attempt (one quiz run) ──────────────────────────────────────
 
@@ -475,7 +463,8 @@ model Notification {
   id        String    @id @default(cuid())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type      String // TOPIC_REQUEST_DIRECTED | TOPIC_REQUEST_ACCEPTED | TOPIC_REQUEST_REOPENED | TOPIC_REQUEST_FULFILLED
+  type      String // free-text; valid values are the NotificationType union in src/lib/notifications.ts
+  //           (TOPIC_REQUEST_*, REGISTRATION_*, CERTIFICATION_*, QUESTION_REQUEST_*, CLASS_ENROLLMENT_*, CLASS_CANCELLED, CLASS_COMPLETED)
   message   String    @db.Text
   link      String?
   readAt    DateTime?

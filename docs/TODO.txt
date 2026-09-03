@@ -1,16 +1,62 @@
 Pruned 2026-09-03 — everything from the original list is implemented (see
 docs/plans/todo-cleanup-sprint.md, chunks 1-13, plus the Aug 30 follow-up
-batch). Only genuinely open items remain below. Each needs a DB/schema
+batch). Only genuinely open items remain below. Most need a DB/schema
 change, so per CLAUDE.md they need explicit DB-modification confirmation
-before starting — none are safe pure-UI work.
+before starting — the exception is the question-bank bulk import, which is
+API + UI only.
 
 Open items
  - Tutor appeal button for suspended/banned classes — no code exists yet.
    Needs somewhere to persist the appeal (reason, status, admin review) —
    a schema change, not just UI.
+
  - Admin topic/subject management page (add/edit topics & subjects) —
    subjects/topics are currently hardcoded in src/lib/subjectTopics.ts.
    Making them admin-editable means moving them into the DB.
+
  - Community (public) vs. personal (directed) topic requests — this is the
    scope of docs/plans/topic-requests-v2.md ("Not started"). Don't duplicate
    it here; track it in that plan file instead.
+
+ - Admin bulk import for the assessment question bank — today the only way to
+   add questions is QuestionFormModal in QuestionBankManager.tsx, one at a
+   time. A topic isn't assessable until it has minBankSize (default 5) active
+   questions (TopicAssessmentConfig), so real content entry needs a batch
+   path. NO schema change: reuses AssessmentQuestion + AssessmentOption as-is;
+   at most add an AUDIT_ACTIONS.QUESTIONS_IMPORTED constant (a TS const, not a
+   migration).
+   Suggested shape:
+     * New POST /api/admin/assessment-questions/bulk — ADMIN-only, reuses
+       createAssessmentQuestionSchema (src/lib/validations/assessment.ts) per
+       row inside one prisma.$transaction, keeps the existing
+       SUBJECT_TOPICS[subject].includes(topic) check, writes one summary audit
+       row.
+     * New "Import" modal in QuestionBankManager (Questions tab): paste input
+       -> client-side preview table (row #, prompt, subject.topic, valid/error
+       + first message) -> "Import N valid" button.
+   Open design questions (raised with the owner, not yet decided):
+     * Input format — paste JSON (best fit: every write path here is already
+       JSON + Zod, no new dependency, no first-ever file input) vs CSV upload
+       (needs a CSV parser dependency + a file input, and a fixed wide column
+       layout to carry 2-6 options).
+     * Subject/topic per row — inherit from the Questions-tab selectors with a
+       per-row override, vs require subject+topic on every row, vs pick one
+       subject+topic in the import dialog for the whole batch.
+     * Invalid rows — preview then import only the valid rows and report what
+       was skipped, vs all-or-nothing (reject the whole batch if any row
+       fails).
+     * Batch size cap (e.g. 200 questions per request).
+
+ - All tables add a sort button on the table header — no shared table component
+   (~11 hand-rolled tables) and most lists are server-paginated, so real sorting
+   needs per-route API params. Needs its own pass.
+
+ - Notification for a declined registration — the notification system (Changes.md
+   Part 18) reserves the REGISTRATION_REJECTED type but never writes it: a
+   declined applicant is set BANNED in the same transaction and can never sign
+   in to see an in-app row. Deliver the decline reason via a path a BANNED user
+   can actually reach (the blocked-login / pending-approval screen, or email via
+   src/lib/mail.ts).
+
+- all declined registration request is marked as banned create another state
+- add a filters on registration page like in users(reuse the table from that page)

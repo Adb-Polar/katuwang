@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -31,7 +32,7 @@ interface AdminTopicRequest {
   createdAt: string;
   topics: string[];
   learner: { id: string; anonymousId: string; firstName: string; lastName: string };
-  directedTo: { anonymousId: string } | null;
+  directedTo: { id: string; anonymousId: string } | null;
   fulfilledClass: { id: string; code: string; status: string; nextSessionAt: string | null } | null;
 }
 
@@ -52,6 +53,8 @@ export default function TopicRequestModerationTable() {
     total,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     loading,
     refetch,
   } = usePaginatedList<AdminTopicRequest>(
@@ -165,21 +168,40 @@ export default function TopicRequestModerationTable() {
                   {requests.map((r) => (
                     <tr key={r.id} className="text-xs">
                       <td>
-                        <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
-                        <div className="text-2xs text-base-content/50 mt-1">
-                          {r.learner.firstName} {r.learner.lastName}
-                        </div>
+                        <Link
+                          href={`/admin/users/${r.learner.id}`}
+                          className="inline-block hover:opacity-70 transition-opacity"
+                        >
+                          <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                          <div className="text-2xs text-base-content/50 mt-1 hover:underline">
+                            {r.learner.firstName} {r.learner.lastName}
+                          </div>
+                        </Link>
                       </td>
                       <td>
                         <div className="font-semibold text-base-content/80">{r.subject}</div>
                         <div className="text-2xs text-base-content/50">{r.topics.join(", ")}</div>
                       </td>
                       <td className="text-base-content/60">
-                        {r.directedTo ? <AnonymousIdBadge id={r.directedTo.anonymousId} role="TUTOR" /> : "Public"}
+                        {r.directedTo ? (
+                          <Link
+                            href={`/admin/users/${r.directedTo.id}`}
+                            className="inline-block hover:opacity-70 transition-opacity"
+                          >
+                            <AnonymousIdBadge id={r.directedTo.anonymousId} role="TUTOR" />
+                          </Link>
+                        ) : (
+                          "Public"
+                        )}
                       </td>
                       <td className="text-base-content/60">
                         {r.fulfilledClass ? (
-                          <span className="font-mono text-2xs">{r.fulfilledClass.code}</span>
+                          <Link
+                            href={`/admin/classes/${r.fulfilledClass.id}`}
+                            className="font-mono text-2xs link link-hover text-primary"
+                          >
+                            {r.fulfilledClass.code}
+                          </Link>
                         ) : (
                           "—"
                         )}
@@ -221,7 +243,13 @@ export default function TopicRequestModerationTable() {
             </div>
           )}
 
-          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </div>
       </section>
 

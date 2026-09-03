@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { resolveQuestionRequestSchema } from "@/lib/validations/assessment";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { notify } from "@/lib/notifications";
 
 // ─── PATCH: Resolve or Dismiss a Question Request ───────────────────────────
 export async function PATCH(
@@ -20,7 +21,13 @@ export async function PATCH(
 
     const existing = await prisma.questionRequest.findUnique({
       where: { id: requestId },
-      select: { id: true, status: true, subject: true, topic: true },
+      select: {
+        id: true,
+        status: true,
+        subject: true,
+        topic: true,
+        tutorProfile: { select: { userId: true } },
+      },
     });
 
     if (!existing) {
@@ -63,6 +70,18 @@ export async function PATCH(
           reason: `${status} — ${existing.subject} · ${existing.topic}`,
         },
       });
+
+      await notify(
+        tx,
+        existing.tutorProfile.userId,
+        status === "RESOLVED" ? "QUESTION_REQUEST_RESOLVED" : "QUESTION_REQUEST_DISMISSED",
+        status === "RESOLVED"
+          ? `Questions were added for your ${existing.subject} · ${existing.topic} request. You can take the assessment now.`
+          : `Your request to add ${existing.subject} · ${existing.topic} questions was dismissed.${
+              resolutionNote ? ` Note: ${resolutionNote}` : ""
+            }`,
+        "/tutor/assessments"
+      );
 
       return row;
     });

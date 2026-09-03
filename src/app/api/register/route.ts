@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/prisma";
-import { generateAnonymousId } from "@/lib/idGenerator";
-import { Role } from "@prisma/client";
-import { registerSchema, LearnerRegisterInput, TutorRegisterInput } from "@/lib/validations/auth";
+import { registerSchema } from "@/lib/validations/auth";
 import { getSetting } from "@/lib/settings";
+import { registerAccount } from "@/lib/registration";
 
 // ─── Registration Handler ─────────────────────────────────────────────────────
+
+const PENDING_MESSAGE =
+  "Registration received. An administrator needs to approve your account before you can sign in.";
+
+const TUTOR_SUCCESS_MESSAGE =
+  "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Validate request body using Zod schema
     const result = registerSchema.safeParse(body);
-    
+
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid registration inputs.";
       return NextResponse.json({ error: errorMsg }, { status: 400 });
@@ -29,11 +32,40 @@ export async function POST(req: NextRequest) {
 
     const data = result.data;
 
-    if (data.type === "LEARNER") {
-      return await registerLearner(data, requireApproval);
-    } else {
-      return await registerTutor(data, requireApproval);
+    const account = await registerAccount({
+      type: data.type,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email,
+      password: data.password,
+      gradeLevel: data.gradeLevel,
+      section: data.section,
+      contactInfo: data.contactInfo || null,
+      consentGiven: data.consentGiven,
+      requireApproval,
+    });
+
+    if (!account.ok) {
+      return NextResponse.json(
+        { error: "An account with this email already exists." },
+        { status: 409 },
+      );
     }
+
+    const message = account.pendingApproval
+      ? PENDING_MESSAGE
+      : data.type === "TUTOR"
+        ? TUTOR_SUCCESS_MESSAGE
+        : "Registration successful.";
+
+    return NextResponse.json(
+      {
+        message,
+        anonymousId: account.anonymousId,
+        pendingApproval: account.pendingApproval,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
@@ -41,138 +73,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-// ─── Learner Registration Helper ──────────────────────────────────────────────
-
-const PENDING_MESSAGE =
-  "Registration received. An administrator needs to approve your account before you can sign in.";
-
-async function registerLearner(data: LearnerRegisterInput, requireApproval = false) {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    gradeLevel,
-    section,
-    contactInfo,
-    consentGiven,
-  } = data;
-
-  // Check for existing email
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return NextResponse.json(
-      { error: "An account with this email already exists." },
-      { status: 409 }
-    );
-  }
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  // Generate anonymous ID
-  const anonymousId = await generateAnonymousId("LEARNER");
-
-  // Create user
-  const user = await prisma.user.create({
-    data: {
-      anonymousId,
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      role: Role.STUDENT_LEARNER,
-      gradeLevel,
-      section,
-      contactInfo: contactInfo || null,
-      consentGiven,
-      ...(requireApproval ? { status: "PENDING" as const } : {}),
-    },
-    select: {
-      anonymousId: true,
-      email: true,
-      role: true,
-    },
-  });
-
-  return NextResponse.json(
-    {
-      message: requireApproval ? PENDING_MESSAGE : "Registration successful.",
-      anonymousId: user.anonymousId,
-      pendingApproval: requireApproval,
-    },
-    { status: 201 }
-  );
-}
-
-// ─── Tutor Registration Helper ────────────────────────────────────────────────
-
-async function registerTutor(data: TutorRegisterInput, requireApproval = false) {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    gradeLevel,
-    section,
-    contactInfo,
-    consentGiven,
-  } = data;
-
-  // Check for existing email
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    return NextResponse.json(
-      { error: "An account with this email already exists." },
-      { status: 409 }
-    );
-  }
-
-  // Hash password
-  const hashedPassword = await bcrypt.hash(password, 12);
-
-  // Generate anonymous ID
-  const anonymousId = await generateAnonymousId("TUTOR");
-
-  // Create user + tutor profile + subject applications in a transaction
-  const user = await prisma.$transaction(async (tx) => {
-    const newUser = await tx.user.create({
-      data: {
-        anonymousId,
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        role: Role.STUDENT_TUTOR,
-        gradeLevel,
-        section,
-        contactInfo: contactInfo || null,
-        consentGiven,
-        ...(requireApproval ? { status: "PENDING" as const } : {}),
-        tutorProfile: {
-          create: {},
-        },
-      },
-      select: {
-        anonymousId: true,
-        email: true,
-        role: true,
-      },
-    });
-
-    return newUser;
-  });
-
-  return NextResponse.json(
-    {
-      message: requireApproval
-        ? PENDING_MESSAGE
-        : "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.",
-      anonymousId: user.anonymousId,
-      pendingApproval: requireApproval,
-    },
-    { status: 201 }
-  );
 }

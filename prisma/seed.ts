@@ -762,19 +762,20 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
     }
   }
 
-  // One per-topic override so the admin UI shows a non-default config.
-  await prisma.topicAssessmentConfig.upsert({
-    where: { subject_topic: { subject: "MATH", topic: "Algebraic Expressions" } },
-    update: { questionCount: 5, passPercent: 60, minBankSize: 5, updatedById: adminId },
-    create: {
-      subject: "MATH",
-      topic: "Algebraic Expressions",
-      questionCount: 5,
-      passPercent: 60,
-      minBankSize: 5,
-      updatedById: adminId,
-    },
-  });
+  // Global assessment settings (one set for every subject/topic). passPercent is
+  // set below the default so the admin Settings → Assessment UI shows a
+  // non-default value.
+  for (const [key, value] of [
+    ["assessmentQuestionCount", "5"],
+    ["assessmentPassPercent", "60"],
+    ["assessmentMinBankSize", "5"],
+  ] as const) {
+    await prisma.platformSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value },
+    });
+  }
 
   // One open question request for a topic with an empty bank, for the admin queue.
   if (demoTutorProfileId) {

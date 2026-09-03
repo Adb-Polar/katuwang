@@ -12,6 +12,8 @@ const {
   topicRequestFindMany,
   topicRequestUpdate,
   notificationCreate,
+  notificationCreateMany,
+  enrollmentFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
@@ -23,6 +25,8 @@ const {
   topicRequestFindMany: vi.fn(),
   topicRequestUpdate: vi.fn(),
   notificationCreate: vi.fn(),
+  notificationCreateMany: vi.fn(),
+  enrollmentFindMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -37,8 +41,9 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         tutorClass: { update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
+        classEnrollment: { findMany: enrollmentFindMany },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
-        notification: { create: notificationCreate },
+        notification: { create: notificationCreate, createMany: notificationCreateMany },
       }),
   },
 }));
@@ -62,6 +67,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     vi.clearAllMocks();
     sessionUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestFindMany.mockResolvedValue([]);
+    enrollmentFindMany.mockResolvedValue([]);
   });
 
   it("returns 403 when the class was suspended by an admin", async () => {
@@ -279,6 +285,31 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     });
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
+    );
+  });
+
+  it("COMPLETED fans CLASS_COMPLETED out to browse-enrolled learners, skipping request-linked ones", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "SCHEDULED",
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classUpdate.mockResolvedValue({ id: "c1", status: "COMPLETED", code: "C-0001", subject: "MATH", topics: [], sessions: [] });
+    topicRequestFindMany.mockResolvedValue([{ id: "r1", learnerId: "L1", subject: "MATH" }]);
+    enrollmentFindMany.mockResolvedValue([{ learnerId: "L1" }, { learnerId: "L2" }, { learnerId: "L3" }]);
+
+    const res = await patch({ status: "COMPLETED" });
+    expect(res.status).toBe(200);
+    expect(notificationCreateMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: [
+          expect.objectContaining({ userId: "L2", type: "CLASS_COMPLETED" }),
+          expect.objectContaining({ userId: "L3", type: "CLASS_COMPLETED" }),
+        ],
+      })
     );
   });
 });

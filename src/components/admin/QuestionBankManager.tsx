@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ChevronRight, CornerUpLeft } from "lucide-react";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
@@ -40,7 +42,6 @@ interface CoverageRow {
   topic: string;
   activeCount: number;
   config: { questionCount: number; passPercent: number; minBankSize: number };
-  hasOverride: boolean;
   ready: boolean;
   openRequests: number;
 }
@@ -109,35 +110,112 @@ const ATTEMPT_TONE = {
 
 // ─── Root ───────────────────────────────────────────────────────────────────
 
-export default function QuestionBankManager() {
-  const [tab, setTab] = useState<"questions" | "requests" | "results">("questions");
+type QBankTab = "questions" | "requests" | "results";
+
+export default function QuestionBankManager({ only }: { only?: QBankTab } = {}) {
+  const [tab, setTab] = useState<QBankTab>(only ?? "questions");
+  const [selSubject, setSelSubject] = useState<SubjectArea | null>(null);
+  const [selTopic, setSelTopic] = useState<string | null>(null);
   const coverage = useFetchList<CoverageRow>(
     "/api/admin/assessment-questions/coverage",
     "Could not load topic coverage."
   );
   const openRequestTotal = coverage.data.reduce((n, c) => n + c.openRequests, 0);
+  const active = only ?? tab;
+
+  const crumbs =
+    active === "questions" && selSubject
+      ? [
+          {
+            label: "Subjects",
+            onClick: () => {
+              setSelSubject(null);
+              setSelTopic(null);
+            },
+          },
+          selTopic
+            ? { label: selSubject, onClick: () => setSelTopic(null) }
+            : { label: selSubject },
+          ...(selTopic ? [{ label: selTopic }] : []),
+        ]
+      : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {crumbs && <Breadcrumb items={crumbs} />}
+
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <Tabs
-            tabs={[
-              { key: "questions", label: "Questions" },
-              { key: "requests", label: "Requests", count: openRequestTotal },
-              { key: "results", label: "Results" },
-            ]}
-            active={tab}
-            onChange={(k) => setTab(k as typeof tab)}
-          />
-
-          {tab === "questions" && (
-            <QuestionsTab coverage={coverage.data} refetchCoverage={coverage.refetch} />
+          {!only && (
+            <Tabs
+              tabs={[
+                { key: "questions", label: "Questions" },
+                { key: "requests", label: "Requests", count: openRequestTotal },
+                { key: "results", label: "Results" },
+              ]}
+              active={tab}
+              onChange={(k) => setTab(k as QBankTab)}
+            />
           )}
-          {tab === "requests" && <RequestsTab onResolved={coverage.refetch} />}
-          {tab === "results" && <ResultsTab />}
+
+          {active === "questions" && (
+            <QuestionsTab
+              coverage={coverage.data}
+              refetchCoverage={coverage.refetch}
+              selSubject={selSubject}
+              setSelSubject={setSelSubject}
+              selTopic={selTopic}
+              setSelTopic={setSelTopic}
+            />
+          )}
+          {active === "requests" && <RequestsTab onResolved={coverage.refetch} />}
+          {active === "results" && <ResultsTab />}
         </div>
       </section>
+    </div>
+  );
+}
+
+// ─── Breadcrumb ─────────────────────────────────────────────────────────────
+
+function Breadcrumb({
+  items,
+}: {
+  items: { label: string; onClick?: () => void }[];
+}) {
+  // last crumb that has a handler = the immediate parent level
+  const back = [...items].reverse().find((it) => it.onClick)?.onClick;
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap rounded-xl border border-base-200 bg-base-200/30 px-2 py-1.5">
+      {back && (
+        <button
+          onClick={back}
+          className="btn btn-ghost btn-xs gap-1 text-2xs font-semibold text-base-content/70 hover:text-primary"
+        >
+          <CornerUpLeft className="w-3.5 h-3.5" />
+          Back
+        </button>
+      )}
+      <span className="flex items-center gap-1 flex-wrap text-xs">
+        {items.map((it, i) => (
+          <span key={i} className="flex items-center gap-1">
+            {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-base-content/30" />}
+            {it.onClick ? (
+              <button
+                onClick={it.onClick}
+                className="rounded-md px-1.5 py-0.5 font-medium text-primary hover:bg-primary/10 cursor-pointer transition-colors"
+              >
+                {it.label}
+              </button>
+            ) : (
+              <span className="rounded-md bg-base-100 border border-base-200 px-1.5 py-0.5 font-semibold text-base-content/80">
+                {it.label}
+              </span>
+            )}
+          </span>
+        ))}
+      </span>
     </div>
   );
 }
@@ -147,19 +225,27 @@ export default function QuestionBankManager() {
 function QuestionsTab({
   coverage,
   refetchCoverage,
+  selSubject,
+  setSelSubject,
+  selTopic,
+  setSelTopic,
 }: {
   coverage: CoverageRow[];
   refetchCoverage: () => void;
+  selSubject: SubjectArea | null;
+  setSelSubject: (s: SubjectArea | null) => void;
+  selTopic: string | null;
+  setSelTopic: (t: string | null) => void;
 }) {
-  const [subject, setSubject] = useState<SubjectArea>("MATH");
-  const [topic, setTopic] = useState<string>(SUBJECT_TOPICS.MATH[0]);
   const [success, setSuccess] = useState("");
   const [editTarget, setEditTarget] = useState<Question | null>(null);
   const [showAdd, setShowAdd] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const topics = SUBJECT_TOPICS[subject];
+  const subject: SubjectArea = selSubject ?? SUBJECTS[0];
+  const topic: string = selTopic ?? SUBJECT_TOPICS[subject][0];
+
   const cov = useMemo(
     () => coverage.find((c) => c.subject === subject && c.topic === topic),
     [coverage, subject, topic]
@@ -229,42 +315,99 @@ function QuestionsTab({
     }
   };
 
+  // ─── Level 1: subject picker ──────────────────────────────────────────────
+  if (!selSubject) {
+    return (
+      <div className="space-y-4">
+        <FeedbackBanner variant="success" message={success || null} />
+        <p className="text-2xs text-base-content/50">
+          Pick a subject to drill into its topics and questions.
+        </p>
+        <div className="border border-base-200 rounded-xl divide-y divide-base-200">
+          {SUBJECTS.map((s) => {
+            const rows = coverage.filter((c) => c.subject === s);
+            const totalTopics = SUBJECT_TOPICS[s].length;
+            const ready = rows.filter((r) => r.ready).length;
+            const activeQ = rows.reduce((n, r) => n + r.activeCount, 0);
+            const openReq = rows.reduce((n, r) => n + r.openRequests, 0);
+            return (
+              <button
+                key={s}
+                onClick={() => setSelSubject(s)}
+                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-base-200/40 transition-colors cursor-pointer"
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-base-content/90">{s}</span>
+                  <span className="block text-2xs text-base-content/50">
+                    {totalTopics} topics · {activeQ} active question{activeQ === 1 ? "" : "s"}
+                  </span>
+                </span>
+                <span className="flex items-center gap-2 shrink-0">
+                  {openReq > 0 && (
+                    <StatusBadge
+                      tone="info"
+                      label={`${openReq} req`}
+                      size="xs"
+                    />
+                  )}
+                  <StatusBadge
+                    tone={ready === totalTopics ? "success" : "warning"}
+                    label={`${ready}/${totalTopics} ready`}
+                    size="xs"
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Level 2: topic picker for the chosen subject ─────────────────────────
+  if (!selTopic) {
+    return (
+      <div className="space-y-4">
+        <FeedbackBanner variant="success" message={success || null} />
+        <div className="border border-base-200 rounded-xl divide-y divide-base-200">
+          {SUBJECT_TOPICS[selSubject].map((t) => {
+            const row = coverage.find((c) => c.subject === selSubject && c.topic === t);
+            const active = row?.activeCount ?? 0;
+            const min = row?.config.minBankSize ?? 5;
+            const isReady = row?.ready ?? false;
+            return (
+              <button
+                key={t}
+                onClick={() => setSelTopic(t)}
+                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-base-200/40 transition-colors cursor-pointer"
+              >
+                <span className="text-sm text-base-content/80">{t}</span>
+                <span className="flex items-center gap-2 shrink-0">
+                  {row && row.openRequests > 0 && (
+                    <StatusBadge tone="info" label={`${row.openRequests} req`} size="xs" />
+                  )}
+                  <StatusBadge
+                    tone={isReady ? "success" : "warning"}
+                    label={isReady ? `Ready · ${active}` : `${active} / ${min}`}
+                    size="xs"
+                  />
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Level 3: questions for subject + topic ───────────────────────────────
   return (
     <div className="space-y-4">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={editTarget || showAdd || deleteTarget ? null : error || null} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <select
-          value={subject}
-          onChange={(e) => {
-            const s = e.target.value as SubjectArea;
-            setSubject(s);
-            setTopic(SUBJECT_TOPICS[s][0]);
-          }}
-          className="select select-bordered select-sm text-xs focus:select-primary"
-        >
-          {SUBJECTS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          className="select select-bordered select-sm text-xs focus:select-primary"
-        >
-          {topics.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
-
       {cov && (
-        <CoveragePanel row={cov} onSaved={refetchCoverage} />
+        <CoveragePanel row={cov} />
       )}
 
       <div className="flex justify-end">
@@ -416,45 +559,13 @@ function QuestionsTab({
   );
 }
 
-// ─── Coverage + per-topic config panel ──────────────────────────────────────
+// ─── Coverage readiness strip ──────────────────────────────────────────────
+// Assessment tuning is platform-wide now (Settings → Assessment); this panel is
+// read-only and just shows how this topic's bank measures up.
 
-function CoveragePanel({ row, onSaved }: { row: CoverageRow; onSaved: () => void }) {
-  const [questionCount, setQuestionCount] = useState(String(row.config.questionCount));
-  const [passPercent, setPassPercent] = useState(String(row.config.passPercent));
-  const [minBankSize, setMinBankSize] = useState(String(row.config.minBankSize));
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [saved, setSaved] = useState(false);
-
-  const save = async () => {
-    setSaving(true);
-    setError("");
-    try {
-      const res = await fetch("/api/admin/assessment-configs", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject: row.subject,
-          topic: row.topic,
-          questionCount: Number(questionCount),
-          passPercent: Number(passPercent),
-          minBankSize: Number(minBankSize),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save config.");
-      setSaved(true);
-      onSaved();
-      setTimeout(() => setSaved(false), 3000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save config.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
+function CoveragePanel({ row }: { row: CoverageRow }) {
   return (
-    <div className="border border-base-200 bg-base-200/20 rounded-xl p-3 space-y-3 text-xs">
+    <div className="border border-base-200 bg-base-200/20 rounded-xl p-3 space-y-2 text-xs">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <span className="font-semibold text-base-content/80">
           {row.activeCount} active question{row.activeCount === 1 ? "" : "s"}
@@ -470,52 +581,14 @@ function CoveragePanel({ row, onSaved }: { row: CoverageRow; onSaved: () => void
         )}
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        <label className="flex flex-col gap-1">
-          <span className="text-2xs text-base-content/60">Questions / attempt</span>
-          <input
-            type="number"
-            min={1}
-            max={50}
-            value={questionCount}
-            onChange={(e) => setQuestionCount(e.target.value)}
-            className="input input-bordered input-xs text-xs"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-2xs text-base-content/60">Pass %</span>
-          <input
-            type="number"
-            min={1}
-            max={100}
-            value={passPercent}
-            onChange={(e) => setPassPercent(e.target.value)}
-            className="input input-bordered input-xs text-xs"
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-2xs text-base-content/60">Min bank size</span>
-          <input
-            type="number"
-            min={1}
-            max={200}
-            value={minBankSize}
-            onChange={(e) => setMinBankSize(e.target.value)}
-            className="input input-bordered input-xs text-xs"
-          />
-        </label>
-      </div>
-
-      {error && <p className="text-2xs text-error">{error}</p>}
-      <div className="flex items-center gap-2">
-        <button onClick={save} disabled={saving} className="btn btn-neutral btn-xs text-2xs cursor-pointer">
-          {saving && <span className="loading loading-spinner loading-xs" />}
-          Save topic settings
-        </button>
-        {saved && <span className="text-2xs text-success">Saved.</span>}
-        {!row.hasOverride && (
-          <span className="text-2xs text-base-content/40">using defaults</span>
-        )}
+      <div className="flex items-center justify-between gap-3 flex-wrap text-2xs text-base-content/50">
+        <span>
+          Platform assessment settings: {row.config.questionCount} questions / attempt ·{" "}
+          {row.config.passPercent}% to pass · min bank {row.config.minBankSize}
+        </span>
+        <Link href="/admin/settings" className="text-primary hover:underline font-medium">
+          Change in Settings → Assessment
+        </Link>
       </div>
     </div>
   );
