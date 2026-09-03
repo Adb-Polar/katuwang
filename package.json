@@ -17,9 +17,9 @@
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.23.0",
-    "mariadb": "^3.5.3",
-    "next": "16.2.9",
-    "next-auth": "^4.24.14",
+    "mariadb": "^3.5.4",
+    "next": "16.2.12",
+    "next-auth": "^4.24.15",
     "prisma": "^7.8.0",
     "prisma-client": "^0.0.0",
     "react": "19.2.4",
@@ -35,12 +35,31 @@
     "@types/react-dom": "^19",
     "daisyui": "^5.6.13",
     "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint-config-next": "16.2.12",
     "prisma-erd-generator": "^3.2.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.11"
+  },
+  "pnpm": {
+    "overrides": {
+      "mariadb": "^3.5.4",
+      "mysql2": "^3.24.3",
+      "hono": "^4.13.5",
+      "@hono/node-server": "^2.1.1",
+      "js-yaml": "^4.3.2",
+      "fast-uri": "^4.1.4",
+      "brace-expansion@1": "^1.1.18",
+      "brace-expansion@5": "^5.0.9",
+      "postcss": "^8.5.26",
+      "browserslist": "^4.28.7",
+      "nanoid": "^3.3.18",
+      "deepmerge-ts": "^8.0.2",
+      "uuid": "^11.1.1",
+      "valibot": "^1.4.2",
+      "sharp": "^0.35.4"
+    }
   }
 }
