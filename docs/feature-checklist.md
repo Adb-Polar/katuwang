@@ -28,7 +28,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Authentication (login/logout) | ✅ | NextAuth credentials + JWT, `/login`, `/logout` |
 | Auto-generated anonymous usernames (`STU-####`/`TUT-####`) | ✅ | `generateAnonymousId()` in `src/lib/idGenerator.ts`, atomic via `IdCounter` |
 | Password hashing (bcrypt) | ✅ | used in `/api/register`, auth callbacks |
-| Password reset flow | ✅ | `/forgot-password`, `/reset-password`, `PasswordResetToken` model (token hashed, expiring, single-use) |
+| Password reset flow | ✅ | `/forgot-password`, `/reset-password`, `PasswordResetToken` model (token hashed, expiring, single-use); reset link emailed via `src/lib/mail.ts` (Nodemailer/SMTP, env-configured, console fallback when unset) |
 | Role-Based Access Control | ✅ | `src/proxy.ts` middleware + per-route `getServerSession` checks |
 | Profile management | ✅ | `/learner/profile`, `/tutor/profile`, `ProfileEditForm`/`ProfileView` |
 | Admin approval of new registrations (optional gate) | ✅ | `AccountStatus.PENDING`, `/admin/registrations`, `requireRegistrationApproval` platform setting |

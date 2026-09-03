@@ -31,12 +31,38 @@ pnpm install
 #   DATABASE_URL=
 #   NEXTAUTH_URL=
 #   NEXTAUTH_SECRET=
+#   # optional SMTP — unset means reset links are logged to the server
+#   # console instead of emailed (fine for local dev):
+#   SMTP_HOST=
+#   SMTP_PORT=            # default 587
+#   SMTP_USER=
+#   SMTP_PASS=
+#   SMTP_SECURE=          # "true" for port 465
+#   MAIL_FROM=            # e.g. "Katuwang <no-reply@example.com>"
 
 npx prisma generate
 npx prisma db push        # sync schema with your local database
 
 pnpm dev                  # http://localhost:3000
 ```
+
+### Email
+
+Transactional email (currently just the password-reset link) goes out over plain
+SMTP via Nodemailer — configured entirely by the `SMTP_*` / `MAIL_FROM` env vars
+above, no provider SDK. If `SMTP_HOST` / `MAIL_FROM` are unset, `sendMail()`
+logs what it *would* have sent and the flow still completes, so local dev needs
+no setup.
+
+Zero-cost relays that work without owning a domain:
+
+- **Brevo** — verify a single sender address, 300 emails/day free. Use its SMTP
+  host/port/login.
+- **Gmail / Google Workspace** — `smtp.gmail.com:587` with an
+  [App Password](https://support.google.com/accounts/answer/185833) (needs 2FA).
+- **Mailpit** (local only) — `docker run -p 1025:1025 -p 8025:8025 axllent/mailpit`,
+  then `SMTP_HOST=localhost SMTP_PORT=1025`, and read the mail at
+  `http://localhost:8025`.
 
 Other common commands:
 

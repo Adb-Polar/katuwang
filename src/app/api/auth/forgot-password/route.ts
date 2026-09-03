@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validations/passwordReset";
 import { generateResetToken, hashResetToken, resetTokenExpiry } from "@/lib/passwordReset";
+import { sendMail, renderPasswordResetEmail } from "@/lib/mail";
 
 // Neutral response — never reveals whether an account matched.
 const NEUTRAL = {
@@ -45,10 +46,15 @@ export async function POST(req: NextRequest) {
         }),
       ]);
 
-      // TODO(mail): no mail transport is configured yet. Until one is wired up,
-      // the reset link is logged server-side so the flow is testable in dev.
-      const resetUrl = `${req.nextUrl.origin}/reset-password?token=${rawToken}`;
-      console.info(`[password-reset] link for user ${user.id}: ${resetUrl}`);
+      const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
+      const resetUrl = `${base}/reset-password?token=${rawToken}`;
+      try {
+        await sendMail({ to: email, ...renderPasswordResetEmail(resetUrl) });
+      } catch (err) {
+        // Never surface a mail failure to the caller — the response must stay
+        // neutral, or a send error leaks that this account exists.
+        console.error("[password-reset] failed to send reset email:", err);
+      }
     }
 
     return NextResponse.json(NEUTRAL, { status: 200 });

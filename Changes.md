@@ -14,6 +14,7 @@
 | [4](#part-4) | **Style — soften global type weight** | Apfel Grotezk has no 600 face, so every `font-semibold`/`font-bold` run snapped to the heavy 700 Fett face ("all bold letters too bold"). | Pinned `--font-weight-medium/semibold/bold` to `500` in `globals.css`, routed the hard-coded `.kt-*` weights + raw `b/strong` through those tokens, and fixed two DaisyUI `.stat-value` numbers in `ReportsView`; committed on branch `redesign/tailwind-ui`. |
 | [5](#part-5) | **Topic Requests v2 — public/directed, accept-to-class, notifications, admin moderation** | Richer request lifecycle: a request is public or directed to one tutor; a tutor accepts by auto-creating a full class (CERTIFIED topics only); the request tracks OPEN → ACCEPTED → ENROLLED → FULFILLED and re-opens if the linked class is cancelled/banned. Adds a real DB-backed notification system and an Admin "Topic Requests" moderation page. | `TopicRequestStatus` gains `ACCEPTED`/`ENROLLED`, `TopicRequest.directedTutorProfileId`, new `Notification` model (migration `20260903000000_topic_requests_directed_and_notifications`, applied non-destructively around dev-DB drift); new libs `notifications.ts` + `topicRequestVisibility.ts`; new/changed routes across `learner/topic-requests`, `tutor/topic-requests/[id]/accept` (replaces `/fulfill`), `classes/[classId]/enroll`, `tutor|admin/classes/[classId]`, `admin/topic-requests`, `notifications`; notification nav badge + pages in learner/tutor portals; `AcceptRequestModal` + shared `ClassScheduleFields`; seed demo data; 51 test files / 382 tests passing. |
 | [6](#part-6) | **Dependency security bump (`pnpm audit` fixes)** | `pnpm audit` found 54 vulnerabilities (1 critical, 30 high, 22 moderate, 1 low). Bumped direct deps and pinned transitive ones to close all of them. | `next` 16.2.9→16.2.12, `next-auth` 4.24.14→4.24.15 (fixes a **critical** email-normalizer homoglyph auth bypass plus a high-severity `getToken()` issue and a moderate OAuth-cookie issue), `mariadb` 3.5.3→3.5.4; 15 transitive packages pinned via `pnpm.overrides` (`mysql2`, `hono`, `@hono/node-server`, `js-yaml`, `fast-uri`, `brace-expansion` 1.x/5.x, `postcss`, `browserslist`, `nanoid`, `deepmerge-ts`, `uuid` 8→11, `valibot`, `sharp` — most are dev-tooling/Prisma-CLI-internal, `sharp`/`uuid`/`mariadb` are runtime). `pnpm audit` now reports 0 vulnerabilities; `tsc`/`lint`/`test` (382/382)/`build` all verified green after the bump. Not requested as part of any task in progress at the time — done opportunistically by an agent mid-unrelated-task; flagged to the project owner before committing. |
+| [7](#part-7) | **Email mailer (Nodemailer + SMTP) + password-reset email** | The password-reset flow was complete except for delivery — `forgot-password` only `console.info`'d the link (`TODO(mail)`). Added a provider-agnostic mailer and wired the reset email; unconfigured environments keep the console-log behaviour. | New `src/lib/mail.ts`: `+nodemailer` (pinned `^7` for the next-auth peer range) `+@types/nodemailer`; `globalThis`-cached SMTP transporter mirroring `src/lib/prisma.ts`, all config from env (`SMTP_HOST/PORT/USER/PASS/SECURE`, `MAIL_FROM`), `isMailConfigured()`, `sendMail()` (logs + no-ops when unconfigured), `renderPasswordResetEmail()` (minimal inline-HTML + plain-text, no templating deps, expiry copy derived from `RESET_TOKEN_TTL_MS`). `forgot-password/route.ts` sends the link via its own try/catch so a send failure never breaks the neutral anti-enumeration 200; reset URL base is `NEXTAUTH_URL ?? req.nextUrl.origin`. Tests: new `src/lib/__tests__/mail.test.ts` (7) + 2 forgot-password cases (link emailed with raw token; neutral 200 on send failure) — 52 files / 391 passing. Docs: `README.md` env block + Email section (Brevo single-sender / Gmail App Password / Mailpit); `todo-cleanup-sprint.md` + `feature-checklist.md` updated. Not committed. |
 
 ---
 
@@ -408,3 +409,107 @@ Implemented `docs/plans/topic-requests-v2.md` in full. Replaces the old "learner
 | `pnpm test` | 382/382 passing |
 | `pnpm build` | succeeds, all routes compile including the new topic-requests/notifications ones |
 | `pnpm audit` | 0 vulnerabilities |
+
+---
+
+<a id="part-7"></a>
+
+## Part 7 — Feature: Email mailer (Nodemailer + SMTP) + password-reset email
+
+### Overview
+
+The password-recovery flow (Part of Chunk 12 / `20260831000000_password_recovery`) was
+functionally complete — hashed single-use tokens, 30-minute TTL, `/forgot-password` +
+`/reset-password` UI, neutral anti-enumeration response — but had **no email delivery**.
+`forgot-password/route.ts` only `console.info`'d the reset link behind a `TODO(mail)`.
+
+This change adds a small, provider-agnostic mailer and wires the reset email. Environments
+with no SMTP configured keep the exact old behaviour (link logged, flow completes), so local
+dev still needs zero setup.
+
+**Decisions (with the project owner):** Nodemailer over plain SMTP — no vendor SDK, no
+lock-in before a deploy host is chosen. No sending domain available, so the documented
+zero-cost relays are Brevo single-sender (300/day) or a Gmail/Workspace App Password.
+Config lives entirely in `process.env` (no DB row, no secrets in the app DB). Scope limited
+to the mailer + the one blocked flow — registration approve/decline and "password changed"
+emails are explicitly deferred. Email bodies are string-built HTML + plain-text, no
+`react-email` dependency.
+
+### Dependencies (`package.json`)
+
+- `+ nodemailer ^7` — pinned to `^7` (installed 7.0.13) to satisfy the `next-auth@4.24.15`
+  peer range (`nodemailer@^7.0.7`) and avoid an unmet-peer warning; the `createTransport` /
+  `sendMail` API used here is identical across 7–9.
+- `+ @types/nodemailer` (dev).
+
+### New file — `src/lib/mail.ts`
+
+- Reads once at module load: `SMTP_HOST`, `SMTP_PORT` (default 587), `SMTP_USER`,
+  `SMTP_PASS`, `SMTP_SECURE` (`"true"` → TLS-on-connect; defaults true only on port 465),
+  `MAIL_FROM`.
+- `isMailConfigured()` — true when `SMTP_HOST` **and** `MAIL_FROM` are set.
+- Transporter cached on `globalThis` (`globalForMail.mailTransporter`), built lazily via
+  `nodemailer.createTransport(...)` — same HMR-survival pattern as `src/lib/prisma.ts`.
+  `auth` is omitted entirely when `SMTP_USER` is unset (open relay / Mailpit).
+- `sendMail({ to, subject, html, text })` — if unconfigured, logs
+  `[mail] not configured — would send: { to, subject }` and returns; otherwise
+  `transporter.sendMail({ from: MAIL_FROM, ... })`. Throws on transport failure (caller
+  decides).
+- `renderPasswordResetEmail(resetUrl)` → `{ subject, html, text }`. Minimal inline-styled
+  HTML (heading, button, raw link, expiry/ignore note) + plain-text equivalent. Expiry copy
+  is derived from `RESET_TOKEN_TTL_MS` (imported from `src/lib/passwordReset.ts`), not a
+  magic number.
+
+### Wiring — `src/app/api/auth/forgot-password/route.ts`
+
+Replaced the `TODO(mail)` stub. Inside the existing non-BANNED-match block, after the token
+`$transaction`:
+
+```ts
+const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
+const resetUrl = `${base}/reset-password?token=${rawToken}`;
+try {
+  await sendMail({ to: email, ...renderPasswordResetEmail(resetUrl) });
+} catch (err) {
+  console.error("[password-reset] failed to send reset email:", err);
+}
+```
+
+The dedicated try/catch is deliberate — it keeps a send failure from becoming a 500, which
+would leak account existence via status/timing. `to: email` is the address the requester
+submitted (already matched against `email` OR `recoveryEmail` in the lookup). The reset-URL
+base now prefers `NEXTAUTH_URL` so links are correct behind a reverse proxy.
+
+### Tests (Vitest)
+
+- **A** `src/lib/__tests__/mail.test.ts` (7) — `nodemailer` mocked; per-scenario fresh
+  import via `vi.resetModules()` + `vi.stubEnv` (+ clears the `globalThis` transporter
+  cache). Covers: `isMailConfigured()` both ways; `sendMail` no-op + log when unconfigured;
+  send with the configured `from` when configured; single transporter reused across calls;
+  transport error propagates; `renderPasswordResetEmail` puts the URL in both bodies and
+  states the 30-minute expiry.
+- **M** `src/app/api/auth/forgot-password/__tests__/route.test.ts` — `vi.mock("@/lib/mail")`;
+  + "emails the reset link (with the raw token) to the submitted address" and + "still
+  returns the neutral 200 when the email send fails" (token still issued). Existing cases
+  unchanged.
+
+### Docs
+
+- **M** `README.md` — `.env` block gains the optional `SMTP_*` / `MAIL_FROM` vars with the
+  "unset → logged to console" note; new **Email** subsection (Brevo single-sender, Gmail
+  App Password, Mailpit for local dev).
+- **M** `docs/plans/todo-cleanup-sprint.md` — Chunk 12 "not done: no email transport"
+  cleared; follow-up paragraph added.
+- **M** `docs/feature-checklist.md` — password-reset row notes email delivery via
+  `src/lib/mail.ts`.
+
+### Verification (2026-09-03)
+
+| Command | Result |
+|---|---|
+| `pnpm exec tsc --noEmit` | clean |
+| `pnpm lint` | 0 errors (same 5 pre-existing unrelated warnings) |
+| `pnpm test` | 52 files / 391 tests passing (was 51 / 382 — +`mail.test.ts`, +2 forgot-password cases) |
+
+Manual end-to-end (Mailpit / unconfigured / dead-port) not yet run in this environment —
+steps are in the plan file. Not committed. Not pushed.

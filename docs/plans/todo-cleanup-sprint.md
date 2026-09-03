@@ -485,8 +485,10 @@ new password.
   recovery), `resetPasswordSchema` (token + password min 8).
 - `POST /api/auth/forgot-password`: looks up `email OR recoveryEmail`; for a non-BANNED
   match, invalidates prior unused tokens then creates a new hashed one in a `$transaction`;
-  **always** returns the same neutral 200 (no user enumeration). No mailer configured —
-  `TODO(mail)`; reset link is `console.info`-logged for dev.
+  **always** returns the same neutral 200 (no user enumeration). Emails the reset link via
+  `sendMail()` / `renderPasswordResetEmail()` from `src/lib/mail.ts`, wrapped in its own
+  try/catch so a send failure never breaks the neutral response. (2026-09-03: mailer added —
+  see below.)
 - `POST /api/auth/reset-password`: validates token by hash, rejects used/expired,
   `bcrypt.hash(pw, 12)`, marks `usedAt` (single-use) in a `$transaction`.
 - Pages: `src/app/forgot-password/page.tsx`, `src/app/reset-password/page.tsx` (+
@@ -497,8 +499,18 @@ new password.
   `.../reset-password/__tests__/route.test.ts` (validation 400, hashed single-use token,
   recovery-email match, neutral no-match, banned skip, used/expired reject, 500). `tsc` /
   `lint` / 279 tests green.
-- **Not done:** no email transport (token only logged); no rate limiting on
-  `forgot-password`; reset works for SUSPENDED accounts (only BANNED excluded).
+- **Not done:** no rate limiting on `forgot-password`; reset works for SUSPENDED accounts
+  (only BANNED excluded).
+
+**Follow-up (2026-09-03): email transport added.** `src/lib/mail.ts` — Nodemailer over
+plain SMTP, configured only by env (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`,
+`SMTP_SECURE`, `MAIL_FROM`), transporter cached on `globalThis` like `src/lib/prisma.ts`.
+`isMailConfigured()`, `sendMail()` (no-ops with a log line when unconfigured — the old dev
+behaviour), `renderPasswordResetEmail()` (minimal HTML + plain-text, no templating deps).
+Wired into `forgot-password/route.ts`. Tests: `src/lib/__tests__/mail.test.ts` (7) + 2 new
+forgot-password cases (link emailed with the raw token; neutral 200 preserved on send
+failure). Docs: relay options (Brevo single-sender / Gmail App Password / Mailpit) in
+`README.md`. `tsc` / `lint` / 391 tests green.
 
 ## Chunk 13 — User registration approval queue
 

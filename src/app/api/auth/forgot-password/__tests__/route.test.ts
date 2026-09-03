@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { findFirstMock, updateManyMock, createMock, transactionMock } = vi.hoisted(() => ({
-  findFirstMock: vi.fn(),
-  updateManyMock: vi.fn(),
-  createMock: vi.fn(),
-  transactionMock: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
-}));
+const { findFirstMock, updateManyMock, createMock, transactionMock, sendMailMock } = vi.hoisted(
+  () => ({
+    findFirstMock: vi.fn(),
+    updateManyMock: vi.fn(),
+    createMock: vi.fn(),
+    transactionMock: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
+    sendMailMock: vi.fn(),
+  })
+);
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -14,6 +17,11 @@ vi.mock("@/lib/prisma", () => ({
     passwordResetToken: { updateMany: updateManyMock, create: createMock },
     $transaction: transactionMock,
   },
+}));
+
+vi.mock("@/lib/mail", () => ({
+  sendMail: sendMailMock,
+  renderPasswordResetEmail: (url: string) => ({ subject: "s", html: url, text: url }),
 }));
 
 import { POST } from "@/app/api/auth/forgot-password/route";
@@ -54,6 +62,26 @@ describe("POST /api/auth/forgot-password", () => {
     expect(created.userId).toBe("U1");
     expect(created.tokenHash).toMatch(/^[a-f0-9]{64}$/); // sha256 hex, not the raw token
     expect(created.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  });
+
+  it("emails the reset link (with the raw token) to the submitted address", async () => {
+    findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
+    await POST(makeRequest({ email: "user@example.com" }));
+
+    expect(sendMailMock).toHaveBeenCalledTimes(1);
+    const arg = sendMailMock.mock.calls[0][0];
+    expect(arg.to).toBe("user@example.com");
+    expect(arg.html).toMatch(/\/reset-password\?token=[a-f0-9]{64}$/);
+  });
+
+  it("still returns the neutral 200 when the email send fails", async () => {
+    findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
+    sendMailMock.mockRejectedValueOnce(new Error("smtp down"));
+
+    const res = await POST(makeRequest({ email: "user@example.com" }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).message).toBe(NEUTRAL_MSG);
+    expect(createMock).toHaveBeenCalledTimes(1); // token was still issued
   });
 
   it("matches on the recovery email as well as the primary", async () => {
