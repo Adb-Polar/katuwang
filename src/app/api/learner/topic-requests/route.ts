@@ -4,7 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { createTopicRequestSchema } from "@/lib/validations/match";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SubjectArea } from "@prisma/client";
+import { subjectExists, topicExists } from "@/lib/subjects";
 import { notify } from "@/lib/notifications";
 
 const MAX_OPEN_REQUESTS = 10;
@@ -116,7 +117,10 @@ export async function POST(req: NextRequest) {
 
     const { subject, topics, gradeLevel, preferredSlots, note, directedTutorId } = result.data;
 
-    if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
+    if (!(await subjectExists(subject))) {
+      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
+    }
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t)))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -149,7 +153,7 @@ export async function POST(req: NextRequest) {
       const request = await tx.topicRequest.create({
         data: {
           learnerId: session.user.id,
-          subject,
+          subject: subject as SubjectArea,
           gradeLevel,
           note: note || null,
           directedTutorProfileId,

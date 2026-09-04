@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SubjectArea } from "@prisma/client";
 import { startAssessmentSchema } from "@/lib/validations/assessment";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { topicExists } from "@/lib/subjects";
 import { getAssessmentConfig } from "@/lib/settings";
 import { pickQuestionIds } from "@/lib/assessmentPicker";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
@@ -79,8 +80,9 @@ export async function POST(req: NextRequest) {
     }
 
     const { subject, topic } = result.data;
+    const subjectEnum = subject as SubjectArea;
 
-    if (!SUBJECT_TOPICS[subject].includes(topic)) {
+    if (!(await topicExists(subject, topic))) {
       return NextResponse.json(
         { error: `"${topic}" is not a valid topic for ${subject}.` },
         { status: 400 }
@@ -89,7 +91,7 @@ export async function POST(req: NextRequest) {
 
     // Resume an unfinished attempt rather than starting a second one.
     const inProgress = await prisma.assessmentAttempt.findFirst({
-      where: { tutorProfileId: tutorProfile.id, subject, topic, status: "IN_PROGRESS" },
+      where: { tutorProfileId: tutorProfile.id, subject: subjectEnum, topic, status: "IN_PROGRESS" },
       include: ATTEMPT_INCLUDE,
     });
     if (inProgress) {
@@ -97,7 +99,7 @@ export async function POST(req: NextRequest) {
     }
 
     const certification = await prisma.topicCertification.findUnique({
-      where: { tutorProfileId_subject_topic: { tutorProfileId: tutorProfile.id, subject, topic } },
+      where: { tutorProfileId_subject_topic: { tutorProfileId: tutorProfile.id, subject: subjectEnum, topic } },
       select: { status: true },
     });
     if (certification?.status === "CERTIFIED") {
@@ -110,7 +112,7 @@ export async function POST(req: NextRequest) {
     const config = await getAssessmentConfig();
 
     const activeCount = await prisma.assessmentQuestion.count({
-      where: { subject, topic, active: true },
+      where: { subject: subjectEnum, topic, active: true },
     });
     if (activeCount < config.minBankSize) {
       return NextResponse.json(
@@ -126,14 +128,14 @@ export async function POST(req: NextRequest) {
 
     const attempt = await prisma.$transaction(async (tx) => {
       const agg = await tx.assessmentAttempt.aggregate({
-        where: { tutorProfileId: tutorProfile.id, subject, topic },
+        where: { tutorProfileId: tutorProfile.id, subject: subjectEnum, topic },
         _max: { attemptNo: true },
       });
-      const attemptNo = (agg._max.attemptNo ?? 0) + 1;
+      const attemptNo = (agg._max?.attemptNo ?? 0) + 1;
 
       const questionIds = await pickQuestionIds(tx, {
         tutorProfileId: tutorProfile.id,
-        subject,
+        subject: subjectEnum,
         topic,
         count,
       });
@@ -141,7 +143,7 @@ export async function POST(req: NextRequest) {
       return tx.assessmentAttempt.create({
         data: {
           tutorProfileId: tutorProfile.id,
-          subject,
+          subject: subjectEnum,
           topic,
           attemptNo,
           questionCount: questionIds.length,

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { GradeLevel, SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -27,7 +27,6 @@ interface Student {
   enrollments: StudentEnrollment[];
 }
 
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
 const GRADE_LEVELS: GradeLevel[] = [
   "GRADE_7",
   "GRADE_8",
@@ -42,7 +41,8 @@ export default function StudentRoster() {
   const [q, setQ] = useState("");
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | "">("");
   const [section, setSection] = useState("");
-  const [subject, setSubject] = useState<SubjectArea | "">("");
+  const { subjects: catalog } = useSubjectCatalog();
+  const [subject, setSubject] = useState<string>("");
 
   const {
     data: students,
@@ -105,12 +105,12 @@ export default function StudentRoster() {
           <select
             className="select select-bordered select-sm text-xs"
             value={subject}
-            onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+            onChange={(e) => setSubject(e.target.value)}
           >
             <option value="">All subjects</option>
-            {SUBJECTS.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {catalog.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
               </option>
             ))}
           </select>

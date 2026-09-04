@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SubjectArea } from "@prisma/client";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
 interface RequestSlot {
@@ -65,12 +64,13 @@ export default function AcceptRequestModal({
   onAccepted: () => void;
 }) {
   const router = useRouter();
+  const { topicsFor } = useSubjectCatalog();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const certifiedSet = new Set(certifiedTopics);
   const preselectedTopics = request.topics.filter((t) => certifiedSet.has(t));
-  const disabledTopics = SUBJECT_TOPICS[request.subject as SubjectArea].filter((t) => !certifiedSet.has(t));
+  const disabledTopics = topicsFor(request.subject).filter((t) => !certifiedSet.has(t));
 
   const firstSlot = request.slots[0];
   const initialSessionRows: SessionRowValue[] = firstSlot

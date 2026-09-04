@@ -6,7 +6,8 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { browsableOrEnrolledWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
 import { getSetting } from "@/lib/settings";
 import { matchCriteriaSchema } from "@/lib/validations/match";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SubjectArea } from "@prisma/client";
+import { subjectExists, topicExists } from "@/lib/subjects";
 import { rankMatches, ClassForMatching } from "@/lib/matching";
 
 const MAX_RESULTS = 20;
@@ -34,7 +35,11 @@ export async function POST(req: NextRequest) {
 
     const { subject, topics, gradeLevel, preferredSlots, classFormat } = result.data;
 
-    if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
+    if (!(await subjectExists(subject))) {
+      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
+    }
+    const topicChecks = await Promise.all(topics.map((t) => topicExists(subject, t)));
+    if (topicChecks.some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -45,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const [rows, showRealNames] = await Promise.all([
       prisma.tutorClass.findMany({
-        where: { ...browsableOrEnrolledWhere(session.user.id), subject },
+        where: { ...browsableOrEnrolledWhere(session.user.id), subject: subject as SubjectArea },
         include: learnerClassInclude(session.user.id),
         orderBy: { createdAt: "desc" },
       }),

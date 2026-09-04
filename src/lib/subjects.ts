@@ -1,6 +1,6 @@
 import type { Subject, Topic } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic, SUBJECT_TOPICS } from "@/lib/subjectTopics";
 
 // ─── Admin-editable subject / topic taxonomy ─────────────────────────────────
 // DB-backed replacement for the static SUBJECT_TOPICS map. Cached in-process
@@ -28,25 +28,56 @@ export function invalidateSubjectCache(): void {
   cache.inflight = null;
 }
 
+let warnedFallback = false;
+
+/** Static SUBJECT_TOPICS shaped like the DB rows — used only if the DB read fails. */
+function staticFallback(): SubjectWithTopics[] {
+  const now = new Date();
+  return (Object.keys(SUBJECT_TOPICS) as string[]).map((slug, i) => ({
+    id: `static-${slug}`,
+    slug,
+    name: slug,
+    order: i,
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+    topics: SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS].map((name, j) => ({
+      id: `static-${slug}-${j}`,
+      subjectId: `static-${slug}`,
+      name,
+      order: j,
+      active: true,
+      createdAt: now,
+    })),
+  }));
+}
+
 async function loadAll(): Promise<SubjectWithTopics[]> {
   if (cache.data && cache.expires > Date.now()) return cache.data;
   if (cache.inflight) return cache.inflight;
 
-  cache.inflight = prisma.subject
-    .findMany({
-      orderBy: [{ order: "asc" }, { name: "asc" }],
-      include: { topics: { orderBy: [{ order: "asc" }, { name: "asc" }] } },
-    })
-    .then((rows) => {
+  cache.inflight = (async () => {
+    try {
+      const rows = await prisma.subject.findMany({
+        orderBy: [{ order: "asc" }, { name: "asc" }],
+        include: { topics: { orderBy: [{ order: "asc" }, { name: "asc" }] } },
+      });
       cache.data = rows;
       cache.expires = Date.now() + CACHE_TTL_MS;
-      cache.inflight = null;
       return rows;
-    })
-    .catch((err) => {
+    } catch (err) {
+      // The taxonomy tables not being reachable (e.g. a unit test that mocks
+      // prisma without `subject`) must not break validation — fall back to the
+      // compile-time SUBJECT_TOPICS. Not cached, so a real DB recovers next call.
+      if (!warnedFallback) {
+        console.warn("[subjects] DB read failed, using static SUBJECT_TOPICS fallback:", err);
+        warnedFallback = true;
+      }
+      return staticFallback();
+    } finally {
       cache.inflight = null;
-      throw err;
-    });
+    }
+  })();
 
   return cache.inflight;
 }

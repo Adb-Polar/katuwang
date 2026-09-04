@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SubjectArea } from "@prisma/client";
 import { requestTopicCertificationSchema } from "@/lib/validations/topicCertification";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { topicExists } from "@/lib/subjects";
 
 // ─── GET: List the Tutor's Topic Certifications ───────────────────────────────
 export async function GET() {
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     const { subject, topic } = result.data;
 
-    if (!SUBJECT_TOPICS[subject].includes(topic)) {
+    if (!(await topicExists(subject, topic))) {
       return NextResponse.json(
         { error: `"${topic}" is not a valid topic for ${subject}.` },
         { status: 400 }
@@ -99,7 +100,7 @@ export async function POST(req: NextRequest) {
     const key = {
       tutorProfileId_subject_topic: {
         tutorProfileId: tutorProfile.id,
-        subject,
+        subject: subject as SubjectArea,
         topic,
       },
     };
@@ -126,7 +127,7 @@ export async function POST(req: NextRequest) {
       },
       create: {
         tutorProfileId: tutorProfile.id,
-        subject,
+        subject: subject as SubjectArea,
         topic,
         status: "PENDING",
       },

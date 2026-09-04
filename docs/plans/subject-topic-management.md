@@ -191,7 +191,28 @@ rename a topic and confirm existing classes/questions show the new name.
 > After Phase 2 the admin can manage the taxonomy, but the rest of the app
 > still validates against the static `SUBJECT_TOPICS`. Phase 3 closes that gap.
 
-### Phase 3 — consumers read validity from the DB
+### Phase 3 — consumers read validity from the DB  ✅ done (2026-09-04)
+
+Landed: validators dropped `z.nativeEnum(SubjectArea)` → `z.string()`; the
+write routes (`learner/match`, `learner/topic-requests` + `[id]`,
+`tutor/classes` + `[classId]`, `tutor/question-requests`,
+`tutor/topic-certifications`, `tutor/assessments`, `admin/assessment-questions`)
+now validate via `subjectExists` / `topicExists` and cast `subject as
+SubjectArea` at the Prisma boundary (grep `as SubjectArea` — removed in
+Phase 4). `matching.ts` `subject` typed `string`. New `useSubjectCatalog()`
+hook (static map as instant seed, `/api/subjects` swap) wired into
+`MatchCriteriaFields`, `ClassScheduleFields`, `AcceptRequestModal`,
+`TopicRequestBrowser`, `EditClassForm`, `ClassBrowser`, `StudentRoster`,
+`CertificationReviewTable`. `src/lib/subjects.ts` falls back to the static
+`SUBJECT_TOPICS` when the DB read throws (keeps route unit tests green).
+
+**Still on the static `SUBJECT_TOPICS` (deliberate, low-risk):**
+`chatbot/recommend.ts` (keyword extraction), `api/dev/route.ts` +
+`DevDataFactory` (dev tooling), `admin/assessment-questions/coverage/route.ts`
+(coverage report), `QuestionBankManager` (subject→topic drill-down with
+per-topic counts). These keep working; convert opportunistically.
+
+**Original notes:
 
 Order the work so `tsc` breaks loudly and guides the sweep. Expect a
 **red → green cycle** across this phase — commit only at the end.

@@ -4,7 +4,7 @@ import { Prisma, SubjectArea } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAssessmentQuestionSchema } from "@/lib/validations/assessment";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { topicExists } from "@/lib/subjects";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
 
     const { subject, topic, prompt, explanation, options } = result.data;
 
-    if (!SUBJECT_TOPICS[subject].includes(topic)) {
+    if (!(await topicExists(subject, topic))) {
       return NextResponse.json(
         { error: `"${topic}" is not a valid topic for ${subject}.` },
         { status: 400 }
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     const created = await prisma.$transaction(async (tx) => {
       const question = await tx.assessmentQuestion.create({
         data: {
-          subject,
+          subject: subject as SubjectArea,
           topic,
           prompt,
           explanation: explanation || null,

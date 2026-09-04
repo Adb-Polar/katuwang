@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { SubjectArea } from "@prisma/client";
-import { SUBJECT_TOPICS, isKnownTopic, normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -30,7 +30,6 @@ export interface ClassScheduleSubmitPayload extends ClassScheduleFormValues {
   sessions: { topic: string; scheduledAt: string; duration: number }[];
 }
 
-const ALL_SUBJECTS = Object.values(SubjectArea);
 
 let rowIdCounter = 0;
 function newRowKey() {
@@ -68,6 +67,7 @@ export default function ClassScheduleFields({
   onCancel: () => void;
   onSubmit: (payload: ClassScheduleSubmitPayload) => void;
 }) {
+  const { subjects, topicsFor } = useSubjectCatalog();
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
     gradeLevel: initial?.gradeLevel ?? "",
@@ -107,7 +107,7 @@ export default function ClassScheduleFields({
   };
 
   const customTopics = form.subject
-    ? selectedTopics.filter((t) => !isKnownTopic(form.subject as SubjectArea, t))
+    ? selectedTopics.filter((t) => !topicsFor(form.subject).some((k) => k.toLowerCase() === t.toLowerCase()))
     : selectedTopics;
 
   const addSessionRow = () => {
@@ -160,9 +160,9 @@ export default function ClassScheduleFields({
           className="select select-bordered select-sm w-full focus:select-primary text-xs disabled:opacity-70"
         >
           <option value="">Select subject</option>
-          {ALL_SUBJECTS.map((sub) => (
-            <option key={sub} value={sub}>
-              {sub}
+          {subjects.map((sub) => (
+            <option key={sub.slug} value={sub.slug}>
+              {sub.name}
             </option>
           ))}
         </select>
@@ -192,7 +192,7 @@ export default function ClassScheduleFields({
         ) : (
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
-              {SUBJECT_TOPICS[form.subject as SubjectArea].map((topic) => {
+              {topicsFor(form.subject).map((topic) => {
                 const disabled = disabledTopicSet.has(topic);
                 return (
                   <label

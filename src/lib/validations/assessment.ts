@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { SubjectArea } from "@prisma/client";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 
 // ─── Question bank (admin) ───────────────────────────────────────────────────
@@ -11,7 +10,7 @@ export const optionInputSchema = z.object({
 
 export const createAssessmentQuestionSchema = z
   .object({
-    subject: z.nativeEnum(SubjectArea, { message: "Invalid subject area." }),
+    subject: z.string().trim().min(1, "Subject is required."),
     topic: z.string().trim().min(1, "Topic is required."),
     prompt: z
       .string()
@@ -83,7 +82,7 @@ export type UpdateGlobalAssessmentConfigInput = z.infer<typeof updateGlobalAsses
 // ─── Taking an assessment (tutor) ───────────────────────────────────────────
 
 export const startAssessmentSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, { message: "Invalid subject area." }),
+  subject: z.string().trim().min(1, "Subject is required."),
   topic: z.string().trim().min(1, "Topic is required."),
 });
 
@@ -106,7 +105,7 @@ export type SubmitAssessmentInput = z.infer<typeof submitAssessmentSchema>;
 // ─── Question requests ──────────────────────────────────────────────────────
 
 export const requestQuestionsSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, { message: "Invalid subject area." }),
+  subject: z.string().trim().min(1, "Subject is required."),
   topic: z.string().trim().min(1, "Topic is required."),
   note: z.string().trim().max(500, "Note cannot exceed 500 characters.").optional().or(z.literal("")),
 });

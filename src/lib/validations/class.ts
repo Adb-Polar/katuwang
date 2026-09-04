@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { SubjectArea, SessionStatus, GradeLevel } from "@prisma/client";
+import { SessionStatus, GradeLevel } from "@prisma/client";
+
+// `subject` is a slug from the admin-managed taxonomy — routes verify it
+// exists via src/lib/subjects.ts (`subjectExists` / `topicExists`).
+const subjectSlug = z.string().trim().min(1, "Subject is required.");
 
 export const sessionSchema = z.object({
   topic: z.string().trim().min(1, "Session topic is required."),
@@ -14,9 +18,7 @@ export const sessionSchema = z.object({
 export type SessionInput = z.infer<typeof sessionSchema>;
 
 export const classDetailsSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, {
-    message: "Invalid subject area.",
-  }),
+  subject: subjectSlug,
   gradeLevel: z
     .nativeEnum(GradeLevel, { message: "Invalid grade level." })
     .nullable()

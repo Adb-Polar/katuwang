@@ -1,4 +1,4 @@
-import { SubjectArea, GradeLevel } from "@prisma/client";
+import { GradeLevel } from "@prisma/client";
 
 // ─── Scoring weights (tunable, kept explicit for transparency in the UI) ──────
 const WEIGHTS = {
@@ -37,7 +37,7 @@ export interface SessionForMatching {
 
 export interface ClassForMatching {
   id: string;
-  subject: SubjectArea;
+  subject: string; // subject slug
   gradeLevel: GradeLevel | null;
   topics: string[];
   /** Topics (within this class's subject) the teaching tutor holds a CERTIFIED certification for. */
@@ -50,7 +50,7 @@ export interface ClassForMatching {
 }
 
 export interface MatchCriteria {
-  subject: SubjectArea;
+  subject: string; // subject slug
   topics: string[];
   gradeLevel?: GradeLevel | null;
   preferredSlots?: PreferredSlot[];

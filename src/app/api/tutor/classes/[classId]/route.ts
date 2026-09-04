@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { SubjectArea } from "@prisma/client";
 import { classDetailsSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { notify, notifyMany } from "@/lib/notifications";
@@ -64,7 +65,8 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { topics: rawTopics, ...updates } = result.data;
+    const { topics: rawTopics, subject: rawSubject, ...updates } = result.data;
+    const subjectUpdate = rawSubject !== undefined ? { subject: rawSubject as SubjectArea } : {};
 
     // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
     const topics = rawTopics
@@ -123,6 +125,7 @@ export async function PATCH(
         where: { id: classId },
         data: {
           ...updates,
+          ...subjectUpdate,
           ...(newStatus ? { status: newStatus } : {}),
           ...(topics
             ? { topics: { deleteMany: {}, create: topics.map((topic) => ({ topic })) } }

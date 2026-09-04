@@ -7,7 +7,8 @@ import {
   createTopicRequestSchema,
   type CreateTopicRequestInput,
 } from "@/lib/validations/match";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SubjectArea } from "@prisma/client";
+import { subjectExists, topicExists } from "@/lib/subjects";
 
 // ─── PATCH: Cancel or edit one's own topic request ───────────────────────────
 //   { status: "CANCELLED" }                                  → cancel (from OPEN or ACCEPTED)
@@ -72,7 +73,10 @@ export async function PATCH(
     const { subject, topics, gradeLevel, preferredSlots, note } =
       parsed.data as CreateTopicRequestInput;
 
-    if (topics.some((t) => !SUBJECT_TOPICS[subject].includes(t))) {
+    if (!(await subjectExists(subject))) {
+      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
+    }
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t)))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -82,7 +86,7 @@ export async function PATCH(
     const updated = await prisma.topicRequest.update({
       where: { id },
       data: {
-        subject,
+        subject: subject as SubjectArea,
         gradeLevel,
         note: note || null,
         topics: {

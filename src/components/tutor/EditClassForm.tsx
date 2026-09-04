@@ -15,7 +15,8 @@ import {
   EyeOff,
 } from "lucide-react";
 import { SubjectArea, GradeLevel } from "@prisma/client";
-import { SUBJECT_TOPICS, isKnownTopic, normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -75,6 +76,7 @@ export default function EditClassForm({
   appeal?: ClassAppealSummary | null;
 }) {
   const router = useRouter();
+  const { topicsFor } = useSubjectCatalog();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
   const [customTopic, setCustomTopic] = useState("");
@@ -106,9 +108,10 @@ export default function EditClassForm({
   };
 
   // Curated topics for this subject, plus any custom topics already on the class.
+  const curated = topicsFor(subject);
   const topicOptions = [
-    ...SUBJECT_TOPICS[subject],
-    ...topics.filter((t) => !isKnownTopic(subject, t)),
+    ...curated,
+    ...topics.filter((t) => !curated.some((k) => k.toLowerCase() === t.toLowerCase())),
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {

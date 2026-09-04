@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -11,7 +11,6 @@ import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 
 const PAGE_SIZE = 10;
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
 
 interface Tutor {
   id: string;
@@ -53,7 +52,8 @@ function fmt(iso: string) {
 export default function CertificationReviewTable() {
   const [tab, setTab] = useState<Tab>("pending");
   const [q, setQ] = useState("");
-  const [subject, setSubject] = useState<SubjectArea | "">("");
+  const { subjects: catalog } = useSubjectCatalog();
+  const [subject, setSubject] = useState<string>("");
   const [sort, setSort] = useState("requested");
   const [success, setSuccess] = useState("");
   const [approveTarget, setApproveTarget] = useState<Certification | null>(null);
@@ -149,13 +149,13 @@ export default function CertificationReviewTable() {
             />
             <select
               value={subject}
-              onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+              onChange={(e) => setSubject(e.target.value)}
               className="select select-bordered select-sm text-xs focus:select-primary"
             >
               <option value="">All subjects</option>
-              {SUBJECTS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {catalog.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
                 </option>
               ))}
             </select>

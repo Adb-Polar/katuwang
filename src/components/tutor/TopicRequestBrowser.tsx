@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
@@ -15,7 +14,6 @@ import Tabs from "@/components/ui/Tabs";
 import AcceptRequestModal from "@/components/tutor/AcceptRequestModal";
 
 const PAGE_SIZE = 10;
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
 
 interface OpenRequest {
   id: string;
@@ -40,8 +38,9 @@ interface AcceptedRequest {
 }
 
 export default function TopicRequestBrowser() {
+  const { subjects } = useSubjectCatalog();
   const [tab, setTab] = useState<"open" | "accepted">("open");
-  const [subject, setSubject] = useState<SubjectArea | "">("");
+  const [subject, setSubject] = useState<string>("");
   const [accepting, setAccepting] = useState<OpenRequest | null>(null);
   const { certifications } = useTopicCertifications();
 
@@ -86,12 +85,12 @@ export default function TopicRequestBrowser() {
           <select
             className="select select-bordered select-sm text-xs"
             value={subject}
-            onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+            onChange={(e) => setSubject(e.target.value)}
           >
             <option value="">All subjects</option>
-            {SUBJECTS.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {subjects.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
               </option>
             ))}
           </select>

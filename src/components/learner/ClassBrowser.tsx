@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
@@ -21,7 +21,6 @@ const MINE_TABS: { key: MineTab; label: string }[] = [
 ];
 
 const PAGE_SIZE = 12;
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
 
 interface ClassSession {
   scheduledAt: string;
@@ -58,7 +57,8 @@ interface TutorClass {
 export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const router = useRouter();
   const [q, setQ] = useState("");
-  const [subject, setSubject] = useState<SubjectArea | "">("");
+  const { subjects: catalog } = useSubjectCatalog();
+  const [subject, setSubject] = useState<string>("");
   const [gradeLevel, setGradeLevel] = useState("");
   const [mineTab, setMineTab] = useState<MineTab>("upcoming");
 
@@ -124,12 +124,12 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
             <select
               className="select select-bordered select-sm text-xs"
               value={subject}
-              onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+              onChange={(e) => setSubject(e.target.value)}
             >
               <option value="">All subjects</option>
-              {SUBJECTS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {catalog.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
                 </option>
               ))}
             </select>

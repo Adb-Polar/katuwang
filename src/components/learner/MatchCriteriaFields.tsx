@@ -1,8 +1,7 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
-import { SubjectArea } from "@prisma/client";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FormField from "@/components/ui/FormField";
 
@@ -30,7 +29,6 @@ export const EMPTY_CRITERIA: MatchCriteriaValue = {
 };
 
 const DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"] as const;
-const ALL_SUBJECTS = Object.values(SubjectArea);
 
 export default function MatchCriteriaFields({
   value,
@@ -44,6 +42,7 @@ export default function MatchCriteriaFields({
   /** Auto Match passes this to show a 1-on-1 / Group selector; topic requests don't. */
   showFormatFilter?: boolean;
 }) {
+  const { subjects, topicsFor } = useSubjectCatalog();
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
 
   const toggleTopic = (topic: string) =>
@@ -66,9 +65,9 @@ export default function MatchCriteriaFields({
             onChange={(e) => onChange({ ...value, subject: e.target.value, topics: [] })}
           >
             <option value="">Select subject</option>
-            {ALL_SUBJECTS.map((s) => (
-              <option key={s} value={s}>
-                {s}
+            {subjects.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
               </option>
             ))}
           </select>
@@ -114,7 +113,7 @@ export default function MatchCriteriaFields({
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto border border-base-200 rounded-lg p-2.5">
-            {SUBJECT_TOPICS[value.subject as SubjectArea].map((topic) => (
+            {topicsFor(value.subject).map((topic) => (
               <label
                 key={topic}
                 className="flex items-center gap-1.5 text-xs cursor-pointer p-1.5 rounded hover:bg-base-200/50"

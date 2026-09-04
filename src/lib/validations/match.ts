@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { SubjectArea, GradeLevel } from "@prisma/client";
+import { GradeLevel } from "@prisma/client";
 import { availabilitySlotSchema } from "@/lib/validations/availability";
 import { createClassSchema } from "@/lib/validations/class";
 
@@ -8,7 +8,7 @@ export const preferredSlotSchema = availabilitySlotSchema;
 
 // Shared criteria used by both the matcher and the topic-request create flow.
 export const matchCriteriaSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, { message: "Invalid subject area." }),
+  subject: z.string().trim().min(1, "Subject is required."),
   topics: z
     .array(z.string().trim().min(1, "Topic cannot be empty."))
     .min(1, "Please choose at least one topic.")

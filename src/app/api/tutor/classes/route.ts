@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { ClassStatus } from "@prisma/client";
+import { ClassStatus, SubjectArea } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
+import { subjectExists } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -95,6 +96,10 @@ export async function POST(req: NextRequest) {
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
 
+    if (!(await subjectExists(subject))) {
+      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
+    }
+
     // Normalize + de-duplicate topics (case-insensitive). Custom topics that
     // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
     // something the catalog doesn't list yet; they're stored verbatim.
@@ -123,7 +128,7 @@ export async function POST(req: NextRequest) {
     const requireCertification = await getSetting("requireCertificationForClassCreation");
     if (requireCertification) {
       const certifiedTopics = await prisma.topicCertification.findMany({
-        where: { tutorProfileId: tutorProfile.id, subject, status: "CERTIFIED" },
+        where: { tutorProfileId: tutorProfile.id, subject: subject as SubjectArea, status: "CERTIFIED" },
         select: { topic: true },
       });
       const certifiedTopicSet = new Set(certifiedTopics.map((c) => c.topic));
@@ -177,7 +182,7 @@ export async function POST(req: NextRequest) {
       data: {
         tutorProfileId: tutorProfile.id,
         code,
-        subject,
+        subject: subject as SubjectArea,
         gradeLevel: gradeLevel ?? null,
         topics: { create: topics.map((topic) => ({ topic })) },
         description: description || null,

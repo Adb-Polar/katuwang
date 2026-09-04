@@ -1,10 +1,7 @@
 import { z } from "zod";
-import { SubjectArea } from "@prisma/client";
 
 export const requestTopicCertificationSchema = z.object({
-  subject: z.nativeEnum(SubjectArea, {
-    message: "Invalid subject area.",
-  }),
+  subject: z.string().trim().min(1, "Subject is required."),
   topic: z.string().trim().min(1, "Topic is required."),
 });
 
