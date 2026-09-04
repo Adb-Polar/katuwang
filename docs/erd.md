@@ -157,6 +157,27 @@ DISMISSED DISMISSED
     }
   
 
+  "subjects" {
+    String id "🗝️"
+    String slug 
+    String name 
+    Int order 
+    Boolean active 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "topics" {
+    String id "🗝️"
+    String subjectId 
+    String name 
+    Int order 
+    Boolean active 
+    DateTime createdAt 
+    }
+  
+
   "tutor_classes" {
     String id "🗝️"
     String code 
@@ -355,6 +376,7 @@ DISMISSED DISMISSED
     "topic_certifications" }o--|| "tutor_profiles" : "tutorProfile"
     "topic_certifications" |o--|| "SubjectArea" : "enum:subject"
     "topic_certifications" |o--|| "TopicCertificationStatus" : "enum:status"
+    "topics" }o--|| "subjects" : "subject"
     "tutor_classes" }o--|| "tutor_profiles" : "tutorProfile"
     "tutor_classes" |o--|| "SubjectArea" : "enum:subject"
     "tutor_classes" |o--|o "GradeLevel" : "enum:gradeLevel"

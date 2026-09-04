@@ -820,6 +820,37 @@ async function main() {
     create: { role: "CLASS", count: 0 },
   });
 
+  // Subject / Topic catalogue — seeded from SUBJECT_TOPICS (slug == old enum value).
+  const SUBJECT_NAMES: Record<string, string> = {
+    MATH: "Mathematics",
+    ENGLISH: "English",
+    SCIENCE: "Science",
+    FILIPINO: "Filipino",
+    ARALING_PANLIPUNAN: "Araling Panlipunan",
+    TLE: "Technology & Livelihood Education",
+    MAPEH: "MAPEH",
+  };
+  {
+    let sOrder = 0;
+    for (const slug of Object.keys(SUBJECT_TOPICS) as SubjectArea[]) {
+      const subject = await prisma.subject.upsert({
+        where: { slug },
+        update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
+        create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
+      });
+      sOrder++;
+      let tOrder = 0;
+      for (const name of SUBJECT_TOPICS[slug]) {
+        await prisma.topic.upsert({
+          where: { subjectId_name: { subjectId: subject.id, name } },
+          update: { order: tOrder },
+          create: { subjectId: subject.id, name, order: tOrder },
+        });
+        tOrder++;
+      }
+    }
+  }
+
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
 
   // Admin account

@@ -214,6 +214,42 @@ model IdCounter {
   @@map("id_counters")
 }
 
+// ─── Subject / Topic catalogue (admin-editable taxonomy) ──────────────────────
+// The editable source of valid subjects + topics. `Subject.slug` is what the
+// `subject` string column on TutorClass / TopicRequest / TopicCertification /
+// AssessmentQuestion / AssessmentAttempt / QuestionRequest stores (it was the
+// `SubjectArea` enum value). `Topic.name` is stored verbatim on the
+// denormalised `topic` string columns of those models' child rows.
+// See src/lib/subjects.ts and docs/plans/subject-topic-management.md.
+
+model Subject {
+  id        String   @id @default(cuid())
+  slug      String   @unique // "MATH" — the value stored in `subject` columns
+  name      String   @unique // "Mathematics" — display label
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  topics Topic[]
+
+  @@map("subjects")
+}
+
+model Topic {
+  id        String   @id @default(cuid())
+  subjectId String
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  name      String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([subjectId, name])
+  @@index([subjectId, active])
+  @@map("topics")
+}
+
 // ─── Tutor Class ─────────────────────────────────────────────────────────────
 
 model TutorClass {
