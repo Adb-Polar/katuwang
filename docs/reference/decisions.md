@@ -145,6 +145,41 @@ runtime dependency.
 
 ---
 
+## Subjects & topics: compile-time enum → admin-editable tables (2026-09-04)
+
+**Decision:** The subject taxonomy moved from the `SubjectArea` Prisma enum +
+the static `SUBJECT_TOPICS` map to admin-editable `Subject` / `Topic` tables
+(`/admin/subjects`). The `subject` column on the 6 models that had it
+(`TutorClass`, `TopicRequest`, `TopicCertification`, `AssessmentQuestion`,
+`AssessmentAttempt`, `QuestionRequest`) is now a plain `String` storing
+`Subject.slug` — the slug is identical to the old enum value (`"MATH"`, …), so
+the DB migration was a lossless `ENUM → VARCHAR` cast with no data-value
+change and no backfill. Topics stay denormalised as strings on child rows;
+`Topic` is the editable catalogue + validation source, and renaming a topic
+fans the new name out to all 7 denormalised `topic` columns in one
+transaction.
+
+**Path chosen:** "string column + catalogue tables" (plan Path B), not a full
+foreign-key rewrite (Path A). B delivers the same admin capability with a far
+smaller blast radius and no FK migration; the app never had DB-level
+referential integrity on `subject` anyway. See
+`docs/plans/subject-topic-management.md`.
+
+**Implications for agents:**
+- There is no `SubjectArea` enum any more. `subject` is a `string` slug
+  everywhere. Validate it with `subjectExists()` / `topicExists()` from
+  `src/lib/subjects.ts` (cached; falls back to the static `SUBJECT_TOPICS`
+  when the DB is unreachable, e.g. in unit tests).
+- `src/lib/subjectTopics.ts` still exists — `normalizeTopic()` is the canonical
+  topic-string normaliser, and `SUBJECT_TOPICS` is the seed/fallback list. It
+  is **not** the source of truth at runtime; the `subjects`/`topics` tables are.
+- Client dropdowns use the `useSubjectCatalog()` hook. A few non-critical spots
+  still read the static map (`chatbot/recommend`, `api/dev`, the coverage
+  report, `QuestionBankManager`'s drill-down) — fine to leave, convert
+  opportunistically.
+- Deleting a subject/topic that's in use is blocked (409); deactivate
+  (`active:false`) instead. `Subject.slug` is immutable once created.
+
 ## How to add a new entry here
 
 When a decision is made that contradicts or supersedes something in the

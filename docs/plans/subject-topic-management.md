@@ -1,5 +1,11 @@
 # Admin-editable Subjects & Topics
 
+> **Status: DONE (2026-09-04).** All 5 phases landed (Path B). Changes.md
+> Part 25. `SubjectArea` enum removed; `subject` columns are `String` slugs;
+> `/admin/subjects` CRUD live; `src/lib/subjects.ts` + `useSubjectCatalog()`
+> are the runtime source. Kept the phase notes below as the implementation
+> record.
+
 ## Context
 
 `docs/TODO.txt`: *"Admin topic/subject management page (add/edit topics &

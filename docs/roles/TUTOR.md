@@ -160,7 +160,7 @@ Create a new class with its initial session(s).
 **Body**
 ```json
 {
-  "subject": "SubjectArea enum",
+  "subject": "string (subject slug, e.g. \"MATH\")",
   "gradeLevel": "GradeLevel enum (optional, null = open to any grade)",
   "topics": ["string", "... (1–10 items, each non-empty)"],
   "description": "string (≤500 chars, optional)",
@@ -262,7 +262,7 @@ Request/upsert a certification for a subject + topic pair.
 
 **Body**
 ```json
-{ "subject": "SubjectArea enum", "topic": "string (required)" }
+{ "subject": "string (subject slug, e.g. \"MATH\")", "topic": "string (required)" }
 ```
 - `topic` must belong to `SUBJECT_TOPICS[subject]`.
 - Upserts on the `(tutorProfileId, subject, topic)` unique key. A `PENDING`/`REJECTED` row is reset to `PENDING` (`reviewedAt`/`reviewNote`/`certifiedAt` cleared, `requestedAt` bumped); a `CERTIFIED` row is returned unchanged with `200`.
@@ -276,7 +276,7 @@ Request/upsert a certification for a subject + topic pair.
 ### `GET /api/tutor/students`
 Aggregate roster of every distinct learner enrolled in any of the tutor's classes.
 
-**Query params** (all optional): `page` (default `1`), `pageSize` (default `10`, max `100`), `gradeLevel` (`GradeLevel` enum), `section` (free-text, `contains`), `subject` (`SubjectArea` enum), `classId`.
+**Query params** (all optional): `page` (default `1`), `pageSize` (default `10`, max `100`), `gradeLevel` (`GradeLevel` enum), `section` (free-text, `contains`), `subject` (subject slug string), `classId`.
 
 **200** → `{ students: [{ id, anonymousId, gradeLevel, section, enrollments: [{ classId, subject, topics: string[], enrolledAt }] }], total, page, pageSize }` — anonymized, no real name/email/contactInfo. Pagination is applied over distinct learners (grouped in application code), not raw enrollment rows.
 **401** → not a tutor. **404** → no tutor profile.
@@ -326,7 +326,7 @@ Update the tutor's own self-service profile fields.
 ### `GET /api/tutor/topic-requests`
 List topic requests the tutor can act on or has already accepted. Requires `role === "STUDENT_TUTOR"` (`401`); `404` if no `TutorProfile`; `403` when `matchingEnabled` is off.
 
-**Query params** (all optional): `tab` (`"open"` default | `"accepted"`), `subject` (`SubjectArea` enum), `page` (default `1`), `pageSize` (default `10`, max `100`).
+**Query params** (all optional): `tab` (`"open"` default | `"accepted"`), `subject` (subject slug string), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
 **200** (`tab=open`) → `{ requests: [{ id, subject, gradeLevel, note, createdAt, topics: string[], slots: [{ day, startTime, endTime }], learner: { anonymousId, gradeLevel, section }, directed: boolean }], total, page, pageSize }` — `OPEN` requests directed at this tutor, or public in a subject/topic they hold a `CERTIFIED` cert for; directed rows sorted first.
 **200** (`tab=accepted`) → `{ requests: [{ id, subject, gradeLevel, status: "ACCEPTED" | "ENROLLED", topics: string[], learner: {...}, class: { id, nextSessionAt, enrolledCount, maxStudents } | null }], total, page, pageSize }` — requests this tutor has accepted, still linked to their class.

@@ -95,6 +95,13 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 - **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`). There is no admin screen for these in v1 — query the table directly and feed real misses back into `src/lib/chatbot/faq.ts`.
   (`POST /api/chatbot` — not admin-gated)
 
+## Subjects & Topics (`/admin/subjects`)
+
+- The subject/topic taxonomy is admin-editable (was a compile-time enum + static list). Subjects have a display `name` and an immutable `slug` (what every `subject` column stores); topics belong to a subject.
+- **Add / rename / reorder / activate-deactivate** subjects and topics. **Renaming a topic** rewrites the stored topic string on every class, session, request, certification, question, and attempt that used it (one transaction).
+- **Deleting** a subject is blocked (`409`) while any class / request / question / certification / attempt references its slug — deactivate it instead. **Deleting a topic** that's in use soft-deletes it (`active: false`, hidden from new dropdowns); an unused topic is removed outright. `slug` cannot be changed.
+  (`GET/POST /api/admin/subjects`, `PATCH/DELETE /api/admin/subjects/[id]`, `POST /api/admin/subjects/[id]/topics`, `PATCH/DELETE /api/admin/topics/[id]`, `GET /api/subjects` — read-only, any authed role)
+
 ## API Reference
 
 All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.
@@ -126,7 +133,7 @@ Suspend, ban, or reactivate a learner/tutor account.
 ### `GET /api/admin/classes`
 List/search all tutor classes platform-wide.
 
-**Query params** (all optional): `q` (topic, tutor first/last name, tutor anonymous ID), `subject` (`SubjectArea` enum), `status` (`ClassStatus` enum), `page`, `pageSize` (same defaults as users).
+**Query params** (all optional): `q` (topic, tutor first/last name, tutor anonymous ID), `subject` (subject slug string), `status` (`ClassStatus` enum), `page`, `pageSize` (same defaults as users).
 
 **200** → `{ classes: TutorClass[], total, page, pageSize }` — each class includes `topics: string[]`, `tutor: { id, anonymousId, firstName, lastName }`, and enrollment count.
 **500** → `{ error }`.
@@ -152,7 +159,7 @@ Suspend, ban, or reinstate a class.
 ### `GET /api/admin/topic-requests`
 List/search all topic requests platform-wide.
 
-**Query params** (all optional): `q` (learner first/last name, anonymous ID, or topic text), `status` (`TopicRequestStatus` enum), `subject` (`SubjectArea` enum), `scope` (`"public"` | `"directed"`), `page`, `pageSize` (same defaults as users).
+**Query params** (all optional): `q` (learner first/last name, anonymous ID, or topic text), `status` (`TopicRequestStatus` enum), `subject` (subject slug string), `scope` (`"public"` | `"directed"`), `page`, `pageSize` (same defaults as users).
 
 **200** → `{ requests: [{ id, subject, gradeLevel, note, status, createdAt, topics: string[], learner: { id, anonymousId, firstName, lastName }, directedTo: { anonymousId } | null, fulfilledClass: { id, code, status, nextSessionAt } | null }], total, page, pageSize }` — real learner name included (admin-only accountability view).
 **401** → not an admin.
@@ -178,7 +185,7 @@ Close or re-open a topic request.
 ### `GET /api/admin/certifications`
 List topic certification requests, filtered/sorted/paginated.
 
-**Query params** (all optional): `status` (`PENDING` default / `CERTIFIED` / `REJECTED`), `q` (topic or tutor `anonymousId`, `contains`), `subject` (`SubjectArea`), `sort` (`requested` default / `certified` / `reviewed` / `subject`), `page` (default `1`), `pageSize` (default `10`, max `100`).
+**Query params** (all optional): `status` (`PENDING` default / `CERTIFIED` / `REJECTED`), `q` (topic or tutor `anonymousId`, `contains`), `subject` (subject slug string), `sort` (`requested` default / `certified` / `reviewed` / `subject`), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
 **200** → `{ certifications: [{ ...TopicCertification, tutor: { id, anonymousId, firstName, lastName, email } }], total, page, pageSize }` (real identity included — admin-only accountability view). `REJECTED` defaults to newest-reviewed-first.
 **401** → not an admin.

@@ -108,3 +108,19 @@ Sortable admin table headers (Changes.md Part 24)
     (Subject/Status), /admin/topic-requests (Subject/Status), /admin/class-appeals
     (Filed/Reviewed)
  [] Sorting combines with the existing search/filter/pagination controls
+
+Subjects & Topics management (Changes.md Part 25)
+ [] /admin/subjects: add a subject (name + SLUG) -> appears in the list;
+    add topics under it; reorder + disable toggles work
+ [] Rename a topic that's used by a class/question -> the class detail, roster,
+    question bank, and certification rows all show the new name (no stale label)
+ [] Delete a subject that's in use -> blocked with a 409 message; disable works
+ [] Delete an unused topic -> removed; delete a used topic -> "deactivated" toast,
+    row shows struck-through
+ [] Learner Auto Match / topic request + tutor create-class + assessment /
+    certification request dropdowns list the DB subjects/topics (add a new one in
+    /admin/subjects, confirm it shows in these forms after a refresh)
+ [] Existing seeded data still validates (start an assessment, post a request,
+    create a class for a seeded subject/topic) after the enum removal
+ [] `grep -r SubjectArea src/` returns nothing; `npx prisma studio` shows
+    subjects/topics tables populated and the `subject` columns unchanged

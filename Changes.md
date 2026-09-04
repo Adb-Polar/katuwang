@@ -24,6 +24,7 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [25](#part-25) | **Admin-editable subjects & topics (SubjectArea enum → tables)** | The subject taxonomy was a compile-time `SubjectArea` enum + static `SUBJECT_TOPICS` map. Replaced with `Subject`/`Topic` tables and a `/admin/subjects` CRUD page; subjects/topics can now be added, renamed, reordered, and (de)activated. | 5 phases (plan Path B). New `Subject`/`Topic` models (`db push`); `src/lib/subjects.ts` (cached reader + static fallback); `/api/admin/subjects*`, `/api/admin/topics/[id]`, `/api/subjects`; `SubjectTopicManager` + nav item. Validators dropped `z.nativeEnum(SubjectArea)`; routes validate via `subjectExists`/`topicExists`. `SubjectArea` enum **removed** — the 6 `subject` columns are now `String` slugs (lossless `ENUM→VARCHAR`). New `useSubjectCatalog()` hook wired into 8 dropdown components. Topic rename fans out to 7 denormalised `topic` columns in one txn. 467/467 tests. Not committed. |
 | [24](#part-24) | **Sortable table headers on the admin list pages** | The admin moderation tables had no column sorting (only Audit Log did). Added shared sort infrastructure + `?sort=&dir=` params on the list routes, wired into clickable column headers. | New `src/lib/sortParams.ts` (`parseSort`), `src/hooks/useTableSort.ts`, `src/components/ui/SortableTh.tsx`. Routes `admin/{users,registrations,classes,topic-requests,class-appeals}` gain a whitelisted `sort`/`dir` → `orderBy`. Tables `UserManagementTable`, `RegistrationApprovalTable`, `ClassModerationTable`, `TopicRequestModerationTable`, `ClassAppealTable` get `SortableTh` headers (name/status/subject/created/reviewed as applicable). Audit Log already had sorting; Certifications keeps its sort `<select>`; the assessment question-bank drill-down is unaffected. 1 new route-test case; 450/450. No schema change. Not committed. |
 | [23](#part-23) | **Tutor appeals for suspended/banned classes** | A moderated class was a dead end for the tutor — no way to contest it. New `ClassAppeal` model + `ClassAppealStatus` enum; tutor files one appeal at a time from the class edit page; admin reviews on a new `/admin/class-appeals` queue; approving reinstates the class to `SCHEDULED` and notifies the tutor. | Schema: `ClassAppeal` + enum + relations on `TutorClass`/`TutorProfile`/`User` (`db push`). Routes: `POST /api/tutor/classes/[classId]/appeal`, `GET /api/admin/class-appeals`, `PATCH /api/admin/class-appeals/[appealId]`. New notification types `CLASS_APPEAL_APPROVED/REJECTED` + audit actions. UI: `ClassAppealCard` under the tutor's `ClassModerationPanel`; `ClassAppealTable` + `/admin/class-appeals` page + "Class Appeals" nav item (Review group). 16 new tests, 449/449. Not committed. |
 | [22](#part-22) | **Declined-registration state (`DECLINED` account status)** | Declining a registration reused `BANNED` — indistinguishable from a policy ban on an active account, and the applicant never learned why. New `DECLINED` `AccountStatus`; a declined applicant hitting sign-in is routed to a new `/account-declined` screen that shows the reason. | `enum AccountStatus` +`DECLINED` (`db push`, no migration file — history drift). `admin/registrations/[userId]` decline → `DECLINED`. `auth.ts` throws `ACCOUNT_DECLINED[:reason]` sentinel; `LoginForm` routes it to `/account-declined?reason=`. Users list + table hide `DECLINED` unless filtered; status maps/selects extended. Tests: auth (2 new), registrations `[userId]` (assert `DECLINED`); 433/433. Not committed. |
@@ -1401,5 +1402,99 @@ is a subject→topic→questions drill-down, not a flat sortable list.
 ### Docs
 
 `docs/TODO.txt` — the sort item removed.
+
+### Not committed.
+
+---
+
+<a id="part-25"></a>
+
+# Part 25 — Admin-editable subjects & topics (SubjectArea enum → tables)
+
+The subject taxonomy was compile-time: the `SubjectArea` Prisma enum + the
+static `SUBJECT_TOPICS` map (`src/lib/subjectTopics.ts`). This makes it
+admin-editable. A `docs/TODO.txt` item; done in 5 phases per
+`docs/plans/subject-topic-management.md` (Path B — string column + catalogue
+tables, not a full FK rewrite). Each phase is its own commit
+(`0923f43`, `d2462d7`, `24804b3`, `98ef5eb`, + this docs commit).
+
+### Phase 1 — tables + seed + reader
+
+- **`prisma/schema.prisma`** — `model Subject` (`slug` unique = old enum value,
+  `name`, `order`, `active`) + `model Topic` (`subjectId` FK, `name`, `order`,
+  `active`, `@@unique([subjectId, name])`). `db push`.
+- **`prisma/seed.ts`** — upsert a `Subject` per `SUBJECT_TOPICS` key + its
+  `Topic` rows.
+- **`src/lib/subjects.ts`** — `getSubjects` / `getTopics` / `subjectExists` /
+  `topicExists` / `getSubjectSlugs` / `invalidateSubjectCache`. `globalThis`
+  cache (60 s TTL); **falls back to the static `SUBJECT_TOPICS` when the DB
+  read throws** so route unit tests need no new mocks. `topicExists` is
+  case-insensitive (mirrors the old `isKnownTopic`).
+- `src/lib/__tests__/subjects.test.ts`.
+
+### Phase 2 — admin CRUD
+
+- **`src/lib/validations/subject.ts`**; `auditLog` `SUBJECT_*` / `TOPIC_*`
+  actions + `SUBJECT` / `TOPIC` target types.
+- **`GET/POST /api/admin/subjects`**, **`PATCH/DELETE /api/admin/subjects/[id]`**
+  (DELETE `409` when the slug is referenced by any class / request /
+  certification / question / attempt), **`POST /api/admin/subjects/[id]/topics`**,
+  **`PATCH/DELETE /api/admin/topics/[id]`**:
+  - **topic rename** rewrites the denormalised `topic` string on `ClassTopic`,
+    `ClassSession`, `TopicRequestTopic`, `TopicCertification`,
+    `AssessmentQuestion`, `AssessmentAttempt`, `QuestionRequest` in one
+    `$transaction`;
+  - topic DELETE is soft (`active:false`) when in use, hard otherwise;
+  - `slug` is immutable.
+- **`GET /api/subjects`** — active taxonomy for client dropdowns, any authed role.
+- **`src/app/admin/subjects/page.tsx`** + **`SubjectTopicManager.tsx`**;
+  "Subjects & Topics" nav item (General group).
+- 13 route tests.
+
+### Phase 3 — consumers validate against the DB
+
+- Validators: `z.nativeEnum(SubjectArea)` → `z.string()` in `class`,
+  `assessment` (×3), `topicCertification`, `match`.
+- Write routes validate via `subjectExists` / `topicExists` and (bridge) cast
+  `subject as SubjectArea` at the Prisma boundary: `learner/match`,
+  `learner/topic-requests` (+`[id]`), `tutor/classes` (+`[classId]`),
+  `tutor/question-requests`, `tutor/topic-certifications`, `tutor/assessments`,
+  `admin/assessment-questions`.
+- `matching.ts` `subject` typed `string`.
+- **`src/hooks/useSubjectCatalog.ts`** (static seed → `/api/subjects` swap)
+  wired into `MatchCriteriaFields`, `ClassScheduleFields`, `AcceptRequestModal`,
+  `TopicRequestBrowser`, `EditClassForm`, `ClassBrowser`, `StudentRoster`,
+  `CertificationReviewTable`.
+
+### Phase 4 — drop the enum
+
+- 6 `subject SubjectArea` columns → `subject String`; `enum SubjectArea`
+  deleted. `prisma db push --accept-data-loss` — MySQL `ENUM → VARCHAR` keeps
+  the label strings verbatim (228 certs / 43 requests / 165 classes verified).
+- Every `import { SubjectArea }`, `as SubjectArea` cast, `Object.values(
+  SubjectArea)`, and `subject in SubjectArea` guard removed (~38 files);
+  `SubjectArea` type annotations → `string`.
+- `ClassModerationTable` + `TopicRequestModerationTable` subject filters moved
+  to `useSubjectCatalog`.
+
+### Still on the static map (deliberate, non-critical)
+
+`chatbot/recommend.ts` (keyword extraction), `api/dev/route.ts` +
+`DevDataFactory` (dev tooling), `admin/assessment-questions/coverage/route.ts`
+(coverage report), `QuestionBankManager` (subject→topic drill-down counts).
+They keep working; convert opportunistically.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` 467/467, `pnpm build` OK, `pnpm exec tsx prisma/seed.ts` runs.
+
+### Docs
+
+`docs/plans/subject-topic-management.md` marked done; `docs/reference/decisions.md`
+new entry (enum → tables, Path B, agent guidance); `docs/feature-checklist.md`
+row added; `docs/roles/ADMIN.md` "Subjects & Topics" section + API; stale
+`SubjectArea enum` references in the role docs replaced with "subject slug
+string"; `docs/erd.md` regenerated; `docs/TODO.txt` item removed.
 
 ### Not committed.

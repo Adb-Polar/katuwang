@@ -62,6 +62,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | In-app notifications — cross-module events | ✅ | expanded 2026-09-04 (Changes.md Part 18): `REGISTRATION_APPROVED`, `CERTIFICATION_CERTIFIED/REJECTED`, `QUESTION_REQUEST_RESOLVED/DISMISSED`, `CLASS_ENROLLMENT_NEW/DROPPED`, `CLASS_CANCELLED/COMPLETED`; topbar bell dropdown + unread dot in `PortalLayout`; per-row read-on-click; Admin portal at parity (`/admin/notifications`) |
 | Admin moderation of topic requests | ✅ | `/admin/topic-requests`, `TopicRequestModerationTable.tsx` |
 | Admin can toggle matching availability | ✅ | `matchingEnabled` platform setting |
+| Admin-editable subjects & topics | ✅ | landed 2026-09-04 (Changes.md Part 25). `Subject`/`Topic` tables + `/admin/subjects` CRUD; replaced the `SubjectArea` enum + static `SUBJECT_TOPICS` map. `subject` columns are now `String` slugs; validation via `src/lib/subjects.ts`; client dropdowns via `useSubjectCatalog()`. Topic rename fans out to all denormalised `topic` columns. See `docs/plans/subject-topic-management.md`. |
 
 ## 4. Assessment Module
 

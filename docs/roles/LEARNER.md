@@ -174,7 +174,7 @@ Rank browsable classes against match criteria. Requires `role === "STUDENT_LEARN
 **Body**
 ```json
 {
-  "subject": "SubjectArea enum",
+  "subject": "string (subject slug, e.g. \"MATH\")",
   "topics": ["string (1–10, each in SUBJECT_TOPICS[subject])"],
   "gradeLevel": "GradeLevel enum (optional)",
   "preferredSlots": [{ "day": "MONDAY", "startTime": "15:00", "endTime": "17:00" }]
@@ -199,7 +199,7 @@ Create a topic request. `403` when `matchingEnabled` is off.
 **Body**
 ```json
 {
-  "subject": "SubjectArea enum",
+  "subject": "string (subject slug, e.g. \"MATH\")",
   "topics": ["string (1–10, each in SUBJECT_TOPICS[subject])"],
   "gradeLevel": "GradeLevel enum (required)",
   "preferredSlots": [{ "day": "MONDAY", "startTime": "15:00", "endTime": "17:00" }],
