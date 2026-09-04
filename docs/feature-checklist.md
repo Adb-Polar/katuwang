@@ -110,7 +110,7 @@ Landed 2026-09-04 (Changes.md Part 19).
 | File upload for learning materials | Explicitly **out of scope** | ✅ correctly absent — no upload endpoints/models exist |
 | Browser/device-agnostic responsive web app | In scope | ✅ Tailwind 4 + DaisyUI 5 responsive layout (`PortalLayout.tsx`) |
 | Free/non-profit, no payment flows | Implied | ✅ no billing code anywhere |
-| Chatbot scope limited to nav/FAQ/recommendation (no replacing tutoring) | In scope, limited | ❌ module doesn't exist yet, so the delimitation is moot until built |
+| Chatbot scope limited to nav/FAQ/recommendation (no replacing tutoring) | In scope, limited | ✅ built 2026-09-04 as a deterministic intent matcher (no LLM); nav help + FAQ + learner class recommendation only — see §5 and `docs/reference/chatbot.md` |
 | Analytics limited to descriptive stats (no ML/predictive) | In scope, limited | ✅ current reports are purely descriptive aggregates — no ML added, consistent with delimitation |
 
 ---

@@ -109,10 +109,11 @@ The notification expansion (Changes.md Part 18) deliberately did **not** build:
   — fires as a side effect of an admin adding bank questions over time, not
   from a single request. The narrower `QUESTION_REQUEST_RESOLVED` (admin
   explicitly resolves the tutor's request) covers the realistic case.
-- **Declined-registration delivery** — `REGISTRATION_REJECTED` is a reserved
-  type but no row is written: a declined applicant is set `BANNED` in the
-  same transaction and can never authenticate to see it. Tracked in
-  `docs/TODO.txt`.
+- **Declined-registration `REGISTRATION_REJECTED` notification** — still not
+  written: a declined applicant now has status `DECLINED` (Changes.md Part 22,
+  not `BANNED`) and still can't sign in to see an in-app row. The decline
+  reason instead reaches them on the `/account-declined` screen, which is what
+  the need actually was — so no notification is planned.
 
 These are infrastructure gaps, not thesis divergences — no scope was cut
 against the spec.
