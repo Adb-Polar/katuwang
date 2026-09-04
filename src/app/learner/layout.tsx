@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, Bell, UserCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 export default async function LearnerLayout({
@@ -20,9 +21,10 @@ export default async function LearnerLayout({
     redirect("/unauthorized");
   }
 
-  const unreadCount = await prisma.notification.count({
-    where: { userId: session.user.id, readAt: null },
-  });
+  const [unreadCount, chatbotEnabled] = await Promise.all([
+    prisma.notification.count({ where: { userId: session.user.id, readAt: null } }),
+    getSetting("chatbotEnabled"),
+  ]);
 
   const LEARNER_NAV_ITEMS: NavItem[] = [
     { label: "Dashboard", href: "/learner", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
@@ -43,6 +45,7 @@ export default async function LearnerLayout({
       idRole="LEARNER"
       unreadCount={unreadCount}
       notificationsHref="/learner/notifications"
+      chatbotEnabled={chatbotEnabled}
     >
       {children}
     </PortalLayout>

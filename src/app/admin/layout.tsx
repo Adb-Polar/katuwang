@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
@@ -36,9 +37,10 @@ export default async function AdminLayout({
     redirect("/unauthorized");
   }
 
-  const unreadCount = await prisma.notification.count({
-    where: { userId: session.user.id, readAt: null },
-  });
+  const [unreadCount, chatbotEnabled] = await Promise.all([
+    prisma.notification.count({ where: { userId: session.user.id, readAt: null } }),
+    getSetting("chatbotEnabled"),
+  ]);
 
   const navItems: NavItem[] = ADMIN_NAV_ITEMS.map((item) =>
     item.href === "/admin/notifications" ? { ...item, badge: unreadCount } : item
@@ -52,6 +54,7 @@ export default async function AdminLayout({
       accent="primary"
       unreadCount={unreadCount}
       notificationsHref="/admin/notifications"
+      chatbotEnabled={chatbotEnabled}
     >
       {children}
     </PortalLayout>

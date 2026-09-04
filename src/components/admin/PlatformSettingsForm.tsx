@@ -46,6 +46,12 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
       "When enabled, passing a topic assessment certifies the tutor for that topic immediately. When off, a passing assessment creates a pending certification for an admin to confirm on the Certifications screen.",
     group: "Assessment",
   },
+  chatbotEnabled: {
+    label: "Chatbot assistant",
+    description:
+      "When enabled, the in-app help assistant (navigation help, FAQs, and class recommendations) appears in every portal. When off, the widget is hidden and its API rejects requests.",
+    group: "General",
+  },
 };
 
 interface AssessmentConfig {

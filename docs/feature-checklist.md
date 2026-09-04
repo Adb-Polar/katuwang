@@ -79,11 +79,15 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 
 | Feature | Status | Notes |
 |---|---|---|
-| Intent-based responder for navigation help | ❌ | No chatbot code found (`grep -ri "chatbot\|intent"` across `src/` returns nothing) |
-| FAQ answering | ❌ | Not implemented |
-| Session/tutor recommendation via chat | ❌ | Not implemented (matching exists via a form UI, not chat) |
+| Intent-based response logic | ✅ | `src/lib/chatbot/` — deterministic tokenise + keyword/synonym/regex scoring (`classifier.ts`), **no LLM**. ~25 role-aware intents in `intents.ts` |
+| Navigation help intents | ✅ | Per-role deep links into every portal section |
+| FAQ knowledge base | 🟡 | `faq.ts` — 15-entry starter set from the project scope + role docs; per the thesis this should be refined with TRIS stakeholder interviews (grow it from the `chatbot_misses` table) |
+| Session recommendation intent (learner) | ✅ | `recommend.ts` — extracts subject/topic from the message and ranks live classes via the existing `rankMatches` engine; falls back to "post a topic request" |
+| Chat UI widget | ✅ | `src/components/chatbot/ChatWidget.tsx` — floating launcher in every portal, `localStorage` transcript, quick-reply chips, class cards |
+| Admin on/off toggle | ✅ | `chatbotEnabled` platform setting (default ON) on `/admin/settings`; route 403s + widget hides when off |
+| Unmatched-query logging | ✅ | `chatbot_misses` table (`ChatbotMiss` model) — read directly, no admin UI in v1 |
 
-**Entire module is unbuilt.**
+Landed 2026-09-04 (Changes.md Part 19).
 
 ## 6. Analytics Dashboard Module (Admin)
 
@@ -118,9 +122,9 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | 2. Session Management | ✅ Complete |
 | 3. Tutor Matching | ✅ Complete (Topic Requests v2 — directed requests, accept-to-class, notifications, admin moderation — landed 2026-09-03) |
 | 4. Assessment | ⚠️ Tutor qualification assessment is complete on `main`; learner pre/post-test is built but **sitting unmerged** on `class-pre-post-tests` |
-| 5. Chatbot Assistant | ❌ Not started |
+| 5. Chatbot Assistant | ✅ Complete (intent-based — nav help, FAQ, class recommendation, per-portal widget — landed 2026-09-04; FAQ KB is a starter set pending stakeholder interviews) |
 | 6. Analytics Dashboard | ✅ Complete |
 
-**Biggest gaps to close next:** (1) Chatbot Assistant module (whole module, 0% built), (2) decide whether/when to merge `class-pre-post-tests` — the learner pre/post-test work already exists, it's just not on `main`.
+**Biggest gaps to close next:** (1) decide whether/when to merge `class-pre-post-tests` — the learner pre/post-test work already exists, it's just not on `main`; (2) grow the chatbot FAQ knowledge base from real `chatbot_misses` + TRIS stakeholder interviews.
 
 **Note on roles:** the thesis reference document names a 4th "Teacher Moderator" role, but the team decided to ship with 3 roles only (Learner, Tutor, Admin). Treat the reference doc's mentions of Teacher Moderator / Moderator Portal as stale, not a missing feature.

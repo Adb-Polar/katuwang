@@ -316,6 +316,15 @@ DISMISSED DISMISSED
     DateTime createdAt 
     }
   
+
+  "chatbot_misses" {
+    String id "🗝️"
+    String message 
+    Role role 
+    String userId "❓"
+    DateTime createdAt 
+    }
+  
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -356,4 +365,6 @@ DISMISSED DISMISSED
     "question_requests" |o--|| "QuestionRequestStatus" : "enum:status"
     "question_requests" }o--|o "users" : "resolvedBy"
     "notifications" }o--|| "users" : "user"
+    "chatbot_misses" |o--|| "Role" : "enum:role"
+    "chatbot_misses" }o--|o "users" : "user"
 ```

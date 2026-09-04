@@ -51,3 +51,25 @@ Notifications (2026-09-04 session — Changes.md Part 18)
  [] Tutor completes / cancels a class, or admin bans it -> every enrolled
     learner is notified once; a learner who joined via a topic request gets only
     the TOPIC_REQUEST_* notification (no duplicate CLASS_* one)
+
+Chatbot assistant (2026-09-04 session — Changes.md Part 19)
+ [] Floating launcher (bottom-right) appears in learner, tutor AND admin
+    portals; click opens the panel with a greeting + suggestion chips; Escape
+    or the X closes it; the page still scrolls behind it
+ [] A nav question ("how do I enroll", "where are my notifications",
+    tutor: "how do I get certified", admin: "approve registrations") returns
+    the right answer AND a working deep link
+ [] An FAQ question ("is katuwang free", "why can't I see the tutor's real
+    name", "can you do my homework") returns the KB answer
+ [] A Taglish phrasing ("paano sumali sa klase", "libre ba", "saan ang
+    notification ko") resolves to the same intent as its English form
+ [] Gibberish ("asdfgh") returns the fallback help with quick-reply chips
+ [] Learner only: "recommend a science class" / "I need help with algebra"
+    returns up to 3 class cards linking to /learner/classes/[id]; with no open
+    class in that subject it returns the "post a topic request" CTA
+ [] Send a few messages, reload the page -> the transcript is restored from
+    localStorage
+ [] /admin/settings -> turn "Chatbot assistant" OFF -> widget disappears on
+    reload in every portal and POST /api/chatbot returns 403
+ [] After sending gibberish, a chatbot_misses row exists (prisma studio /
+    direct query) with the message, role and userId

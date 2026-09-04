@@ -126,6 +126,7 @@ model User {
   resolvedQuestionRequests QuestionRequest[]    @relation("ResolvedQuestionRequests")
 
   notifications Notification[]
+  chatbotMisses ChatbotMiss[]
 
   @@map("users")
 }
@@ -472,4 +473,20 @@ model Notification {
 
   @@index([userId, readAt])
   @@map("notifications")
+}
+
+// ─── Chatbot Miss (unmatched assistant queries, for growing the FAQ) ────────
+// One row per message the intent classifier could not confidently match.
+// Read straight from the table for now — no admin UI in v1.
+
+model ChatbotMiss {
+  id        String   @id @default(cuid())
+  message   String   @db.Text
+  role      Role
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("chatbot_misses")
 }

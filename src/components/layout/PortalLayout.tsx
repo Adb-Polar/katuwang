@@ -7,6 +7,7 @@ import { HelpCircle, LogOut, Menu, Search, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import ChatWidget from "@/components/chatbot/ChatWidget";
 
 export interface NavItem {
   label: string;
@@ -30,6 +31,8 @@ interface PortalLayoutProps {
   unreadCount?: number;
   /** portal-specific notifications page, e.g. "/tutor/notifications" */
   notificationsHref?: string;
+  /** when true, mounts the floating intent-based help assistant */
+  chatbotEnabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -42,6 +45,7 @@ export default function PortalLayout({
   idRole,
   unreadCount = 0,
   notificationsHref = "/dashboard",
+  chatbotEnabled = false,
   children,
 }: PortalLayoutProps) {
   const pathname = usePathname();
@@ -229,6 +233,8 @@ export default function PortalLayout({
             {logoutLink}
           </div>
         </aside>
+
+      {chatbotEnabled && <ChatWidget />}
     </div>
   );
 }

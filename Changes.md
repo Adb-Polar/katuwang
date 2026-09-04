@@ -24,6 +24,7 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [19](#part-19) | **Chatbot Assistant module (intent-based, no LLM)** | Module 5 of 6 — the last unbuilt module. A deterministic rule/pattern intent matcher: tokenise → score against ~25 role-aware intents + a 15-entry FAQ KB by keyword/synonym/regex overlap → predefined reply, optionally with a deep link or (learner) live class matches from `rankMatches`. Floating chat widget in every portal. | New `src/lib/chatbot/` (`types`, `normalize`, `intents`, `faq`, `classifier`, `recommend`, `respond`); `POST /api/chatbot` (auth + `chatbotEnabled` gate + Zod); `src/components/chatbot/ChatWidget.tsx` wired via a new `PortalLayout` prop; `chatbotEnabled` platform setting (default ON) on `/admin/settings`. New `ChatbotMiss` table (unmatched queries, applied via `db push` — history drift, same as Part 17) + `User` relation. 3 new test files, 429/429. `tsc`/`lint`/`build` clean. Not committed. |
 | [18](#part-18) | **Notification system expansion — cross-module events, topbar bell dropdown + unread dot, admin parity** | Part 5's notification system only fired for topic-request events, had no Admin surface, and its topbar bell was dead. Adds 10 new `NotificationType` values wired across registration approval, certification review, question-request outcomes, and class enrol/lifecycle; turns the bell into a dropdown panel with a red unread dot; per-row read-on-click replaces "mark all on page open"; Admin gets a Notifications nav item + page + count. | **No schema change** (`Notification.type` is free-text). New trigger `notify()`/`notifyMany()` calls inside existing `$transaction`s in `admin/registrations/[userId]`, `admin/certifications/[certificationId]`, `admin/question-requests/[requestId]`, `classes/[classId]/enroll` (POST+DELETE now wrapped in `$transaction`), `tutor/classes/[classId]`, `admin/classes/[classId]` (last two fan out to all enrolled learners, de-duped against the topic-request path). `GET /api/notifications` gains `?take`. New `notificationMeta.tsx` (shared icons/format) + `NotificationBell.tsx` (client dropdown). `PortalLayout` gains `unreadCount`/`notificationsHref` props. `.kt-icon-btn` made `position: relative`. New `src/app/admin/notifications/page.tsx`; admin nav item under "Review". 7 route test files updated; `tsc`/`lint` clean, 398/398 tests. Not committed. |
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 
@@ -1037,5 +1038,104 @@ notification system" line removed, a `REGISTRATION_REJECTED` delivery follow-up
 added; `docs/TOTEST.txt` — manual-check block added; `docs/feature-checklist.md`
 Notifications row updated; `docs/reference/decisions.md` — out-of-scope note
 (session reminders / assessment-unlocked / rejected-registration delivery).
+
+### Not committed.
+
+---
+
+<a id="part-19"></a>
+
+# Part 19 — Feature: Chatbot Assistant module (intent-based, no LLM)
+
+Module 5 of 6 was the last whole module with zero code. Built as a
+deterministic rule/pattern intent matcher per the thesis ("intent-based
+response logic", "no free-form generative chat"). No LLM, no external NLP
+service, no new runtime dependency. Plan: `docs/plans/chatbot-assistant.md`.
+
+### Schema
+
+- **`prisma/schema.prisma`** — new `model ChatbotMiss` (`message`, `role`,
+  nullable `userId` with `onDelete: SetNull`, `createdAt`, `@@index([createdAt])`,
+  `@@map("chatbot_misses")`) + `User.chatbotMisses` relation. One row per
+  message the classifier can't confidently match, so the FAQ can be grown from
+  real misses. No admin UI in v1 — read the table directly.
+- Applied to the **local dev DB with `npx prisma db push`** (not `migrate dev`):
+  the local migration history is drifted (`20260902081727_class_pre_post_tests`
+  is applied to the DB but only exists on the unmerged `class-pre-post-tests`
+  branch, and `20260903000000_topic_requests_directed_and_notifications` was
+  edited post-apply), so `migrate dev` demanded a full reset. Same workaround
+  as Part 17. No migration file written. `npx prisma generate` re-run
+  (regenerates `docs/erd.md` too).
+
+### Intent engine — `src/lib/chatbot/`
+
+- `types.ts` — `Intent`, `FaqEntry`, `ChatContext`, `BotReply`, etc.
+- `normalize.ts` — `tokenize()`: lowercase, strip diacritics/punctuation, drop
+  an English + Filipino stopword set, light plural→singular, then a Taglish
+  synonym map (`paano→how`, `guro→tutor`, `klase→class`, `sumali→enroll`…).
+- `intents.ts` — `INTENTS`: ~25 role-aware entries (nav for every portal
+  section, small talk, the learner recommendation intent) with keywords +
+  regex patterns + static/functional responses + deep links.
+- `faq.ts` — `FAQ_ENTRIES`: 15-entry starter knowledge base (free/on-campus/
+  anonymity/grades/subjects/becoming a tutor/matching/cancelled class/no
+  upload/data use…). Flagged in-file as needing TRIS stakeholder-interview
+  refinement.
+- `classifier.ts` — `classify()`: scores every role-eligible intent
+  (keyword ×1, pattern ×3; patterns test raw **and** normalised token stream
+  so Taglish hits) and every FAQ entry (keyword ×2); picks the best above a
+  confidence floor, category priority (`recommend > nav > faq > smalltalk`)
+  breaks ties; an intent wins ties with an equal-scoring FAQ.
+- `recommend.ts` — `extractCriteria()` (subject keyword table + topic
+  substring match vs `SUBJECT_TOPICS`) and `recommendClasses()` — reuses
+  `browsableOrEnrolledWhere` / `learnerClassInclude` / `toLearnerClassDTO`
+  (`classQueries.ts`) + `rankMatches` (`matching.ts`); top-3 class cards, or a
+  "post a topic request" fallback.
+- `respond.ts` — `getBotReply()` orchestrates classify → FAQ / recommendation /
+  nav / fallback; logs a `ChatbotMiss` on fallback (best-effort).
+
+### API + settings
+
+- **`src/lib/validations/chatbot.ts`** — `chatbotMessageSchema` (1–500 chars).
+- **`src/app/api/chatbot/route.ts`** — `POST`; auth (any role); `403` when
+  `getSetting("chatbotEnabled")` is false; `400` on bad input; loads the
+  learner's `gradeLevel`; returns `{ reply }`.
+- **`src/lib/settings.ts`** — `chatbotEnabled` added to `PLATFORM_SETTING_KEYS`
+  + `DEFAULTS` (`true`). **`src/lib/validations/admin.ts`** —
+  `updatePlatformSettingSchema` key enum extended.
+  **`src/components/admin/PlatformSettingsForm.tsx`** — `SETTING_META` entry
+  (General group). The settings API iterates the keys, so no route change.
+
+### UI
+
+- **`src/components/chatbot/`** — `ChatWidget.tsx` (`"use client"`, floating
+  launcher bottom-right, DaisyUI `chat` bubbles, `localStorage` transcript
+  capped at 30, quick-reply chips, class cards, Escape-to-close),
+  `ChatMessage.tsx`, `chatbotClient.ts`.
+- **`src/components/layout/PortalLayout.tsx`** — new `chatbotEnabled?: boolean`
+  prop; mounts `<ChatWidget/>` when true.
+- **`src/app/{learner,tutor,admin}/layout.tsx`** — each fetches
+  `getSetting("chatbotEnabled")` (in parallel with the notification count) and
+  passes it through.
+
+### Tests
+
+New: `src/lib/chatbot/__tests__/classifier.test.ts` (intent table, Taglish,
+fallback, role-gating, FAQ retrieval), `.../recommend.test.ts` (`extractCriteria`
++ `recommendClasses` with a mocked prisma), `src/app/api/chatbot/__tests__/route.test.ts`
+(401 / 403-disabled / 400 / 200-matched / miss-logged). No component tests
+(repo has none). Suite: **429/429** (was 398 + 31).
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean; `pnpm lint` clean (5 pre-existing warnings);
+`pnpm test` 429/429; `pnpm build` succeeds (`/api/chatbot` registered).
+
+### Docs
+
+`docs/plans/chatbot-assistant.md`; `docs/feature-checklist.md` §5 rebuilt +
+module status → ✅; `docs/reference/decisions.md` — "zero code" entry replaced
+with a "built deterministic, no LLM" decision; `docs/TOTEST.txt` manual-check
+block; role docs (`LEARNER`/`TUTOR`/`ADMIN`) get a Chatbot section + the
+`POST /api/chatbot` reference; `docs/erd.md` regenerated.
 
 ### Not committed.

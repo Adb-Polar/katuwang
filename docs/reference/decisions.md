@@ -85,8 +85,6 @@ Unlike the roles decision above, these are modules the thesis specs that
 simply haven't been built yet. Listed here so agents don't waste time
 re-deriving this from scratch; full detail in `docs/feature-checklist.md`.
 
-- **Chatbot Assistant module** — zero code exists (`intent`, `chatbot`,
-  `faq` all return no hits in `src/`). Entire module 5 of 6 is unstarted.
 - **Learner pre-test / post-test assessment** — the built assessment system
   (`AssessmentAttempt`, `AssessmentAttemptItem`, `TopicCertification`) is
   scoped entirely to `TutorProfile` (tutor qualifying exams). There is no
@@ -118,6 +116,32 @@ The notification expansion (Changes.md Part 18) deliberately did **not** build:
 
 These are infrastructure gaps, not thesis divergences — no scope was cut
 against the spec.
+
+---
+
+## Chatbot Assistant — built deterministic (no LLM), 2026-09-04
+
+**Decision:** Module 5 shipped as a rule-based intent matcher — tokenise the
+message, score it against a fixed catalogue of ~25 role-aware intents + a
+15-entry FAQ knowledge base by keyword/synonym/regex overlap, and return a
+predefined response (optionally with a deep link or, for the learner
+recommendation intent, live class matches from `rankMatches`). See
+`docs/plans/chatbot-assistant.md` and Changes.md Part 19.
+
+**Thesis alignment:** this matches the thesis exactly — it describes
+"intent-based response logic" and the delimitations say "no free-form
+generative chat". There is no LLM, no external NLP service, and no new
+runtime dependency.
+
+**Implications for agents:**
+- Don't add an LLM/generative layer to the chatbot — it's out of scope by
+  the thesis delimitation, not a limitation to "fix".
+- The FAQ set in `src/lib/chatbot/faq.ts` is a **starter** — the thesis wants
+  it refined from TRIS stakeholder interviews. Grow it from the
+  `chatbot_misses` table (unmatched queries logged there).
+- The only new table is `ChatbotMiss`. There is **no admin UI** to review
+  misses in v1 — read the table directly.
+- The widget is gated by the `chatbotEnabled` platform setting (default ON).
 
 ---
 

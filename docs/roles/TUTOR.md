@@ -84,6 +84,13 @@ Two tabs on one page:
 - Notification types you'll see: `TOPIC_REQUEST_DIRECTED` (a learner directed a request specifically at you), `CERTIFICATION_CERTIFIED` / `CERTIFICATION_REJECTED` (an admin reviewed your topic certification — links to `/tutor/assessments`), `QUESTION_REQUEST_RESOLVED` / `QUESTION_REQUEST_DISMISSED` (an admin acted on your "please add questions" request), `CLASS_ENROLLMENT_NEW` / `CLASS_ENROLLMENT_DROPPED` (a learner, shown by `STU-xxxx`, joined or left one of your classes).
   (`GET /api/notifications`, `POST /api/notifications/read`)
 
+## Chatbot assistant (floating widget)
+
+- A launcher at the bottom-right of every page opens an **intent-based** help assistant (rule/keyword matching, not a generative AI).
+- It points you to the right page (create a class, get certified / take an assessment, accept a topic request, view your students, notifications, profile, password reset) and answers common questions about how Katuwang works. It understands common Taglish phrasings. Class recommendation is learner-only.
+- It does **not** run tutoring sessions. The transcript is kept in your browser only. An admin can switch the assistant off platform-wide.
+  (`POST /api/chatbot`)
+
 ## Availability (auto-derived)
 
 - There is **no** availability editor or page. A tutor's weekly availability is computed
@@ -287,6 +294,14 @@ Mark notifications read.
 **200** → `{ unreadCount }`.
 **401** → not authenticated.
 **500** → `{ error }`.
+
+### `POST /api/chatbot`
+Ask the intent-based assistant. Any authenticated role.
+
+**Body**: `{ "message": "string (1–500 chars)" }`.
+
+**200** → `{ reply: { text, intentId, category, links?, cards?, suggestions? } }`. Unmatched messages return the fallback reply and are logged to `chatbot_misses`.
+**400** → empty / over-length message. **401** → not authenticated. **403** → `chatbotEnabled` setting is off. **500** → `{ error }`.
 
 ### `PATCH /api/tutor/profile`
 Update the tutor's own self-service profile fields.

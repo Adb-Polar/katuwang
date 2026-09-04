@@ -43,6 +43,7 @@ export const updatePlatformSettingSchema = z.object({
       "showTutorRealNames",
       "requireRegistrationApproval",
       "autoCertifyOnAssessmentPass",
+      "chatbotEnabled",
     ],
     { message: "Invalid setting key." }
   ),

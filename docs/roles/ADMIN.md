@@ -80,6 +80,13 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 - The moderation actions an admin performs (approve registration, review certification, resolve a question request, ban a class) send notifications to the **affected tutor or learner**, not to admins — so an admin's own list is usually empty today. The page + count exist for parity and for future admin-directed notifications.
   (`GET /api/notifications`, `POST /api/notifications/read` — not admin-gated)
 
+## Chatbot assistant
+
+- The same floating **intent-based** help widget shown to learners and tutors also appears in the admin portal (nav help for Registrations, Certifications, Question Bank, moderation, Reports, Settings; plus general FAQs). Rule/keyword matching — not a generative AI.
+- **Toggle:** *Settings → Chatbot assistant* (`chatbotEnabled`, default ON). When off, the widget is hidden everywhere and `POST /api/chatbot` returns `403`.
+- **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`). There is no admin screen for these in v1 — query the table directly and feed real misses back into `src/lib/chatbot/faq.ts`.
+  (`POST /api/chatbot` — not admin-gated)
+
 ## API Reference
 
 All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.

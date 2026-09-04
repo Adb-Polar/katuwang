@@ -72,6 +72,13 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 - Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed), `REGISTRATION_APPROVED` (your account was approved), `CLASS_CANCELLED` / `CLASS_COMPLETED` (a class you were enrolled in — sent to browse-enrolled learners; request-linked learners get the `TOPIC_REQUEST_*` one instead).
   (`GET /api/notifications`, `POST /api/notifications/read`)
 
+## Chatbot assistant (floating widget)
+
+- A launcher button sits at the bottom-right of every page. It opens a small chat panel — an **intent-based** assistant (rule/keyword matching, not a generative AI).
+- It can: point you to the right page (browse, enrol, matching, requests, notifications, profile, password reset), answer common questions about how Katuwang works, and **recommend classes** — ask e.g. "recommend a science class" or "I need help with algebra" and it ranks open classes for you (or suggests posting a topic request if none fit). It understands common Taglish phrasings.
+- It does **not** run tutoring sessions or answer schoolwork. The transcript is kept in your browser only. An admin can switch the assistant off platform-wide.
+  (`POST /api/chatbot`)
+
 ## Profile (`/learner/profile`)
 
 - **View own account info** — real name, email, anonymous ID (`STU-XXXX`), and role. Always read-only.
@@ -232,6 +239,17 @@ Mark notifications read.
 
 **200** → `{ unreadCount }`.
 **401** → not authenticated.
+**500** → `{ error }`.
+
+### `POST /api/chatbot`
+Ask the intent-based assistant. Any authenticated role.
+
+**Body**: `{ "message": "string (1–500 chars)" }`.
+
+**200** → `{ reply: { text, intentId, category, links?, cards?, suggestions? } }`. `cards` (class recommendations) only appear for learners. Unmatched messages return the fallback reply and are logged to `chatbot_misses`.
+**400** → empty / over-length message.
+**401** → not authenticated.
+**403** → the `chatbotEnabled` platform setting is off.
 **500** → `{ error }`.
 
 ### `PATCH /api/learner/profile`
