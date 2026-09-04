@@ -8,7 +8,10 @@ API + UI only.
 Open items
  - Admin topic/subject management page (add/edit topics & subjects) —
    subjects/topics are currently hardcoded in src/lib/subjectTopics.ts.
-   Making them admin-editable means moving them into the DB.
+   Making them admin-editable means moving them into the DB. FULL PLAN written:
+   docs/plans/subject-topic-management.md (5 phases, enum -> Subject table with
+   FKs; project-scale, needs its own branch + a real data migration). Owner
+   chose the full scope; execution deferred to a dedicated effort.
 
  - Admin bulk import for the assessment question bank — today the only way to
    add questions is QuestionFormModal in QuestionBankManager.tsx, one at a
