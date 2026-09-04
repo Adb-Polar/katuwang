@@ -24,6 +24,8 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [21](#part-21) | **Registration Approvals — role + grade-level filters** | The registrations queue only had a text search; the Users page has role tabs + a status dropdown. Brought the registrations table to parity: role tabs (All / Learners / Tutors) + a grade-level dropdown. | `GET /api/admin/registrations` gains a `gradeLevel` param (validated against the `GradeLevel` enum, ignored if invalid) alongside the existing `role`/`q`. `RegistrationApprovalTable.tsx` adds `Tabs` + a grade `<select>` wired into `usePaginatedList`. 2 new route-test cases; 431/431. No schema change. Not committed. |
+| [20](#part-20-docs) | **Docs — Chatbot Assistant workflow reference** | Standing architecture doc for the chatbot module: message → `classify()` → reply, the scoring model, the recommendation path, the `ChatbotMiss` loop, config, and how to extend. | New `docs/reference/chatbot.md`; linked from `docs/README.md`. Docs only. Not committed. |
 | [19](#part-19) | **Chatbot Assistant module (intent-based, no LLM)** | Module 5 of 6 — the last unbuilt module. A deterministic rule/pattern intent matcher: tokenise → score against ~25 role-aware intents + a 15-entry FAQ KB by keyword/synonym/regex overlap → predefined reply, optionally with a deep link or (learner) live class matches from `rankMatches`. Floating chat widget in every portal. | New `src/lib/chatbot/` (`types`, `normalize`, `intents`, `faq`, `classifier`, `recommend`, `respond`); `POST /api/chatbot` (auth + `chatbotEnabled` gate + Zod); `src/components/chatbot/ChatWidget.tsx` wired via a new `PortalLayout` prop; `chatbotEnabled` platform setting (default ON) on `/admin/settings`. New `ChatbotMiss` table (unmatched queries, applied via `db push` — history drift, same as Part 17) + `User` relation. 3 new test files, 429/429. `tsc`/`lint`/`build` clean. Not committed. |
 | [18](#part-18) | **Notification system expansion — cross-module events, topbar bell dropdown + unread dot, admin parity** | Part 5's notification system only fired for topic-request events, had no Admin surface, and its topbar bell was dead. Adds 10 new `NotificationType` values wired across registration approval, certification review, question-request outcomes, and class enrol/lifecycle; turns the bell into a dropdown panel with a red unread dot; per-row read-on-click replaces "mark all on page open"; Admin gets a Notifications nav item + page + count. | **No schema change** (`Notification.type` is free-text). New trigger `notify()`/`notifyMany()` calls inside existing `$transaction`s in `admin/registrations/[userId]`, `admin/certifications/[certificationId]`, `admin/question-requests/[requestId]`, `classes/[classId]/enroll` (POST+DELETE now wrapped in `$transaction`), `tutor/classes/[classId]`, `admin/classes/[classId]` (last two fan out to all enrolled learners, de-duped against the topic-request path). `GET /api/notifications` gains `?take`. New `notificationMeta.tsx` (shared icons/format) + `NotificationBell.tsx` (client dropdown). `PortalLayout` gains `unreadCount`/`notificationsHref` props. `.kt-icon-btn` made `position: relative`. New `src/app/admin/notifications/page.tsx`; admin nav item under "Review". 7 route test files updated; `tsc`/`lint` clean, 398/398 tests. Not committed. |
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
@@ -1137,5 +1139,61 @@ module status → ✅; `docs/reference/decisions.md` — "zero code" entry repla
 with a "built deterministic, no LLM" decision; `docs/TOTEST.txt` manual-check
 block; role docs (`LEARNER`/`TUTOR`/`ADMIN`) get a Chatbot section + the
 `POST /api/chatbot` reference; `docs/erd.md` regenerated.
+
+### Not committed.
+
+---
+
+<a id="part-20-docs"></a>
+
+# Part 20 — Docs: Chatbot Assistant workflow reference
+
+Standing architecture doc for the chatbot module (Part 19) — how a message
+travels from the widget through `classify()` to a reply, the scoring model
+(token normalisation, keyword/pattern/FAQ weights, `MIN_SCORE`, category
+priority, intent-beats-equal-FAQ), the recommendation path over `rankMatches`,
+the `ChatbotMiss` feedback loop, the `chatbotEnabled` gate, and an
+"extending it" table.
+
+### Changes
+
+- **New** `docs/reference/chatbot.md`.
+- **`docs/README.md`** — added it to the `reference/` row.
+
+Docs only. Not committed.
+
+---
+
+<a id="part-21"></a>
+
+# Part 21 — Registration Approvals: role + grade-level filters
+
+The Users page (`UserManagementTable`) has role tabs + a status dropdown; the
+Registration Approvals queue only had a free-text search. This brings the
+queue to parity (a `docs/TODO.txt` item).
+
+### Changes
+
+- **`src/app/api/admin/registrations/route.ts`** — `GET` accepts a
+  `gradeLevel` query param, added to the `where` when it's a valid
+  `GradeLevel` enum value (ignored otherwise). Sits alongside the existing
+  `role` and `q` params.
+- **`src/components/admin/RegistrationApprovalTable.tsx`** — a `Tabs` row
+  (All / Learners / Tutors, reusing `TAB_ROLE` from the users table) and a
+  grade-level `<select>` (from `GRADE_LEVELS`), both threaded into the
+  `usePaginatedList` query params.
+- **`src/app/api/admin/registrations/__tests__/route.test.ts`** — two cases:
+  `role` + `gradeLevel` applied to the `where`; an invalid `gradeLevel` is
+  dropped.
+
+### Verification
+
+`tsc` + `lint` clean; `pnpm test` 431/431.
+
+### Docs
+
+`docs/TODO.txt` — the "add a filters on registration page" line removed; the
+stale "Community (public) vs. personal (directed) topic requests" line also
+removed (shipped in Part 5 / `topic-requests-v2.md`).
 
 ### Not committed.

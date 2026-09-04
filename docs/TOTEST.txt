@@ -73,3 +73,7 @@ Chatbot assistant (2026-09-04 session — Changes.md Part 19)
     reload in every portal and POST /api/chatbot returns 403
  [] After sending gibberish, a chatbot_misses row exists (prisma studio /
     direct query) with the message, role and userId
+
+Registration Approvals filters (Changes.md Part 21)
+ [] /admin/registrations: role tabs (All / Learners / Tutors) filter the queue;
+    grade-level dropdown filters it; combine with the text search + pagination

@@ -14,10 +14,6 @@ Open items
    subjects/topics are currently hardcoded in src/lib/subjectTopics.ts.
    Making them admin-editable means moving them into the DB.
 
- - Community (public) vs. personal (directed) topic requests — this is the
-   scope of docs/plans/topic-requests-v2.md ("Not started"). Don't duplicate
-   it here; track it in that plan file instead.
-
  - Admin bulk import for the assessment question bank — today the only way to
    add questions is QuestionFormModal in QuestionBankManager.tsx, one at a
    time. A topic isn't assessable until it has minBankSize (default 5) active
@@ -59,4 +55,3 @@ Open items
    src/lib/mail.ts).
 
 - all declined registration request is marked as banned create another state
-- add a filters on registration page like in users(reuse the table from that page)

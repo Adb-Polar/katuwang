@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, Role } from "@prisma/client";
+import { Prisma, Role, GradeLevel } from "@prisma/client";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
     const role = searchParams.get("role");
+    const gradeLevel = searchParams.get("gradeLevel");
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(
       100,
@@ -27,6 +28,7 @@ export async function GET(req: NextRequest) {
     const where: Prisma.UserWhereInput = {
       status: "PENDING",
       ...(role && role in Role ? { role: role as Role } : { role: { not: "ADMIN" } }),
+      ...(gradeLevel && gradeLevel in GradeLevel ? { gradeLevel: gradeLevel as GradeLevel } : {}),
       ...(q
         ? {
             OR: [

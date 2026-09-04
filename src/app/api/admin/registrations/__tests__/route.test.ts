@@ -51,6 +51,33 @@ describe("GET /api/admin/registrations", () => {
     );
   });
 
+  it("applies the role and gradeLevel filters", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    findManyMock.mockResolvedValue([]);
+    countMock.mockResolvedValue(0);
+
+    await GET(makeRequest("http://localhost/api/admin/registrations?role=STUDENT_TUTOR&gradeLevel=GRADE_11"));
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          status: "PENDING",
+          role: "STUDENT_TUTOR",
+          gradeLevel: "GRADE_11",
+        }),
+      })
+    );
+  });
+
+  it("ignores an invalid gradeLevel value", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    findManyMock.mockResolvedValue([]);
+    countMock.mockResolvedValue(0);
+
+    await GET(makeRequest("http://localhost/api/admin/registrations?gradeLevel=GRADE_99"));
+    const call = findManyMock.mock.calls[0][0];
+    expect(call.where.gradeLevel).toBeUndefined();
+  });
+
   it("applies the q search filter", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     findManyMock.mockResolvedValue([]);

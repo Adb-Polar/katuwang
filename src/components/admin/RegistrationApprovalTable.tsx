@@ -3,12 +3,20 @@
 import { useState } from "react";
 import { Role, GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
+import Tabs from "@/components/ui/Tabs";
 
 const PAGE_SIZE = 10;
+
+const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
+  all: "",
+  learners: "STUDENT_LEARNER",
+  tutors: "STUDENT_TUTOR",
+};
 
 interface PendingUser {
   id: string;
@@ -34,6 +42,8 @@ function fmt(iso: string) {
 
 export default function RegistrationApprovalTable() {
   const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState<"all" | "learners" | "tutors">("all");
+  const [gradeFilter, setGradeFilter] = useState<GradeLevel | "">("");
   const [success, setSuccess] = useState("");
   const [declineTarget, setDeclineTarget] = useState<PendingUser | null>(null);
   const [reason, setReason] = useState("");
@@ -53,7 +63,11 @@ export default function RegistrationApprovalTable() {
   } = usePaginatedList<PendingUser>(
     "/api/admin/registrations",
     "users",
-    { ...(search.trim() ? { q: search.trim() } : {}) },
+    {
+      ...(TAB_ROLE[activeTab] ? { role: TAB_ROLE[activeTab] } : {}),
+      ...(gradeFilter ? { gradeLevel: gradeFilter } : {}),
+      ...(search.trim() ? { q: search.trim() } : {}),
+    },
     PAGE_SIZE,
     "Could not retrieve pending registrations.",
     "registrations"
@@ -96,13 +110,37 @@ export default function RegistrationApprovalTable() {
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Pending Registrations</h2>
 
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or ID..."
-            className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+          <Tabs
+            tabs={[
+              { key: "all", label: "All" },
+              { key: "learners", label: "Learners" },
+              { key: "tutors", label: "Tutors" },
+            ]}
+            active={activeTab}
+            onChange={(key) => setActiveTab(key as "all" | "learners" | "tutors")}
           />
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by name, email, or ID..."
+              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+            />
+            <select
+              value={gradeFilter}
+              onChange={(e) => setGradeFilter(e.target.value as GradeLevel | "")}
+              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+            >
+              <option value="">All Grade Levels</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {loading ? (
             <div className="flex justify-center items-center py-10">
