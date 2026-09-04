@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { Role, GradeLevel, SubjectArea, ClassStatus } from "@prisma/client";
+import { Role, GradeLevel, ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateClassCode } from "@/lib/idGenerator";
 import { registerAccount } from "@/lib/registration";
@@ -29,7 +29,7 @@ const SECTIONS = ["Rizal", "Bonifacio", "Mabini", "Aguinaldo", "Luna", "Del Pila
 const GRADES: GradeLevel[] = [
   "GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12",
 ];
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
+const SUBJECTS = Object.keys(SUBJECT_TOPICS) as string[];
 
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const sample = <T,>(arr: readonly T[], n: number): T[] => {
@@ -226,7 +226,7 @@ async function createClass(body: Record<string, unknown>) {
     tutorUserId = profile.userId;
   }
 
-  const subject = SUBJECTS.includes(body.subject as SubjectArea) ? (body.subject as SubjectArea) : pick(SUBJECTS);
+  const subject: string = SUBJECTS.includes(body.subject as string) ? (body.subject as string) : pick(SUBJECTS);
   const topicCount = clampInt(body.topicCount, 1, Math.min(6, SUBJECT_TOPICS[subject].length), 2);
   const sessionCount = clampInt(body.sessionCount, 1, 10, 2);
   const maxStudents = clampInt(body.maxStudents, 1, 10, 3);

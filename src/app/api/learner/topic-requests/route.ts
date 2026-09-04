@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { createTopicRequestSchema } from "@/lib/validations/match";
-import { SubjectArea } from "@prisma/client";
+
 import { subjectExists, topicExists } from "@/lib/subjects";
 import { notify } from "@/lib/notifications";
 
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
       const request = await tx.topicRequest.create({
         data: {
           learnerId: session.user.id,
-          subject: subject as SubjectArea,
+          subject: subject,
           gradeLevel,
           note: note || null,
           directedTutorProfileId,

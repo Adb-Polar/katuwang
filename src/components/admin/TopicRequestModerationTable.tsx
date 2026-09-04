@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { SubjectArea } from "@prisma/client";
+
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import SortableTh from "@/components/ui/SortableTh";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -27,7 +28,7 @@ const STATUS_TONE: Record<RequestStatus, "info" | "success" | "neutral" | "error
 
 interface AdminTopicRequest {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   gradeLevel: string;
   note: string | null;
   status: RequestStatus;
@@ -41,7 +42,8 @@ interface AdminTopicRequest {
 export default function TopicRequestModerationTable() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
-  const [subjectFilter, setSubjectFilter] = useState<SubjectArea | "">("");
+  const { subjects: subjectCatalog } = useSubjectCatalog();
+  const [subjectFilter, setSubjectFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "">("");
   const [scopeFilter, setScopeFilter] = useState<"" | "public" | "directed">("");
   const [closeTarget, setCloseTarget] = useState<AdminTopicRequest | null>(null);
@@ -119,13 +121,13 @@ export default function TopicRequestModerationTable() {
             />
             <select
               value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value as SubjectArea | "")}
+              onChange={(e) => setSubjectFilter(e.target.value)}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All Subjects</option>
-              {Object.values(SubjectArea).map((s) => (
-                <option key={s} value={s}>
-                  {s}
+              {subjectCatalog.map((s) => (
+                <option key={s.slug} value={s.slug}>
+                  {s.name}
                 </option>
               ))}
             </select>

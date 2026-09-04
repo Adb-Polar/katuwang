@@ -1,4 +1,4 @@
-import { PrismaClient, Role, GradeLevel, SubjectArea, ClassStatus, SessionStatus, User, TutorProfile } from "@prisma/client";
+import { PrismaClient, Role, GradeLevel, ClassStatus, SessionStatus, User, TutorProfile } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
 import { config as loadEnv } from "dotenv";
@@ -70,7 +70,7 @@ const LAST_NAMES = [
 ];
 const SECTIONS = ["Rizal", "Bonifacio", "Mabini", "Aguinaldo", "Luna", "Del Pilar", "Jacinto", "Silang", "Malvar", "Tandang Sora"];
 const ALL_GRADES: GradeLevel[] = ["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"];
-const ALL_SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
+const ALL_SUBJECTS = Object.keys(SUBJECT_TOPICS) as string[];
 const WEEKDAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 const REQUEST_NOTES = [
   "I struggle most with word problems.",
@@ -108,7 +108,7 @@ interface TutorSeed {
   gradeLevel: GradeLevel;
   section: string;
   topicCertifications: {
-    subject: SubjectArea;
+    subject: string;
     topic: string;
     certified: boolean;
     rejected?: boolean;
@@ -291,7 +291,7 @@ interface SessionSeed {
 
 interface ClassSeed {
   tutorEmail: string;
-  subject: SubjectArea;
+  subject: string;
   gradeLevel?: GradeLevel;
   topics: string[];
   description: string;
@@ -519,18 +519,18 @@ function genLearnerSeeds(count: number): LearnerSeed[] {
 
 interface GeneratedClass {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   status: ClassStatus;
 }
 
 /** Builds and persists one procedurally-generated class for a tutor. */
 async function createGeneratedClass(
   profileId: string,
-  certifiedTopics: { subject: SubjectArea; topic: string }[],
+  certifiedTopics: { subject: string; topic: string }[],
   learnerIds: string[]
 ): Promise<GeneratedClass> {
   // Prefer a subject the tutor is verified in, so "verified topic" badges show up.
-  let subject: SubjectArea;
+  let subject: string;
   let topics: string[];
   if (certifiedTopics.length > 0 && rand.chance(0.65)) {
     subject = rand.pick(certifiedTopics).subject;
@@ -594,7 +594,7 @@ interface QSeed {
   options: [string, boolean][]; // [text, isCorrect]
 }
 
-const QUESTION_BANK: { subject: SubjectArea; topic: string; questions: QSeed[] }[] = [
+const QUESTION_BANK: { subject: string; topic: string; questions: QSeed[] }[] = [
   {
     subject: "MATH",
     topic: "Algebraic Expressions",
@@ -700,7 +700,7 @@ const GEN_WRONG = [
   "Rely only on the first idea that comes to mind.",
 ];
 
-function genQuestionsForTopic(subject: SubjectArea, topic: string, n: number): QSeed[] {
+function genQuestionsForTopic(subject: string, topic: string, n: number): QSeed[] {
   const out: QSeed[] = [];
   for (let i = 0; i < n; i++) {
     const stem = GEN_STEMS[i % GEN_STEMS.length];
@@ -720,7 +720,7 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
   const curated = new Map(QUESTION_BANK.map((s) => [`${s.subject}::${s.topic}`, s.questions]));
   let created = 0;
 
-  for (const subject of Object.keys(SUBJECT_TOPICS) as SubjectArea[]) {
+  for (const subject of Object.keys(SUBJECT_TOPICS) as string[]) {
     for (const topic of SUBJECT_TOPICS[subject]) {
       const hand = curated.get(`${subject}::${topic}`) ?? [];
       if (hand.length === 0 && perTopic === 0) continue;
@@ -832,7 +832,7 @@ async function main() {
   };
   {
     let sOrder = 0;
-    for (const slug of Object.keys(SUBJECT_TOPICS) as SubjectArea[]) {
+    for (const slug of Object.keys(SUBJECT_TOPICS) as string[]) {
       const subject = await prisma.subject.upsert({
         where: { slug },
         update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
@@ -875,7 +875,7 @@ async function main() {
   // on them.
   const tutorUsers: Record<string, User> = {};
   const tutorProfiles: Record<string, TutorProfile> = {};
-  const certifiedByProfile = new Map<string, { subject: SubjectArea; topic: string }[]>();
+  const certifiedByProfile = new Map<string, { subject: string; topic: string }[]>();
 
   const registerTutor = async (t: TutorSeed) => {
     const user = await ensureUser(t, "STUDENT_TUTOR", passwordHash);

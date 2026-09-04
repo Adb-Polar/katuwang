@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, AssessmentAttemptStatus, SubjectArea } from "@prisma/client";
+import { Prisma, AssessmentAttemptStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     );
 
     const where: Prisma.AssessmentAttemptWhereInput = {
-      ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      ...(subject ? { subject } : {}),
       ...(topic ? { topic } : {}),
       ...(status ? { status } : {}),
       ...(q ? { tutorProfile: { user: { anonymousId: { contains: q } } } } : {}),

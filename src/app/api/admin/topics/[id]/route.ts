@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { Prisma, SubjectArea } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { invalidateSubjectCache } from "@/lib/subjects";
 import { updateTopicSchema } from "@/lib/validations/subject";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -11,13 +11,13 @@ import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 /** Rows across every denormalised `topic` string column for one (slug, name). */
 async function topicUsageCount(slug: string, name: string): Promise<number> {
   const counts = await Promise.all([
-    prisma.classTopic.count({ where: { topic: name, class: { subject: slug as SubjectArea } } }),
-    prisma.classSession.count({ where: { topic: name, class: { subject: slug as SubjectArea } } }),
-    prisma.topicRequestTopic.count({ where: { topic: name, request: { subject: slug as SubjectArea } } }),
-    prisma.topicCertification.count({ where: { subject: slug as SubjectArea, topic: name } }),
-    prisma.assessmentQuestion.count({ where: { subject: slug as SubjectArea, topic: name } }),
-    prisma.assessmentAttempt.count({ where: { subject: slug as SubjectArea, topic: name } }),
-    prisma.questionRequest.count({ where: { subject: slug as SubjectArea, topic: name } }),
+    prisma.classTopic.count({ where: { topic: name, class: { subject: slug } } }),
+    prisma.classSession.count({ where: { topic: name, class: { subject: slug } } }),
+    prisma.topicRequestTopic.count({ where: { topic: name, request: { subject: slug } } }),
+    prisma.topicCertification.count({ where: { subject: slug, topic: name } }),
+    prisma.assessmentQuestion.count({ where: { subject: slug, topic: name } }),
+    prisma.assessmentAttempt.count({ where: { subject: slug, topic: name } }),
+    prisma.questionRequest.count({ where: { subject: slug, topic: name } }),
   ]);
   return counts.reduce((a, b) => a + b, 0);
 }
@@ -29,16 +29,16 @@ async function renameTopicEverywhere(
   from: string,
   to: string
 ): Promise<void> {
-  await tx.classTopic.updateMany({ where: { topic: from, class: { subject: slug as SubjectArea } }, data: { topic: to } });
-  await tx.classSession.updateMany({ where: { topic: from, class: { subject: slug as SubjectArea } }, data: { topic: to } });
+  await tx.classTopic.updateMany({ where: { topic: from, class: { subject: slug } }, data: { topic: to } });
+  await tx.classSession.updateMany({ where: { topic: from, class: { subject: slug } }, data: { topic: to } });
   await tx.topicRequestTopic.updateMany({
-    where: { topic: from, request: { subject: slug as SubjectArea } },
+    where: { topic: from, request: { subject: slug } },
     data: { topic: to },
   });
-  await tx.topicCertification.updateMany({ where: { subject: slug as SubjectArea, topic: from }, data: { topic: to } });
-  await tx.assessmentQuestion.updateMany({ where: { subject: slug as SubjectArea, topic: from }, data: { topic: to } });
-  await tx.assessmentAttempt.updateMany({ where: { subject: slug as SubjectArea, topic: from }, data: { topic: to } });
-  await tx.questionRequest.updateMany({ where: { subject: slug as SubjectArea, topic: from }, data: { topic: to } });
+  await tx.topicCertification.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  await tx.questionRequest.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
 }
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

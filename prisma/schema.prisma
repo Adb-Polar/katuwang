@@ -43,15 +43,8 @@ enum TopicCertificationStatus {
   REJECTED // Assessment reviewed and not passed; tutor may re-request
 }
 
-enum SubjectArea {
-  MATH
-  ENGLISH
-  SCIENCE
-  FILIPINO
-  ARALING_PANLIPUNAN
-  TLE
-  MAPEH
-}
+// SubjectArea enum removed 2026-09-04 — subjects are now the admin-editable
+// `Subject` table; the `subject` columns store `Subject.slug` as a plain string.
 
 enum ClassStatus {
   SCHEDULED
@@ -193,7 +186,7 @@ model TopicCertification {
   id             String                   @id @default(cuid())
   tutorProfileId String
   tutorProfile   TutorProfile             @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  subject        SubjectArea
+  subject        String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   topic          String
   status         TopicCertificationStatus @default(PENDING)
   requestedAt    DateTime                 @default(now())
@@ -257,7 +250,7 @@ model TutorClass {
   code            String       @unique // human-friendly sequential code, "C-0001" (see generateClassCode)
   tutorProfileId  String
   tutorProfile    TutorProfile @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  subject         SubjectArea
+  subject         String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   gradeLevel      GradeLevel? // optional target grade for this class; null = open to any grade
   description     String?      @db.Text
   maxStudents     Int          @default(1) // Support for 1-on-1 or small group tutoring
@@ -332,7 +325,7 @@ model TopicRequest {
   id                      String             @id @default(cuid())
   learnerId               String
   learner                 User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
-  subject                 SubjectArea
+  subject                 String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   gradeLevel              GradeLevel
   note                    String?            @db.Text
   status                  TopicRequestStatus @default(OPEN)
@@ -405,7 +398,7 @@ model PlatformSetting {
 
 model AssessmentQuestion {
   id          String      @id @default(cuid())
-  subject     SubjectArea
+  subject     String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   topic       String
   prompt      String      @db.Text
   explanation String?     @db.Text // shown to the tutor after grading
@@ -449,7 +442,7 @@ model AssessmentAttempt {
   id             String                  @id @default(cuid())
   tutorProfileId String
   tutorProfile   TutorProfile            @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  subject        SubjectArea
+  subject        String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   topic          String
   attemptNo      Int // 1-based, per (tutorProfile, subject, topic)
   status         AssessmentAttemptStatus @default(IN_PROGRESS)
@@ -490,7 +483,7 @@ model QuestionRequest {
   id             String                @id @default(cuid())
   tutorProfileId String
   tutorProfile   TutorProfile          @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
-  subject        SubjectArea
+  subject        String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
   topic          String
   note           String?               @db.Text
   status         QuestionRequestStatus @default(OPEN)

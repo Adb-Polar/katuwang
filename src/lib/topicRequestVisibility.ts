@@ -1,4 +1,4 @@
-import { Prisma, SubjectArea } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 /**
  * The Prisma `where` for the set of OPEN topic requests a given tutor can act on
@@ -12,9 +12,9 @@ import { Prisma, SubjectArea } from "@prisma/client";
  */
 export function tutorPoolWhere(
   tutorProfileId: string,
-  certifiedTopics: { subject: SubjectArea; topic: string }[]
+  certifiedTopics: { subject: string; topic: string }[]
 ): Prisma.TopicRequestWhereInput {
-  const topicsBySubject = new Map<SubjectArea, string[]>();
+  const topicsBySubject = new Map<string, string[]>();
   for (const c of certifiedTopics) {
     topicsBySubject.set(c.subject, [...(topicsBySubject.get(c.subject) ?? []), c.topic]);
   }

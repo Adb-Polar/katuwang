@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, SubjectArea } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAssessmentQuestionSchema } from "@/lib/validations/assessment";
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
     );
 
     const where: Prisma.AssessmentQuestionWhereInput = {
-      ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      ...(subject ? { subject } : {}),
       ...(topic ? { topic } : {}),
       ...(activeParam === "true" ? { active: true } : activeParam === "false" ? { active: false } : {}),
       ...(q ? { prompt: { contains: q } } : {}),
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     const created = await prisma.$transaction(async (tx) => {
       const question = await tx.assessmentQuestion.create({
         data: {
-          subject: subject as SubjectArea,
+          subject: subject,
           topic,
           prompt,
           explanation: explanation || null,

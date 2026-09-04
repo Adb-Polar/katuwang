@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { SubjectArea } from "@prisma/client";
+
 import { invalidateSubjectCache } from "@/lib/subjects";
 import { updateSubjectSchema } from "@/lib/validations/subject";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -10,12 +10,12 @@ import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 /** How many rows across the 6 `subject`-bearing models reference this slug. */
 async function subjectUsageCount(slug: string): Promise<number> {
   const [a, b, c, d, e, f] = await Promise.all([
-    prisma.tutorClass.count({ where: { subject: slug as SubjectArea } }),
-    prisma.topicRequest.count({ where: { subject: slug as SubjectArea } }),
-    prisma.topicCertification.count({ where: { subject: slug as SubjectArea } }),
-    prisma.assessmentQuestion.count({ where: { subject: slug as SubjectArea } }),
-    prisma.assessmentAttempt.count({ where: { subject: slug as SubjectArea } }),
-    prisma.questionRequest.count({ where: { subject: slug as SubjectArea } }),
+    prisma.tutorClass.count({ where: { subject: slug } }),
+    prisma.topicRequest.count({ where: { subject: slug } }),
+    prisma.topicCertification.count({ where: { subject: slug } }),
+    prisma.assessmentQuestion.count({ where: { subject: slug } }),
+    prisma.assessmentAttempt.count({ where: { subject: slug } }),
+    prisma.questionRequest.count({ where: { subject: slug } }),
   ]);
   return a + b + c + d + e + f;
 }

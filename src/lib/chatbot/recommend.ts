@@ -1,4 +1,4 @@
-import type { SubjectArea } from "@prisma/client";
+
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { browsableOrEnrolledWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
@@ -8,7 +8,7 @@ import type { ChatContext, RecommendationCard } from "@/lib/chatbot/types";
 
 // ─── Recommendation intent: parse a message + rank live classes ───────────
 
-const SUBJECT_KEYWORDS: Record<SubjectArea, string[]> = {
+const SUBJECT_KEYWORDS: Record<string, string[]> = {
   MATH: ["math", "mathematics", "arithmetic", "algebra", "geometry", "trigonometry", "trig", "calculus", "fractions", "statistics", "probability", "equations", "numbers"],
   ENGLISH: ["english", "grammar", "essay", "writing", "reading", "comprehension", "vocabulary", "literature", "speaking", "research"],
   SCIENCE: ["science", "biology", "chemistry", "physics", "cell", "genetics", "chemical", "ecosystem", "environment", "energy", "motion", "space"],
@@ -18,10 +18,10 @@ const SUBJECT_KEYWORDS: Record<SubjectArea, string[]> = {
   MAPEH: ["mapeh", "music", "arts", "physical education", "health", "sports", "dance", "pe"],
 };
 
-const SUBJECTS = Object.keys(SUBJECT_KEYWORDS) as SubjectArea[];
+const SUBJECTS = Object.keys(SUBJECT_KEYWORDS) as string[];
 
 export interface ExtractedCriteria {
-  subject: SubjectArea | null;
+  subject: string | null;
   topics: string[];
 }
 
@@ -29,7 +29,7 @@ export interface ExtractedCriteria {
 export function extractCriteria(message: string): ExtractedCriteria {
   const text = message.toLowerCase();
 
-  let subject: SubjectArea | null = null;
+  let subject: string | null = null;
   let subjectHits = 0;
   for (const s of SUBJECTS) {
     const hits = SUBJECT_KEYWORDS[s].filter((k) => text.includes(k)).length;
@@ -53,7 +53,7 @@ export function extractCriteria(message: string): ExtractedCriteria {
 export interface RecommendationResult {
   cards: RecommendationCard[];
   fallbackToRequest: boolean;
-  subject: SubjectArea | null;
+  subject: string | null;
 }
 
 const MAX_CARDS = 3;

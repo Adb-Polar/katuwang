@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, SubjectArea, TopicRequestStatus } from "@prisma/client";
+import { Prisma, TopicRequestStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseSort } from "@/lib/sortParams";
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     const { sort, dir } = parseSort(searchParams, Object.keys(TR_SORT_COLUMN), "createdAt");
 
     const where: Prisma.TopicRequestWhereInput = {
-      ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      ...(subject ? { subject } : {}),
       ...(status && status in TopicRequestStatus ? { status: status as TopicRequestStatus } : {}),
       ...(scope === "public" ? { directedTutorProfileId: null } : {}),
       ...(scope === "directed" ? { directedTutorProfileId: { not: null } } : {}),

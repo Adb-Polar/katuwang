@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, SubjectArea } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       const where: Prisma.TopicRequestWhereInput = {
         status: { in: ["ACCEPTED", "ENROLLED"] },
         fulfilledClass: { tutorProfileId: tutorProfile.id },
-        ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+        ...(subject ? { subject } : {}),
       };
 
       const [total, requests] = await Promise.all([
@@ -103,8 +103,8 @@ export async function GET(req: NextRequest) {
     });
 
     let where = tutorPoolWhere(tutorProfile.id, certifiedTopics);
-    if (subject && subject in SubjectArea) {
-      where = { ...where, subject: subject as SubjectArea };
+    if (subject) {
+      where = { ...where, subject };
     }
 
     const [total, requests] = await Promise.all([

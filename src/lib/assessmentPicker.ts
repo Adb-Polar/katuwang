@@ -1,4 +1,4 @@
-import { Prisma, SubjectArea } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 /** In-place Fisher–Yates shuffle. */
 function shuffle<T>(arr: T[]): T[] {
@@ -26,7 +26,7 @@ export async function pickQuestionIds(
     subject,
     topic,
     count,
-  }: { tutorProfileId: string; subject: SubjectArea; topic: string; count: number }
+  }: { tutorProfileId: string; subject: string; topic: string; count: number }
 ): Promise<string[]> {
   const pool = await tx.assessmentQuestion.findMany({
     where: { subject, topic, active: true },

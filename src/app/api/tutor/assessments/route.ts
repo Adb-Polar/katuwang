@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SubjectArea } from "@prisma/client";
+
 import { startAssessmentSchema } from "@/lib/validations/assessment";
 import { topicExists } from "@/lib/subjects";
 import { getAssessmentConfig } from "@/lib/settings";
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { subject, topic } = result.data;
-    const subjectEnum = subject as SubjectArea;
+    const subjectEnum = subject;
 
     if (!(await topicExists(subject, topic))) {
       return NextResponse.json(

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { SubjectArea } from "@prisma/client";
+
 import { useFetchList } from "@/hooks/useFetchList";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -33,7 +33,7 @@ interface ClassSession {
 interface TutorClass {
   id: string;
   code: string;
-  subject: SubjectArea;
+  subject: string;
   gradeLevel: string | null;
   topics: string[];
   description: string | null;
@@ -54,7 +54,7 @@ export default function ClassManagement() {
     "Could not retrieve classes."
   );
   const { certifications } = useTopicCertifications();
-  const verifiedTopicsFor = (subject: SubjectArea) =>
+  const verifiedTopicsFor = (subject: string) =>
     certifications.filter((c) => c.subject === subject && c.status === "CERTIFIED").map((c) => c.topic);
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<"active" | "history">("active");

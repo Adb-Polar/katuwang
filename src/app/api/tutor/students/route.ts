@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, GradeLevel, SubjectArea } from "@prisma/client";
+import { Prisma, GradeLevel } from "@prisma/client";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -13,7 +13,7 @@ interface StudentEntry {
   section: string;
   enrollments: {
     classId: string;
-    subject: SubjectArea;
+    subject: string;
     topics: string[];
     enrolledAt: Date;
   }[];
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
     const where: Prisma.ClassEnrollmentWhereInput = {
       class: {
         tutorProfileId: tutorProfile.id,
-        ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+        ...(subject ? { subject } : {}),
         ...(classId ? { id: classId } : {}),
       },
       ...(gradeLevel || section || q

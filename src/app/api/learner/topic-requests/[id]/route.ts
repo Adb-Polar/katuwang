@@ -7,7 +7,7 @@ import {
   createTopicRequestSchema,
   type CreateTopicRequestInput,
 } from "@/lib/validations/match";
-import { SubjectArea } from "@prisma/client";
+
 import { subjectExists, topicExists } from "@/lib/subjects";
 
 // ─── PATCH: Cancel or edit one's own topic request ───────────────────────────
@@ -86,7 +86,7 @@ export async function PATCH(
     const updated = await prisma.topicRequest.update({
       where: { id },
       data: {
-        subject: subject as SubjectArea,
+        subject: subject,
         gradeLevel,
         note: note || null,
         topics: {

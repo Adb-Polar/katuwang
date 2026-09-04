@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { GradeLevel, SubjectArea } from "@prisma/client";
+import { GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -14,7 +14,7 @@ const PAGE_SIZE = 10;
 
 interface StudentEnrollment {
   classId: string;
-  subject: SubjectArea;
+  subject: string;
   topics: string[];
   enrolledAt: string;
 }

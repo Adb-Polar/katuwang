@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, SubjectArea, ClassStatus } from "@prisma/client";
+import { Prisma, ClassStatus } from "@prisma/client";
 import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
     const { sort, dir } = parseSort(searchParams, Object.keys(CLASS_SORT_COLUMN), "createdAt");
 
     const where: Prisma.TutorClassWhereInput = {
-      ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      ...(subject ? { subject } : {}),
       ...(status && status in ClassStatus ? { status: status as ClassStatus } : {}),
       ...(q
         ? {

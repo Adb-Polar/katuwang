@@ -2,18 +2,18 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { SubjectArea } from "@prisma/client";
+
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import type { TopicAssessmentStatus } from "@/lib/assessmentStatus";
 
 export interface TaughtTopic {
-  subject: SubjectArea;
+  subject: string;
   topic: string;
 }
 
 export interface TopicCertificationEntry {
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   status: "PENDING" | "CERTIFIED" | "REJECTED";
   reviewNote?: string | null;
@@ -38,7 +38,7 @@ export default function TopicCertificationList({
   const [requested, setRequested] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
 
-  const startAssessment = async (subject: SubjectArea, topic: string) => {
+  const startAssessment = async (subject: string, topic: string) => {
     const key = keyOf(subject, topic);
     setBusy(key);
     setError("");
@@ -64,7 +64,7 @@ export default function TopicCertificationList({
     }
   };
 
-  const requestQuestions = async (subject: SubjectArea, topic: string) => {
+  const requestQuestions = async (subject: string, topic: string) => {
     const key = keyOf(subject, topic);
     setBusy(key);
     setError("");

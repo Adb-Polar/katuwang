@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, SubjectArea, TopicCertificationStatus } from "@prisma/client";
+import { Prisma, TopicCertificationStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.TopicCertificationWhereInput = {
       status,
-      ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
+      ...(subject ? { subject } : {}),
       ...(q
         ? {
             OR: [

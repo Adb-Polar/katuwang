@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { Prisma, SubjectArea, GradeLevel } from "@prisma/client";
+import { Prisma, GradeLevel } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     const gradeParam = searchParams.get("gradeLevel");
 
     const listFilters: Prisma.TutorClassWhereInput = {
-      ...(subjectParam && subjectParam in SubjectArea ? { subject: subjectParam as SubjectArea } : {}),
+      ...(subjectParam ? { subject: subjectParam } : {}),
       ...(gradeParam && gradeParam in GradeLevel ? { gradeLevel: gradeParam as GradeLevel } : {}),
       ...(q
         ? {

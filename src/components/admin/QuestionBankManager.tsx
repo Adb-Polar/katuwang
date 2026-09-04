@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { ChevronRight, CornerUpLeft } from "lucide-react";
-import { SubjectArea } from "@prisma/client";
+
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
@@ -16,7 +16,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 
 const PAGE_SIZE = 10;
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as SubjectArea[];
+const SUBJECTS = Object.keys(SUBJECT_TOPICS) as string[];
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -28,7 +28,7 @@ interface Option {
 }
 interface Question {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   prompt: string;
   explanation: string | null;
@@ -38,7 +38,7 @@ interface Question {
   createdAt: string;
 }
 interface CoverageRow {
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   activeCount: number;
   config: { questionCount: number; passPercent: number; minBankSize: number };
@@ -47,7 +47,7 @@ interface CoverageRow {
 }
 interface QRequest {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   note: string | null;
   status: "OPEN" | "RESOLVED" | "DISMISSED";
@@ -58,7 +58,7 @@ interface QRequest {
 }
 interface AttemptRow {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   attemptNo: number;
   status: "IN_PROGRESS" | "PASSED" | "FAILED";
@@ -114,7 +114,7 @@ type QBankTab = "questions" | "requests" | "results";
 
 export default function QuestionBankManager({ only }: { only?: QBankTab } = {}) {
   const [tab, setTab] = useState<QBankTab>(only ?? "questions");
-  const [selSubject, setSelSubject] = useState<SubjectArea | null>(null);
+  const [selSubject, setSelSubject] = useState<string | null>(null);
   const [selTopic, setSelTopic] = useState<string | null>(null);
   const coverage = useFetchList<CoverageRow>(
     "/api/admin/assessment-questions/coverage",
@@ -232,8 +232,8 @@ function QuestionsTab({
 }: {
   coverage: CoverageRow[];
   refetchCoverage: () => void;
-  selSubject: SubjectArea | null;
-  setSelSubject: (s: SubjectArea | null) => void;
+  selSubject: string | null;
+  setSelSubject: (s: string | null) => void;
   selTopic: string | null;
   setSelTopic: (t: string | null) => void;
 }) {
@@ -243,7 +243,7 @@ function QuestionsTab({
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const subject: SubjectArea = selSubject ?? SUBJECTS[0];
+  const subject: string = selSubject ?? SUBJECTS[0];
   const topic: string = selTopic ?? SUBJECT_TOPICS[subject][0];
 
   const cov = useMemo(
@@ -608,7 +608,7 @@ function QuestionFormModal({
   onClose,
   onSaved,
 }: {
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   question: Question | null;
   onClose: () => void;
@@ -951,7 +951,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
 // ─── Results tab ────────────────────────────────────────────────────────────
 
 function ResultsTab() {
-  const [subject, setSubject] = useState<SubjectArea | "">("");
+  const [subject, setSubject] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState("");
   const [q, setQ] = useState("");
   const [detail, setDetail] = useState<AttemptDetail | null>(null);
@@ -1004,7 +1004,7 @@ function ResultsTab() {
         />
         <select
           value={subject}
-          onChange={(e) => setSubject(e.target.value as SubjectArea | "")}
+          onChange={(e) => setSubject(e.target.value)}
           className="select select-bordered select-sm text-xs focus:select-primary"
         >
           <option value="">All subjects</option>

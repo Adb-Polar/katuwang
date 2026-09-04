@@ -38,18 +38,6 @@ REJECTED REJECTED
     
 
 
-        SubjectArea {
-            MATH MATH
-ENGLISH ENGLISH
-SCIENCE SCIENCE
-FILIPINO FILIPINO
-ARALING_PANLIPUNAN ARALING_PANLIPUNAN
-TLE TLE
-MAPEH MAPEH
-        }
-    
-
-
         ClassStatus {
             SCHEDULED SCHEDULED
 COMPLETED COMPLETED
@@ -141,7 +129,7 @@ DISMISSED DISMISSED
   "topic_certifications" {
     String id "🗝️"
     String tutorProfileId 
-    SubjectArea subject 
+    String subject 
     String topic 
     TopicCertificationStatus status 
     DateTime requestedAt 
@@ -182,7 +170,7 @@ DISMISSED DISMISSED
     String id "🗝️"
     String code 
     String tutorProfileId 
-    SubjectArea subject 
+    String subject 
     GradeLevel gradeLevel "❓"
     String description "❓"
     Int maxStudents 
@@ -228,7 +216,7 @@ DISMISSED DISMISSED
   "topic_requests" {
     String id "🗝️"
     String learnerId 
-    SubjectArea subject 
+    String subject 
     GradeLevel gradeLevel 
     String note "❓"
     TopicRequestStatus status 
@@ -275,7 +263,7 @@ DISMISSED DISMISSED
 
   "assessment_questions" {
     String id "🗝️"
-    SubjectArea subject 
+    String subject 
     String topic 
     String prompt 
     String explanation "❓"
@@ -298,7 +286,7 @@ DISMISSED DISMISSED
   "assessment_attempts" {
     String id "🗝️"
     String tutorProfileId 
-    SubjectArea subject 
+    String subject 
     String topic 
     Int attemptNo 
     AssessmentAttemptStatus status 
@@ -324,7 +312,7 @@ DISMISSED DISMISSED
   "question_requests" {
     String id "🗝️"
     String tutorProfileId 
-    SubjectArea subject 
+    String subject 
     String topic 
     String note "❓"
     QuestionRequestStatus status 
@@ -374,11 +362,9 @@ DISMISSED DISMISSED
     "password_reset_tokens" }o--|| "users" : "user"
     "tutor_profiles" |o--|| "users" : "user"
     "topic_certifications" }o--|| "tutor_profiles" : "tutorProfile"
-    "topic_certifications" |o--|| "SubjectArea" : "enum:subject"
     "topic_certifications" |o--|| "TopicCertificationStatus" : "enum:status"
     "topics" }o--|| "subjects" : "subject"
     "tutor_classes" }o--|| "tutor_profiles" : "tutorProfile"
-    "tutor_classes" |o--|| "SubjectArea" : "enum:subject"
     "tutor_classes" |o--|o "GradeLevel" : "enum:gradeLevel"
     "tutor_classes" |o--|| "ClassStatus" : "enum:status"
     "class_topics" }o--|| "tutor_classes" : "class"
@@ -387,7 +373,6 @@ DISMISSED DISMISSED
     "class_enrollments" }o--|| "tutor_classes" : "class"
     "class_enrollments" }o--|| "users" : "learner"
     "topic_requests" }o--|| "users" : "learner"
-    "topic_requests" |o--|| "SubjectArea" : "enum:subject"
     "topic_requests" |o--|| "GradeLevel" : "enum:gradeLevel"
     "topic_requests" |o--|| "TopicRequestStatus" : "enum:status"
     "topic_requests" }o--|o "tutor_classes" : "fulfilledClass"
@@ -395,17 +380,14 @@ DISMISSED DISMISSED
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
     "audit_logs" }o--|| "users" : "admin"
-    "assessment_questions" |o--|| "SubjectArea" : "enum:subject"
     "assessment_questions" }o--|| "users" : "createdBy"
     "assessment_options" }o--|| "assessment_questions" : "question"
     "assessment_attempts" }o--|| "tutor_profiles" : "tutorProfile"
-    "assessment_attempts" |o--|| "SubjectArea" : "enum:subject"
     "assessment_attempts" |o--|| "AssessmentAttemptStatus" : "enum:status"
     "assessment_attempt_items" }o--|| "assessment_attempts" : "attempt"
     "assessment_attempt_items" }o--|| "assessment_questions" : "question"
     "assessment_attempt_items" }o--|o "assessment_options" : "selectedOption"
     "question_requests" }o--|| "tutor_profiles" : "tutorProfile"
-    "question_requests" |o--|| "SubjectArea" : "enum:subject"
     "question_requests" |o--|| "QuestionRequestStatus" : "enum:status"
     "question_requests" }o--|o "users" : "resolvedBy"
     "notifications" }o--|| "users" : "user"

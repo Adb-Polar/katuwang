@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { ClassStatus, SubjectArea } from "@prisma/client";
+import { ClassStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
@@ -128,7 +128,7 @@ export async function POST(req: NextRequest) {
     const requireCertification = await getSetting("requireCertificationForClassCreation");
     if (requireCertification) {
       const certifiedTopics = await prisma.topicCertification.findMany({
-        where: { tutorProfileId: tutorProfile.id, subject: subject as SubjectArea, status: "CERTIFIED" },
+        where: { tutorProfileId: tutorProfile.id, subject: subject, status: "CERTIFIED" },
         select: { topic: true },
       });
       const certifiedTopicSet = new Set(certifiedTopics.map((c) => c.topic));
@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
       data: {
         tutorProfileId: tutorProfile.id,
         code,
-        subject: subject as SubjectArea,
+        subject: subject,
         gradeLevel: gradeLevel ?? null,
         topics: { create: topics.map((topic) => ({ topic })) },
         description: description || null,

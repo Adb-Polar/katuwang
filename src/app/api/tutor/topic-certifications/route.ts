@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SubjectArea } from "@prisma/client";
+
 import { requestTopicCertificationSchema } from "@/lib/validations/topicCertification";
 import { topicExists } from "@/lib/subjects";
 
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     const key = {
       tutorProfileId_subject_topic: {
         tutorProfileId: tutorProfile.id,
-        subject: subject as SubjectArea,
+        subject: subject,
         topic,
       },
     };
@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       },
       create: {
         tutorProfileId: tutorProfile.id,
-        subject: subject as SubjectArea,
+        subject: subject,
         topic,
         status: "PENDING",
       },

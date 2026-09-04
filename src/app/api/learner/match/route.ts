@@ -6,7 +6,7 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { browsableOrEnrolledWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
 import { getSetting } from "@/lib/settings";
 import { matchCriteriaSchema } from "@/lib/validations/match";
-import { SubjectArea } from "@prisma/client";
+
 import { subjectExists, topicExists } from "@/lib/subjects";
 import { rankMatches, ClassForMatching } from "@/lib/matching";
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     const [rows, showRealNames] = await Promise.all([
       prisma.tutorClass.findMany({
-        where: { ...browsableOrEnrolledWhere(session.user.id), subject: subject as SubjectArea },
+        where: { ...browsableOrEnrolledWhere(session.user.id), subject: subject },
         include: learnerClassInclude(session.user.id),
         orderBy: { createdAt: "desc" },
       }),

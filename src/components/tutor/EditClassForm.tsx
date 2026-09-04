@@ -14,7 +14,7 @@ import {
   MapPin,
   EyeOff,
 } from "lucide-react";
-import { SubjectArea, GradeLevel } from "@prisma/client";
+import { GradeLevel } from "@prisma/client";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
@@ -54,7 +54,7 @@ export default function EditClassForm({
   appeal = null,
 }: {
   classId: string;
-  subject: SubjectArea;
+  subject: string;
   gradeLevel: GradeLevel | null;
   status: ClassLifecycleStatus;
   activeLabel: string;

@@ -1,6 +1,6 @@
-import { SubjectArea } from "@prisma/client";
 
-export const SUBJECT_TOPICS: Record<SubjectArea, string[]> = {
+
+export const SUBJECT_TOPICS: Record<string, string[]> = {
   MATH: [
     "Whole Numbers & Operations",
     "Fractions & Decimals",
@@ -69,7 +69,7 @@ export function normalizeTopic(raw: string): string {
 }
 
 /** True when `topic` is one of the curated topics for `subject` (case-insensitive). */
-export function isKnownTopic(subject: SubjectArea, topic: string): boolean {
+export function isKnownTopic(subject: string, topic: string): boolean {
   const t = normalizeTopic(topic).toLowerCase();
   return (SUBJECT_TOPICS[subject] ?? []).some((k) => k.toLowerCase() === t);
 }

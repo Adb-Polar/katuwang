@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SubjectArea } from "@prisma/client";
+
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
@@ -23,7 +23,7 @@ interface Appeal {
   class: {
     id: string;
     code: string;
-    subject: SubjectArea;
+    subject: string;
     status: string;
     suspendedReason: string | null;
   };

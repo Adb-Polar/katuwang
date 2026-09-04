@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SubjectArea } from "@prisma/client";
+
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -22,7 +22,7 @@ interface Tutor {
 
 interface Certification {
   id: string;
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   status: "PENDING" | "CERTIFIED" | "REJECTED";
   requestedAt: string;

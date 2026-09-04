@@ -1,11 +1,11 @@
 import { useCallback, useState } from "react";
-import { SubjectArea } from "@prisma/client";
+
 import { useFetchList } from "./useFetchList";
 
 export interface TopicCertification {
   id: string;
   tutorProfileId: string;
-  subject: SubjectArea;
+  subject: string;
   topic: string;
   status: "PENDING" | "CERTIFIED" | "REJECTED";
   requestedAt: string;
@@ -22,12 +22,12 @@ export function useTopicCertifications() {
   const [requesting, setRequesting] = useState<string | null>(null);
 
   const statusFor = useCallback(
-    (subject: SubjectArea, topic: string) => data.find((c) => c.subject === subject && c.topic === topic)?.status,
+    (subject: string, topic: string) => data.find((c) => c.subject === subject && c.topic === topic)?.status,
     [data]
   );
 
   const requestAssessment = useCallback(
-    async (subject: SubjectArea, topic: string) => {
+    async (subject: string, topic: string) => {
       const key = `${subject}:${topic}`;
       setRequesting(key);
       try {

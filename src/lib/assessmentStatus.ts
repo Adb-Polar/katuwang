@@ -1,4 +1,4 @@
-import { SubjectArea, TopicCertificationStatus } from "@prisma/client";
+import { TopicCertificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAssessmentConfig } from "@/lib/settings";
 
@@ -23,7 +23,7 @@ const keyOf = (subject: string, topic: string) => `${subject}::${topic}`;
  */
 export async function getTopicAssessmentStatus(
   tutorProfileId: string,
-  taughtTopics: { subject: SubjectArea; topic: string }[]
+  taughtTopics: { subject: string; topic: string }[]
 ): Promise<Map<string, TopicAssessmentStatus>> {
   const result = new Map<string, TopicAssessmentStatus>();
   if (taughtTopics.length === 0) return result;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
-import { SubjectArea } from "@prisma/client";
+
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
@@ -31,7 +31,7 @@ interface ClassSession {
 interface TutorClass {
   id: string;
   code: string;
-  subject: SubjectArea;
+  subject: string;
   gradeLevel: string | null;
   topics: string[];
   verifiedTopics: string[];
