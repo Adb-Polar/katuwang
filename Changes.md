@@ -24,6 +24,7 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [23](#part-23) | **Tutor appeals for suspended/banned classes** | A moderated class was a dead end for the tutor — no way to contest it. New `ClassAppeal` model + `ClassAppealStatus` enum; tutor files one appeal at a time from the class edit page; admin reviews on a new `/admin/class-appeals` queue; approving reinstates the class to `SCHEDULED` and notifies the tutor. | Schema: `ClassAppeal` + enum + relations on `TutorClass`/`TutorProfile`/`User` (`db push`). Routes: `POST /api/tutor/classes/[classId]/appeal`, `GET /api/admin/class-appeals`, `PATCH /api/admin/class-appeals/[appealId]`. New notification types `CLASS_APPEAL_APPROVED/REJECTED` + audit actions. UI: `ClassAppealCard` under the tutor's `ClassModerationPanel`; `ClassAppealTable` + `/admin/class-appeals` page + "Class Appeals" nav item (Review group). 16 new tests, 449/449. Not committed. |
 | [22](#part-22) | **Declined-registration state (`DECLINED` account status)** | Declining a registration reused `BANNED` — indistinguishable from a policy ban on an active account, and the applicant never learned why. New `DECLINED` `AccountStatus`; a declined applicant hitting sign-in is routed to a new `/account-declined` screen that shows the reason. | `enum AccountStatus` +`DECLINED` (`db push`, no migration file — history drift). `admin/registrations/[userId]` decline → `DECLINED`. `auth.ts` throws `ACCOUNT_DECLINED[:reason]` sentinel; `LoginForm` routes it to `/account-declined?reason=`. Users list + table hide `DECLINED` unless filtered; status maps/selects extended. Tests: auth (2 new), registrations `[userId]` (assert `DECLINED`); 433/433. Not committed. |
 | [21](#part-21) | **Registration Approvals — role + grade-level filters** | The registrations queue only had a text search; the Users page has role tabs + a status dropdown. Brought the registrations table to parity: role tabs (All / Learners / Tutors) + a grade-level dropdown. | `GET /api/admin/registrations` gains a `gradeLevel` param (validated against the `GradeLevel` enum, ignored if invalid) alongside the existing `role`/`q`. `RegistrationApprovalTable.tsx` adds `Tabs` + a grade `<select>` wired into `usePaginatedList`. 2 new route-test cases; 431/431. No schema change. Not committed. |
 | [20](#part-20-docs) | **Docs — Chatbot Assistant workflow reference** | Standing architecture doc for the chatbot module: message → `classify()` → reply, the scoring model, the recommendation path, the `ChatbotMiss` loop, config, and how to extend. | New `docs/reference/chatbot.md`; linked from `docs/README.md`. Docs only. Not committed. |
@@ -1261,5 +1262,83 @@ screen instead, which is what the TODO item actually needed.
 `docs/TODO.txt` — the two declined-registration items removed;
 `docs/roles/ADMIN.md` — registration-approval + `DECLINED` behaviour noted,
 users `status` query-param list updated; `docs/erd.md` regenerated.
+
+### Not committed.
+
+---
+
+<a id="part-23"></a>
+
+# Part 23 — Tutor appeals for suspended/banned classes
+
+A `SUSPENDED`/`BANNED` class was a dead end for the owning tutor — the edit
+form locked and there was no way to contest the decision. A `docs/TODO.txt`
+item.
+
+### Schema
+
+- **`prisma/schema.prisma`** — `enum ClassAppealStatus { PENDING APPROVED
+  REJECTED }`; `model ClassAppeal` (`classId`, `tutorProfileId`, `reason` Text,
+  `status`, `reviewNote` Text?, `reviewedById` User? `SetNull`, `reviewedAt`,
+  `createdAt`; `@@index([status, createdAt])`, `@@index([classId])`,
+  `@@map("class_appeals")`); relations `TutorClass.appeals`,
+  `TutorProfile.classAppeals`, `User.reviewedClassAppeals`. `db push` (history
+  drift — same as Parts 17/19/22); `prisma generate` re-run.
+
+### Routes
+
+- **`POST /api/tutor/classes/[classId]/appeal`** — tutor-only; 404 unknown
+  class, 403 not the owner, 400 class not `SUSPENDED`/`BANNED`, 409 an open
+  appeal already exists, else `201` creates a `PENDING` appeal
+  (`createClassAppealSchema`: reason 10–500 chars).
+- **`GET /api/admin/class-appeals`** — admin; `?status` (default `PENDING`) +
+  pagination; includes the class summary + tutor `anonymousId`.
+- **`PATCH /api/admin/class-appeals/[appealId]`** — admin; appeal must be
+  `PENDING` (400 otherwise); `reviewClassAppealSchema` (`APPROVE`/`REJECT` +
+  optional note). In one `$transaction`: appeal → `APPROVED`/`REJECTED`
+  (+ `reviewedById`/`reviewedAt`/`reviewNote`); on approve, the class →
+  `SCHEDULED` with `suspendedReason`/`suspendedUntil` cleared (mirrors the
+  admin reinstate path); one audit row
+  (`CLASS_APPEAL_APPROVED`/`REJECTED`, target `CLASS_APPEAL`); `notify` the
+  tutor (`CLASS_APPEAL_APPROVED`/`CLASS_APPEAL_REJECTED`, link
+  `/tutor/classes/{id}`).
+
+### Other lib
+
+- **`src/lib/notifications.ts`** — union +`CLASS_APPEAL_APPROVED`,
+  `CLASS_APPEAL_REJECTED`; **`notificationMeta.tsx`** — `Gavel` icon for both;
+  schema `Notification.type` comment refreshed.
+- **`src/lib/auditLog.ts`** — `CLASS_APPEAL_APPROVED`/`_REJECTED` actions +
+  `CLASS_APPEAL` target type.
+- **`src/lib/validations/classAppeal.ts`** (new).
+
+### UI
+
+- **`src/components/tutor/ClassAppealCard.tsx`** (new) — rendered under
+  `ClassModerationPanel` in `EditClassForm`. Shows "awaiting review" with the
+  filed reason when an appeal is `PENDING`; otherwise a "Appeal this decision"
+  button → inline reason textarea → `POST`. A rejected prior appeal shows the
+  admin note and an "Appeal again" button. `EditClassForm` gains an `appeal`
+  prop; the edit page fetches `appeals: { take: 1, orderBy createdAt desc }`.
+- **`src/components/admin/ClassAppealTable.tsx`** + **`src/app/admin/class-appeals/page.tsx`**
+  (new) — Pending/Approved/Rejected tabs, approve (`ConfirmDialog`) / reject
+  (modal + note). Admin nav gains **Class Appeals** (`Gavel`, Review group).
+
+### Tests
+
+- `src/app/api/tutor/classes/[classId]/appeal/__tests__/route.test.ts` (7:
+  401 / 400 short / 404 / 403 / 400 wrong-status / 409 / 201).
+- `src/app/api/admin/class-appeals/__tests__/route.test.ts` (3: 401, default
+  PENDING + tutor shaping, `?status`).
+- `src/app/api/admin/class-appeals/[appealId]/__tests__/route.test.ts` (6:
+  401 / 404 / 400 not-pending / 400 bad-decision / APPROVE reinstates+notifies /
+  REJECT notifies without touching the class).
+- `tsc` + `lint` clean; `pnpm test` 449/449; `pnpm build` OK.
+
+### Docs
+
+`docs/TODO.txt` — the appeal item removed; `docs/roles/TUTOR.md` +
+`docs/roles/ADMIN.md` — appeal flow / review queue sections; `docs/erd.md`
+regenerated.
 
 ### Not committed.

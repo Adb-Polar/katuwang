@@ -25,6 +25,7 @@ import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
+import ClassAppealCard, { type ClassAppealSummary } from "@/components/tutor/ClassAppealCard";
 
 export default function EditClassForm({
   classId,
@@ -49,6 +50,7 @@ export default function EditClassForm({
   locked = false,
   suspendedReason = null,
   suspendedUntil = null,
+  appeal = null,
 }: {
   classId: string;
   subject: SubjectArea;
@@ -70,6 +72,7 @@ export default function EditClassForm({
   locked?: boolean;
   suspendedReason?: string | null;
   suspendedUntil?: string | null;
+  appeal?: ClassAppealSummary | null;
 }) {
   const router = useRouter();
   const backHref = `/tutor/classes/${classId}`;
@@ -171,12 +174,15 @@ export default function EditClassForm({
       </div>
 
       {locked && (status === "SUSPENDED" || status === "BANNED") && (
-        <ClassModerationPanel
-          status={status}
-          suspendedReason={suspendedReason}
-          suspendedUntil={suspendedUntil}
-          audience="tutor"
-        />
+        <div className="space-y-3">
+          <ClassModerationPanel
+            status={status}
+            suspendedReason={suspendedReason}
+            suspendedUntil={suspendedUntil}
+            audience="tutor"
+          />
+          <ClassAppealCard classId={classId} appeal={appeal} />
+        </div>
       )}
 
       <FeedbackBanner variant="error" message={error || null} />

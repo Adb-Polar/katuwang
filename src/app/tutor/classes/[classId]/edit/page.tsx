@@ -29,10 +29,22 @@ export default async function EditClassPage({
       topics: true,
       sessions: { orderBy: { scheduledAt: "asc" } },
       enrollments: { select: { id: true } },
+      appeals: { orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
 
   if (!tutorClass || tutorClass.tutorProfileId !== tutorProfile.id) notFound();
+
+  const latestAppeal = tutorClass.appeals[0]
+    ? {
+        id: tutorClass.appeals[0].id,
+        status: tutorClass.appeals[0].status,
+        reason: tutorClass.appeals[0].reason,
+        reviewNote: tutorClass.appeals[0].reviewNote,
+        createdAt: tutorClass.appeals[0].createdAt.toISOString(),
+        reviewedAt: tutorClass.appeals[0].reviewedAt?.toISOString() ?? null,
+      }
+    : null;
 
   const locked = tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED";
 
@@ -68,6 +80,7 @@ export default async function EditClassPage({
       locked={locked}
       suspendedReason={tutorClass.suspendedReason}
       suspendedUntil={tutorClass.suspendedUntil?.toISOString() ?? null}
+      appeal={latestAppeal}
     />
   );
 }

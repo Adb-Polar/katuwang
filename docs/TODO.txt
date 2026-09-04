@@ -6,10 +6,6 @@ before starting — the exception is the question-bank bulk import, which is
 API + UI only.
 
 Open items
- - Tutor appeal button for suspended/banned classes — no code exists yet.
-   Needs somewhere to persist the appeal (reason, status, admin review) —
-   a schema change, not just UI.
-
  - Admin topic/subject management page (add/edit topics & subjects) —
    subjects/topics are currently hardcoded in src/lib/subjectTopics.ts.
    Making them admin-editable means moving them into the DB.

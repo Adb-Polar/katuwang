@@ -88,3 +88,15 @@ Declined-registration state (Changes.md Part 22)
     without the reason callout
  [] Admin opens a DECLINED user via the "Declined" filter and sets it back to
     ACTIVE -> that person can now sign in
+
+Tutor class appeals (Changes.md Part 23)
+ [] Admin suspends/bans a tutor's class -> tutor opens the class edit page,
+    sees the appeal card under the moderation panel; "Appeal this decision" ->
+    reason textarea (needs >=10 chars) -> submit -> card flips to "awaiting review"
+ [] Filing a second appeal while one is pending is blocked (409)
+ [] /admin/class-appeals: Pending tab lists the appeal with class + tutor reason;
+    Approve -> class returns to SCHEDULED, tutor gets CLASS_APPEAL_APPROVED
+    notification, class edit page unlocks
+ [] Reject with a note -> appeal moves to Rejected tab, class stays moderated,
+    tutor gets CLASS_APPEAL_REJECTED with the note; "Appeal again" button appears
+ [] "Class Appeals" nav item shows under the admin Review group and highlights

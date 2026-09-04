@@ -25,6 +25,13 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - **Suspend a class** — only a `SCHEDULED` class can be suspended; requires a reason and optional duration (auto-reinstates when the duration elapses, see `reinstateExpiredClasses`).
 - **Ban a class** — a `SCHEDULED` or `SUSPENDED` class can be banned (indefinite, with a reason); the owning tutor can no longer modify it.
 - **Reinstate a class** — a `SUSPENDED` or `BANNED` class can be returned to `SCHEDULED`.
+
+## Class Appeals (`/admin/class-appeals`)
+
+- Tutors can contest a suspension/ban on one of their classes. The queue has Pending / Approved / Rejected tabs; each row shows the class, the moderation reason, and the tutor's appeal text.
+- **Approve** → the appeal is `APPROVED`, the class is reinstated to `SCHEDULED` (moderation reason/expiry cleared), an audit row is written, and the tutor gets a `CLASS_APPEAL_APPROVED` notification.
+- **Reject** (with an optional note) → the appeal is `REJECTED`, the moderation stands, and the tutor gets `CLASS_APPEAL_REJECTED`. The tutor may appeal again.
+  (`GET /api/admin/class-appeals`, `PATCH /api/admin/class-appeals/[appealId]`)
   (`PATCH /api/admin/classes/[classId]`)
 - All class moderation actions are recorded in the audit log.
 - **Banning** a class re-opens any topic request still linked to it (`status in ACCEPTED, ENROLLED` → `OPEN`, `fulfilledClassId` nulled, learner notified) in the same transaction.

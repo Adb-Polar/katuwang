@@ -24,7 +24,10 @@ export type NotificationType =
   | "CLASS_ENROLLMENT_DROPPED"
   // class lifecycle (learner-facing)
   | "CLASS_CANCELLED"
-  | "CLASS_COMPLETED";
+  | "CLASS_COMPLETED"
+  // class appeal review (tutor-facing)
+  | "CLASS_APPEAL_APPROVED"
+  | "CLASS_APPEAL_REJECTED";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

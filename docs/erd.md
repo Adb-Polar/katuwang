@@ -60,6 +60,14 @@ BANNED BANNED
     
 
 
+        ClassAppealStatus {
+            PENDING PENDING
+APPROVED APPROVED
+REJECTED REJECTED
+        }
+    
+
+
         SessionStatus {
             SCHEDULED SCHEDULED
 COMPLETED COMPLETED
@@ -326,6 +334,19 @@ DISMISSED DISMISSED
     DateTime createdAt 
     }
   
+
+  "class_appeals" {
+    String id "🗝️"
+    String classId 
+    String tutorProfileId 
+    String reason 
+    ClassAppealStatus status 
+    String reviewNote "❓"
+    String reviewedById "❓"
+    DateTime reviewedAt "❓"
+    DateTime createdAt 
+    }
+  
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -368,4 +389,8 @@ DISMISSED DISMISSED
     "notifications" }o--|| "users" : "user"
     "chatbot_misses" |o--|| "Role" : "enum:role"
     "chatbot_misses" }o--|o "users" : "user"
+    "class_appeals" }o--|| "tutor_classes" : "class"
+    "class_appeals" }o--|| "tutor_profiles" : "tutorProfile"
+    "class_appeals" |o--|| "ClassAppealStatus" : "enum:status"
+    "class_appeals" }o--|o "users" : "reviewedBy"
 ```

@@ -61,6 +61,12 @@ enum ClassStatus {
   BANNED
 }
 
+enum ClassAppealStatus {
+  PENDING // Filed by the tutor, awaiting admin review
+  APPROVED // Admin agreed — the class was reinstated to SCHEDULED
+  REJECTED // Admin upheld the moderation
+}
+
 enum SessionStatus {
   SCHEDULED
   COMPLETED
@@ -125,6 +131,7 @@ model User {
   // Assessment authoring / moderation (ADMIN only in practice)
   authoredQuestions        AssessmentQuestion[] @relation("AuthoredQuestions")
   resolvedQuestionRequests QuestionRequest[]    @relation("ResolvedQuestionRequests")
+  reviewedClassAppeals     ClassAppeal[]        @relation("ReviewedClassAppeals")
 
   notifications Notification[]
   chatbotMisses ChatbotMiss[]
@@ -169,6 +176,9 @@ model TutorProfile {
 
   // Topic requests directed specifically at this tutor
   directedTopicRequests TopicRequest[] @relation("DirectedTopicRequests")
+
+  // Appeals this tutor has filed against class moderation
+  classAppeals ClassAppeal[]
 
   @@map("tutor_profiles")
 }
@@ -229,6 +239,7 @@ model TutorClass {
   sessions          ClassSession[]
   enrollments       ClassEnrollment[]
   fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
+  appeals           ClassAppeal[]
 
   @@map("tutor_classes")
 }
@@ -466,7 +477,7 @@ model Notification {
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String // free-text; valid values are the NotificationType union in src/lib/notifications.ts
-  //           (TOPIC_REQUEST_*, REGISTRATION_*, CERTIFICATION_*, QUESTION_REQUEST_*, CLASS_ENROLLMENT_*, CLASS_CANCELLED, CLASS_COMPLETED)
+  //           (TOPIC_REQUEST_*, REGISTRATION_*, CERTIFICATION_*, QUESTION_REQUEST_*, CLASS_ENROLLMENT_*, CLASS_CANCELLED, CLASS_COMPLETED, CLASS_APPEAL_*)
   message   String    @db.Text
   link      String?
   readAt    DateTime?
@@ -490,4 +501,25 @@ model ChatbotMiss {
 
   @@index([createdAt])
   @@map("chatbot_misses")
+}
+
+// ─── Class Appeal (tutor contests a suspension/ban) ────────────────────────
+
+model ClassAppeal {
+  id             String            @id @default(cuid())
+  classId        String
+  class          TutorClass        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  tutorProfileId String
+  tutorProfile   TutorProfile      @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
+  reason         String            @db.Text
+  status         ClassAppealStatus @default(PENDING)
+  reviewNote     String?           @db.Text // admin's note to the tutor on the decision
+  reviewedById   String?
+  reviewedBy     User?             @relation("ReviewedClassAppeals", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt     DateTime?
+  createdAt      DateTime          @default(now())
+
+  @@index([status, createdAt])
+  @@index([classId])
+  @@map("class_appeals")
 }
