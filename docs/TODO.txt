@@ -47,11 +47,3 @@ Open items
    (~11 hand-rolled tables) and most lists are server-paginated, so real sorting
    needs per-route API params. Needs its own pass.
 
- - Notification for a declined registration — the notification system (Changes.md
-   Part 18) reserves the REGISTRATION_REJECTED type but never writes it: a
-   declined applicant is set BANNED in the same transaction and can never sign
-   in to see an in-app row. Deliver the decline reason via a path a BANNED user
-   can actually reach (the blocked-login / pending-approval screen, or email via
-   src/lib/mail.ts).
-
-- all declined registration request is marked as banned create another state

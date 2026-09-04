@@ -84,15 +84,15 @@ describe("PATCH /api/admin/registrations/[userId]", () => {
     );
   });
 
-  it("declines -> BANNED with the reason + USER_DECLINED audit entry", async () => {
+  it("declines -> DECLINED with the reason + USER_DECLINED audit entry", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     findUniqueMock.mockResolvedValue({ id: "U1", status: "PENDING" });
-    updateMock.mockResolvedValue({ id: "U1", anonymousId: "STU-0005", status: "BANNED", statusReason: "Not a real student" });
+    updateMock.mockResolvedValue({ id: "U1", anonymousId: "STU-0005", status: "DECLINED", statusReason: "Not a real student" });
 
     const res = await PATCH(makeRequest({ decision: "DECLINE", reason: "Not a real student" }), { params });
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ status: "BANNED", statusReason: "Not a real student" }) })
+      expect.objectContaining({ data: expect.objectContaining({ status: "DECLINED", statusReason: "Not a real student" }) })
     );
     expect(auditCreateMock).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ action: "USER_DECLINED", reason: "Not a real student" }) })

@@ -15,6 +15,7 @@ const STATUS_TONE = {
   SUSPENDED: "warning",
   BANNED: "error",
   PENDING: "warning",
+  DECLINED: "error",
 } as const;
 
 function fmt(d: Date) {

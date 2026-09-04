@@ -59,6 +59,12 @@ export default function LoginForm() {
           router.push("/pending-approval");
           return;
         }
+        if (result.error.startsWith("ACCOUNT_DECLINED")) {
+          const sep = result.error.indexOf(":");
+          const reason = sep >= 0 ? result.error.slice(sep + 1).trim() : "";
+          router.push(reason ? `/account-declined?reason=${encodeURIComponent(reason)}` : "/account-declined");
+          return;
+        }
         setError(result.error);
         setLoading(false);
       } else {

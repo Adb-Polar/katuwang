@@ -11,7 +11,7 @@ export type DevUser = {
   lastName: string;
   email: string;
   role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
-  status: "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING";
+  status: "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING" | "DECLINED";
   gradeLevel: string;
   section: string;
 };

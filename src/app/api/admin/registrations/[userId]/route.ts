@@ -51,7 +51,7 @@ export async function PATCH(
         where: { id: userId },
         data: approved
           ? { status: "ACTIVE", statusReason: null, statusUpdatedAt: new Date() }
-          : { status: "BANNED", statusReason: reason || null, statusUpdatedAt: new Date() },
+          : { status: "DECLINED", statusReason: reason || null, statusUpdatedAt: new Date() },
         select: { id: true, anonymousId: true, status: true, statusReason: true },
       });
 

@@ -24,7 +24,10 @@ export async function GET(req: NextRequest) {
 
     const where: Prisma.UserWhereInput = {
       role: role && role in Role ? (role as Role) : { not: "ADMIN" },
-      ...(status && status in AccountStatus ? { status: status as AccountStatus } : {}),
+      // Declined applicants are terminal — hide them unless explicitly filtered for.
+      ...(status && status in AccountStatus
+        ? { status: status as AccountStatus }
+        : { status: { not: "DECLINED" } }),
       ...(q
         ? {
             OR: [

@@ -43,6 +43,7 @@ const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
   SUSPENDED: "warning",
   BANNED: "error",
   PENDING: "warning",
+  DECLINED: "error",
 };
 
 const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
@@ -163,6 +164,7 @@ export default function UserManagementTable() {
               <option value="ACTIVE">Active</option>
               <option value="SUSPENDED">Suspended</option>
               <option value="BANNED">Banned</option>
+              <option value="DECLINED">Declined</option>
             </select>
           </div>
 

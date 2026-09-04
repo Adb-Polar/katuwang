@@ -179,6 +179,44 @@ describe("auth authorize()", () => {
     ).rejects.toThrow(/banned/i);
   });
 
+  it("throws the ACCOUNT_DECLINED sentinel (with the reason) when the registration was declined", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "DECLINED",
+      statusReason: "Name not on the school roster",
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow("ACCOUNT_DECLINED:Name not on the school roster");
+  });
+
+  it("throws a bare ACCOUNT_DECLINED sentinel when no reason was recorded", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "DECLINED",
+      statusReason: null,
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow(/^ACCOUNT_DECLINED$/);
+  });
+
   it("returns the user payload when credentials are valid", async () => {
     userFindUnique.mockResolvedValue({
       id: "1",

@@ -25,6 +25,7 @@ enum AccountStatus {
   SUSPENDED
   BANNED
   PENDING // Awaiting admin approval (when requireRegistrationApproval is on); cannot log in
+  DECLINED // Registration rejected by an admin; cannot log in. Distinct from BANNED (which is a policy action on an active account).
 }
 
 enum GradeLevel {

@@ -24,6 +24,7 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [22](#part-22) | **Declined-registration state (`DECLINED` account status)** | Declining a registration reused `BANNED` — indistinguishable from a policy ban on an active account, and the applicant never learned why. New `DECLINED` `AccountStatus`; a declined applicant hitting sign-in is routed to a new `/account-declined` screen that shows the reason. | `enum AccountStatus` +`DECLINED` (`db push`, no migration file — history drift). `admin/registrations/[userId]` decline → `DECLINED`. `auth.ts` throws `ACCOUNT_DECLINED[:reason]` sentinel; `LoginForm` routes it to `/account-declined?reason=`. Users list + table hide `DECLINED` unless filtered; status maps/selects extended. Tests: auth (2 new), registrations `[userId]` (assert `DECLINED`); 433/433. Not committed. |
 | [21](#part-21) | **Registration Approvals — role + grade-level filters** | The registrations queue only had a text search; the Users page has role tabs + a status dropdown. Brought the registrations table to parity: role tabs (All / Learners / Tutors) + a grade-level dropdown. | `GET /api/admin/registrations` gains a `gradeLevel` param (validated against the `GradeLevel` enum, ignored if invalid) alongside the existing `role`/`q`. `RegistrationApprovalTable.tsx` adds `Tabs` + a grade `<select>` wired into `usePaginatedList`. 2 new route-test cases; 431/431. No schema change. Not committed. |
 | [20](#part-20-docs) | **Docs — Chatbot Assistant workflow reference** | Standing architecture doc for the chatbot module: message → `classify()` → reply, the scoring model, the recommendation path, the `ChatbotMiss` loop, config, and how to extend. | New `docs/reference/chatbot.md`; linked from `docs/README.md`. Docs only. Not committed. |
 | [19](#part-19) | **Chatbot Assistant module (intent-based, no LLM)** | Module 5 of 6 — the last unbuilt module. A deterministic rule/pattern intent matcher: tokenise → score against ~25 role-aware intents + a 15-entry FAQ KB by keyword/synonym/regex overlap → predefined reply, optionally with a deep link or (learner) live class matches from `rankMatches`. Floating chat widget in every portal. | New `src/lib/chatbot/` (`types`, `normalize`, `intents`, `faq`, `classifier`, `recommend`, `respond`); `POST /api/chatbot` (auth + `chatbotEnabled` gate + Zod); `src/components/chatbot/ChatWidget.tsx` wired via a new `PortalLayout` prop; `chatbotEnabled` platform setting (default ON) on `/admin/settings`. New `ChatbotMiss` table (unmatched queries, applied via `db push` — history drift, same as Part 17) + `User` relation. 3 new test files, 429/429. `tsc`/`lint`/`build` clean. Not committed. |
@@ -1195,5 +1196,70 @@ queue to parity (a `docs/TODO.txt` item).
 `docs/TODO.txt` — the "add a filters on registration page" line removed; the
 stale "Community (public) vs. personal (directed) topic requests" line also
 removed (shipped in Part 5 / `topic-requests-v2.md`).
+
+### Not committed.
+
+---
+
+<a id="part-22"></a>
+
+# Part 22 — Declined-registration state (`DECLINED` account status)
+
+Declining a pending registration set `status: "BANNED"` — the same value used
+for a policy action on an already-active account — and stored the reason on
+`statusReason` where the applicant could never see it (a declined account
+can't sign in). Two `docs/TODO.txt` items.
+
+### Schema
+
+- **`prisma/schema.prisma`** — `enum AccountStatus` gains `DECLINED`
+  ("Registration rejected by an admin; cannot log in. Distinct from BANNED").
+  Applied with `npx prisma db push` (local migration history is drifted — same
+  as Parts 17 & 19); no migration file. `npx prisma generate` re-run.
+
+### Changes
+
+- **`src/app/api/admin/registrations/[userId]/route.ts`** — the decline branch
+  now writes `status: "DECLINED"` (was `"BANNED"`); reason + `USER_DECLINED`
+  audit row unchanged.
+- **`src/lib/auth.ts`** — `authorize()` gains a `DECLINED` branch that throws
+  `ACCOUNT_DECLINED` (or `ACCOUNT_DECLINED:<reason>` when a reason is stored) —
+  a sentinel, like the existing `ACCOUNT_PENDING`.
+- **`src/components/auth/LoginForm.tsx`** — intercepts an `ACCOUNT_DECLINED*`
+  error, splits off the reason after the first `:`, and
+  `router.push("/account-declined?reason=…")`.
+- **`src/app/account-declined/page.tsx`** (new) — server component mirroring
+  `/pending-approval`; renders the decline reason (from `searchParams`) in a
+  callout, plus "Back to sign in" / "Register again" links. Public route (not
+  under the `proxy.ts` matcher).
+- **`src/app/api/admin/users/route.ts`** — the moderation list default-excludes
+  `DECLINED` (`status: { not: "DECLINED" }`) unless a `status` filter asks for
+  it.
+- **`src/components/admin/UserManagementTable.tsx`** — `STATUS_TONE` +
+  the status `<select>` gain `DECLINED`; **`src/app/admin/users/[id]/page.tsx`**
+  and **`src/components/dev/DevLoginBoard.tsx`** status maps/unions extended
+  (exhaustive-`Record<AccountStatus>` fixes).
+
+### Tests
+
+- `src/lib/__tests__/auth.test.ts` — 2 new cases (`ACCOUNT_DECLINED:<reason>`
+  and the bare sentinel).
+- `src/app/api/admin/registrations/[userId]/__tests__/route.test.ts` — decline
+  case now asserts `status: "DECLINED"`.
+- `tsc` + `lint` clean; `pnpm test` 433/433; `pnpm build` OK (`/account-declined`
+  registered).
+
+### Notes
+
+The `REGISTRATION_REJECTED` notification type (reserved in Part 18) stays
+**unwired** — a `DECLINED` account still can't sign in to see an in-app row.
+The decline reason now reaches the applicant via the `/account-declined`
+screen instead, which is what the TODO item actually needed.
+
+### Docs
+
+`docs/TODO.txt` — the two declined-registration items removed;
+`docs/roles/ADMIN.md` — registration-approval + `DECLINED` behaviour noted,
+users `status` query-param list updated; `docs/erd.md` regenerated.
 
 ### Not committed.

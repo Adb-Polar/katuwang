@@ -77,3 +77,14 @@ Chatbot assistant (2026-09-04 session — Changes.md Part 19)
 Registration Approvals filters (Changes.md Part 21)
  [] /admin/registrations: role tabs (All / Learners / Tutors) filter the queue;
     grade-level dropdown filters it; combine with the text search + pagination
+
+Declined-registration state (Changes.md Part 22)
+ [] Admin declines a pending registration with a reason -> account status is
+    DECLINED (not BANNED); it no longer shows in the Users table unless the
+    status filter is set to "Declined"
+ [] The declined applicant tries to sign in -> lands on /account-declined with
+    the reason shown; "Back to sign in" and "Register again" links work
+ [] Declined applicant with NO reason recorded -> /account-declined renders
+    without the reason callout
+ [] Admin opens a DECLINED user via the "Declined" filter and sets it back to
+    ACTIVE -> that person can now sign in

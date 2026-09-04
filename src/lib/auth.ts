@@ -55,6 +55,14 @@ export const authOptions: NextAuthOptions = {
           throw new Error("ACCOUNT_PENDING");
         }
 
+        if (user.status === "DECLINED") {
+          // Sentinel (+ optional reason after the first ":") — LoginForm
+          // redirects this to /account-declined, which surfaces the reason.
+          throw new Error(
+            user.statusReason ? `ACCOUNT_DECLINED:${user.statusReason}` : "ACCOUNT_DECLINED"
+          );
+        }
+
         return {
           id: user.id,
           anonymousId: user.anonymousId,

@@ -14,6 +14,7 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
   (`PATCH /api/admin/users/[userId]`)
 - **Ban a user** — set a user's account status to `BANNED` (indefinite, with a reason).
 - **Reactivate a user** — restore a suspended/banned account back to `ACTIVE`.
+- **Registration approval** (`/admin/registrations`, active while `requireRegistrationApproval` is on) — approve → `ACTIVE`; decline → `DECLINED` (distinct from `BANNED`, which is a policy action on an already-active account). A declined applicant can't sign in; when they try, they're sent to `/account-declined`, which shows the decline reason. The Users table hides `DECLINED` accounts unless you filter for that status.
 - Every status change is written to the audit log automatically.
 - Admin accounts cannot be modified through this endpoint (`400 Cannot modify an admin account`).
 
@@ -94,7 +95,7 @@ All endpoints below require an authenticated session with `role === "ADMIN"`, or
 ### `GET /api/admin/users`
 List/search learner + tutor accounts (admins excluded).
 
-**Query params** (all optional): `q` (free-text: first/last name, email, anonymous ID), `role` (`STUDENT_LEARNER` \| `STUDENT_TUTOR`), `status` (`ACTIVE` \| `SUSPENDED` \| `BANNED`), `page` (default `1`), `pageSize` (default `10`, max `100`).
+**Query params** (all optional): `q` (free-text: first/last name, email, anonymous ID), `role` (`STUDENT_LEARNER` \| `STUDENT_TUTOR`), `status` (`ACTIVE` \| `SUSPENDED` \| `BANNED` \| `PENDING` \| `DECLINED` — omitted excludes `DECLINED`), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
 **200** → `{ users: User[], total, page, pageSize }` — each `User` includes `id, anonymousId, firstName, lastName, email, role, gradeLevel, section, status, statusReason, statusUpdatedAt, statusExpiresAt, createdAt`.
 
