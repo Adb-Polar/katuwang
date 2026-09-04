@@ -39,7 +39,3 @@ Open items
        fails).
      * Batch size cap (e.g. 200 questions per request).
 
- - All tables add a sort button on the table header — no shared table component
-   (~11 hand-rolled tables) and most lists are server-paginated, so real sorting
-   needs per-route API params. Needs its own pass.
-

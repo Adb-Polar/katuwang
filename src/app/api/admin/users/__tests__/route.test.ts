@@ -74,6 +74,21 @@ describe("GET /api/admin/users", () => {
     );
   });
 
+  it("maps ?sort/?dir to orderBy, ignoring unknown sort keys", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+
+    await GET(makeRequest("?sort=name&dir=asc"));
+    expect(findManyMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ orderBy: { lastName: "asc" } })
+    );
+
+    await GET(makeRequest("?sort=bogus&dir=asc"));
+    expect(findManyMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ orderBy: { createdAt: "asc" } })
+    );
+  });
+
   it("returns 500 on unexpected error", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     findManyMock.mockRejectedValue(new Error("DB down"));

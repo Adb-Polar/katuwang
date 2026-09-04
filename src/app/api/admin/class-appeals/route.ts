@@ -3,8 +3,15 @@ import { getServerSession } from "next-auth";
 import { Prisma, ClassAppealStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+const APPEAL_SORT_COLUMN: Record<string, "createdAt" | "reviewedAt" | "status"> = {
+  createdAt: "createdAt",
+  reviewedAt: "reviewedAt",
+  status: "status",
+};
 
 // ─── GET: List class appeals (tabbed / paginated) ──────────────────────────
 export async function GET(req: NextRequest) {
@@ -26,6 +33,12 @@ export async function GET(req: NextRequest) {
       100,
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE)
     );
+    const { sort, dir } = parseSort(
+      searchParams,
+      Object.keys(APPEAL_SORT_COLUMN),
+      status === "PENDING" ? "createdAt" : "reviewedAt",
+      status === "PENDING" ? "asc" : "desc"
+    );
 
     const where: Prisma.ClassAppealWhereInput = { status };
 
@@ -38,7 +51,7 @@ export async function GET(req: NextRequest) {
           },
           tutorProfile: { select: { user: { select: { id: true, anonymousId: true } } } },
         },
-        orderBy: status === "PENDING" ? { createdAt: "asc" } : { reviewedAt: "desc" },
+        orderBy: { [APPEAL_SORT_COLUMN[sort]]: dir },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

@@ -3,8 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma, SubjectArea, ClassStatus } from "@prisma/client";
+import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+const CLASS_SORT_COLUMN: Record<string, "createdAt" | "code" | "subject" | "status"> = {
+  createdAt: "createdAt",
+  code: "code",
+  subject: "subject",
+  status: "status",
+};
 
 // ─── GET: List All Classes for Moderation ──────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -21,6 +29,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get("status");
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
+    const { sort, dir } = parseSort(searchParams, Object.keys(CLASS_SORT_COLUMN), "createdAt");
 
     const where: Prisma.TutorClassWhereInput = {
       ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
@@ -51,7 +60,7 @@ export async function GET(req: NextRequest) {
           },
           _count: { select: { enrollments: true } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { [CLASS_SORT_COLUMN[sort]]: dir },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

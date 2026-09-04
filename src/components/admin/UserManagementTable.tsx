@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
+import SortableTh from "@/components/ui/SortableTh";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -63,6 +65,7 @@ export default function UserManagementTable() {
   const [reason, setReason] = useState("");
   const [durationDays, setDurationDays] = useState<string>("");
   const [saving, setSaving] = useState(false);
+  const { sort, dir, toggle } = useTableSort("createdAt", "desc", { name: "asc" });
 
   const {
     data: users,
@@ -82,6 +85,8 @@ export default function UserManagementTable() {
       ...(TAB_ROLE[activeTab] ? { role: TAB_ROLE[activeTab] } : {}),
       ...(statusFilter ? { status: statusFilter } : {}),
       ...(search.trim() ? { q: search.trim() } : {}),
+      sort,
+      dir,
     },
     PAGE_SIZE,
     "Could not retrieve users."
@@ -178,10 +183,10 @@ export default function UserManagementTable() {
                 <thead>
                   <tr className="text-xs">
                     <th>ID</th>
-                    <th>Name</th>
+                    <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
                     <th>Grade &amp; Section</th>
-                    <th>Status</th>
+                    <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
                     <th></th>
                   </tr>
                 </thead>

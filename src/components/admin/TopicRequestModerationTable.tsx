@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
+import SortableTh from "@/components/ui/SortableTh";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -47,6 +49,7 @@ export default function TopicRequestModerationTable() {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const { sort, dir, toggle } = useTableSort("createdAt", "desc", { subject: "asc", status: "asc" });
 
   const {
     data: requests,
@@ -65,6 +68,8 @@ export default function TopicRequestModerationTable() {
       ...(statusFilter ? { status: statusFilter } : {}),
       ...(scopeFilter ? { scope: scopeFilter } : {}),
       ...(search.trim() ? { q: search.trim() } : {}),
+      sort,
+      dir,
     },
     PAGE_SIZE,
     "Could not retrieve topic requests."
@@ -157,10 +162,10 @@ export default function TopicRequestModerationTable() {
                 <thead>
                   <tr className="text-2xs">
                     <th>Learner</th>
-                    <th>Subject / Topics</th>
+                    <SortableTh label="Subject / Topics" field="subject" sort={sort} dir={dir} onSort={toggle} />
                     <th>Directed to</th>
                     <th>Linked class</th>
-                    <th>Status</th>
+                    <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
                     <th></th>
                   </tr>
                 </thead>

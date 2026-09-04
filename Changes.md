@@ -24,6 +24,7 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [24](#part-24) | **Sortable table headers on the admin list pages** | The admin moderation tables had no column sorting (only Audit Log did). Added shared sort infrastructure + `?sort=&dir=` params on the list routes, wired into clickable column headers. | New `src/lib/sortParams.ts` (`parseSort`), `src/hooks/useTableSort.ts`, `src/components/ui/SortableTh.tsx`. Routes `admin/{users,registrations,classes,topic-requests,class-appeals}` gain a whitelisted `sort`/`dir` → `orderBy`. Tables `UserManagementTable`, `RegistrationApprovalTable`, `ClassModerationTable`, `TopicRequestModerationTable`, `ClassAppealTable` get `SortableTh` headers (name/status/subject/created/reviewed as applicable). Audit Log already had sorting; Certifications keeps its sort `<select>`; the assessment question-bank drill-down is unaffected. 1 new route-test case; 450/450. No schema change. Not committed. |
 | [23](#part-23) | **Tutor appeals for suspended/banned classes** | A moderated class was a dead end for the tutor — no way to contest it. New `ClassAppeal` model + `ClassAppealStatus` enum; tutor files one appeal at a time from the class edit page; admin reviews on a new `/admin/class-appeals` queue; approving reinstates the class to `SCHEDULED` and notifies the tutor. | Schema: `ClassAppeal` + enum + relations on `TutorClass`/`TutorProfile`/`User` (`db push`). Routes: `POST /api/tutor/classes/[classId]/appeal`, `GET /api/admin/class-appeals`, `PATCH /api/admin/class-appeals/[appealId]`. New notification types `CLASS_APPEAL_APPROVED/REJECTED` + audit actions. UI: `ClassAppealCard` under the tutor's `ClassModerationPanel`; `ClassAppealTable` + `/admin/class-appeals` page + "Class Appeals" nav item (Review group). 16 new tests, 449/449. Not committed. |
 | [22](#part-22) | **Declined-registration state (`DECLINED` account status)** | Declining a registration reused `BANNED` — indistinguishable from a policy ban on an active account, and the applicant never learned why. New `DECLINED` `AccountStatus`; a declined applicant hitting sign-in is routed to a new `/account-declined` screen that shows the reason. | `enum AccountStatus` +`DECLINED` (`db push`, no migration file — history drift). `admin/registrations/[userId]` decline → `DECLINED`. `auth.ts` throws `ACCOUNT_DECLINED[:reason]` sentinel; `LoginForm` routes it to `/account-declined?reason=`. Users list + table hide `DECLINED` unless filtered; status maps/selects extended. Tests: auth (2 new), registrations `[userId]` (assert `DECLINED`); 433/433. Not committed. |
 | [21](#part-21) | **Registration Approvals — role + grade-level filters** | The registrations queue only had a text search; the Users page has role tabs + a status dropdown. Brought the registrations table to parity: role tabs (All / Learners / Tutors) + a grade-level dropdown. | `GET /api/admin/registrations` gains a `gradeLevel` param (validated against the `GradeLevel` enum, ignored if invalid) alongside the existing `role`/`q`. `RegistrationApprovalTable.tsx` adds `Tabs` + a grade `<select>` wired into `usePaginatedList`. 2 new route-test cases; 431/431. No schema change. Not committed. |
@@ -1340,5 +1341,65 @@ item.
 `docs/TODO.txt` — the appeal item removed; `docs/roles/TUTOR.md` +
 `docs/roles/ADMIN.md` — appeal flow / review queue sections; `docs/erd.md`
 regenerated.
+
+### Not committed.
+
+---
+
+<a id="part-24"></a>
+
+# Part 24 — Sortable table headers on the admin list pages
+
+Only the Audit Log had column sorting. The other admin moderation tables were
+fixed-order. A `docs/TODO.txt` item ("all tables add a sort button on the
+header").
+
+### Shared infrastructure (new)
+
+- **`src/lib/sortParams.ts`** — `parseSort(searchParams, allowed[], fallback,
+  defaultDir)` → `{ sort, dir }`, clamping to a per-route whitelist.
+- **`src/hooks/useTableSort.ts`** — `useTableSort(defaultSort, defaultDir,
+  perFieldDefaults)` → `{ sort, dir, toggle }`. `toggle(field)` flips the
+  direction on the active field, or switches field at its default direction.
+  Feeds straight into a `usePaginatedList` `params` object (the list resets to
+  page 1 when they change).
+- **`src/components/ui/SortableTh.tsx`** — a `<th>` whose label is a sort
+  button with an up/down/idle chevron and `aria-sort`.
+
+### Routes — `?sort=&dir=` → `orderBy`
+
+Each whitelists its sortable keys and maps them to a scalar column:
+
+| Route | Sortable keys |
+|---|---|
+| `admin/users` | `createdAt`, `name` (→ `lastName`), `status`, `role` |
+| `admin/registrations` | `createdAt`, `name`, `role` |
+| `admin/classes` | `createdAt`, `code`, `subject`, `status` |
+| `admin/topic-requests` | `createdAt`, `subject`, `status` |
+| `admin/class-appeals` | `createdAt`, `reviewedAt`, `status` |
+
+### Tables
+
+`UserManagementTable`, `RegistrationApprovalTable`, `ClassModerationTable`,
+`TopicRequestModerationTable`, `ClassAppealTable` now render `SortableTh` on
+the relevant headers and thread `{ sort, dir }` into their list params.
+
+### Out of scope for this pass
+
+Audit Log already had a working `sortHeader` + `sort`/`dir` route contract
+(left as-is). `CertificationReviewTable` keeps its existing sort `<select>`
+(`requested`/`certified`/`reviewed`/`subject`). The assessment question-bank
+is a subject→topic→questions drill-down, not a flat sortable list.
+
+### Verification
+
+`tsc` + `lint` clean; `pnpm test` 450/450 (existing route tests use
+`objectContaining`, so the changed `orderBy` doesn't break them; one new
+`admin/users` case asserts `?sort`/`?dir` mapping + unknown-key fallback);
+`pnpm build` OK.
+
+### Docs
+
+`docs/TODO.txt` — the sort item removed.
 
 ### Not committed.

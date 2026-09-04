@@ -3,8 +3,15 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma, Role, GradeLevel } from "@prisma/client";
+import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+const REG_SORT_COLUMN: Record<string, "createdAt" | "lastName" | "role"> = {
+  createdAt: "createdAt",
+  name: "lastName",
+  role: "role",
+};
 
 // ─── GET: List Accounts Awaiting Approval ─────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -24,6 +31,7 @@ export async function GET(req: NextRequest) {
       100,
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE)
     );
+    const { sort, dir } = parseSort(searchParams, Object.keys(REG_SORT_COLUMN), "createdAt", "asc");
 
     const where: Prisma.UserWhereInput = {
       status: "PENDING",
@@ -55,7 +63,7 @@ export async function GET(req: NextRequest) {
           section: true,
           createdAt: true,
         },
-        orderBy: { createdAt: "asc" },
+        orderBy: { [REG_SORT_COLUMN[sort]]: dir },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

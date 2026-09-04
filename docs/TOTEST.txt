@@ -100,3 +100,11 @@ Tutor class appeals (Changes.md Part 23)
  [] Reject with a note -> appeal moves to Rejected tab, class stays moderated,
     tutor gets CLASS_APPEAL_REJECTED with the note; "Appeal again" button appears
  [] "Class Appeals" nav item shows under the admin Review group and highlights
+
+Sortable admin table headers (Changes.md Part 24)
+ [] /admin/users: click "Name" / "Status" headers -> rows reorder, chevron
+    shows direction, second click flips it, list stays on page 1
+ [] Same for /admin/registrations (Name/Role/Requested), /admin/classes
+    (Subject/Status), /admin/topic-requests (Subject/Status), /admin/class-appeals
+    (Filed/Reviewed)
+ [] Sorting combines with the existing search/filter/pagination controls

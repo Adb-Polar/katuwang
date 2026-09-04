@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
+import SortableTh from "@/components/ui/SortableTh";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -52,6 +54,8 @@ export default function ClassAppealTable() {
   const [rejectTarget, setRejectTarget] = useState<Appeal | null>(null);
   const [reviewNote, setReviewNote] = useState("");
   const [saving, setSaving] = useState(false);
+  const dateField = tab === "pending" ? "createdAt" : "reviewedAt";
+  const { sort, dir, toggle } = useTableSort(dateField, tab === "pending" ? "asc" : "desc");
 
   const {
     data: appeals,
@@ -67,7 +71,7 @@ export default function ClassAppealTable() {
   } = usePaginatedList<Appeal>(
     "/api/admin/class-appeals",
     "appeals",
-    { status: TAB_STATUS[tab] },
+    { status: TAB_STATUS[tab], sort, dir },
     PAGE_SIZE,
     "Could not retrieve class appeals.",
     "appeals"
@@ -132,7 +136,13 @@ export default function ClassAppealTable() {
                     <th>Class</th>
                     <th>Tutor</th>
                     <th>Tutor&apos;s reason</th>
-                    <th>{tab === "pending" ? "Filed" : "Reviewed"}</th>
+                    <SortableTh
+                      label={tab === "pending" ? "Filed" : "Reviewed"}
+                      field={dateField}
+                      sort={sort}
+                      dir={dir}
+                      onSort={toggle}
+                    />
                     {tab !== "pending" && <th>Admin note</th>}
                     {tab === "pending" && <th></th>}
                   </tr>

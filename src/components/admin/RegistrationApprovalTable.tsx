@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Role, GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
+import SortableTh from "@/components/ui/SortableTh";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -48,6 +50,7 @@ export default function RegistrationApprovalTable() {
   const [declineTarget, setDeclineTarget] = useState<PendingUser | null>(null);
   const [reason, setReason] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { sort, dir, toggle } = useTableSort("createdAt", "asc", { name: "asc", role: "asc" });
 
   const {
     data: users,
@@ -67,6 +70,8 @@ export default function RegistrationApprovalTable() {
       ...(TAB_ROLE[activeTab] ? { role: TAB_ROLE[activeTab] } : {}),
       ...(gradeFilter ? { gradeLevel: gradeFilter } : {}),
       ...(search.trim() ? { q: search.trim() } : {}),
+      sort,
+      dir,
     },
     PAGE_SIZE,
     "Could not retrieve pending registrations.",
@@ -152,11 +157,11 @@ export default function RegistrationApprovalTable() {
                 <thead>
                   <tr className="text-xs">
                     <th>ID</th>
-                    <th>Name</th>
+                    <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
-                    <th>Role</th>
+                    <SortableTh label="Role" field="role" sort={sort} dir={dir} onSort={toggle} />
                     <th>Grade &amp; Section</th>
-                    <th>Requested</th>
+                    <SortableTh label="Requested" field="createdAt" sort={sort} dir={dir} onSort={toggle} />
                     <th></th>
                   </tr>
                 </thead>

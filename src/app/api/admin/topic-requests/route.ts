@@ -3,8 +3,15 @@ import { getServerSession } from "next-auth";
 import { Prisma, SubjectArea, TopicRequestStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
+
+const TR_SORT_COLUMN: Record<string, "createdAt" | "subject" | "status"> = {
+  createdAt: "createdAt",
+  subject: "subject",
+  status: "status",
+};
 
 // ─── GET: List/search all topic requests platform-wide ──────────────────────
 export async function GET(req: NextRequest) {
@@ -22,6 +29,7 @@ export async function GET(req: NextRequest) {
     const scope = searchParams.get("scope"); // "public" | "directed"
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
+    const { sort, dir } = parseSort(searchParams, Object.keys(TR_SORT_COLUMN), "createdAt");
 
     const where: Prisma.TopicRequestWhereInput = {
       ...(subject && subject in SubjectArea ? { subject: subject as SubjectArea } : {}),
@@ -61,7 +69,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: { [TR_SORT_COLUMN[sort]]: dir },
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

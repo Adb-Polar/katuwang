@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { SubjectArea } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
+import SortableTh from "@/components/ui/SortableTh";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -56,6 +58,7 @@ export default function ClassModerationTable() {
   const [durationDays, setDurationDays] = useState<string>("");
   const [reinstateTarget, setReinstateTarget] = useState<AdminClass | null>(null);
   const [saving, setSaving] = useState(false);
+  const { sort, dir, toggle } = useTableSort("createdAt", "desc", { subject: "asc", code: "asc", status: "asc" });
 
   const {
     data: classes,
@@ -73,6 +76,8 @@ export default function ClassModerationTable() {
       ...(subjectFilter ? { subject: subjectFilter } : {}),
       ...(statusFilter ? { status: statusFilter } : {}),
       ...(search.trim() ? { q: search.trim() } : {}),
+      sort,
+      dir,
     },
     PAGE_SIZE,
     "Could not retrieve classes."
@@ -165,11 +170,11 @@ export default function ClassModerationTable() {
               <table className="table table-sm">
                 <thead>
                   <tr className="text-2xs">
-                    <th>Subject / Topics</th>
+                    <SortableTh label="Subject / Topics" field="subject" sort={sort} dir={dir} onSort={toggle} />
                     <th>Tutor</th>
                     <th>Scheduled</th>
                     <th>Enrolled</th>
-                    <th>Status</th>
+                    <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
                     <th></th>
                   </tr>
                 </thead>
