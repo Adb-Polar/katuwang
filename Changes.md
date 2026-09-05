@@ -24,6 +24,8 @@
 | [13](#part-13) | **Dev fix — Data Factory "Create users" now really registers** | The `/dev` factory's *Create users* action called `prisma.user.create` directly, bypassing the real signup logic — it added rows, it didn't register accounts. | Extracted the account-creation core of `src/app/api/register/route.ts` into a new HTTP-agnostic `registerAccount()` in `src/lib/registration.ts` (dup-email check, bcrypt hash, anon ID, PENDING-on-approval, user+`tutorProfile` transaction for tutors). The register route is now a thin wrapper over it (identical responses; 7 route tests unchanged). `src/app/api/dev/route.ts` `createUsers` routes learners/tutors through `registerAccount()`; a new `pending` flag (checkbox in `DevDataFactory`, non-ADMIN only) creates them `status: PENDING` so they show in Admin → Registration Approvals. `ADMIN` keeps its direct create (no admin registration path). `@dev.test` emails + `password123` unchanged. `tsc` clean, 391/391 tests. Not committed. |
 | [15](#part-15) | **Global assessment config (replaces per-topic config)** | Assessment tuning (questions/attempt, pass %, min bank size) is now one platform-wide set on **Admin → Settings → Assessment**, not a per-`(subject, topic)` override. No migration — stored in the existing `platform_settings` key/value table. | `TopicAssessmentConfig` reads/writes removed everywhere; model left dormant in the schema (dropping it = a follow-up needing DB confirmation). New `getAssessmentConfig()` + `ASSESSMENT_SETTING_KEYS` in `src/lib/settings.ts`; `resolveTopicConfig()` deleted from `assessmentConfig.ts`. Consumers (`assessmentStatus.ts`, `assessment-questions/coverage`, `tutor/assessments`) switched to the global lookup; coverage payload drops `hasOverride`. `/api/admin/assessment-configs` repurposed from per-topic PATCH to global `GET` + `PATCH` (writes `PlatformSetting` rows, one audit row); `updateTopicAssessmentConfigSchema` → `updateGlobalAssessmentConfigSchema`. `PlatformSettingsForm` split into "General" / "Assessment" cards, the Assessment card holding the `autoCertifyOnAssessmentPass` toggle + 3 number inputs (save on blur). `QuestionBankManager` `CoveragePanel` is now a read-only readiness strip linking to Settings. `prisma/seed.ts` seeds the 3 global keys (`assessmentPassPercent=60`). Plan: `docs/plans/global-assessment-config.md`. Tests rewritten for the new shape; `tsc` + `lint` clean, 394/394. Not committed. |
 | [16](#part-16) | **Process — TODO pruning + mandatory TOTEST updates** | Two new `CLAUDE.md` "### Warning" rules: finished `docs/TODO.txt` items are deleted (not annotated "DONE"), and every non-docs change must add `[ ]` items to `docs/TOTEST.txt` for manual verification. | `CLAUDE.md` edited; `docs/TODO.txt` pruned of the four finished 2026-09-03 items (drill-down + config relocation, topic-request links + pagination, promo-card removal, global assessment config); `docs/TOTEST.txt` gained manual-check items for Parts 11 / 14 / 15. Docs/process only. Not committed. |
+| [28](#part-28) | **Working global search + learner Tutor browsing** | The top-bar search box was decorative markup — an unwired `<input>` with no handler. It now runs a real role-scoped quick search. Learners also get a dedicated "Find Tutors" browse page (the tutor *profile* page already existed but nothing linked to a listing). | New `GET /api/search` (role-scoped: learner → browsable classes + verified tutors + topics; tutor → own classes + topics; admin → all classes + accounts + topics; max 6/group, min 2 chars) and `GET /api/learner/tutors` (paginated, `q` on `anonymousId` + `subject` filter, real names only when `showTutorRealNames`). New `GlobalSearch.tsx` (debounced fetch, grouped dropdown, ⌘K/Ctrl+K + `/` focus, ↑/↓/Enter/Escape, outside-click close) replaces the dead markup in `PortalLayout`. New `TutorBrowser.tsx` + `/learner/tutors` page + "Find Tutors" nav item. 9 new route tests; 478/478. No schema change. Not committed. |
+| [26](#part-26) | **Role-based Help & FAQs pages** | Each portal gets its own `/help` page — a Help Center with role-scoped quick links, step-by-step guides, and a searchable, categorised FAQ accordion. Learners, tutors, and admins each see only their own material. | New `src/lib/help/helpContent.ts` (per-role `HELP_CONTENT` data), `src/components/help/HelpCenter.tsx` (client: FAQ search + DaisyUI `collapse` accordions), and `src/app/{learner,tutor,admin}/help/page.tsx` (lean server pages). Each portal layout adds a "Help & FAQs" nav item and passes a new `helpHref` prop to `PortalLayout`, which now renders the previously-dead topbar help button as a `<Link>`. No schema/API/test change; `tsc` + `lint` clean, 467/467 tests. Not committed. |
 | [25](#part-25) | **Admin-editable subjects & topics (SubjectArea enum → tables)** | The subject taxonomy was a compile-time `SubjectArea` enum + static `SUBJECT_TOPICS` map. Replaced with `Subject`/`Topic` tables and a `/admin/subjects` CRUD page; subjects/topics can now be added, renamed, reordered, and (de)activated. | 5 phases (plan Path B). New `Subject`/`Topic` models (`db push`); `src/lib/subjects.ts` (cached reader + static fallback); `/api/admin/subjects*`, `/api/admin/topics/[id]`, `/api/subjects`; `SubjectTopicManager` + nav item. Validators dropped `z.nativeEnum(SubjectArea)`; routes validate via `subjectExists`/`topicExists`. `SubjectArea` enum **removed** — the 6 `subject` columns are now `String` slugs (lossless `ENUM→VARCHAR`). New `useSubjectCatalog()` hook wired into 8 dropdown components. Topic rename fans out to 7 denormalised `topic` columns in one txn. 467/467 tests. Not committed. |
 | [24](#part-24) | **Sortable table headers on the admin list pages** | The admin moderation tables had no column sorting (only Audit Log did). Added shared sort infrastructure + `?sort=&dir=` params on the list routes, wired into clickable column headers. | New `src/lib/sortParams.ts` (`parseSort`), `src/hooks/useTableSort.ts`, `src/components/ui/SortableTh.tsx`. Routes `admin/{users,registrations,classes,topic-requests,class-appeals}` gain a whitelisted `sort`/`dir` → `orderBy`. Tables `UserManagementTable`, `RegistrationApprovalTable`, `ClassModerationTable`, `TopicRequestModerationTable`, `ClassAppealTable` get `SortableTh` headers (name/status/subject/created/reviewed as applicable). Audit Log already had sorting; Certifications keeps its sort `<select>`; the assessment question-bank drill-down is unaffected. 1 new route-test case; 450/450. No schema change. Not committed. |
 | [23](#part-23) | **Tutor appeals for suspended/banned classes** | A moderated class was a dead end for the tutor — no way to contest it. New `ClassAppeal` model + `ClassAppealStatus` enum; tutor files one appeal at a time from the class edit page; admin reviews on a new `/admin/class-appeals` queue; approving reinstates the class to `SCHEDULED` and notifies the tutor. | Schema: `ClassAppeal` + enum + relations on `TutorClass`/`TutorProfile`/`User` (`db push`). Routes: `POST /api/tutor/classes/[classId]/appeal`, `GET /api/admin/class-appeals`, `PATCH /api/admin/class-appeals/[appealId]`. New notification types `CLASS_APPEAL_APPROVED/REJECTED` + audit actions. UI: `ClassAppealCard` under the tutor's `ClassModerationPanel`; `ClassAppealTable` + `/admin/class-appeals` page + "Class Appeals" nav item (Review group). 16 new tests, 449/449. Not committed. |
@@ -33,6 +35,8 @@
 | [19](#part-19) | **Chatbot Assistant module (intent-based, no LLM)** | Module 5 of 6 — the last unbuilt module. A deterministic rule/pattern intent matcher: tokenise → score against ~25 role-aware intents + a 15-entry FAQ KB by keyword/synonym/regex overlap → predefined reply, optionally with a deep link or (learner) live class matches from `rankMatches`. Floating chat widget in every portal. | New `src/lib/chatbot/` (`types`, `normalize`, `intents`, `faq`, `classifier`, `recommend`, `respond`); `POST /api/chatbot` (auth + `chatbotEnabled` gate + Zod); `src/components/chatbot/ChatWidget.tsx` wired via a new `PortalLayout` prop; `chatbotEnabled` platform setting (default ON) on `/admin/settings`. New `ChatbotMiss` table (unmatched queries, applied via `db push` — history drift, same as Part 17) + `User` relation. 3 new test files, 429/429. `tsc`/`lint`/`build` clean. Not committed. |
 | [18](#part-18) | **Notification system expansion — cross-module events, topbar bell dropdown + unread dot, admin parity** | Part 5's notification system only fired for topic-request events, had no Admin surface, and its topbar bell was dead. Adds 10 new `NotificationType` values wired across registration approval, certification review, question-request outcomes, and class enrol/lifecycle; turns the bell into a dropdown panel with a red unread dot; per-row read-on-click replaces "mark all on page open"; Admin gets a Notifications nav item + page + count. | **No schema change** (`Notification.type` is free-text). New trigger `notify()`/`notifyMany()` calls inside existing `$transaction`s in `admin/registrations/[userId]`, `admin/certifications/[certificationId]`, `admin/question-requests/[requestId]`, `classes/[classId]/enroll` (POST+DELETE now wrapped in `$transaction`), `tutor/classes/[classId]`, `admin/classes/[classId]` (last two fan out to all enrolled learners, de-duped against the topic-request path). `GET /api/notifications` gains `?take`. New `notificationMeta.tsx` (shared icons/format) + `NotificationBell.tsx` (client dropdown). `PortalLayout` gains `unreadCount`/`notificationsHref` props. `.kt-icon-btn` made `position: relative`. New `src/app/admin/notifications/page.tsx`; admin nav item under "Review". 7 route test files updated; `tsc`/`lint` clean, 398/398 tests. Not committed. |
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
+| [29](#part-29) | **Session pre/post-tests (`docs/plans/pre-test-post-test-plan.md`)** | Per-session PRE/POST diagnostic tests: a tutor builds one ordered question set per `ClassSession`, served twice (as a PRE attempt, then a POST attempt); learners take/resume/review; tutor + learner + admin analytics with four charts. Adapts the stale `class-pre-post-tests` branch, re-grained from per-class to per-session. Delivered in phases. | **Phase 0** — extracted `recharts` primitives out of `ReportsView.tsx` into a shared `src/components/charts/` module (`useThemeColors` widened to `--color-accent/success/error`; `DataTable` now `{rows,labelKey}` **or** `{rows,columns}`; `BarChartCard` moved verbatim) + new `GroupedBarChart` / `ProgressAreaChart` / `RateBarChart` / `DeltaBar` (the last pure-CSS, uses the `.kt-delta` badge); dead `.kt-chart-*` CSS removed. **Phase 1** — schema: 4 enums (`QuestionOrigin`, `SessionTestStatus`, `SessionTestKind`, `SessionTestAttemptStatus`) + 4 models (`SessionTest` `@@unique(sessionId)`, `SessionTestQuestion`, `SessionTestAttempt` with `kind` + `@@unique([sessionTestId,learnerId,kind])`, `SessionTestAttemptItem`) + `AssessmentQuestion.origin`/`ownerTutorProfileId` and index `[subject,topic,active,origin]` (origin appended last to keep existing prefixes). Applied via `prisma db push` (Option 1 — additive, no reset; history stays drifted). 478/478 throughout. Not committed. |
+| [30](#part-30) | **Chatbot v1.1 — usability pass (admin misses review + matching robustness + KB growth)** | The deterministic chatbot's `chatbot_misses` feedback loop was dead (no admin UI ever read it), an over-broad `smalltalk_capabilities` intent swallowed unclear messages before they could be logged as misses, and matching was brittle (no typo tolerance, no length-normalized confidence). Closes the loop, hardens matching, and roughly doubles the FAQ KB — no LLM, no new dependency, no schema change. | New `/admin/chatbot` page + `GET /api/admin/chatbot-misses` (JS-side `aggregateMisses()` groups misses by role + normalised token string — Prisma `groupBy` can't group by a derived value — role/text filter, sort by count/first/last seen, pagination); new admin nav item. `classifier.ts`: typo-correction step (`correctToken`, Levenshtein-1 via new `editDistance`/`fuzzyHit` in `normalize.ts`) snaps a misspelled token to its nearest known keyword before scoring *and* before pattern-matching, so e.g. "enrol" still lights up `/\benroll\b/`; added a length-normalized `MIN_CONFIDENCE = 0.35` gate (score / max(3, tokenCount)) alongside the existing absolute `MIN_SCORE` floor, per the original plan's un-implemented spec; `respond.ts`/`route.ts` now surface the winning score as a non-production `debugScore` field. `intents.ts`: narrowed `smalltalk_capabilities` (dropped the bare `/\bhelp\b/` pattern + generic keywords that swallowed most unclear messages) and added 12 new nav intents (find tutors, help page, search, tutor class-appeal/sessions/question-request, admin users/class-appeals/audit-log/subjects/question-requests/chatbot). `faq.ts`: 11 new grounded entries (26 total), each cited to its source doc line; purged 2 dead stopword-colliding keywords (`"my"`, `"you"`). `normalize.ts`: exported `STOPWORDS`, ~12 new `SYNONYMS`. New tests: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`, `chatbot-misses/route.test.ts`, extended `classifier.test.ts` (fuzzy matching, narrowed capabilities, confidence gate) — 586/586. `tsc`/`lint`/`test` all clean. `docs/reference/decisions.md` reviewed — no new entry (implementation refinement, not a thesis divergence). Not committed. |
 
 ---
 
@@ -1498,3 +1502,541 @@ row added; `docs/roles/ADMIN.md` "Subjects & Topics" section + API; stale
 string"; `docs/erd.md` regenerated; `docs/TODO.txt` item removed.
 
 ### Not committed.
+
+---
+
+<a id="part-26"></a>
+
+# Part 26 — Role-based Help & FAQs pages
+
+## What / why
+
+There was no in-app help. The topbar had a Help (`?`) icon button wired to
+nothing, and the sidebars had no help entry. Added a proper role-scoped Help
+Center to each portal.
+
+## Behaviour
+
+- `/learner/help`, `/tutor/help`, `/admin/help` — one page each, gated by the
+  portal layout's existing role guard (a learner cannot open `/admin/help`).
+- Each page shows, for that role only:
+  - **Jump to** — quick-link buttons into the portal's main pages.
+  - **Step-by-step guides** — numbered walkthroughs of the common tasks
+    (learner: find/join a class, Auto Match, post a topic request, leave a
+    class; tutor: get certified, create a class, fulfil a request, manage
+    roster, appeal a moderated class; admin: approvals, certifications,
+    question bank, assessment config, class moderation/appeals, subjects).
+  - **FAQs** — categorised question/answer list rendered as DaisyUI
+    `collapse collapse-arrow` accordions, with a client-side search box that
+    filters across question/answer/category (matches auto-expand).
+- FAQ content is grounded in real app behaviour and reinforces the RA 10173
+  double-blind rule on both the learner and tutor pages.
+- Typography kept restrained: quiet uppercase section labels (the `PageHeader`
+  eyebrow style), guide/FAQ titles at `font-medium`, no stacked large-bold
+  headings in the content body.
+
+## Files
+
+- **New** `src/lib/help/helpContent.ts` — `HELP_CONTENT: Record<HelpRole, HelpEntry>`;
+  types `HelpRole`, `HelpLink`, `HelpGuide`, `HelpFaq`, `HelpEntry`.
+- **New** `src/components/help/HelpCenter.tsx` — `"use client"`; takes `role`,
+  reads `HELP_CONTENT`, groups + filters FAQs.
+- **New** `src/app/{learner,tutor,admin}/help/page.tsx` — server components,
+  `PageHeader` + `<HelpCenter role=… />`, `metadata.title`.
+- `src/app/{learner,tutor,admin}/layout.tsx` — `HelpCircle` import, a
+  "Help & FAQs" nav item (learner/tutor "Account" group, admin "General"
+  group), and a new `helpHref` prop passed to `PortalLayout`.
+- `src/components/layout/PortalLayout.tsx` — new optional `helpHref` prop; the
+  topbar help button renders as a `next/link` `<Link>` when it is set, falling
+  back to the old inert `<button>` otherwise.
+
+## Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` 467/467.
+
+### Not committed.
+
+---
+
+# Part 27 — Chatbot Assistant: role-scope the FAQ knowledge base
+
+## What / why
+
+Navigation/small-talk intents were already role-gated (`Intent.roles` +
+`intentAppliesTo` in the classifier), so a learner never got the tutor
+"create a class" answer and a tutor never got the admin "approve
+registrations" answer. The **FAQ knowledge base was not** — `FAQ_ENTRIES`
+had no role field and `classify()` scored every entry for every role, so a
+learner asking about tutor certification, or an admin asking a learner
+matching question, could still be served the other role's workflow answer.
+
+## Behaviour
+
+- `FaqEntry` gains an optional `roles?: Role[] | "all"` (mirrors
+  `Intent.roles`; absent ⇒ all roles, so platform-wide facts like privacy,
+  cost, subjects, anonymity stay unscoped).
+- `classify()` now skips FAQ entries whose `roles` don't include the asker
+  (`faqAppliesTo`), exactly as it already did for intents.
+- Entries scoped:
+  - **Tutor only**: `faq_become_tutor`, `faq_after_pass`.
+  - **Learner only**: `faq_matching`, `faq_no_match`, `faq_class_cancelled`,
+    `faq_group_solo`.
+- A message that no longer matches any in-scope FAQ/intent falls through to
+  the existing role-specific fallback reply.
+
+## Files
+
+- `src/lib/chatbot/types.ts` — `FaqEntry.roles?`.
+- `src/lib/chatbot/faq.ts` — `LEARNER`/`TUTOR` consts, `roles` on the six
+  role-specific entries, header comment on the convention.
+- `src/lib/chatbot/classifier.ts` — `faqAppliesTo` guard in the FAQ loop.
+- `src/lib/chatbot/__tests__/classifier.test.ts` — three role-gating cases
+  (tutor-workflow FAQ withheld from learner, learner-workflow FAQ withheld
+  from tutor/admin, platform-wide FAQ still served to all).
+
+## Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm test` 470/470.
+
+### Not committed.
+
+---
+
+<a id="part-28"></a>
+
+# Part 28 — Working global search + learner Tutor browsing
+
+Two gaps closed in one pass.
+
+**The top-bar search box did nothing.** `PortalLayout` rendered a `.kt-search`
+div with a bare `<input type="search">` — no `value`, no `onChange`, no
+handler, and the `⌘K` `kbd` was decoration. Typing in it had no effect in any
+portal.
+
+**Tutor browsing had a profile page but no way in.** `/learner/tutors/[tutorId]`
+existed and was reachable only by clicking a tutor's ID badge on a class card.
+There was no listing, so a learner could not go looking for a tutor.
+
+### `GET /api/search` (new)
+
+Any authenticated role; results are **scoped to the caller's role** so the
+double-blind holds:
+
+| Role | Groups returned |
+|---|---|
+| Learner | browsable classes (`browseClassesWhere`), verified `ACTIVE` tutors (by `anonymousId`), topics |
+| Tutor | **only their own** classes, topics |
+| Admin | all classes, all non-admin accounts, topics |
+
+- `?q` shorter than 2 characters returns `{ groups: [] }` without touching the
+  DB. Max `PER_GROUP = 6` items per group.
+- Topic matches come from the admin-managed catalogue (`getSubjects()`), and
+  link to a pre-filtered list page for the caller's role.
+- Response shape: `{ groups: [{ kind, label, items: [{ id, title, subtitle?, href }] }] }`.
+
+### `GET /api/learner/tutors` (new)
+
+Learner-only. Lists `ACTIVE` `STUDENT_TUTOR`s holding at least one `CERTIFIED`
+topic, with per-tutor aggregates: `verifiedTopicCount`, distinct `subjects`,
+`publishedClassCount`, and `nextSessionAt` (soonest upcoming `SCHEDULED`
+session across their published classes). `q` matches `anonymousId`; `subject`
+restricts to tutors certified in that subject. Real name/section are selected
+**only** when `showTutorRealNames` is on — otherwise they are never read from
+the DB.
+
+### UI
+
+- **`src/components/layout/GlobalSearch.tsx`** (new) — replaces the dead markup
+  in `PortalLayout`. 220 ms debounced fetch; grouped dropdown with per-kind
+  icons; `⌘K` / `Ctrl+K` and bare `/` (when not already typing) focus the box;
+  `↑`/`↓` move the highlight, `Enter` opens it, `Escape` and outside-click
+  close; `role="combobox"` + `role="listbox"`/`option` wiring. All state
+  changes happen inside the debounce timeout so the effect never calls
+  `setState` synchronously.
+- **`src/components/learner/TutorBrowser.tsx`** + **`src/app/learner/tutors/page.tsx`**
+  (new) — card grid over `usePaginatedList` (page + size in the URL), with an
+  ID search box and a subject `<select>` fed by `useSubjectCatalog()`. Each card
+  shows the anonymous ID, certified subjects, the three aggregates, and links to
+  the existing profile page.
+- **`src/app/learner/layout.tsx`** — "Find Tutors" nav item (Users icon, Main
+  menu), between Browse Classes and My Classes.
+
+### Tests
+
+- `src/app/api/search/__tests__/route.test.ts` — 401; `<2` chars short-circuits
+  without a query; learner gets class/tutor/topic groups with learner hrefs;
+  tutor is scoped to `tutorProfile: { userId }` and gets no tutor group.
+- `src/app/api/learner/tutors/__tests__/route.test.ts` — 401 for a non-learner;
+  anonymized aggregate shape (subjects de-duped + sorted, soonest
+  `nextSessionAt`); `subject` filter lands in the certification `some` clause;
+  real name present only when `showTutorRealNames` is on.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` **478/478**, `pnpm build` OK (`/api/search`, `/api/learner/tutors`,
+`/learner/tutors` all registered).
+
+### Docs
+
+`docs/roles/LEARNER.md` — new "Find Tutors" section + `GET /api/learner/tutors`
+and `GET /api/search` API entries; `docs/roles/TUTOR.md` and
+`docs/roles/ADMIN.md` — role-scoped `GET /api/search` entries;
+`docs/TOTEST.txt` — manual-check block.
+
+### Not committed.
+
+---
+
+<a id="session-2026-09-04"></a>
+
+# Session — 2026-09-04
+
+Nothing committed or pushed. No database changes in this session so far.
+
+---
+
+<a id="part-29"></a>
+
+## Part 29 — Session pre/post-tests, Phase 0: shared chart components
+
+### Context
+
+First phase of `docs/plans/pre-test-post-test-plan.md` (per-session pre/post-test
+assessment). Phase 0 is deliberately schema-free and feature-free: it only lifts
+the `recharts` plumbing that was trapped inside `ReportsView.tsx` into a shared
+module and adds the four chart shapes the later phases will mount.
+
+### New — `src/components/charts/`
+
+| File | What |
+|---|---|
+| `useThemeColors.ts` | The OKLCH-token reader from `ReportsView`, widened to also expose `accent` / `success` / `error` (`--color-*`). Same SSR-safe fallback map. |
+| `DataTable.tsx` | The `<details>Show data table</details>` a11y companion. Now accepts **either** the original `{ rows, labelKey }` (label + `count`) **or** `{ rows, columns }` with `DataColumn<Row>[]` for the richer session-test payloads. |
+| `BarChartCard.tsx` | Single-series vertical bar card — moved verbatim from `ReportsView`. |
+| `GroupedBarChart.tsx` | **New.** Multi-series grouped vertical bars (chart **a** — pre-vs-post average per session). `null` values render as a missing bar, never a fake zero. Optional `unit`, `yDomain`, custom `tableColumns`, `footer`, `emptyHint`. |
+| `ProgressAreaChart.tsx` | **New.** Overlaid areas over an ordered axis (chart **b** — one learner's pre/post score across sessions). `connectNulls={false}` so gaps stay gaps. |
+| `RateBarChart.tsx` | **New.** 0–100 % specialisation of `GroupedBarChart` (chart **c** — per-question correct rate, PRE vs POST); data table also surfaces `deltaRate` when present. |
+| `DeltaBar.tsx` | **New.** Pure-CSS diverging horizontal bars (chart **d** — per-learner gain), using the `.kt-delta` ▲/▼ badge from `globals.css`. Null delta → dash, learner never dropped. |
+| `index.ts` | Barrel re-export. |
+
+### Changed
+
+- `src/components/admin/ReportsView.tsx` — deletes its private `useThemeColors` /
+  `DataTable` / `BarChartCard`; imports them from `@/components/charts`. The
+  inline enrollments `AreaChart` and its recharts imports stay. Behaviour
+  unchanged.
+- `src/app/globals.css` — removed the dead `.kt-chart-plot` / `.kt-chart-bar`
+  rules (no consumers anywhere). `.kt-delta` kept — `DeltaBar` now uses it, which
+  is what it was built for.
+
+### Phase 0 verification
+
+`pnpm exec tsc --noEmit` clean; `pnpm lint` clean (5 pre-existing warnings);
+`pnpm test` **478/478** unchanged. `docs/TOTEST.txt` — manual-check item for the
+`/admin/reports` charts (should be visually identical after the extraction).
+
+---
+
+## Part 29 — Phase 1: schema
+
+### `prisma/schema.prisma` — additive only
+
+**4 new enums:** `QuestionOrigin { BANK, TUTOR }`,
+`SessionTestStatus { DRAFT, PUBLISHED, CLOSED }`,
+`SessionTestKind { PRE, POST }`,
+`SessionTestAttemptStatus { IN_PROGRESS, SUBMITTED }`.
+
+**4 new models:**
+
+| Model | Key points |
+|---|---|
+| `SessionTest` | Exactly one per session — `sessionId @unique`, `onDelete: Cascade` from `ClassSession`. `title`, `instructions?`, `status DRAFT`, `publishedAt?`, `closedAt?`. `@@index([status])`. |
+| `SessionTestQuestion` | Ordered set shared by both runs. `@@unique([sessionTestId, position])` + `@@unique([sessionTestId, questionId])`. |
+| `SessionTestAttempt` | **`kind` lives here, not on the test.** `@@unique([sessionTestId, learnerId, kind])` (one PRE + one POST per learner); frozen `totalQuestions`/`correctCount`/`scorePercent` snapshots (matches `AssessmentAttempt`). Indexes `[learnerId, kind]`, `[sessionTestId, kind, status]`. |
+| `SessionTestAttemptItem` | `position` = the pre/post join key. `@@unique([attemptId, position])` + `@@unique([attemptId, questionId])`. |
+
+**`AssessmentQuestion`** gains `origin QuestionOrigin @default(BANK)`,
+`ownerTutorProfileId String?` + `ownerTutorProfile TutorProfile? @relation("OwnedQuestions", onDelete: Cascade)`,
+back-relations `sessionTestLinks` / `sessionTestItems`, and:
+`@@index([subject, topic, active, origin])` (replaces `[subject, topic, active]` —
+`origin` **appended last** so the three post-branch `(subject)` / `(subject, topic)`
+queries keep a usable prefix) + `@@index([ownerTutorProfileId])`.
+
+**Back-relations added:** `ClassSession.test SessionTest?`,
+`User.sessionTestAttempts`, `TutorProfile.ownedQuestions`,
+`AssessmentOption.sessionTestSelections`. No `TutorClass.tests` — class roll-ups
+reach tests via `sessions.test`.
+
+**`AssessmentAttemptItem` is NOT reused** — its `attemptId` FKs the tutor-scoped
+`assessment_attempts`; a separate `session_test_attempt_items` table has zero
+blast radius on certification.
+
+### Applied
+
+`prisma db push` (Option 1, owner-confirmed) — additive, no reset, no migration
+file; local migration history stays drifted (as with Parts 17/19/22/23/25).
+`prisma generate` re-run (`docs/erd.md` regenerated). `origin` needs no back-fill —
+`DEFAULT 'BANK'` is correct for every existing (admin-authored) row.
+
+### Phase 1 verification
+
+`pnpm exec tsc --noEmit` clean; `pnpm test` **478/478** (no code consumes the new
+models yet). `npx prisma validate` OK.
+
+---
+
+## Part 29 — Phase 2: question-origin isolation
+
+Every consumer of the shared question bank now filters `origin: "BANK"`, so the
+new tutor-authored (`origin: "TUTOR"`) questions can never leak into certification
+quizzes.
+
+### Filters added
+
+| File | Change |
+|---|---|
+| `src/lib/assessmentPicker.ts` | `origin: "BANK"` on the `pickQuestionIds` pool query. |
+| `src/lib/assessmentStatus.ts` | `origin: "BANK"` on the readiness `groupBy`. |
+| `api/admin/assessment-questions/route.ts` | `origin: "BANK"` on the GET `where` **and** the POST `create` data. |
+| `api/admin/assessment-questions/coverage/route.ts` | `origin: "BANK"` on the coverage `groupBy`. |
+| `api/admin/assessment-questions/[questionId]/route.ts` | `loadQuestion` is now `findFirst({ where: { id, origin: "BANK" } })`; `inUse` / the edit + delete guards also count `_count.sessionTestItems`. |
+| **`api/tutor/assessments/route.ts`** | **The gap the branch missed.** The `activeCount` gate behind `BANK_NOT_READY` now filters `origin: "BANK"` — otherwise a tutor could author custom questions to clear `minBankSize` on a thin admin bank and unlock their own certification quiz. |
+
+`api/admin/topics/[id]` and `api/admin/subjects/[id]` are left **unfiltered on
+purpose** (comments added): a topic/subject rename must reach tutor questions,
+and tutor questions should still block a topic/subject delete.
+
+### Tutor question CRUD (new)
+
+- `src/lib/validations/sessionTest.ts` — adapted from the branch's `classTest.ts`
+  with `kind` removed (one set per session). Holds `create/update/setQuestions/
+  status` schemas + `authorTutorQuestionSchema` / `updateTutorQuestionSchema`.
+- `src/lib/sessionTestAccess.ts` — `isAccessError` + `loadOwnedClass` (folds the
+  SUSPENDED/BANNED → 403 check in). Session/enrolled helpers land in Phase 3.
+- `GET|POST /api/tutor/questions` + `PATCH|DELETE /api/tutor/questions/[questionId]` —
+  a tutor's own `origin: "TUTOR"` questions, scoped to `ownerTutorProfileId`;
+  locked once on a non-DRAFT test or once answered. Ported from the branch,
+  re-grained (`classTest*` → `sessionTest*`). Branch route test applied (5 cases).
+
+### Shared modal
+
+- `src/components/quiz/QuestionFormModal.tsx` — applied clean from the branch
+  (owns form state + validation UI; caller supplies `onSubmit`).
+- `src/components/admin/QuestionBankManager.tsx` — **re-extracted on main's
+  1175-line file** (not the branch copy): deleted the local `QuestionFormModal`
+  (+`DraftOption`, +the now-unused `OPTION_COUNT_*` import), call site now renders
+  the shared modal with an `onSubmit` that does the admin POST/PATCH.
+
+### Tests
+
+New assertions guarding the isolation: `assessmentPicker` (`origin: "BANK"` in
+the pool), `tutor/assessments` (the `activeCount` gate filters `origin: "BANK"`),
+`admin/assessment-questions` GET (`where` scoped) + POST (`create` sets
+`origin: "BANK"`); `[questionId]` test mock gains `findFirst` + `sessionTestItems`
+in `_count`. **486/486** (478 + 5 tutor-questions + 3 guards).
+
+### Not committed.
+
+---
+
+## Part 29 — Phase 3: backend libs + tutor routes
+
+### New libs
+
+| File | What |
+|---|---|
+| `src/lib/gradeAttempt.ts` | Extracted MCQ grading arithmetic (`gradeAttempt(items, answers, total)` → `{graded, correctCount, scorePercent}`). Certification submit (`api/tutor/assessments/[attemptId]/submit`) now calls it too — one grading rule for both flows. |
+| `src/lib/sessionTestSerialize.ts` | `serializeSessionTestAttempt` (kind read from the **attempt**, not the test; `reveal:false` strips correct flags/explanations/score by omitting the keys) + `serializeSessionTest` (no `kind` field). |
+| `src/lib/sessionTestResults.ts` | `buildSessionTestResults(sessionTestId)` — per-question PRE/POST rate + `deltaRate` (chart c), per-learner PRE/POST/delta with never-attempted learners as nulls, **no `id`** (chart d); `avgDelta` = mean of paired deltas, returned alongside `pairedCount`. `buildClassSessionTestRollup(classId)` — one row per session (chart a); a session with no test is a gap (`sessionTestId: null`, every average `null`), never a fake zero. |
+| `src/lib/sessionTestAccess.ts` | Extended with `loadOwnedSession` (class ownership + session-in-class) and `loadEnrolledSession` (enrollment + moderation + session-in-class, for the learner side). |
+
+### Tutor routes (all under `/api/tutor/classes/[classId]/sessions/[sessionId]/test`)
+
+`GET`/`POST`/`PATCH`/`DELETE` on `test/route.ts` (create needs `sessionTestsEnabled`;
+delete needs `DRAFT` + zero attempts), `PUT /questions` (locked once `PUBLISHED`
+**or** any attempt exists — not just status), `PATCH /status` (publish needs
+`sessionTestsEnabled` + ≥1 question + fans out `SESSION_PRETEST_OPEN` to every
+enrolled learner in the same transaction; close needs `PUBLISHED`), `GET /results`,
+`GET /attempts/[attemptId]` (tutor drill-down, double-blind — `anonymousId` only).
+Plus `GET /api/tutor/classes/[classId]/test-results` (the class roll-up) and
+`GET /api/tutor/question-bank` (re-created without `SubjectArea` — plain string
+subject filter, per the plan's §7 fix).
+
+### Notification hook
+
+`src/lib/notifications.ts` gains `SESSION_PRETEST_OPEN` / `SESSION_POSTTEST_OPEN`
++ icons in `notificationMeta.tsx`. `api/tutor/classes/[classId]/sessions/[sessionId]/route.ts`
+`PATCH`: a `SCHEDULED → COMPLETED` flip now runs inside `$transaction` when it
+needs to notify (branches to the plain non-transactional update otherwise) and
+fans out `SESSION_POSTTEST_OPEN` to every enrollment if the session has a
+`PUBLISHED` test. No per-submission tutor notification (would be 12/session).
+
+### Tests
+
+New: `gradeAttempt`, `sessionTestSerialize`, `sessionTestAccess`, `sessionTestResults`
+(asserts `avgDelta ≠ avgPost − avgPre` when a learner is unpaired, and that
+learner rows carry no `id`) — 25 lib cases. Tutor route tests for `test`
+CRUD (incl. the `sessionTestsEnabled` 403), `questions` PUT, `status` PATCH
+(notification fan-out asserted), `results`, `test-results` roll-up,
+`attempts/[attemptId]` (double-blind), `question-bank`. Updated: the existing
+`sessions/[sessionId]` route test gains the `$transaction`/notification mocks
++ 2 new cases (fires on PUBLISHED, silent on DRAFT/none). **586/586.**
+
+### Not committed.
+
+---
+
+## Part 29 — Phase 4: learner + admin routes, feature flag
+
+### Feature flag
+
+`sessionTestsEnabled` added to `PLATFORM_SETTING_KEYS` + `DEFAULTS` (default
+`true`) in `src/lib/settings.ts` — two lines, no migration. Gates: tutor test
+creation (403), publishing (403), and every learner start (403). Reads
+(results, list, progress) stay available regardless — "collected data stays
+readable." Admin toggle UI is Phase 6.
+
+### Learner routes
+
+- `GET /api/learner/classes/[classId]/session-tests` — one row per session
+  with `test: {id,title,status} | null` (a `DRAFT` test reports as `null`) and
+  the learner's own `pre`/`post` attempt summaries.
+- `POST /api/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/start` —
+  the full §2 ladder (401 → 403 flag → 404 bad kind → 404 class → 403 not
+  enrolled → 403 moderated class → 404 session-not-in-class → 404 DRAFT/absent
+  test → 409 CLOSED → 409 gating table → 409 already submitted → 200 resume →
+  201 create). **Only new starts are gated** — an existing `IN_PROGRESS`
+  attempt always resumes, bypassing the session-status table entirely, so a
+  learner mid-pre-test never loses work to a tutor's "Mark Complete" click.
+- `GET /api/learner/session-test-attempts/[attemptId]` + `POST …/submit` —
+  own-attempt only (**404, not 403**, on someone else's id — don't confirm it
+  exists); submit reuses `gradeAttempt`; re-submit is 409.
+- `GET /api/learner/progress?classId=` — chart (b): `series[]` (`classCode`,
+  `subject`, `topic`, `scheduledAt`, `preScore`, `postScore`, `delta`, sorted
+  in JS) + `summary` (`pairedCount`, `avgDelta`). No tutor identity, no
+  cohort/class-average — a small class would make "class average" a
+  de-anonymisation oracle.
+
+### Admin routes (read-only)
+
+`GET /api/admin/session-tests` (paginated, `subject`/`status`/`q` filters, flattens
+the session→class join to `classCode`/`subject`/`sessionTopic`/`tutor`),
+`GET /api/admin/session-tests/[testId]/results`, `GET …/attempts/[attemptId]`
+(double-blind, same as the tutor drill-down).
+
+### Tests
+
+Learner `start` route: **one case per row of the §2 ladder** (15 cases, incl.
+both gating-table blocks and the in-progress-bypasses-gating case), `submit`
+(4 cases), `session-tests` list (DRAFT-hides-as-null case), `progress`
+(double-blind assertion via `JSON.stringify` scan for "tutor", classId filter,
+DRAFT/no-test sessions excluded from the series). Admin `session-tests` list
+(join-flattening shape). **615/615.**
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (5 pre-existing warnings),
+`pnpm test` 615/615. Greps: `firstName|lastName` in `sessionTestResults.ts` +
+`api/learner/progress` → empty; every `assessmentQuestion.` call site outside
+`__tests__` carries an `origin` filter or an intentional-unfiltered comment.
+
+### Not committed.
+
+---
+
+<a id="part-30"></a>
+## Part 30 — Chatbot v1.1: usability pass
+
+Follow-up to Part 19/20. The chatbot shipped as designed (deterministic, no
+LLM) but three things kept it from being genuinely usable: `chatbot_misses`
+was written to but never read by anything (`schema.prisma` comment: "no admin
+UI in v1"), `smalltalk_capabilities` was broad enough to swallow most unclear
+messages before they could even reach the miss log, and matching had no typo
+tolerance or length-normalized confidence (the original plan,
+`docs/plans/chatbot-assistant.md`, called for a `score / tokenCount` +
+`MIN_CONFIDENCE` gate that was never implemented). Scope: stay fully
+deterministic, zero new dependencies, no schema change, one focused pass.
+
+### A. Admin misses review — `/admin/chatbot`
+
+- `src/lib/chatbot/misses.ts` (new) — `aggregateMisses(rows, opts)`: groups
+  raw `ChatbotMiss` rows by `role + normalized-token-string` (JS, not SQL —
+  Prisma `groupBy` can't group by a derived value), tracks `count`/
+  `firstSeen`/`lastSeen`/the most recent raw phrasing as `sample`, filters by
+  `role`/`q`, sorts by `count`/`firstSeen`/`lastSeen`, paginates.
+- `GET /api/admin/chatbot-misses` (new, ADMIN only) — bounded
+  `findMany({ take: 2000 })` (volume is inherently low — a row only appears
+  when the classifier fails) piped through `aggregateMisses`.
+- `ChatbotMissesTable.tsx` (new, mirrors `AuditLogTable.tsx`) + `/admin/chatbot/page.tsx`
+  (new) — read-only table: message, role, count, first/last seen, sortable
+  columns, role + text filters, `Pagination`. New "Chatbot" admin nav item
+  (Review group).
+- **No DB change.** Aggregation key (`normalized`) isn't a stored column, so
+  "mark this group handled" needs a persisted column + `updateMany` endpoint —
+  deliberately left for a follow-up PR that needs its own DB confirmation.
+
+### B. Matching robustness — `src/lib/chatbot/{normalize,classifier,intents}.ts`
+
+- **Narrowed `smalltalk_capabilities`** (`intents.ts`) — dropped the bare
+  `/\bhelp\b/` pattern and the `what`/`help`/`who`/`can` keywords that let a
+  single stray word swallow the intent; kept only genuine "what can you do" /
+  "who are you" phrase patterns. "help" alone and "can you help me" now fall
+  through to the new `nav_help_page` intent or the fallback (→ logged as a
+  miss), instead of always returning the same canned blurb.
+- **Purged dead stopword-colliding keywords** — `"my"` (`nav_my_classes`),
+  `"you"` (`faq_chatbot_scope`), `"hello"` (`smalltalk_greeting`, already
+  covered by its pattern). `tokenize()` drops every `STOPWORDS` member, so
+  these never contributed to a score; `normalize.test.ts` now asserts no
+  catalogue keyword is a stopword.
+- **Typo tolerance** — new `editDistance()` (bounded Levenshtein, single
+  rolling row) and `fuzzyHit()` (exact, or a single-edit typo of a keyword
+  ≥4 chars) in `normalize.ts`. `classifier.ts` runs each tokenized message
+  token through a new `correctToken()` that snaps it to its nearest known
+  catalogue keyword *before* scoring — so a typo both scores the exact
+  keyword weight and still lights up phrase patterns like `/\benroll\b/`
+  (testing raw regexes against corrected typos directly wasn't otherwise
+  possible).
+- **Length-normalized confidence** — `classifier.ts` adds
+  `MIN_CONFIDENCE = 0.35` (score / `max(3, tokenCount)`) alongside the
+  existing absolute `MIN_SCORE = 2` floor, on both the intent and FAQ loops. A
+  long rambling message that only glances two keywords now correctly misses
+  (→ logged) instead of confidently answering the wrong thing; short pointed
+  queries are protected by the `max(3, …)` floor.
+- `respond.ts` / `route.ts` — `classify()`'s `score` (previously computed but
+  unused) is now threaded through `getBotReplyWithScore()` and returned as a
+  non-production-only `debugScore` field, so the KB can be tuned from
+  near-misses without shipping the number to end users.
+
+### C. Content expansion
+
+- 12 new nav intents across all three roles (find tutors, help page, search,
+  tutor class-appeal / sessions / question-request, admin users / class-appeals
+  / audit-log / subjects / question-requests / chatbot).
+- 11 new FAQ entries (15 → 26), each grounded in a role-doc or codebase fact
+  (cited inline) — registration pending/declined states, class capacity,
+  multi-topic/session classes, profile-editable fields, account deletion (no
+  self-service route exists — answered honestly), Taglish support, email vs.
+  in-app notifications, no offline/mobile app, no self-service report button.
+  Stopped short of the ~30 target where a further entry would have needed
+  invented (ungrounded) facts.
+
+### Tests
+
+New: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`,
+`api/admin/chatbot-misses/route.test.ts`. Extended: `classifier.test.ts`
+(fuzzy matching, narrowed capabilities, confidence gate). All existing
+chatbot/classifier/route tests pass unchanged. `tsc --noEmit` / `lint` /
+`test` all clean, 586/586.
+
+### Docs
+
+`docs/TOTEST.txt`, `docs/feature-checklist.md`, `docs/plans/chatbot-assistant.md`,
+`docs/roles/ADMIN.md`, `docs/reference/chatbot.md` updated alongside this
+entry. `docs/reference/decisions.md` reviewed — no new entry: this is
+implementation refinement of an already-decided module, not a scope/role cut
+against the thesis.
+
+### Not committed.
+

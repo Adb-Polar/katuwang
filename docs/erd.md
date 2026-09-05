@@ -88,6 +88,35 @@ RESOLVED RESOLVED
 DISMISSED DISMISSED
         }
     
+
+
+        QuestionOrigin {
+            BANK BANK
+TUTOR TUTOR
+        }
+    
+
+
+        SessionTestStatus {
+            DRAFT DRAFT
+PUBLISHED PUBLISHED
+CLOSED CLOSED
+        }
+    
+
+
+        SessionTestKind {
+            PRE PRE
+POST POST
+        }
+    
+
+
+        SessionTestAttemptStatus {
+            IN_PROGRESS IN_PROGRESS
+SUBMITTED SUBMITTED
+        }
+    
   "users" {
     String id "🗝️"
     String anonymousId 
@@ -268,7 +297,9 @@ DISMISSED DISMISSED
     String prompt 
     String explanation "❓"
     Boolean active 
+    QuestionOrigin origin 
     String createdById 
+    String ownerTutorProfileId "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
@@ -356,6 +387,51 @@ DISMISSED DISMISSED
     DateTime createdAt 
     }
   
+
+  "session_tests" {
+    String id "🗝️"
+    String sessionId 
+    String title 
+    String instructions "❓"
+    SessionTestStatus status 
+    DateTime publishedAt "❓"
+    DateTime closedAt "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "session_test_questions" {
+    String id "🗝️"
+    String sessionTestId 
+    String questionId 
+    Int position 
+    }
+  
+
+  "session_test_attempts" {
+    String id "🗝️"
+    String sessionTestId 
+    String learnerId 
+    SessionTestKind kind 
+    SessionTestAttemptStatus status 
+    Int totalQuestions 
+    Int correctCount 
+    Int scorePercent 
+    DateTime startedAt 
+    DateTime submittedAt "❓"
+    }
+  
+
+  "session_test_attempt_items" {
+    String id "🗝️"
+    String attemptId 
+    String questionId 
+    Int position 
+    String selectedOptionId "❓"
+    Boolean isCorrect "❓"
+    }
+  
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -380,7 +456,9 @@ DISMISSED DISMISSED
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
     "audit_logs" }o--|| "users" : "admin"
+    "assessment_questions" |o--|| "QuestionOrigin" : "enum:origin"
     "assessment_questions" }o--|| "users" : "createdBy"
+    "assessment_questions" }o--|o "tutor_profiles" : "ownerTutorProfile"
     "assessment_options" }o--|| "assessment_questions" : "question"
     "assessment_attempts" }o--|| "tutor_profiles" : "tutorProfile"
     "assessment_attempts" |o--|| "AssessmentAttemptStatus" : "enum:status"
@@ -397,4 +475,15 @@ DISMISSED DISMISSED
     "class_appeals" }o--|| "tutor_profiles" : "tutorProfile"
     "class_appeals" |o--|| "ClassAppealStatus" : "enum:status"
     "class_appeals" }o--|o "users" : "reviewedBy"
+    "session_tests" |o--|| "class_sessions" : "session"
+    "session_tests" |o--|| "SessionTestStatus" : "enum:status"
+    "session_test_questions" }o--|| "session_tests" : "sessionTest"
+    "session_test_questions" }o--|| "assessment_questions" : "question"
+    "session_test_attempts" }o--|| "session_tests" : "sessionTest"
+    "session_test_attempts" }o--|| "users" : "learner"
+    "session_test_attempts" |o--|| "SessionTestKind" : "enum:kind"
+    "session_test_attempts" |o--|| "SessionTestAttemptStatus" : "enum:status"
+    "session_test_attempt_items" }o--|| "session_test_attempts" : "attempt"
+    "session_test_attempt_items" }o--|| "assessment_questions" : "question"
+    "session_test_attempt_items" }o--|o "assessment_options" : "selectedOption"
 ```

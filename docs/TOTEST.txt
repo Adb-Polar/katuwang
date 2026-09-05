@@ -124,3 +124,94 @@ Subjects & Topics management (Changes.md Part 25)
     create a class for a seeded subject/topic) after the enum removal
  [] `grep -r SubjectArea src/` returns nothing; `npx prisma studio` shows
     subjects/topics tables populated and the `subject` columns unchanged
+
+Help & FAQs pages (2026-09-04 session, Changes.md Part 26)
+ [] /learner/help, /tutor/help, /admin/help each load; sidebar "Help & FAQs"
+    item highlights; a learner hitting /admin/help is redirected (role guard)
+ [] Topbar "?" button navigates to the current portal's /help page
+ [] FAQ search box filters the accordions across question/answer/category and
+    auto-expands matches; "No FAQs match" shows for a nonsense query
+ [] "Jump to" quick links and guide content point to real pages for that role
+
+Chatbot FAQ role-scoping (2026-09-04 session, Changes.md Part 27)
+ [] As a learner, ask the chatbot "how do I become a tutor" / "what happens
+    after I pass an assessment" -> gets the role fallback, NOT the tutor answer
+ [] As a tutor or admin, ask "how does matching work" / "my class was cancelled"
+    / "one-on-one vs group" -> role fallback, NOT the learner answer
+ [] As every role, ask "is Katuwang free" / "why can't I see real names" ->
+    still answered (platform-wide FAQs unaffected)
+
+Global search + Find Tutors (Changes.md Part 28)
+ [] Top-bar search: type 2+ chars -> a dropdown appears with grouped results
+    (Classes / Tutors / Topics); it closes on outside-click and Escape
+ [] Cmd/Ctrl+K and "/" (when not already typing) focus the search box
+ [] Arrow up/down moves the highlight, Enter opens the highlighted result,
+    clicking a row navigates and clears the box
+ [] Learner search: class rows go to /learner/classes/[id], tutor rows to
+    /learner/tutors/[id], topic rows pre-filter /learner/classes
+ [] Tutor search: only their OWN classes appear; no Tutors/Accounts group
+ [] Admin search: all classes + non-admin accounts; account rows open
+    /admin/users/[id]
+ [] Search with a gibberish query -> "No matches for ..." (no crash)
+ [] /learner/tutors: card grid of verified tutors with subjects, verified-topic
+    count, class count, next session; filter by ID text and by subject
+ [] Clicking a tutor card opens /learner/tutors/[id] (existing profile page)
+ [] With showTutorRealNames OFF the cards show no real names; turning it ON in
+    /admin/settings makes the name appear on the card
+ [] "Find Tutors" appears in the learner sidebar under Main menu and highlights
+    when active
+
+Session pre/post-tests - Phase 0: chart extraction (Changes.md Part 29)
+ [] /admin/reports still renders every chart exactly as before (enrollments
+    area chart + the 6 bar-chart cards); "Show data table" toggles still work
+ [] No visual/console regression on that page after the recharts extraction
+
+Session pre/post-tests - Phase 2: origin isolation (Changes.md Part 29)
+ [] Admin -> Assessment -> Question Bank: add + edit a question still works
+    (shared QuestionFormModal); the modal shows "<subject> . <topic>" context
+ [] The admin question-bank list/count still shows only admin-authored questions
+ [] Certification quiz (tutor): on a topic with a near-empty admin bank, the
+    tutor still gets BANK_NOT_READY even after authoring custom questions
+ [] Certification quiz still serves bank-only questions (no tutor-authored ones)
+
+Session pre/post-tests - Phases 3-4: backend only, no UI yet (Changes.md Part 29)
+NOTE: these routes have no UI mount point until Phase 5-6 ships. Verify via
+curl/Postman/Prisma Studio against a seeded class+session, or hold this block
+until the UI phases land and re-verify through the screens directly.
+ [] Tutor: POST a session test, PUT its question set (mixing a BANK question
+    with a self-authored TUTOR one), PATCH status to PUBLISHED -> every
+    enrolled learner gets a notification; question set PUT now 409s
+ [] Learner: POST .../test/PRE/start while the session is SCHEDULED succeeds;
+    the same call while COMPLETED 409s with code PRE_WINDOW_CLOSED; POST/start
+    while SCHEDULED 409s with code POST_NOT_OPEN
+ [] Tutor marks the session COMPLETED (with a PUBLISHED test) -> learners get
+    SESSION_POSTTEST_OPEN; learner can now start the POST test; submit ->
+    receives score + delta only once BOTH pre and post are submitted
+ [] A learner who already had the pre-test open when the tutor hit "Mark
+    Complete" can still resume and submit that in-progress PRE attempt
+ [] GET .../test/results (tutor) and GET /api/admin/session-tests/[id]/results
+    (admin) show per-question rates + per-learner deltas with no `id` field
+    on any learner row, only `anonymousId`
+ [] GET /api/learner/progress returns only this learner's own series - no
+    tutor name, no class-average figure anywhere in the payload
+ [] Turn "sessionTestsEnabled" OFF via Prisma Studio (platform_settings) ->
+    tutor test creation and publish both 403; existing results stay readable
+
+Chatbot v1.1 - usability pass (Changes.md Part 30)
+ [] /admin/chatbot renders; role filter + text search + sort by count/first
+    seen/last seen + pagination all work; "Chatbot" nav item highlights when active
+ [] Ask the assistant gibberish ("asdf qwerty zxcv") as each role -> after a
+    refresh a row appears in /admin/chatbot for that role
+ [] Two near-identical gibberish messages differing only in case/punctuation
+    (e.g. "Foo Bar?" then "foo bar") -> collapse into one group with count 2
+ [] Ask "help" alone -> no longer returns the capabilities blurb; ask "what can
+    you do" -> still returns it
+ [] Misspelled queries ("how do i enrol", "notificaton") -> correct page /
+    answer still suggested
+ [] New nav intents deep-link correctly: "find tutors" (learner), "help page"
+    (all 3 roles, correct /{role}/help), "appeal a suspended class" (tutor),
+    "audit log" / "subjects" / "chatbot" (admin)
+ [] New FAQ entries retrieve correctly for a few phrasings (e.g. "why can't I
+    sign in after registering", "is there a class capacity limit")
+ [] Chatbot still answers its existing pre-v1.1 canned topics unchanged (e.g.
+    "how do I enroll", "is katuwang free")

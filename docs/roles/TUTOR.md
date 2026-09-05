@@ -285,6 +285,15 @@ Aggregate roster of every distinct learner enrolled in any of the tutor's classe
 > Availability has no API. It is derived in-process from the tutor's `ClassSession`
 > rows whenever the dashboard or a learner tutor-profile page renders.
 
+### `GET /api/search`
+Quick search behind the top-bar box. Any authenticated role; results are scoped to the caller's role — a tutor gets **only their own classes** plus topic matches (never other tutors' classes or any account list).
+
+**Query params**: `q` (required; fewer than 2 characters returns `{ groups: [] }`).
+
+**200** → `{ groups: [{ kind: "class" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Max 6 items per group.
+**401** → not authenticated.
+**500** → `{ error }`.
+
 ### `GET /api/notifications`
 The caller's own notifications, newest first, capped at 50. Optional `?take=N` clamps the page size to `1..50` (the topbar bell dropdown uses `?take=8`). Any authenticated role (not gated to tutors).
 
@@ -361,3 +370,8 @@ Accept an `OPEN` request by auto-creating a full class from it. Does **not** enr
 - Cannot change a class's subject after creation, or remove a topic that's still used by one of its sessions.
 - Cannot self-edit name, email, password, or grade level — only `contactInfo` and `section` are self-service.
 - Cannot see a learner's real name, email, or contact info anywhere, including the Students roster (anonymized only).
+
+## Help & FAQs (`/tutor/help`)
+
+- In-portal Help Center: **Jump to** quick links, **step-by-step guides** (get certified for a topic, create a class, fulfil a topic request, manage the roster, appeal a moderated class), and a **searchable FAQ** accordion covering certification, classes/sessions, requests, privacy, moderation, and account topics.
+- Content is static (`src/lib/help/helpContent.ts`, `TUTOR` entry) rendered by the shared `HelpCenter` component; no API. Also reachable from the topbar `?` button.

@@ -62,6 +62,8 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | In-app notifications — cross-module events | ✅ | expanded 2026-09-04 (Changes.md Part 18): `REGISTRATION_APPROVED`, `CERTIFICATION_CERTIFIED/REJECTED`, `QUESTION_REQUEST_RESOLVED/DISMISSED`, `CLASS_ENROLLMENT_NEW/DROPPED`, `CLASS_CANCELLED/COMPLETED`; topbar bell dropdown + unread dot in `PortalLayout`; per-row read-on-click; Admin portal at parity (`/admin/notifications`) |
 | Admin moderation of topic requests | ✅ | `/admin/topic-requests`, `TopicRequestModerationTable.tsx` |
 | Admin can toggle matching availability | ✅ | `matchingEnabled` platform setting |
+| Learner tutor browsing (list + profile) | ✅ | `/learner/tutors` card grid (`TutorBrowser.tsx`, `GET /api/learner/tutors`) over verified tutors, filterable by ID + subject; opens the existing `/learner/tutors/[tutorId]` profile. Landed 2026-09-04 (Changes.md Part 28). |
+| Global quick search (classes / tutors / topics) | ✅ | Top-bar box in every portal (`GlobalSearch.tsx`, `GET /api/search`), role-scoped results, ⌘K + keyboard nav. Replaced the previously unwired input. Part 28. |
 | Admin-editable subjects & topics | ✅ | landed 2026-09-04 (Changes.md Part 25). `Subject`/`Topic` tables + `/admin/subjects` CRUD; replaced the `SubjectArea` enum + static `SUBJECT_TOPICS` map. `subject` columns are now `String` slugs; validation via `src/lib/subjects.ts`; client dropdowns via `useSubjectCatalog()`. Topic rename fans out to all denormalised `topic` columns. See `docs/plans/subject-topic-management.md`. |
 
 ## 4. Assessment Module
@@ -80,15 +82,17 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 
 | Feature | Status | Notes |
 |---|---|---|
-| Intent-based response logic | ✅ | `src/lib/chatbot/` — deterministic tokenise + keyword/synonym/regex scoring (`classifier.ts`), **no LLM**. ~25 role-aware intents in `intents.ts` |
-| Navigation help intents | ✅ | Per-role deep links into every portal section |
-| FAQ knowledge base | 🟡 | `faq.ts` — 15-entry starter set from the project scope + role docs; per the thesis this should be refined with TRIS stakeholder interviews (grow it from the `chatbot_misses` table) |
+| Intent-based response logic | ✅ | `src/lib/chatbot/` — deterministic tokenise + keyword/synonym/regex scoring with typo-tolerant matching and a length-normalized confidence gate (`classifier.ts`), **no LLM**. ~35 role-aware intents in `intents.ts` |
+| Navigation help intents | ✅ | Per-role deep links into every portal section, including Help & FAQs, global search, and admin moderation queues |
+| FAQ knowledge base | 🟡 | `faq.ts` — 26 entries, each grounded in a role doc or codebase fact; the `/admin/chatbot` review page (below) now closes the grow-from-misses loop, still pending real TRIS stakeholder interviews |
 | Session recommendation intent (learner) | ✅ | `recommend.ts` — extracts subject/topic from the message and ranks live classes via the existing `rankMatches` engine; falls back to "post a topic request" |
 | Chat UI widget | ✅ | `src/components/chatbot/ChatWidget.tsx` — floating launcher in every portal, `localStorage` transcript, quick-reply chips, class cards |
 | Admin on/off toggle | ✅ | `chatbotEnabled` platform setting (default ON) on `/admin/settings`; route 403s + widget hides when off |
-| Unmatched-query logging | ✅ | `chatbot_misses` table (`ChatbotMiss` model) — read directly, no admin UI in v1 |
+| Unmatched-query logging | ✅ | `chatbot_misses` table (`ChatbotMiss` model), surfaced at `/admin/chatbot` — grouped by normalised wording, role-filterable, sortable (Changes.md Part 30) |
 
-Landed 2026-09-04 (Changes.md Part 19).
+Landed 2026-09-04 (Changes.md Part 19); usability pass (typo tolerance,
+narrowed `smalltalk_capabilities`, confidence gate, admin misses review, KB
+expansion) landed the same day (Part 30).
 
 ## 6. Analytics Dashboard Module (Admin)
 
@@ -110,7 +114,7 @@ Landed 2026-09-04 (Changes.md Part 19).
 | File upload for learning materials | Explicitly **out of scope** | ✅ correctly absent — no upload endpoints/models exist |
 | Browser/device-agnostic responsive web app | In scope | ✅ Tailwind 4 + DaisyUI 5 responsive layout (`PortalLayout.tsx`) |
 | Free/non-profit, no payment flows | Implied | ✅ no billing code anywhere |
-| Chatbot scope limited to nav/FAQ/recommendation (no replacing tutoring) | In scope, limited | ✅ built 2026-09-04 as a deterministic intent matcher (no LLM); nav help + FAQ + learner class recommendation only — see §5 and `docs/reference/chatbot.md` |
+| Chatbot scope limited to nav/FAQ/recommendation (no replacing tutoring) | In scope, limited | ✅ built 2026-09-04 as a deterministic intent matcher (no LLM), usability pass same day; nav help + FAQ + learner class recommendation only — see §5 and `docs/reference/chatbot.md` |
 | Analytics limited to descriptive stats (no ML/predictive) | In scope, limited | ✅ current reports are purely descriptive aggregates — no ML added, consistent with delimitation |
 
 ---
@@ -123,9 +127,9 @@ Landed 2026-09-04 (Changes.md Part 19).
 | 2. Session Management | ✅ Complete |
 | 3. Tutor Matching | ✅ Complete (Topic Requests v2 — directed requests, accept-to-class, notifications, admin moderation — landed 2026-09-03) |
 | 4. Assessment | ⚠️ Tutor qualification assessment is complete on `main`; learner pre/post-test is built but **sitting unmerged** on `class-pre-post-tests` |
-| 5. Chatbot Assistant | ✅ Complete (intent-based — nav help, FAQ, class recommendation, per-portal widget — landed 2026-09-04; FAQ KB is a starter set pending stakeholder interviews) |
+| 5. Chatbot Assistant | ✅ Complete (intent-based — nav help, FAQ, class recommendation, per-portal widget, admin misses review — landed 2026-09-04, usability pass same day; FAQ KB is grounded but still pending real stakeholder interviews) |
 | 6. Analytics Dashboard | ✅ Complete |
 
-**Biggest gaps to close next:** (1) decide whether/when to merge `class-pre-post-tests` — the learner pre/post-test work already exists, it's just not on `main`; (2) grow the chatbot FAQ knowledge base from real `chatbot_misses` + TRIS stakeholder interviews.
+**Biggest gaps to close next:** (1) decide whether/when to merge `class-pre-post-tests` — the learner pre/post-test work already exists, it's just not on `main`; (2) grow the chatbot FAQ knowledge base further from `/admin/chatbot` + TRIS stakeholder interviews.
 
 **Note on roles:** the thesis reference document names a 4th "Teacher Moderator" role, but the team decided to ship with 3 roles only (Learner, Tutor, Admin). Treat the reference doc's mentions of Teacher Moderator / Moderator Portal as stale, not a missing feature.

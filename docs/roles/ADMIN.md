@@ -92,8 +92,13 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 
 - The same floating **intent-based** help widget shown to learners and tutors also appears in the admin portal (nav help for Registrations, Certifications, Question Bank, moderation, Reports, Settings; plus general FAQs). Rule/keyword matching — not a generative AI.
 - **Toggle:** *Settings → Chatbot assistant* (`chatbotEnabled`, default ON). When off, the widget is hidden everywhere and `POST /api/chatbot` returns `403`.
-- **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`). There is no admin screen for these in v1 — query the table directly and feed real misses back into `src/lib/chatbot/faq.ts`.
+- **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`).
   (`POST /api/chatbot` — not admin-gated)
+
+## Chatbot misses (`/admin/chatbot`)
+
+- **Review unanswered questions** — every logged `ChatbotMiss` grouped by role + normalised wording (case/punctuation-insensitive), showing the most recent phrasing, a count, and first/last-seen timestamps. Sortable by count / first seen / last seen; filterable by role and a text search. Read-only — use it to grow `src/lib/chatbot/faq.ts` / `intents.ts` with real, recurring questions.
+  (`GET /api/admin/chatbot-misses`)
 
 ## Subjects & Topics (`/admin/subjects`)
 
@@ -105,6 +110,15 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 ## API Reference
 
 All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.
+
+### `GET /api/search`
+Quick search behind the top-bar box. **Not** admin-gated (any authenticated role), but results are role-scoped: an admin sees all classes, all non-admin accounts, and topic matches.
+
+**Query params**: `q` (required; fewer than 2 characters returns `{ groups: [] }`).
+
+**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Max 6 items per group; account rows link to `/admin/users/[id]`, class rows to a pre-filtered `/admin/classes`.
+**401** → not authenticated.
+**500** → `{ error }`.
 
 ### `GET /api/admin/users`
 List/search learner + tutor accounts (admins excluded).
@@ -247,8 +261,25 @@ Most recent 200 `AuditLog` entries.
 **200** → array of `{ id, adminId, admin: { anonymousId, firstName, lastName }, action, targetType, targetId, reason, createdAt }`, newest first.
 **500** → `{ error }`.
 
+### `GET /api/admin/chatbot-misses`
+`ChatbotMiss` rows grouped by role + normalised message text (aggregation happens
+in JS over the most recent 2000 rows — the group key isn't a stored column).
+
+**Query params** (all optional): `role` (`STUDENT_LEARNER` | `STUDENT_TUTOR` | `ADMIN`),
+`q` (substring match on the raw message), `sort` (`lastSeen` default | `count` |
+`firstSeen`), `dir` (`asc` | `desc`, default `desc`), `page` (default `1`), `pageSize`
+(default `25`, max `200`).
+
+**200** → `{ groups: [{ normalized, sample, role, count, firstSeen, lastSeen }], total, page, pageSize }`.
+**500** → `{ error }`.
+
 ## What Admins Cannot Do
 
 - Cannot view or modify another admin's account.
 - Cannot see the real names of learners/tutors in learner-/tutor-facing peer contexts (double-blind anonymity is preserved everywhere except the admin moderation surfaces above, which exist specifically for accountability/enforcement per RA 10173 compliance design).
 - Cannot create classes, enroll in classes, or request certifications themselves — those are tutor/learner-only actions.
+
+## Help & FAQs (`/admin/help`)
+
+- In-portal Help Center: **Jump to** quick links, **step-by-step guides** (approve/decline registrations, review certifications, maintain the question bank, configure assessment rules, moderate classes and appeals, manage subjects & topics), and a **searchable FAQ** accordion covering users, assessment, moderation, settings, analytics, and privacy topics.
+- Content is static (`src/lib/help/helpContent.ts`, `ADMIN` entry) rendered by the shared `HelpCenter` component; no API. Also reachable from the topbar `?` button.

@@ -27,6 +27,13 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 - **View the tutor's profile** — clicking the tutor's anonymous ID badge opens a dedicated fullscreen page (`/learner/tutors/[tutorId]`, server-rendered from Prisma — 404s if the id isn't a tutor): their `anonymousId`, their verified (`CERTIFIED`) topics grouped by subject, and **every one of their `published` classes** as clickable cards (each links to that class's detail page). Never shows real name, email, or contact info.
 - **Request a topic from this tutor** — a "Request a topic from this tutor" button on that same profile page opens the same criteria form used on `/learner/requests`, but submits with `directedTutorId` set so the request is **directed**: only that tutor sees it (see Topic Requests below).
 
+## Find Tutors (`/learner/tutors`)
+
+- **Browse verified tutors** — a card grid of every `ACTIVE` Student Tutor holding at least one `CERTIFIED` topic. Each card shows the tutor's `anonymousId`, the subjects they're certified in, their verified-topic count, how many published classes they run, and when their next scheduled session is. Real names appear only when an admin has enabled `showTutorRealNames`.
+- **Filter** by anonymous ID (free text, e.g. `TUT-01`) and by a subject they're certified to teach. Paginated; page + page size live in the URL.
+- Clicking a card opens that tutor's profile page (below).
+  (`GET /api/learner/tutors`)
+
 ## Enrollment (`/learner/classes/[classId]`)
 
 - **Enroll in a class** — join a `SCHEDULED` class that has at least one upcoming `SCHEDULED` session and still has open seats. Enrolling joins the whole course, not an individual session.
@@ -225,6 +232,24 @@ Cancel one of the caller's own `OPEN` or `ACCEPTED` requests, or edit an `OPEN` 
 **401** → not a learner. **404** → request not found or not the caller's.
 **500** → `{ error }`.
 
+### `GET /api/learner/tutors`
+Browsable tutors for the Find Tutors page. Requires `role === "STUDENT_LEARNER"` (`401`).
+
+**Query params** (all optional): `q` (matches `anonymousId`, `contains`), `subject` (subject slug — restricts to tutors `CERTIFIED` in that subject), `page` (default `1`), `pageSize` (default `12`, max `48`).
+
+**200** → `{ tutors: [{ id, anonymousId, name?, section?, verifiedTopicCount, subjects: string[], publishedClassCount, nextSessionAt }], total, page, pageSize }`. `name`/`section` are present only when `showTutorRealNames` is enabled.
+**401** → not a learner.
+**500** → `{ error }`.
+
+### `GET /api/search`
+Quick search behind the top-bar box. Any authenticated role; results are scoped to the caller's role.
+
+**Query params**: `q` (required; fewer than 2 characters returns `{ groups: [] }`).
+
+**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Learners get browsable classes + verified tutors + topics; tutors get their own classes + topics; admins get all classes + accounts + topics. Max 6 items per group.
+**401** → not authenticated.
+**500** → `{ error }`.
+
 ### `GET /api/notifications`
 The caller's own notifications, newest first, capped at 50. Optional `?take=N` clamps the page size to `1..50` (the topbar bell dropdown uses `?take=8`). Any authenticated role (not gated to learners).
 
@@ -274,3 +299,8 @@ Update the learner's own self-service profile fields. Requires `role === "STUDEN
 - Cannot enroll in a class that is full, unpublished, has no upcoming sessions, cancelled, suspended, or banned.
 - Cannot unenroll from a single session — enrollment and unenrollment are always whole-class.
 - Cannot see other learners enrolled in the same class.
+
+## Help & FAQs (`/learner/help`)
+
+- In-portal Help Center: **Jump to** quick links, **step-by-step guides** (find/join a class, use Auto Match, post a topic request, leave a class), and a **searchable FAQ** accordion covering general, privacy, classes, requests, matching, and account topics.
+- Content is static (`src/lib/help/helpContent.ts`, `LEARNER` entry) rendered by the shared `HelpCenter` component; no API. Also reachable from the topbar `?` button.
