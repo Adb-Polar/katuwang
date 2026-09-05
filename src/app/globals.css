@@ -203,7 +203,16 @@ b, strong { font-weight: var(--font-weight-bold); }
     background: var(--color-base-100); border: 1px solid var(--kt-border);
     border-radius: 999px; padding: 0.5rem 0.9rem; font-size: 0.85rem; color: var(--kt-muted);
   }
-  .kt-search input { border: 0; background: none; flex: 1; font: inherit; color: var(--color-base-content); outline: none; }
+  .kt-search input {
+    border: 0; background: none; flex: 1; min-width: 0; font: inherit;
+    color: var(--color-base-content); outline: none;
+  }
+  /* Chrome/Safari draw their own clear "x" in a search input, in a colour we
+     don't control. Suppress it (and Edge's ::-ms-clear) — GlobalSearch renders
+     a themed clear button instead, so the affordance is the same everywhere. */
+  .kt-search input::-webkit-search-cancel-button,
+  .kt-search input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
+  .kt-search input::-ms-clear { display: none; }
   .kt-icon-btn {
     position: relative;
     width: 2.1rem; height: 2.1rem; display: grid; place-items: center; flex: none;
@@ -236,10 +245,6 @@ b, strong { font-weight: var(--font-weight-bold); }
     color: var(--kt-muted); background: none; border: 0; cursor: pointer;
   }
   .kt-tab[data-active="true"] { background: var(--color-base-100); color: var(--color-base-content); box-shadow: var(--kt-shadow-card); }
-
-  .kt-chart-plot { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.5rem; align-items: end; height: 12rem; }
-  .kt-chart-bar { background: var(--kt-tint-primary); border-radius: 0.35rem 0.35rem 0 0; min-height: 4px; }
-  .kt-chart-bar[data-peak="true"] { background: var(--color-primary); }
 
   .kt-week { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; }
   .kt-day {

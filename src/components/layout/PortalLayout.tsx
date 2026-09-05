@@ -3,10 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HelpCircle, LogOut, Menu, Search, X } from "lucide-react";
+import { HelpCircle, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import GlobalSearch from "@/components/layout/GlobalSearch";
 import ChatWidget from "@/components/chatbot/ChatWidget";
 
 export interface NavItem {
@@ -31,6 +32,8 @@ interface PortalLayoutProps {
   unreadCount?: number;
   /** portal-specific notifications page, e.g. "/tutor/notifications" */
   notificationsHref?: string;
+  /** portal-specific Help & FAQs page, e.g. "/tutor/help"; drives the topbar help button */
+  helpHref?: string;
   /** when true, mounts the floating intent-based help assistant */
   chatbotEnabled?: boolean;
   children: React.ReactNode;
@@ -45,6 +48,7 @@ export default function PortalLayout({
   idRole,
   unreadCount = 0,
   notificationsHref = "/dashboard",
+  helpHref,
   chatbotEnabled = false,
   children,
 }: PortalLayoutProps) {
@@ -166,19 +170,19 @@ export default function PortalLayout({
 
           <BrandMark size="sm" />
 
-          <div className="kt-search hidden sm:flex">
-            <Search className="w-4 h-4 shrink-0" />
-            <input type="search" placeholder="Search classes, tutors, topics…" aria-label="Search" />
-            <kbd className="text-2xs font-mono border border-base-300 rounded px-1 py-0.5 hidden md:inline">
-              ⌘K
-            </kbd>
-          </div>
+          <GlobalSearch />
 
           <div className="flex-1" />
 
-          <button type="button" className="kt-icon-btn" aria-label="Help">
-            <HelpCircle className="w-4 h-4" />
-          </button>
+          {helpHref ? (
+            <Link href={helpHref} className="kt-icon-btn" aria-label="Help & FAQs">
+              <HelpCircle className="w-4 h-4" />
+            </Link>
+          ) : (
+            <button type="button" className="kt-icon-btn" aria-label="Help">
+              <HelpCircle className="w-4 h-4" />
+            </button>
+          )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           <span className="kt-avatar" aria-hidden="true">
             {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}

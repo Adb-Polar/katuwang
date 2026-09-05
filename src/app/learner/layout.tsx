@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, Bell, UserCircle } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, Bell, UserCircle, HelpCircle, Users } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
@@ -29,11 +29,13 @@ export default async function LearnerLayout({
   const LEARNER_NAV_ITEMS: NavItem[] = [
     { label: "Dashboard", href: "/learner", icon: <LayoutDashboard className="w-4 h-4" />, group: "Main menu" },
     { label: "Browse Classes", href: "/learner/classes", icon: <BookOpen className="w-4 h-4" />, group: "Main menu" },
+    { label: "Find Tutors", href: "/learner/tutors", icon: <Users className="w-4 h-4" />, group: "Main menu" },
     { label: "My Classes", href: "/learner/my-classes", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
     { label: "Auto Match", href: "/learner/match", icon: <Sparkles className="w-4 h-4" />, group: "Tools" },
     { label: "My Requests", href: "/learner/requests", icon: <Inbox className="w-4 h-4" />, group: "Tools" },
     { label: "Notifications", href: "/learner/notifications", icon: <Bell className="w-4 h-4" />, group: "Tools", badge: unreadCount },
     { label: "Profile", href: "/learner/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
+    { label: "Help & FAQs", href: "/learner/help", icon: <HelpCircle className="w-4 h-4" />, group: "Account" },
   ];
 
   return (
@@ -45,6 +47,7 @@ export default async function LearnerLayout({
       idRole="LEARNER"
       unreadCount={unreadCount}
       notificationsHref="/learner/notifications"
+      helpHref="/learner/help"
       chatbotEnabled={chatbotEnabled}
     >
       {children}

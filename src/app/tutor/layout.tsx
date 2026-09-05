@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, Bell, UserCircle } from "lucide-react";
+import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, Bell, UserCircle, HelpCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
@@ -34,6 +34,7 @@ export default async function TutorLayout({
     { label: "Assessments", href: "/tutor/assessments", icon: <BadgeCheck className="w-4 h-4" />, group: "Teaching" },
     { label: "Notifications", href: "/tutor/notifications", icon: <Bell className="w-4 h-4" />, group: "Teaching", badge: unreadCount },
     { label: "Profile", href: "/tutor/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
+    { label: "Help & FAQs", href: "/tutor/help", icon: <HelpCircle className="w-4 h-4" />, group: "Account" },
   ];
 
   return (
@@ -45,6 +46,7 @@ export default async function TutorLayout({
       idRole="TUTOR"
       unreadCount={unreadCount}
       notificationsHref="/tutor/notifications"
+      helpHref="/tutor/help"
       chatbotEnabled={chatbotEnabled}
     >
       {children}
