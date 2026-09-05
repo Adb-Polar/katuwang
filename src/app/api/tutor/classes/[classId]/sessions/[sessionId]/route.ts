@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateSessionSchema } from "@/lib/validations/class";
 import { hasSessionOverlap } from "@/lib/classSessions";
+import { notifyMany } from "@/lib/notifications";
 
 // ─── PATCH: Reschedule or Change Status of a Single Session ───────────────────
 export async function PATCH(
@@ -94,15 +95,42 @@ export async function PATCH(
       }
     }
 
-    const updated = await prisma.classSession.update({
-      where: { id: sessionId },
-      data: {
-        ...(topic !== undefined ? { topic } : {}),
-        ...(scheduledAt !== undefined ? { scheduledAt: effectiveStart } : {}),
-        ...(duration !== undefined ? { duration } : {}),
-        ...(status !== undefined ? { status } : {}),
-      },
-    });
+    const sessionData = {
+      ...(topic !== undefined ? { topic } : {}),
+      ...(scheduledAt !== undefined ? { scheduledAt: effectiveStart } : {}),
+      ...(duration !== undefined ? { duration } : {}),
+      ...(status !== undefined ? { status } : {}),
+    };
+
+    // Flipping SCHEDULED -> COMPLETED with a published session test opens the
+    // post-test window — notify every enrolled learner in the same transaction.
+    const opensPostTest = targetSession.status === "SCHEDULED" && effectiveStatus === "COMPLETED";
+
+    const updated = opensPostTest
+      ? await prisma.$transaction(async (tx) => {
+          const s = await tx.classSession.update({ where: { id: sessionId }, data: sessionData });
+
+          const test = await tx.sessionTest.findUnique({
+            where: { sessionId },
+            select: { status: true },
+          });
+          if (test?.status === "PUBLISHED") {
+            const learners = await tx.classEnrollment.findMany({
+              where: { classId },
+              select: { learnerId: true },
+            });
+            await notifyMany(
+              tx,
+              learners.map((l) => l.learnerId),
+              "SESSION_POSTTEST_OPEN",
+              `A post-test is now open for your "${s.topic}" session.`,
+              `/learner/classes/${classId}`,
+            );
+          }
+
+          return s;
+        })
+      : await prisma.classSession.update({ where: { id: sessionId }, data: sessionData });
 
     return NextResponse.json(updated);
   } catch (error) {

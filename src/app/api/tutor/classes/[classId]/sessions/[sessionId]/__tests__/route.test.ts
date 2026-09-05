@@ -8,6 +8,9 @@ const {
   sessionFindMany,
   sessionUpdate,
   sessionDelete,
+  sessionTestFindUnique,
+  classEnrollmentFindMany,
+  notificationCreateMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
@@ -15,6 +18,9 @@ const {
   sessionFindMany: vi.fn(),
   sessionUpdate: vi.fn(),
   sessionDelete: vi.fn(),
+  sessionTestFindUnique: vi.fn(),
+  classEnrollmentFindMany: vi.fn(),
+  notificationCreateMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -26,6 +32,15 @@ vi.mock("@/lib/prisma", () => ({
     tutorProfile: { findUnique: tutorProfileFindUnique },
     tutorClass: { findUnique: classFindUnique },
     classSession: { findMany: sessionFindMany, update: sessionUpdate, delete: sessionDelete },
+    sessionTest: { findUnique: sessionTestFindUnique },
+    classEnrollment: { findMany: classEnrollmentFindMany },
+    $transaction: (fn: (tx: unknown) => unknown) =>
+      fn({
+        classSession: { update: sessionUpdate },
+        sessionTest: { findUnique: sessionTestFindUnique },
+        classEnrollment: { findMany: classEnrollmentFindMany },
+        notification: { createMany: notificationCreateMany },
+      }),
   },
 }));
 
@@ -74,6 +89,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionFindMany.mockResolvedValue([]);
+    sessionTestFindUnique.mockResolvedValue(null);
   });
 
   it("returns 401 for the wrong role", async () => {
@@ -170,6 +186,36 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     const res = await patch({ status: "COMPLETED" });
     expect(res.status).toBe(200);
     expect(sessionFindMany).not.toHaveBeenCalled();
+  });
+
+  it("SCHEDULED -> COMPLETED with a PUBLISHED session test notifies every enrolled learner", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classFindUnique.mockResolvedValue(makeClass());
+    sessionUpdate.mockResolvedValue({ ...targetSession, status: "COMPLETED", topic: targetSession.topic });
+    sessionTestFindUnique.mockResolvedValue({ status: "PUBLISHED" });
+    classEnrollmentFindMany.mockResolvedValue([{ learnerId: "L1" }, { learnerId: "L2" }]);
+
+    const res = await patch({ status: "COMPLETED" });
+    expect(res.status).toBe(200);
+    expect(notificationCreateMany).toHaveBeenCalledWith({
+      data: [
+        { userId: "L1", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
+        { userId: "L2", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
+      ],
+    });
+  });
+
+  it("SCHEDULED -> COMPLETED with no test (or a DRAFT one) sends no post-test notification", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classFindUnique.mockResolvedValue(makeClass());
+    sessionUpdate.mockResolvedValue({ ...targetSession, status: "COMPLETED" });
+    sessionTestFindUnique.mockResolvedValue({ status: "DRAFT" });
+
+    const res = await patch({ status: "COMPLETED" });
+    expect(res.status).toBe(200);
+    expect(notificationCreateMany).not.toHaveBeenCalled();
   });
 
   it("changes status to CANCELLED", async () => {

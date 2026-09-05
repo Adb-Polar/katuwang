@@ -27,7 +27,10 @@ export type NotificationType =
   | "CLASS_COMPLETED"
   // class appeal review (tutor-facing)
   | "CLASS_APPEAL_APPROVED"
-  | "CLASS_APPEAL_REJECTED";
+  | "CLASS_APPEAL_REJECTED"
+  // session pre/post tests (learner-facing)
+  | "SESSION_PRETEST_OPEN"
+  | "SESSION_POSTTEST_OPEN";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

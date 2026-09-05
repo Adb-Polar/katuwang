@@ -20,15 +20,10 @@ export async function GET(req: NextRequest) {
     const topic = searchParams.get("topic")?.trim() || "";
     const statusParam = searchParams.get("status");
     const status =
-      statusParam && statusParam in AssessmentAttemptStatus
-        ? (statusParam as AssessmentAttemptStatus)
-        : null;
+      statusParam && statusParam in AssessmentAttemptStatus ? (statusParam as AssessmentAttemptStatus) : null;
     const q = searchParams.get("q")?.trim() || "";
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
-    const pageSize = Math.min(
-      100,
-      Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE)
-    );
+    const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
 
     const where: Prisma.AssessmentAttemptWhereInput = {
       ...(subject ? { subject } : {}),

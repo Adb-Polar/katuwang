@@ -109,6 +109,17 @@ describe("POST /api/tutor/assessments", () => {
     expect(attemptCreate).not.toHaveBeenCalled();
   });
 
+  it("the minBankSize gate counts BANK questions only (not tutor-authored ones)", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    questionCount.mockResolvedValue(3);
+
+    await POST(post(validBody));
+    expect(questionCount).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) }),
+    );
+  });
+
   it("409 when the tutor is already certified for the topic", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });

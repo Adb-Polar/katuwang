@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
+import { gradeAttempt } from "@/lib/gradeAttempt";
 
 // ─── POST: Grade & Submit an Attempt ───────────────────────────────────────
 export async function POST(
@@ -42,22 +43,11 @@ export async function POST(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const answerByQuestion = new Map(result.data.answers.map((a) => [a.questionId, a.optionId]));
-
-    // Grade each served item; an unanswered or mismatched option counts as wrong.
-    const graded = attempt.items.map((item) => {
-      const chosenId = answerByQuestion.get(item.questionId) ?? null;
-      const chosen = item.question.options.find((o) => o.id === chosenId) ?? null;
-      return {
-        id: item.id,
-        selectedOptionId: chosen ? chosen.id : null,
-        isCorrect: chosen?.isCorrect === true,
-      };
-    });
-
-    const correctCount = graded.filter((g) => g.isCorrect).length;
-    const scorePercent =
-      attempt.questionCount > 0 ? Math.round((correctCount / attempt.questionCount) * 100) : 0;
+    const { graded, correctCount, scorePercent } = gradeAttempt(
+      attempt.items,
+      result.data.answers,
+      attempt.questionCount,
+    );
     const passed = scorePercent >= attempt.passPercent;
 
     const { subject, topic } = attempt;

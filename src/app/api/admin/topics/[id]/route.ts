@@ -15,6 +15,7 @@ async function topicUsageCount(slug: string, name: string): Promise<number> {
     prisma.classSession.count({ where: { topic: name, class: { subject: slug } } }),
     prisma.topicRequestTopic.count({ where: { topic: name, request: { subject: slug } } }),
     prisma.topicCertification.count({ where: { subject: slug, topic: name } }),
+    // No origin filter on purpose: tutor-authored questions must also block a topic delete.
     prisma.assessmentQuestion.count({ where: { subject: slug, topic: name } }),
     prisma.assessmentAttempt.count({ where: { subject: slug, topic: name } }),
     prisma.questionRequest.count({ where: { subject: slug, topic: name } }),
@@ -36,6 +37,7 @@ async function renameTopicEverywhere(
     data: { topic: to },
   });
   await tx.topicCertification.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  // No origin filter on purpose: a topic rename must reach tutor-authored questions too.
   await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
   await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
   await tx.questionRequest.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });

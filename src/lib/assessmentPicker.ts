@@ -29,7 +29,8 @@ export async function pickQuestionIds(
   }: { tutorProfileId: string; subject: string; topic: string; count: number }
 ): Promise<string[]> {
   const pool = await tx.assessmentQuestion.findMany({
-    where: { subject, topic, active: true },
+    // origin: "BANK" — certification quizzes never serve tutor-authored questions.
+    where: { subject, topic, active: true, origin: "BANK" },
     select: { id: true },
   });
   const poolIds = pool.map((q) => q.id);

@@ -6,11 +6,13 @@ import { updateAssessmentQuestionSchema } from "@/lib/validations/assessment";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
 async function loadQuestion(questionId: string) {
-  return prisma.assessmentQuestion.findUnique({
-    where: { id: questionId },
+  // Scoped to BANK so tutor-authored custom (session-test) questions are
+  // invisible to the admin bank editor.
+  return prisma.assessmentQuestion.findFirst({
+    where: { id: questionId, origin: "BANK" },
     include: {
       options: { orderBy: { position: "asc" } },
-      _count: { select: { attemptItems: true } },
+      _count: { select: { attemptItems: true, sessionTestItems: true } },
     },
   });
 }
@@ -34,7 +36,10 @@ export async function GET(
     }
 
     const { _count, ...q } = question;
-    return NextResponse.json({ ...q, inUse: _count.attemptItems > 0 });
+    return NextResponse.json({
+      ...q,
+      inUse: _count.attemptItems > 0 || _count.sessionTestItems > 0,
+    });
   } catch (error) {
     console.error("Error fetching assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
@@ -67,7 +72,7 @@ export async function PATCH(
     }
 
     const { prompt, explanation, options, active } = result.data;
-    const inUse = existing._count.attemptItems > 0;
+    const inUse = existing._count.attemptItems > 0 || existing._count.sessionTestItems > 0;
     const wantsContentEdit = prompt !== undefined || explanation !== undefined || options !== undefined;
 
     if (inUse && wantsContentEdit) {
@@ -135,7 +140,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Question not found." }, { status: 404 });
     }
 
-    if (existing._count.attemptItems > 0) {
+    if (existing._count.attemptItems > 0 || existing._count.sessionTestItems > 0) {
       return NextResponse.json(
         { error: "This question has been used in an attempt. Retire it instead of deleting." },
         { status: 409 }

@@ -9,6 +9,7 @@ export const PLATFORM_SETTING_KEYS = [
   "requireRegistrationApproval",
   "autoCertifyOnAssessmentPass",
   "chatbotEnabled",
+  "sessionTestsEnabled",
 ] as const;
 
 export type PlatformSettingKey = (typeof PLATFORM_SETTING_KEYS)[number];
@@ -21,6 +22,7 @@ const DEFAULTS: Record<PlatformSettingKey, boolean> = {
   requireRegistrationApproval: false,
   autoCertifyOnAssessmentPass: false,
   chatbotEnabled: true,
+  sessionTestsEnabled: true,
 };
 
 export async function getSetting(key: PlatformSettingKey): Promise<boolean> {

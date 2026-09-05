@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
     );
 
     const where: Prisma.AssessmentQuestionWhereInput = {
+      origin: "BANK", // tutor-authored custom questions never appear in the admin bank
       ...(subject ? { subject } : {}),
       ...(topic ? { topic } : {}),
       ...(activeParam === "true" ? { active: true } : activeParam === "false" ? { active: false } : {}),
@@ -92,6 +93,7 @@ export async function POST(req: NextRequest) {
           topic,
           prompt,
           explanation: explanation || null,
+          origin: "BANK", // admin authoring always creates bank questions
           createdById: session.user.id,
           options: {
             create: options.map((o, i) => ({

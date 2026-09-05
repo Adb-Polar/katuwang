@@ -7,8 +7,8 @@ import { ChevronRight, CornerUpLeft } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
 import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
-import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
@@ -519,14 +519,41 @@ function QuestionsTab({
 
       {(showAdd || editTarget) && (
         <QuestionFormModal
-          subject={subject}
-          topic={topic}
-          question={editTarget}
+          title={editTarget ? "Edit question" : "Add question"}
+          contextLabel={`${subject} · ${topic}`}
+          submitLabel={editTarget ? "Save changes" : "Add question"}
+          initial={
+            editTarget
+              ? {
+                  prompt: editTarget.prompt,
+                  explanation: editTarget.explanation ?? undefined,
+                  options: editTarget.options.map((o) => ({
+                    text: o.text,
+                    isCorrect: o.isCorrect,
+                  })),
+                }
+              : null
+          }
           onClose={() => {
             setShowAdd(false);
             setEditTarget(null);
           }}
-          onSaved={afterWrite}
+          onSubmit={async (draft) => {
+            const isEdit = editTarget !== null;
+            const res = await fetch(
+              isEdit
+                ? `/api/admin/assessment-questions/${editTarget!.id}`
+                : "/api/admin/assessment-questions",
+              {
+                method: isEdit ? "PATCH" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(isEdit ? draft : { ...draft, subject, topic }),
+              }
+            );
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to save question.");
+            afterWrite(isEdit ? "Question updated." : "Question added.");
+          }}
         />
       )}
 
@@ -590,171 +617,6 @@ function CoveragePanel({ row }: { row: CoverageRow }) {
           Change in Settings → Assessment
         </Link>
       </div>
-    </div>
-  );
-}
-
-// ─── Add / edit question modal ──────────────────────────────────────────────
-
-interface DraftOption {
-  text: string;
-  isCorrect: boolean;
-}
-
-function QuestionFormModal({
-  subject,
-  topic,
-  question,
-  onClose,
-  onSaved,
-}: {
-  subject: string;
-  topic: string;
-  question: Question | null;
-  onClose: () => void;
-  onSaved: (msg: string) => void;
-}) {
-  const isEdit = question !== null;
-  const [prompt, setPrompt] = useState(question?.prompt ?? "");
-  const [explanation, setExplanation] = useState(question?.explanation ?? "");
-  const [options, setOptions] = useState<DraftOption[]>(
-    question
-      ? question.options.map((o) => ({ text: o.text, isCorrect: o.isCorrect }))
-      : [
-          { text: "", isCorrect: true },
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-          { text: "", isCorrect: false },
-        ]
-  );
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  const setCorrect = (idx: number) =>
-    setOptions((prev) => prev.map((o, i) => ({ ...o, isCorrect: i === idx })));
-  const setText = (idx: number, text: string) =>
-    setOptions((prev) => prev.map((o, i) => (i === idx ? { ...o, text } : o)));
-  const addOption = () =>
-    setOptions((prev) => (prev.length >= OPTION_COUNT_MAX ? prev : [...prev, { text: "", isCorrect: false }]));
-  const removeOption = (idx: number) =>
-    setOptions((prev) => {
-      if (prev.length <= OPTION_COUNT_MIN) return prev;
-      const next = prev.filter((_, i) => i !== idx);
-      if (!next.some((o) => o.isCorrect)) next[0].isCorrect = true;
-      return next;
-    });
-
-  const submit = async () => {
-    setSaving(true);
-    setError("");
-    try {
-      const payload = {
-        prompt,
-        explanation: explanation.trim() || undefined,
-        options: options.map((o) => ({ text: o.text, isCorrect: o.isCorrect })),
-        ...(isEdit ? {} : { subject, topic }),
-      };
-      const res = await fetch(
-        isEdit ? `/api/admin/assessment-questions/${question!.id}` : "/api/admin/assessment-questions",
-        {
-          method: isEdit ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save question.");
-      onSaved(isEdit ? "Question updated." : "Question added.");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to save question.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 kt-card space-y-4">
-        <div>
-          <h3 className="font-bold text-sm text-base-content">
-            {isEdit ? "Edit question" : "Add question"}
-          </h3>
-          <p className="text-2xs text-base-content/50 mt-0.5">
-            {subject} · {topic}
-          </p>
-        </div>
-
-        <FeedbackBanner variant="error" message={error || null} />
-
-        <FormField label="Question prompt" required>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            rows={3}
-            maxLength={1000}
-            className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
-          />
-        </FormField>
-
-        <FormField label="Options" hint="Select the one correct answer">
-          <div className="space-y-2">
-            {options.map((o, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="correct-option"
-                  className="radio radio-xs radio-primary"
-                  checked={o.isCorrect}
-                  onChange={() => setCorrect(i)}
-                />
-                <input
-                  type="text"
-                  value={o.text}
-                  onChange={(e) => setText(i, e.target.value)}
-                  maxLength={500}
-                  placeholder={`Option ${i + 1}`}
-                  className="input input-bordered input-xs text-xs flex-1 focus:input-primary"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeOption(i)}
-                  disabled={options.length <= OPTION_COUNT_MIN}
-                  className="btn btn-ghost btn-xs text-2xs"
-                  aria-label="Remove option"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-            {options.length < OPTION_COUNT_MAX && (
-              <button type="button" onClick={addOption} className="btn btn-ghost btn-xs text-2xs">
-                + Add option
-              </button>
-            )}
-          </div>
-        </FormField>
-
-        <FormField label="Explanation" hint="Shown to the tutor after grading (optional)">
-          <textarea
-            value={explanation}
-            onChange={(e) => setExplanation(e.target.value)}
-            rows={2}
-            maxLength={1000}
-            className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
-          />
-        </FormField>
-
-        <div className="modal-action pt-1">
-          <button className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving}>
-            Cancel
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={submit} disabled={saving}>
-            {saving && <span className="loading loading-spinner loading-xs" />}
-            {isEdit ? "Save changes" : "Add question"}
-          </button>
-        </div>
-      </div>
-      <label className="modal-backdrop" onClick={onClose} aria-label="Close" />
     </div>
   );
 }

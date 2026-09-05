@@ -22,7 +22,12 @@ const {
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    assessmentQuestion: { findUnique: findUniqueMock, update: updateMock, delete: deleteMock },
+    assessmentQuestion: {
+      findUnique: findUniqueMock,
+      findFirst: findUniqueMock,
+      update: updateMock,
+      delete: deleteMock,
+    },
     assessmentOption: { deleteMany: optionDeleteMany, createMany: optionCreateMany },
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
@@ -56,9 +61,9 @@ const usedQuestion = {
   topic: "Algebraic Expressions",
   active: true,
   options: [],
-  _count: { attemptItems: 4 },
+  _count: { attemptItems: 4, sessionTestItems: 0 },
 };
-const freshQuestion = { ...usedQuestion, _count: { attemptItems: 0 } };
+const freshQuestion = { ...usedQuestion, _count: { attemptItems: 0, sessionTestItems: 0 } };
 
 describe("PATCH /api/admin/assessment-questions/[questionId]", () => {
   beforeEach(() => vi.clearAllMocks());

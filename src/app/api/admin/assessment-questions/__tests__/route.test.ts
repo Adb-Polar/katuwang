@@ -71,7 +71,23 @@ describe("GET /api/admin/assessment-questions", () => {
     expect(json.total).toBe(2);
     expect(json.questions.map((q: { inUse: boolean }) => q.inUse)).toEqual([false, true]);
     expect(findManyMock).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ subject: "MATH", topic: "Algebraic Expressions" }) })
+      expect.objectContaining({
+        where: expect.objectContaining({
+          subject: "MATH",
+          topic: "Algebraic Expressions",
+          origin: "BANK",
+        }),
+      })
+    );
+  });
+
+  it("never lists tutor-authored questions — the query is scoped to origin BANK", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+    countMock.mockResolvedValue(0);
+    await GET(getReq());
+    expect(findManyMock).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) })
     );
   });
 });
@@ -117,6 +133,7 @@ describe("POST /api/admin/assessment-questions", () => {
           subject: "MATH",
           topic: "Algebraic Expressions",
           createdById: "A1",
+          origin: "BANK",
           options: { create: [
             { text: "5x", isCorrect: true, position: 0 },
             { text: "6x", isCorrect: false, position: 1 },

@@ -22,7 +22,7 @@ export async function GET() {
     const [counts, config, openRequests] = await Promise.all([
       prisma.assessmentQuestion.groupBy({
         by: ["subject", "topic"],
-        where: { active: true },
+        where: { active: true, origin: "BANK" },
         _count: { _all: true },
       }),
       getAssessmentConfig(),

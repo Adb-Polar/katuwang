@@ -2,10 +2,9 @@ import { describe, it, expect, vi } from "vitest";
 import { pickQuestionIds } from "@/lib/assessmentPicker";
 
 function makeTx(poolIds: string[], seenIds: string[] | null) {
+  const findMany = vi.fn().mockResolvedValue(poolIds.map((id) => ({ id })));
   return {
-    assessmentQuestion: {
-      findMany: vi.fn().mockResolvedValue(poolIds.map((id) => ({ id }))),
-    },
+    assessmentQuestion: { findMany },
     assessmentAttempt: {
       findFirst: vi
         .fn()
@@ -44,5 +43,16 @@ describe("pickQuestionIds", () => {
     const tx = makeTx(["q1", "q2", "q3"], null);
     const ids = await pickQuestionIds(tx, args);
     expect([...ids].sort()).toEqual(["q1", "q2", "q3"]);
+  });
+
+  it("only ever draws from the BANK pool (never tutor-authored questions)", async () => {
+    const tx = makeTx(["q1", "q2", "q3"], null);
+    await pickQuestionIds(tx, args);
+    expect(
+      (tx as unknown as { assessmentQuestion: { findMany: ReturnType<typeof vi.fn> } })
+        .assessmentQuestion.findMany,
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) }),
+    );
   });
 });

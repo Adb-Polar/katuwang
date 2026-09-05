@@ -86,6 +86,27 @@ enum QuestionRequestStatus {
   DISMISSED // Admin declined
 }
 
+enum QuestionOrigin {
+  BANK // Admin-authored, shared question bank (feeds certification quizzes)
+  TUTOR // Authored by a tutor for their own session tests only
+}
+
+enum SessionTestStatus {
+  DRAFT // Tutor is still building it
+  PUBLISHED // Learners can take it
+  CLOSED // No further attempts accepted
+}
+
+enum SessionTestKind {
+  PRE // Taken before the tutoring session
+  POST // Taken after the tutoring session
+}
+
+enum SessionTestAttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+}
+
 // ─── User ────────────────────────────────────────────────────────────────────
 
 model User {
@@ -128,6 +149,9 @@ model User {
 
   notifications Notification[]
   chatbotMisses ChatbotMiss[]
+
+  // Per-session pre/post tests taken as an enrolled learner
+  sessionTestAttempts SessionTestAttempt[] @relation("LearnerSessionTestAttempts")
 
   @@map("users")
 }
@@ -172,6 +196,9 @@ model TutorProfile {
 
   // Appeals this tutor has filed against class moderation
   classAppeals ClassAppeal[]
+
+  // Custom questions this tutor authored for their session tests
+  ownedQuestions AssessmentQuestion[] @relation("OwnedQuestions")
 
   @@map("tutor_profiles")
 }
@@ -300,6 +327,8 @@ model ClassSession {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
+  test SessionTest?
+
   @@index([classId])
   @@map("class_sessions")
 }
@@ -322,19 +351,19 @@ model ClassEnrollment {
 // Topics and preferred time slots are child rows (3NF), mirroring ClassTopic and Availability.
 
 model TopicRequest {
-  id                      String             @id @default(cuid())
-  learnerId               String
-  learner                 User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
-  subject                 String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
-  gradeLevel              GradeLevel
-  note                    String?            @db.Text
-  status                  TopicRequestStatus @default(OPEN)
-  fulfilledClassId        String?
-  fulfilledClass          TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
-  directedTutorProfileId  String?
-  directedTutor           TutorProfile?      @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id], onDelete: SetNull)
-  createdAt               DateTime           @default(now())
-  updatedAt               DateTime           @updatedAt
+  id                     String             @id @default(cuid())
+  learnerId              String
+  learner                User               @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
+  subject                String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
+  gradeLevel             GradeLevel
+  note                   String?            @db.Text
+  status                 TopicRequestStatus @default(OPEN)
+  fulfilledClassId       String?
+  fulfilledClass         TutorClass?        @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id], onDelete: SetNull)
+  directedTutorProfileId String?
+  directedTutor          TutorProfile?      @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id], onDelete: SetNull)
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
 
   topics TopicRequestTopic[]
   slots  TopicRequestSlot[]
@@ -397,21 +426,30 @@ model PlatformSetting {
 // it is soft-retired via `active = false` and its content becomes immutable.
 
 model AssessmentQuestion {
-  id          String      @id @default(cuid())
-  subject     String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
-  topic       String
-  prompt      String      @db.Text
-  explanation String?     @db.Text // shown to the tutor after grading
-  active      Boolean     @default(true)
-  createdById String
-  createdBy   User        @relation("AuthoredQuestions", fields: [createdById], references: [id])
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id                  String         @id @default(cuid())
+  subject             String // subject slug — was the SubjectArea enum (see src/lib/subjects.ts)
+  topic               String
+  prompt              String         @db.Text
+  explanation         String?        @db.Text // shown to the tutor after grading
+  active              Boolean        @default(true)
+  origin              QuestionOrigin @default(BANK) // BANK questions feed certification quizzes; TUTOR questions are for session tests only
+  createdById         String
+  createdBy           User           @relation("AuthoredQuestions", fields: [createdById], references: [id])
+  // Set only for `origin = TUTOR`: the tutor who owns this custom question.
+  ownerTutorProfileId String?
+  ownerTutorProfile   TutorProfile?  @relation("OwnedQuestions", fields: [ownerTutorProfileId], references: [id], onDelete: Cascade)
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
 
-  options      AssessmentOption[]
-  attemptItems AssessmentAttemptItem[]
+  options          AssessmentOption[]
+  attemptItems     AssessmentAttemptItem[]
+  sessionTestLinks SessionTestQuestion[]
+  sessionTestItems SessionTestAttemptItem[]
 
-  @@index([subject, topic, active])
+  // `origin` is appended LAST so every pre-existing (subject) / (subject, topic) /
+  // (subject, topic, active) query still resolves on a usable prefix.
+  @@index([subject, topic, active, origin])
+  @@index([ownerTutorProfileId])
   @@map("assessment_questions")
 }
 
@@ -423,7 +461,8 @@ model AssessmentOption {
   isCorrect  Boolean            @default(false)
   position   Int // 0-based display order
 
-  selectedInItems AssessmentAttemptItem[] @relation("SelectedOption")
+  selectedInItems       AssessmentAttemptItem[]  @relation("SelectedOption")
+  sessionTestSelections SessionTestAttemptItem[] @relation("SessionTestSelectedOption")
 
   @@unique([questionId, position])
   @@map("assessment_options")
@@ -551,4 +590,82 @@ model ClassAppeal {
   @@index([status, createdAt])
   @@index([classId])
   @@map("class_appeals")
+}
+
+// ─── Per-Session Pre/Post Test ──────────────────────────────────────────────
+// A tutor builds ONE ordered question set per ClassSession. It is served twice:
+// once as a PRE attempt (before the session) and once as a POST attempt (after).
+// `kind` therefore lives on the ATTEMPT, not on the test — so `position` refers
+// to the same question in both runs, which is what makes per-question pre-vs-post
+// comparison and same-row delta possible. Diagnostic only; no pass mark.
+// Editable only while DRAFT and with zero attempts (see docs/plans/pre-test-post-test-plan.md).
+
+model SessionTest {
+  id           String            @id @default(cuid())
+  sessionId    String            @unique
+  session      ClassSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title        String
+  instructions String?           @db.Text
+  status       SessionTestStatus @default(DRAFT)
+  publishedAt  DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  questions SessionTestQuestion[]
+  attempts  SessionTestAttempt[]
+
+  @@index([status])
+  @@map("session_tests")
+}
+
+model SessionTestQuestion {
+  id            String             @id @default(cuid())
+  sessionTestId String
+  sessionTest   SessionTest        @relation(fields: [sessionTestId], references: [id], onDelete: Cascade)
+  questionId    String
+  question      AssessmentQuestion @relation(fields: [questionId], references: [id])
+  position      Int // 0-based display order, shared by both the PRE and POST run
+
+  @@unique([sessionTestId, position])
+  @@unique([sessionTestId, questionId])
+  @@map("session_test_questions")
+}
+
+model SessionTestAttempt {
+  id             String                   @id @default(cuid())
+  sessionTestId  String
+  sessionTest    SessionTest              @relation(fields: [sessionTestId], references: [id], onDelete: Cascade)
+  learnerId      String
+  learner        User                     @relation("LearnerSessionTestAttempts", fields: [learnerId], references: [id], onDelete: Cascade)
+  kind           SessionTestKind
+  status         SessionTestAttemptStatus @default(IN_PROGRESS)
+  totalQuestions Int
+  correctCount   Int                      @default(0)
+  scorePercent   Int                      @default(0)
+  startedAt      DateTime                 @default(now())
+  submittedAt    DateTime?
+
+  items SessionTestAttemptItem[]
+
+  @@unique([sessionTestId, learnerId, kind]) // one PRE + one POST per learner
+  @@index([learnerId, kind])
+  @@index([sessionTestId, kind, status])
+  @@map("session_test_attempts")
+}
+
+model SessionTestAttemptItem {
+  id               String             @id @default(cuid())
+  attemptId        String
+  attempt          SessionTestAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  questionId       String
+  question         AssessmentQuestion @relation(fields: [questionId], references: [id])
+  position         Int // the pre/post join key
+  selectedOptionId String?
+  selectedOption   AssessmentOption?  @relation("SessionTestSelectedOption", fields: [selectedOptionId], references: [id], onDelete: SetNull)
+  isCorrect        Boolean?
+
+  @@unique([attemptId, position])
+  @@unique([attemptId, questionId])
+  @@map("session_test_attempt_items")
 }

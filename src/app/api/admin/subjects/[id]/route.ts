@@ -13,6 +13,7 @@ async function subjectUsageCount(slug: string): Promise<number> {
     prisma.tutorClass.count({ where: { subject: slug } }),
     prisma.topicRequest.count({ where: { subject: slug } }),
     prisma.topicCertification.count({ where: { subject: slug } }),
+    // No origin filter on purpose: tutor-authored questions must also block a subject delete.
     prisma.assessmentQuestion.count({ where: { subject: slug } }),
     prisma.assessmentAttempt.count({ where: { subject: slug } }),
     prisma.questionRequest.count({ where: { subject: slug } }),

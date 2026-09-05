@@ -112,7 +112,9 @@ export async function POST(req: NextRequest) {
     const config = await getAssessmentConfig();
 
     const activeCount = await prisma.assessmentQuestion.count({
-      where: { subject: subjectEnum, topic, active: true },
+      // origin: "BANK" — must match pickQuestionIds' pool exactly, or a tutor
+      // could author custom questions to clear minBankSize on a thin admin bank.
+      where: { subject: subjectEnum, topic, active: true, origin: "BANK" },
     });
     if (activeCount < config.minBankSize) {
       return NextResponse.json(

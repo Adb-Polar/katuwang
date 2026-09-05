@@ -12,6 +12,7 @@ import {
   CalendarX,
   CalendarCheck,
   Gavel,
+  ClipboardList,
 } from "lucide-react";
 
 // Shared shape + presentation helpers for notifications, used by both the
@@ -52,6 +53,9 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   // class appeal review (tutor-facing)
   CLASS_APPEAL_APPROVED: <Gavel className="h-4 w-4 text-success" />,
   CLASS_APPEAL_REJECTED: <Gavel className="h-4 w-4 text-error" />,
+  // session pre/post tests (learner-facing)
+  SESSION_PRETEST_OPEN: <ClipboardList className="h-4 w-4 text-info" />,
+  SESSION_POSTTEST_OPEN: <ClipboardList className="h-4 w-4 text-success" />,
 };
 
 export function relativeTime(iso: string): string {
