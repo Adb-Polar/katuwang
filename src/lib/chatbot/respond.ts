@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { classify } from "@/lib/chatbot/classifier";
 import { extractCriteria, recommendClasses } from "@/lib/chatbot/recommend";
-import type { BotLink, BotReply, ChatContext, Intent } from "@/lib/chatbot/types";
+import type { BotLink, BotReply, ChatContext, FaqEntry, Intent } from "@/lib/chatbot/types";
 
 // ─── Orchestrator: message + context -> a single predefined reply ─────────
 
@@ -26,9 +26,30 @@ async function logMiss(message: string, ctx: ChatContext): Promise<void> {
   }
 }
 
-export async function getBotReply(message: string, ctx: ChatContext): Promise<BotReply> {
-  const { intent, faq } = classify(message, ctx);
+export interface BotReplyResult {
+  reply: BotReply;
+  /** Raw classifier score of the winning intent/FAQ (0 on a miss) — surfaced
+   *  to devs via a non-production API field so the KB can be tuned from real
+   *  near-misses without shipping the number to end users. */
+  score: number;
+}
 
+export async function getBotReply(message: string, ctx: ChatContext): Promise<BotReply> {
+  const { reply } = await getBotReplyWithScore(message, ctx);
+  return reply;
+}
+
+export async function getBotReplyWithScore(message: string, ctx: ChatContext): Promise<BotReplyResult> {
+  const { intent, faq, score } = classify(message, ctx);
+  return { reply: await buildReply(message, ctx, intent, faq), score };
+}
+
+async function buildReply(
+  message: string,
+  ctx: ChatContext,
+  intent: Intent | null,
+  faq: FaqEntry | null
+): Promise<BotReply> {
   // ── FAQ hit ──
   if (faq) {
     return {

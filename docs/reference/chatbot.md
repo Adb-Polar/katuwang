@@ -22,14 +22,16 @@ Everything runs inside the app — one API route plus pure functions.
 | | `src/components/chatbot/chatbotClient.ts` | `askChatbot(message)` → `POST /api/chatbot`. |
 | API | `src/app/api/chatbot/route.ts` | Auth, `chatbotEnabled` gate, Zod validation, loads the learner's grade level, calls `getBotReply`. |
 | Validation | `src/lib/validations/chatbot.ts` | `chatbotMessageSchema` — 1–500 chars. |
-| Engine | `src/lib/chatbot/normalize.ts` | `tokenize()` — lowercase, strip accents/punctuation, drop stopwords, plural→singular, apply the Taglish synonym map. |
-| | `src/lib/chatbot/intents.ts` | `INTENTS` — the ~25-entry intent catalogue. |
-| | `src/lib/chatbot/faq.ts` | `FAQ_ENTRIES` — the 15-entry starter knowledge base. |
-| | `src/lib/chatbot/classifier.ts` | `classify(message, ctx)` — scores intents + FAQ, returns the best or nothing. |
+| Engine | `src/lib/chatbot/normalize.ts` | `tokenize()` — lowercase, strip accents/punctuation, drop stopwords, plural→singular, apply the Taglish synonym map. Also exports `editDistance()`/`fuzzyHit()` (typo tolerance) and `STOPWORDS`. |
+| | `src/lib/chatbot/intents.ts` | `INTENTS` — the ~35-entry intent catalogue. |
+| | `src/lib/chatbot/faq.ts` | `FAQ_ENTRIES` — the 26-entry knowledge base. |
+| | `src/lib/chatbot/classifier.ts` | `classify(message, ctx)` — corrects typos, scores intents + FAQ, returns the best or nothing. |
 | | `src/lib/chatbot/recommend.ts` | `extractCriteria()` + `recommendClasses()` — the learner class-recommendation path, built on the existing matching engine. |
-| | `src/lib/chatbot/respond.ts` | `getBotReply(message, ctx)` — the orchestrator; also logs unmatched messages. |
+| | `src/lib/chatbot/respond.ts` | `getBotReply(message, ctx)` / `getBotReplyWithScore()` — the orchestrator; also logs unmatched messages. |
+| | `src/lib/chatbot/misses.ts` | `aggregateMisses(rows, opts)` — groups `ChatbotMiss` rows by role + normalised wording for the admin review page. |
 | | `src/lib/chatbot/types.ts` | Shared types. |
 | Data | `ChatbotMiss` model (`prisma/schema.prisma`) | One row per unmatched message, for growing the FAQ. |
+| Admin UI | `src/app/admin/chatbot/page.tsx` + `ChatbotMissesTable.tsx` | `/admin/chatbot` — read-only, grouped/sortable/filterable review of unanswered questions, backed by `GET /api/admin/chatbot-misses`. |
 | Setting | `chatbotEnabled` (`src/lib/settings.ts`, default **ON**) | Toggle on `/admin/settings`. |
 
 ---
@@ -85,6 +87,12 @@ User types "paano sumali sa klase"  (ChatWidget)
    `classes` → `class`)
 4. apply the **synonym map** (`paano`→`how`, `guro`→`tutor`, `klase`→`class`,
    `sumali`→`enroll`, `libre`→`free`, …)
+5. **typo-correct** each token via `correctToken()` (`classifier.ts`): if the
+   token isn't already a known catalogue keyword and is a single edit
+   (`editDistance` = 1) from one that's ≥4 chars, snap it to that keyword —
+   e.g. `"enrol"` → `"enroll"`. This runs *before* both keyword scoring and
+   pattern matching, so a typo still lights up a regex like `/\benroll\b/`,
+   not just the keyword weight.
 
 **b. Score each candidate**
 
@@ -103,13 +111,20 @@ caller's role — so a learner never matches `nav_create_class` (tutor-only).
 
 **c. Pick the winner**
 
-- A candidate must reach **`MIN_SCORE = 2`** or it's ignored.
+- A candidate must reach **both** `MIN_SCORE = 2` (absolute floor) **and**
+  `MIN_CONFIDENCE = 0.35` measured as `score / max(3, tokenCount)` (relative
+  to message length, floored at 3 tokens so short pointed queries like
+  "reset password" aren't penalised) — a long rambling message that only
+  glances a couple of keywords now correctly misses instead of confidently
+  answering the wrong thing.
 - Among intents, higher score wins; ties break by **category priority**
   `recommend (4) > nav (3) > faq (2) > smalltalk (1)`.
 - An **intent beats an FAQ of equal score** (it can offer a deep link and
   follow-up chips); an FAQ only wins if it scores strictly higher.
-- If nothing clears `MIN_SCORE`, `classify` returns `{ intent: null,
-  faq: null }` and the orchestrator serves the **fallback**.
+- If nothing clears both gates, `classify` returns `{ intent: null,
+  faq: null, score: 0 }` and the orchestrator serves the **fallback**. The
+  winning `score` is otherwise returned too — `route.ts` surfaces it as a
+  non-production `debugScore` field for tuning the KB from near-misses.
 
 ---
 
@@ -148,11 +163,13 @@ When `classify` returns nothing, `respond.ts` writes a row:
 ChatbotMiss { message, role, userId, createdAt }   // best-effort, never blocks the reply
 ```
 
-Purpose: the FAQ in `faq.ts` is a **starter set**. Per the thesis it should
-be refined with real TRIS stakeholder input — the `chatbot_misses` table is
-that feedback channel. There is **no admin UI** for it in v1; query the
-table directly (`npx prisma studio`), spot recurring questions, and add
-`FaqEntry` rows (or new intents).
+Purpose: the FAQ in `faq.ts` is grounded but not exhaustive — the thesis
+calls for it to be refined with real TRIS stakeholder input, and
+`chatbot_misses` is that feedback channel. **`/admin/chatbot`** (backed by
+`aggregateMisses()` in `misses.ts` + `GET /api/admin/chatbot-misses`) reads
+the table, grouped by role + normalised wording so repeat questions surface
+as one row with a count — sort by count to find what's worth adding next as a
+`FaqEntry` (or a new `Intent`).
 
 ---
 
@@ -176,13 +193,15 @@ table directly (`npx prisma studio`), spot recurring questions, and add
 | Add a canned answer to a common question | Add a `FaqEntry` to `FAQ_ENTRIES` in `faq.ts` (question, answer, `keywords` in canonical/singular form, optional `link`). |
 | Add a "take me to X" answer | Add an `Intent` to `INTENTS` in `intents.ts` — `id`, `category: "nav"`, `roles`, `keywords`, optional `patterns`, `response` (string or `(ctx) => …`), `link`. |
 | Handle a new Taglish word | Add it to `SYNONYMS` in `normalize.ts` mapping to an existing canonical token. |
-| Tune sensitivity | `MIN_SCORE` / the weights / `CATEGORY_PRIORITY` in `classifier.ts`. |
+| Tune sensitivity | `MIN_SCORE` / `MIN_CONFIDENCE` / the weights / `CATEGORY_PRIORITY` in `classifier.ts`. |
 | Recommend on a new axis | Extend `MatchCriteria` handling in `src/lib/matching.ts` — the chatbot inherits it automatically. |
 
 **Tests** live in `src/lib/chatbot/__tests__/` (`classifier.test.ts`,
-`recommend.test.ts`) and `src/app/api/chatbot/__tests__/route.test.ts`. Add
-an utterance → expected-intent row to `classifier.test.ts` whenever you add
-an intent or FAQ entry.
+`recommend.test.ts`, `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`)
+and `src/app/api/chatbot/__tests__/route.test.ts` +
+`src/app/api/admin/chatbot-misses/__tests__/route.test.ts`. Add an
+utterance → expected-intent row to `classifier.test.ts` (or `faq.test.ts`
+for a new FAQ) whenever you add an intent or FAQ entry.
 
 ---
 
@@ -190,7 +209,10 @@ an intent or FAQ entry.
 
 - No memory of earlier turns — every message is classified in isolation
   (the client keeps the visible transcript, the server does not).
-- No spelling correction beyond the synonym map and plural stemming.
+- Spelling correction is single-edit-distance only, and only against
+  keywords already in the catalogue (`fuzzyHit`/`editDistance` in
+  `normalize.ts`) — a token more than one edit from every known keyword
+  still misses.
 - One intent or one FAQ entry per reply — no multi-answer composition.
 - English + common Taglish only; other phrasings fall to the fallback (and
   get logged).

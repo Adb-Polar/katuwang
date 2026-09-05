@@ -65,5 +65,7 @@ export interface FaqEntry {
   question: string;
   answer: string;
   keywords: string[];
+  /** "all" (default) or the roles this entry is offered to — mirrors Intent.roles. */
+  roles?: Role[] | "all";
   link?: BotLink;
 }

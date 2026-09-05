@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { chatbotMessageSchema } from "@/lib/validations/chatbot";
-import { getBotReply } from "@/lib/chatbot/respond";
+import { getBotReplyWithScore } from "@/lib/chatbot/respond";
 import type { ChatContext } from "@/lib/chatbot/types";
 
 // ─── POST: ask the intent-based assistant ────────────────────────────────
@@ -39,8 +39,12 @@ export async function POST(req: NextRequest) {
       gradeLevel: user?.gradeLevel ?? null,
     };
 
-    const reply = await getBotReply(result.data.message, ctx);
-    return NextResponse.json({ reply });
+    const { reply, score } = await getBotReplyWithScore(result.data.message, ctx);
+    return NextResponse.json({
+      reply,
+      // Dev-only, so tuning the KB from near-misses doesn't leak to end users.
+      ...(process.env.NODE_ENV !== "production" ? { debugScore: score } : {}),
+    });
   } catch (error) {
     console.error("Error handling chatbot message:", error);
     return NextResponse.json(

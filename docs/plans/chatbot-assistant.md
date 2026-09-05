@@ -74,8 +74,8 @@ unchanged.
 | `types.ts` | `IntentCategory = "nav" \| "faq" \| "recommend" \| "smalltalk" \| "fallback"`; `Intent`, `FaqEntry`, `ChatContext` (`{ role: Role; userId: string; gradeLevel: GradeLevel \| null }`), `BotReply` (`{ text; intentId; links?: {href,label}[]; cards?: RecCard[]; suggestions?: string[] }`). |
 | `normalize.ts` | `tokenize(text)` — lowercase, strip diacritics + punctuation, split, drop an English + Filipino stopword set. `SYNONYMS` map folding common Taglish / variants to canonical tokens (`paano→how`, `saan→where`, `libre→free`, `guro→tutor`, `klase→class`, `magpatala/sumali→enroll`, `iskedyul→schedule`, …). |
 | `intents.ts` | `INTENTS: Intent[]` — each has `id`, `category`, `roles: Role[] \| "all"`, `keywords: string[]`, `patterns: RegExp[]`, `response: string \| (ctx) => Omit<BotReply,"intentId">`, optional `link` and `suggestions`. ~25 entries (catalogue below). |
-| `faq.ts` | `FAQ_ENTRIES: FaqEntry[]` — `{ id, question, answer, keywords, link? }`, ~15 entries seeded from `project-overview.md` delimitations + the role docs. Header comment: *starter set — refine with TRIS stakeholder interviews (thesis Sprint 5 "FAQ Knowledge Base")*. |
-| `classifier.ts` | `classify(message, ctx): { intent: Intent \| null; faq: FaqEntry \| null; score: number }`. Score = Σ(keyword token hits ×1) + Σ(regex/phrase hits ×3), divided by message token count; role-filtered; below `MIN_CONFIDENCE` → `null` (→ fallback). Category priority breaks ties: `recommend > nav > faq > smalltalk`. |
+| `faq.ts` | `FAQ_ENTRIES: FaqEntry[]` — `{ id, question, answer, keywords, roles?: Role[] \| "all", link? }`, ~15 entries seeded from `project-overview.md` delimitations + the role docs. `roles` (absent ⇒ all) scopes an entry to one role's workflow so a learner never gets a tutor how-to and vice-versa; platform-wide facts stay unscoped. Header comment: *starter set — refine with TRIS stakeholder interviews (thesis Sprint 5 "FAQ Knowledge Base")*. |
+| `classifier.ts` | `classify(message, ctx): { intent: Intent \| null; faq: FaqEntry \| null; score: number }`. Score = Σ(keyword token hits ×1) + Σ(regex/phrase hits ×3), divided by message token count; role-filtered (both intents via `Intent.roles` **and** FAQ entries via `FaqEntry.roles`); below `MIN_CONFIDENCE` → `null` (→ fallback). Category priority breaks ties: `recommend > nav > faq > smalltalk`. |
 | `recommend.ts` | `extractCriteria(message)` → `{ subject?: SubjectArea; topics: string[] }` via a subject-keyword table + substring match against `SUBJECT_TOPICS` (`src/lib/subjectTopics.ts`). `recommendClasses(ctx, criteria)` → mirrors the core of `POST /api/learner/match`: reuse `browsableOrEnrolledWhere`, `learnerClassInclude`, `toLearnerClassDTO` (`src/lib/classQueries.ts`) + `rankMatches` (`src/lib/matching.ts`); return top 3 `RecCard`s (`{ id, title, subject, score, reasons, href: "/learner/classes/{id}" }`) and `fallbackToRequest: boolean` (true when none rank). |
 | `respond.ts` | `getBotReply(message, ctx): Promise<BotReply>` — `classify` → dispatch: `recommend` + learner → `recommendClasses`; `faq` → answer + link; `nav`/`smalltalk` → response (+link+suggestions); `null` → **log a `ChatbotMiss`** (fire-and-forget) and return the generic help reply with the top quick-reply chips. |
 
@@ -221,3 +221,34 @@ is a floating widget only.
   (`npx prisma studio` or a direct query) with the message, role, and userId.
 - Run the new Vitest files; confirm `classifier.test.ts` covers the
   role-gating and fallback paths.
+
+---
+
+## v1.1 — usability pass (2026-09-04, Changes.md Part 30)
+
+Shipped as designed above, but as-built the classifier used a flat
+`MIN_SCORE` floor rather than the `score / tokenCount` + `MIN_CONFIDENCE`
+gate this doc originally specified (§ "Intent engine" table above), and the
+`chatbot_misses` table had no reader — the "grow it from real usage" plan had
+no mechanism to act on. The v1.1 pass closed both gaps, plus typo tolerance
+and a KB expansion:
+
+- **`MIN_CONFIDENCE` implemented** — `classifier.ts` now gates on
+  `score / max(3, tokenCount) >= 0.35`, alongside the original absolute
+  `MIN_SCORE` floor (kept so a single strong pattern hit still wins on a
+  short message).
+- **Fuzzy keyword matching** — a single-edit-distance typo of a known
+  keyword (≥4 chars) is corrected before scoring *and* before pattern
+  matching, via `editDistance`/`fuzzyHit` (`normalize.ts`) and
+  `correctToken()` (`classifier.ts`).
+- **`smalltalk_capabilities` narrowed** — it was broad enough (bare `"help"`
+  keyword + `/\bhelp\b/` pattern) to swallow most unclear messages before
+  they could reach `logMiss`, undermining the "grow from misses" loop from
+  the other direction.
+- **The misses loop is closed** — `/admin/chatbot` (new) reads
+  `chatbot_misses`, grouped by role + normalised wording, sortable/filterable.
+  This is the mechanism this doc assumed would exist but never built.
+- **FAQ KB grown** 15 → 26 entries, +12 nav intents, each addition grounded in
+  a role doc or codebase fact (no invented content).
+
+See `Changes.md` Part 30 for the full file-by-file breakdown.

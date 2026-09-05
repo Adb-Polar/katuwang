@@ -1,15 +1,18 @@
 import type { ChatContext, FaqEntry, Intent } from "@/lib/chatbot/types";
 import { INTENTS } from "@/lib/chatbot/intents";
 import { FAQ_ENTRIES } from "@/lib/chatbot/faq";
-import { tokenize } from "@/lib/chatbot/normalize";
+import { tokenize, fuzzyHit } from "@/lib/chatbot/normalize";
 
 // Weights: a canonical keyword hit is worth 1, a phrase/shape pattern hit 3,
 // a (more specific) FAQ keyword hit 2. A candidate needs at least MIN_SCORE
-// to beat the fallback.
+// (absolute floor) AND to clear MIN_CONFIDENCE (score relative to message
+// length) to beat the fallback — a long rambling message that only glances a
+// couple of keywords should still fall through to the miss log.
 const KEYWORD_WEIGHT = 1;
 const PATTERN_WEIGHT = 3;
 const FAQ_KEYWORD_WEIGHT = 2;
 const MIN_SCORE = 2;
+const MIN_CONFIDENCE = 0.35;
 
 const CATEGORY_PRIORITY: Record<string, number> = {
   recommend: 4,
@@ -18,15 +21,31 @@ const CATEGORY_PRIORITY: Record<string, number> = {
   smalltalk: 1,
 };
 
+// Every keyword the catalogue knows, used to typo-correct message tokens
+// before scoring — so "enrol" (a single-edit typo of "enroll") both scores
+// the exact keyword weight AND still lights up patterns like /\benroll\b/.
+const KNOWN_KEYWORDS: string[] = [
+  ...new Set([...INTENTS.flatMap((i) => i.keywords), ...FAQ_ENTRIES.flatMap((f) => f.keywords)]),
+];
+
+function correctToken(token: string): string {
+  if (token.length < 4 || KNOWN_KEYWORDS.includes(token)) return token;
+  return KNOWN_KEYWORDS.find((kw) => fuzzyHit(token, kw)) ?? token;
+}
+
 function intentAppliesTo(intent: Intent, role: ChatContext["role"]): boolean {
   return intent.roles === "all" || intent.roles.includes(role);
+}
+
+function faqAppliesTo(entry: FaqEntry, role: ChatContext["role"]): boolean {
+  return !entry.roles || entry.roles === "all" || entry.roles.includes(role);
 }
 
 function scoreIntent(intent: Intent, tokens: Set<string>, raw: string, normalized: string): number {
   let score = 0;
   for (const kw of intent.keywords) if (tokens.has(kw)) score += KEYWORD_WEIGHT;
-  // Patterns match against the raw message OR the normalised token stream, so
-  // Taglish phrasings ("paano mag-enroll" -> "how enroll") still hit them.
+  // Patterns match against the raw message OR the (typo-corrected) normalised
+  // token stream, so Taglish phrasings and misspellings still hit them.
   for (const re of intent.patterns ?? []) if (re.test(raw) || re.test(normalized)) score += PATTERN_WEIGHT;
   return score;
 }
@@ -50,16 +69,20 @@ export interface Classification {
  */
 export function classify(message: string, ctx: ChatContext): Classification {
   const raw = message.toLowerCase().trim();
-  const tokenList = tokenize(message);
+  const tokenList = tokenize(message).map(correctToken);
   const tokens = new Set(tokenList);
   const normalized = tokenList.join(" ");
+  // Confidence = score / message length, floored at 3 tokens so short but
+  // pointed queries ("reset password") aren't unfairly punished.
+  const denom = Math.max(3, tokenList.length);
+  const clears = (s: number) => s >= MIN_SCORE && s / denom >= MIN_CONFIDENCE;
 
   let bestIntent: Intent | null = null;
   let bestIntentScore = 0;
   for (const intent of INTENTS) {
     if (!intentAppliesTo(intent, ctx.role)) continue;
     const s = scoreIntent(intent, tokens, raw, normalized);
-    if (s < MIN_SCORE) continue;
+    if (!clears(s)) continue;
     const better =
       s > bestIntentScore ||
       (s === bestIntentScore &&
@@ -74,8 +97,9 @@ export function classify(message: string, ctx: ChatContext): Classification {
   let bestFaq: FaqEntry | null = null;
   let bestFaqScore = 0;
   for (const entry of FAQ_ENTRIES) {
+    if (!faqAppliesTo(entry, ctx.role)) continue;
     const s = scoreFaq(entry, tokens);
-    if (s >= MIN_SCORE && s > bestFaqScore) {
+    if (clears(s) && s > bestFaqScore) {
       bestFaq = entry;
       bestFaqScore = s;
     }

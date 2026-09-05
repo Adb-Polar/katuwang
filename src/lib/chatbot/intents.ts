@@ -74,10 +74,21 @@ export const INTENTS: Intent[] = [
     link: { href: "/learner/requests", label: "My Requests" },
   },
   {
+    id: "nav_find_tutors",
+    category: "nav",
+    roles: [LEARNER],
+    keywords: ["tutor", "find", "browse", "verified", "profile"],
+    patterns: [/\bfind\b.*\btutors?\b/, /\bbrowse\b.*\btutors?\b/, /\blist of tutors\b/],
+    response: {
+      text: "Find Tutors shows every verified tutor with a CERTIFIED topic — their subjects, verified-topic count, and published classes.",
+    },
+    link: { href: "/learner/tutors", label: "Find Tutors" },
+  },
+  {
     id: "nav_my_classes",
     category: "nav",
     roles: "all",
-    keywords: ["class", "schedule", "my", "upcoming", "where"],
+    keywords: ["class", "schedule", "upcoming", "where"],
     patterns: [/\bmy classes\b/, /\bmy schedule\b/, /\bupcoming (class|session)\b/],
     response: (ctx) => ({
       text:
@@ -140,6 +151,30 @@ export const INTENTS: Intent[] = [
     patterns: [/\b(log ?out|sign ?out)\b/],
     response: { text: "Use Log Out at the bottom of the sidebar." },
   },
+  {
+    id: "nav_help_page",
+    category: "nav",
+    roles: "all",
+    keywords: ["help", "guide", "faq", "tutorial", "documentation"],
+    patterns: [/\bhelp (page|centre|center)\b/, /\bfaqs?\b/, /\buser guide\b/],
+    response: { text: "Open Help & FAQs for a full walkthrough of the platform, organised by topic." },
+    link: (ctx) =>
+      ctx.role === LEARNER
+        ? { href: "/learner/help", label: "Help & FAQs" }
+        : ctx.role === TUTOR
+        ? { href: "/tutor/help", label: "Help & FAQs" }
+        : { href: "/admin/help", label: "Help & FAQs" },
+  },
+  {
+    id: "nav_search",
+    category: "nav",
+    roles: "all",
+    keywords: ["search", "lookup", "directory"],
+    patterns: [/\bhow\b.*\bsearch\b/, /\bwhere\b.*\bsearch\b/],
+    response: {
+      text: "Use the search bar in the top navigation bar — it looks up classes, tutors, and requests as you type.",
+    },
+  },
 
   // ── Navigation — tutor ────────────────────────────────────────────────
   {
@@ -186,6 +221,39 @@ export const INTENTS: Intent[] = [
       text: "Students lists every learner across your classes (by anonymous ID). Open a class for its per-class roster.",
     },
     link: { href: "/tutor/students", label: "Students" },
+  },
+  {
+    id: "nav_appeal_class",
+    category: "nav",
+    roles: [TUTOR],
+    keywords: ["appeal", "suspend", "class", "locked", "moderation"],
+    patterns: [/\bappeal\b.*\b(class|suspension|ban)\b/, /\bclass\b.*\b(suspended|banned)\b/],
+    response: {
+      text: "A SUSPENDED or BANNED class shows an appeal card under its moderation panel — open the class and file one appeal with your reason. You can only have one PENDING appeal per class at a time.",
+    },
+    link: { href: "/tutor/classes", label: "Classes" },
+  },
+  {
+    id: "nav_tutor_sessions",
+    category: "nav",
+    roles: [TUTOR],
+    keywords: ["session", "schedule", "add", "reschedule", "cancel"],
+    patterns: [/\b(add|reschedule|cancel)\b.*\bsession\b/, /\bschedule a session\b/],
+    response: {
+      text: "Open the class and use the Sessions panel to add, reschedule, or cancel a session — this is also how your availability is derived.",
+    },
+    link: { href: "/tutor/classes", label: "Classes" },
+  },
+  {
+    id: "nav_tutor_question_request",
+    category: "nav",
+    roles: [TUTOR],
+    keywords: ["question", "request", "assessment", "enough", "topic"],
+    patterns: [/\bnot enough questions\b/, /\brequest questions\b/],
+    response: {
+      text: "If a topic doesn't have enough questions to take its assessment, open Assessments and use \"Request questions\" on that topic — an admin will add more.",
+    },
+    link: { href: "/tutor/assessments", label: "Assessments" },
   },
 
   // ── Navigation — admin ───────────────────────────────────────────────
@@ -249,14 +317,79 @@ export const INTENTS: Intent[] = [
     },
     link: { href: "/admin/settings", label: "Settings" },
   },
+  {
+    id: "nav_admin_users",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["user", "account", "manage", "suspend", "search"],
+    patterns: [/\bmanage\b.*\busers?\b/, /\buser (list|directory)\b/],
+    response: { text: "Open Users to search, review, and manage every account on the platform." },
+    link: { href: "/admin/users", label: "Users" },
+  },
+  {
+    id: "nav_admin_class_appeals",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["appeal", "class", "suspend", "review", "pending"],
+    patterns: [/\b(review|decide)\b.*\bappeal/],
+    response: { text: "Open Class Appeals to approve or reject a tutor's appeal on a suspended or banned class." },
+    link: { href: "/admin/class-appeals", label: "Class Appeals" },
+  },
+  {
+    id: "nav_admin_audit_log",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["audit", "log", "history", "action", "moderation"],
+    patterns: [/\baudit log\b/, /\bmoderation history\b/],
+    response: { text: "Open Audit Log for a full history of moderation actions taken by administrators." },
+    link: { href: "/admin/audit-log", label: "Audit Log" },
+  },
+  {
+    id: "nav_admin_subjects",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["subject", "topic", "manage", "add", "edit"],
+    patterns: [/\b(add|edit|manage)\b.*\b(subject|topic)s?\b/],
+    response: { text: "Open Subjects & Topics to add, edit, or retire the subjects and topics used across the platform." },
+    link: { href: "/admin/subjects", label: "Subjects & Topics" },
+  },
+  {
+    id: "nav_admin_question_requests",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["question", "request", "tutor", "add", "assessment"],
+    patterns: [/\btutors?\b.*\brequest(ed|ing)?\b.*\bquestions?\b/],
+    response: { text: "Open Requests (under Assessment) to see topics where a tutor asked for more assessment questions." },
+    link: { href: "/admin/assessment/requests", label: "Requests" },
+  },
+  {
+    id: "nav_admin_chatbot",
+    category: "nav",
+    roles: [ADMIN],
+    keywords: ["chatbot", "unanswered", "miss", "assistant", "question"],
+    patterns: [/\bchatbot\b.*\b(miss|unanswered|question)/, /\bwhat.*(students|users).*ask/],
+    response: {
+      text: "Open Chatbot to see every question the assistant couldn't answer, grouped by frequency — use it to grow the FAQ knowledge base.",
+    },
+    link: { href: "/admin/chatbot", label: "Chatbot" },
+  },
 
   // ── Small talk / meta ────────────────────────────────────────────────
   {
     id: "smalltalk_capabilities",
     category: "smalltalk",
     roles: "all",
-    keywords: ["what", "help", "who", "can", "assist", "chatbot", "bot"],
-    patterns: [/\bwhat can you do\b/, /\bwho are you\b/, /\bhow can you help\b/, /\bhelp\b/],
+    // Deliberately narrow — a bare "help" (or "can") used to match this and
+    // swallow unclear messages before they could reach the fallback/miss log.
+    // Only a genuine "what can you do" / "who are you" phrasing should.
+    keywords: ["assist", "chatbot", "bot", "assistant"],
+    patterns: [
+      /\bwhat can (you|u) do\b/,
+      /\bwhat do you do\b/,
+      /\bwho are (you|u)\b/,
+      /\bwhat (are|r) (you|u)\b/,
+      /\bhow (can|do) (you|u) help\b/,
+    ],
     response: {
       text: "I'm the Katuwang assistant. I can point you to the right page, answer common questions about how the platform works, and (for learners) suggest classes that fit what you need. I don't run tutoring sessions myself.",
     },
@@ -274,7 +407,7 @@ export const INTENTS: Intent[] = [
     id: "smalltalk_greeting",
     category: "smalltalk",
     roles: "all",
-    keywords: ["morning", "afternoon", "greetings", "kumusta", "hello"],
+    keywords: ["morning", "afternoon", "greetings", "kumusta"],
     patterns: [/^\s*(hi|hey|hello|kumusta|good (morning|afternoon|evening))\b/],
     response: { text: "Hi! What do you need help with today?" },
     suggestions: ["What can you do?", "How do I enroll?"],

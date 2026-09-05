@@ -54,6 +54,25 @@ describe("classify — role gating", () => {
     expect(classify("recommend a math class", learner).intent?.category).toBe("recommend");
     expect(classify("recommend a math class", tutor).intent?.category ?? null).not.toBe("recommend");
   });
+
+  it("does not serve a tutor-workflow FAQ to a learner", () => {
+    expect(classify("how do I become a tutor", tutor).faq?.id).toBe("faq_become_tutor");
+    const res = classify("how do I become a tutor", learner);
+    expect(res.faq?.id ?? null).not.toBe("faq_become_tutor");
+  });
+
+  it("does not serve a learner-workflow FAQ to a tutor or admin", () => {
+    expect(classify("my class was cancelled what now", learner).faq?.id).toBe("faq_class_cancelled");
+    expect(classify("my class was cancelled what now", tutor).faq?.id ?? null).not.toBe("faq_class_cancelled");
+    expect(classify("my class was cancelled what now", admin).faq?.id ?? null).not.toBe("faq_class_cancelled");
+  });
+
+  it("still serves platform-wide FAQs to every role", () => {
+    for (const ctx of [learner, tutor, admin]) {
+      expect(classify("is katuwang free", ctx).faq?.id).toBe("faq_free");
+      expect(classify("why can't I see real names", ctx).faq?.id).toBe("faq_anonymity");
+    }
+  });
 });
 
 describe("classify — FAQ retrieval", () => {
@@ -64,5 +83,51 @@ describe("classify — FAQ retrieval", () => {
     ["can I upload a worksheet", "faq_file_upload"],
   ])("%s -> %s", (message, expectedId) => {
     expect(classify(message, learner).faq?.id).toBe(expectedId);
+  });
+});
+
+describe("classify — typo tolerance (v1.1)", () => {
+  it("resolves a single-edit-distance misspelling to the intended intent", () => {
+    expect(classify("how do i enrol in a class", learner).intent?.id).toBe("nav_enroll");
+    expect(classify("reccommend a math class", learner).intent?.id).toBe("recommend_class");
+  });
+
+  it("resolves a misspelling to the intended FAQ entry", () => {
+    expect(classify("will katuwang send me an email notificaton", learner).faq?.id).toBe(
+      "faq_email_notifications"
+    );
+  });
+
+  it("does not fuzzy-match short words", () => {
+    // "car" is not a real keyword anywhere, so this must stay unmatched
+    // rather than snapping to some unrelated 3-letter keyword.
+    expect(classify("car", learner).intent).toBeNull();
+  });
+});
+
+describe("classify — narrowed smalltalk_capabilities (v1.1)", () => {
+  it("a bare 'help' no longer matches the capabilities blurb", () => {
+    expect(classify("help", learner).intent?.id).not.toBe("smalltalk_capabilities");
+    expect(classify("can you help me", learner).intent?.id).not.toBe("smalltalk_capabilities");
+  });
+
+  it("a genuine 'what can you do' phrasing still matches", () => {
+    expect(classify("what can you do", learner).intent?.id).toBe("smalltalk_capabilities");
+    expect(classify("who are you", learner).intent?.id).toBe("smalltalk_capabilities");
+  });
+});
+
+describe("classify — length-normalized confidence (v1.1)", () => {
+  it("rejects a long rambling message that only glances a couple of keywords", () => {
+    const res = classify(
+      "so anyway I was talking to my friend yesterday about random school stuff and somehow class came up in conversation and also somewhere in there tutor got mentioned too",
+      learner
+    );
+    expect(res.intent).toBeNull();
+    expect(res.faq).toBeNull();
+  });
+
+  it("still accepts a short, pointed query", () => {
+    expect(classify("reset my password", learner).intent?.id).toBe("nav_password");
   });
 });
