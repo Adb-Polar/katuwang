@@ -30,7 +30,15 @@ const KNOWN_KEYWORDS: string[] = [
 
 function correctToken(token: string): string {
   if (token.length < 4 || KNOWN_KEYWORDS.includes(token)) return token;
-  return KNOWN_KEYWORDS.find((kw) => fuzzyHit(token, kw)) ?? token;
+  const candidates = KNOWN_KEYWORDS.filter((kw) => fuzzyHit(token, kw));
+  if (candidates.length === 0) return token;
+  // Typos almost never change the first letter, but two unrelated keywords
+  // can both sit a single edit away from the same misspelling (e.g. "sction"
+  // is one edit from both "section" and "action") — picking whichever one
+  // happens to be declared first is a coin flip. Prefer a same-first-letter
+  // candidate; if none share it, leave the token uncorrected rather than
+  // confidently guess wrong.
+  return candidates.find((kw) => kw[0] === token[0]) ?? token;
 }
 
 function intentAppliesTo(intent: Intent, role: ChatContext["role"]): boolean {

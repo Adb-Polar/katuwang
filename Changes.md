@@ -37,6 +37,7 @@
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 | [29](#part-29) | **Session pre/post-tests (`docs/plans/pre-test-post-test-plan.md`)** | Per-session PRE/POST diagnostic tests: a tutor builds one ordered question set per `ClassSession`, served twice (as a PRE attempt, then a POST attempt); learners take/resume/review; tutor + learner + admin analytics with four charts. Adapts the stale `class-pre-post-tests` branch, re-grained from per-class to per-session. Delivered in phases. | **Phase 0** — extracted `recharts` primitives out of `ReportsView.tsx` into a shared `src/components/charts/` module (`useThemeColors` widened to `--color-accent/success/error`; `DataTable` now `{rows,labelKey}` **or** `{rows,columns}`; `BarChartCard` moved verbatim) + new `GroupedBarChart` / `ProgressAreaChart` / `RateBarChart` / `DeltaBar` (the last pure-CSS, uses the `.kt-delta` badge); dead `.kt-chart-*` CSS removed. **Phase 1** — schema: 4 enums (`QuestionOrigin`, `SessionTestStatus`, `SessionTestKind`, `SessionTestAttemptStatus`) + 4 models (`SessionTest` `@@unique(sessionId)`, `SessionTestQuestion`, `SessionTestAttempt` with `kind` + `@@unique([sessionTestId,learnerId,kind])`, `SessionTestAttemptItem`) + `AssessmentQuestion.origin`/`ownerTutorProfileId` and index `[subject,topic,active,origin]` (origin appended last to keep existing prefixes). Applied via `prisma db push` (Option 1 — additive, no reset; history stays drifted). 478/478 throughout. Not committed. |
 | [30](#part-30) | **Chatbot v1.1 — usability pass (admin misses review + matching robustness + KB growth)** | The deterministic chatbot's `chatbot_misses` feedback loop was dead (no admin UI ever read it), an over-broad `smalltalk_capabilities` intent swallowed unclear messages before they could be logged as misses, and matching was brittle (no typo tolerance, no length-normalized confidence). Closes the loop, hardens matching, and roughly doubles the FAQ KB — no LLM, no new dependency, no schema change. | New `/admin/chatbot` page + `GET /api/admin/chatbot-misses` (JS-side `aggregateMisses()` groups misses by role + normalised token string — Prisma `groupBy` can't group by a derived value — role/text filter, sort by count/first/last seen, pagination); new admin nav item. `classifier.ts`: typo-correction step (`correctToken`, Levenshtein-1 via new `editDistance`/`fuzzyHit` in `normalize.ts`) snaps a misspelled token to its nearest known keyword before scoring *and* before pattern-matching, so e.g. "enrol" still lights up `/\benroll\b/`; added a length-normalized `MIN_CONFIDENCE = 0.35` gate (score / max(3, tokenCount)) alongside the existing absolute `MIN_SCORE` floor, per the original plan's un-implemented spec; `respond.ts`/`route.ts` now surface the winning score as a non-production `debugScore` field. `intents.ts`: narrowed `smalltalk_capabilities` (dropped the bare `/\bhelp\b/` pattern + generic keywords that swallowed most unclear messages) and added 12 new nav intents (find tutors, help page, search, tutor class-appeal/sessions/question-request, admin users/class-appeals/audit-log/subjects/question-requests/chatbot). `faq.ts`: 11 new grounded entries (26 total), each cited to its source doc line; purged 2 dead stopword-colliding keywords (`"my"`, `"you"`). `normalize.ts`: exported `STOPWORDS`, ~12 new `SYNONYMS`. New tests: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`, `chatbot-misses/route.test.ts`, extended `classifier.test.ts` (fuzzy matching, narrowed capabilities, confidence gate) — 586/586. `tsc`/`lint`/`test` all clean. `docs/reference/decisions.md` reviewed — no new entry (implementation refinement, not a thesis divergence). Not committed. |
+| [31](#part-31) | **Chatbot v1.2 — usability-test fixes** | Live-tested the v1.1 chatbot as all three roles via the running dev server (curl against `/api/chatbot` + `/api/admin/chatbot-misses`, logged in through NextAuth credentials). Found and fixed 3 real matching bugs the test itself surfaced as fresh miss rows. | `normalize.ts`: removed the pre-existing `session: "class"` synonym fold — it silently killed `nav_tutor_sessions`'s and `faq_multi_topic_class`'s own `"session"` keyword (the token could never appear in the token stream). `intents.ts`: `nav_search` and `nav_help_page` ("guide"/"tutorial") and `nav_appeal_class` ("suspend(ed)"/"ban(ned)") each gained a bare-keyword pattern so a single-word message (weight 1, below `MIN_SCORE = 2`) now also clears the pattern weight (3) — bare "help" deliberately still falls through, unchanged from v1.1. `faq.ts`: dropped the generic `"level"` keyword from `faq_grades` (was tying 4-4 against `faq_update_grade_section` on "update my grade level", with the earlier-declared entry wrongly winning) and dropped `"what"`/`"now"` from `faq_class_cancelled` (was tying 2-2 against `faq_declined` on "what happens if my application is declined") — both entries still resolve correctly on their own strong keywords. Added a `classify — usability fixes (v1.2)` test block (8 cases) covering every bug + a no-regression check on the two FAQs' original strong phrasings. 623/623 tests pass, `tsc`/`lint` clean. No schema change, no new dependency. Not committed. |
 
 ---
 
@@ -2037,6 +2038,149 @@ chatbot/classifier/route tests pass unchanged. `tsc --noEmit` / `lint` /
 entry. `docs/reference/decisions.md` reviewed — no new entry: this is
 implementation refinement of an already-decided module, not a scope/role cut
 against the thesis.
+
+### Not committed.
+
+---
+
+<a id="part-31"></a>
+## Part 31 — Chatbot v1.2: usability-test fixes
+
+Live-tested the v1.1 chatbot end-to-end: logged in as `demo@learner.test`,
+`demo@tutor.test`, and `admin@katuwang.test` via the NextAuth credentials
+flow against the running dev server, then drove `POST /api/chatbot` with a
+battery of realistic and edge-case phrasings per role, and cross-checked
+`GET /api/admin/chatbot-misses` to confirm the miss-logging loop (added in
+Part 30) actually captures what it misses. It did — and surfaced 3 real
+matching bugs as fresh, correctly-grouped miss rows, which is exactly the
+loop working as designed.
+
+### Bugs found and fixed
+
+1. **`session` synonym collision.** `normalize.ts`'s `SYNONYMS` map folded
+   `session → class` (added earlier for Filipino "aral"/"leksyon"), which
+   meant the token `"session"` could never survive tokenization — silently
+   killing `nav_tutor_sessions`'s own `"session"` keyword (only reachable via
+   its regex patterns, which require an add/reschedule/cancel verb too) and
+   `faq_multi_topic_class`'s `"session"` keyword the same way. Removed the
+   mapping; "session" is now its own token.
+2. **Bare single-keyword nav queries couldn't clear `MIN_SCORE = 2`.** A
+   lone word like `"search"` or `"guide"` only scores the keyword weight (1),
+   below the absolute floor, so it fell to the fallback (and got logged as a
+   miss) instead of answering. Added a bare-keyword regex pattern (weight 3)
+   to `nav_search`, and `"guide"`/`"tutorial"` patterns to `nav_help_page` —
+   each now clears the gate on its own. Left bare `"help"` alone: falling
+   through to the fallback there is the intended v1.1 behavior.
+3. **FAQ keyword ties resolved to the wrong (earlier-declared) entry.**
+   `"how do i update my grade level"` scored `faq_grades` and
+   `faq_update_grade_section` at 4-4 (`grade`+`level` vs. `grade`+`update`);
+   the classifier's FAQ tie-break keeps whichever was declared first in
+   `FAQ_ENTRIES`, so the more generic `faq_grades` ("grades 7–12") won over
+   the specific one asked for. Same pattern for `"what happens if my
+   application is declined"` — `faq_class_cancelled`'s generic `"what"`/
+   `"now"` keywords tied it 2-2 against `faq_declined`'s `"declined"` hit,
+   and again the earlier-declared entry won a query it wasn't about. Fixed
+   by dropping the offending generic keyword from each earlier entry
+   (`"level"` from `faq_grades`; `"what"`/`"now"` from `faq_class_cancelled`)
+   — both still resolve correctly on their remaining, more specific
+   keywords; also mentioned nowhere near `nav_appeal_class`'s gate — that
+   one needed the opposite fix (its own patterns broadened, see #2's sibling
+   below), since a tutor asking "what happens if I get suspended" has no
+   `"class"` word to satisfy the existing paired patterns. Added bare
+   `/\bsuspend(ed)?\b/` / `/\bban(ned)?\b/` patterns to `nav_appeal_class`.
+
+### Verification
+
+Re-ran every previously-broken phrasing (and the two at-risk "still works"
+phrasings for the touched FAQs) live against `POST /api/chatbot` after the
+fix, as the correct role each time — all 9 resolve to the intended
+intent/FAQ, no regressions. Added `classify — usability fixes (v1.2)` to
+`classifier.test.ts` (8 cases, including two no-regression assertions on the
+FAQs' original strong phrasings). `pnpm exec tsc --noEmit`, `pnpm lint`, and
+`pnpm test` all clean — **623/623** tests pass (was 586/586).
+
+No schema change, no new dependency. `docs/reference/decisions.md` reviewed
+— no entry needed (bug fixes on an already-decided module, not a thesis
+divergence).
+
+### Not committed.
+
+---
+
+<a id="part-32"></a>
+## Part 32 — Chatbot v1.2b: `nav_find_tutors` vs. `recommend_class` tie
+
+Fixes the last bug found during the Part 31 usability test: "find tutors"
+(no subject named) tied `nav_find_tutors` and `recommend_class` at the same
+score (both share the `"find"`/`"tutor"` keywords, and both had a pattern
+hit), and the classifier's tie-break — `recommend` (`CATEGORY_PRIORITY` 4)
+beats `nav` (3) — always won it for `recommend_class`, so the learner got
+"tell me a subject" instead of the Find Tutors deep link.
+
+`intents.ts`: `nav_find_tutors` gained two anchored patterns —
+`/^(find|browse|show)\s*tutors?$/` and `/^tutors?\s*(directory|list)$/` —
+that only match a short, subject-less phrasing. They add an extra pattern
+hit (weight 3) on top of the existing generic pattern, so "find tutors"
+scores 8 vs. `recommend_class`'s unchanged 5 — an outright win, no tie, no
+`CATEGORY_PRIORITY` fallback needed. A subject-bearing phrasing like "find
+me a science tutor" doesn't match the new anchored patterns, so
+`recommend_class` still wins there exactly as before (verified, no
+regression).
+
+Added two cases to `classify — usability fixes (v1.2)` in
+`classifier.test.ts`: "find tutors"/"tutors directory" → `nav_find_tutors`,
+and "find me a science tutor" → `recommend_class` unchanged. Re-verified
+live via curl against `POST /api/chatbot` as the learner role. **625/625**
+tests pass, `tsc`/`lint` clean. No schema change, no new dependency.
+`docs/reference/decisions.md` reviewed — no entry needed.
+
+### Not committed.
+
+---
+
+<a id="part-33"></a>
+## Part 33 — Chatbot v1.2c: misspelling battery test + `correctToken` tie-break fix
+
+Ran a battery of ~30 misspelled phrasings against `POST /api/chatbot` as the
+learner role (and cross-checked with the tutor/admin catalogues) to
+stress-test the typo-tolerance work from Part 30. Most held up correctly —
+distance-1 typos self-correct ("enrol"→enroll, "grde"→grade, "declned"→
+declined, "shedule"→schedule, "tutorr"→tutor, "acount"→account,
+"anonimous"→anonymous), and distance-2+ typos ("paswrd", "cancled",
+"certifcation", "notifcations") correctly stay uncorrected per the
+documented single-edit-distance limit.
+
+One real bug found: `correctToken()` (`classifier.ts`) picked whichever
+known keyword `Array.prototype.find` reached first when a misspelling sat
+exactly one edit from **two** unrelated keywords — "sction" is one edit from
+both `"section"` (drop the middle "e") and `"action"` (substitute the first
+letter), and array-declaration order happened to hand it `"action"`
+(the admin audit-log keyword), silently discarding the intended
+`"section"` correction and weakening the match to `faq_update_grade_section`
+(score 2 via `"update"` alone instead of 4 via `"update"` + `"section"`).
+
+Fixed by collecting **all** distance-1 candidates and preferring the one
+sharing the token's first letter — a substitution/deletion/insertion typo
+essentially never changes the first character, so this reliably picks
+`"section"` over `"action"` for "sction". If no candidate shares the first
+letter, the token is now left uncorrected rather than guessing — safer than
+a confident wrong correction. Added a regression test ("sction update" →
+`faq_update_grade_section`) to `classify — usability fixes (v1.2)` in
+`classifier.test.ts`. **626/626** tests pass, `tsc`/`lint` clean, re-verified
+live via curl. No schema change, no new dependency.
+`docs/reference/decisions.md` reviewed — no entry needed.
+
+Noted, not fixed (both are inherent to the single-edit-distance design, not
+new bugs — see updated `docs/reference/chatbot.md` limitations):
+- A misspelled trigger word breaks a pattern-only intent outright (e.g.
+  "wat can you do" doesn't match `smalltalk_capabilities` — its patterns are
+  literal regex, not typo-tolerant, unlike keyword scoring).
+- A typo in a word that only exists as a `SYNONYMS` source (e.g.
+  "certifcation", meant to fold to `"certify"`) isn't corrected, because
+  `correctToken` compares the misspelled token against the canonical
+  *target* keyword, and the edit distance between "certifcation" and
+  "certify" is too large — the two-stage fold-then-correct design doesn't
+  fuzzy-match against synonym *keys*.
 
 ### Not committed.
 

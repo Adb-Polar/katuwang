@@ -32,7 +32,6 @@ const SYNONYMS: Record<string, string> = {
   teacher: "tutor",
   klase: "class",
   klaseng: "class",
-  session: "class",
   aral: "class",
   leksyon: "class",
   lesson: "class",

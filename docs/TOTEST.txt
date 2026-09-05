@@ -200,18 +200,58 @@ until the UI phases land and re-verify through the screens directly.
 Chatbot v1.1 - usability pass (Changes.md Part 30)
  [] /admin/chatbot renders; role filter + text search + sort by count/first
     seen/last seen + pagination all work; "Chatbot" nav item highlights when active
- [] Ask the assistant gibberish ("asdf qwerty zxcv") as each role -> after a
-    refresh a row appears in /admin/chatbot for that role
- [] Two near-identical gibberish messages differing only in case/punctuation
-    (e.g. "Foo Bar?" then "foo bar") -> collapse into one group with count 2
- [] Ask "help" alone -> no longer returns the capabilities blurb; ask "what can
-    you do" -> still returns it
- [] Misspelled queries ("how do i enrol", "notificaton") -> correct page /
-    answer still suggested
- [] New nav intents deep-link correctly: "find tutors" (learner), "help page"
-    (all 3 roles, correct /{role}/help), "appeal a suspended class" (tutor),
-    "audit log" / "subjects" / "chatbot" (admin)
+    (not yet checked visually in-browser - browser extension unavailable this
+    session; the API it's backed by was exercised directly, see below)
+ [Good] Ask the assistant gibberish ("asdf qwerty zxcv") as each role -> after a
+    refresh a row appears in /admin/chatbot for that role - verified via curl
+    against POST /api/chatbot + GET /api/admin/chatbot-misses as all 3 roles
+ [Good] Two near-identical gibberish messages differing only in case/punctuation
+    (e.g. "Foo Bar?" then "foo bar") -> collapse into one group with count 2 -
+    verified ("zzqxx flarn blibbet nonsense" / "ZZQXX flarn, blibbet nonsense!!")
+ [Good] Ask "help" alone -> no longer returns the capabilities blurb; ask "what can
+    you do" -> still returns it - verified via curl
+ [Good] Misspelled queries ("how do i enrol", "notificaton") -> correct page /
+    answer still suggested - verified via curl
+ [Good] New nav intents deep-link correctly: "find tutors" (learner), "help
+    page" (all 3 roles, correct /{role}/help), "appeal a suspended class"
+    (tutor), "audit log" / "subjects" / "chatbot" (admin) - all verified via
+    curl for their roles, including "find tutors" after the Part 32 fix
  [] New FAQ entries retrieve correctly for a few phrasings (e.g. "why can't I
     sign in after registering", "is there a class capacity limit")
- [] Chatbot still answers its existing pre-v1.1 canned topics unchanged (e.g.
-    "how do I enroll", "is katuwang free")
+ [Good] Chatbot still answers its existing pre-v1.1 canned topics unchanged (e.g.
+    "how do I enroll", "is katuwang free") - verified via curl
+
+Chatbot v1.2 - usability-test fixes (Changes.md Part 31)
+ [Good] "how do i cancel a session" (tutor) -> nav_tutor_sessions, not
+    diverted by the old session->class synonym fold - verified via curl
+ [Good] Bare "search" (any role) -> nav_search; bare "guide" (any role) ->
+    nav_help_page; bare "help" still falls to fallback (unchanged) - verified
+ [Good] "what happens if i get suspended" (tutor, no "class" word) ->
+    nav_appeal_class - verified via curl
+ [Good] "how do i update my grade level" -> faq_update_grade_section, not the
+    generic faq_grades; "what grade levels does katuwang serve" still resolves
+    to faq_grades - verified via curl (no regression)
+ [Good] "what happens if my application is declined" -> faq_declined, not
+    faq_class_cancelled; "my class was cancelled what now" still resolves to
+    faq_class_cancelled - verified via curl (no regression)
+ [] Same 5 checks above, repeated through the actual chat widget UI (not just
+    the raw API) once the browser is available - low risk, same code path,
+    but not yet eyeballed in the widget itself
+ [Good] "find tutors" / "tutors directory" (learner) -> nav_find_tutors, no
+    longer loses the tie to recommend_class (Changes.md Part 32); "find me a
+    science tutor" still resolves to recommend_class unchanged - verified via curl
+
+Chatbot v1.2c - misspelling battery test (Changes.md Part 33)
+ [Good] ~30 misspelled phrasings tested live via curl as learner (cross-checked
+    tutor/admin catalogues too): distance-1 typos self-correct correctly
+    (enrol, grde, declned, shedule, tutorr, acount, anonimous, passwrd, ...);
+    distance-2+ typos correctly stay uncorrected (paswrd, cancled, notifcations,
+    certifcation) - matches documented single-edit-distance limit
+ [Good] "sction update" -> faq_update_grade_section with BOTH keywords scoring
+    (debugScore 4, was wrongly 2 before the fix - correctToken was picking
+    "action" instead of "section", an equidistant-candidate tie) - fixed &
+    verified via curl
+ [] Known, not-a-bug limitations worth being aware of during manual testing:
+    a misspelled trigger word breaks a pattern-only intent (e.g. "wat can you
+    do" doesn't match smalltalk_capabilities); a typo in a word that only
+    exists as a SYNONYMS source (e.g. "certifcation") isn't corrected

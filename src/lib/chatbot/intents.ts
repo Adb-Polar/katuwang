@@ -78,7 +78,19 @@ export const INTENTS: Intent[] = [
     category: "nav",
     roles: [LEARNER],
     keywords: ["tutor", "find", "browse", "verified", "profile"],
-    patterns: [/\bfind\b.*\btutors?\b/, /\bbrowse\b.*\btutors?\b/, /\blist of tutors\b/],
+    patterns: [
+      /\bfind\b.*\btutors?\b/,
+      /\bbrowse\b.*\btutors?\b/,
+      /\blist of tutors\b/,
+      // Short, subject-less phrasing ("find tutors", "tutors directory")
+      // gets an extra pattern hit so it doesn't tie against recommend_class
+      // (which shares the "find"/"tutor" keywords for subject-bearing
+      // phrasings like "find me a science tutor", where recommend should
+      // still win) — untied, this beats recommend outright instead of
+      // losing the tie to its higher CATEGORY_PRIORITY.
+      /^(find|browse|show)\s*tutors?$/,
+      /^tutors?\s*(directory|list)$/,
+    ],
     response: {
       text: "Find Tutors shows every verified tutor with a CERTIFIED topic — their subjects, verified-topic count, and published classes.",
     },
@@ -156,7 +168,10 @@ export const INTENTS: Intent[] = [
     category: "nav",
     roles: "all",
     keywords: ["help", "guide", "faq", "tutorial", "documentation"],
-    patterns: [/\bhelp (page|centre|center)\b/, /\bfaqs?\b/, /\buser guide\b/],
+    // Bare "guide"/"tutorial" also clear via pattern weight alone — mirrors
+    // the existing bare /\bfaqs?\b/ pattern. Bare "help" deliberately stays
+    // out (see smalltalk_capabilities narrowing) so it still falls through.
+    patterns: [/\bhelp (page|centre|center)\b/, /\bfaqs?\b/, /\buser guide\b/, /\bguide\b/, /\btutorial\b/],
     response: { text: "Open Help & FAQs for a full walkthrough of the platform, organised by topic." },
     link: (ctx) =>
       ctx.role === LEARNER
@@ -170,7 +185,9 @@ export const INTENTS: Intent[] = [
     category: "nav",
     roles: "all",
     keywords: ["search", "lookup", "directory"],
-    patterns: [/\bhow\b.*\bsearch\b/, /\bwhere\b.*\bsearch\b/],
+    // Bare /\bsearch\b/ (not just "how/where do I search") so a one-word
+    // "search" message clears MIN_SCORE via the pattern weight alone.
+    patterns: [/\bhow\b.*\bsearch\b/, /\bwhere\b.*\bsearch\b/, /\bsearch\b/],
     response: {
       text: "Use the search bar in the top navigation bar — it looks up classes, tutors, and requests as you type.",
     },
@@ -227,7 +244,15 @@ export const INTENTS: Intent[] = [
     category: "nav",
     roles: [TUTOR],
     keywords: ["appeal", "suspend", "class", "locked", "moderation"],
-    patterns: [/\bappeal\b.*\b(class|suspension|ban)\b/, /\bclass\b.*\b(suspended|banned)\b/],
+    // Bare /\bsuspend(ed)?\b/ and /\bban(ned)?\b/ too — "what happens if I
+    // get suspended" has no "class" word, so the paired patterns below never
+    // fired; these are specific enough on their own for a tutor-only intent.
+    patterns: [
+      /\bappeal\b.*\b(class|suspension|ban)\b/,
+      /\bclass\b.*\b(suspended|banned)\b/,
+      /\bsuspend(ed)?\b/,
+      /\bban(ned)?\b/,
+    ],
     response: {
       text: "A SUSPENDED or BANNED class shows an appeal card under its moderation panel — open the class and file one appeal with your reason. You can only have one PENDING appeal per class at a time.",
     },

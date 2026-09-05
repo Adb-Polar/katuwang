@@ -47,7 +47,9 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_grades",
     question: "What grade levels does Katuwang serve?",
     answer: "Junior and Senior High School — Grades 7 to 12 — under the Philippine K-12 framework.",
-    keywords: ["grade", "level", "year", "junior", "senior", "high", "school", "who"],
+    // "level" dropped — it tied this against faq_update_grade_section on
+    // "update my grade level" (both scored 4, first-declared won wrongly).
+    keywords: ["grade", "year", "junior", "senior", "high", "school", "who"],
   },
   {
     id: "faq_subjects",
@@ -96,7 +98,11 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     question: "My class was cancelled — what now?",
     answer:
       "You'll get a notification. If your enrolment came from a topic request, that request re-opens automatically so a tutor can pick it up again. Otherwise, browse for another class or post a new request.",
-    keywords: ["cancel", "cancelled", "class", "removed", "gone", "what", "now"],
+    // "what"/"now" dropped — too generic, tied this against faq_declined on
+    // "what happens if my application is declined" (both scored 2, this one
+    // first-declared won wrongly). "cancel"/"cancelled"/"class" carry the
+    // real signal on their own.
+    keywords: ["cancel", "cancelled", "class", "removed", "gone"],
     roles: [LEARNER],
   },
   {

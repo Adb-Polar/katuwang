@@ -131,3 +131,55 @@ describe("classify — length-normalized confidence (v1.1)", () => {
     expect(classify("reset my password", learner).intent?.id).toBe("nav_password");
   });
 });
+
+describe("classify — usability fixes (v1.2)", () => {
+  it("a tutor asking about their sessions is no longer swallowed by the 'session'->'class' synonym fold", () => {
+    expect(classify("how do i cancel a session", tutor).intent?.id).toBe("nav_tutor_sessions");
+  });
+
+  it("a bare 'search' clears the confidence gate for nav_search", () => {
+    expect(classify("search", learner).intent?.id).toBe("nav_search");
+  });
+
+  it("a bare 'guide' clears the confidence gate for nav_help_page", () => {
+    expect(classify("guide", tutor).intent?.id).toBe("nav_help_page");
+  });
+
+  it("a bare 'help' still falls through to the fallback (unchanged from v1.1)", () => {
+    const res = classify("help", learner);
+    expect(res.intent).toBeNull();
+    expect(res.faq).toBeNull();
+  });
+
+  it("a tutor asking what happens if they're suspended reaches nav_appeal_class without mentioning 'class'", () => {
+    expect(classify("what happens if i get suspended", tutor).intent?.id).toBe("nav_appeal_class");
+  });
+
+  it("'update my grade level' resolves to faq_update_grade_section, not the generic faq_grades", () => {
+    expect(classify("how do i update my grade level", learner).faq?.id).toBe("faq_update_grade_section");
+  });
+
+  it("a declined application no longer loses the tie to faq_class_cancelled", () => {
+    expect(classify("what happens if my application is declined", learner).faq?.id).toBe("faq_declined");
+  });
+
+  it("faq_grades and faq_class_cancelled still resolve correctly on their own strong phrasings", () => {
+    expect(classify("what grade levels does katuwang serve", learner).faq?.id).toBe("faq_grades");
+    expect(classify("my class was cancelled what now", learner).faq?.id).toBe("faq_class_cancelled");
+  });
+
+  it("subject-less 'find tutors' reaches nav_find_tutors instead of losing the tie to recommend_class", () => {
+    expect(classify("find tutors", learner).intent?.id).toBe("nav_find_tutors");
+    expect(classify("tutors directory", learner).intent?.id).toBe("nav_find_tutors");
+  });
+
+  it("a subject-bearing tutor request still goes to the recommendation flow, unchanged", () => {
+    expect(classify("find me a science tutor", learner).intent?.id).toBe("recommend_class");
+  });
+
+  it("prefers a same-first-letter correction when a misspelling is equidistant to two keywords", () => {
+    // "sction" is one edit from both "section" (drop the middle "e") and
+    // "action" (substitute the first letter) - must resolve to "section".
+    expect(classify("sction update", learner).faq?.id).toBe("faq_update_grade_section");
+  });
+});

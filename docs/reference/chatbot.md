@@ -212,7 +212,37 @@ for a new FAQ) whenever you add an intent or FAQ entry.
 - Spelling correction is single-edit-distance only, and only against
   keywords already in the catalogue (`fuzzyHit`/`editDistance` in
   `normalize.ts`) — a token more than one edit from every known keyword
-  still misses.
+  still misses. When a misspelling sits one edit from two different
+  keywords, `correctToken()` (`classifier.ts`) prefers the one sharing the
+  token's first letter (typos essentially never change it); if neither
+  candidate does, it leaves the token uncorrected rather than guess.
+- A misspelled trigger word breaks a pattern-only intent outright — regex
+  `patterns` are literal, not typo-tolerant, so e.g. "wat can you do" won't
+  match `smalltalk_capabilities` the way "how do i enrol" corrects and still
+  hits `/\benroll\b/`.
+- A typo in a word that only appears as a `SYNONYMS` *source* (e.g.
+  "certifcation", meant to fold to `"certify"`) isn't corrected — fuzzy
+  correction compares against the canonical *target* keyword, and the edit
+  distance from the misspelled full word to its short canonical form is
+  usually too large.
 - One intent or one FAQ entry per reply — no multi-answer composition.
 - English + common Taglish only; other phrasings fall to the fallback (and
   get logged).
+- A bare single-keyword message only clears `MIN_SCORE` if that keyword also
+  has a matching regex pattern (patterns are worth 3, a lone keyword only 1).
+  A handful of nav intents (`nav_search`, `nav_help_page`) have such a
+  pattern for this reason; not every keyword does.
+- FAQ ties resolve to whichever entry is declared **first** in
+  `FAQ_ENTRIES` — there's no FAQ-vs-FAQ tie-break beyond declaration order
+  (unlike intents, which break ties by `CATEGORY_PRIORITY`). Keep FAQ
+  keyword lists specific to avoid a generic word (e.g. `"what"`, `"level"`)
+  silently letting an earlier, more generic entry win a query aimed at a
+  later, more specific one — see Changes.md Part 31 for two real instances.
+- A `nav` intent can still lose a tie to a higher-`CATEGORY_PRIORITY`
+  `recommend` intent when both hit the same score on shared keywords (e.g.
+  `nav_find_tutors` and `recommend_class` both list `"find"`/`"tutor"`).
+  `nav_find_tutors` carries two anchored patterns for exactly this reason —
+  they only match a short, subject-less phrasing ("find tutors", "tutors
+  directory"), so it wins outright instead of tying; a subject-bearing
+  phrasing ("find me a science tutor") still ties and correctly goes to
+  `recommend_class` (see Changes.md Part 32).
