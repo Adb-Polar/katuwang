@@ -78,7 +78,7 @@ export default function ClassManagement() {
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="flex justify-between items-center">
-            <h2 className="card-title text-sm font-bold">Class Schedule & Management</h2>
+            <h2 className="card-title text-base font-bold">Class Schedule &amp; Management</h2>
             <Link href="/tutor/classes/new" className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer">
               <Plus className="h-4 w-4" />
               Schedule Class

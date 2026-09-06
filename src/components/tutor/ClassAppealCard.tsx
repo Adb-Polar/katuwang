@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Gavel } from "lucide-react";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import CharCount from "@/components/ui/CharCount";
+
+const REASON_MAX = 500;
 
 export interface ClassAppealSummary {
   id: string;
@@ -94,10 +97,11 @@ export default function ClassAppealCard({
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              maxLength={500}
+              maxLength={REASON_MAX}
               placeholder="Explain your side. An admin will review it."
               className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-24"
             />
+            <CharCount value={reason} max={REASON_MAX} />
           </FormField>
           <div className="flex justify-end gap-2">
             <button

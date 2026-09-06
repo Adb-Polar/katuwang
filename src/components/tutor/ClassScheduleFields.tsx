@@ -81,6 +81,7 @@ export default function ClassScheduleFields({
   const actionBtnCls = page ? "btn-md text-sm" : "btn-sm text-xs";
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
   const topicLabelCls = page ? "text-xs" : "text-2xs";
+  const fieldSize = page ? "md" : "sm";
   const { subjects, topicsFor } = useSubjectCatalog();
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
@@ -174,7 +175,7 @@ export default function ClassScheduleFields({
     <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
 
-      <FormField label="Subject Area" required>
+      <FormField size={fieldSize} label="Subject Area" required>
         <select
           name="subject"
           value={form.subject}
@@ -192,7 +193,7 @@ export default function ClassScheduleFields({
         </select>
       </FormField>
 
-      <FormField label="Target Grade" hint="Optional — helps matching. Leave as 'Any grade' if it's open to all.">
+      <FormField size={fieldSize} label="Target Grade" hint="Optional — helps matching. Leave as 'Any grade' if it's open to all.">
         <select
           name="gradeLevel"
           value={form.gradeLevel}
@@ -208,7 +209,7 @@ export default function ClassScheduleFields({
         </select>
       </FormField>
 
-      <FormField label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
+      <FormField size={fieldSize} label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
         {!form.subject ? (
           <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
             Select a subject to see available topics.
@@ -291,7 +292,7 @@ export default function ClassScheduleFields({
         )}
       </FormField>
 
-      <FormField label="Description" hint="Optional">
+      <FormField size={fieldSize} label="Description" hint="Optional">
         <textarea
           name="description"
           value={form.description}
@@ -302,6 +303,7 @@ export default function ClassScheduleFields({
       </FormField>
 
       <FormField
+        size={fieldSize}
         label={`Sessions${sessionRows.length > 0 ? ` (${sessionRows.length})` : ""}`}
         required
         hint="Each session covers one topic from the ones selected above."
@@ -313,7 +315,10 @@ export default function ClassScheduleFields({
         ) : (
           <div className="space-y-2">
             {sessionRows.map((row, i) => (
-              <div key={row.key} className="border border-base-200 rounded-lg p-2 space-y-1.5">
+              <div
+                key={row.key}
+                className="border border-base-300 bg-base-200/40 rounded-lg p-2.5 space-y-1.5"
+              >
                 <div className="flex items-center gap-1.5">
                   <span className={`${page ? "text-xs" : "text-2xs"} font-semibold text-base-content/50 shrink-0`}>
                     #{i + 1}
@@ -370,7 +375,7 @@ export default function ClassScheduleFields({
         )}
       </FormField>
 
-      <FormField label="Location" hint="Optional — for an in-person class">
+      <FormField size={fieldSize} label="Location" hint="Optional — for an in-person class">
         <div className="flex flex-wrap items-center gap-1.5">
           <input
             type="text"
@@ -392,7 +397,7 @@ export default function ClassScheduleFields({
       </FormField>
 
       <div className="grid grid-cols-2 gap-4">
-        <FormField label="Max Capacity" required>
+        <FormField size={fieldSize} label="Max Capacity" required>
           <input
             type="number"
             name="maxStudents"
@@ -405,7 +410,7 @@ export default function ClassScheduleFields({
           />
         </FormField>
 
-        <FormField label="Meeting Link" hint="Optional">
+        <FormField size={fieldSize} label="Meeting Link" hint="Optional">
           <input
             type="url"
             name="meetingLink"

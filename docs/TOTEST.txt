@@ -33,6 +33,19 @@ fixes.md Phase 1 (Changes.md Part 37)
     "This class isn't published yet" placeholder + "Back to my classes", not
     the full class details
 
+fixes.md Phase 2 (Changes.md Part 38)
+ [] Suspended/banned class -> tutor class page -> "Appeal this decision" ->
+    the reason textarea shows a live "N/500" counter that turns amber near 500
+ [] Verified topics now render as green-outlined pills (with a check) wherever
+    they show: class card, class detail page, /learner/tutors/[id] Verified
+    Topics; non-verified topics stay neutral/primary outline
+ [] /tutor/classes/new and /tutor/requests/[id]/accept: field labels are the
+    larger text-sm size; the compact accept-request layout still fits
+ [] /tutor/classes: "Class Schedule & Management" header is larger; class
+    cards lift slightly + show a primary border on hover
+ [] /tutor/classes/new: each session row has a visible grey fill + border
+    (doesn't blend into the form background)
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

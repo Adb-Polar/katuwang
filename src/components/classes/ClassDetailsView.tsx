@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, Link as LinkIcon, Users, BadgeCheck, EyeOff, MapPin } from "lucide-react";
+import { ArrowLeft, Link as LinkIcon, Users, EyeOff, MapPin } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
+import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import ClassModerationPanel from "./ClassModerationPanel";
 
@@ -104,13 +105,12 @@ export default function ClassDetailsView({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {topics.map((topic) => (
-            <span
+            <TopicChip
               key={topic}
-              className="badge badge-outline badge-primary text-2xs font-semibold gap-1 py-2.5"
-            >
-              {verifiedTopics?.includes(topic) && <BadgeCheck className="h-3 w-3 text-success" />}
-              {topic}
-            </span>
+              topic={topic}
+              tone="primary"
+              verified={verifiedTopics?.includes(topic)}
+            />
           ))}
         </div>
       </div>

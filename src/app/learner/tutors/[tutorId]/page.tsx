@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { ArrowLeft, BadgeCheck, User } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
+import TopicChip from "@/components/ui/TopicChip";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
@@ -136,10 +137,7 @@ export default async function LearnerTutorProfilePage({
                   <span className="badge badge-neutral badge-sm text-2xs font-bold">{subject}</span>
                   <div className="flex flex-wrap gap-1">
                     {topics.map((t) => (
-                      <span key={t} className="badge badge-outline badge-sm text-2xs gap-1">
-                        <BadgeCheck className="h-3 w-3 text-success" />
-                        {t}
-                      </span>
+                      <TopicChip key={t} topic={t} verified />
                     ))}
                   </div>
                 </div>

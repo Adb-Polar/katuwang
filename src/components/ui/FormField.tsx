@@ -6,6 +6,7 @@ export default function FormField({
   hint,
   error,
   orientation = "vertical",
+  size = "sm",
   children,
 }: {
   label: string;
@@ -13,10 +14,12 @@ export default function FormField({
   hint?: string;
   error?: string;
   orientation?: "vertical" | "horizontal";
+  /** `"md"` bumps the label to `text-sm` — use on full-page forms. */
+  size?: "sm" | "md";
   children: ReactNode;
 }) {
   const labelNode = (
-    <span className="text-xs font-semibold text-base-content/80">
+    <span className={`${size === "md" ? "text-sm" : "text-xs"} font-semibold text-base-content/80`}>
       {label}
       {required && <span className="text-error ml-0.5">*</span>}
     </span>

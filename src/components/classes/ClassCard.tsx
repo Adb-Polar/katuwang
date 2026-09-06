@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, BadgeCheck, Layers, EyeOff, AlertTriangle, GraduationCap } from "lucide-react";
+import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle, GraduationCap } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
+import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 
 interface SessionLike {
@@ -78,11 +79,11 @@ export default function ClassCard({
 
   const isModerated = status === "SUSPENDED" || status === "BANNED";
 
-  const cardClassName = `card border cursor-pointer transition duration-200 text-xs p-4 space-y-3 block ${
+  const cardClassName = `card border cursor-pointer transition duration-200 hover:-translate-y-0.5 hover:shadow-md text-xs p-4 space-y-3 block ${
     isModerated
       ? "bg-error/5 hover:bg-error/10 border-error/30"
       : published
-      ? "bg-base-200/30 hover:bg-base-200/50 border-base-300"
+      ? "bg-base-200/30 hover:bg-base-200/60 hover:border-primary/40 border-base-300"
       : "bg-warning/5 hover:bg-warning/10 border-warning/30"
   }`;
 
@@ -124,13 +125,7 @@ export default function ClassCard({
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-1">
           {shownTopics.map((topic) => (
-            <span
-              key={topic}
-              className="badge badge-outline badge-sm text-2xs font-semibold gap-1 py-2.5"
-            >
-              {verifiedTopics?.includes(topic) && <BadgeCheck className="h-3 w-3 text-success" />}
-              {topic}
-            </span>
+            <TopicChip key={topic} topic={topic} verified={verifiedTopics?.includes(topic)} />
           ))}
           {overflowCount > 0 && (
             <span className="badge badge-ghost badge-sm text-2xs font-semibold py-2.5">
