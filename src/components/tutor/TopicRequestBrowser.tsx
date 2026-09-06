@@ -37,16 +37,25 @@ interface AcceptedRequest {
 
 export default function TopicRequestBrowser() {
   const { subjects } = useSubjectCatalog();
-  const [tab, setTab] = useState<"open" | "accepted">("open");
+  const [tab, setTab] = useState<"directed" | "public" | "accepted">("directed");
   const [subject, setSubject] = useState<string>("");
 
-  const openList = usePaginatedList<OpenRequest>(
+  const directedList = usePaginatedList<OpenRequest>(
     "/api/tutor/topic-requests",
     "requests",
-    { tab: "open", ...(subject ? { subject } : {}) },
+    { tab: "directed", ...(subject ? { subject } : {}) },
     PAGE_SIZE,
-    "Could not load topic requests.",
-    "open"
+    "Could not load directed requests.",
+    "directed"
+  );
+
+  const publicList = usePaginatedList<OpenRequest>(
+    "/api/tutor/topic-requests",
+    "requests",
+    { tab: "public", ...(subject ? { subject } : {}) },
+    PAGE_SIZE,
+    "Could not load public requests.",
+    "public"
   );
 
   const acceptedList = usePaginatedList<AcceptedRequest>(
@@ -58,7 +67,9 @@ export default function TopicRequestBrowser() {
     "accepted"
   );
 
-  const active = tab === "open" ? openList : acceptedList;
+  const openList = tab === "directed" ? directedList : publicList;
+  const active = tab === "accepted" ? acceptedList : openList;
+  const isOpenTab = tab === "directed" || tab === "public";
 
   return (
     <div className="space-y-4">
@@ -66,11 +77,12 @@ export default function TopicRequestBrowser() {
 
       <Tabs
         tabs={[
-          { key: "open", label: "Open to me" },
+          { key: "directed", label: "Directed to me" },
+          { key: "public", label: "Public requests" },
           { key: "accepted", label: "Accepted by me" },
         ]}
         active={tab}
-        onChange={(k) => setTab(k as "open" | "accepted")}
+        onChange={(k) => setTab(k as "directed" | "public" | "accepted")}
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -94,10 +106,12 @@ export default function TopicRequestBrowser() {
         <div className="flex justify-center py-10">
           <span className="loading loading-spinner loading-md" />
         </div>
-      ) : tab === "open" ? (
+      ) : isOpenTab ? (
         openList.data.length === 0 ? (
           <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
-            No open requests match these filters.
+            {tab === "directed"
+              ? "No learner has sent you a request directly."
+              : "No public requests match these filters."}
           </div>
         ) : (
           <div className="space-y-3">

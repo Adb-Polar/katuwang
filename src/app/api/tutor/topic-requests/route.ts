@@ -34,7 +34,16 @@ export async function GET(req: NextRequest) {
     }
 
     const { searchParams } = new URL(req.url);
-    const tab = searchParams.get("tab") === "accepted" ? "accepted" : "open";
+    const tabParam = searchParams.get("tab");
+    // "open" family: open | public (open, not directed) | directed (open, to me)
+    const tab: "accepted" | "open" | "public" | "directed" =
+      tabParam === "accepted"
+        ? "accepted"
+        : tabParam === "public"
+          ? "public"
+          : tabParam === "directed"
+            ? "directed"
+            : "open";
     const subject = searchParams.get("subject");
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
@@ -105,6 +114,11 @@ export async function GET(req: NextRequest) {
     let where = tutorPoolWhere(tutorProfile.id, certifiedTopics);
     if (subject) {
       where = { ...where, subject };
+    }
+    if (tab === "directed") {
+      where = { ...where, directedTutorProfileId: tutorProfile.id };
+    } else if (tab === "public") {
+      where = { ...where, directedTutorProfileId: null };
     }
 
     const [total, requests] = await Promise.all([

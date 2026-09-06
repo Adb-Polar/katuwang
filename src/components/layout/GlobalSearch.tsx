@@ -138,7 +138,7 @@ export default function GlobalSearch() {
         role="combobox"
         aria-expanded={showPanel}
         aria-controls="global-search-results"
-        placeholder="Search classes, tutors, topics…"
+        placeholder="Search classes, tutors, topics, requests…"
         aria-label="Search"
         value={q}
         onChange={(e) => {

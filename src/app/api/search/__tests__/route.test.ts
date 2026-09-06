@@ -1,17 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, classFindMany, userFindMany, getSubjectsMock, getSettingMock } = vi.hoisted(() => ({
+const {
+  getServerSessionMock,
+  classFindMany,
+  userFindMany,
+  tutorProfileFindUnique,
+  topicRequestFindMany,
+  getSubjectsMock,
+  getSettingMock,
+} = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindMany: vi.fn(),
   userFindMany: vi.fn(),
+  tutorProfileFindUnique: vi.fn(),
+  topicRequestFindMany: vi.fn(),
   getSubjectsMock: vi.fn(),
   getSettingMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { tutorClass: { findMany: classFindMany }, user: { findMany: userFindMany } },
+  prisma: {
+    tutorClass: { findMany: classFindMany },
+    user: { findMany: userFindMany },
+    tutorProfile: { findUnique: tutorProfileFindUnique },
+    topicRequest: { findMany: topicRequestFindMany },
+  },
 }));
 vi.mock("@/lib/subjects", () => ({ getSubjects: getSubjectsMock }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
@@ -32,6 +47,8 @@ describe("GET /api/search", () => {
       { id: "c1", code: "C-0231", subject: "MATH", topics: [{ topic: "Linear equations" }], status: "SCHEDULED" },
     ]);
     userFindMany.mockResolvedValue([{ id: "u1", anonymousId: "TUT-0148" }]);
+    tutorProfileFindUnique.mockResolvedValue({ id: "TP1", topicCertifications: [] });
+    topicRequestFindMany.mockResolvedValue([]);
   });
 
   it("401 when unauthenticated", async () => {
@@ -65,5 +82,18 @@ describe("GET /api/search", () => {
     expect(json.groups.some((g: { kind: string }) => g.kind === "tutor")).toBe(false);
     const where = classFindMany.mock.calls[0][0].where;
     expect(where.tutorProfile).toEqual({ userId: "T1" });
+  });
+
+  it("tutor: surfaces eligible open topic requests as a 'Class requests' group", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "T1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "TP1", topicCertifications: [] });
+    topicRequestFindMany.mockResolvedValue([
+      { id: "r1", subject: "MATH", topics: [{ topic: "Linear equations" }], directedTutorProfileId: "TP1" },
+    ]);
+    const json = await (await GET(req("linear"))).json();
+    const g = json.groups.find((x: { label: string }) => x.label === "Class requests");
+    expect(g).toBeTruthy();
+    expect(g.items[0].href).toBe("/tutor/requests/r1/accept");
+    expect(g.items[0].subtitle).toBe("Directed to you");
   });
 });

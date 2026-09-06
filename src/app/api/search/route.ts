@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { browseClassesWhere } from "@/lib/classQueries";
 import { getSubjects } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
+import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 
 const PER_GROUP = 6;
 
@@ -122,15 +123,56 @@ export async function GET(req: NextRequest) {
           }),
         });
     } else if (role === "STUDENT_TUTOR") {
-      const classes = await prisma.tutorClass.findMany({
-        where: {
-          tutorProfile: { userId: session.user.id },
-          OR: [{ code: { contains: q } }, { subject: { contains: q } }, { topics: { some: { topic: { contains: q } } } }],
+      const tutorProfile = await prisma.tutorProfile.findUnique({
+        where: { userId: session.user.id },
+        select: {
+          id: true,
+          topicCertifications: {
+            where: { status: "CERTIFIED" },
+            select: { subject: true, topic: true },
+          },
         },
-        select: { id: true, code: true, subject: true, status: true },
-        take: PER_GROUP,
-        orderBy: { createdAt: "desc" },
       });
+
+      const [classes, requests] = await Promise.all([
+        prisma.tutorClass.findMany({
+          where: {
+            tutorProfile: { userId: session.user.id },
+            OR: [
+              { code: { contains: q } },
+              { subject: { contains: q } },
+              { topics: { some: { topic: { contains: q } } } },
+            ],
+          },
+          select: { id: true, code: true, subject: true, status: true },
+          take: PER_GROUP,
+          orderBy: { createdAt: "desc" },
+        }),
+        tutorProfile
+          ? prisma.topicRequest.findMany({
+              where: {
+                AND: [
+                  tutorPoolWhere(tutorProfile.id, tutorProfile.topicCertifications),
+                  {
+                    OR: [
+                      { subject: { contains: q } },
+                      { topics: { some: { topic: { contains: q } } } },
+                    ],
+                  },
+                ],
+              },
+              select: {
+                id: true,
+                subject: true,
+                topics: { select: { topic: true }, take: 3 },
+                directedTutorProfileId: true,
+              },
+              take: PER_GROUP,
+              orderBy: { createdAt: "asc" },
+            })
+          : Promise.resolve([]),
+      ]);
+
       if (classes.length)
         groups.push({
           kind: "class",
@@ -140,6 +182,19 @@ export async function GET(req: NextRequest) {
             title: `${c.code} · ${c.subject}`,
             subtitle: c.status,
             href: `/tutor/classes/${c.id}`,
+          })),
+        });
+
+      if (requests.length)
+        groups.push({
+          kind: "topic",
+          label: "Class requests",
+          items: requests.map((r) => ({
+            id: r.id,
+            title: `${r.subject} · ${r.topics.map((t) => t.topic).join(", ")}`,
+            subtitle:
+              r.directedTutorProfileId === tutorProfile?.id ? "Directed to you" : "Public request",
+            href: `/tutor/requests/${r.id}/accept`,
           })),
         });
     } else {

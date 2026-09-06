@@ -70,6 +70,22 @@ fixes.md Phase 4a (Changes.md Part 40)
  [] /tutor/profile: a "Verified Topics" card lists the tutor's certified
     topics grouped by subject (green pills); empty state when none
 
+fixes.md Phase 4b (Changes.md Part 41)
+ [] /tutor/requests: three tabs — "Directed to me" (only requests sent to
+    this tutor), "Public requests" (open pool, no direct target), "Accepted
+    by me"; subject filter + pagination work on each
+ [] Tutor global search: typing a subject/topic surfaces a "Class requests"
+    group for eligible OPEN requests; clicking a row opens
+    /tutor/requests/[id]/accept; a request not open to the tutor doesn't appear
+ [] Admin sets "Require certification for class creation" ON -> /tutor/classes/new
+    topic list only lets the tutor check topics they're certified for, the
+    "add another topic" box is gone, and an explanatory line shows; setting OFF
+    restores the full picker
+ [] /tutor/assessments: the "Take an assessment for any topic" card lets a
+    tutor pick any subject+topic and start the quiz even with no class for it;
+    an already-certified topic is rejected; a thin question bank shows the
+    BANK_NOT_READY message
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

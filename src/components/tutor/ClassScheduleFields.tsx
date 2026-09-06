@@ -49,6 +49,7 @@ export default function ClassScheduleFields({
   initial,
   subjectLocked = false,
   disabledTopics = [],
+  allowedTopics,
   allowCustomTopics = true,
   submitLabel = "Schedule",
   submitting = false,
@@ -60,6 +61,12 @@ export default function ClassScheduleFields({
   initial?: Partial<ClassScheduleFormValues> & { topics?: string[]; sessionRows?: SessionRowValue[] };
   /** Subject can't be changed — used when accepting a request (subject comes from the request). */
   subjectLocked?: boolean;
+  /**
+   * When set, ONLY these topics may be selected (case-insensitive) — used when
+   * the platform requires certification to create a class, so the picker mirrors
+   * the tutor's CERTIFIED topics. Also forces the custom-topic input off.
+   */
+  allowedTopics?: string[];
   /** Topics in the subject's list that can't be checked (e.g. the tutor isn't CERTIFIED for them). */
   disabledTopics?: string[];
   /** When false, hides the "add another topic" custom-topic input (accept flow: only certified topics allowed). */
@@ -109,9 +116,13 @@ export default function ClassScheduleFields({
   };
 
   const disabledTopicSet = new Set(disabledTopics);
+  const allowedTopicSet = allowedTopics ? new Set(allowedTopics.map((t) => t.toLowerCase())) : null;
+  const customAllowed = allowCustomTopics && !allowedTopicSet;
+  const isTopicDisabled = (topic: string) =>
+    disabledTopicSet.has(topic) || (allowedTopicSet ? !allowedTopicSet.has(topic.toLowerCase()) : false);
 
   const toggleTopic = (topic: string) => {
-    if (disabledTopicSet.has(topic)) return;
+    if (isTopicDisabled(topic)) return;
     setSelectedTopics((prev) => {
       const hit = prev.find((t) => t.toLowerCase() === topic.toLowerCase());
       return hit ? prev.filter((t) => t !== hit) : [...prev, topic];
@@ -244,7 +255,7 @@ export default function ClassScheduleFields({
                 </p>
               )}
               {shownTopicOptions.map((topic) => {
-                const disabled = disabledTopicSet.has(topic);
+                const disabled = isTopicDisabled(topic);
                 return (
                   <label
                     key={topic}
@@ -284,7 +295,14 @@ export default function ClassScheduleFields({
               </div>
             )}
 
-            {allowCustomTopics && (
+            {allowedTopicSet && (
+              <p className="text-2xs text-base-content/50">
+                Your school requires certification to teach a topic — only topics you&apos;ve
+                passed the assessment for can be picked.
+              </p>
+            )}
+
+            {customAllowed && (
               <div className="flex gap-2">
                 <input
                   type="text"

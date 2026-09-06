@@ -7,6 +7,7 @@ import TopicCertificationList, {
   TopicCertificationEntry,
 } from "@/components/tutor/TopicCertificationList";
 import AssessmentHistory, { CertificationDetail } from "@/components/tutor/AssessmentHistory";
+import OtherTopicAssessment from "@/components/tutor/OtherTopicAssessment";
 import type { TopicAssessmentStatus } from "@/lib/assessmentStatus";
 import type { AttemptSummary } from "@/app/tutor/assessments/page";
 
@@ -54,6 +55,7 @@ export default function AssessmentsTabs({
               requested={requested}
               onRequested={(key) => setRequested((prev) => new Set(prev).add(key))}
             />
+            <OtherTopicAssessment />
           </>
         ) : (
           <AssessmentHistory certifications={certificationDetails} attempts={attempts} />
