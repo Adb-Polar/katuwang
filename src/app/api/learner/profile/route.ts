@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { updateProfileSchema } from "@/lib/validations/profile";
+import { updateProfileSchema, normalizeContactInfo } from "@/lib/validations/profile";
 
 // ─── PATCH: Update Own Editable Profile Fields ─────────────────────────────────
 export async function PATCH(req: NextRequest) {
@@ -21,16 +21,24 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { contactInfo, section, recoveryEmail } = result.data;
+    const { contactInfo, section, gradeLevel, recoveryEmail } = result.data;
+
+    let normalizedContact: string | undefined;
+    if (contactInfo !== undefined) {
+      const res = normalizeContactInfo(contactInfo);
+      if (!res.ok) return NextResponse.json({ error: res.error }, { status: 400 });
+      normalizedContact = res.value;
+    }
 
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
-        ...(contactInfo !== undefined ? { contactInfo: contactInfo || null } : {}),
+        ...(normalizedContact !== undefined ? { contactInfo: normalizedContact || null } : {}),
         ...(section !== undefined ? { section } : {}),
+        ...(gradeLevel !== undefined ? { gradeLevel } : {}),
         ...(recoveryEmail !== undefined ? { recoveryEmail: recoveryEmail || null } : {}),
       },
-      select: { contactInfo: true, section: true, recoveryEmail: true },
+      select: { contactInfo: true, section: true, gradeLevel: true, recoveryEmail: true },
     });
 
     return NextResponse.json(updated);

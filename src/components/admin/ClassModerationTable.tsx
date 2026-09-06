@@ -213,7 +213,8 @@ export default function ClassModerationTable() {
                             </div>
                           )}
                         </td>
-                        <td className="flex gap-2 justify-end">
+                        <td>
+                          <div className="flex flex-wrap gap-2 justify-end">
                           <Link
                             href={`/admin/classes/${c.id}`}
                             className="btn btn-ghost btn-xs text-2xs font-bold cursor-pointer"
@@ -254,6 +255,7 @@ export default function ClassModerationTable() {
                               Reinstate
                             </button>
                           )}
+                          </div>
                         </td>
                       </tr>
                     );

@@ -62,6 +62,7 @@ Admin-configurable boolean flags stored in `PlatformSetting`:
 - **`registrationOpen`** — toggles whether new learner/tutor registrations are accepted (`POST /api/register` checks this and returns `403` when closed). Defaults to `true`.
 - **`requireCertificationForClassCreation`** — when enabled, tutors may only create a class covering topics they hold a `CERTIFIED` `TopicCertification` for. Defaults to `false`.
 - **`matchingEnabled`** — when disabled, the learner "Find a Class" matcher (`POST /api/learner/match`), topic requests (`/api/learner/topic-requests`), and the tutor request queue (`/api/tutor/topic-requests`) all return `403`. Defaults to `true`.
+- **`sessionTestsEnabled`** — when disabled, a tutor cannot create or publish a session test and a learner cannot start a pre/post attempt; already-collected results stay fully readable regardless. Defaults to `true`.
 
 (`GET`/`PATCH /api/admin/settings`)
 
@@ -85,7 +86,8 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 
 - A **Notifications** sidebar item (bell icon, under "Review") shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both refresh on navigation.
 - The page (and the dropdown) list notifications newest first. Clicking a row marks **just that one** read and follows its link if it has one; a "Mark all read" button clears the rest.
-- The moderation actions an admin performs (approve registration, review certification, resolve a question request, ban a class) send notifications to the **affected tutor or learner**, not to admins — so an admin's own list is usually empty today. The page + count exist for parity and for future admin-directed notifications.
+- The moderation actions an admin performs (approve registration, review certification, resolve a question request, ban a class) send notifications to the **affected tutor or learner**, not to admins.
+- Admin-directed notifications so far: when a tutor submits a **question-bank request** (`POST /api/tutor/question-requests`), every active admin gets a `QUESTION_REQUEST_NEW` notification linking to `/admin/assessment/requests`.
   (`GET /api/notifications`, `POST /api/notifications/read` — not admin-gated)
 
 ## Chatbot assistant
@@ -99,6 +101,22 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 
 - **Review unanswered questions** — every logged `ChatbotMiss` grouped by role + normalised wording (case/punctuation-insensitive), showing the most recent phrasing, a count, and first/last-seen timestamps. Sortable by count / first seen / last seen; filterable by role and a text search. Read-only — use it to grow `src/lib/chatbot/faq.ts` / `intents.ts` with real, recurring questions.
   (`GET /api/admin/chatbot-misses`)
+
+## Session Tests (`/admin/session-tests`)
+
+Read-only visibility into every tutor-built session pre/post-test, double-blind
+throughout (never a learner's real name/id, only `anonymousId`):
+
+- **List** — every `SessionTest` across the platform, paginated, filterable by
+  subject, status (`DRAFT`/`PUBLISHED`/`CLOSED`), and a text search across
+  title/class code/tutor anonymous id. Each row shows the class, tutor,
+  session topic, status, and question/attempt counts.
+  (`GET /api/admin/session-tests`)
+- **View results** — the same per-question and per-learner pre/post/delta
+  breakdown the tutor sees, plus per-attempt drill-down.
+  (`GET /api/admin/session-tests/[testId]/results`, `.../attempts/[attemptId]`)
+- Cannot create, edit, publish, or close a test — building is tutor-only;
+  this page is oversight, not authoring.
 
 ## Subjects & Topics (`/admin/subjects`)
 
@@ -272,6 +290,13 @@ in JS over the most recent 2000 rows — the group key isn't a stored column).
 
 **200** → `{ groups: [{ normalized, sample, role, count, firstSeen, lastSeen }], total, page, pageSize }`.
 **500** → `{ error }`.
+
+### Session tests (read-only)
+
+- `GET /api/admin/session-tests?subject=&status=&q=&page=&pageSize=` → paginated list, join-flattened to `{ id, title, status, classCode, subject, sessionTopic, scheduledAt, sessionStatus, tutor: {id, anonymousId}, questionCount, attemptCount }`.
+- `GET /api/admin/session-tests/[testId]/results` → same shape as the tutor results view.
+- `GET /api/admin/session-tests/[testId]/attempts/[attemptId]` → one attempt, double-blind (`learner: {anonymousId}` only).
+- No write routes — admins observe, they don't author or publish.
 
 ## What Admins Cannot Do
 

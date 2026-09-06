@@ -112,6 +112,17 @@ b, strong { font-weight: var(--font-weight-bold); }
 .card { box-shadow: var(--kt-shadow-card); }
 
 @layer components {
+  /* Subtle content swap — a short fade + tiny rise, used when the Auto Match
+     panel switches between the criteria form and the results. */
+  @keyframes kt-swap-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .kt-swap { animation: kt-swap-in 180ms ease-out both; }
+  @media (prefers-reduced-motion: reduce) {
+    .kt-swap { animation: none; }
+  }
+
   .kt-card {
     background: var(--color-base-100);
     border: 1px solid var(--kt-border);

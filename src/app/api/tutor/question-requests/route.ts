@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 import { requestQuestionsSchema } from "@/lib/validations/assessment";
 import { topicExists } from "@/lib/subjects";
+import { notifyMany } from "@/lib/notifications";
 
 // ─── GET: The Tutor's Own Question Requests ─────────────────────────────────
 export async function GET() {
@@ -46,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { anonymousId: true } } },
     });
     if (!tutorProfile) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
@@ -88,22 +89,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const request = await prisma.questionRequest.upsert({
-      where: key,
-      update: {
-        status: "OPEN",
-        note: note || null,
-        resolvedById: null,
-        resolvedAt: null,
-        resolutionNote: null,
-      },
-      create: {
-        tutorProfileId: tutorProfile.id,
-        subject: subject,
-        topic,
-        note: note || null,
-        status: "OPEN",
-      },
+    const request = await prisma.$transaction(async (tx) => {
+      const created = await tx.questionRequest.upsert({
+        where: key,
+        update: {
+          status: "OPEN",
+          note: note || null,
+          resolvedById: null,
+          resolvedAt: null,
+          resolutionNote: null,
+        },
+        create: {
+          tutorProfileId: tutorProfile.id,
+          subject: subject,
+          topic,
+          note: note || null,
+          status: "OPEN",
+        },
+      });
+
+      // Let every admin know there's a new question-bank request to act on.
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN", status: "ACTIVE" },
+        select: { id: true },
+      });
+      await notifyMany(
+        tx,
+        admins.map((a) => a.id),
+        "QUESTION_REQUEST_NEW",
+        `${tutorProfile.user.anonymousId} requested assessment questions for "${topic}" (${subject}).`,
+        "/admin/assessment/requests"
+      );
+
+      return created;
     });
 
     return NextResponse.json(request, { status: 201 });

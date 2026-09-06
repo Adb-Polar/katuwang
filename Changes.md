@@ -37,6 +37,7 @@
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 | [29](#part-29) | **Session pre/post-tests (`docs/plans/pre-test-post-test-plan.md`)** | Per-session PRE/POST diagnostic tests: a tutor builds one ordered question set per `ClassSession`, served twice (as a PRE attempt, then a POST attempt); learners take/resume/review; tutor + learner + admin analytics with four charts. Adapts the stale `class-pre-post-tests` branch, re-grained from per-class to per-session. Delivered in phases. | **Phase 0** — extracted `recharts` primitives out of `ReportsView.tsx` into a shared `src/components/charts/` module (`useThemeColors` widened to `--color-accent/success/error`; `DataTable` now `{rows,labelKey}` **or** `{rows,columns}`; `BarChartCard` moved verbatim) + new `GroupedBarChart` / `ProgressAreaChart` / `RateBarChart` / `DeltaBar` (the last pure-CSS, uses the `.kt-delta` badge); dead `.kt-chart-*` CSS removed. **Phase 1** — schema: 4 enums (`QuestionOrigin`, `SessionTestStatus`, `SessionTestKind`, `SessionTestAttemptStatus`) + 4 models (`SessionTest` `@@unique(sessionId)`, `SessionTestQuestion`, `SessionTestAttempt` with `kind` + `@@unique([sessionTestId,learnerId,kind])`, `SessionTestAttemptItem`) + `AssessmentQuestion.origin`/`ownerTutorProfileId` and index `[subject,topic,active,origin]` (origin appended last to keep existing prefixes). Applied via `prisma db push` (Option 1 — additive, no reset; history stays drifted). 478/478 throughout. Not committed. |
 | [30](#part-30) | **Chatbot v1.1 — usability pass (admin misses review + matching robustness + KB growth)** | The deterministic chatbot's `chatbot_misses` feedback loop was dead (no admin UI ever read it), an over-broad `smalltalk_capabilities` intent swallowed unclear messages before they could be logged as misses, and matching was brittle (no typo tolerance, no length-normalized confidence). Closes the loop, hardens matching, and roughly doubles the FAQ KB — no LLM, no new dependency, no schema change. | New `/admin/chatbot` page + `GET /api/admin/chatbot-misses` (JS-side `aggregateMisses()` groups misses by role + normalised token string — Prisma `groupBy` can't group by a derived value — role/text filter, sort by count/first/last seen, pagination); new admin nav item. `classifier.ts`: typo-correction step (`correctToken`, Levenshtein-1 via new `editDistance`/`fuzzyHit` in `normalize.ts`) snaps a misspelled token to its nearest known keyword before scoring *and* before pattern-matching, so e.g. "enrol" still lights up `/\benroll\b/`; added a length-normalized `MIN_CONFIDENCE = 0.35` gate (score / max(3, tokenCount)) alongside the existing absolute `MIN_SCORE` floor, per the original plan's un-implemented spec; `respond.ts`/`route.ts` now surface the winning score as a non-production `debugScore` field. `intents.ts`: narrowed `smalltalk_capabilities` (dropped the bare `/\bhelp\b/` pattern + generic keywords that swallowed most unclear messages) and added 12 new nav intents (find tutors, help page, search, tutor class-appeal/sessions/question-request, admin users/class-appeals/audit-log/subjects/question-requests/chatbot). `faq.ts`: 11 new grounded entries (26 total), each cited to its source doc line; purged 2 dead stopword-colliding keywords (`"my"`, `"you"`). `normalize.ts`: exported `STOPWORDS`, ~12 new `SYNONYMS`. New tests: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`, `chatbot-misses/route.test.ts`, extended `classifier.test.ts` (fuzzy matching, narrowed capabilities, confidence gate) — 586/586. `tsc`/`lint`/`test` all clean. `docs/reference/decisions.md` reviewed — no new entry (implementation refinement, not a thesis divergence). Not committed. |
+| [31](#part-31) | **Sept 5 fixes — 9-item bug/UX batch** | One pass over nine reported issues: match flip-card, register password reveal, profile page redesign + contact-info validation, self-service grade level, global-search tutor names, assessments request-button state loss, admin notifications for tutor question requests, and the admin moderation-table action-column layout. | `MatchFinder` — the panel now swaps between the criteria form and the ranked results with a subtle 180ms fade + rise (`.kt-swap` keyframe in `globals.css`, respects `prefers-reduced-motion`), "View results" / "Adjust filters" toggles. (An earlier 3D `rotateY` flip read as tilted/distracting and was dropped.) `RegisterForm` — eye/eye-off reveal toggles on both password fields (same pattern as `LoginForm`). `ProfileView` rebuilt as a two-column identity / editable split; `ProfileEditForm` gains a grade-level `<select>` and inline contact-info validation. New dependency-free `src/lib/contactInfo.ts` (`normalizeContactInfo` — PH-mobile format check + `09XXXXXXXXX` normalisation, free-form handles pass through) used by `ProfileEditForm` and both profile PATCH routes; `updateProfileSchema` gains `gradeLevel` (`z.nativeEnum(GradeLevel)`) and both routes now persist it. `GET /api/search` — learner branch reads `showTutorRealNames`; when on, it also matches tutors by first/last name and shows the real name (anon ID as subtitle). `AssessmentsTabs` lifts the `requested` Set out of `TopicCertificationList` so a "Request questions" click survives a tab switch without a page refresh (+ `router.refresh()`). `POST /api/tutor/question-requests` now wraps the upsert in a `$transaction` and `notifyMany`s every active admin with a new `QUESTION_REQUEST_NEW` notification type (icon added, link → `/admin/assessment/requests`). `ClassModerationTable` + `TopicRequestModerationTable` — the action `<td className="flex …">` (which broke table-cell layout) becomes a plain `<td>` wrapping a `flex flex-wrap` `<div>`. Follow-ups: (a) `ClassScheduleFields` session rows (topic select + `datetime-local` + duration + trash) now wrap to a two-line layout (`#n` + topic + trash, then `datetime-local` `flex-1` + duration) instead of overflowing on narrow screens, Location row wraps too; (b) the whole Schedule-a-Class form moved out of the cramped `max-w-lg` modal to its own page at `/tutor/classes/new` (new `NewClassForm` + server page; `ClassManagement` modal/state/handler deleted, buttons are now `<Link>`s), a `ClassScheduleFields` `variant="page"` prop enlarges the controls, and the accept-a-topic-request flow moved the same way — `AcceptRequestModal` deleted for `/tutor/requests/[id]/accept` (`AcceptRequestForm` + eligibility-checked server page). New tests: `src/lib/__tests__/contactInfo.test.ts` (6); `search` route test mocks `@/lib/settings`. `tsc`/`lint` clean, 621/621. Not committed. |
 
 ---
 
@@ -1946,6 +1947,206 @@ DRAFT/no-test sessions excluded from the series). Admin `session-tests` list
 
 ---
 
+## Part 29 — Phase 5: tutor UI
+
+Builder, results (charts (c)/(d)), the class-wide progress panel (chart (a)),
+and the per-session tests list — all reachable from the tutor's class page.
+No learner/admin UI yet (Phase 6) and no seed data for it (Phase 7).
+
+- `SessionTestBuilder` (new, adapted from the stale branch's `ClassTestBuilder`)
+  — `src/components/tutor/SessionTestBuilder.tsx`. Drops `kind` entirely (one
+  test, not a PRE/POST pair): when the session has no test yet it renders a
+  small create form (`POST .../test`) instead of the branch's two-button
+  `ClassTestsCard` per-kind create flow; once a test exists it's the same
+  meta/question-list/publish/close builder as the branch, pointed at the new
+  per-session routes (`.../sessions/[sessionId]/test{,/questions,/status}`).
+  `editable` now also requires `attemptCount === 0`, matching the routes'
+  "question set locks once attempted" rule (the branch only checked `DRAFT`,
+  since a class-scoped test couldn't be resumed after being taken once anyway).
+- `SessionTestResults` (rewrite of `ClassTestResults`) —
+  `src/components/tutor/SessionTestResults.tsx`. Replaces the branch's
+  `siblingKind`-conditional stat cards with fixed pre/post columns (a session
+  test always has both potential runs), adds `RateBarChart` (per-question
+  correct-rate, PRE vs POST bars) and `DeltaBar` (per-learner gain) from the
+  Phase 0 chart module — the branch had no charts, just tables. Per-learner
+  detail modal now offers separate "Pre"/"Post" buttons (two attempt ids per
+  learner) instead of the branch's single "View".
+- `ClassProgressPanel` (new) — `src/components/tutor/ClassProgressPanel.tsx`.
+  Chart (a): fetches `GET /api/tutor/classes/[classId]/test-results` (the
+  class roll-up built in Phase 3) and renders one `GroupedBarChart` bar-pair
+  per session, gaps (`avgPre`/`avgPost` both `null`) rendering as missing bars,
+  never a fake zero. Mounted at the top of the class page's new `belowRoster`
+  slot.
+- `SessionTestsCard` (adapted from `ClassTestsCard`) —
+  `src/components/classes/SessionTestsCard.tsx`. The branch rendered exactly
+  two rows (PRE, POST) per class; this renders one row per `ClassSession`,
+  since the test now lives on the session. Keeps the `audience: "tutor" |
+  "learner"` prop from the branch — only the tutor branch is wired up this
+  phase; the learner branch (Resume/Take/Review links into
+  `/learner/classes/[classId]/sessions/[sessionId]/test/{pre,post}`, which
+  don't exist as pages yet) is written now so Phase 6 only has to wire it in,
+  not rewrite it.
+- `ClassDetailsView` gained a new optional `belowRoster` slot (a plain
+  full-width card below the roster card), used to mount
+  `ClassProgressPanel` + `SessionTestsCard` on the tutor class page
+  (`src/app/tutor/classes/[classId]/page.tsx`) without disturbing the
+  existing `sessions`/`roster` slots. The page's session query grew an
+  `include: { test: { select: { id, title, status } } }` to feed the card.
+- New pages: `src/app/tutor/classes/[classId]/sessions/[sessionId]/test/page.tsx`
+  (builder — 404s via `loadOwnedSession` same as the routes; passes `test:
+  null` straight through when none exists yet) and `.../test/results/page.tsx`
+  (results — 404s if the test doesn't exist, since there's nothing to show).
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (same 5 pre-existing
+warnings), `pnpm test` 615/615 (no new test files this phase — UI only,
+already covered by the Phase 3/4 route tests), `pnpm build` succeeds with
+both new tutor pages registered.
+
+### Not committed.
+
+---
+
+## Part 29 — Phase 6: learner + admin UI
+
+The remaining consumer surfaces: the learner runner (take/resume/review, with
+the pre→post delta on a submitted post-test), "My Progress" (chart (b)), the
+admin read-only table, the settings toggle, and wiring `SessionTestsCard`'s
+learner branch onto the learner class page. Feature is now UI-complete
+end-to-end.
+
+- `SessionTestRunner` (new, adapted from the branch's `ClassTestRunner`) —
+  `src/components/quiz/SessionTestRunner.tsx`. Two behavioral changes beyond
+  the rename: (1) it no longer creates the attempt itself — it either `GET`s
+  an existing attempt by id (passed down from the server-rendered page) or
+  `POST`s `.../test/[kind]/start` when there isn't one yet, per the plan's
+  "consolidate attempt-creation on the route" fix-while-adapting note, so
+  there's exactly one place (the `/start` route) that decides whether to
+  create, resume, or reject; (2) on a submitted `POST` attempt it fetches the
+  learner's own `session-tests` list to read the sibling `PRE` score and
+  shows the delta inline ("up 45 from your 40% pre-test") — the attempt
+  payload itself has no sibling-score field, by design (kind lives on the
+  attempt, each attempt only knows its own score).
+- **Backend gap found while wiring the runner**: the learner
+  `GET .../session-tests` list route (Phase 4) returned `pre`/`post` as
+  `{status, scorePercent, submittedAt}` with no attempt `id` — enough to
+  render status but not enough to route to a *specific already-submitted*
+  attempt for review (the `/start` route intentionally 409s on an
+  already-submitted kind, so it can't be used to fetch one for review).
+  Fixed by adding `id: true` to that route's attempt `select`
+  (`src/app/api/learner/classes/[classId]/session-tests/route.ts`) — additive,
+  no existing test broke. The runner's page
+  (`.../sessions/[sessionId]/test/[kind]/page.tsx`) now looks up that id
+  directly via Prisma and passes it to the runner, which decides GET-vs-POST
+  from its presence.
+- New page: `src/app/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/page.tsx`.
+- `SessionTestsCard`'s learner branch (written but unmounted in Phase 5) is
+  now wired onto `src/app/learner/classes/[classId]/page.tsx` (`belowRoster`,
+  enrolled learners only) and rewritten more carefully than the first draft:
+  the original per-row action logic showed "Review" for *any* submitted
+  attempt on the row, which meant a learner who'd only taken the pre-test
+  (post not yet open) saw "Review" forever instead of "Take post-test" once
+  it opened. Replaced with a `LearnerAction` helper that checks
+  `post → pre → nothing` in that order and consults a new `sessionStatus`
+  field on the row (mirroring the `/start` route's own gating) to distinguish
+  "post not open yet" from "pre-test window closed, never taken."
+- `MyProgressView` (new) — `src/components/learner/MyProgressView.tsx`. Chart
+  (b): `ProgressAreaChart` of pre/post score per session, a 3-stat summary
+  row, and a class filter `<select>` (fed by the learner's enrolled classes,
+  fetched server-side by the page — filtering is by `classId`, not
+  `classCode`, so the page passes real ids). Supports a `compact` +
+  `fixedClassId` mode (per the plan's "reused compact on the class page")
+  used to embed the same chart, filter-less, on
+  `learner/classes/[classId]/page.tsx` below the new `SessionTestsCard`.
+- New page: `src/app/learner/progress/page.tsx`. Nav: "My Progress" added to
+  the learner sidebar (Main menu group, `TrendingUp` icon).
+- `SessionTestsTable` (adapted from `ClassTestsTable`) —
+  `src/components/admin/SessionTestsTable.tsx`. Subject filter now uses
+  `useSubjectCatalog()` instead of the branch's `SubjectArea` enum + static
+  `SUBJECT_TOPICS`; dropped the `kind` filter entirely (no `kind` on the
+  test); added `SortableTh` — client-side sort over the current page only,
+  since `GET /api/admin/session-tests` has no `sort`/`dir` query param (it
+  wasn't specified as part of the Phase 3/4 route contract, and adding one
+  wasn't worth reopening already-shipped, tested routes for a table that's
+  read-only oversight, not a primary workflow). Results view reuses the same
+  `SessionTestResults` component the tutor page uses, pointed at the admin
+  routes.
+- New page: `src/app/admin/session-tests/page.tsx`. Nav: "Session Tests"
+  added to the admin sidebar (Assessment group, `ListChecks` icon).
+- `sessionTestsEnabled` toggle added to `PlatformSettingsForm`'s
+  `SETTING_META` (Assessment group) — the setting itself already existed
+  since Phase 4 (`src/lib/settings.ts`); this just gives it a switch on
+  `/admin/settings`. `GET /api/admin/settings` already lists every
+  `PLATFORM_SETTING_KEYS` entry, so no route change was needed.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean (same 5 pre-existing
+warnings), `pnpm test` 615/615 (no new test files — UI + one additive field
+on an already-tested route), `pnpm build` succeeds with every new
+learner/admin page and the `session-tests`/`[kind]` dynamic routes
+registered.
+
+### Not committed.
+
+---
+
+## Part 29 — Phase 7: seed data + docs
+
+- `prisma/seed.ts` — added `seedSessionTests()` (adapted from the branch's
+  `seedClassTests()`, re-grained to the per-session model): targets the
+  existing "demo class for walkthroughs" (`demo@tutor.test`, MATH,
+  "Algebraic Expressions", already enrolling `demo@learner.test` +
+  `juan.delacruz@katuwang.test`), marks that session `COMPLETED` (so the
+  demo shows an open post-test window rather than a locked one), builds one
+  `SessionTest` from 5 `BANK` questions + 1 freshly-authored `TUTOR`
+  question, publishes it, and seeds attempts: `demo@learner.test` gets a
+  submitted `PRE` (~40%) and `POST` (~85%) — a clear gain — while
+  `juan.delacruz@katuwang.test` gets only a submitted `PRE` (~60%),
+  deliberately unpaired, so `avgDelta` visibly differs from a naive
+  `avgPost − avgPre` the moment anyone looks at the seeded results. No
+  FK-ordering hazard to guard against here (unlike the branch, which added a
+  "skip if referenced" guard to `seedQuestionBank`): main's seed already
+  does a full `tutorClass.deleteMany` (cascading through `ClassSession` →
+  `SessionTest` → questions/attempts) *before* `seedQuestionBank` rebuilds
+  the bank, so by the time `seedSessionTests()` runs there's never a
+  leftover session-test row pinning an old bank question. Ran
+  `pnpm exec tsx prisma/seed.ts` — completed with `session tests: yes` in the
+  summary line, `pnpm test`/`build` still clean afterward.
+- `docs/reference/decisions.md` — two new entries (newest-first, per §11 of
+  the plan): "scoped per session, not per class" (documents that the
+  now-superseded `class-pre-post-tests` branch and its migration should
+  never be resurrected) and "one question set served twice" (documents that
+  `pickQuestionIds()` is never wired into session tests, and restates the
+  `origin: "BANK"` isolation rule for future agents). Also updated the
+  pre-existing "unmerged branch" entry's framing implicitly — the feature is
+  no longer missing from `main`.
+- `docs/feature-checklist.md` — flipped both pre-test and post-test rows from
+  ⚠️ (unmerged branch) to ✅ with the real routes/pages; Module 4 (Assessment)
+  summary flipped to ✅ Complete; removed the "decide whether to merge
+  `class-pre-post-tests`" line from "Biggest gaps to close next."
+- `docs/roles/{TUTOR,LEARNER,ADMIN}.md` — each gained a narrative section
+  (Session Pre/Post-Tests / Session Tests) plus a matching API Reference
+  block, in each doc's existing style, covering every new route.
+- `docs/plans/README.md` — added an index row for
+  `pre-test-post-test-plan.md`, status **Done**, all 8 phases.
+- `docs/TOTEST.txt` — added Phase 5/6/7 manual-verification blocks (see
+  below); the Phase 3-4 block's "no UI yet" note is now obsolete on the
+  tutor side and narrowed to just the learner/admin legs that still need a
+  curl-level check before a human clicks through them.
+
+### Verification
+
+`pnpm exec tsc --noEmit` clean, `pnpm lint` clean, `pnpm test` 615/615,
+`pnpm build` clean, seed script ran successfully against the dev database
+(user-confirmed per `CLAUDE.md`'s "database modification needs confirmation"
+rule).
+
+### Not committed.
+
+---
+
 <a id="part-30"></a>
 ## Part 30 — Chatbot v1.1: usability pass
 
@@ -2037,6 +2238,149 @@ chatbot/classifier/route tests pass unchanged. `tsc --noEmit` / `lint` /
 entry. `docs/reference/decisions.md` reviewed — no new entry: this is
 implementation refinement of an already-decided module, not a scope/role cut
 against the thesis.
+
+### Not committed.
+
+---
+
+<a id="part-31"></a>
+
+## Part 31 — Sept 5 fixes (9-item bug/UX batch)
+
+Plan: `docs/plans/sept-5-fixes.md`. Nine reported issues, one pass.
+
+### 1. `/learner/match` — swap criteria form ↔ results
+
+`MatchFinder` renders one panel at a time — the criteria form or the ranked
+results — inside a `<div key={flipped ? "results" : "filters"}
+className="kt-swap">`. A successful Auto Match sets `flipped` and the key
+change remounts the child with a subtle `.kt-swap` animation (180ms fade +
+4px rise, new `@keyframes kt-swap-in` in `globals.css`, disabled under
+`prefers-reduced-motion`). "Adjust filters" (results view) and "View results"
+(form view, shown once matches exist) toggle back and forth.
+
+A first pass used a 3D `rotateY(180deg)` card flip; it looked tilted and
+distracting mid-animation, so it was replaced with the plain fade.
+
+### 2. `/register/learner` — show-password toggle
+
+`RegisterForm` gets `showPassword` / `showConfirmPassword` state and an
+eye / eye-off button inside each password field — the exact control already on
+`LoginForm` (lucide `Eye`/`EyeOff`, `absolute inset-y-0 right-0`, `pr-10` on the
+input). Applies to the tutor form too (shared component).
+
+### 3. `/learner/profile` — redesign + contact-info format
+
+- `ProfileView` rebuilt: a two-column layout — a read-only **Identity** card
+  (real name, email, anon ID, role) and an **Editable details** card. Grade
+  level moved out of the read-only list into the edit form.
+- New `src/lib/contactInfo.ts` — `normalizeContactInfo(raw)`: phone-like input
+  (`/^[\d\s()+.-]+$/`) is held to a PH mobile pattern (`(+63|63|0)9XXXXXXXXX`)
+  and normalised to local `09XXXXXXXXX`; anything else passes through as a
+  free-form handle (3–200 chars). Dependency-free so the client form can import
+  it. `updateProfileSchema` re-exports it and only length-checks the field;
+  both profile PATCH routes call `normalizeContactInfo` and return `400` on a
+  bad number.
+- `ProfileEditForm` shows the validation message inline (`FormField error`).
+
+### 4. Global search (learner) — real tutor names
+
+`GET /api/search` learner branch now reads `getSetting("showTutorRealNames")`.
+When on: the tutor query also matches `firstName` / `lastName`, and each result
+shows the real name as the title with the anon ID as subtitle. When off:
+unchanged (anon ID only).
+
+### 7. `/tutor/profile` — editable grade level + section
+
+Section was already editable; grade level is now too. `updateProfileSchema`
+gains `gradeLevel: z.nativeEnum(GradeLevel).optional()`; `PATCH
+/api/tutor/profile` and `/api/learner/profile` persist it. Diverges from the
+old CLAUDE.md note that "grade level changes require an administrator" — logged
+in `docs/reference/decisions.md`.
+
+### 5. `/tutor/assessments` — request button reverts on tab switch
+
+`TopicCertificationList` is unmounted when the "Assessment History" tab is
+active, so its local `requested` Set was lost on the way back (the "Questions
+requested" badge reverted to a "Request questions" button until a full page
+reload). The Set now lives in the parent `AssessmentsTabs` and is passed down
+with an `onRequested` callback; `requestQuestions` also calls `router.refresh()`
+so server state catches up.
+
+### 6. `/admin/notifications` — tutor question requests now notify admins
+
+There were previously **no** admin-directed notifications anywhere. `POST
+/api/tutor/question-requests` now wraps its `upsert` in a `$transaction` and
+`notifyMany`s every `role: ADMIN, status: ACTIVE` user with a new
+`QUESTION_REQUEST_NEW` type (added to the `NotificationType` union +
+`TYPE_ICON` map), linking to `/admin/assessment/requests`. Fires only when an
+OPEN request is actually created/re-opened (the "already open" early-return
+path doesn't re-notify).
+
+### 11. `/tutor/classes` — Schedule-a-Class moved out of the modal to its own page
+
+The create-class form (subject, target grade, a scrollable topic checklist, a
+description box, a variable list of session rows, location, capacity, meeting
+link) never fit the `max-w-lg` dialog. It's now a full page at
+**`/tutor/classes/new`**:
+
+- New `src/app/tutor/classes/new/page.tsx` (lean server page + `PageHeader`) and
+  `src/components/tutor/NewClassForm.tsx` (client — owns the POST, renders
+  `ClassScheduleFields` in a `card kt-card`, on success routes to
+  `/tutor/classes/{id}`, Cancel routes back to `/tutor/classes`).
+- `ClassScheduleFields` gains a `variant` prop: `"modal"` (default — compact
+  `input-sm`/`select-xs`/`text-2xs` controls) vs `"page"` (comfortable
+  `input-md`/`select-sm`/`text-sm`, roomier spacing, 3-col topic grid,
+  right-aligned action row). Both `NewClassForm` and `AcceptRequestForm` pass
+  `variant="page"`.
+- `ClassManagement.tsx` — the modal, its `isScheduleOpen` / `formKey` /
+  `formLoading` / `formError` state, the `handleCreateClass` handler, and the
+  `success` banner are all removed. Both "Schedule Class" / "Schedule your first
+  class now" triggers are now `<Link href="/tutor/classes/new">`.
+- The **accept-a-topic-request** flow moved to a page too: `AcceptRequestModal`
+  is **deleted**, replaced by `src/app/tutor/requests/[id]/accept/page.tsx`
+  (server — re-checks `matchingEnabled` + `tutorPoolWhere` eligibility,
+  `notFound()`s otherwise) and `src/components/tutor/AcceptRequestForm.tsx` (the
+  old modal body minus the dialog shell). `TopicRequestBrowser`'s "Accept &
+  create class" button is now a `<Link href="/tutor/requests/{id}/accept">`;
+  its `accepting` state, `AcceptRequestModal` import, `useTopicCertifications`
+  hook, and `certifiedTopicsFor` helper are removed.
+- Both new pages are covered by `src/proxy.ts`'s existing `/tutor` prefix
+  guard; no API change.
+
+### 10. `/tutor/classes` — "Add Session" builder not responsive
+
+`ClassScheduleFields` (the Schedule-a-Class form body, also reused by the
+accept-a-request flow) laid each session row out as one non-wrapping
+`flex items-center` line: topic `<select>` + a wide `datetime-local` input +
+duration `<select>` + trash button. Inside the `max-w-lg` modal that
+overflowed horizontally on phones. Each row is now a bordered block with two
+wrapping lines — `#n` label + topic select + remove button on top, then the
+`datetime-local` (`flex-1 min-w-[9.5rem]`) + duration select below. The
+optional Location row (`Building` + `Room`) also gained `flex-wrap`.
+
+### 8 & 9. `/admin/classes` + `/admin/topic-requests` — action-column layout
+
+Both moderation tables had `<td className="flex gap-2 justify-end">` — making a
+table cell a flex container drops `display: table-cell` and mis-renders the
+row (the Suspend / Ban / Reinstate / Close / Re-open buttons landed out of
+place). Now a plain `<td>` wrapping a `<div className="flex flex-wrap gap-2
+justify-end">`.
+
+### Tests
+
+New `src/lib/__tests__/contactInfo.test.ts` (6 cases — empty, PH-mobile
+normalisation across `+63` / `63` / `0` / punctuation, invalid numbers,
+free-form handles, length bounds). `src/app/api/search/__tests__/route.test.ts`
+now mocks `@/lib/settings` (`getSetting`). `tsc --noEmit` / `lint` clean,
+621/621 tests.
+
+### Docs
+
+`docs/plans/sept-5-fixes.md` (new), `docs/TOTEST.txt`,
+`docs/reference/decisions.md` (grade-level self-service divergence),
+`docs/roles/{LEARNER,TUTOR}.md` (profile-editable fields) updated with this
+entry.
 
 ### Not committed.
 

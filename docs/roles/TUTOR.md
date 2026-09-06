@@ -20,7 +20,7 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
 
 - **View own classes** — list all classes the tutor has created, optionally filtered by status; includes each class's topics, all of its sessions, and the roster of enrolled learners (learners are shown only by anonymized info: ID, grade level, section — never real name/email).
   (`GET /api/tutor/classes`)
-- **Create a class** — choose a subject, one or more topics (validated against the subject's predefined topic list), description, max student capacity, optional meeting link, and **one or more initial sessions** (each with a topic drawn from the class's topics, a date/time, and a duration).
+- **Create a class** — the "Schedule Class" button opens a dedicated full page (`/tutor/classes/new`), not a modal. Choose a subject, one or more topics (validated against the subject's predefined topic list), description, max student capacity, optional meeting link, and **one or more initial sessions** (each with a topic drawn from the class's topics, a date/time, and a duration). On success you land on the new class's detail page.
   - Every session's topic must be one of the class's selected topics.
   - Blocked from scheduling any session in the past.
   - Blocked if the submitted sessions overlap each other, or overlap any of the tutor's existing sessions across any of their other classes (conflict detection).
@@ -45,6 +45,48 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
 - **View class details** — clicking a class opens a dedicated fullscreen detail page (`/tutor/classes/[classId]`, server-rendered directly from Prisma with an ownership check — 404s if the class doesn't belong to the requesting tutor), showing the full session list (with per-session reschedule/complete/cancel/delete controls and an Add Session action), description, and enrolled learners' roster (anonymized — `anonymousId`, grade level, section only). A **Manage Class** menu (top-right, next to the back link) groups Edit Class Info, Publish/Unpublish, Finish Class, Cancel Class, and (when eligible) Delete Class — kept behind one menu instead of standing buttons so destructive actions aren't one accidental click away.
 - **View a student's profile** — clicking a learner in the roster (on this page or on the Students page below) opens a dedicated fullscreen page (`/tutor/students/[studentId]`, server-rendered from Prisma; 404s unless that learner is enrolled in one of the requesting tutor's classes): `anonymousId`, grade level, section, and the full breakdown of every class/subject/topic they're enrolled in **with this tutor** (each row links to that class). Still never shows real name, email, or contact info.
 
+## Session Pre/Post-Tests (`/tutor/classes/[classId]/sessions/[sessionId]/test`)
+
+One `SessionTest` per session — a single ordered question set that enrolled
+learners take **twice**: once as a `PRE` attempt before the session, once as
+a `POST` attempt after you mark that session `COMPLETED`. There is no
+separate PRE test and POST test to build; the same questions are reused so a
+per-question and per-learner pre→post gain can be measured. Gated by the
+`sessionTestsEnabled` platform setting (see [[admin-role]]).
+
+- **Build a test** — from the class page's Session Tests card, "Build test"
+  on any session with none yet opens the builder: set a title + optional
+  instructions, then add questions from the admin bank (filtered to the
+  class's subject), from your own previously-written custom questions, or
+  write a new one on the spot. Reorder or remove while still `DRAFT`.
+  (`POST`/`PATCH .../test`, `PUT .../test/questions`)
+- **Publish** — locks the question set and opens the pre-test; every
+  enrolled learner is notified (`SESSION_PRETEST_OPEN`). Requires at least
+  one question. Once published (or once any attempt exists), the question
+  set can no longer be edited.
+  (`PATCH .../test/status` with `{ "status": "PUBLISHED" }`)
+- **The post-test opens automatically** when you mark that specific session
+  `COMPLETED` (not on class-level status changes) — learners are notified
+  (`SESSION_POSTTEST_OPEN`). A learner already mid-pre-test when you do this
+  keeps working; only *new* pre-test starts are blocked once the session is
+  complete.
+- **Close** — stops new attempts on a `PUBLISHED` test; already-collected
+  results stay fully readable.
+  (`PATCH .../test/status` with `{ "status": "CLOSED" }`)
+- **View results** — per-question correct-rate (pre vs post, on a shared
+  chart since both runs serve the same question), per-learner pre/post/delta
+  table with drill-down into any individual attempt, and summary stats
+  (submitted counts, average pre/post, average gain). The average gain is the
+  **mean of each paired learner's own delta**, not `avgPost − avgPre` — a
+  learner who only took one of the two runs doesn't skew it.
+  (`GET .../test/results`, `GET .../test/attempts/[attemptId]`)
+- **Class-wide progress panel** — on the class page, one pre/post bar-pair
+  per session across the whole class (`GET /api/tutor/classes/[classId]/test-results`);
+  a session with no test shows as a gap, never a fake 0%.
+- Self-authored (`origin: "TUTOR"`) questions are private to you — they never
+  appear in the admin question bank, another tutor's "my questions" list, or
+  the certification quiz pool.
+
 ## Students (`/tutor/students`)
 
 - **View your student roster** — every distinct learner enrolled in any of your classes, aggregated across classes, anonymized (`anonymousId`, grade level, section only), with the subjects/topics/enrollment dates for each of their enrollments with you.
@@ -58,7 +100,7 @@ Two tabs on one page:
 
 - **Open to me** (`tab=open`, default) — `OPEN` requests you're eligible to accept: every request **directed** at you specifically (pinned first, badged "Directed to you"), plus every **public** request (no directed tutor) in a subject/topic you hold a `CERTIFIED` certification for. Each row is anonymized (`anonymousId`, grade level, section only) and shows the subject, requested topics, preferred weekly time windows, an optional note, and when it was posted. Paginated, filterable by `subject`.
   (`GET /api/tutor/topic-requests?tab=open`)
-- **Accept & create class** — accepting a request opens the full class-creation form, pre-filled from the request (subject locked to the request's subject; topics pre-checked to the overlap between the request's topics and your `CERTIFIED` topics in that subject — topics you aren't certified for can't be checked; target grade and description seeded from the request; first session date pre-filled from the request's first preferred time slot, resolved to its next occurrence). Submitting **auto-creates a full `SCHEDULED`, published `TutorClass`** (same past-date/overlap validation as `POST /api/tutor/classes`), sets the request to `ACCEPTED` and links it to the new class, and notifies the learner. The learner is **not** auto-enrolled — they review and enroll themselves.
+- **Accept & create class** — "Accept & create class" opens a dedicated page (`/tutor/requests/[id]/accept`, not a modal; server-rendered with the same eligibility gate as the list — 404s if the request isn't open to you) with the full class-creation form pre-filled from the request (subject locked to the request's subject; topics pre-checked to the overlap between the request's topics and your `CERTIFIED` topics in that subject — topics you aren't certified for can't be checked; target grade and description seeded from the request; first session date pre-filled from the request's first preferred time slot, resolved to its next occurrence). Submitting **auto-creates a full `SCHEDULED`, published `TutorClass`** (same past-date/overlap validation as `POST /api/tutor/classes`), sets the request to `ACCEPTED` and links it to the new class, and notifies the learner. The learner is **not** auto-enrolled — they review and enroll themselves.
   (`POST /api/tutor/topic-requests/[id]/accept`)
 - **Accepted by me** (`tab=accepted`) — every request you've accepted that's still linked to its class (`ACCEPTED` = learner hasn't enrolled yet; `ENROLLED` = they have), showing the linked class, its next session, and enrollment count.
   (`GET /api/tutor/topic-requests?tab=accepted`)
@@ -110,9 +152,13 @@ Two tabs on one page:
 ## Profile (`/tutor/profile`)
 
 - **View own account info** — real name, email, anonymous ID (`TUT-XXXX`), and role. Always read-only.
-- **Edit `contactInfo` and `section`** — the only two self-service editable fields.
-  (`PATCH /api/tutor/profile`)
-- Name, email, password, and grade level are **not** self-editable: email/password changes need a dedicated, security-sensitive flow (not yet built); name changes are avoided since the session's cached `fullName` only refreshes on next login and this is an anonymity-sensitive platform; grade level is admin-managed since it feeds grade/section filters elsewhere (e.g. the Students roster, admin user tables).
+- **Edit `contactInfo`, `section`, and `gradeLevel`** — the self-service editable fields.
+  (`PATCH /api/tutor/profile`) `contactInfo` is format-checked: a phone-like value must be a
+  PH mobile number and is normalised to `09XXXXXXXXX`; anything else is kept as a free-form handle.
+- Name, email, and password are **not** self-editable: email/password changes need a dedicated,
+  security-sensitive flow (not yet built); name changes are avoided since the session's cached
+  `fullName` only refreshes on next login and this is an anonymity-sensitive platform. Grade level
+  became self-service on 2026-09-06 (see `docs/reference/decisions.md`).
 
 ## Privacy & Identity
 
@@ -356,6 +402,23 @@ Accept an `OPEN` request by auto-creating a full class from it. Does **not** enr
 **401** → not a tutor. **403** → not eligible for this request, or matching disabled. **404** → request or tutor profile not found.
 **409** → time conflict (internal overlap or against an existing session).
 **500** → `{ error }`.
+
+### Session pre/post-tests (`sessionTestsEnabled`-gated)
+
+All routes are `role === "STUDENT_TUTOR"` + ownership of the class (401/403/404
+via `loadOwnedSession`/`loadOwnedClass` in `src/lib/sessionTestAccess.ts`).
+
+- `GET .../classes/[classId]/sessions/[sessionId]/test` → `{ session, test, attemptCount }` (`test: null` if none created yet).
+- `POST .../test` → create (`{ title, instructions? }`). **403** if `sessionTestsEnabled` is off. **409** if a test already exists for this session.
+- `PATCH .../test` → edit title/instructions. **409** unless `DRAFT`.
+- `DELETE .../test` → remove a `DRAFT`, zero-attempt test. **409** otherwise.
+- `PUT .../test/questions` → replace the ordered question set (`{ questionIds: string[] }`, each must be an active `BANK` question in the class's subject or a `TUTOR` question this tutor owns). **409** unless `DRAFT` with zero attempts.
+- `PATCH .../test/status` → `{ status: "PUBLISHED" | "CLOSED" }`. Publishing notifies every enrolled learner (`SESSION_PRETEST_OPEN`) and requires `sessionTestsEnabled` + ≥1 question. **409** on an invalid transition.
+- `GET .../test/results` → `{ test, totals, learners: [...], questions: [...] }` — no learner `id`, only `anonymousId`.
+- `GET .../test/attempts/[attemptId]` → one learner's full attempt with answers revealed, `{ ...attempt, learner: { anonymousId } }`.
+- `GET /api/tutor/classes/[classId]/test-results` → per-session pre/post roll-up for the whole class, for the progress chart.
+- `GET /api/tutor/question-bank?subject=&topic=&q=` → browse `BANK` questions to add.
+- `GET`/`POST /api/tutor/questions`, `PATCH`/`DELETE /api/tutor/questions/[questionId]` → the tutor's own `TUTOR`-origin questions; a question already used by a non-`DRAFT` test or with any attempt is locked (edit/delete `409`).
 
 ## What Tutors Cannot Do
 

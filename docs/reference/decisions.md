@@ -12,22 +12,80 @@ Format: newest first.
 
 ---
 
-## Learner pre-/post-test assessment exists — on an unmerged branch
+## Grade level is self-service on the profile page (2026-09-06)
 
-**Status:** Not a divergence — this is a "don't re-derive from scratch" note.
-`docs/feature-checklist.md` previously said the learner pre-/post-test
-assessment (thesis module 4) was entirely unbuilt. That was true of `main`
-but not of the repo: it's fully built and committed on branch
-`class-pre-post-tests` (commit `1b6662c`, "Add class pre/post tests
-(tutor-built, learner-taken)") — `ClassTest`/`ClassTestQuestion`/
-`ClassTestAttempt(+Item)` models, a tutor test-builder UI, learner
-take/resume/review flow, admin read-only results, and pre→post score-gain
-reporting. It has its own committed migration
-(`prisma/migrations/20260902081727_class_pre_post_tests/`).
+**Decision:** A learner or tutor can change their own **grade level** (and
+section) from `/{role}/profile`. `PATCH /api/{learner,tutor}/profile` accepts
+`gradeLevel` (`z.nativeEnum(GradeLevel)`), and `ProfileEditForm` exposes it as
+a `<select>`.
 
-**Implication for agents:** before telling someone this feature needs to be
-built, check `git log --all --oneline | grep -i "pre.post"` / `git branch -a`
-first — it may already exist unmerged. Don't duplicate the work.
+**Earlier note said otherwise:** `CLAUDE.md` and the profile copy said "Name,
+email, and grade level changes require an administrator." Name and email still
+do; grade level no longer does.
+
+**Why:** Sept 5 review item 7 — students advance a grade every year and there
+was no self-service path, forcing an admin ticket for a routine change. Real
+name / email stay admin-only because they are the double-blind identity anchor.
+
+**Implication for agents:** Treat `gradeLevel` + `section` as user-editable
+profile fields. Only `firstName` / `lastName` / `email` require an admin route.
+
+---
+
+## Session pre/post-tests: scoped per session, not per class
+
+**Decision:** The pre/post-test assessment (thesis module 4) is scoped to one
+`SessionTest` per `ClassSession`, not per `TutorClass`. A class with 5
+sessions can carry 5 independent tests, each gated to that specific
+session's lifecycle (pre-test opens once published; post-test opens once
+that one session is marked COMPLETED).
+
+**Thesis text says otherwise (implicitly):** the thesis and the first
+implementation attempt (an unmerged branch, `class-pre-post-tests`, commit
+`1b6662c`) both modeled one PRE test + one POST test per class, covering the
+whole class regardless of how many sessions it ran. That branch is now
+superseded and safe to delete — its schema (`ClassTest`/`ClassTestQuestion`/
+`ClassTestAttempt(+Item)`) and its migration
+(`prisma/migrations/20260902081727_class_pre_post_tests/`) were never applied
+to `main` and should not be resurrected.
+
+**Why:** a single class-wide pre/post pair can't attribute a score change to
+any particular session's material — with several sessions between the two
+runs, "what caused the gain" is unrecoverable. Per-session scoping makes the
+diagnostic meaningful: the pre-test measures readiness for *that* session's
+topic, the post-test measures retention right after *that* session.
+
+**Implication for agents:** don't look for `ClassTest*` models or
+class-level test routes — they don't exist on `main`. The real models are
+`SessionTest` / `SessionTestQuestion` / `SessionTestAttempt(+Item)`
+(`prisma/schema.prisma`), one `SessionTest` per `sessionId` (unique). See
+`docs/plans/pre-test-post-test-plan.md` for the full re-graining rationale.
+
+## Session pre/post-tests: one question set served twice, not two separate tests
+
+**Decision:** A `SessionTest` holds a single ordered `SessionTestQuestion[]`.
+Learners take that *same* question set twice — once as a `PRE` attempt,
+once as a `POST` attempt — via `SessionTestAttempt.kind`. There are no
+separate PRE/POST question sets and no `kind` field on the test itself.
+
+**Why:** `kind` living on the attempt (not the test) means `position` refers
+to the identical question in both runs, which is what makes a per-question
+pre→post delta ("did learners get Q3 right more often after the session?")
+meaningful — comparing two independently-authored question sets wouldn't be.
+
+**Implication for agents:**
+- `pickQuestionIds()` (`src/lib/assessmentPicker.ts`, used by the tutor
+  certification quiz) is **not** wired into session tests — a tutor builds a
+  session test's question set manually (bank + self-authored questions), it
+  is never auto-picked. Don't assume the two systems share a selection path.
+- Every `AssessmentQuestion` query outside the certification-quiz/admin-bank
+  path must filter `origin: "BANK"` (or intentionally not, with a comment) —
+  see §5 of the plan. A tutor's self-authored (`origin: "TUTOR"`) questions
+  must never leak into the certification quiz pool or another tutor's bank
+  view.
+- The full build (schema, backend, tutor/learner/admin UI, seed data) landed
+  directly on `main` in one continuous effort (`Changes.md` Part 29, phases
+  0–7) — there is no separate unmerged branch for this feature any more.
 
 ---
 

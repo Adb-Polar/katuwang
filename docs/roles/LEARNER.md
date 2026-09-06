@@ -42,6 +42,37 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 - **Unenroll from a class** — leave a class the learner is currently enrolled in, as long as it's still `SCHEDULED` (can't unenroll from a completed/cancelled class). Unenrolling is whole-class regardless of individual session states — you can't unenroll from just one session, since later sessions build on earlier ones.
   (`DELETE /api/classes/[classId]/enroll`)
 
+## Session Pre/Post-Tests (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`)
+
+For a session with a published test, a short diagnostic quiz is taken
+**twice**: once before the session (pre-test), once after your tutor marks
+it `COMPLETED` (post-test). Both runs serve the identical question set, so
+your own score change is measurable question-by-question. It's diagnostic
+only — no pass/fail, no grade impact.
+
+- **Take the pre-test** — from the class page's Session Tests card, once
+  your tutor publishes it. Answer all questions and submit; you can leave
+  and resume an in-progress attempt any time before submitting.
+  (`POST /api/learner/classes/[classId]/sessions/[sessionId]/test/PRE/start`)
+- **The post-test opens automatically** once your tutor marks that specific
+  session complete — you're notified. If you were still mid-pre-test at that
+  moment, it isn't cut short; you can still finish and submit it.
+- **Review a submitted attempt** — see which answers were correct, the
+  correct option and explanation for each question, and your score. A
+  submitted post-test also shows your gain versus your pre-test score, when
+  both were taken.
+  (`GET /api/learner/session-test-attempts/[attemptId]`)
+- **My Progress** (`/learner/progress`) — every session across your enrolled
+  classes that had a test, plotted pre vs post, with a summary (sessions
+  with a test, how many were paired pre+post, your average gain). Filterable
+  by class. A compact version of the same chart appears on each class's own
+  page. Shows only your own scores — no tutor identity, no class-average
+  figure (a small class would make "class average" identify a classmate).
+  (`GET /api/learner/progress?classId=`)
+- Missing the pre-test window (session already completed) or the post-test
+  window (session not yet completed) simply means that run isn't available —
+  it isn't an error you caused.
+
 ## Automatic Matching (`/learner/match`)
 
 - **Find a class** — describe what you need (subject, one or more topics, an optional grade level, and any number of preferred weekly time windows) and get a ranked list of open, browsable classes that fit. Enrolling still happens through the normal class detail page — matching only ranks, it never enrolls.
@@ -89,9 +120,13 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 ## Profile (`/learner/profile`)
 
 - **View own account info** — real name, email, anonymous ID (`STU-XXXX`), and role. Always read-only.
-- **Edit `contactInfo` and `section`** — the only two self-service editable fields.
-  (`PATCH /api/learner/profile`)
-- Name, email, password, and grade level are **not** self-editable (same rationale as the tutor profile): email/password changes need a dedicated security flow (not yet built); name changes are avoided on an anonymity-sensitive platform where the session's cached `fullName` only refreshes on next login; grade level is admin-managed because it feeds grade/section filters elsewhere.
+- **Edit `contactInfo`, `section`, and `gradeLevel`** — the self-service editable fields.
+  (`PATCH /api/learner/profile`) `contactInfo` is format-checked: a phone-like value must be a
+  PH mobile number and is normalised to `09XXXXXXXXX`; anything else is kept as a free-form handle.
+- Name, email, and password are **not** self-editable: email/password changes need a dedicated
+  security flow (not yet built); name changes are avoided on an anonymity-sensitive platform where
+  the session's cached `fullName` only refreshes on next login. Grade level became self-service on
+  2026-09-06 (see `docs/reference/decisions.md`).
 
 ## Privacy & Identity
 
@@ -291,6 +326,17 @@ Update the learner's own self-service profile fields. Requires `role === "STUDEN
 **400** → validation error (empty section, `contactInfo` too long).
 **401** → not a learner.
 **500** → `{ error }`.
+
+### Session pre/post-tests (`sessionTestsEnabled`-gated)
+
+All routes are `role === "STUDENT_LEARNER"`; ownership of the *attempt* (not
+just the class) is checked for the two attempt routes.
+
+- `GET /api/learner/classes/[classId]/session-tests` → one row per session in the class, `{ sessionId, topic, scheduledAt, test: {id,title,status}|null, pre, post }`. A `DRAFT` test reports as `test: null` — indistinguishable from no test at all.
+- `POST /api/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/start` (`kind` = `PRE`|`POST`) → creates a new attempt (**201**) or resumes an existing `IN_PROGRESS` one (**200**) — resuming is never blocked by session status. **404** bad kind / not enrolled / no test / `DRAFT` test. **409** `CLOSED` test, already-submitted, or the session-status gate not open yet (`code: "PRE_WINDOW_CLOSED"` once the session is `COMPLETED`, `code: "POST_NOT_OPEN"` while still `SCHEDULED`, `code: "SESSION_CANCELLED"`). **403** if `sessionTestsEnabled` is off.
+- `GET /api/learner/session-test-attempts/[attemptId]` → your own attempt; answers/score revealed only once `SUBMITTED`. **404** (never `403`) if it isn't yours — doesn't confirm the id exists.
+- `POST /api/learner/session-test-attempts/[attemptId]/submit` → grade + submit (`{ answers: [{questionId, optionId}] }`). **409** if already submitted.
+- `GET /api/learner/progress?classId=` → `{ series: [{classCode, subject, topic, scheduledAt, preScore, postScore, delta}], summary: {sessionsWithTest, pairedCount, avgDelta} }` — your own results only, no tutor identity or class-average anywhere in the payload.
 
 ## What Learners Cannot Do
 

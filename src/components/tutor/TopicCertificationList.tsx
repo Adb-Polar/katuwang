@@ -27,15 +27,19 @@ export default function TopicCertificationList({
   taughtTopics,
   initialCertifications,
   topicStatuses,
+  requested,
+  onRequested,
 }: {
   taughtTopics: TaughtTopic[];
   initialCertifications: TopicCertificationEntry[];
   topicStatuses: Record<string, TopicAssessmentStatus>;
+  /** Keys (`subject::topic`) already requested this session — owned by the parent so it survives tab switches. */
+  requested: Set<string>;
+  onRequested: (key: string) => void;
 }) {
   const router = useRouter();
   const certByKey = new Map(initialCertifications.map((c) => [keyOf(c.subject, c.topic), c]));
   const [busy, setBusy] = useState<string | null>(null);
-  const [requested, setRequested] = useState<Set<string>>(new Set());
   const [error, setError] = useState("");
 
   const startAssessment = async (subject: string, topic: string) => {
@@ -76,7 +80,8 @@ export default function TopicCertificationList({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send request.");
-      setRequested((prev) => new Set(prev).add(key));
+      onRequested(key);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send request.");
     } finally {

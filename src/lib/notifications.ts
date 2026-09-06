@@ -17,6 +17,7 @@ export type NotificationType =
   | "CERTIFICATION_CERTIFIED"
   | "CERTIFICATION_REJECTED"
   // question-bank requests
+  | "QUESTION_REQUEST_NEW"
   | "QUESTION_REQUEST_RESOLVED"
   | "QUESTION_REQUEST_DISMISSED"
   // class enrolment (tutor-facing)

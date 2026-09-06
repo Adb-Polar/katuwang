@@ -216,7 +216,8 @@ export default function TopicRequestModerationTable() {
                       <td>
                         <StatusBadge tone={STATUS_TONE[r.status]} label={r.status} size="xs" />
                       </td>
-                      <td className="flex gap-2 justify-end">
+                      <td>
+                        <div className="flex flex-wrap gap-2 justify-end">
                         {(r.status === "OPEN" ||
                           r.status === "ACCEPTED" ||
                           r.status === "ENROLLED") && (
@@ -239,6 +240,7 @@ export default function TopicRequestModerationTable() {
                             Re-open
                           </button>
                         )}
+                        </div>
                       </td>
                     </tr>
                   ))}

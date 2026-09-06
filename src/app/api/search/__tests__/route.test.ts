@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, classFindMany, userFindMany, getSubjectsMock } = vi.hoisted(() => ({
+const { getServerSessionMock, classFindMany, userFindMany, getSubjectsMock, getSettingMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindMany: vi.fn(),
   userFindMany: vi.fn(),
   getSubjectsMock: vi.fn(),
+  getSettingMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
@@ -13,6 +14,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: { tutorClass: { findMany: classFindMany }, user: { findMany: userFindMany } },
 }));
 vi.mock("@/lib/subjects", () => ({ getSubjects: getSubjectsMock }));
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 // browseClassesWhere is a pure helper — keep the real one.
 
 import { GET } from "@/app/api/search/route";
@@ -22,6 +24,7 @@ const req = (q: string) => new NextRequest(`http://localhost/api/search?q=${enco
 describe("GET /api/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    getSettingMock.mockResolvedValue(false);
     getSubjectsMock.mockResolvedValue([
       { slug: "MATH", name: "Mathematics", topics: [{ name: "Linear equations" }, { name: "Fractions" }] },
     ]);

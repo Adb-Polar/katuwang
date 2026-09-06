@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { browseClassesWhere } from "@/lib/classQueries";
 import { getSubjects } from "@/lib/subjects";
+import { getSetting } from "@/lib/settings";
 
 const PER_GROUP = 6;
 
@@ -60,6 +61,9 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "STUDENT_LEARNER") {
+      // When the platform reveals tutor names, learners can also search by name
+      // and see the real name in results instead of just the anonymous ID.
+      const showRealNames = await getSetting("showTutorRealNames");
       const [classes, tutors] = await Promise.all([
         prisma.tutorClass.findMany({
           where: {
@@ -78,10 +82,15 @@ export async function GET(req: NextRequest) {
           where: {
             role: "STUDENT_TUTOR",
             status: "ACTIVE",
-            anonymousId: { contains: q },
             tutorProfile: { topicCertifications: { some: { status: "CERTIFIED" } } },
+            OR: [
+              { anonymousId: { contains: q } },
+              ...(showRealNames
+                ? [{ firstName: { contains: q } }, { lastName: { contains: q } }]
+                : []),
+            ],
           },
-          select: { id: true, anonymousId: true },
+          select: { id: true, anonymousId: true, firstName: true, lastName: true },
           take: PER_GROUP,
           orderBy: { anonymousId: "asc" },
         }),
@@ -102,7 +111,15 @@ export async function GET(req: NextRequest) {
         groups.push({
           kind: "tutor",
           label: "Tutors",
-          items: tutors.map((t) => ({ id: t.id, title: t.anonymousId, href: `/learner/tutors/${t.id}` })),
+          items: tutors.map((t) => {
+            const name = `${t.firstName} ${t.lastName}`.trim();
+            return {
+              id: t.id,
+              title: showRealNames && name ? name : t.anonymousId,
+              subtitle: showRealNames && name ? t.anonymousId : undefined,
+              href: `/learner/tutors/${t.id}`,
+            };
+          }),
         });
     } else if (role === "STUDENT_TUTOR") {
       const classes = await prisma.tutorClass.findMany({

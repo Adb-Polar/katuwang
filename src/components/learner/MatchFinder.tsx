@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap } from "lucide-react";
+import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ClassCard from "@/components/classes/ClassCard";
 import MatchCriteriaFields, {
@@ -70,6 +70,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [flipped, setFlipped] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +88,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not find matches.");
       setMatches(data.matches);
+      setFlipped(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not find matches.");
     } finally {
@@ -98,41 +100,28 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card kt-card">
-        <div className="card-body gap-5 p-6 sm:p-8">
-          <div>
-            <h2 className="card-title text-base font-bold">What do you need help with?</h2>
-            <p className="text-xs text-base-content/60 mt-1">
-              Pick a subject and topics, add the times you&apos;re free, and we&apos;ll rank the open classes that fit.
-            </p>
-          </div>
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <MatchCriteriaFields
-              value={criteria}
-              onChange={setCriteria}
-              showFormatFilter
-              gradeHint="Prefilled from your profile — change it if this class is for a different level."
-            />
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary btn-md text-sm gap-2 w-full sm:w-auto"
-            >
-              {loading ? <span className="loading loading-spinner loading-sm" /> : <Sparkles className="h-4 w-4" />}
-              Auto Match
-            </button>
-          </form>
-        </div>
-      </section>
+      {/* One panel at a time — a short fade swaps the criteria form for the ranked results. */}
+      <div key={flipped ? "results" : "filters"} className="kt-swap">
+        {flipped && matches !== null ? (
+          <section className="card kt-card">
+            <div className="card-body gap-4">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="card-title text-sm font-bold">
+                  {matches.length > 0
+                    ? `${matches.length} class${matches.length === 1 ? "" : "es"} for you`
+                    : "No matches yet"}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setFlipped(false)}
+                  className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" />
+                  Adjust filters
+                </button>
+              </div>
 
-      {matches !== null && (
-        <section className="card kt-card">
-          <div className="card-body gap-4">
-            <h2 className="card-title text-sm font-bold">
-              {matches.length > 0 ? `${matches.length} class${matches.length === 1 ? "" : "es"} for you` : "No matches yet"}
-            </h2>
-
-            {matches.length === 0 ? (
+              {matches.length === 0 ? (
               <div className="text-center py-8 bg-base-200/10 border border-dashed border-base-300 rounded-xl space-y-2">
                 <p className="text-xs text-base-content/50 italic">
                   Nothing open fits this right now.
@@ -175,10 +164,55 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        </section>
-      )}
+              )}
+            </div>
+          </section>
+        ) : (
+          <section className="card kt-card">
+            <div className="card-body gap-5 p-6 sm:p-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="card-title text-base font-bold">What do you need help with?</h2>
+                  <p className="text-xs text-base-content/60 mt-1">
+                    Pick a subject and topics, add the times you&apos;re free, and we&apos;ll rank the open classes that
+                    fit.
+                  </p>
+                </div>
+                {matches !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setFlipped(true)}
+                    className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                  >
+                    <ListChecks className="h-3.5 w-3.5" />
+                    View results
+                  </button>
+                )}
+              </div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <MatchCriteriaFields
+                  value={criteria}
+                  onChange={setCriteria}
+                  showFormatFilter
+                  gradeHint="Prefilled from your profile — change it if this class is for a different level."
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary btn-md text-sm gap-2 w-full sm:w-auto"
+                >
+                  {loading ? (
+                    <span className="loading loading-spinner loading-sm" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" />
+                  )}
+                  Auto Match
+                </button>
+              </form>
+            </div>
+          </section>
+        )}
+      </div>
     </div>
   );
 }

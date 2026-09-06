@@ -174,13 +174,10 @@ Session pre/post-tests - Phase 2: origin isolation (Changes.md Part 29)
     tutor still gets BANK_NOT_READY even after authoring custom questions
  [] Certification quiz still serves bank-only questions (no tutor-authored ones)
 
-Session pre/post-tests - Phases 3-4: backend only, no UI yet (Changes.md Part 29)
-NOTE: these routes have no UI mount point until Phase 5-6 ships. Verify via
-curl/Postman/Prisma Studio against a seeded class+session, or hold this block
-until the UI phases land and re-verify through the screens directly.
- [] Tutor: POST a session test, PUT its question set (mixing a BANK question
-    with a self-authored TUTOR one), PATCH status to PUBLISHED -> every
-    enrolled learner gets a notification; question set PUT now 409s
+Session pre/post-tests - Phases 3-4: backend routes (Changes.md Part 29)
+NOTE: the exact status codes/error codes below are easiest to check via
+curl/Postman against the seeded demo class+session; the Phase 6 block covers
+the same flows through the actual screens.
  [] Learner: POST .../test/PRE/start while the session is SCHEDULED succeeds;
     the same call while COMPLETED 409s with code PRE_WINDOW_CLOSED; POST/start
     while SCHEDULED 409s with code POST_NOT_OPEN
@@ -189,13 +186,79 @@ until the UI phases land and re-verify through the screens directly.
     receives score + delta only once BOTH pre and post are submitted
  [] A learner who already had the pre-test open when the tutor hit "Mark
     Complete" can still resume and submit that in-progress PRE attempt
- [] GET .../test/results (tutor) and GET /api/admin/session-tests/[id]/results
-    (admin) show per-question rates + per-learner deltas with no `id` field
-    on any learner row, only `anonymousId`
+ [] GET /api/admin/session-tests/[id]/results shows per-question rates +
+    per-learner deltas with no `id` field on any learner row, only
+    `anonymousId`
  [] GET /api/learner/progress returns only this learner's own series - no
     tutor name, no class-average figure anywhere in the payload
+
+Session pre/post-tests - Phase 5: tutor UI (Changes.md Part 29)
+ [] Tutor class page: a session with no test shows "Build test" in the new
+    Session Tests card; clicking it lands on the builder with the create-test
+    form (title/instructions only)
+ [] Builder: create a test, add questions from the bank, add a self-authored
+    one via "Write a question", reorder + remove, "Save question set", then
+    Publish -> question list becomes read-only, enrolled learners get
+    SESSION_PRETEST_OPEN, "View results" link appears
+ [] Builder on a PUBLISHED test: "Close test" works and flips the badge; on a
+    test with >=1 attempt, editing controls (add/reorder/remove/save) are
+    gone even while still DRAFT
+ [] Session Tests card on the class page reflects Draft/Open/Closed status
+    per session and its Build/View/Results links go to the right session
+ [] Results page: per-question RateBarChart (pre vs post bars) and
+    per-learner DeltaBar render correctly with 0, 1, and several submitted
+    attempts; "no data" states show the empty-hint text, not a broken chart
+ [] Results page per-learner table: "Pre"/"Post" buttons each open the
+    correct attempt's detail modal (right answers highlighted, picked answer
+    marked) and only appear when that attempt exists
+ [] Class page: ClassProgressPanel (chart a) shows one pre/post bar-pair per
+    session with a test, a gap (not a 0% bar) for sessions with no test yet,
+    and the class-wide avg-gain footer text only when pairedCount > 0
  [] Turn "sessionTestsEnabled" OFF via Prisma Studio (platform_settings) ->
-    tutor test creation and publish both 403; existing results stay readable
+    the builder's create-test POST 403s with a clear error banner; existing
+    results/builder pages for already-created tests stay reachable
+
+Session pre/post-tests - Phase 6: learner + admin UI (Changes.md Part 29)
+ [] Learner class page: Session Tests card shows "Take pre-test" once
+    published; taking it and submitting shows the score banner (no correct
+    answers revealed on an in-progress attempt if you refresh mid-test)
+ [] After the tutor marks the session COMPLETED: card now shows "Take
+    post-test" for a learner who already submitted the pre-test; submitting
+    the post-test shows the score AND the delta vs the pre-test score in the
+    banner text
+ [] A learner who never took the pre-test still sees "Review pre-test" (not
+    "Take post-test") once the post window opens, since there's nothing
+    paired to show — reflects the seeded juan.delacruz row (pre only)
+ [] Resuming an in-progress pre-test (leave mid-quiz, come back) restores
+    previously-selected answers and does not reveal correct/incorrect yet
+ [] Reviewing an already-submitted attempt (either kind) shows the
+    correct/incorrect marks, the explanation text, and does not let you
+    change your answer
+ [] /learner/progress: ProgressAreaChart renders the seeded demo@learner.test
+    gain; the class filter narrows the series correctly; summary numbers
+    (sessions with test, paired count, avg gain) match the chart
+ [] Compact MyProgressView embedded on the learner's class page has no class
+    filter dropdown and matches the same data as the full page filtered to
+    that class
+ [] /admin/session-tests: subject/status/text filters and column sorting
+    (SortableTh) all work against the seeded data; "Results" opens the same
+    results view the tutor sees, still double-blind (no learner id visible)
+ [] /admin/settings -> Assessment group shows "Session pre/post-tests" toggle;
+    flipping it off/on matches the platform_settings row and the tutor/learner
+    403 behavior above
+ [] Both nav items highlight correctly when active: "My Progress" (learner,
+    Main menu) and "Session Tests" (admin, Assessment group)
+
+Session pre/post-tests - Phase 7: seed data (Changes.md Part 29)
+ [] Log in as demo@tutor.test -> the "Algebraic Expressions" session under
+    the demo MATH class is COMPLETED and has a PUBLISHED session test with 6
+    questions (5 bank + 1 custom); its results page shows demo@learner.test's
+    pre (~40%) -> post (~85%) gain and juan.delacruz's pre-only (~60%) row
+ [] Log in as demo@learner.test -> /learner/progress shows this session with
+    a visible gain; the class's Session Tests card shows both attempts as
+    "Review"
+ [] Re-running `pnpm exec tsx prisma/seed.ts` a second time is clean (no FK
+    errors) and reproduces the same seeded session-test state each time
 
 Chatbot v1.1 - usability pass (Changes.md Part 30)
  [] /admin/chatbot renders; role filter + text search + sort by count/first
@@ -215,3 +278,51 @@ Chatbot v1.1 - usability pass (Changes.md Part 30)
     sign in after registering", "is there a class capacity limit")
  [] Chatbot still answers its existing pre-v1.1 canned topics unchanged (e.g.
     "how do I enroll", "is katuwang free")
+
+Sept 5 fixes - 9-item batch (Changes.md Part 31)
+ [] /learner/match: run Auto Match -> the panel swaps from the criteria form to
+    the ranked results with a short, subtle fade (not a tilted 3D spin);
+    "Adjust filters" swaps back; once results exist a "View results" button on
+    the form swaps forward again; motion is suppressed with reduce-motion on
+ [] /register/learner and /register/tutor: eye toggle reveals/hides each
+    password field independently; submit still validates match + min length
+ [] /learner/profile: new two-column layout (Identity read-only / Editable
+    details); grade level is a working <select>; saving persists it
+ [] Contact info validation: "0917 123 4567", "+63 917 123 4567" save and
+    display as 09171234567; "123" or a US number is rejected with the PH-mobile
+    message; a Messenger handle ("Tita Rosa on FB") saves as-is
+ [] /tutor/profile: grade level + section both editable and persist; contact
+    info validated the same way
+ [] Global search as a learner while admin setting "Show tutor real names" is
+    ON: searching a tutor's real name finds them and the row shows the name
+    (anon ID beneath); with the setting OFF, only anon-ID search works and only
+    the anon ID shows
+ [] /tutor/assessments: click "Request questions" on a topic -> switch to
+    "Assessment History" tab -> switch back -> the topic still shows "Questions
+    requested" (no revert, no refresh needed)
+ [] After that request, log in as an admin -> /admin/notifications shows a new
+    "requested assessment questions for ..." entry linking to
+    /admin/assessment/requests; the topbar bell unread dot updates
+ [] /admin/classes and /admin/topic-requests: the row action buttons
+    (View/Suspend/Ban/Reinstate, Close/Re-open) sit correctly aligned at the
+    right of each row, wrapping instead of overflowing on a narrow window
+ [] /tutor/classes -> "Schedule a Class" -> pick subject + topic(s) -> the
+    Sessions "Add Session" rows: on a narrow / mobile viewport each row wraps
+    to two lines (topic + remove, then date/time + duration) and the modal does
+    not scroll sideways; on desktop it still reads as a compact row. Same check
+    when accepting a topic request (AcceptRequestModal uses the same fields).
+ [] /tutor/classes -> "Schedule Class" now navigates to /tutor/classes/new (a
+    full page, not a modal); fill it in and submit -> lands on the new class's
+    detail page and the class appears in the Active list. "Cancel" returns to
+    /tutor/classes. The empty-state "Schedule your first class now" link also
+    goes to /tutor/classes/new. Direct-visiting /tutor/classes/new while logged
+    out redirects to login (proxy /tutor guard).
+ [] On /tutor/classes/new the inputs/selects are full-size (input-md /
+    select-sm, text-sm) and comfortably spaced; the accept-a-topic-request
+    dialog still uses the compact control sizes.
+ [] /tutor/requests -> "Accept & create class" now navigates to
+    /tutor/requests/[id]/accept (a full page, not a modal); subject is locked,
+    only certified topics selectable, first session pre-filled from the
+    request's earliest preferred slot; submit -> lands on the new class detail
+    page. "Cancel" returns to /tutor/requests. Visiting the accept URL for a
+    request NOT open to you (or when matching is disabled) 404s.

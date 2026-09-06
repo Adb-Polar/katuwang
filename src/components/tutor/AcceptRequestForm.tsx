@@ -51,17 +51,19 @@ function nextOccurrence(day: string, time: string): string {
 
 let rowIdCounter = 0;
 
-export default function AcceptRequestModal({
+/**
+ * Full-page "accept a topic request & create a class" form — the page-based
+ * replacement for the old `AcceptRequestModal`. Reuses `ClassScheduleFields`
+ * (`variant="page"`) with the subject locked and only the tutor's certified
+ * topics selectable, pre-filled from the request.
+ */
+export default function AcceptRequestForm({
   request,
   certifiedTopics,
-  onClose,
-  onAccepted,
 }: {
   request: RequestSummary;
   /** The tutor's CERTIFIED topics within the request's subject. */
   certifiedTopics: string[];
-  onClose: () => void;
-  onAccepted: () => void;
 }) {
   const router = useRouter();
   const { topicsFor } = useSubjectCatalog();
@@ -95,33 +97,30 @@ export default function AcceptRequestModal({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not accept this request.");
-      onAccepted();
       router.push(`/tutor/classes/${data.classId}`);
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not accept this request.");
-    } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-        <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4">
-          ✕
-        </button>
-        <h3 className="font-serif text-base font-semibold mb-1">Accept &amp; create class</h3>
-        <p className="text-xs text-base-content/60 mb-4">
-          This creates a full class from the request. Only topics you&apos;re certified for can be selected.
+    <section className="card kt-card">
+      <div className="card-body gap-4 p-6 sm:p-8">
+        <p className="text-xs text-base-content/60">
+          This creates a full class from {request.subject} request. Only topics you&apos;re certified for can be
+          selected.
         </p>
 
         {certifiedTopics.length === 0 && (
-          <div className="text-2xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-2 mb-3">
+          <div className="text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-3">
             You have no CERTIFIED topics in {request.subject} yet — request an assessment first.
           </div>
         )}
 
         <ClassScheduleFields
+          variant="page"
           initial={{
             subject: request.subject,
             gradeLevel: request.gradeLevel,
@@ -135,10 +134,10 @@ export default function AcceptRequestModal({
           submitLabel="Accept & create class"
           submitting={submitting}
           error={error}
-          onCancel={onClose}
+          onCancel={() => router.push("/tutor/requests")}
           onSubmit={submit}
         />
       </div>
-    </div>
+    </section>
   );
 }

@@ -1,9 +1,22 @@
 import { z } from "zod";
+import { GradeLevel } from "@prisma/client";
 
-// Self-service profile fields — the same two for tutors and learners.
+export { normalizeContactInfo } from "@/lib/contactInfo";
+
+// ─── Self-service profile fields ─────────────────────────────────────────────
+// Shared by tutors and learners. `gradeLevel` is editable by the account owner
+// (see docs/reference/decisions.md — grade/section are self-service).
+// `contactInfo` is only length-checked here; call `normalizeContactInfo` in the
+// route for format validation + normalisation.
 export const updateProfileSchema = z.object({
-  contactInfo: z.string().trim().max(200, "Contact info cannot exceed 200 characters.").optional().or(z.literal("")),
+  contactInfo: z
+    .string()
+    .trim()
+    .max(200, "Contact info cannot exceed 200 characters.")
+    .optional()
+    .or(z.literal("")),
   section: z.string().trim().min(1, "Section is required.").max(50, "Section cannot exceed 50 characters.").optional(),
+  gradeLevel: z.nativeEnum(GradeLevel, { message: "Select a valid grade level." }).optional(),
   recoveryEmail: z
     .string()
     .trim()

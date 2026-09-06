@@ -1,11 +1,13 @@
+import { ShieldCheck } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
 
 /**
- * Shared account page for learners and tutors — a clean definition list of the
- * read-only identity fields plus the self-service edit card. The two portals
- * differ only by eyebrow / role label / ID role / endpoint.
+ * Shared account page for learners and tutors — read-only identity fields the
+ * account owner can't change themselves, plus the self-service edit card
+ * (grade level, section, contact info). The two portals differ only by
+ * eyebrow / role label / ID role / endpoint.
  */
 export default function ProfileView({
   eyebrow,
@@ -32,17 +34,13 @@ export default function ProfileView({
   section: string;
   contactInfo: string;
 }) {
-  const rows: { label: string; value: React.ReactNode }[] = [
+  const identityRows: { label: string; value: React.ReactNode }[] = [
     { label: "Real name", value: <span className="font-semibold">{fullName}</span> },
     { label: "Email", value: <span className="font-semibold break-all">{email}</span> },
     {
       label: "Anonymous ID",
       value: <AnonymousIdBadge id={anonymousId} role={idRole} />,
     },
-    ...(gradeLevel
-      ? [{ label: "Grade level", value: <span className="font-semibold">{gradeLevel.replace("_", " ")}</span> }]
-      : []),
-    { label: "Section", value: <span className="font-semibold">{section || "—"}</span> },
     { label: "Role", value: <span className={`font-semibold ${roleLabelClass}`}>{roleLabel}</span> },
   ];
 
@@ -55,34 +53,47 @@ export default function ProfileView({
         actions={<AnonymousIdBadge id={anonymousId} role={idRole} size="md" showIcon />}
       />
 
-      <section className="card kt-card">
-        <div className="card-body gap-4 p-6">
-          <h2 className="card-title text-sm font-bold">Account information</h2>
-          <dl className="divide-y divide-base-200">
-            {rows.map((r) => (
-              <div
-                key={r.label}
-                className="grid grid-cols-1 sm:grid-cols-[10rem_1fr] gap-1 sm:gap-3 py-3 text-sm"
-              >
-                <dt className="text-base-content/50">{r.label}</dt>
-                <dd>{r.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-5">
+        {/* Read-only identity */}
+        <section className="card kt-card lg:col-span-2">
+          <div className="card-body gap-4 p-6">
+            <div>
+              <h2 className="card-title text-sm font-bold">Identity</h2>
+              <p className="text-2xs text-base-content/60 mt-1 flex items-start gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 shrink-0 mt-px text-success" />
+                Name and email are managed by an administrator.
+              </p>
+            </div>
+            <dl className="divide-y divide-base-200">
+              {identityRows.map((r) => (
+                <div key={r.label} className="grid gap-0.5 py-3 text-sm">
+                  <dt className="text-2xs uppercase tracking-wide text-base-content/45">{r.label}</dt>
+                  <dd>{r.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
 
-      <section className="card kt-card">
-        <div className="card-body gap-4 p-6">
-          <h2 className="card-title text-sm font-bold">Edit profile</h2>
-          <p className="text-xs text-base-content/60">
-            You can update your section and contact info yourself. Name, email, and grade level changes require an
-            administrator.
-          </p>
-          <div className="divider my-0"></div>
-          <ProfileEditForm endpoint={endpoint} initialContactInfo={contactInfo} initialSection={section} />
-        </div>
-      </section>
+        {/* Self-service fields */}
+        <section className="card kt-card lg:col-span-3">
+          <div className="card-body gap-4 p-6">
+            <div>
+              <h2 className="card-title text-sm font-bold">Editable details</h2>
+              <p className="text-2xs text-base-content/60 mt-1">
+                Keep your grade level, section, and contact info up to date so tutors and admins can reach you.
+              </p>
+            </div>
+            <div className="divider my-0"></div>
+            <ProfileEditForm
+              endpoint={endpoint}
+              initialContactInfo={contactInfo}
+              initialSection={section}
+              initialGradeLevel={gradeLevel ?? ""}
+            />
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { useTopicCertifications } from "@/hooks/useTopicCertifications";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -11,7 +10,6 @@ import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
-import AcceptRequestModal from "@/components/tutor/AcceptRequestModal";
 
 const PAGE_SIZE = 10;
 
@@ -41,8 +39,6 @@ export default function TopicRequestBrowser() {
   const { subjects } = useSubjectCatalog();
   const [tab, setTab] = useState<"open" | "accepted">("open");
   const [subject, setSubject] = useState<string>("");
-  const [accepting, setAccepting] = useState<OpenRequest | null>(null);
-  const { certifications } = useTopicCertifications();
 
   const openList = usePaginatedList<OpenRequest>(
     "/api/tutor/topic-requests",
@@ -63,9 +59,6 @@ export default function TopicRequestBrowser() {
   );
 
   const active = tab === "open" ? openList : acceptedList;
-
-  const certifiedTopicsFor = (subj: string) =>
-    certifications.filter((c) => c.subject === subj && c.status === "CERTIFIED").map((c) => c.topic);
 
   return (
     <div className="space-y-4">
@@ -126,12 +119,12 @@ export default function TopicRequestBrowser() {
                       {r.learner.gradeLevel.replace("_", " ")} · {r.learner.section}
                     </span>
                   </div>
-                  <button
-                    onClick={() => setAccepting(r)}
+                  <Link
+                    href={`/tutor/requests/${r.id}/accept`}
                     className="btn btn-primary btn-xs text-2xs"
                   >
                     Accept &amp; create class
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="flex flex-wrap gap-1">
@@ -214,18 +207,6 @@ export default function TopicRequestBrowser() {
       )}
 
       <Pagination page={active.page} pageSize={PAGE_SIZE} total={active.total} onPageChange={active.setPage} />
-
-      {accepting && (
-        <AcceptRequestModal
-          request={accepting}
-          certifiedTopics={certifiedTopicsFor(accepting.subject)}
-          onClose={() => setAccepting(null)}
-          onAccepted={() => {
-            setAccepting(null);
-            openList.refetch();
-          }}
-        />
-      )}
     </div>
   );
 }

@@ -42,6 +42,7 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   CERTIFICATION_CERTIFIED: <BadgeCheck className="h-4 w-4 text-success" />,
   CERTIFICATION_REJECTED: <XCircle className="h-4 w-4 text-error" />,
   // question-bank requests
+  QUESTION_REQUEST_NEW: <ClipboardList className="h-4 w-4 text-info" />,
   QUESTION_REQUEST_RESOLVED: <CheckCheck className="h-4 w-4 text-success" />,
   QUESTION_REQUEST_DISMISSED: <XCircle className="h-4 w-4 text-base-content/40" />,
   // class enrolment (tutor-facing)

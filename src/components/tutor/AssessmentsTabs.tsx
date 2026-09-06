@@ -24,6 +24,10 @@ export default function AssessmentsTabs({
   attempts: AttemptSummary[];
 }) {
   const [activeTab, setActiveTab] = useState<"topics" | "history">("topics");
+  // Lifted so a "Request questions" click survives switching to the History tab
+  // and back — TopicCertificationList unmounts on tab change and would otherwise
+  // lose its local state until a full page refresh.
+  const [requested, setRequested] = useState<Set<string>>(new Set());
 
   return (
     <section className="card kt-card">
@@ -47,6 +51,8 @@ export default function AssessmentsTabs({
               taughtTopics={taughtTopics}
               initialCertifications={initialCertifications}
               topicStatuses={topicStatuses}
+              requested={requested}
+              onRequested={(key) => setRequested((prev) => new Set(prev).add(key))}
             />
           </>
         ) : (

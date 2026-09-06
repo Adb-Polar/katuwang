@@ -40,8 +40,9 @@ function newRowKey() {
 /**
  * The reusable body of "create/accept-into a class": subject, target grade,
  * topics, description, sessions, location, capacity, meeting link. Used by
- * `ClassManagement` (tutor-initiated) and `AcceptRequestModal` (accepting a
- * topic request) so there's one implementation of the class form.
+ * `NewClassForm` (tutor-initiated, `/tutor/classes/new`) and `AcceptRequestForm`
+ * (accepting a topic request, `/tutor/requests/[id]/accept`) so there's one
+ * implementation of the class form.
  */
 export default function ClassScheduleFields({
   initial,
@@ -51,6 +52,7 @@ export default function ClassScheduleFields({
   submitLabel = "Schedule",
   submitting = false,
   error,
+  variant = "modal",
   onCancel,
   onSubmit,
 }: {
@@ -64,9 +66,21 @@ export default function ClassScheduleFields({
   submitLabel?: string;
   submitting?: boolean;
   error?: string;
+  /** "modal" = compact controls for the dialog (accept-request flow); "page" = comfortable full-size controls. */
+  variant?: "modal" | "page";
   onCancel: () => void;
   onSubmit: (payload: ClassScheduleSubmitPayload) => void;
 }) {
+  const page = variant === "page";
+  const inputCls = page ? "input-md text-sm" : "input-sm text-xs";
+  const selectCls = page ? "select-md text-sm" : "select-sm text-xs";
+  const rowInputCls = page ? "input-sm text-sm" : "input-xs text-2xs";
+  const rowSelectCls = page ? "select-sm text-sm" : "select-xs text-2xs";
+  const rowBtnCls = page ? "btn-sm" : "btn-xs";
+  const textareaCls = page ? "textarea-md text-sm h-24" : "textarea-sm text-xs h-20";
+  const actionBtnCls = page ? "btn-md text-sm" : "btn-sm text-xs";
+  const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
+  const topicLabelCls = page ? "text-xs" : "text-2xs";
   const { subjects, topicsFor } = useSubjectCatalog();
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
@@ -147,7 +161,7 @@ export default function ClassScheduleFields({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3.5">
+    <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
 
       <FormField label="Subject Area" required>
@@ -157,7 +171,7 @@ export default function ClassScheduleFields({
           onChange={handleInputChange}
           required
           disabled={subjectLocked}
-          className="select select-bordered select-sm w-full focus:select-primary text-xs disabled:opacity-70"
+          className={`select select-bordered ${selectCls} w-full focus:select-primary disabled:opacity-70`}
         >
           <option value="">Select subject</option>
           {subjects.map((sub) => (
@@ -173,7 +187,7 @@ export default function ClassScheduleFields({
           name="gradeLevel"
           value={form.gradeLevel}
           onChange={handleInputChange}
-          className="select select-bordered select-sm w-full focus:select-primary text-xs"
+          className={`select select-bordered ${selectCls} w-full focus:select-primary`}
         >
           <option value="">Any grade</option>
           {GRADE_LEVELS.map((g) => (
@@ -191,13 +205,17 @@ export default function ClassScheduleFields({
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="grid grid-cols-2 gap-1.5 max-h-40 overflow-y-auto border border-base-200 rounded-lg p-2">
+            <div
+              className={`grid grid-cols-2 ${page ? "sm:grid-cols-3" : ""} gap-1.5 ${
+                page ? "max-h-56" : "max-h-40"
+              } overflow-y-auto border border-base-200 rounded-lg p-2`}
+            >
               {topicsFor(form.subject).map((topic) => {
                 const disabled = disabledTopicSet.has(topic);
                 return (
                   <label
                     key={topic}
-                    className={`flex items-center gap-1.5 text-2xs p-1 rounded ${
+                    className={`flex items-center gap-1.5 ${topicLabelCls} p-1 rounded ${
                       disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:bg-base-200/50"
                     }`}
                     title={disabled ? "You're not certified for this topic." : undefined}
@@ -207,7 +225,7 @@ export default function ClassScheduleFields({
                       checked={selectedTopics.includes(topic)}
                       disabled={disabled}
                       onChange={() => toggleTopic(topic)}
-                      className="checkbox checkbox-xs checkbox-primary"
+                      className={`checkbox ${checkboxCls} checkbox-primary`}
                     />
                     <span>{topic}</span>
                   </label>
@@ -247,13 +265,13 @@ export default function ClassScheduleFields({
                   }}
                   placeholder="Add another topic not listed above…"
                   maxLength={60}
-                  className="input input-bordered input-xs flex-1 text-2xs focus:input-primary"
+                  className={`input input-bordered ${rowInputCls} flex-1 focus:input-primary`}
                 />
                 <button
                   type="button"
                   onClick={addCustomTopic}
                   disabled={normalizeTopic(customTopic).length < 2 || selectedTopics.length >= 10}
-                  className="btn btn-outline btn-xs text-2xs"
+                  className={`btn btn-outline ${rowBtnCls} ${page ? "text-sm" : "text-2xs"}`}
                 >
                   Add
                 </button>
@@ -269,7 +287,7 @@ export default function ClassScheduleFields({
           value={form.description}
           onChange={handleInputChange}
           placeholder="Briefly explain what will be covered in this class..."
-          className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-20"
+          className={`textarea textarea-bordered ${textareaCls} w-full focus:textarea-primary`}
         />
       </FormField>
 
@@ -284,50 +302,57 @@ export default function ClassScheduleFields({
           </div>
         ) : (
           <div className="space-y-2">
-            {sessionRows.map((row) => (
-              <div key={row.key} className="flex items-center gap-1.5 border border-base-200 rounded-lg p-2">
-                <select
-                  value={row.topic}
-                  onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
-                  className="select select-bordered select-xs text-2xs flex-1 min-w-0"
-                >
-                  {selectedTopics.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  type="datetime-local"
-                  value={row.scheduledAt}
-                  onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
-                  className="input input-bordered input-xs text-2xs"
-                />
-                <select
-                  value={row.duration}
-                  onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
-                  className="select select-bordered select-xs text-2xs"
-                >
-                  <option value={30}>30m</option>
-                  <option value={45}>45m</option>
-                  <option value={60}>60m</option>
-                  <option value={90}>90m</option>
-                  <option value={120}>120m</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => removeSessionRow(row.key)}
-                  className="btn btn-ghost btn-xs text-error shrink-0 cursor-pointer"
-                  aria-label="Remove session"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
+            {sessionRows.map((row, i) => (
+              <div key={row.key} className="border border-base-200 rounded-lg p-2 space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <span className={`${page ? "text-xs" : "text-2xs"} font-semibold text-base-content/50 shrink-0`}>
+                    #{i + 1}
+                  </span>
+                  <select
+                    value={row.topic}
+                    onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
+                    className={`select select-bordered ${rowSelectCls} flex-1 min-w-0`}
+                  >
+                    {selectedTopics.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => removeSessionRow(row.key)}
+                    className={`btn btn-ghost ${rowBtnCls} text-error shrink-0 cursor-pointer`}
+                    aria-label="Remove session"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  <input
+                    type="datetime-local"
+                    value={row.scheduledAt}
+                    onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
+                    className={`input input-bordered ${rowInputCls} flex-1 min-w-[9.5rem]`}
+                  />
+                  <select
+                    value={row.duration}
+                    onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
+                    className={`select select-bordered ${rowSelectCls} shrink-0`}
+                  >
+                    <option value={30}>30m</option>
+                    <option value={45}>45m</option>
+                    <option value={60}>60m</option>
+                    <option value={90}>90m</option>
+                    <option value={120}>120m</option>
+                  </select>
+                </div>
               </div>
             ))}
             <button
               type="button"
               onClick={addSessionRow}
-              className="btn btn-ghost btn-xs text-2xs font-bold gap-1 cursor-pointer"
+              className={`btn btn-ghost ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
             >
               <Plus className="h-3 w-3" /> Add Session
             </button>
@@ -336,14 +361,14 @@ export default function ClassScheduleFields({
       </FormField>
 
       <FormField label="Location" hint="Optional — for an in-person class">
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <input
             type="text"
             name="building"
             value={form.building}
             onChange={handleInputChange}
             placeholder="Building"
-            className="input input-bordered input-sm w-full focus:input-primary text-xs"
+            className={`input input-bordered ${inputCls} flex-1 min-w-[10rem] focus:input-primary`}
           />
           <input
             type="text"
@@ -351,7 +376,7 @@ export default function ClassScheduleFields({
             value={form.room}
             onChange={handleInputChange}
             placeholder="Room"
-            className="input input-bordered input-sm w-32 shrink-0 focus:input-primary text-xs"
+            className={`input input-bordered ${inputCls} ${page ? "w-28" : "w-24"} shrink-0 focus:input-primary`}
           />
         </div>
       </FormField>
@@ -366,7 +391,7 @@ export default function ClassScheduleFields({
             required
             min={1}
             max={10}
-            className="input input-bordered input-sm w-full focus:input-primary text-xs"
+            className={`input input-bordered ${inputCls} w-full focus:input-primary`}
           />
         </FormField>
 
@@ -377,21 +402,21 @@ export default function ClassScheduleFields({
             value={form.meetingLink}
             onChange={handleInputChange}
             placeholder="https://meet.google.com/..."
-            className="input input-bordered input-sm w-full focus:input-primary text-xs"
+            className={`input input-bordered ${inputCls} w-full focus:input-primary`}
           />
         </FormField>
       </div>
 
-      <div className="modal-action pt-2">
+      <div className={`${page ? "flex justify-end gap-2" : "modal-action"} pt-2`}>
         <button
           type="button"
           onClick={onCancel}
-          className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+          className={`btn btn-neutral btn-outline ${actionBtnCls} cursor-pointer`}
         >
           Cancel
         </button>
-        <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs cursor-pointer">
-          {submitting ? <span className="loading loading-spinner loading-xs"></span> : submitLabel}
+        <button type="submit" disabled={submitting} className={`btn btn-primary ${actionBtnCls} cursor-pointer`}>
+          {submitting ? <span className="loading loading-spinner loading-sm"></span> : submitLabel}
         </button>
       </div>
     </form>
