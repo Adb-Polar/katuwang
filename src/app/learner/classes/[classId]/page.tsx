@@ -9,6 +9,8 @@ import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import LearnerClassActions from "@/components/learner/LearnerClassActions";
 import TutorInfoTrigger from "@/components/learner/TutorInfoTrigger";
+import SessionTestsCard from "@/components/classes/SessionTestsCard";
+import MyProgressView from "@/components/learner/MyProgressView";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -29,7 +31,22 @@ export default async function LearnerClassDetailPage({
       where: { id: classId },
       include: {
         topics: true,
-        sessions: { orderBy: { scheduledAt: "asc" } },
+        sessions: {
+          orderBy: { scheduledAt: "asc" },
+          include: {
+            test: {
+              select: {
+                id: true,
+                title: true,
+                status: true,
+                attempts: {
+                  where: { learnerId: session!.user.id },
+                  select: { kind: true, status: true, scorePercent: true },
+                },
+              },
+            },
+          },
+        },
         tutorProfile: {
           select: {
             user: {
@@ -101,9 +118,39 @@ export default async function LearnerClassDetailPage({
         <>
           <h2 className="card-title text-sm font-bold">Sessions</h2>
           <SessionsList
-            sessions={tutorClass.sessions.map((s) => ({ ...s, scheduledAt: s.scheduledAt.toISOString() }))}
+            sessions={tutorClass.sessions.map((s) => ({
+              id: s.id,
+              topic: s.topic,
+              scheduledAt: s.scheduledAt.toISOString(),
+              duration: s.duration,
+              status: s.status,
+            }))}
           />
         </>
+      }
+      belowRoster={
+        isEnrolled ? (
+          <div className="space-y-6">
+            <SessionTestsCard
+              classId={tutorClass.id}
+              audience="learner"
+              rows={tutorClass.sessions.map((s) => {
+                const test = s.test && s.test.status !== "DRAFT" ? s.test : null;
+                const attemptOf = (kind: "PRE" | "POST") => test?.attempts.find((a) => a.kind === kind) ?? null;
+                return {
+                  sessionId: s.id,
+                  topic: s.topic,
+                  scheduledAt: s.scheduledAt.toISOString(),
+                  sessionStatus: s.status,
+                  test: test ? { id: test.id, title: test.title, status: test.status } : null,
+                  pre: attemptOf("PRE"),
+                  post: attemptOf("POST"),
+                };
+              })}
+            />
+            <MyProgressView fixedClassId={tutorClass.id} compact />
+          </div>
+        ) : undefined
       }
       actions={
         <LearnerClassActions

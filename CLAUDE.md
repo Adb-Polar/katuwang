@@ -12,8 +12,8 @@
 - **[`docs/README.md`](docs/README.md)** indexes everything else (plans, ERD, theme tokens, auth build guide).
 
 ### Warning
-- Do not commit anything 
-- Do not push anything
+- Only commit when told
+- Only push when told
 - If asked to commit ask for confirmation
 - database modification needs confirmation
 - tables should be normalize 3NF

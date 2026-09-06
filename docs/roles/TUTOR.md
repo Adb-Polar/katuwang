@@ -145,7 +145,7 @@ Two tabs on one page:
 
 ## Appealing a suspended / banned class
 
-- When a class is `SUSPENDED` or `BANNED` by an admin its edit page locks, and an **appeal card** appears under the moderation panel.
+- When a class is `SUSPENDED` or `BANNED` by an admin, an **appeal card** appears directly on the class detail page (`/tutor/classes/[classId]`) under the moderation panel — no need to open the edit page. (The edit page still shows the moderation panel and links back here.)
 - **File one appeal at a time** (`POST /api/tutor/classes/[classId]/appeal`, reason 10–500 chars). While it's `PENDING` the card shows "awaiting admin review" with your reason; a second appeal is rejected (`409`) until the first is decided.
 - If the admin **approves**, the class returns to `SCHEDULED` (moderation reason/expiry cleared) and you get a `CLASS_APPEAL_APPROVED` notification. If they **reject**, the moderation stands, you get `CLASS_APPEAL_REJECTED` (with the admin's note if any), and you may appeal again.
 

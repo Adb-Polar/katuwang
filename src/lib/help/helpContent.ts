@@ -294,7 +294,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       { label: "Registrations", href: "/admin/registrations" },
       { label: "Classes", href: "/admin/classes" },
       { label: "Topic Requests", href: "/admin/topic-requests" },
-      { label: "Certifications", href: "/admin/certifications" },
+      { label: "Certifications", href: "/admin/assessment/certifications" },
       { label: "Class Appeals", href: "/admin/class-appeals" },
       { label: "Question Bank", href: "/admin/assessment/question-bank" },
       { label: "Reports", href: "/admin/reports" },

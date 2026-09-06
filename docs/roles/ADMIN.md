@@ -46,8 +46,10 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - All actions are recorded in the audit log (`TOPIC_REQUEST_STATUS_CHANGE` / `TOPIC_REQUEST`).
 - A `TutorClass` an admin **bans** also re-opens any topic request still linked to it (`→ OPEN`, unlinked, learner notified) — see Class Moderation below.
 
-## Tutor Certification Review (`/admin/certifications`)
+## Tutor Certification Review (`/admin/assessment/certifications`)
 
+- Lives in the **Assessment** nav group alongside Question Bank / Requests / Results / Session Tests — it's the human sign-off on a passed assessment. `/admin/certifications` (old path) permanently redirects here.
+- When `autoCertifyOnAssessmentPass` is **off** (default), a tutor who passes an assessment gets a `PENDING` `TopicCertification` that shows up on the Pending tab for an admin to approve; when it's **on**, passing goes straight to `CERTIFIED` and the Pending tab stays empty (Certified/Rejected tabs remain the certification ledger).
 - **Review topic certification requests** — Pending / Certified / Rejected tabs, with topic + tutor-ID search, subject filter, sort, and pagination. Each row shows the requesting tutor's anonymized + real identity (admin-only view retains real names for accountability).
   (`GET /api/admin/certifications?status=&q=&subject=&sort=&page=&pageSize=`)
 - **Approve a certification request** — marks the request `CERTIFIED`, stamps `certifiedAt` + `reviewedAt`. Certified tutors are trusted to teach that specific topic (used to gate class creation when `requireCertificationForClassCreation` is enabled).

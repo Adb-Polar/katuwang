@@ -26,7 +26,6 @@ import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
-import ClassAppealCard, { type ClassAppealSummary } from "@/components/tutor/ClassAppealCard";
 
 export default function EditClassForm({
   classId,
@@ -51,7 +50,6 @@ export default function EditClassForm({
   locked = false,
   suspendedReason = null,
   suspendedUntil = null,
-  appeal = null,
 }: {
   classId: string;
   subject: string;
@@ -73,7 +71,6 @@ export default function EditClassForm({
   locked?: boolean;
   suspendedReason?: string | null;
   suspendedUntil?: string | null;
-  appeal?: ClassAppealSummary | null;
 }) {
   const router = useRouter();
   const { topicsFor } = useSubjectCatalog();
@@ -184,7 +181,13 @@ export default function EditClassForm({
             suspendedUntil={suspendedUntil}
             audience="tutor"
           />
-          <ClassAppealCard classId={classId} appeal={appeal} />
+          <p className="text-2xs text-base-content/50">
+            To appeal this decision, go back to the{" "}
+            <Link href={backHref} className="link link-primary">
+              class page
+            </Link>
+            .
+          </p>
         </div>
       )}
 

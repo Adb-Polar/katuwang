@@ -101,7 +101,7 @@ export default function TutorBrowser() {
                   key={t.id}
                   type="button"
                   onClick={() => router.push(`/learner/tutors/${t.id}`)}
-                  className="flex flex-col gap-2.5 rounded-xl border border-base-200 bg-base-100 p-4 text-left transition-colors hover:border-primary/40 hover:bg-base-200/30"
+                  className="flex flex-col gap-2.5 rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <AnonymousIdBadge id={t.anonymousId} role="TUTOR" size="sm" showIcon />
@@ -120,7 +120,7 @@ export default function TutorBrowser() {
                     </div>
                   )}
 
-                  <div className="mt-auto grid grid-cols-2 gap-2 border-t border-base-200 pt-2 text-2xs text-base-content/60">
+                  <div className="mt-auto grid grid-cols-2 gap-2 border-t border-base-300 pt-2 text-2xs text-base-content/60">
                     <span className="flex items-center gap-1">
                       <BadgeCheck className="h-3 w-3 text-success" />
                       {t.verifiedTopicCount} verified {t.verifiedTopicCount === 1 ? "topic" : "topics"}

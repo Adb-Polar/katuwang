@@ -37,6 +37,7 @@
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 | [29](#part-29) | **Session pre/post-tests (`docs/plans/pre-test-post-test-plan.md`)** | Per-session PRE/POST diagnostic tests: a tutor builds one ordered question set per `ClassSession`, served twice (as a PRE attempt, then a POST attempt); learners take/resume/review; tutor + learner + admin analytics with four charts. Adapts the stale `class-pre-post-tests` branch, re-grained from per-class to per-session. Delivered in phases. | **Phase 0** — extracted `recharts` primitives out of `ReportsView.tsx` into a shared `src/components/charts/` module (`useThemeColors` widened to `--color-accent/success/error`; `DataTable` now `{rows,labelKey}` **or** `{rows,columns}`; `BarChartCard` moved verbatim) + new `GroupedBarChart` / `ProgressAreaChart` / `RateBarChart` / `DeltaBar` (the last pure-CSS, uses the `.kt-delta` badge); dead `.kt-chart-*` CSS removed. **Phase 1** — schema: 4 enums (`QuestionOrigin`, `SessionTestStatus`, `SessionTestKind`, `SessionTestAttemptStatus`) + 4 models (`SessionTest` `@@unique(sessionId)`, `SessionTestQuestion`, `SessionTestAttempt` with `kind` + `@@unique([sessionTestId,learnerId,kind])`, `SessionTestAttemptItem`) + `AssessmentQuestion.origin`/`ownerTutorProfileId` and index `[subject,topic,active,origin]` (origin appended last to keep existing prefixes). Applied via `prisma db push` (Option 1 — additive, no reset; history stays drifted). 478/478 throughout. Not committed. |
 | [30](#part-30) | **Chatbot v1.1 — usability pass (admin misses review + matching robustness + KB growth)** | The deterministic chatbot's `chatbot_misses` feedback loop was dead (no admin UI ever read it), an over-broad `smalltalk_capabilities` intent swallowed unclear messages before they could be logged as misses, and matching was brittle (no typo tolerance, no length-normalized confidence). Closes the loop, hardens matching, and roughly doubles the FAQ KB — no LLM, no new dependency, no schema change. | New `/admin/chatbot` page + `GET /api/admin/chatbot-misses` (JS-side `aggregateMisses()` groups misses by role + normalised token string — Prisma `groupBy` can't group by a derived value — role/text filter, sort by count/first/last seen, pagination); new admin nav item. `classifier.ts`: typo-correction step (`correctToken`, Levenshtein-1 via new `editDistance`/`fuzzyHit` in `normalize.ts`) snaps a misspelled token to its nearest known keyword before scoring *and* before pattern-matching, so e.g. "enrol" still lights up `/\benroll\b/`; added a length-normalized `MIN_CONFIDENCE = 0.35` gate (score / max(3, tokenCount)) alongside the existing absolute `MIN_SCORE` floor, per the original plan's un-implemented spec; `respond.ts`/`route.ts` now surface the winning score as a non-production `debugScore` field. `intents.ts`: narrowed `smalltalk_capabilities` (dropped the bare `/\bhelp\b/` pattern + generic keywords that swallowed most unclear messages) and added 12 new nav intents (find tutors, help page, search, tutor class-appeal/sessions/question-request, admin users/class-appeals/audit-log/subjects/question-requests/chatbot). `faq.ts`: 11 new grounded entries (26 total), each cited to its source doc line; purged 2 dead stopword-colliding keywords (`"my"`, `"you"`). `normalize.ts`: exported `STOPWORDS`, ~12 new `SYNONYMS`. New tests: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`, `chatbot-misses/route.test.ts`, extended `classifier.test.ts` (fuzzy matching, narrowed capabilities, confidence gate) — 586/586. `tsc`/`lint`/`test` all clean. `docs/reference/decisions.md` reviewed — no new entry (implementation refinement, not a thesis divergence). Not committed. |
+| [34](#part-34) | **Docs — deployment plan** | Records the free-tier deployment options for taking Katuwang live: hosting on Oracle Cloud (always-free ARM VM) or Render (free web service), a free MySQL-compatible database (TiDB Cloud Serverless), and a free `.tech` / `.me` domain via the GitHub Student Developer Pack. | Added `docs/plans/deployment.md` — two hosting options with step-by-step setup, TiDB connection-string + `prisma migrate deploy` DB bootstrap (no seed in prod), env-var reference (`NODE_ENV`/`DATABASE_URL`/`NEXTAUTH_*`/`SMTP_*`/`MAIL_FROM`), pre-deploy code changes (fix the `next.config.ts` dual-export bug, second-layer `/dev` + `/api/dev` guard in `proxy.ts`, `.dockerignore`, reconcile `prisma/migrations/` with the `db push`-only schema changes before first deploy), `main → production` fast-forward branching model, post-deploy verification checklist, rollback, and a cost/catches summary. Docs only — no code, schema, or test change. Not committed. |
 | [31](#part-31) | **Sept 5 fixes — 9-item bug/UX batch** | One pass over nine reported issues: match flip-card, register password reveal, profile page redesign + contact-info validation, self-service grade level, global-search tutor names, assessments request-button state loss, admin notifications for tutor question requests, and the admin moderation-table action-column layout. | `MatchFinder` — the panel now swaps between the criteria form and the ranked results with a subtle 180ms fade + rise (`.kt-swap` keyframe in `globals.css`, respects `prefers-reduced-motion`), "View results" / "Adjust filters" toggles. (An earlier 3D `rotateY` flip read as tilted/distracting and was dropped.) `RegisterForm` — eye/eye-off reveal toggles on both password fields (same pattern as `LoginForm`). `ProfileView` rebuilt as a two-column identity / editable split; `ProfileEditForm` gains a grade-level `<select>` and inline contact-info validation. New dependency-free `src/lib/contactInfo.ts` (`normalizeContactInfo` — PH-mobile format check + `09XXXXXXXXX` normalisation, free-form handles pass through) used by `ProfileEditForm` and both profile PATCH routes; `updateProfileSchema` gains `gradeLevel` (`z.nativeEnum(GradeLevel)`) and both routes now persist it. `GET /api/search` — learner branch reads `showTutorRealNames`; when on, it also matches tutors by first/last name and shows the real name (anon ID as subtitle). `AssessmentsTabs` lifts the `requested` Set out of `TopicCertificationList` so a "Request questions" click survives a tab switch without a page refresh (+ `router.refresh()`). `POST /api/tutor/question-requests` now wraps the upsert in a `$transaction` and `notifyMany`s every active admin with a new `QUESTION_REQUEST_NEW` notification type (icon added, link → `/admin/assessment/requests`). `ClassModerationTable` + `TopicRequestModerationTable` — the action `<td className="flex …">` (which broke table-cell layout) becomes a plain `<td>` wrapping a `flex flex-wrap` `<div>`. Follow-ups: (a) `ClassScheduleFields` session rows (topic select + `datetime-local` + duration + trash) now wrap to a two-line layout (`#n` + topic + trash, then `datetime-local` `flex-1` + duration) instead of overflowing on narrow screens, Location row wraps too; (b) the whole Schedule-a-Class form moved out of the cramped `max-w-lg` modal to its own page at `/tutor/classes/new` (new `NewClassForm` + server page; `ClassManagement` modal/state/handler deleted, buttons are now `<Link>`s), a `ClassScheduleFields` `variant="page"` prop enlarges the controls, and the accept-a-topic-request flow moved the same way — `AcceptRequestModal` deleted for `/tutor/requests/[id]/accept` (`AcceptRequestForm` + eligibility-checked server page). New tests: `src/lib/__tests__/contactInfo.test.ts` (6); `search` route test mocks `@/lib/settings`. `tsc`/`lint` clean, 621/621. Not committed. |
 
 ---
@@ -1686,6 +1687,14 @@ and `GET /api/search` API entries; `docs/roles/TUTOR.md` and
 `docs/roles/ADMIN.md` — role-scoped `GET /api/search` entries;
 `docs/TOTEST.txt` — manual-check block.
 
+### Follow-up (2026-09-06) — `/learner/tutors` card contrast
+
+The tutor cards were `border-base-200 bg-base-100` inside a `bg-base-100`
+card, so they visually dissolved into the panel. Now
+`border-base-300 bg-base-200/40 shadow-sm`, lifting to
+`bg-base-100 shadow-md -translate-y-0.5` on hover; inner divider bumped to
+`border-base-300` to match. `TutorBrowser.tsx` only; no logic change.
+
 ### Not committed.
 
 ---
@@ -2143,6 +2152,36 @@ registered.
 (user-confirmed per `CLAUDE.md`'s "database modification needs confirmation"
 rule).
 
+## Part 29 — Phase 8: learner-review + serialization fixes (2026-09-06)
+
+Two learner-facing fixes on the (still-uncommitted) session-tests feature:
+
+- **`SessionTestResults` — Server Component crash.** The tutor results page
+  passed `attemptUrl={(id) => \`…/attempts/${id}\`}` (a function) into the
+  client `SessionTestResults`, which threw
+  "Functions cannot be passed directly to Client Components" during RSC
+  serialization — the whole results view broke. Prop changed to a plain
+  string `attemptBaseUrl`; the component builds `${attemptBaseUrl}/${id}`
+  itself. Updated the tutor results page and `SessionTestsTable` (admin).
+- **`SessionTestsCard` — learner could only review the last attempt.**
+  `LearnerAction` collapsed to a single button, so once the post-test was
+  submitted the only link was "Review" (post) — no way back to the pre-test.
+  Rewritten to render the one actionable "next step" (take/resume) plus a
+  **"Review pre"** and/or **"Review post"** link for every phase the learner
+  has already submitted, available even after the test is `CLOSED` (the
+  `GET /api/learner/session-test-attempts/[attemptId]` endpoint has no
+  test-status gate, only ownership). The per-kind review pages already
+  existed at `/learner/classes/[classId]/sessions/[sessionId]/test/{pre,post}`.
+- **`/admin/session-tests` — duplicate back button in the results drill-down.**
+  `SessionTestsTable` renders its own `← Back to session tests` button (it
+  closes the `openId` client-state drill-down), and `SessionTestResults` also
+  rendered a `Back` link from its `backHref` — two back controls stacked.
+  `backHref` is now optional; the admin table stops passing it, so only its
+  own state-aware button shows. The tutor results *page* still passes
+  `backHref` (it's a real route that needs one).
+
+`tsc`/`lint`/`build` clean, 621/621. Not committed.
+
 ### Not committed.
 
 ---
@@ -2384,3 +2423,109 @@ entry.
 
 ### Not committed.
 
+
+---
+
+<a id="part-32"></a>
+
+## Part 32 — Admin IA: "Certifications" moved under the Assessment group (2026-09-06)
+
+The tutor-certification review queue was the odd page out — filed under the
+**Review** nav group while every other assessment-pipeline page (Question Bank
+→ Requests → Results → Session Tests) sits under **Assessment**. It's not
+redundant with those (it's the human approve/reject on the `PENDING`
+`TopicCertification` a passed assessment creates when
+`autoCertifyOnAssessmentPass` is off, plus the certified/rejected ledger), just
+mis-grouped.
+
+- Page moved: `src/app/admin/certifications/page.tsx` → renders the review
+  table at **`/admin/assessment/certifications`**; the old path is now a
+  `redirect()` stub (same pattern as the earlier `/admin/question-bank` move).
+- `src/app/admin/layout.tsx` — the "Certifications" `NavItem` moved from
+  `group: "Review"` to `group: "Assessment"`, positioned after "Results".
+- Internal links repointed: `src/app/admin/page.tsx` ("Pending certifications"
+  stat card), `src/lib/help/helpContent.ts`, `src/lib/chatbot/intents.ts`.
+- **API unchanged** — still `GET`/`PATCH /api/admin/certifications[/…]`;
+  `CertificationReviewTable` untouched.
+- `docs/roles/ADMIN.md` — section retitled to the new path + a note on the
+  Assessment grouping and the `autoCertifyOnAssessmentPass` behaviour.
+
+`tsc` / `lint` clean, `pnpm build` OK (both `/admin/certifications` redirect and
+`/admin/assessment/certifications` registered), 621/621 tests. Not committed.
+
+---
+
+<a id="part-33"></a>
+
+## Part 33 — Class appeal card moved to the class detail page (2026-09-06)
+
+The "appeal this decision" card for a `SUSPENDED`/`BANNED` class only lived on
+the class **edit** page (`/tutor/classes/[classId]/edit`), which a tutor has no
+reason to open for a locked class — so the appeal path was easy to miss.
+
+- `ClassDetailsView` gains an optional `moderationExtra` slot, rendered
+  directly under `ClassModerationPanel` (only when `SUSPENDED`/`BANNED`).
+- `src/app/tutor/classes/[classId]/page.tsx` — now fetches the latest
+  `ClassAppeal` (`appeals: { orderBy: { createdAt: "desc" }, take: 1 }`),
+  passes `suspendedReason` / `suspendedUntil` through, and renders
+  `<ClassAppealCard>` via `moderationExtra` when the class is locked. So the
+  appeal button is visible on the page a tutor actually lands on, and only for
+  a suspended/banned class.
+- `EditClassForm` — the `ClassAppealCard` render + its `appeal` prop and
+  `ClassAppealSummary` import removed; the moderation panel there now just
+  links back to the class page to appeal. `edit/page.tsx` drops the now-unused
+  `appeals` query + `latestAppeal` construction.
+- No API/schema change; `POST /api/tutor/classes/[classId]/appeal` and
+  `/admin/class-appeals` review flow are untouched.
+
+`tsc` / `lint` clean, `pnpm build` OK, 621/621 tests. Not committed.
+
+---
+
+<a id="part-34"></a>
+
+## Part 34 — Docs: deployment plan (2026-09-06)
+
+Added `docs/plans/deployment.md` — the free-tier plan for putting Katuwang on
+a public URL. No code, schema, or test change.
+
+Covered:
+
+- **Hosting option A — Render** free web service (`pnpm build` → `pnpm start`,
+  persistent container, sleeps after 15 min idle, ~1 min cold start, 750
+  hrs/mo). Build/start/pre-deploy commands, env vars, custom-domain wiring.
+- **Hosting option B — Oracle Cloud** always-free ARM VM (2 CPU / 12 GB / 200
+  GB / 10 TB egress, no sleep). VM + security-list + MariaDB/nginx/certbot
+  setup, systemd/pm2/Docker run options, `deploy.sh` update flow, and the
+  7-day idle-reclaim caveat + mitigation.
+- **Database — TiDB Cloud Serverless** (MySQL-compatible, 25 GiB free, TLS
+  required). Connection-string shape for `@prisma/adapter-mariadb`,
+  `prisma migrate deploy` to bootstrap the schema, no `seed.ts` in prod,
+  optional `scripts/create-admin.ts`. Alternatives table (Oracle MySQL
+  HeatWave, self-hosted MariaDB, Aiven, Neon/Supabase-with-migration).
+- **Domain** — `.me` (Namecheap) and `.tech` (get.tech) free for 1 year via
+  the GitHub Student Developer Pack; DNS records for Render vs the Oracle VM;
+  renewal / transfer-lock / deliverability catches.
+- **Env-var reference** — `NODE_ENV`, `DATABASE_URL`, `NEXTAUTH_URL`,
+  `NEXTAUTH_SECRET`, `SMTP_*`, `MAIL_FROM`; console-log mail fallback when
+  SMTP is unset.
+- **Pre-deploy code changes** — fix the `next.config.ts` dual
+  `module.exports` / `export default` bug (ESM default wins, so
+  `allowedDevOrigins` is currently ignored); add `output: "standalone"` if
+  containerising; second-layer `/dev` + `/api/dev` block in `src/proxy.ts`
+  plus a test asserting the guard; `.dockerignore`; reconcile
+  `prisma/migrations/` with the schema changes that were only `db push`-ed
+  locally (session pre/post-tests, subjects/topics) **before** the first
+  `migrate deploy`, with owner confirmation.
+- **Branching** — `feature/* → main → production`, promote by fast-forward
+  (`git push origin main:production`) or tag; `production` is never
+  hand-edited; environments differ by env vars, not code.
+- Post-deploy verification checklist (dev routes 404, auth flows, password
+  reset, cert, persistence), forward-only migration + `mysqldump` rollback
+  note, and a cost/catches table.
+
+Recommended starting combination: Render + TiDB Cloud Serverless + a `.me`
+domain — $0 through the capstone defense, no server to administer; move to the
+Oracle VM later if TRIS needs an always-on host.
+
+`docs/plans/README.md` updated with the new row. Not committed.

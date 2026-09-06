@@ -1,19 +1,6 @@
-import PageHeader from "@/components/ui/PageHeader";
-import CertificationReviewTable from "@/components/admin/CertificationReviewTable";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Review Certifications | Katuwang",
-};
-
-export default function AdminCertificationsPage() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Admin Portal"
-        title="Tutor Certifications"
-        subtitle="Approve or reject pending topic certification requests from tutors."
-      />
-      <CertificationReviewTable />
-    </div>
-  );
+// Certification review moved under the grouped "Assessment" section.
+export default function AdminCertificationsRedirect() {
+  redirect("/admin/assessment/certifications");
 }

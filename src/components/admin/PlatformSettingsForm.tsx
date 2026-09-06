@@ -52,6 +52,12 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
       "When enabled, the in-app help assistant (navigation help, FAQs, and class recommendations) appears in every portal. When off, the widget is hidden and its API rejects requests.",
     group: "General",
   },
+  sessionTestsEnabled: {
+    label: "Session pre/post-tests",
+    description:
+      "When enabled, tutors can build and publish a per-session test and learners can start pre/post attempts. When off, creation and starts are rejected — results already collected stay readable.",
+    group: "Assessment",
+  },
 };
 
 interface AssessmentConfig {

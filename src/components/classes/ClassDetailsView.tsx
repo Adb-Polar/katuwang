@@ -17,6 +17,7 @@ export default function ClassDetailsView({
   suspendedReason,
   suspendedUntil,
   moderationAudience = "tutor",
+  moderationExtra,
   maxStudents,
   enrolledCount,
   building,
@@ -26,6 +27,7 @@ export default function ClassDetailsView({
   extraFacts,
   sessions,
   roster,
+  belowRoster,
   sidebarExtra,
   actions,
 }: {
@@ -46,6 +48,8 @@ export default function ClassDetailsView({
   suspendedUntil?: string | null;
   /** Tailors the moderation panel copy. Defaults to "tutor". */
   moderationAudience?: "tutor" | "learner";
+  /** Rendered directly below the moderation panel when SUSPENDED/BANNED (e.g. the tutor's appeal card). */
+  moderationExtra?: ReactNode;
   maxStudents: number;
   enrolledCount: number;
   building?: string | null;
@@ -58,6 +62,8 @@ export default function ClassDetailsView({
   sessions?: ReactNode;
   /** Full-width content rendered below Sessions (e.g. the enrolled-learners roster). */
   roster?: ReactNode;
+  /** Full-width content rendered below the roster (e.g. session-test progress/list). */
+  belowRoster?: ReactNode;
   /** Extra cards rendered in the right-hand sidebar, below the quick-facts card. */
   sidebarExtra?: ReactNode;
   /** Primary action buttons, rendered top-right next to the back link. */
@@ -110,12 +116,15 @@ export default function ClassDetailsView({
       </div>
 
       {(status === "SUSPENDED" || status === "BANNED") && (
-        <ClassModerationPanel
-          status={status}
-          suspendedReason={suspendedReason}
-          suspendedUntil={suspendedUntil}
-          audience={moderationAudience}
-        />
+        <div className="space-y-3">
+          <ClassModerationPanel
+            status={status}
+            suspendedReason={suspendedReason}
+            suspendedUntil={suspendedUntil}
+            audience={moderationAudience}
+          />
+          {moderationExtra}
+        </div>
       )}
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -178,6 +187,12 @@ export default function ClassDetailsView({
           {roster && (
             <div className="card kt-card">
               <div className="card-body gap-3">{roster}</div>
+            </div>
+          )}
+
+          {belowRoster && (
+            <div className="card kt-card">
+              <div className="card-body gap-3">{belowRoster}</div>
             </div>
           )}
         </div>

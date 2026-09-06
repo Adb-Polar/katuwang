@@ -800,6 +800,114 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
   return created;
 }
 
+// ─── Session pre/post-tests (demo) ──────────────────────────────────────────
+// One ordered question set per ClassSession, served twice — PRE then POST.
+// Targets the "demo class for walkthroughs" (demo@tutor.test, MATH,
+// Algebraic Expressions) so logging in as either demo account shows real
+// pre/post results out of the box.
+async function seedSessionTests(): Promise<boolean> {
+  const tutorClass = await prisma.tutorClass.findFirst({
+    where: {
+      subject: "MATH",
+      tutorProfile: { user: { email: "demo@tutor.test" } },
+      topics: { some: { topic: "Algebraic Expressions" } },
+    },
+    include: {
+      enrollments: { select: { learnerId: true, learner: { select: { email: true } } }, orderBy: { enrolledAt: "asc" } },
+      tutorProfile: { select: { id: true, user: { select: { id: true } } } },
+      sessions: { where: { topic: "Algebraic Expressions" }, take: 1 },
+    },
+  });
+  if (!tutorClass || tutorClass.enrollments.length === 0 || tutorClass.sessions.length === 0) return false;
+
+  const classSession = tutorClass.sessions[0];
+  // Mark it complete so the demo shows an open post-test window, not a locked one.
+  await prisma.classSession.update({ where: { id: classSession.id }, data: { status: "COMPLETED" } });
+
+  const bankQs = await prisma.assessmentQuestion.findMany({
+    where: { origin: "BANK", subject: "MATH", topic: "Algebraic Expressions", active: true },
+    orderBy: { createdAt: "asc" },
+    take: 5,
+    select: { id: true, options: { select: { id: true, isCorrect: true }, orderBy: { position: "asc" } } },
+  });
+  if (bankQs.length < 5) return false;
+
+  const custom = await prisma.assessmentQuestion.create({
+    data: {
+      subject: "MATH",
+      topic: "Algebraic Expressions",
+      prompt: "What is the degree of the polynomial 4x^3 + x + 7?",
+      explanation: "The degree is the highest exponent, which is 3.",
+      origin: "TUTOR",
+      createdById: tutorClass.tutorProfile.user.id,
+      ownerTutorProfileId: tutorClass.tutorProfile.id,
+      options: {
+        create: [
+          { text: "3", isCorrect: true, position: 0 },
+          { text: "1", isCorrect: false, position: 1 },
+          { text: "4", isCorrect: false, position: 2 },
+          { text: "7", isCorrect: false, position: 3 },
+        ],
+      },
+    },
+    select: { id: true, options: { select: { id: true, isCorrect: true } } },
+  });
+
+  const specs = [...bankQs, custom];
+  const test = await prisma.sessionTest.create({
+    data: {
+      sessionId: classSession.id,
+      title: "Algebraic Expressions check-in",
+      instructions: "A short diagnostic before and after this session. Answer as best you can.",
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+      questions: { create: specs.map((q, i) => ({ questionId: q.id, position: i })) },
+    },
+  });
+
+  type QSpec = { id: string; options: { id: string; isCorrect: boolean }[] };
+  const makeAttempt = async (kind: "PRE" | "POST", learnerId: string, correctFraction: number) => {
+    const correctUpTo = Math.round(specs.length * correctFraction);
+    const items = specs.map((q: QSpec, idx) => {
+      const right = idx < correctUpTo;
+      const correctOpt = q.options.find((o) => o.isCorrect)!;
+      const wrongOpt = q.options.find((o) => !o.isCorrect) ?? correctOpt;
+      const chosen = right ? correctOpt : wrongOpt;
+      return { questionId: q.id, position: idx, selectedOptionId: chosen.id, isCorrect: right };
+    });
+    const correctCount = items.filter((i) => i.isCorrect).length;
+    await prisma.sessionTestAttempt.create({
+      data: {
+        sessionTestId: test.id,
+        learnerId,
+        kind,
+        status: "SUBMITTED",
+        totalQuestions: items.length,
+        correctCount,
+        scorePercent: Math.round((correctCount / items.length) * 100),
+        submittedAt: new Date(),
+        items: { create: items },
+      },
+    });
+  };
+
+  const demoLearner = tutorClass.enrollments.find((e) => e.learner.email === "demo@learner.test");
+  const otherLearner = tutorClass.enrollments.find((e) => e.learner.email !== "demo@learner.test");
+
+  // demo@learner.test: pre then post, showing a clear gain.
+  if (demoLearner) {
+    await makeAttempt("PRE", demoLearner.learnerId, 0.4);
+    await makeAttempt("POST", demoLearner.learnerId, 0.85);
+  }
+  // A second learner who only took the pre-test — deliberately unpaired, so
+  // avgDelta (mean of paired deltas) visibly differs from avgPost - avgPre.
+  if (otherLearner) {
+    await makeAttempt("PRE", otherLearner.learnerId, 0.6);
+  }
+
+  return true;
+}
+
 async function main() {
   // Initialize counters for both roles
   await prisma.idCounter.upsert({
@@ -1157,6 +1265,9 @@ async function main() {
     Object.values(tutorProfiles)[0]?.id ?? null
   );
 
+  // ── Session pre/post-tests (demo) ──
+  const sessionTestsSeeded = await seedSessionTests();
+
   const tutorTotal = TUTORS.length + generatedTutorSeeds.length;
   const learnerTotal = LEARNERS.length + generatedLearnerSeeds.length;
   const classTotal = buildClasses().length + generatedClasses.length;
@@ -1164,7 +1275,7 @@ async function main() {
   console.log("Seed complete.\n");
   console.log(`All dummy accounts use the password: ${DUMMY_PASSWORD}\n`);
   console.log(
-    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic)`
+    `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic), session tests: ${sessionTestsSeeded ? "yes" : "skipped"}`
   );
   if (GEN.tutors || GEN.learners || GEN.classes || GEN.topicRequests) {
     console.log("Generated accounts use emails like gen.tutor.001@seed.katuwang.test / gen.learner.001@seed.katuwang.test");

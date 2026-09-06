@@ -40,7 +40,7 @@ export async function GET(
             status: true,
             attempts: {
               where: { learnerId: session.user.id },
-              select: { kind: true, status: true, scorePercent: true, submittedAt: true },
+              select: { id: true, kind: true, status: true, scorePercent: true, submittedAt: true },
             },
           },
         },

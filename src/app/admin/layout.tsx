@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell, Gavel, Tags, HelpCircle, MessageCircleQuestion } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell, Gavel, Tags, HelpCircle, MessageCircleQuestion, ListChecks } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
@@ -12,7 +12,6 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Registrations", href: "/admin/registrations", icon: <UserCheck className="w-4 h-4" />, group: "Main menu" },
   { label: "Classes", href: "/admin/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
   { label: "Topic Requests", href: "/admin/topic-requests", icon: <Inbox className="w-4 h-4" />, group: "Main menu" },
-  { label: "Certifications", href: "/admin/certifications", icon: <BadgeCheck className="w-4 h-4" />, group: "Review" },
   { label: "Class Appeals", href: "/admin/class-appeals", icon: <Gavel className="w-4 h-4" />, group: "Review" },
   { label: "Notifications", href: "/admin/notifications", icon: <Bell className="w-4 h-4" />, group: "Review" },
   { label: "Audit Log", href: "/admin/audit-log", icon: <History className="w-4 h-4" />, group: "Review" },
@@ -21,6 +20,8 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Question Bank", href: "/admin/assessment/question-bank", icon: <FileQuestion className="w-4 h-4" />, group: "Assessment" },
   { label: "Requests", href: "/admin/assessment/requests", icon: <ClipboardList className="w-4 h-4" />, group: "Assessment" },
   { label: "Results", href: "/admin/assessment/results", icon: <ClipboardCheck className="w-4 h-4" />, group: "Assessment" },
+  { label: "Certifications", href: "/admin/assessment/certifications", icon: <BadgeCheck className="w-4 h-4" />, group: "Assessment" },
+  { label: "Session Tests", href: "/admin/session-tests", icon: <ListChecks className="w-4 h-4" />, group: "Assessment" },
   { label: "Subjects & Topics", href: "/admin/subjects", icon: <Tags className="w-4 h-4" />, group: "General" },
   { label: "Settings", href: "/admin/settings", icon: <Settings className="w-4 h-4" />, group: "General" },
   { label: "Help & FAQs", href: "/admin/help", icon: <HelpCircle className="w-4 h-4" />, group: "General" },

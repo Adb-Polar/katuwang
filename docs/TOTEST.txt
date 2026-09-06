@@ -326,3 +326,46 @@ Sept 5 fixes - 9-item batch (Changes.md Part 31)
     request's earliest preferred slot; submit -> lands on the new class detail
     page. "Cancel" returns to /tutor/requests. Visiting the accept URL for a
     request NOT open to you (or when matching is disabled) 404s.
+
+Session pre/post-tests - Phase 8: learner review + RSC fix (Changes.md Part 29 Phase 8)
+ [] Tutor: open a published session test's "Results" (from the class page
+    Session Tests card or /tutor/classes/.../test/results) -> page renders, no
+    "Functions cannot be passed to Client Components" console error; clicking a
+    learner's "Pre"/"Post" opens the per-attempt detail modal.
+ [] Learner who has submitted BOTH pre and post: the class page Session Tests
+    card row shows "Review pre" AND "Review post" (not just one); each opens the
+    correct submitted attempt in review mode (answers + correct + explanations,
+    post shows the delta vs pre).
+ [] Learner who submitted only the pre-test: row shows "Review pre" plus the
+    next action ("Take post-test" when the session is completed, otherwise just
+    the review link).
+ [] After the tutor CLOSES the test, a learner who took it can still open
+    "Review pre" / "Review post"; one who never took it shows "Closed — not taken".
+ [] /admin/session-tests -> open a test's "Results": there is exactly ONE back
+    control ("← Back to session tests"), which returns to the table without a
+    full reload. The tutor page /tutor/classes/.../test/results still has its
+    own "Back" link.
+ [] /learner/tutors -> the tutor cards read as distinct raised tiles against
+    the panel (subtle grey fill + border + shadow), not flush with the
+    background; hovering one lifts it, brightens to white, and highlights the
+    border.
+
+Admin IA - Certifications moved under Assessment (Changes.md Part 32)
+ [] Admin sidebar: "Certifications" now appears in the Assessment group (after
+    Results), not in Review; it highlights when active.
+ [] Visiting /admin/certifications redirects to /admin/assessment/certifications;
+    the review table (Pending/Certified/Rejected tabs, approve/reject) works
+    the same as before.
+ [] Admin dashboard "Pending certifications" stat card, the admin Help Center
+    certifications link, and the chatbot "review certifications" answer all
+    deep-link to /admin/assessment/certifications.
+
+Class appeal moved to class detail page (Changes.md Part 33)
+ [] Admin suspends or bans a tutor's class -> the tutor opens
+    /tutor/classes/[id] (the normal class page, not Edit) and sees the
+    moderation panel WITH the "Appeal this decision" card right below it;
+    filing/awaiting/rejected states behave as before.
+ [] For a SCHEDULED/COMPLETED/CANCELLED class the appeal card does NOT show on
+    the detail page.
+ [] The edit page still shows the moderation panel for a locked class, now with
+    a "go back to the class page" link instead of the appeal form.
