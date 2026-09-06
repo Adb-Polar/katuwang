@@ -6,6 +6,7 @@ import { Plus, Clock, X, Pencil } from "lucide-react";
 import { useFetchList } from "@/hooks/useFetchList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import CharCount from "@/components/ui/CharCount";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import MatchCriteriaFields, {
@@ -180,9 +181,11 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
+                  maxLength={500}
                   className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
                   placeholder="e.g. I struggle with word problems the most."
                 />
+                <CharCount value={note} max={500} />
               </FormField>
               <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
                 {submitting ? <span className="loading loading-spinner loading-xs" /> : "Post request"}

@@ -5,12 +5,14 @@ import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
+import { clearClientSessionData } from "@/lib/clientStorage";
 
 export default function LogoutConfirm() {
   const [loading, setLoading] = useState(false);
 
   const handleSignOut = () => {
     setLoading(true);
+    clearClientSessionData();
     signOut({ callbackUrl: "/login" });
   };
 

@@ -46,6 +46,19 @@ fixes.md Phase 2 (Changes.md Part 38)
  [] /tutor/classes/new: each session row has a visible grey fill + border
     (doesn't blend into the form background)
 
+fixes.md Phase 3 (Changes.md Part 39)
+ [] Char counter shows + updates on: class description (create + edit class),
+    topic-request note (learner request form + request-a-specific-tutor),
+    session-test instructions; typing stops at the limit and the counter turns
+    amber near it; submitting at the limit still saves (no server 400)
+ [] Send a few chatbot messages, sign out via /logout -> sign back in ->
+    the chat widget starts fresh (no restored transcript)
+ [] /tutor/classes/new: for a subject with many topics a "Search topics…"
+    box appears above the checklist and filters it; clearing it restores the
+    full list; a no-match query shows the hint
+ [] /tutor/requests/[id]/accept (few certified topics) -> no search box, or it
+    still filters correctly
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

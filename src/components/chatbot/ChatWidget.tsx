@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { askChatbot, type ChatTurn } from "@/components/chatbot/chatbotClient";
 import ChatMessage from "@/components/chatbot/ChatMessage";
+import { CHAT_HISTORY_KEY } from "@/lib/clientStorage";
 
-const STORAGE_KEY = "kt-chat-history";
+const STORAGE_KEY = CHAT_HISTORY_KEY;
 const MAX_STORED = 30;
 
 const GREETING: ChatTurn = {

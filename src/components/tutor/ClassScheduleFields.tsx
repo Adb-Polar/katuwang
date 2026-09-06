@@ -7,6 +7,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import CharCount from "@/components/ui/CharCount";
 
 export interface SessionRowValue {
   key: string;
@@ -94,6 +95,7 @@ export default function ClassScheduleFields({
   });
   const [selectedTopics, setSelectedTopics] = useState<string[]>(initial?.topics ?? []);
   const [customTopic, setCustomTopic] = useState("");
+  const [topicFilter, setTopicFilter] = useState("");
   const [sessionRows, setSessionRows] = useState<SessionRowValue[]>(initial?.sessionRows ?? []);
   const [formError, setFormError] = useState("");
 
@@ -134,6 +136,12 @@ export default function ClassScheduleFields({
   const customTopics = form.subject
     ? selectedTopics.filter((t) => !topicsFor(form.subject).some((k) => k.toLowerCase() === t.toLowerCase()))
     : selectedTopics;
+
+  const subjectTopics = form.subject ? topicsFor(form.subject) : [];
+  const q = topicFilter.trim().toLowerCase();
+  const shownTopicOptions = q
+    ? subjectTopics.filter((t) => t.toLowerCase().includes(q))
+    : subjectTopics;
 
   const addSessionRow = () => {
     setSessionRows((prev) => [
@@ -216,12 +224,26 @@ export default function ClassScheduleFields({
           </div>
         ) : (
           <div className="space-y-2">
+            {subjectTopics.length > 8 && (
+              <input
+                type="text"
+                value={topicFilter}
+                onChange={(e) => setTopicFilter(e.target.value)}
+                placeholder="Search topics…"
+                className={`input input-bordered ${rowInputCls} w-full focus:input-primary`}
+              />
+            )}
             <div
               className={`grid grid-cols-2 ${page ? "sm:grid-cols-3" : ""} gap-1.5 ${
                 page ? "max-h-56" : "max-h-40"
               } overflow-y-auto border border-base-200 rounded-lg p-2`}
             >
-              {topicsFor(form.subject).map((topic) => {
+              {shownTopicOptions.length === 0 && (
+                <p className="col-span-full text-2xs text-base-content/50 italic py-2 text-center">
+                  No topics match “{topicFilter}”.
+                </p>
+              )}
+              {shownTopicOptions.map((topic) => {
                 const disabled = disabledTopicSet.has(topic);
                 return (
                   <label
@@ -298,8 +320,10 @@ export default function ClassScheduleFields({
           value={form.description}
           onChange={handleInputChange}
           placeholder="Briefly explain what will be covered in this class..."
+          maxLength={500}
           className={`textarea textarea-bordered ${textareaCls} w-full focus:textarea-primary`}
         />
+        <CharCount value={form.description} max={500} />
       </FormField>
 
       <FormField

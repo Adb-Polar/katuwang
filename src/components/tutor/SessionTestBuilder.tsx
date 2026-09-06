@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import CharCount from "@/components/ui/CharCount";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
@@ -134,6 +135,7 @@ function CreateTestPanel({
               maxLength={2000}
               className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
             />
+            <CharCount value={instructions} max={2000} />
           </FormField>
           <div className="flex justify-end">
             <button onClick={create} disabled={busy || title.trim().length < 3} className="btn btn-primary btn-sm text-xs">
@@ -315,6 +317,7 @@ function BuilderBody({
               maxLength={2000}
               className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
             />
+            <CharCount value={instructions} max={2000} />
           </FormField>
           {editable && (
             <div className="flex justify-end">

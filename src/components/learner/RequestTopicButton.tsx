@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import CharCount from "@/components/ui/CharCount";
 import MatchCriteriaFields, {
   MatchCriteriaValue,
   EMPTY_CRITERIA,
@@ -93,9 +94,11 @@ export default function RequestTopicButton({
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
+                  maxLength={500}
                   className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
                   placeholder="e.g. I struggle with word problems the most."
                 />
+                <CharCount value={note} max={500} />
               </FormField>
               <div className="modal-action pt-2">
                 <button type="button" onClick={() => setOpen(false)} className="btn btn-neutral btn-outline btn-sm text-xs">

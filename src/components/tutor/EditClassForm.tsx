@@ -21,6 +21,7 @@ import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import CharCount from "@/components/ui/CharCount";
 import SessionsList, { SessionSummary } from "@/components/classes/SessionsList";
 import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
@@ -337,8 +338,10 @@ export default function EditClassForm({
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Briefly explain what will be covered in this class... (optional)"
+                    maxLength={500}
                     className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-24"
                   />
+                  <CharCount value={form.description} max={500} />
                 </div>
               </div>
 
