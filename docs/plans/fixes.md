@@ -12,6 +12,12 @@ into low-risk, dependency-ordered phases. Each phase is committed separately.
 
 Legend: ✅ done · 🟡 partial · ⬜ not started
 
+**Status (2026-09-06): Phases 1–6 all shipped** — Changes.md Parts 37–44
+(commits after `1f8bc8c`). Phase 6 needed no migration after all
+(`Notification.type` is a free-text column). Remaining `fixes.txt` items not
+picked up by a phase are lower-priority visual polish (dashboard card copy,
+403 page styling) — leave in `fixes.txt` for a later pass.
+
 ---
 
 ## Status audit
@@ -132,8 +138,8 @@ Also shipped: nested-`<form>` / self-closing modals on the Edit Class page (Part
 ### Phase 5 — Copy rename sweep (last; mechanical)
 - "Topic request" → "Class request" across UI strings only
 
-### Phase 6 — Schema change (needs explicit DB confirmation)
-- Appeals notify admin: `NotificationType.CLASS_APPEAL_NEW` + migration + `notifyMany` in `POST /api/tutor/classes/[classId]/appeal`
+### Phase 6 — Appeals notify admin ✅ (Part 44 — no migration; `Notification.type` is free-text)
+- `"CLASS_APPEAL_NEW"` added to the `NotificationType` union + `notifyMany` of all active admins in `POST /api/tutor/classes/[classId]/appeal`
 
 ---
 

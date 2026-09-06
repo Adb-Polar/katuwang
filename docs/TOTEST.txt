@@ -108,6 +108,14 @@ fixes.md Phase 5 (Changes.md Part 43)
  [] The feature still works end to end (post a request, tutor accepts, class
     created) — routes and data unaffected by the copy change
 
+fixes.md Phase 6 (Changes.md Part 44)
+ [] Admin suspends/bans a tutor's class -> tutor files an appeal from the
+    class page -> every admin gets a "TUT-xxxx appealed the moderation on
+    <subject> · <code>" notification; the bell dot + sidebar badge update;
+    clicking it opens /admin/class-appeals
+ [] Filing a second appeal while one is pending still 409s and sends no
+    notification
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

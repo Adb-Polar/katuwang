@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassAppealSchema } from "@/lib/validations/classAppeal";
+import { notifyMany } from "@/lib/notifications";
 
 // ─── POST: A tutor appeals a suspension/ban on one of their classes ──────────
 export async function POST(
@@ -27,11 +28,11 @@ export async function POST(
     const [tutorProfile, existingClass] = await Promise.all([
       prisma.tutorProfile.findUnique({
         where: { userId: session.user.id },
-        select: { id: true },
+        select: { id: true, user: { select: { anonymousId: true } } },
       }),
       prisma.tutorClass.findUnique({
         where: { id: classId },
-        select: { id: true, status: true, tutorProfileId: true },
+        select: { id: true, status: true, tutorProfileId: true, code: true, subject: true },
       }),
     ]);
 
@@ -62,12 +63,29 @@ export async function POST(
       );
     }
 
-    const appeal = await prisma.classAppeal.create({
-      data: {
-        classId,
-        tutorProfileId: tutorProfile.id,
-        reason: result.data.reason,
-      },
+    const appeal = await prisma.$transaction(async (tx) => {
+      const created = await tx.classAppeal.create({
+        data: {
+          classId,
+          tutorProfileId: tutorProfile.id,
+          reason: result.data.reason,
+        },
+      });
+
+      // Let every active admin know there's an appeal waiting for review.
+      const admins = await tx.user.findMany({
+        where: { role: "ADMIN", status: "ACTIVE" },
+        select: { id: true },
+      });
+      await notifyMany(
+        tx,
+        admins.map((a) => a.id),
+        "CLASS_APPEAL_NEW",
+        `${tutorProfile.user.anonymousId} appealed the moderation on ${existingClass.subject} · ${existingClass.code}.`,
+        "/admin/class-appeals"
+      );
+
+      return created;
     });
 
     return NextResponse.json(appeal, { status: 201 });

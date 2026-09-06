@@ -51,7 +51,8 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   // class lifecycle (learner-facing)
   CLASS_CANCELLED: <CalendarX className="h-4 w-4 text-error" />,
   CLASS_COMPLETED: <CalendarCheck className="h-4 w-4 text-success" />,
-  // class appeal review (tutor-facing)
+  // class appeals — filed (admin-facing), reviewed (tutor-facing)
+  CLASS_APPEAL_NEW: <Gavel className="h-4 w-4 text-warning" />,
   CLASS_APPEAL_APPROVED: <Gavel className="h-4 w-4 text-success" />,
   CLASS_APPEAL_REJECTED: <Gavel className="h-4 w-4 text-error" />,
   // session pre/post tests (learner-facing)

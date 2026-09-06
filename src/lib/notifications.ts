@@ -26,7 +26,8 @@ export type NotificationType =
   // class lifecycle (learner-facing)
   | "CLASS_CANCELLED"
   | "CLASS_COMPLETED"
-  // class appeal review (tutor-facing)
+  // class appeals — filed (admin-facing), reviewed (tutor-facing)
+  | "CLASS_APPEAL_NEW"
   | "CLASS_APPEAL_APPROVED"
   | "CLASS_APPEAL_REJECTED"
   // session pre/post tests (learner-facing)
