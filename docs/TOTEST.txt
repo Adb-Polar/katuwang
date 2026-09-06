@@ -86,6 +86,20 @@ fixes.md Phase 4b (Changes.md Part 41)
     an already-certified topic is rejected; a thin question bank shows the
     BANK_NOT_READY message
 
+fixes.md Phase 4c (Changes.md Part 42)
+ [] /tutor dashboard: each of the 4 stat cards shows an icon; numbers still
+    correct; "Enrolled Learners" / "Open Topic Requests" cards still link out
+ [] /tutor dashboard: "Upcoming sessions" rows show a weekday+date badge,
+    subject badge, topic, time+duration; clicking a row opens the class
+ [] /tutor dashboard: "This week" is a Mon–Sun grid; sessions land in the
+    right weekday column, ordered by time, and link to the class; empty state
+    shows when there are no sessions in the next 7 days
+ [] /learner/profile and /tutor/profile: the page is read-only (grade,
+    section, contact shown as text) with an "Edit details" button
+ [] /learner/profile/edit and /tutor/profile/edit: the form loads with
+    current values, saves, shows "Profile updated", "Back to profile" works;
+    visiting the edit URL logged out redirects to login
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

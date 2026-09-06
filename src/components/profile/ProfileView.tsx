@@ -1,21 +1,22 @@
-import { ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import { ShieldCheck, Pencil } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
-import ProfileEditForm from "@/components/profile/ProfileEditForm";
 import TopicChip from "@/components/ui/TopicChip";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 /**
- * Shared account page for learners and tutors — read-only identity fields the
- * account owner can't change themselves, plus the self-service edit card
- * (grade level, section, contact info). The two portals differ only by
- * eyebrow / role label / ID role / endpoint.
+ * Read-only account page for learners and tutors — identity fields only an
+ * admin can change, a read-only summary of the self-service fields (grade
+ * level, section, contact info) with an "Edit details" link to
+ * `{role}/profile/edit`, and (tutors) a verified-topics card.
  */
 export default function ProfileView({
   eyebrow,
   roleLabel,
   roleLabelClass,
   idRole,
-  endpoint,
+  editHref,
   fullName,
   email,
   anonymousId,
@@ -28,7 +29,7 @@ export default function ProfileView({
   roleLabel: string;
   roleLabelClass: string;
   idRole: "LEARNER" | "TUTOR";
-  endpoint: string;
+  editHref: string;
   fullName: string;
   email: string;
   anonymousId: string;
@@ -38,6 +39,15 @@ export default function ProfileView({
   /** Tutor only: their CERTIFIED topics, grouped and shown as a card. */
   certifiedTopics?: { subject: string; topic: string }[];
 }) {
+  const gradeLabel =
+    GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ??
+    gradeLevel?.replace("_", " ") ??
+    "—";
+  const editableRows: { label: string; value: string }[] = [
+    { label: "Grade level", value: gradeLabel },
+    { label: "Section", value: section || "—" },
+    { label: "Contact info", value: contactInfo || "Not set" },
+  ];
   const topicsBySubject = new Map<string, string[]>();
   for (const c of certifiedTopics ?? []) {
     topicsBySubject.set(c.subject, [...(topicsBySubject.get(c.subject) ?? []), c.topic]);
@@ -83,22 +93,29 @@ export default function ProfileView({
           </div>
         </section>
 
-        {/* Self-service fields */}
+        {/* Self-service fields (read-only summary; edit on its own page) */}
         <section className="card kt-card lg:col-span-3">
           <div className="card-body gap-4 p-6">
-            <div>
-              <h2 className="card-title text-sm font-bold">Editable details</h2>
-              <p className="text-2xs text-base-content/60 mt-1">
-                Keep your grade level, section, and contact info up to date so tutors and admins can reach you.
-              </p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="card-title text-sm font-bold">Your details</h2>
+                <p className="text-2xs text-base-content/60 mt-1">
+                  Grade level, section, and contact info — keep these current so tutors and admins can reach you.
+                </p>
+              </div>
+              <Link href={editHref} className="btn btn-outline btn-primary btn-sm text-xs gap-1 shrink-0">
+                <Pencil className="h-3.5 w-3.5" />
+                Edit details
+              </Link>
             </div>
-            <div className="divider my-0"></div>
-            <ProfileEditForm
-              endpoint={endpoint}
-              initialContactInfo={contactInfo}
-              initialSection={section}
-              initialGradeLevel={gradeLevel ?? ""}
-            />
+            <dl className="divide-y divide-base-200">
+              {editableRows.map((r) => (
+                <div key={r.label} className="grid gap-0.5 py-3 text-sm">
+                  <dt className="text-2xs uppercase tracking-wide text-base-content/45">{r.label}</dt>
+                  <dd className="font-semibold break-words">{r.value}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
       </div>

@@ -21,7 +21,7 @@ export default async function LearnerProfilePage() {
       roleLabel="Student Learner"
       roleLabelClass="text-secondary"
       idRole="LEARNER"
-      endpoint="/api/learner/profile"
+      editHref="/learner/profile/edit"
       fullName={session!.user.fullName}
       email={session!.user.email}
       anonymousId={session!.user.anonymousId}

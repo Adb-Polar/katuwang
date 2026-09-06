@@ -1,14 +1,22 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { CheckCircle2, Circle, AlertTriangle, CalendarClock } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  AlertTriangle,
+  CalendarClock,
+  BookOpen,
+  BadgeCheck,
+  Users,
+  Inbox,
+} from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
-import WeeklyScheduleView from "@/components/tutor/WeeklyScheduleView";
-import { deriveWeeklyAvailability } from "@/lib/derivedAvailability";
+import WeeklyTimetable from "@/components/tutor/WeeklyTimetable";
 
 function fmt(d: Date) {
   return d.toLocaleString(undefined, {
@@ -77,21 +85,29 @@ export default async function TutorDashboard() {
       ? prisma.classSession.findMany({
           where: {
             status: "SCHEDULED",
-            scheduledAt: { gt: now },
+            scheduledAt: { gt: now, lt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) },
             class: { tutorProfileId: tutorProfile.id },
           },
-          select: { scheduledAt: true, duration: true },
+          orderBy: { scheduledAt: "asc" },
+          select: {
+            id: true,
+            topic: true,
+            scheduledAt: true,
+            duration: true,
+            class: { select: { id: true, subject: true } },
+          },
         })
       : Promise.resolve([]),
   ]);
 
-  const scheduleSlots = deriveWeeklyAvailability(
-    weeklySessions.map((s) => ({
-      scheduledAt: s.scheduledAt,
-      duration: s.duration,
-      status: "SCHEDULED",
-    }))
-  );
+  const timetableSessions = weeklySessions.map((s) => ({
+    id: s.id,
+    topic: s.topic,
+    subject: s.class.subject,
+    classId: s.class.id,
+    scheduledAt: s.scheduledAt.toISOString(),
+    duration: s.duration,
+  }));
 
   const enrolledLearnerCount = classes.reduce((sum, c) => sum + c._count.enrollments, 0);
   const isModerated = user?.status !== "ACTIVE";
@@ -142,21 +158,47 @@ export default async function TutorDashboard() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Topics Taught</span>
-          <span className="kt-stat-value">{taughtTopics.length}</span>
+        <div className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2">
+          <div>
+            <span className="kt-stat-title">Topics Taught</span>
+            <span className="kt-stat-value">{taughtTopics.length}</span>
+          </div>
+          <span className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+            <BookOpen className="h-4 w-4" />
+          </span>
         </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Verified Topics</span>
-          <span className="kt-stat-value">{certifiedCount}</span>
+        <div className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2">
+          <div>
+            <span className="kt-stat-title">Verified Topics</span>
+            <span className="kt-stat-value">{certifiedCount}</span>
+          </div>
+          <span className="p-2 rounded-lg bg-success/10 text-success shrink-0">
+            <BadgeCheck className="h-4 w-4" />
+          </span>
         </div>
-        <Link href="/tutor/students" className="card kt-card kt-stat p-4 hover:border-primary/40 transition-colors">
-          <span className="kt-stat-title">Enrolled Learners</span>
-          <span className="kt-stat-value">{enrolledLearnerCount}</span>
+        <Link
+          href="/tutor/students"
+          className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
+        >
+          <div>
+            <span className="kt-stat-title">Enrolled Learners</span>
+            <span className="kt-stat-value">{enrolledLearnerCount}</span>
+          </div>
+          <span className="p-2 rounded-lg bg-secondary/10 text-secondary shrink-0">
+            <Users className="h-4 w-4" />
+          </span>
         </Link>
-        <Link href="/tutor/requests" className="card kt-card kt-stat p-4 hover:border-primary/40 transition-colors">
-          <span className="kt-stat-title">Open Topic Requests</span>
-          <span className="kt-stat-value">{openRequestCount}</span>
+        <Link
+          href="/tutor/requests"
+          className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
+        >
+          <div>
+            <span className="kt-stat-title">Open Topic Requests</span>
+            <span className="kt-stat-value">{openRequestCount}</span>
+          </div>
+          <span className="p-2 rounded-lg bg-accent/10 text-accent shrink-0">
+            <Inbox className="h-4 w-4" />
+          </span>
         </Link>
       </div>
 
@@ -171,25 +213,39 @@ export default async function TutorDashboard() {
               No scheduled sessions across your classes.
             </p>
           ) : (
-            <ul className="divide-y divide-base-200">
-              {upcomingSessions.map((s) => (
-                <li key={s.id}>
-                  <Link
-                    href={`/tutor/classes/${s.class.id}`}
-                    className="flex items-center justify-between gap-3 py-2.5 text-xs hover:bg-base-200/40 -mx-2 px-2 rounded"
-                  >
-                    <div className="min-w-0">
-                      <span className="kt-badge kt-badge--neutral uppercase mr-2">
-                        {s.class.subject}
-                      </span>
-                      <span className="text-base-content/80">{s.topic}</span>
-                    </div>
-                    <span className="text-base-content/60 shrink-0">
-                      {fmt(s.scheduledAt)} · {s.duration}m
-                    </span>
-                  </Link>
-                </li>
-              ))}
+            <ul className="space-y-2">
+              {upcomingSessions.map((s) => {
+                const d = new Date(s.scheduledAt);
+                return (
+                  <li key={s.id}>
+                    <Link
+                      href={`/tutor/classes/${s.class.id}`}
+                      className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
+                        <span className="text-2xs font-bold uppercase leading-none">
+                          {d.toLocaleDateString(undefined, { weekday: "short" })}
+                        </span>
+                        <span className="text-base font-bold leading-tight">{d.getDate()}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
+                            {s.class.subject}
+                          </span>
+                          <span className="text-sm font-semibold text-base-content/85 truncate">
+                            {s.topic}
+                          </span>
+                        </div>
+                        <p className="text-2xs text-base-content/55 mt-0.5">
+                          {d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                          {s.duration} min
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>
@@ -199,15 +255,12 @@ export default async function TutorDashboard() {
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />
-            Your weekly schedule
+            This week
           </h2>
           <p className="text-2xs text-base-content/50">
-            Auto-derived from your upcoming sessions. This is what learners see on your profile.
+            Your scheduled sessions over the next 7 days.
           </p>
-          <WeeklyScheduleView
-            slots={scheduleSlots}
-            emptyMessage="Schedule sessions in your classes to build a weekly schedule."
-          />
+          <WeeklyTimetable sessions={timetableSessions} />
         </div>
       </section>
 

@@ -34,7 +34,7 @@ export default async function TutorProfilePage() {
       roleLabel="Student Tutor"
       roleLabelClass="text-accent-content"
       idRole="TUTOR"
-      endpoint="/api/tutor/profile"
+      editHref="/tutor/profile/edit"
       fullName={session!.user.fullName}
       email={session!.user.email}
       anonymousId={session!.user.anonymousId}
