@@ -2,7 +2,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import TopicRequestModerationTable from "@/components/admin/TopicRequestModerationTable";
 
 export const metadata = {
-  title: "Topic Requests | Katuwang",
+  title: "Class Requests | Katuwang",
 };
 
 export default function AdminTopicRequestsPage() {
@@ -10,7 +10,7 @@ export default function AdminTopicRequestsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Topic Requests"
+        title="Class Requests"
         subtitle="Close a request that violates platform policy, or re-open one."
       />
       <TopicRequestModerationTable />

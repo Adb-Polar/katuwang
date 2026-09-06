@@ -53,7 +53,7 @@ export const updatePlatformSettingSchema = z.object({
 export type UpdatePlatformSettingInput = z.infer<typeof updatePlatformSettingSchema>;
 
 export const moderateTopicRequestSchema = z.object({
-  status: z.enum(["OPEN", "CANCELLED"], { message: "Invalid topic request status." }),
+  status: z.enum(["OPEN", "CANCELLED"], { message: "Invalid class request status." }),
   reason: z.string().trim().max(500, "Reason cannot exceed 500 characters.").optional().or(z.literal("")),
 });
 

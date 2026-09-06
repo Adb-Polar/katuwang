@@ -12,6 +12,29 @@ Format: newest first.
 
 ---
 
+## "Topic request" is called "Class request" in the UI (2026-09-06)
+
+**Decision:** All learner/tutor/admin-facing copy now says **"class request"**
+instead of "topic request" (headings, nav labels, page titles, help/FAQ/chatbot
+text, notification subtitles). A learner posts a *class request*; a tutor
+accepts it to create a class.
+
+**Unchanged:** the data model and code (`TopicRequest`, `TopicRequestTopic`,
+`TopicRequestSlot`, `directedTutorProfileId`), the API routes
+(`/api/tutor/topic-requests`, `/api/admin/topic-requests`), the page routes
+(`/tutor/requests`, `/admin/topic-requests`, `/learner/requests`), and the
+`docs/` that describe the implementation. Only user-visible strings changed.
+
+**Why:** "topic request" tested as confusing next to the Assessment module's
+per-topic language — learners read it as "requesting a topic be added". What
+they actually get is a class, so the label now matches the outcome.
+`fixes.txt` Redesign→General ("Rename Topic request to class request").
+
+**Implication for agents:** when adding UI copy for this feature, say "class
+request". Keep using `TopicRequest*` in code. Don't rename routes/models.
+
+---
+
 ## Grade level is self-service on the profile page (2026-09-06)
 
 **Decision:** A learner or tutor can change their own **grade level** (and

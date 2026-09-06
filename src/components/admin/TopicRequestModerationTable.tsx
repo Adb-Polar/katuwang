@@ -74,7 +74,7 @@ export default function TopicRequestModerationTable() {
       dir,
     },
     PAGE_SIZE,
-    "Could not retrieve topic requests."
+    "Could not retrieve class requests."
   );
 
   const moderate = async (id: string, status: "OPEN" | "CANCELLED") => {
@@ -109,7 +109,7 @@ export default function TopicRequestModerationTable() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">All Topic Requests</h2>
+          <h2 className="card-title text-sm font-bold">All Class Requests</h2>
 
           <div className="flex flex-col sm:flex-row gap-3">
             <input

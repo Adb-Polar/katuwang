@@ -86,7 +86,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_no_match",
     question: "What if no class matches what I need?",
     answer:
-      "Post a topic request from My Requests. Pick the subject, topics, your grade level and preferred times; a tutor can accept it and build a class for you. You can also send it to one specific tutor.",
+      "Post a class request from My Requests. Pick the subject, topics, your grade level and preferred times; a tutor can accept it and build a class for you. You can also send it to one specific tutor.",
     keywords: ["no", "match", "nothing", "empty", "request", "cant", "find", "fallback"],
     roles: [LEARNER],
     link: { href: "/learner/requests", label: "My Requests" },
@@ -95,7 +95,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_class_cancelled",
     question: "My class was cancelled — what now?",
     answer:
-      "You'll get a notification. If your enrolment came from a topic request, that request re-opens automatically so a tutor can pick it up again. Otherwise, browse for another class or post a new request.",
+      "You'll get a notification. If your enrolment came from a class request, that request re-opens automatically so a tutor can pick it up again. Otherwise, browse for another class or post a new request.",
     keywords: ["cancel", "cancelled", "class", "removed", "gone", "what", "now"],
     roles: [LEARNER],
   },
@@ -103,7 +103,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_group_solo",
     question: "Can I choose one-on-one vs. group tutoring?",
     answer:
-      "Yes. When you use Auto Match or post a topic request you can set your preferred setup — one-on-one (solo) or group — and matching respects it.",
+      "Yes. When you use Auto Match or post a class request you can set your preferred setup — one-on-one (solo) or group — and matching respects it.",
     keywords: ["group", "solo", "one", "individual", "setup", "format", "alone"],
     roles: [LEARNER],
   },
@@ -111,7 +111,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_chatbot_scope",
     question: "Can the chatbot tutor me or answer schoolwork?",
     answer:
-      "No. I only help with navigating Katuwang, answering questions about how it works, and (for learners) suggesting classes. For actual tutoring, enrol in a class or post a topic request.",
+      "No. I only help with navigating Katuwang, answering questions about how it works, and (for learners) suggesting classes. For actual tutoring, enrol in a class or post a class request.",
     keywords: ["tutor", "teach", "answer", "homework", "schoolwork", "solve", "explain"],
   },
   {

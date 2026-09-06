@@ -127,7 +127,7 @@ export default async function LearnerDashboard() {
             {[
               { label: "Browse classes", href: "/learner/classes", icon: BookOpen },
               { label: "Auto Match", href: "/learner/match", icon: Sparkles },
-              { label: "My topic requests", href: "/learner/requests", icon: Inbox },
+              { label: "My class requests", href: "/learner/requests", icon: Inbox },
             ].map((l) => (
               <Link
                 key={l.href}

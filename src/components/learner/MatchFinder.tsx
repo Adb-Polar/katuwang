@@ -127,7 +127,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   Nothing open fits this right now.
                 </p>
                 <Link href="/learner/requests" className="btn btn-outline btn-xs text-xs">
-                  Post a topic request instead
+                  Post a class request instead
                 </Link>
               </div>
             ) : (

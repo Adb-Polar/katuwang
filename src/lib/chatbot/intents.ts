@@ -23,7 +23,7 @@ export const INTENTS: Intent[] = [
       /\bi need help\b/,
     ],
     response: { text: "" }, // built in respond.ts from live matches
-    suggestions: ["Recommend a math class", "Find me a science tutor", "Post a topic request"],
+    suggestions: ["Recommend a math class", "Find me a science tutor", "Post a class request"],
   },
 
   // ── Navigation — available to every role ───────────────────────────────
@@ -37,7 +37,7 @@ export const INTENTS: Intent[] = [
       text: "Open Browse Classes to see every scheduled class you can join, then use the Enroll button on one that fits.",
     },
     link: { href: "/learner/classes", label: "Browse Classes" },
-    suggestions: ["How does matching work?", "Post a topic request"],
+    suggestions: ["How does matching work?", "Post a class request"],
   },
   {
     id: "nav_leave_class",
@@ -60,7 +60,7 @@ export const INTENTS: Intent[] = [
       text: "Auto Match ranks scheduled classes for you using a weighted score — subject, topic overlap, grade-level fit, and how well the schedule matches your preferred times. Open Auto Match and enter what you need.",
     },
     link: { href: "/learner/match", label: "Auto Match" },
-    suggestions: ["Post a topic request", "How do I enroll?"],
+    suggestions: ["Post a class request", "How do I enroll?"],
   },
   {
     id: "nav_topic_request",
@@ -69,7 +69,7 @@ export const INTENTS: Intent[] = [
     keywords: ["request", "topic", "no", "match", "post", "ask"],
     patterns: [/\b(post|submit|make|create)\b.*\brequest\b/, /\bno (class|tutor)\b/, /\bcan'?t find\b/],
     response: {
-      text: "If nothing fits, open My Requests and post a topic request — pick the subject, topics, your grade level and preferred times. A tutor can accept it and build a class for you. You can also direct it at one specific tutor from their profile.",
+      text: "If nothing fits, open My Requests and post a class request — pick the subject, topics, your grade level and preferred times. A tutor can accept it and build a class for you. You can also direct it at one specific tutor from their profile.",
     },
     link: { href: "/learner/requests", label: "My Requests" },
   },
@@ -207,7 +207,7 @@ export const INTENTS: Intent[] = [
     keywords: ["request", "accept", "topic", "learner", "queue"],
     patterns: [/\b(accept|answer|take|respond to)\b.*\brequest\b/],
     response: {
-      text: "Open Requests to see topic requests you can take. Accepting one auto-creates a full class from it (for your CERTIFIED topics only).",
+      text: "Open Requests to see class requests you can take. Accepting one auto-creates a full class from it (for your CERTIFIED topics only).",
     },
     link: { href: "/tutor/requests", label: "Requests" },
   },
@@ -293,7 +293,7 @@ export const INTENTS: Intent[] = [
     keywords: ["moderate", "suspend", "ban", "class", "request", "report"],
     patterns: [/\b(suspend|ban|moderate|remove)\b.*\b(class|request|user)\b/],
     response: {
-      text: "Class Moderation is under Classes, topic requests under Topic Requests, and every moderation action is recorded in the Audit Log.",
+      text: "Class Moderation is under Classes, class requests under Class Requests, and every moderation action is recorded in the Audit Log.",
     },
     link: { href: "/admin/classes", label: "Classes" },
   },

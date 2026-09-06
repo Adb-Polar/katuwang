@@ -11,7 +11,7 @@ export default function LearnerNotificationsPage() {
       <PageHeader
         eyebrow="Learner Portal"
         title="Notifications"
-        subtitle="Updates about your topic requests and classes."
+        subtitle="Updates about your class requests and classes."
       />
       <NotificationList />
     </div>

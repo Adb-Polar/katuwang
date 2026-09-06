@@ -11,7 +11,7 @@ export default function TutorNotificationsPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Notifications"
-        subtitle="Updates about topic requests directed to you and your classes."
+        subtitle="Updates about class requests directed to you and your classes."
       />
       <NotificationList />
     </div>

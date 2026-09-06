@@ -18,7 +18,7 @@ export default function DevHomePage() {
           <div>
             <h1 className="font-serif text-2xl font-semibold text-base-content">Dev Data Factory</h1>
             <p className="text-xs text-base-content/60">
-              Spawn throwaway users, classes, enrolments and topic requests against the current database.
+              Spawn throwaway users, classes, enrolments and class requests against the current database.
               Not available in production. All accounts use <code className="rounded bg-base-300 px-1">password123</code>{" "}
               and an <code className="rounded bg-base-300 px-1">@dev.test</code> email.
             </p>

@@ -23,9 +23,9 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
     group: "General",
   },
   matchingEnabled: {
-    label: "Class matching & topic requests",
+    label: "Class matching & class requests",
     description:
-      "When disabled, the learner 'Auto Match' matcher and topic requests (and the tutor request queue) are turned off.",
+      "When disabled, the learner 'Auto Match' matcher and class requests (and the tutor request queue) are turned off.",
     group: "General",
   },
   showTutorRealNames: {

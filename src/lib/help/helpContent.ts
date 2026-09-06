@@ -67,11 +67,11 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
           "Open Auto Match.",
           "Set the subject and topic you need help with, your availability, and whether you want 1-on-1 or a group class.",
           "Review the ranked list — classes are scored on subject, topic overlap, grade-level fit, and how well the schedule matches yours.",
-          "Enroll in a good match, or post a topic request if nothing fits.",
+          "Enroll in a good match, or post a class request if nothing fits.",
         ],
       },
       {
-        title: "Post a topic request",
+        title: "Post a class request",
         steps: [
           "Go to My Requests, or use the “Post a request” option shown when Auto Match finds nothing.",
           "Describe the topic, your availability, and your preferred setup (1-on-1 or group).",
@@ -129,11 +129,11 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Classes",
         question: "What happens if a class is cancelled or suspended?",
         answer:
-          "You get a notification. If the class was created from one of your topic requests, that request automatically re-opens so another tutor can pick it up.",
+          "You get a notification. If the class was created from one of your class requests, that request automatically re-opens so another tutor can pick it up.",
       },
       {
         category: "Requests",
-        question: "Public vs. directed topic request — which should I use?",
+        question: "Public vs. directed class request — which should I use?",
         answer:
           "Use public when you just need help and any certified tutor will do — it reaches the most tutors. Use directed when you have a specific tutor in mind; only that tutor sees it.",
       },
@@ -147,7 +147,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Matching",
         question: "Why does Auto Match show no results?",
         answer:
-          "No existing class scored well enough on subject, topic, grade level, and schedule fit. That is expected sometimes — post a topic request instead and a tutor can create a class for you.",
+          "No existing class scored well enough on subject, topic, grade level, and schedule fit. That is expected sometimes — post a class request instead and a tutor can create a class for you.",
       },
       {
         category: "Account",
@@ -166,7 +166,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
 
   TUTOR: {
     intro:
-      "How to get certified, run classes and sessions, and fulfil learner topic requests.",
+      "How to get certified, run classes and sessions, and fulfil learner class requests.",
     quickLinks: [
       { label: "Classes", href: "/tutor/classes" },
       { label: "Students", href: "/tutor/students" },
@@ -196,7 +196,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         ],
       },
       {
-        title: "Fulfil a topic request",
+        title: "Fulfil a class request",
         steps: [
           "Open Requests to see public requests plus any directed to you.",
           "Open one whose topic you are certified for.",
@@ -256,11 +256,11 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Classes & sessions",
         question: "What happens to enrolled learners if I unpublish or cancel a class?",
         answer:
-          "Every enrolled learner is notified. If the class came from a learner's topic request, that request re-opens automatically so another tutor can take it.",
+          "Every enrolled learner is notified. If the class came from a learner's class request, that request re-opens automatically so another tutor can take it.",
       },
       {
         category: "Requests",
-        question: "What exactly does “Accept” do on a topic request?",
+        question: "What exactly does “Accept” do on a class request?",
         answer:
           "It auto-creates a class matching the request (subject, topic, setup, schedule window) and links it to the request. The learner is then guided to enroll in that class.",
       },
@@ -293,7 +293,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       { label: "Users", href: "/admin/users" },
       { label: "Registrations", href: "/admin/registrations" },
       { label: "Classes", href: "/admin/classes" },
-      { label: "Topic Requests", href: "/admin/topic-requests" },
+      { label: "Class Requests", href: "/admin/topic-requests" },
       { label: "Certifications", href: "/admin/assessment/certifications" },
       { label: "Class Appeals", href: "/admin/class-appeals" },
       { label: "Question Bank", href: "/admin/assessment/question-bank" },

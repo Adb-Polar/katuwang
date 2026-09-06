@@ -19,7 +19,7 @@ export default async function LearnerRequestsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Learner Portal"
-        title="Topic requests"
+        title="Class requests"
         subtitle="Ask for help on a topic when no open class fits."
       />
       <TopicRequestManager defaultGrade={me?.gradeLevel ?? ""} />

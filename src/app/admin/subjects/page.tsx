@@ -11,7 +11,7 @@ export default function AdminSubjectsPage() {
       <PageHeader
         eyebrow="Admin Portal"
         title="Subjects & Topics"
-        subtitle="The taxonomy used across classes, matching, topic requests and assessments. Renaming a topic updates it everywhere it's already stored."
+        subtitle="The taxonomy used across classes, matching, class requests and assessments. Renaming a topic updates it everywhere it's already stored."
       />
       <SubjectTopicManager />
     </div>

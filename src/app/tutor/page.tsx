@@ -193,7 +193,7 @@ export default async function TutorDashboard() {
           className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
         >
           <div>
-            <span className="kt-stat-title">Open Topic Requests</span>
+            <span className="kt-stat-title">Open Class Requests</span>
             <span className="kt-stat-value">{openRequestCount}</span>
           </div>
           <span className="p-2 rounded-lg bg-accent/10 text-accent shrink-0">

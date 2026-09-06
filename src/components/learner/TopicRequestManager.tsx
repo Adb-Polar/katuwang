@@ -158,7 +158,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="card-title text-sm font-bold">Your topic requests</h2>
+            <h2 className="card-title text-sm font-bold">Your class requests</h2>
             <button
               onClick={() => {
                 setShowForm((v) => !v);

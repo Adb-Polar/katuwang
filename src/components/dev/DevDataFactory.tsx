@@ -277,7 +277,7 @@ export default function DevDataFactory() {
         </Panel>
 
         {/* Topic requests */}
-        <Panel title="Topic requests">
+        <Panel title="Class requests">
           <Field label="How many (1–40)">
             <input
               type="number"

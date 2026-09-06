@@ -8,7 +8,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AcceptRequestForm from "@/components/tutor/AcceptRequestForm";
 
 export const metadata = {
-  title: "Accept Topic Request | Katuwang",
+  title: "Accept Class Request | Katuwang",
 };
 
 export default async function AcceptTopicRequestPage({
@@ -51,7 +51,7 @@ export default async function AcceptTopicRequestPage({
       <PageHeader
         eyebrow="Tutor Portal"
         title="Accept & create class"
-        subtitle="Auto-create a class from this topic request. Certification required per topic."
+        subtitle="Auto-create a class from this class request. Certification required per topic."
       />
       <AcceptRequestForm
         request={{

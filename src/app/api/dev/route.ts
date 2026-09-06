@@ -331,7 +331,7 @@ async function createTopicRequests(body: Record<string, unknown>) {
         learnerId: learner.id,
         subject,
         gradeLevel: learner.gradeLevel,
-        note: "Dev factory topic request.",
+        note: "Dev factory class request.",
         status: "OPEN",
         topics: { create: topics.map((topic) => ({ topic })) },
         slots: { create: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }] },
@@ -340,7 +340,7 @@ async function createTopicRequests(body: Record<string, unknown>) {
     made++;
   }
 
-  return NextResponse.json({ message: `Created ${made} open topic request(s).` }, { status: 201 });
+  return NextResponse.json({ message: `Created ${made} open class request(s).` }, { status: 201 });
 }
 
 async function wipeDevData() {

@@ -100,6 +100,14 @@ fixes.md Phase 4c (Changes.md Part 42)
     current values, saves, shows "Profile updated", "Back to profile" works;
     visiting the edit URL logged out redirects to login
 
+fixes.md Phase 5 (Changes.md Part 43)
+ [] Every place that said "topic request" now says "class request": learner
+    "My class requests" nav + page, tutor "Requests" page + dashboard stat
+    ("Open Class Requests"), admin "Class Requests" nav + page title,
+    notification page subtitles, chatbot/FAQ/help answers
+ [] The feature still works end to end (post a request, tutor accepts, class
+    created) — routes and data unaffected by the copy change
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)
