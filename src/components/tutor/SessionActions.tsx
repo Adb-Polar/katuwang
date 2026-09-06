@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -94,6 +95,7 @@ export default function SessionActions({
       {session.status === "SCHEDULED" && (
         <div className="flex items-center gap-1">
           <button
+            type="button"
             onClick={() => setIsRescheduling(true)}
             className="btn btn-ghost btn-xs cursor-pointer tooltip"
             data-tip="Reschedule"
@@ -102,6 +104,7 @@ export default function SessionActions({
             <Pencil className="h-3.5 w-3.5" />
           </button>
           <button
+            type="button"
             onClick={() => setPendingAction("complete")}
             className="btn btn-ghost btn-xs text-success cursor-pointer tooltip"
             data-tip="Mark complete"
@@ -110,6 +113,7 @@ export default function SessionActions({
             <CheckCircle className="h-3.5 w-3.5" />
           </button>
           <button
+            type="button"
             onClick={() => setPendingAction("cancel")}
             className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
             data-tip="Cancel"
@@ -118,6 +122,7 @@ export default function SessionActions({
             <XCircle className="h-3.5 w-3.5" />
           </button>
           <button
+            type="button"
             onClick={() => setPendingAction("delete")}
             className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
             data-tip="Delete"
@@ -143,10 +148,12 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      {isRescheduling && (
+      {isRescheduling && typeof document !== "undefined" &&
+        createPortal(
         <div className="modal modal-open">
           <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
             <button
+              type="button"
               onClick={() => setIsRescheduling(false)}
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             >
@@ -211,7 +218,8 @@ export default function SessionActions({
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

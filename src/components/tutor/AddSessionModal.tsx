@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -39,15 +40,21 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
 
   return (
     <>
-      <button onClick={() => setIsOpen(true)} className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer">
+      <button
+        type="button"
+        onClick={() => setIsOpen(true)}
+        className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer"
+      >
         <Plus className="h-3.5 w-3.5" />
         Add Session
       </button>
 
-      {isOpen && (
+      {isOpen && typeof document !== "undefined" &&
+        createPortal(
         <div className="modal modal-open">
           <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
             <button
+              type="button"
               onClick={() => setIsOpen(false)}
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             >
@@ -112,7 +119,8 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

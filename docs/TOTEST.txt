@@ -2,6 +2,12 @@ Learner
  - check if class schedule confict detection exist
 
 Tutor
+ [] Edit Class page (/tutor/classes/[classId]/edit) with a SCHEDULED session:
+    no "form cannot be a descendant of form" console error on load; the
+    Pencil/Reschedule button opens the modal AND IT STAYS OPEN (no flash-close),
+    the Topic/Date/Duration form submits and saves, Cancel + ✕ close it.
+    Same check for the "Add Session" button/modal. Neither modal submits or
+    resets the outer Edit Class form. (Changes.md Part 35)
  [Good] Schedule detection on class creation
  [] Schedule detection on request accept
  [] What happen if u unpublish class with enrolled student
