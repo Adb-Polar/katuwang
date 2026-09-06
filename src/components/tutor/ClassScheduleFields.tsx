@@ -109,12 +109,22 @@ export default function ClassScheduleFields({
 
   const toggleTopic = (topic: string) => {
     if (disabledTopicSet.has(topic)) return;
-    setSelectedTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]));
+    setSelectedTopics((prev) => {
+      const hit = prev.find((t) => t.toLowerCase() === topic.toLowerCase());
+      return hit ? prev.filter((t) => t !== hit) : [...prev, topic];
+    });
   };
 
   const addCustomTopic = () => {
-    const t = normalizeTopic(customTopic);
-    if (t.length < 2) return;
+    const raw = normalizeTopic(customTopic);
+    if (raw.length < 2) return;
+    // Canonicalise against the catalogue so "algebra" resolves to "Algebra"
+    // rather than being added as a case-mismatched ghost entry that shows in
+    // the "N selected" count but matches no checkbox and no custom chip.
+    const catalogueMatch = form.subject
+      ? topicsFor(form.subject).find((k) => k.toLowerCase() === raw.toLowerCase())
+      : undefined;
+    const t = catalogueMatch ?? raw;
     const exists = selectedTopics.some((s) => s.toLowerCase() === t.toLowerCase());
     if (!exists && selectedTopics.length < 10) setSelectedTopics((prev) => [...prev, t]);
     setCustomTopic("");
@@ -222,7 +232,7 @@ export default function ClassScheduleFields({
                   >
                     <input
                       type="checkbox"
-                      checked={selectedTopics.includes(topic)}
+                      checked={selectedTopics.some((t) => t.toLowerCase() === topic.toLowerCase())}
                       disabled={disabled}
                       onChange={() => toggleTopic(topic)}
                       className={`checkbox ${checkboxCls} checkbox-primary`}

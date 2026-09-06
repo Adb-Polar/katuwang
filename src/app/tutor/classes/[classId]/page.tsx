@@ -90,10 +90,12 @@ export default async function TutorClassDetailPage({
         <>
           <div className="flex items-center justify-between">
             <h2 className="card-title text-sm font-bold">Sessions</h2>
-            <Link href={`/tutor/classes/${tutorClass.id}/edit`} className="btn btn-ghost btn-xs text-xs gap-1">
-              <Pencil className="h-3 w-3" />
-              Manage in Edit
-            </Link>
+            {!locked && (
+              <Link href={`/tutor/classes/${tutorClass.id}/edit`} className="btn btn-ghost btn-xs text-xs gap-1">
+                <Pencil className="h-3 w-3" />
+                Manage in Edit
+              </Link>
+            )}
           </div>
           <SessionsList
             sessions={tutorClass.sessions.map((s) => ({

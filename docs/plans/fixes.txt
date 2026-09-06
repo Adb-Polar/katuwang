@@ -1,0 +1,66 @@
+sept 5 updates:
+1. http://localhost:3000/learner/match		-auto match, flip card to show result
+2. http://localhost:3000/register/learner 	- show pass button (mata) "reuse input password in login"
+3. http://localhost:3000/learner/profile 	- validation and proper format for contact info (whole page redesign)
+4. global search tutee side 			- if tutor setting shows name show name
+5. http://localhost:3000/tutor/assessments	- button for request reverts back to a req button after switching to assessment history and switching back, changes only occur after refreshing page.
+6. http://localhost:3000/admin/notifications	- tutor question req does not reflect on notifs
+7. http://localhost:3000/tutor/profile		- make grade lvl and section editable
+8. http://localhost:3000/admin/classes		- placement render issue (suspend, ban)
+9. http://localhost:3000/admin/topic-requests	-  same as no 8
+
+Sept 6 updates
+1. http://localhost:3000/tutor/classes - add session ui not responsive
+2. http://localhost:3000/tutor/classes - modal already too big, make this a whole page instead
+
+Additions
+1. cannot re-click the sort on the tables
+2. class and users tables should have a columns for code
+3. add character count at the apeal input box
+4. apeals should notify admin
+5. http://localhost:3000/admin/class-appeals should allow admin to view the auditlogs add a view button and will show the info
+6. add a visual time table for upcomming sessions
+7. verified badge should have green border
+8. http://localhost:3000/tutor/assessments
+9. browse public topic request and directed to me separation use tab
+10. http://localhost:3000/tutor/classes/new - input label too small
+11 BUG: /tutor/classes/new when adding the same topic it checks the existing topic but when the capitalization do not match is says 1 selected stating that the same topic is selected but did not appear in the checklist
+
+
+Redesign
+General
+ 	- all sentence input should have character limit and a counter to show it
+	- clear chat data when loggin out
+	- Rename Topic request to class request
+	- edit profile should be the same as edit class its on the different page
+
+	Tutor
+	 - global search placeholder says tutor topics and classes allow them to search public class request
+		dashboard
+			- card redesign too plain add icon per card
+			- upcomming session card: make it more visually readable currently its too bland
+			- weekly schedule: make this a time table
+		Classes
+			- class schedule header too small
+			- add hover effect to class card
+			- active badge on class card shows even unpublished
+			- disable all button in class when suspended or banned
+			- 403 fallback page
+			[] should tutor be allowed to edit finished classes?
+		Add class page
+			- add topic search
+			- add a character counter limit on the description field
+			- fix the layout of the session card add contrast to it, currently blends in bg
+			- when the require certification is enabled by admin the checklist for the topic and the select for the subjkect is only the certified topic they have\
+		Student
+			- enrolled in column must be class code not subject
+		Assessment
+			- add a button to take assessment to a topic so even if the tutor doesnt have a class for that topic they can still take assessment for it
+		Notifications
+		  - row gap
+
+		Profile
+			- add the certified topics
+	Learner
+		Classes
+			- currenty unpublished classes can still be viewed by enrolled student should limit

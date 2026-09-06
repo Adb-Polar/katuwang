@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import EditClassForm from "@/components/tutor/EditClassForm";
@@ -33,6 +33,9 @@ export default async function EditClassPage({
   });
 
   if (!tutorClass || tutorClass.tutorProfileId !== tutorProfile.id) notFound();
+
+  // A finished class is read-only — there's nothing left to schedule or change.
+  if (tutorClass.status === "COMPLETED") redirect(`/tutor/classes/${classId}`);
 
   const locked = tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED";
 

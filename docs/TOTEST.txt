@@ -13,6 +13,26 @@ Tutor
  [] What happen if u unpublish class with enrolled student
  [] What happen if u suspend or baned classes with enrolled students
 
+fixes.md Phase 1 (Changes.md Part 37)
+ [] Any admin list table (/admin/users, /admin/classes): click a sortable
+    column header repeatedly -> direction flips asc<->desc every click (not
+    stuck after the first click)
+ [] /tutor/classes/new: type a topic that already exists in the checklist but
+    with different casing (e.g. "algebra" vs "Algebra") -> it's treated as the
+    same topic, the catalogue checkbox shows checked, and the "N selected"
+    count does not gain a phantom entry
+ [] /tutor/classes: an unpublished class card shows only the "Unpublished"
+    badge, NOT also a green "Active" badge; a published SCHEDULED class still
+    shows "Active"; Completed/Suspended/Banned cards still show their status
+ [] Open /tutor/classes/[id]/edit for a COMPLETED class -> redirected to the
+    read-only class page
+ [] For a SUSPENDED or BANNED class: the tutor class page "Manage Class" menu
+    hides "Edit Class Info" and shows a disabled-actions note; the Sessions
+    header has no "Manage in Edit" link
+ [] Enrolled learner opens a class the tutor has unpublished -> sees the
+    "This class isn't published yet" placeholder + "Back to my classes", not
+    the full class details
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

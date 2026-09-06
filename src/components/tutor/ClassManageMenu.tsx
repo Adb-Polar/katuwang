@@ -74,6 +74,7 @@ export default function ClassManageMenu({
   };
 
   const isScheduled = status === "SCHEDULED";
+  const isModerated = status === "SUSPENDED" || status === "BANNED";
 
   return (
     <>
@@ -88,12 +89,19 @@ export default function ClassManageMenu({
           tabIndex={0}
           className="dropdown-content menu menu-sm bg-base-100 rounded-box z-10 w-60 p-2 shadow-lg border border-base-200 mt-2"
         >
-          <li>
-            <Link href={`/tutor/classes/${classId}/edit`} className="text-xs gap-2">
-              <Pencil className="h-3.5 w-3.5" />
-              Edit Class Info
-            </Link>
-          </li>
+          {!isModerated && (
+            <li>
+              <Link href={`/tutor/classes/${classId}/edit`} className="text-xs gap-2">
+                <Pencil className="h-3.5 w-3.5" />
+                Edit Class Info
+              </Link>
+            </li>
+          )}
+          {isModerated && (
+            <li className="menu-title text-2xs">
+              <span>This class is {status.toLowerCase()} — actions are disabled.</span>
+            </li>
+          )}
           {isScheduled && (
             <li>
               <button onClick={handleTogglePublish} disabled={publishing} className="text-xs gap-2">

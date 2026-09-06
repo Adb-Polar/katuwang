@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
-import { Users } from "lucide-react";
+import Link from "next/link";
+import { Users, EyeOff } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
@@ -74,6 +75,26 @@ export default async function LearnerClassDetailPage({
     tutorClass.sessions.some((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date());
 
   if (!isEnrolled && !isBrowsable) notFound();
+
+  // The tutor has unpublished this class. Enrolled learners keep their spot,
+  // but the details stay hidden until it's published again.
+  if (isEnrolled && !tutorClass.published) {
+    return (
+      <div className="mx-auto max-w-lg py-16 text-center space-y-4">
+        <div className="inline-flex p-3 rounded-2xl bg-warning/10 text-warning">
+          <EyeOff className="h-6 w-6" />
+        </div>
+        <h1 className="text-lg font-bold text-base-content">This class isn&apos;t published yet</h1>
+        <p className="text-sm text-base-content/60">
+          You&apos;re still enrolled. Your tutor has temporarily hidden the class details —
+          check back once it&apos;s published again.
+        </p>
+        <Link href="/learner/classes" className="btn btn-neutral btn-sm">
+          Back to my classes
+        </Link>
+      </div>
+    );
+  }
 
   const verifiedTopics = tutorClass.tutorProfile.topicCertifications
     .filter((c) => c.subject === tutorClass.subject)

@@ -113,7 +113,11 @@ export default function ClassCard({
               Unpublished
             </span>
           )}
-          <StatusBadge tone={tone} label={label} size="xs" />
+          {/* An unpublished class isn't live, so don't also badge it "Active"/"Full".
+              Real lifecycle states (Completed/Suspended/Banned/Cancelled) still show. */}
+          {(published || status !== "SCHEDULED") && (
+            <StatusBadge tone={tone} label={label} size="xs" />
+          )}
         </div>
       </div>
 
