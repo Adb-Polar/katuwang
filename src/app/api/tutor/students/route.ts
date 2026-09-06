@@ -13,6 +13,7 @@ interface StudentEntry {
   section: string;
   enrollments: {
     classId: string;
+    code: string;
     subject: string;
     topics: string[];
     enrolledAt: Date;
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
       where,
       select: {
         enrolledAt: true,
-        class: { select: { id: true, subject: true, topics: { select: { topic: true } } } },
+        class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
         learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
       },
       orderBy: { enrolledAt: "desc" },
@@ -78,6 +79,7 @@ export async function GET(req: NextRequest) {
       const existing = byLearner.get(enr.learner.id);
       const entry = {
         classId: enr.class.id,
+        code: enr.class.code,
         subject: enr.class.subject,
         topics: enr.class.topics.map((t) => t.topic),
         enrolledAt: enr.enrolledAt,

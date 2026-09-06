@@ -59,6 +59,17 @@ fixes.md Phase 3 (Changes.md Part 39)
  [] /tutor/requests/[id]/accept (few certified topics) -> no search box, or it
     still filters correctly
 
+fixes.md Phase 4a (Changes.md Part 40)
+ [] /admin/users: a "Code" column header sorts by anonymous ID (asc/desc,
+    re-clickable); combines with search + pagination
+ [] /admin/classes: a dedicated "Code" column sorts by class code
+ [] /admin/class-appeals: each row has a "View audit log" link -> opens
+    /admin/audit-log pre-filtered to that class's id
+ [] /tutor/students: the "Enrolled In" column shows class codes (mono
+    badges); hovering shows the subject + topics
+ [] /tutor/profile: a "Verified Topics" card lists the tutor's certified
+    topics grouped by subject (green pills); empty state when none
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)

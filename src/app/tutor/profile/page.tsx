@@ -12,7 +12,20 @@ export default async function TutorProfilePage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },
-    select: { contactInfo: true, section: true, gradeLevel: true },
+    select: {
+      contactInfo: true,
+      section: true,
+      gradeLevel: true,
+      tutorProfile: {
+        select: {
+          topicCertifications: {
+            where: { status: "CERTIFIED" },
+            select: { subject: true, topic: true },
+            orderBy: [{ subject: "asc" }, { topic: "asc" }],
+          },
+        },
+      },
+    },
   });
 
   return (
@@ -28,6 +41,7 @@ export default async function TutorProfilePage() {
       gradeLevel={user?.gradeLevel}
       section={user?.section ?? ""}
       contactInfo={user?.contactInfo ?? ""}
+      certifiedTopics={user?.tutorProfile?.topicCertifications ?? []}
     />
   );
 }

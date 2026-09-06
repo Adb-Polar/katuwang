@@ -2,6 +2,7 @@ import { ShieldCheck } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
+import TopicChip from "@/components/ui/TopicChip";
 
 /**
  * Shared account page for learners and tutors — read-only identity fields the
@@ -21,6 +22,7 @@ export default function ProfileView({
   gradeLevel,
   section,
   contactInfo,
+  certifiedTopics,
 }: {
   eyebrow: string;
   roleLabel: string;
@@ -33,7 +35,13 @@ export default function ProfileView({
   gradeLevel?: string | null;
   section: string;
   contactInfo: string;
+  /** Tutor only: their CERTIFIED topics, grouped and shown as a card. */
+  certifiedTopics?: { subject: string; topic: string }[];
 }) {
+  const topicsBySubject = new Map<string, string[]>();
+  for (const c of certifiedTopics ?? []) {
+    topicsBySubject.set(c.subject, [...(topicsBySubject.get(c.subject) ?? []), c.topic]);
+  }
   const identityRows: { label: string; value: React.ReactNode }[] = [
     { label: "Real name", value: <span className="font-semibold">{fullName}</span> },
     { label: "Email", value: <span className="font-semibold break-all">{email}</span> },
@@ -94,6 +102,40 @@ export default function ProfileView({
           </div>
         </section>
       </div>
+
+      {certifiedTopics && (
+        <section className="card kt-card">
+          <div className="card-body gap-3 p-6">
+            <div>
+              <h2 className="card-title text-sm font-bold">Verified Topics</h2>
+              <p className="text-2xs text-base-content/60 mt-1">
+                Topics you&apos;ve passed the assessment for. Learners see these on your profile.
+              </p>
+            </div>
+            {topicsBySubject.size === 0 ? (
+              <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+                No verified topics yet — take an assessment from the Assessments page.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {Array.from(topicsBySubject.entries()).map(([subject, topics]) => (
+                  <div
+                    key={subject}
+                    className="border border-base-200 bg-base-200/20 rounded-lg p-3 space-y-1.5"
+                  >
+                    <span className="badge badge-neutral badge-sm text-2xs font-bold">{subject}</span>
+                    <div className="flex flex-wrap gap-1">
+                      {topics.map((t) => (
+                        <TopicChip key={t} topic={t} verified />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -5,7 +5,13 @@ export const metadata = {
   title: "Audit Log | Katuwang",
 };
 
-export default function AdminAuditLogPage() {
+export default async function AdminAuditLogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -13,7 +19,7 @@ export default function AdminAuditLogPage() {
         title="Audit Log"
         subtitle="A history of moderation actions taken by administrators."
       />
-      <AuditLogTable />
+      <AuditLogTable initialQuery={q ?? ""} />
     </div>
   );
 }

@@ -65,7 +65,7 @@ export default function UserManagementTable() {
   const [reason, setReason] = useState("");
   const [durationDays, setDurationDays] = useState<string>("");
   const [saving, setSaving] = useState(false);
-  const { sort, dir, toggle } = useTableSort("createdAt", "desc", { name: "asc" });
+  const { sort, dir, toggle } = useTableSort("createdAt", "desc", { name: "asc", code: "asc" });
 
   const {
     data: users,
@@ -182,7 +182,7 @@ export default function UserManagementTable() {
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
-                    <th>ID</th>
+                    <SortableTh label="Code" field="code" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
                     <th>Grade &amp; Section</th>

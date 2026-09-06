@@ -14,6 +14,7 @@ const PAGE_SIZE = 10;
 
 interface StudentEnrollment {
   classId: string;
+  code: string;
   subject: string;
   topics: string[];
   enrolledAt: string;
@@ -153,10 +154,10 @@ export default function StudentRoster() {
                       {student.enrollments.map((enr) => (
                         <span
                           key={enr.classId}
-                          className="badge badge-outline badge-sm text-2xs"
-                          title={enr.topics.join(", ")}
+                          className="badge badge-outline badge-sm text-2xs font-mono"
+                          title={`${enr.subject} — ${enr.topics.join(", ")}`}
                         >
-                          {enr.subject}
+                          {enr.code}
                         </span>
                       ))}
                     </div>

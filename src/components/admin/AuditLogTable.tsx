@@ -32,10 +32,10 @@ const TARGET_TYPES = Object.values(AUDIT_TARGET_TYPES);
 
 type SortKey = "createdAt" | "action" | "targetType";
 
-export default function AuditLogTable() {
+export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: string }) {
   const [action, setAction] = useState("");
   const [targetType, setTargetType] = useState("");
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(initialQuery);
   const [sort, setSort] = useState<SortKey>("createdAt");
   const [dir, setDir] = useState<"asc" | "desc">("desc");
 

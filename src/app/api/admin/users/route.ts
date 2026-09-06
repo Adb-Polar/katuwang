@@ -8,11 +8,15 @@ import { parseSort } from "@/lib/sortParams";
 const DEFAULT_PAGE_SIZE = 10;
 
 // sort key -> the scalar column it orders by
-const USER_SORT_COLUMN: Record<string, "createdAt" | "lastName" | "status" | "role"> = {
+const USER_SORT_COLUMN: Record<
+  string,
+  "createdAt" | "lastName" | "status" | "role" | "anonymousId"
+> = {
   createdAt: "createdAt",
   name: "lastName",
   status: "status",
   role: "role",
+  code: "anonymousId",
 };
 
 // ─── GET: List Learner + Tutor Accounts for Moderation ────────────────────────

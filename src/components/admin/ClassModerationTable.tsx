@@ -172,6 +172,7 @@ export default function ClassModerationTable() {
               <table className="table table-sm">
                 <thead>
                   <tr className="text-2xs">
+                    <SortableTh label="Code" field="code" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Subject / Topics" field="subject" sort={sort} dir={dir} onSort={toggle} />
                     <th>Tutor</th>
                     <th>Scheduled</th>
@@ -185,8 +186,10 @@ export default function ClassModerationTable() {
                     const { tone, label } = getClassStatusBadge(c.status, false, "Scheduled");
                     return (
                       <tr key={c.id} className="text-xs">
+                        <td className="font-mono text-2xs font-semibold text-primary/80 align-top">
+                          {c.code}
+                        </td>
                         <td>
-                          <div className="font-mono text-2xs font-semibold text-primary/80">{c.code}</div>
                           <div className="font-semibold text-base-content/80">{c.subject}</div>
                           <div className="text-2xs text-base-content/50">{c.topics.join(", ")}</div>
                         </td>

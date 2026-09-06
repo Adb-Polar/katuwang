@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
@@ -160,6 +161,12 @@ export default function ClassAppealTable() {
                             Mod reason: {a.class.suspendedReason}
                           </div>
                         )}
+                        <Link
+                          href={`/admin/audit-log?q=${a.class.id}`}
+                          className="text-2xs text-primary hover:underline mt-1 inline-block"
+                        >
+                          View audit log
+                        </Link>
                       </td>
                       <td>
                         <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
