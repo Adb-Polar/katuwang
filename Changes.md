@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [54](#part-54) | **Minimalist scrollbars, app-wide** | Every scrollbar (page, sidebar, tables, modals) is now a thin rounded grey pill with no visible track, darkening slightly on hover. | `src/app/globals.css` — one global rule: Firefox `scrollbar-width/color`, Chromium/Safari `::-webkit-scrollbar` 8px w/ transparent track + `background-clip: padding-box` inset thumb (~4px visible), `9999px` radius. `--kt-scrollbar-thumb`/`-hover` tokens (`color-mix` of `--color-base-content` at 18%/34%). CSS only, no other changes. Not committed. |
 | [53](#part-53) | **Admin portal fixes (`docs/plans/admin-portal-fixes.txt`)** | 7-part admin polish: collapsible sidebar nav groups (persisted per portal, essentials expanded, active group auto-open); admin dashboard stat cards restyled to the tutor pattern + "needs attention" badges go amber/red only when the count is > 0 (added an "Open class appeals" row); grade-level filter on the Users list; sortable "ID" column on Registrations; Classes list showed `Invalid Date` (class has no `scheduledAt` — now a derived `nextSessionAt` with a "—" fallback) and gained a rows-per-page selector; Reports gained an "Export CSV" button; the Subjects/Topics row "⋯" menu was clipped by the card's `overflow` — now portalled to `document.body` and fixed-positioned. | `PortalLayout` `defaultExpandedGroups` prop + `localStorage["kt-nav:<portal>"]` collapse state + `.kt-nav-group-toggle`/`.kt-nav-chev` CSS; `src/app/admin/page.tsx` `statCards`/`actions` with `tone`; `GradeLevel` added to `GET /api/admin/users` + a `<select>` in `UserManagementTable`; `code→anonymousId` in `REG_SORT_COLUMN` + `<SortableTh field="code">`; `GET /api/admin/classes` maps `nextSessionAt` and stops leaking `sessions`, `ClassModerationTable` renders it + wires `onPageSizeChange`; new `src/lib/csv.ts` (`toCsv` RFC-4180 + `downloadCsv`) used by `ReportsView`; `RowMenu` in `SubjectTopicManager` rewritten with `createPortal` + `getBoundingClientRect` + outside-click/Escape/scroll close. New `src/lib/__tests__/csv.test.ts`; route-test cases for `?gradeLevel`, `?sort=code`, `nextSessionAt`. `tsc`/`lint`/`build` clean, 643/643. Not committed. |
 | [52](#part-52) | **Learner portal fixes (`docs/plans/leaner-portal-fixes.txt`)** | 10-part usability pass on the learner portal: topbar avatar links to the profile; progress-chart hover card null-safe + pre-before-post everywhere; learner dashboard restyled to match the tutor's (colored stat cards, bordered upcoming tiles, "This week" grid); browse + global search now match subject *names*, and global search gains a scope selector (Everything / Tutor code / Subject / Topic / Class code); "Find Tutors" cards show verified-class badges + a multi-select subject filter; tutor profile uses the weekly timetable, hides suspended/banned classes from non-enrollees, and puts completed classes in an enrolled-only tab (fixes the 404); "My Classes" back button returns to the right list; "My Requests" hides the list + button while adding/editing; profile validates the phone number live; auto-match surfaces the numeric score. | `PortalLayout` gains `profileHref`; `WeeklyTimetable` moved to `src/components/schedule/` + `hrefFor` prop; new `src/lib/subjects.ts#resolveSubjectSlugs`, `src/components/learner/TutorProfileClassTabs.tsx`; `?from=` param on the learner class-detail route; `GroupedBarChart` reuses `buildProgressTooltipRows` with a `missingLabel` prop; `src/app/api/{classes,search,learner/tutors}` query changes; `TopicRequestManager` edit form lifted out of the card map; `ProfileEditForm` live `normalizeContactInfo` check. New tests in `api/{search,classes,learner/tutors}` + `lib/matching`; 635/635, `tsc`/`lint`/`build` clean. `WeeklyScheduleView`/`deriveWeeklyAvailability` now unused. Not committed. |
 | [1](#part-1) | **Bug fix — Admin "Registration Approvals" crash** | The approvals table crashed on render with `Cannot read properties of undefined (reading 'map')`. | `RegistrationApprovalTable` asked `usePaginatedList` for the wrong response key (`registrations` vs. the API's `users`); fixed the key + kept the URL-prefix arg, and hardened `usePaginatedList` to fall back to `[]` on a key mismatch. |
@@ -2998,4 +2999,23 @@ two call sites are unchanged.
 Tests: new `src/lib/__tests__/csv.test.ts`; added cases to
 `src/app/api/admin/{users,registrations,classes}/__tests__/route.test.ts` (`?gradeLevel`
 filter, `?sort=code`, `nextSessionAt` shape + no leaked `sessions`). `tsc`/`lint`/`build`
-clean, 643/643. Not committed.
+clean, 643/643.
+
+**Follow-up fix (uncommitted):** part 1's `collapsed` state read `localStorage` in the
+`useState` initializer, so a client with stored prefs hydrated against a different SSR tree
+(`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
+post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
+`prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-54"></a>
+## Part 54 — Minimalist scrollbars, app-wide (2026-09-09)
+
+`src/app/globals.css` — a single global rule set styling every scrollbar
+(page, sidebar, tables, modals, code blocks): Firefox `scrollbar-width: thin` +
+`scrollbar-color: <thumb> transparent`; Chromium/Safari `::-webkit-scrollbar`
+8px with a transparent track/corner and a `9999px`-rounded thumb inset by a
+`2px solid transparent` + `background-clip: padding-box` border (so the visible
+pill is ~4px). Thumb colour is `color-mix` of `--color-base-content` at 18%
+(→ 34% on hover), added as `--kt-scrollbar-thumb` / `--kt-scrollbar-thumb-hover`
+tokens on `:root`. CSS only — no TS/component/schema/test change. `build` clean.
+Not committed.

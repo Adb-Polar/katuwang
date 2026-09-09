@@ -614,3 +614,8 @@ Admin portal fixes (Changes.md Part 53)
     -> the menu is fully visible over the card edge, not clipped. Same for a topic row.
     Menu closes on outside-click / Escape / scrolling the list; move up/down, disable,
     and delete (-> confirm dialog) all still work.
+
+Minimalist scrollbars (Changes.md Part 54)
+ [] Scrollable areas (page body, sidebar, wide tables, modals, code blocks) show a
+    thin rounded grey thumb with no visible track in Chrome/Edge and Firefox;
+    thumb darkens slightly on hover. No layout shift where scrollbars appear.

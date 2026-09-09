@@ -62,24 +62,28 @@ export default function PortalLayout({
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Per-group collapse state, persisted per portal. `true` = collapsed. A group
-  // absent from the map falls back to `defaultExpandedGroups`.
+  // absent from the map falls back to `defaultExpandedGroups`. Starts empty so
+  // the first client render matches SSR; the stored prefs load post-mount.
   const navPrefKey = `kt-nav:${portalLabel}`;
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return {};
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [prefsLoaded, setPrefsLoaded] = useState(false);
+  useEffect(() => {
     try {
       const raw = window.localStorage.getItem(navPrefKey);
-      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+      if (raw) setCollapsed(JSON.parse(raw) as Record<string, boolean>);
     } catch {
-      return {};
+      /* private mode / storage disabled — non-fatal */
     }
-  });
+    setPrefsLoaded(true);
+  }, [navPrefKey]);
   useEffect(() => {
+    if (!prefsLoaded) return;
     try {
       window.localStorage.setItem(navPrefKey, JSON.stringify(collapsed));
     } catch {
       /* private mode / storage disabled — non-fatal */
     }
-  }, [navPrefKey, collapsed]);
+  }, [navPrefKey, collapsed, prefsLoaded]);
   const toggleGroup = (name: string) =>
     setCollapsed((cur) => {
       const openByDefault = defaultExpandedGroups?.includes(name) ?? false;

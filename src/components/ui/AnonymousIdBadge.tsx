@@ -29,7 +29,7 @@ export default function AnonymousIdBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]}`}
+      className={`inline-flex items-center text-nowrap rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]}`}
     >
       {showIcon && <ShieldCheck className="w-3 h-3 shrink-0" />}
       {id}

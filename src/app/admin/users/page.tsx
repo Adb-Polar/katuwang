@@ -1,7 +1,8 @@
 import PageHeader from "@/components/ui/PageHeader";
 import UserManagementTable from "@/components/admin/UserManagementTable";
+import { Metadata } from "next";
 
-export const metadata = {
+export const metadata : Metadata = {
   title: "Manage Users | Katuwang",
 };
 
