@@ -588,3 +588,29 @@ Learner portal fixes (Changes.md Part 52)
     non-numeric handle shows no error while typing; Save succeeds.
  [] Auto Match (/learner/match): run a match -> each result card shows a
     "Match <n>" badge and the list is ordered highest-first.
+
+Admin portal fixes (Changes.md Part 53)
+ [] Sidebar (any portal): only the "essential" groups show their items on first load
+    (admin: Main menu + Review; tutor: Main menu + Teaching; learner: Main menu + Tools);
+    other group titles show a collapsed chevron. Click a collapsed group -> expands,
+    chevron rotates. Navigate into a collapsed group's page -> it auto-expands and its
+    toggle is disabled while active. Reload -> manual expand/collapse choices persist.
+    Mobile drawer mirrors the same state.
+ [] /admin dashboard: the 4 top cards have a tinted icon tile and match the tutor
+    dashboard look. In "Needs attention", a count of 0 shows a grey badge; a queue with
+    items (pending registration, open appeal, etc.) shows an amber badge; flagged
+    accounts > 0 shows a red badge. "Active classes" stays grey regardless.
+ [] /admin/users: the new grade-level dropdown filters the list; combine with the
+    role tab + status filter; "All Grade Levels" restores it.
+ [] /admin/registrations: the "ID" column header is a sort button; toggling it orders
+    rows by anonymous ID asc/desc.
+ [] /admin/classes: the "Scheduled" column shows a real date for classes with a session
+    and "—" for classes with none — never "Invalid Date". A "Rows per page" selector is
+    present; changing it to 25/50 reloads with that many rows and updates the URL.
+ [] /admin/reports: "Export CSV" downloads katuwang-report-YYYY-MM-DD.csv; open it ->
+    header `section,label,count`, one row per breakdown entry, `enrollments_total` rows,
+    and 30 `enrollments_by_day` rows. Numbers match the on-page charts.
+ [] /admin/subjects: open a subject row's "⋯" menu near the bottom of the scrolled list
+    -> the menu is fully visible over the card edge, not clipped. Same for a topic row.
+    Menu closes on outside-click / Escape / scrolling the list; move up/down, disable,
+    and delete (-> confirm dialog) all still work.

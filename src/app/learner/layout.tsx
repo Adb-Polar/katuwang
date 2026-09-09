@@ -50,6 +50,7 @@ export default async function LearnerLayout({
       notificationsHref="/learner/notifications"
       helpHref="/learner/help"
       profileHref="/learner/profile"
+      defaultExpandedGroups={["Main menu", "Tools"]}
       chatbotEnabled={chatbotEnabled}
     >
       {children}

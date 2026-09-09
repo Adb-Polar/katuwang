@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { ArrowRight, ScrollText } from "lucide-react";
+import { ArrowRight, ScrollText, Users, GraduationCap, ShieldAlert, CalendarClock } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
@@ -27,6 +27,7 @@ export default async function AdminDashboard() {
     pendingRegistrationCount,
     openQuestionRequestCount,
     openTopicRequestCount,
+    openClassAppealCount,
     recentLogs,
   ] =
     await Promise.all([
@@ -38,6 +39,7 @@ export default async function AdminDashboard() {
       prisma.user.count({ where: { status: "PENDING" } }),
       prisma.questionRequest.count({ where: { status: "OPEN" } }),
       prisma.topicRequest.count({ where: { status: "OPEN" } }),
+      prisma.classAppeal.count({ where: { status: "PENDING" } }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: "desc" },
         take: 8,
@@ -52,13 +54,23 @@ export default async function AdminDashboard() {
       }),
     ]);
 
+  const statCards = [
+    { label: "Learners", value: learnerCount, icon: Users, tint: "bg-primary/10 text-primary" },
+    { label: "Tutors", value: tutorCount, icon: GraduationCap, tint: "bg-accent/10 text-accent" },
+    { label: "Flagged Accounts", value: flaggedAccountCount, icon: ShieldAlert, tint: "bg-error/10 text-error" },
+    { label: "Active Classes", value: activeClassCount, icon: CalendarClock, tint: "bg-success/10 text-success" },
+  ];
+
+  // `tone` drives the count badge colour — only applied when value > 0, except
+  // "Active classes" which is informational and stays neutral.
   const actions = [
-    { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations" },
-    { label: "Pending certifications", value: pendingCertCount, href: "/admin/assessment/certifications" },
-    { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/assessment/requests" },
-    { label: "Open topic requests", value: openTopicRequestCount, href: "/admin/topic-requests" },
-    { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users" },
-    { label: "Active classes", value: activeClassCount, href: "/admin/classes" },
+    { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations", tone: "warning" },
+    { label: "Pending certifications", value: pendingCertCount, href: "/admin/assessment/certifications", tone: "warning" },
+    { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/assessment/requests", tone: "warning" },
+    { label: "Open topic requests", value: openTopicRequestCount, href: "/admin/topic-requests", tone: "warning" },
+    { label: "Open class appeals", value: openClassAppealCount, href: "/admin/class-appeals", tone: "warning" },
+    { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users", tone: "error" },
+    { label: "Active classes", value: activeClassCount, href: "/admin/classes", tone: "neutral" },
   ];
 
   return (
@@ -71,22 +83,20 @@ export default async function AdminDashboard() {
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Learners</span>
-          <span className="kt-stat-value">{learnerCount}</span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Tutors</span>
-          <span className="kt-stat-value">{tutorCount}</span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Flagged Accounts</span>
-          <span className="kt-stat-value">{flaggedAccountCount}</span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Active Classes</span>
-          <span className="kt-stat-value">{activeClassCount}</span>
-        </div>
+        {statCards.map((s) => (
+          <div
+            key={s.label}
+            className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2"
+          >
+            <div>
+              <span className="kt-stat-title">{s.label}</span>
+              <span className="kt-stat-value">{s.value}</span>
+            </div>
+            <span className={`p-2 rounded-lg shrink-0 ${s.tint}`}>
+              <s.icon className="h-4 w-4" />
+            </span>
+          </div>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -136,7 +146,11 @@ export default async function AdminDashboard() {
               >
                 <span>{a.label}</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="kt-badge kt-badge--neutral">{a.value}</span>
+                  <span
+                    className={`kt-badge kt-badge--${a.value > 0 ? a.tone : "neutral"}`}
+                  >
+                    {a.value}
+                  </span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </span>
               </Link>

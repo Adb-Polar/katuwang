@@ -7,10 +7,11 @@ import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-const REG_SORT_COLUMN: Record<string, "createdAt" | "lastName" | "role"> = {
+const REG_SORT_COLUMN: Record<string, "createdAt" | "lastName" | "role" | "anonymousId"> = {
   createdAt: "createdAt",
   name: "lastName",
   role: "role",
+  code: "anonymousId",
 };
 
 // ─── GET: List Accounts Awaiting Approval ─────────────────────────────────────

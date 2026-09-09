@@ -74,6 +74,20 @@ describe("GET /api/admin/users", () => {
     );
   });
 
+  it("filters by grade level when a valid ?gradeLevel is given", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+
+    await GET(makeRequest("?gradeLevel=GRADE_9"));
+    expect(findManyMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: expect.objectContaining({ gradeLevel: "GRADE_9" }) })
+    );
+
+    await GET(makeRequest("?gradeLevel=NOPE"));
+    const where = findManyMock.mock.calls.at(-1)![0].where;
+    expect(where).not.toHaveProperty("gradeLevel");
+  });
+
   it("maps ?sort/?dir to orderBy, ignoring unknown sort keys", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     findManyMock.mockResolvedValue([]);

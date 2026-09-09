@@ -10,8 +10,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Download } from "lucide-react";
 import { BarChartCard, DataTable, useThemeColors } from "@/components/charts";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import { toCsv, downloadCsv } from "@/lib/csv";
 
 interface Breakdown {
   count: number;
@@ -63,12 +65,52 @@ export default function ReportsView() {
     );
   }
 
+  const exportCsv = () => {
+    if (!reports) return;
+    const sections: [string, Breakdown[], string][] = [
+      ["users_by_role", reports.usersByRole, "role"],
+      ["users_by_grade_level", reports.usersByGradeLevel, "gradeLevel"],
+      ["users_by_status", reports.usersByStatus, "status"],
+      ["classes_by_subject", reports.classesBySubject, "subject"],
+      ["classes_by_status", reports.classesByStatus, "status"],
+      ["certifications_by_status", reports.certificationsByStatus, "status"],
+    ];
+    const rows: Record<string, string | number>[] = [];
+    for (const [section, data, labelKey] of sections) {
+      for (const row of data) {
+        rows.push({ section, label: String(row[labelKey] ?? ""), count: row.count });
+      }
+    }
+    rows.push({ section: "enrollments_total", label: "total", count: reports.enrollments.total });
+    rows.push({
+      section: "enrollments_total",
+      label: "last_30_days",
+      count: reports.enrollments.last30Days,
+    });
+    for (const d of reports.enrollments.byDay) {
+      rows.push({ section: "enrollments_by_day", label: d.date, count: d.count });
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCsv(`katuwang-report-${today}.csv`, toCsv(rows, ["section", "label", "count"]));
+  };
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
 
       {reports && (
         <>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={exportCsv}
+              className="btn btn-outline btn-sm gap-1.5 text-xs"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Export CSV
+            </button>
+          </div>
+
           <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto flex-wrap stats-vertical sm:stats-horizontal">
             <div className="stat py-4">
               <div className="stat-title text-2xs">Total Enrollments</div>

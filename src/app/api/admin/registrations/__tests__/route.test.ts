@@ -78,6 +78,17 @@ describe("GET /api/admin/registrations", () => {
     expect(call.where.gradeLevel).toBeUndefined();
   });
 
+  it("sorts by anonymous ID when ?sort=code", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    findManyMock.mockResolvedValue([]);
+    countMock.mockResolvedValue(0);
+
+    await GET(makeRequest("http://localhost/api/admin/registrations?sort=code&dir=desc"));
+    expect(findManyMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ orderBy: { anonymousId: "desc" } })
+    );
+  });
+
   it("applies the q search filter", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     findManyMock.mockResolvedValue([]);

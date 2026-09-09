@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, Trash2 } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -28,43 +29,105 @@ interface MenuItem {
   disabled?: boolean;
 }
 
+const MENU_WIDTH = 176; // matches w-44
+
 /**
- * A `⋯` row menu built on the Popover API so it renders in the top layer and
- * is not clipped by the scrollable list it lives in. `anchorId` must be unique
- * and a valid CSS/HTML identifier.
+ * A `⋯` row menu. The panel is rendered through a portal to `document.body` and
+ * fixed-positioned from the trigger's rect, so it is never clipped by the
+ * scrollable card the row lives in. Closes on outside-click / Escape / scroll.
  */
 function RowMenu({ anchorId, busy, items }: { anchorId: string; busy: boolean; items: MenuItem[] }) {
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+
+  const place = useCallback(() => {
+    const btn = btnRef.current;
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
+    const estHeight = menuRef.current?.offsetHeight ?? items.length * 34 + 12;
+    const below = r.bottom + 4;
+    const flip = below + estHeight > window.innerHeight && r.top - estHeight - 4 > 0;
+    setPos({
+      top: flip ? r.top - estHeight - 4 : below,
+      left: Math.max(8, Math.min(r.right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - 8)),
+    });
+  }, [items.length]);
+
+  // Refine position once the panel has a real measured height.
+  useEffect(() => {
+    if (open) place();
+  }, [open, place]);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    const onDown = (e: MouseEvent) => {
+      if (
+        !menuRef.current?.contains(e.target as Node) &&
+        !btnRef.current?.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+    };
+  }, [open]);
+
   return (
-    <div className="dropdown dropdown-end shrink-0">
+    <div className="shrink-0">
       <button
+        ref={btnRef}
         type="button"
         aria-label="Row actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
         className="btn btn-ghost btn-xs btn-square"
-        popoverTarget={anchorId}
-        style={{ anchorName: `--${anchorId}` } as React.CSSProperties}
+        onClick={() => {
+          if (!open) place();
+          setOpen((v) => !v);
+        }}
       >
         <MoreVertical className="h-3.5 w-3.5" />
       </button>
-      <ul
-        id={anchorId}
-        popover=""
-        className="dropdown-content menu menu-xs w-44 rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg"
-        style={{ positionAnchor: `--${anchorId}` } as React.CSSProperties}
-      >
-        {items.map((it) => (
-          <li key={it.label}>
-            <button
-              type="button"
-              disabled={busy || it.disabled}
-              onClick={it.onClick}
-              className={`gap-2 text-xs ${it.danger ? "text-error" : ""}`}
-            >
-              {it.icon}
-              {it.label}
-            </button>
-          </li>
-        ))}
-      </ul>
+      {open &&
+        createPortal(
+          <ul
+            ref={menuRef}
+            id={anchorId}
+            role="menu"
+            style={{ position: "fixed", top: pos.top, left: pos.left, width: MENU_WIDTH }}
+            className="menu menu-xs z-[60] rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg"
+          >
+            {items.map((it) => (
+              <li key={it.label}>
+                <button
+                  type="button"
+                  disabled={busy || it.disabled}
+                  onClick={() => {
+                    setOpen(false);
+                    it.onClick();
+                  }}
+                  className={`gap-2 text-xs ${it.danger ? "text-error" : ""}`}
+                >
+                  {it.icon}
+                  {it.label}
+                </button>
+              </li>
+            ))}
+          </ul>,
+          document.body,
+        )}
     </div>
   );
 }

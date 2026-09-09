@@ -10,4 +10,8 @@ Admin
     - doesnt have the row number config
   Report
     - add export csv report
-    -
+  Subject and topics
+    - the subject options modal is clipping inside the card put it ontop of it
+    - also the topic option modals clipping inside the card
+Sidebar nav
+  -  group the entries into its category and since the Sidebar is alr scrollable make the sidebar group title expandable and colapsable just default the essentials as expanded

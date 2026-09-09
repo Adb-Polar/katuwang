@@ -29,7 +29,7 @@ interface AdminClass {
   code: string;
   subject: string;
   topics: string[];
-  scheduledAt: string;
+  nextSessionAt: string | null;
   status: ClassLifecycleStatus;
   suspendedReason: string | null;
   suspendedUntil: string | null;
@@ -67,6 +67,8 @@ export default function ClassModerationTable() {
     total,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     loading,
     error,
     setError,
@@ -200,12 +202,14 @@ export default function ClassModerationTable() {
                           </div>
                         </td>
                         <td className="text-base-content/60">
-                          {new Date(c.scheduledAt).toLocaleDateString(undefined, {
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                          {c.nextSessionAt
+                            ? new Date(c.nextSessionAt).toLocaleDateString(undefined, {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })
+                            : "—"}
                         </td>
                         <td className="text-base-content/60">{c._count.enrollments}</td>
                         <td>
@@ -271,7 +275,13 @@ export default function ClassModerationTable() {
             </div>
           )}
 
-          <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
+          <Pagination
+            page={page}
+            pageSize={pageSize}
+            total={total}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+          />
         </div>
       </section>
 

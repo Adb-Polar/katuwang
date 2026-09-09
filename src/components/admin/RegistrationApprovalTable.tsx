@@ -50,7 +50,7 @@ export default function RegistrationApprovalTable() {
   const [declineTarget, setDeclineTarget] = useState<PendingUser | null>(null);
   const [reason, setReason] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
-  const { sort, dir, toggle } = useTableSort("createdAt", "asc", { name: "asc", role: "asc" });
+  const { sort, dir, toggle } = useTableSort("createdAt", "asc", { name: "asc", role: "asc", code: "asc" });
 
   const {
     data: users,
@@ -156,7 +156,7 @@ export default function RegistrationApprovalTable() {
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
-                    <th>ID</th>
+                    <SortableTh label="ID" field="code" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
                     <SortableTh label="Role" field="role" sort={sort} dir={dir} onSort={toggle} />

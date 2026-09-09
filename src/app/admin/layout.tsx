@@ -60,6 +60,7 @@ export default async function AdminLayout({
       unreadCount={unreadCount}
       notificationsHref="/admin/notifications"
       helpHref="/admin/help"
+      defaultExpandedGroups={["Main menu", "Review"]}
       chatbotEnabled={chatbotEnabled}
     >
       {children}

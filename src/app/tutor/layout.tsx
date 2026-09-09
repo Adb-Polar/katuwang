@@ -48,6 +48,7 @@ export default async function TutorLayout({
       notificationsHref="/tutor/notifications"
       helpHref="/tutor/help"
       profileHref="/tutor/profile"
+      defaultExpandedGroups={["Main menu", "Teaching"]}
       chatbotEnabled={chatbotEnabled}
     >
       {children}

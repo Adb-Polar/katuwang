@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [53](#part-53) | **Admin portal fixes (`docs/plans/admin-portal-fixes.txt`)** | 7-part admin polish: collapsible sidebar nav groups (persisted per portal, essentials expanded, active group auto-open); admin dashboard stat cards restyled to the tutor pattern + "needs attention" badges go amber/red only when the count is > 0 (added an "Open class appeals" row); grade-level filter on the Users list; sortable "ID" column on Registrations; Classes list showed `Invalid Date` (class has no `scheduledAt` — now a derived `nextSessionAt` with a "—" fallback) and gained a rows-per-page selector; Reports gained an "Export CSV" button; the Subjects/Topics row "⋯" menu was clipped by the card's `overflow` — now portalled to `document.body` and fixed-positioned. | `PortalLayout` `defaultExpandedGroups` prop + `localStorage["kt-nav:<portal>"]` collapse state + `.kt-nav-group-toggle`/`.kt-nav-chev` CSS; `src/app/admin/page.tsx` `statCards`/`actions` with `tone`; `GradeLevel` added to `GET /api/admin/users` + a `<select>` in `UserManagementTable`; `code→anonymousId` in `REG_SORT_COLUMN` + `<SortableTh field="code">`; `GET /api/admin/classes` maps `nextSessionAt` and stops leaking `sessions`, `ClassModerationTable` renders it + wires `onPageSizeChange`; new `src/lib/csv.ts` (`toCsv` RFC-4180 + `downloadCsv`) used by `ReportsView`; `RowMenu` in `SubjectTopicManager` rewritten with `createPortal` + `getBoundingClientRect` + outside-click/Escape/scroll close. New `src/lib/__tests__/csv.test.ts`; route-test cases for `?gradeLevel`, `?sort=code`, `nextSessionAt`. `tsc`/`lint`/`build` clean, 643/643. Not committed. |
 | [52](#part-52) | **Learner portal fixes (`docs/plans/leaner-portal-fixes.txt`)** | 10-part usability pass on the learner portal: topbar avatar links to the profile; progress-chart hover card null-safe + pre-before-post everywhere; learner dashboard restyled to match the tutor's (colored stat cards, bordered upcoming tiles, "This week" grid); browse + global search now match subject *names*, and global search gains a scope selector (Everything / Tutor code / Subject / Topic / Class code); "Find Tutors" cards show verified-class badges + a multi-select subject filter; tutor profile uses the weekly timetable, hides suspended/banned classes from non-enrollees, and puts completed classes in an enrolled-only tab (fixes the 404); "My Classes" back button returns to the right list; "My Requests" hides the list + button while adding/editing; profile validates the phone number live; auto-match surfaces the numeric score. | `PortalLayout` gains `profileHref`; `WeeklyTimetable` moved to `src/components/schedule/` + `hrefFor` prop; new `src/lib/subjects.ts#resolveSubjectSlugs`, `src/components/learner/TutorProfileClassTabs.tsx`; `?from=` param on the learner class-detail route; `GroupedBarChart` reuses `buildProgressTooltipRows` with a `missingLabel` prop; `src/app/api/{classes,search,learner/tutors}` query changes; `TopicRequestManager` edit form lifted out of the card map; `ProfileEditForm` live `normalizeContactInfo` check. New tests in `api/{search,classes,learner/tutors}` + `lib/matching`; 635/635, `tsc`/`lint`/`build` clean. `WeeklyScheduleView`/`deriveWeeklyAvailability` now unused. Not committed. |
 | [1](#part-1) | **Bug fix — Admin "Registration Approvals" crash** | The approvals table crashed on render with `Cannot read properties of undefined (reading 'map')`. | `RegistrationApprovalTable` asked `usePaginatedList` for the wrong response key (`registrations` vs. the API's `users`); fixed the key + kept the URL-prefix arg, and hardened `usePaginatedList` to fall back to `[]` on a key mismatch. |
 | [2](#part-2) | **Assessment-taking system (question bank + auto-graded quizzes)** | Replaces the manual "request assessment → admin certifies" flow with a real auto-graded single-answer MCQ quiz backed by an admin-managed, per-topic question bank; passing either auto-certifies or creates a PENDING certification for admin confirmation. | 6 new Prisma models + 2 enums (additive migration `20260902052746_assessment_question_bank`); new libs (`assessmentConfig`, `assessmentPicker`, `assessmentStatus`, `assessmentSerialize`, `validations/assessment`); ~15 new API routes under `admin/assessment-*`, `admin/question-requests`, `tutor/assessments`, `tutor/question-requests`; new Admin "Question Bank" portal (`QuestionBankManager`) + tutor quiz runner (`AssessmentQuizRunner`); new platform setting `autoCertifyOnAssessmentPass` (default OFF); seed generator (645 bank questions); 8 new Vitest files. |
@@ -2936,3 +2937,65 @@ returned `score` sequence is non-increasing.
 New/updated tests: `api/search`, `api/classes`, `api/learner/tutors`,
 `lib/matching`. `tsc`/`lint`/`build` clean, 635/635. `WeeklyScheduleView` and
 `deriveWeeklyAvailability` are now unused (left in place). Not committed.
+
+<a id="part-53"></a>
+## Part 53 — Admin portal fixes (`docs/plans/admin-portal-fixes.txt`) (2026-09-09)
+
+Seven independent parts.
+
+**1 — Collapsible sidebar nav groups.** `PortalLayout` (`src/components/layout/PortalLayout.tsx`)
+gains a `defaultExpandedGroups?: string[]` prop. Each `.kt-nav-label` `<span>` becomes a
+`<button className="kt-nav-label kt-nav-group-toggle">` with a rotating `ChevronDown`; a
+group's items render only when open. Open = in `defaultExpandedGroups`, or user-toggled open,
+or contains the active route (force-open, toggle disabled). Collapse state is a
+`Record<string,boolean>` persisted to `localStorage["kt-nav:" + portalLabel]` (lazy-init +
+`useEffect` write, guarded). Layouts pass: admin `["Main menu","Review"]`, tutor
+`["Main menu","Teaching"]`, learner `["Main menu","Tools"]`. New CSS `.kt-nav-group-toggle` /
+`.kt-nav-chev` in `globals.css`. One `navTree` variable feeds both the desktop aside and the
+mobile drawer, so they stay in sync.
+
+**2 — Admin dashboard.** `src/app/admin/page.tsx`: the 4 top stat cards move to the
+tutor/learner pattern (`kt-stat p-4 flex-row items-start justify-between gap-2` + a tinted
+lucide icon tile — Users/GraduationCap/ShieldAlert/CalendarClock). Each "Needs attention"
+row gets a `tone`; the count badge renders `kt-badge--<tone>` only when `value > 0`, else
+`--neutral`. Queue rows (registrations, certifications, question/topic requests, class
+appeals) are `warning`; flagged accounts `error`; active classes always neutral. Added a
+`prisma.classAppeal.count({ where: { status: "PENDING" } })` and an "Open class appeals" row.
+
+**3 — Users: filter by grade.** `GET /api/admin/users` imports `GradeLevel`, parses
+`?gradeLevel`, and adds `{ gradeLevel }` to `where` when valid. `UserManagementTable` adds a
+`gradeFilter` state + a `GRADE_LEVELS` `<select>` next to the status filter, passed into the
+`usePaginatedList` params.
+
+**4 — Registration: sortable "ID" column.** `REG_SORT_COLUMN` in
+`GET /api/admin/registrations` gains `code: "anonymousId"`. `RegistrationApprovalTable`
+replaces `<th>ID</th>` with `<SortableTh label="ID" field="code">` and adds `code: "asc"` to
+the `useTableSort` default-dir map.
+
+**5 — Classes: `Invalid Date` + rows-per-page.** `TutorClass` has no `scheduledAt`, so the
+table's `new Date(c.scheduledAt)` was always `Invalid Date`. `GET /api/admin/classes` now
+derives `nextSessionAt` (first upcoming SCHEDULED session → earliest session → `null`) per
+class and omits the raw `sessions` array from the payload. `ClassModerationTable`:
+`scheduledAt` → `nextSessionAt: string | null`, cell renders it or `"—"`; destructures
+`pageSize`/`setPageSize` and passes `onPageSizeChange` so the "Rows per page" `<select>`
+(10/25/50/100) appears.
+
+**6 — Reports: Export CSV.** New `src/lib/csv.ts` — `toCsv(rows, headers?)` (RFC-4180, every
+field quoted, `"`-doubled, CRLF) + `downloadCsv(filename, csv)` (Blob → object URL →
+transient `<a download>`). `ReportsView` adds an "Export CSV" button that flattens the 6
+breakdowns + enrollment totals + `byDay` into one long-format file
+(`section,label,count`), `katuwang-report-YYYY-MM-DD.csv`. Unit test
+`src/lib/__tests__/csv.test.ts`.
+
+**7 — Subjects & Topics: un-clip the row menu.** `RowMenu` in `SubjectTopicManager.tsx` used
+the Popover API + CSS anchor positioning and was clipped by the card's `overflow-hidden` /
+`overflow-y-auto` wrappers. Rewritten to manage its own `open` state and render the panel via
+`createPortal(<ul>, document.body)` with `position: fixed` coords from the trigger's
+`getBoundingClientRect()` (right-aligned, flips above near the viewport bottom). Closes on
+outside `mousedown` / `Escape` / `scroll` (capture) / `resize`. Same `MenuItem[]` API — the
+two call sites are unchanged.
+
+Tests: new `src/lib/__tests__/csv.test.ts`; added cases to
+`src/app/api/admin/{users,registrations,classes}/__tests__/route.test.ts` (`?gradeLevel`
+filter, `?sort=code`, `nextSessionAt` shape + no leaked `sessions`). `tsc`/`lint`/`build`
+clean, 643/643. Not committed.

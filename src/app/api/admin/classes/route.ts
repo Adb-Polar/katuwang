@@ -67,12 +67,23 @@ export async function GET(req: NextRequest) {
       prisma.tutorClass.count({ where }),
     ]);
 
+    const now = new Date();
     return NextResponse.json({
-      classes: classes.map(({ tutorProfile, topics, ...c }) => ({
-        ...c,
-        topics: topics.map((t) => t.topic),
-        tutor: tutorProfile.user,
-      })),
+      classes: classes.map(({ tutorProfile, topics, sessions = [], ...c }) => {
+        const nextUpcoming = sessions.find(
+          (s) => s.status === "SCHEDULED" && s.scheduledAt > now,
+        );
+        return {
+          ...c,
+          topics: topics.map((t) => t.topic),
+          tutor: tutorProfile.user,
+          // First upcoming scheduled session, else the earliest session, else null.
+          nextSessionAt:
+            nextUpcoming?.scheduledAt.toISOString() ??
+            sessions[0]?.scheduledAt.toISOString() ??
+            null,
+        };
+      }),
       total,
       page,
       pageSize,

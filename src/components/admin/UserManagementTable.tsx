@@ -12,6 +12,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 const PAGE_SIZE = 10;
 
@@ -60,6 +61,7 @@ export default function UserManagementTable() {
   const [activeTab, setActiveTab] = useState<"all" | "learners" | "tutors">("all");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<AccountStatus | "">("");
+  const [gradeFilter, setGradeFilter] = useState<GradeLevel | "">("");
   const [target, setTarget] = useState<AdminUser | null>(null);
   const [status, setStatus] = useState<AccountStatus>("ACTIVE");
   const [reason, setReason] = useState("");
@@ -84,6 +86,7 @@ export default function UserManagementTable() {
     {
       ...(TAB_ROLE[activeTab] ? { role: TAB_ROLE[activeTab] } : {}),
       ...(statusFilter ? { status: statusFilter } : {}),
+      ...(gradeFilter ? { gradeLevel: gradeFilter } : {}),
       ...(search.trim() ? { q: search.trim() } : {}),
       sort,
       dir,
@@ -170,6 +173,18 @@ export default function UserManagementTable() {
               <option value="SUSPENDED">Suspended</option>
               <option value="BANNED">Banned</option>
               <option value="DECLINED">Declined</option>
+            </select>
+            <select
+              value={gradeFilter}
+              onChange={(e) => setGradeFilter(e.target.value as GradeLevel | "")}
+              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+            >
+              <option value="">All Grade Levels</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
             </select>
           </div>
 

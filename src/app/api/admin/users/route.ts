@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Prisma, Role, AccountStatus } from "@prisma/client";
+import { Prisma, Role, AccountStatus, GradeLevel } from "@prisma/client";
 import { parseSort } from "@/lib/sortParams";
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
     const q = searchParams.get("q")?.trim() || "";
     const role = searchParams.get("role");
     const status = searchParams.get("status");
+    const gradeLevel = searchParams.get("gradeLevel");
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
     const { sort, dir } = parseSort(searchParams, Object.keys(USER_SORT_COLUMN), "createdAt");
@@ -42,6 +43,7 @@ export async function GET(req: NextRequest) {
       ...(status && status in AccountStatus
         ? { status: status as AccountStatus }
         : { status: { not: "DECLINED" } }),
+      ...(gradeLevel && gradeLevel in GradeLevel ? { gradeLevel: gradeLevel as GradeLevel } : {}),
       ...(q
         ? {
             OR: [

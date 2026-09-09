@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HelpCircle, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, HelpCircle, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -36,6 +36,8 @@ interface PortalLayoutProps {
   helpHref?: string;
   /** portal-specific profile page, e.g. "/learner/profile"; makes the topbar avatar a link */
   profileHref?: string;
+  /** sidebar groups expanded by default; every other group starts collapsed */
+  defaultExpandedGroups?: string[];
   /** when true, mounts the floating intent-based help assistant */
   chatbotEnabled?: boolean;
   children: React.ReactNode;
@@ -52,11 +54,38 @@ export default function PortalLayout({
   notificationsHref = "/dashboard",
   helpHref,
   profileHref,
+  defaultExpandedGroups,
   chatbotEnabled = false,
   children,
 }: PortalLayoutProps) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Per-group collapse state, persisted per portal. `true` = collapsed. A group
+  // absent from the map falls back to `defaultExpandedGroups`.
+  const navPrefKey = `kt-nav:${portalLabel}`;
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem(navPrefKey);
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
+    } catch {
+      return {};
+    }
+  });
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(navPrefKey, JSON.stringify(collapsed));
+    } catch {
+      /* private mode / storage disabled — non-fatal */
+    }
+  }, [navPrefKey, collapsed]);
+  const toggleGroup = (name: string) =>
+    setCollapsed((cur) => {
+      const openByDefault = defaultExpandedGroups?.includes(name) ?? false;
+      const currentlyOpen = name in cur ? !cur[name] : openByDefault;
+      return { ...cur, [name]: currentlyOpen }; // store the collapsed flag = was open
+    });
 
   // Close the mobile drawer on navigation (adjust state during render — no effect).
   const [lastPathname, setLastPathname] = useState(pathname);
@@ -95,28 +124,51 @@ export default function PortalLayout({
     g.items.push(item);
   }
 
+  const isGroupOpen = (g: { name: string; items: NavItem[] }) => {
+    // The group holding the current page is always shown, regardless of state.
+    if (g.items.some((i) => isActive(i.href))) return true;
+    if (g.name in collapsed) return !collapsed[g.name];
+    return defaultExpandedGroups?.includes(g.name) ?? false;
+  };
+
   const navTree = (
     <nav className="flex flex-col gap-4">
-      {groups.map((g) => (
-        <div key={g.name} className="flex flex-col gap-0.5">
-          <span className="kt-nav-label">{g.name}</span>
-          {g.items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              data-active={isActive(item.href) ? "true" : "false"}
-              aria-current={isActive(item.href) ? "page" : undefined}
-              className="kt-nav-item"
+      {groups.map((g) => {
+        const open = isGroupOpen(g);
+        const hasActive = g.items.some((i) => isActive(i.href));
+        return (
+          <div key={g.name} className="flex flex-col gap-0.5">
+            <button
+              type="button"
+              className="kt-nav-label kt-nav-group-toggle"
+              aria-expanded={open}
+              disabled={hasActive}
+              onClick={() => toggleGroup(g.name)}
             >
-              <span className="kt-ic">{item.icon}</span>
-              {item.label}
-              {!!item.badge && item.badge > 0 && (
-                <span className="badge badge-error badge-xs ml-auto">{item.badge > 99 ? "99+" : item.badge}</span>
-              )}
-            </Link>
-          ))}
-        </div>
-      ))}
+              {g.name}
+              <ChevronDown className={`kt-nav-chev ${open ? "" : "-rotate-90"}`} aria-hidden="true" />
+            </button>
+            {open &&
+              g.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  data-active={isActive(item.href) ? "true" : "false"}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className="kt-nav-item"
+                >
+                  <span className="kt-ic">{item.icon}</span>
+                  {item.label}
+                  {!!item.badge && item.badge > 0 && (
+                    <span className="badge badge-error badge-xs ml-auto">
+                      {item.badge > 99 ? "99+" : item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+          </div>
+        );
+      })}
     </nav>
   );
 

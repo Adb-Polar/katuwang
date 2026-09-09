@@ -35,13 +35,18 @@ describe("GET /api/admin/classes", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 200 with flattened topics/tutor and pagination metadata", async () => {
+  it("returns 200 with flattened topics/tutor, nextSessionAt, and pagination metadata", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    const upcoming = new Date(Date.now() + 3 * 86_400_000);
     findManyMock.mockResolvedValue([
       {
         id: "c1",
         subject: "MATH",
         topics: [{ id: "t1", classId: "c1", topic: "Algebraic Expressions" }],
+        sessions: [
+          { id: "s1", status: "COMPLETED", scheduledAt: new Date(Date.now() - 86_400_000) },
+          { id: "s2", status: "SCHEDULED", scheduledAt: upcoming },
+        ],
         tutorProfile: { user: { id: "t1", anonymousId: "TUT-0001", firstName: "Maria", lastName: "Santos" } },
         _count: { enrollments: 2 },
       },
@@ -59,8 +64,28 @@ describe("GET /api/admin/classes", () => {
         topics: ["Algebraic Expressions"],
         tutor: { id: "t1", anonymousId: "TUT-0001", firstName: "Maria", lastName: "Santos" },
         _count: { enrollments: 2 },
+        nextSessionAt: upcoming.toISOString(),
       },
     ]);
+    // The raw sessions array is not leaked to the client.
+    expect(json.classes[0]).not.toHaveProperty("sessions");
+  });
+
+  it("nextSessionAt is null when a class has no sessions", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    findManyMock.mockResolvedValue([
+      {
+        id: "c2",
+        subject: "SCIENCE",
+        topics: [],
+        sessions: [],
+        tutorProfile: { user: { id: "t2", anonymousId: "TUT-0002", firstName: "A", lastName: "B" } },
+        _count: { enrollments: 0 },
+      },
+    ]);
+    countMock.mockResolvedValue(1);
+    const json = await (await GET(makeRequest())).json();
+    expect(json.classes[0].nextSessionAt).toBeNull();
   });
 
   it("filters by subject and status when provided", async () => {
