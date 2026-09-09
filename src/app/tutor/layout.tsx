@@ -47,6 +47,7 @@ export default async function TutorLayout({
       unreadCount={unreadCount}
       notificationsHref="/tutor/notifications"
       helpHref="/tutor/help"
+      profileHref="/tutor/profile"
       chatbotEnabled={chatbotEnabled}
     >
       {children}

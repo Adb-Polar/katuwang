@@ -126,6 +126,20 @@ describe("rankMatches", () => {
     expect(ranked.map((r) => r.class.id)).toEqual(["strong", "weak"]);
   });
 
+  it("returns results ordered by score, highest first", () => {
+    const criteria = { subject: "MATH" as const, topics: ["Algebraic Expressions", "Trigonometry"] };
+    const classes: ClassForMatching[] = [
+      mkClass({ id: "a", topics: ["Algebraic Expressions"] }),
+      mkClass({ id: "b", topics: ["Algebraic Expressions", "Trigonometry"], verifiedTopics: ["Trigonometry"] }),
+      mkClass({ id: "c", topics: ["Trigonometry"], gradeLevel: "GRADE_12" }),
+    ];
+    const scores = rankMatches(criteria, classes, NOW).map((r) => r.score);
+    expect(scores.length).toBeGreaterThan(1);
+    for (let i = 1; i < scores.length; i++) {
+      expect(scores[i - 1]).toBeGreaterThanOrEqual(scores[i]);
+    }
+  });
+
   it("prefers the class whose next session is sooner", () => {
     const classes: ClassForMatching[] = [
       mkClass({ id: "later", sessions: [{ scheduledAt: daysFromNow(9), duration: 60, status: "SCHEDULED" }] }),

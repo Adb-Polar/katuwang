@@ -1,0 +1,123 @@
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 50, "rankSpacing": 70}} }%%
+flowchart TB
+    %% ================= Katuwang — Level 1 DFD =================
+    %% ["…"] external entity    (("…")) process    [( "…" )] data store
+    %% All seven processes additionally write notification rows to DS10
+    %% (three representative flows drawn; the rest omitted for clarity).
+    %% The chatbot assistant and fine-grained admin actions decompose at Level 2.
+
+    L["Student<br/>Learner"]
+    T["Student<br/>Tutor"]
+    A["Administrator"]
+    MAIL["Email / SMTP<br/>Service"]
+
+    P1(("1.0<br/>Registration &amp;<br/>Authentication"))
+    P2(("2.0<br/>Account &amp; Platform<br/>Administration"))
+    P3(("3.0<br/>Tutor Topic<br/>Certification"))
+    P4(("4.0<br/>Class &amp; Session<br/>Management"))
+    P5(("5.0<br/>Class Discovery<br/>&amp; Enrolment"))
+    P6(("6.0<br/>Class<br/>Requests"))
+    P7(("7.0<br/>Session Pre/Post<br/>Testing"))
+    P8(("8.0<br/>Notification<br/>Delivery"))
+
+    DS1[("DS1 · Users &amp; Tutor Profiles")]
+    DS2[("DS2 · Subjects &amp; Topics")]
+    DS3[("DS3 · Topic Certifications")]
+    DS4[("DS4 · Question Bank &amp; Attempts")]
+    DS5[("DS5 · Tutor Classes &amp; Sessions")]
+    DS6[("DS6 · Class Enrolments")]
+    DS7[("DS7 · Class Requests")]
+    DS8[("DS8 · Session Tests &amp; Attempts")]
+    DS9[("DS9 · Class Appeals")]
+    DS10[("DS10 · Notifications")]
+    DS11[("DS11 · Audit Log")]
+    DS12[("DS12 · Platform &amp; Assessment Settings")]
+
+    %% ---- 1.0 Registration & Authentication ----
+    L -->|"registration / login / forgot-password"| P1
+    T -->|"tutor application / login"| P1
+    DS1 -->|"credential &amp; status check"| P1
+    P1 -->|"account (tutor = PENDING) + anonymous ID"| DS1
+    P1 -->|"reset link / recovery mail"| MAIL
+    P1 -->|"session (JWT) + anonymous ID"| L
+    P1 -->|"session (JWT) + anonymous ID"| T
+
+    %% ---- 2.0 Account & Platform Administration ----
+    A -->|"registration / account / class / appeal decisions"| P2
+    A -->|"question bank, assessment config, settings, catalogue"| P2
+    A -->|"report &amp; audit queries"| P2
+    DS1 -->|"registration &amp; account queue"| P2
+    DS5 -->|"class review queue &amp; metrics"| P2
+    DS11 -->|"action history"| P2
+    P2 -->|"status ACTIVE / DECLINED / SUSPENDED / BANNED"| DS1
+    P2 -->|"subject &amp; topic catalogue"| DS2
+    P2 -->|"bank questions + options"| DS4
+    P2 -->|"class status + reason"| DS5
+    P2 -->|"appeal outcome"| DS9
+    P2 -->|"platform + assessment config"| DS12
+    P2 -->|"moderation action record"| DS11
+    P2 -->|"review queues, reports, audit log"| A
+
+    %% ---- 3.0 Tutor Topic Certification ----
+    T -->|"certification request + quiz answers"| P3
+    A -->|"certify / reject + note"| P3
+    DS4 -->|"question set (origin = BANK)"| P3
+    DS12 -->|"pass % + attempt limit"| P3
+    P3 -->|"attempt + graded items"| DS4
+    P3 -->|"row PENDING &rarr; CERTIFIED / REJECTED"| DS3
+    P3 -->|"qualifying quiz + result"| T
+    P3 -->|"certification-decided notice"| DS10
+
+    %% ---- 4.0 Class & Session Management ----
+    T -->|"class + session definitions"| P4
+    DS3 -->|"eligibility: CERTIFIED per topic"| P4
+    DS2 -->|"valid subject / topic"| P4
+    DS6 -->|"roster"| P4
+    P4 -->|"classes + class-topics + sessions"| DS5
+    P4 -->|"roster (anonymised)"| T
+
+    %% ---- 5.0 Class Discovery & Enrolment ----
+    L -->|"browse / search / auto-match + enrol request"| P5
+    DS5 -->|"open classes + capacity + status"| P5
+    DS2 -->|"subject / topic list"| P5
+    DS1 -->|"tutor directory (anonymised)"| P5
+    P5 -->|"ranked classes / matches / directory"| L
+    P5 -->|"enrol / withdraw row"| DS6
+    P5 -->|"new-enrolment notice"| DS10
+
+    %% ---- 6.0 Class Requests ----
+    L -->|"class request (topics + availability slots)"| P6
+    T -->|"accept + attach a class"| P6
+    A -->|"request moderation (hide / remove)"| P6
+    DS7 -->|"open / directed requests"| P6
+    P6 -->|"request + topics + slots ; status FULFILLED"| DS7
+    P6 -->|"class created from request"| DS5
+    P6 -->|"matching open requests"| T
+    P6 -->|"class-request-accepted notice"| DS10
+
+    %% ---- 7.0 Session Pre/Post Testing ----
+    T -->|"session-test definition + question set"| P7
+    L -->|"PRE answers / POST answers"| P7
+    A -->|"read-only results view"| P7
+    DS4 -->|"selected bank questions"| P7
+    DS5 -->|"session lifecycle (PRE on publish, POST on COMPLETED)"| P7
+    DS6 -->|"enrolment check"| P7
+    P7 -->|"tests + attempts (kind PRE / POST)"| DS8
+    P7 -->|"score + feedback + progress delta"| L
+    P7 -->|"class pre &rarr; post results (anonymised)"| T
+
+    %% ---- 8.0 Notification Delivery ----
+    DS10 -->|"unread rows"| P8
+    L -->|"fetch / mark read"| P8
+    T -->|"fetch / mark read"| P8
+    A -->|"fetch / mark read"| P8
+    P8 -->|"unread list + badge"| L
+    P8 -->|"unread list + badge"| T
+    P8 -->|"unread list + badge"| A
+
+    classDef ext fill:#F4F5F7,stroke:#5B5B66,stroke-width:1.5px,color:#1B1B1F;
+    classDef proc fill:#EEF3FE,stroke:#2F6FED,stroke-width:2.5px,color:#1E4CA8;
+    classDef store fill:#FCF3E6,stroke:#E88C30,stroke-width:1.3px,color:#1B1B1F;
+    class L,T,A,MAIL ext;
+    class P1,P2,P3,P4,P5,P6,P7,P8 proc;
+    class DS1,DS2,DS3,DS4,DS5,DS6,DS7,DS8,DS9,DS10,DS11,DS12 store;

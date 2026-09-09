@@ -1,0 +1,39 @@
+%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 60, "rankSpacing": 130}} }%%
+flowchart LR
+    %% ===== Katuwang — Context Diagram (Level 0 DFD) =====
+
+    L["Student<br/>Learner"]
+    T["Student<br/>Tutor"]
+    A["Administrator"]
+    M["Email / SMTP<br/>Service"]
+
+    P(("0<br/>Katuwang<br/>Peer Tutoring<br/>Platform"))
+
+    %% ---- Learner ----
+    L ==>|"registration, login &amp; profile edits"| P
+    L ==>|"browse, match, enrol &amp; class requests"| P
+    L ==>|"pre/post-test answers &amp; chatbot messages"| P
+    P ==>|"anonymous ID, session, class list, matches &amp; schedule"| L
+    P ==>|"test scores, progress deltas, replies &amp; notifications"| L
+
+    %% ---- Tutor ----
+    T ==>|"application, login &amp; certification quiz answers"| P
+    T ==>|"class, session &amp; session-test definitions"| P
+    T ==>|"class-request acceptance &amp; class appeals"| P
+    P ==>|"approval, anonymous ID, qualifying quiz &amp; certification result"| T
+    P ==>|"roster, session-test results, appeal decisions &amp; notifications"| T
+
+    %% ---- Admin ----
+    A ==>|"registration, account, class &amp; appeal decisions"| P
+    A ==>|"certification review, question bank &amp; assessment config"| P
+    A ==>|"platform settings &amp; report queries"| P
+    P ==>|"review queues, aggregate reports &amp; audit log"| A
+    P ==>|"moderation outcomes &amp; notifications"| A
+
+    %% ---- Email ----
+    P ==>|"password-reset link &amp; account-recovery mail"| M
+
+    classDef ext fill:#F4F5F7,stroke:#5B5B66,stroke-width:1.5px,color:#1B1B1F;
+    classDef proc fill:#EEF3FE,stroke:#2F6FED,stroke-width:2.5px,color:#1E4CA8;
+    class L,T,A,M ext;
+    class P proc;

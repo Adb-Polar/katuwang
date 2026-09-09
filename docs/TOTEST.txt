@@ -116,6 +116,56 @@ fixes.md Phase 6 (Changes.md Part 44)
  [] Filing a second appeal while one is pending still 409s and sends no
     notification
 
+UI fix (Changes.md Part 45)
+ [] /tutor dashboard: each of the 4 stat cards shows the label on its own
+    line, the number below it, and the tinted icon top-right — not all three
+    on one line. Check the learner + admin dashboards look right too.
+
+Seed — session-test charts (Changes.md Part 46)
+ [] Run `pnpm exec tsx prisma/seed.ts` then
+    `pnpm exec tsx prisma/seed-session-tests.ts` — completes with no error and
+    prints the summary.
+ [] Chart (a): log in as demo@tutor.test -> /tutor/classes -> demo MATH class
+    -> Progress panel shows 5 sessions with pre+post bars, S4 with a pre bar
+    only, and no bar/gap for the future session (S6).
+ [] Chart (b): log in as demo@learner.test -> /learner/progress -> the area
+    chart has a point per session, dips at the S2 regression, and handles the
+    S4 null-post gracefully; "Avg gain" stat is non-null.
+ [] Chart (c): tutor -> demo class -> session 1 "View results" -> the
+    per-question correct-rate chart has 6 columns with differing pre/post bars.
+ [] Chart (d): tutor -> demo class -> session 2 results -> DeltaBar shows at
+    least one positive, one negative and one zero bar; session 3 results show
+    "—" (null) delta rows for learners who skipped the post-test.
+ [] Re-run seed-session-tests.ts a second time -> still succeeds, no duplicate
+    sessions/tests/questions, roster count unchanged.
+
+Chart fix — pre-vs-post charts, duplicate-label + order (Changes.md Part 47)
+ [Good] /learner/progress as demo@learner.test: hovering the 4th point (pre-only
+    "Linear Equations & Inequalities") shows "Pre-test: 33%" then
+    "Post-test: not taken yet" — verified live in-browser. Each of the 5
+    points now shows its OWN row (was collapsing duplicate topic labels).
+ [Good] Legend + tooltip list Pre-test before Post-test.
+ [] Tutor chart (a) — /tutor/classes -> C-0012 (demo MATH class, has 3
+    "Algebraic Expressions" + 2 "Linear Equations" sessions) -> Progress
+    panel: each bar group is its own session (duplicates not merged), the
+    x-axis still shows readable topic labels, S4 has a pre bar but no post
+    bar, and the tooltip labels match the hovered bar.
+ [] Tutor chart (c) per-question rate ("Q1".."Q6"): unchanged — labels were
+    already unique; confirm nothing regressed.
+
+Dev Chart Lab (Changes.md Part 48)
+ [] /dev/charts loads (dev only; 404 in a production build). "Chart Lab ->"
+    link on /dev works; "<- Dev Tools" link back works.
+ [] Edit a pre/post cell -> all three charts (a/b/d) update live. Blank the
+    post cell of a row -> chart (a) drops that post bar, chart (b) shows a
+    gap, chart (d) shows "-" for that row. No console errors.
+ [] Scenario buttons swap the dataset: "Duplicate labels" -> 3 distinct bars
+    (not merged) and NO "two children with the same key" console error;
+    "Empty" -> every chart shows its empty hint; "Negative & zero deltas" ->
+    DeltaBar shows a down bar, a zero, and up bars.
+ [] Per-question editor drives chart (c); single-series editor drives the
+    BarChartCard.
+
 Admin (2026-09-03 session)
  [] Question bank drill-down: subject list -> topic list -> questions table;
     breadcrumb "Back" + crumbs navigate back up (Changes.md Part 11)
@@ -478,3 +528,63 @@ Class appeal moved to class detail page (Changes.md Part 33)
     the detail page.
  [] The edit page still shows the moderation panel for a locked class, now with
     a "go back to the class page" link instead of the appeal form.
+
+M01 group presentation deck (Changes.md Part 49)
+ [] Open docs/to-submit/m01-presentation/Katuwang_M01_System-Design-Refinement.pptx
+    in PowerPoint / Google Slides -> all 16 slides render, no overflow text,
+    speaker notes present on slides 1-16.
+ [] Architecture (slide 4), Context DFD (slide 10) and Level 1 DFD (slide 11)
+    connectors read cleanly after opening in the real editor; nudge shapes if
+    LibreOffice-style connector routing looks crossed.
+ [] Replace R2 / R3 placeholder rows (slides 3 and 14) with the team's actual
+    Capstone 1 panel recommendations, or delete them if the panel gave only
+    the tutor-certification recommendation.
+ [] Add the 3 UI screenshots (tutor "not certified" gate, certification
+    PENDING state, learner class-browser empty state) into slide 9 from the
+    running app (pnpm dev + seed accounts); save copies under assets/ui/.
+ [] Fill the Group Identification details on slide 1 (group number + member
+    names) and confirm the speaker map on slide 16 matches who will actually
+    present.
+ [] Rehearse against a timer -> core content lands in 10-13 min leaving room
+    for 2-3 min Q&A; every one of the 5 members speaks for at least one section.
+ [] DFDs: open assets/DFD.md (GitHub / VS Code mermaid preview) -> both Level 0
+    and Level 1 diagrams render; cross-check every DS1-DS12 store against a real
+    model in prisma/schema.prisma and every process against a route group.
+ [] Deck slides 10 (Level 0 image), 11 (8-process map), 17-18 (DFD appendices)
+    render correctly in PowerPoint / Google Slides.
+
+Learner portal fixes (Changes.md Part 52)
+ [] Topbar avatar: click it in the learner portal -> /learner/profile. Same in
+    the tutor portal -> /tutor/profile. Admin avatar stays non-clickable.
+ [] Progress chart (enrolled class -> class page, or /learner/progress): a
+    session with a PRE attempt but no submitted POST shows "Pre-test <n>%" then
+    "Post-test not taken yet" on hover; legend + hover list Pre-test before
+    Post-test. Cross-check /dev/charts "Typical (one unpaired)" for GroupedBarChart
+    -> missing bar's hover reads "—", not a number.
+ [] Learner dashboard (/learner): stat cards have a tinted icon tile; upcoming
+    sessions are bordered tiles with a weekday/day chip; a "This week" Mon-Sun
+    grid shows, chips open /learner/classes/<id>.
+ [] Browse Classes (/learner/classes): search "Mathematics" (display name, not
+    "MATH") returns math classes.
+ [] Global search (Cmd/Ctrl+K): scope "Class code" + partial code -> only class
+    hits; "Tutor code" + "TUT" -> only tutors; "Subject" + a subject name ->
+    subject/class + topic hits; "Everything" behaves as before.
+ [] Find Tutors (/learner/tutors): cards show green verified-class code badges;
+    toggling Math + Science chips -> only tutors CERTIFIED in both; "Clear"
+    resets. Open a profile -> schedule is the weekly-timetable grid, chips open
+    /learner/classes/<id>.
+ [] Tutor profile as a NON-enrolled learner: the tutor's suspended/banned and
+    completed classes are absent; no "Completed" tab. As an ENROLLED learner of a
+    completed class: "Completed" tab present; opening that class renders (no 404).
+ [] My Classes (/learner/my-classes) -> open a class -> in-page "Back" -> returns
+    to /learner/my-classes (not /learner/classes). From Browse it returns to
+    /learner/classes.
+ [] My Requests (/learner/requests): click "New request" -> existing request
+    cards + the "New request" button disappear; "Back to requests" restores them.
+    Click "Edit" on an OPEN request -> same; "Save changes" / "Back to requests"
+    restores the list.
+ [] Profile edit (/learner/profile/edit): type "0917123" in Contact info -> inline
+    error appears immediately (before submit); "09171234567" clears it; a
+    non-numeric handle shows no error while typing; Save succeeds.
+ [] Auto Match (/learner/match): run a match -> each result card shows a
+    "Match <n>" badge and the list is ordered highest-first.

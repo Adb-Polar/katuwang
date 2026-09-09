@@ -10,6 +10,7 @@ const {
   userFindUniqueMock,
   enrollmentFindManyMock,
   topicRequestFindManyMock,
+  resolveSubjectSlugsMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findManyMock: vi.fn(),
@@ -19,6 +20,7 @@ const {
   userFindUniqueMock: vi.fn(),
   enrollmentFindManyMock: vi.fn(),
   topicRequestFindManyMock: vi.fn(),
+  resolveSubjectSlugsMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -39,6 +41,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+vi.mock("@/lib/subjects", () => ({ resolveSubjectSlugs: resolveSubjectSlugsMock }));
 
 import { GET } from "@/app/api/classes/route";
 
@@ -58,6 +61,7 @@ describe("GET /api/classes", () => {
     userFindUniqueMock.mockResolvedValue({ gradeLevel: "GRADE_9" });
     enrollmentFindManyMock.mockResolvedValue([]);
     topicRequestFindManyMock.mockResolvedValue([]);
+    resolveSubjectSlugsMock.mockResolvedValue([]);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -183,6 +187,7 @@ describe("GET /api/classes", () => {
               gradeLevel: "GRADE_9",
               OR: [
                 { code: { contains: "algebra" } },
+                { subject: { contains: "algebra" } },
                 { topics: { some: { topic: { contains: "algebra" } } } },
                 { tutorProfile: { user: { anonymousId: { contains: "algebra" } } } },
               ],
@@ -190,6 +195,25 @@ describe("GET /api/classes", () => {
           ],
         },
       })
+    );
+  });
+
+  it("search by subject display name resolves to slugs in the OR filter", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);
+    countMock
+      .mockResolvedValueOnce(30)
+      .mockResolvedValueOnce(4)
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(0)
+      .mockResolvedValueOnce(1);
+
+    await GET(makeRequest("?q=Mathematics"));
+
+    const call = findManyMock.mock.calls[0][0];
+    const filters = call.where.AND[1];
+    expect(filters.OR).toEqual(
+      expect.arrayContaining([{ subject: { in: ["MATH"] } }]),
     );
   });
 

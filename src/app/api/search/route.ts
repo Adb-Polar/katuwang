@@ -1,13 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { browseClassesWhere } from "@/lib/classQueries";
-import { getSubjects } from "@/lib/subjects";
+import { getSubjects, resolveSubjectSlugs } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 
 const PER_GROUP = 6;
+
+// The top-bar box lets the user scope the search. "all" is the blanket search;
+// the rest each pin it to one field so e.g. a class code isn't buried under
+// subject/topic hits.
+const SEARCH_SCOPES = ["all", "tutorCode", "subject", "topic", "classCode"] as const;
+type SearchScope = (typeof SEARCH_SCOPES)[number];
+
+/**
+ * The `OR` clauses for a class query under a given scope, or `null` when this
+ * scope should not return classes at all (e.g. "tutorCode").
+ */
+function classOrFor(
+  scope: SearchScope,
+  q: string,
+  subjectSlugs: string[],
+): Prisma.TutorClassWhereInput[] | null {
+  const bySubject: Prisma.TutorClassWhereInput[] = [
+    { subject: { contains: q } },
+    ...(subjectSlugs.length ? [{ subject: { in: subjectSlugs } }] : []),
+  ];
+  switch (scope) {
+    case "tutorCode":
+      return null;
+    case "classCode":
+      return [{ code: { contains: q } }];
+    case "subject":
+      return bySubject;
+    case "topic":
+      return [{ topics: { some: { topic: { contains: q } } } }];
+    default:
+      return [
+        { code: { contains: q } },
+        ...bySubject,
+        { topics: { some: { topic: { contains: q } } } },
+      ];
+  }
+}
 
 export interface SearchItem {
   id: string;
@@ -31,15 +69,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const q = (new URL(req.url).searchParams.get("q") || "").trim();
+    const params = new URL(req.url).searchParams;
+    const q = (params.get("q") || "").trim();
     if (q.length < 2) return NextResponse.json({ groups: [] });
+
+    const scopeParam = params.get("scope") as SearchScope | null;
+    const scope: SearchScope =
+      scopeParam && SEARCH_SCOPES.includes(scopeParam) ? scopeParam : "all";
+
+    const subjectSlugs = await resolveSubjectSlugs(q);
+    const classOr = classOrFor(scope, q, subjectSlugs);
+    const wantTopics = scope === "all" || scope === "topic";
+    const wantTutorCode = scope === "all" || scope === "tutorCode";
 
     const role = session.user.role;
     const groups: SearchGroup[] = [];
 
     // ── Topics (all roles) ──
     const topicMatches: SearchItem[] = [];
-    const catalog = await getSubjects();
+    const catalog = wantTopics ? await getSubjects() : [];
     const ql = q.toLowerCase();
     for (const s of catalog) {
       for (const t of s.topics) {
@@ -65,36 +113,44 @@ export async function GET(req: NextRequest) {
       // When the platform reveals tutor names, learners can also search by name
       // and see the real name in results instead of just the anonymous ID.
       const showRealNames = await getSetting("showTutorRealNames");
-      const [classes, tutors] = await Promise.all([
-        prisma.tutorClass.findMany({
-          where: {
-            ...browseClassesWhere(session.user.id),
-            OR: [
-              { code: { contains: q } },
-              { subject: { contains: q } },
-              { topics: { some: { topic: { contains: q } } } },
-            ],
-          },
-          select: { id: true, code: true, subject: true, topics: { select: { topic: true }, take: 3 } },
-          take: PER_GROUP,
-          orderBy: { createdAt: "desc" },
-        }),
-        prisma.user.findMany({
-          where: {
-            role: "STUDENT_TUTOR",
-            status: "ACTIVE",
-            tutorProfile: { topicCertifications: { some: { status: "CERTIFIED" } } },
-            OR: [
+      // "tutorCode" scope matches the anonymous ID only; "all" also matches the
+      // real name where the platform reveals it.
+      const tutorOr: Prisma.UserWhereInput[] =
+        scope === "tutorCode"
+          ? [{ anonymousId: { contains: q } }]
+          : [
               { anonymousId: { contains: q } },
               ...(showRealNames
                 ? [{ firstName: { contains: q } }, { lastName: { contains: q } }]
                 : []),
-            ],
-          },
-          select: { id: true, anonymousId: true, firstName: true, lastName: true },
-          take: PER_GROUP,
-          orderBy: { anonymousId: "asc" },
-        }),
+            ];
+      const [classes, tutors] = await Promise.all([
+        classOr
+          ? prisma.tutorClass.findMany({
+              where: { ...browseClassesWhere(session.user.id), OR: classOr },
+              select: {
+                id: true,
+                code: true,
+                subject: true,
+                topics: { select: { topic: true }, take: 3 },
+              },
+              take: PER_GROUP,
+              orderBy: { createdAt: "desc" },
+            })
+          : Promise.resolve([]),
+        wantTutorCode
+          ? prisma.user.findMany({
+              where: {
+                role: "STUDENT_TUTOR",
+                status: "ACTIVE",
+                tutorProfile: { topicCertifications: { some: { status: "CERTIFIED" } } },
+                OR: tutorOr,
+              },
+              select: { id: true, anonymousId: true, firstName: true, lastName: true },
+              take: PER_GROUP,
+              orderBy: { anonymousId: "asc" },
+            })
+          : Promise.resolve([]),
       ]);
 
       if (classes.length)
@@ -134,30 +190,31 @@ export async function GET(req: NextRequest) {
         },
       });
 
+      const wantRequests = scope === "all" || scope === "subject" || scope === "topic";
       const [classes, requests] = await Promise.all([
-        prisma.tutorClass.findMany({
-          where: {
-            tutorProfile: { userId: session.user.id },
-            OR: [
-              { code: { contains: q } },
-              { subject: { contains: q } },
-              { topics: { some: { topic: { contains: q } } } },
-            ],
-          },
-          select: { id: true, code: true, subject: true, status: true },
-          take: PER_GROUP,
-          orderBy: { createdAt: "desc" },
-        }),
-        tutorProfile
+        classOr
+          ? prisma.tutorClass.findMany({
+              where: { tutorProfile: { userId: session.user.id }, OR: classOr },
+              select: { id: true, code: true, subject: true, status: true },
+              take: PER_GROUP,
+              orderBy: { createdAt: "desc" },
+            })
+          : Promise.resolve([]),
+        tutorProfile && wantRequests
           ? prisma.topicRequest.findMany({
               where: {
                 AND: [
                   tutorPoolWhere(tutorProfile.id, tutorProfile.topicCertifications),
                   {
-                    OR: [
-                      { subject: { contains: q } },
-                      { topics: { some: { topic: { contains: q } } } },
-                    ],
+                    OR:
+                      scope === "subject"
+                        ? [{ subject: { contains: q } }]
+                        : scope === "topic"
+                        ? [{ topics: { some: { topic: { contains: q } } } }]
+                        : [
+                            { subject: { contains: q } },
+                            { topics: { some: { topic: { contains: q } } } },
+                          ],
                   },
                 ],
               },
@@ -200,32 +257,33 @@ export async function GET(req: NextRequest) {
     } else {
       // ADMIN
       const [classes, users] = await Promise.all([
-        prisma.tutorClass.findMany({
-          where: {
-            OR: [
-              { code: { contains: q } },
-              { subject: { contains: q } },
-              { topics: { some: { topic: { contains: q } } } },
-            ],
-          },
-          select: { id: true, code: true, subject: true, status: true },
-          take: PER_GROUP,
-          orderBy: { createdAt: "desc" },
-        }),
-        prisma.user.findMany({
-          where: {
-            role: { not: "ADMIN" },
-            OR: [
-              { anonymousId: { contains: q } },
-              { firstName: { contains: q } },
-              { lastName: { contains: q } },
-              { email: { contains: q } },
-            ],
-          },
-          select: { id: true, anonymousId: true, role: true, firstName: true, lastName: true },
-          take: PER_GROUP,
-          orderBy: { anonymousId: "asc" },
-        }),
+        classOr
+          ? prisma.tutorClass.findMany({
+              where: { OR: classOr },
+              select: { id: true, code: true, subject: true, status: true },
+              take: PER_GROUP,
+              orderBy: { createdAt: "desc" },
+            })
+          : Promise.resolve([]),
+        wantTutorCode
+          ? prisma.user.findMany({
+              where: {
+                role: { not: "ADMIN" },
+                OR:
+                  scope === "tutorCode"
+                    ? [{ anonymousId: { contains: q } }]
+                    : [
+                        { anonymousId: { contains: q } },
+                        { firstName: { contains: q } },
+                        { lastName: { contains: q } },
+                        { email: { contains: q } },
+                      ],
+              },
+              select: { id: true, anonymousId: true, role: true, firstName: true, lastName: true },
+              take: PER_GROUP,
+              orderBy: { anonymousId: "asc" },
+            })
+          : Promise.resolve([]),
       ]);
       if (classes.length)
         groups.push({

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Katuwang — Finalized Architecture Design</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 18mm 22mm 18mm;
+  }
+  @page {
+    @bottom-center { content: counter(page) " / " counter(pages); }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.5;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  h1, h2, h3, h4 { font-family: "Segoe UI Semibold", "Segoe UI", Arial, sans-serif; color: #0f2b46; line-height: 1.25; }
+  h1 { font-size: 20pt; margin: 0 0 4pt; }
+  h2 {
+    font-size: 15pt;
+    margin: 26pt 0 8pt;
+    padding-bottom: 4pt;
+    border-bottom: 2px solid #1f6feb;
+    page-break-after: avoid;
+  }
+  h3 { font-size: 12pt; margin: 16pt 0 5pt; page-break-after: avoid; }
+  h4 { font-size: 10.5pt; margin: 12pt 0 3pt; color: #33475b; page-break-after: avoid; }
+  p { margin: 0 0 7pt; }
+  ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+  li { margin: 0 0 3pt; }
+  code {
+    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+    font-size: 9pt;
+    background: #eef2f7;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  pre {
+    font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+    font-size: 8.6pt;
+    background: #0f2b46;
+    color: #e8eef5;
+    padding: 10pt 12pt;
+    border-radius: 5px;
+    overflow-x: auto;
+    line-height: 1.45;
+    page-break-inside: avoid;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6pt 0 12pt;
+    font-size: 9.3pt;
+    page-break-inside: avoid;
+  }
+  th, td { border: 1px solid #c5d2e0; padding: 5pt 7pt; text-align: left; vertical-align: top; }
+  th { background: #e7eff8; color: #0f2b46; font-weight: 600; }
+  tr:nth-child(even) td { background: #f6f9fc; }
+  .cover {
+    page-break-after: always;
+    padding-top: 55mm;
+    text-align: center;
+  }
+  .cover .kicker { letter-spacing: 3px; text-transform: uppercase; color: #1f6feb; font-size: 10pt; font-weight: 600; }
+  .cover h1 { font-size: 30pt; margin: 12pt 0 6pt; }
+  .cover .sub { font-size: 13pt; color: #4a5b6d; }
+  .cover .meta { margin-top: 40mm; font-size: 10pt; color: #4a5b6d; }
+  .cover .meta table { width: 70%; margin: 0 auto; font-size: 10pt; }
+  .cover .meta td { border-color: #d7e0ea; }
+  .toc { page-break-after: always; }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; margin: 4pt 0; font-weight: 600; }
+  .toc > ol > li::before { content: counter(toc) ".  "; color: #1f6feb; }
+  .toc ol ol { padding-left: 22pt; margin-top: 3pt; }
+  .toc ol ol li { font-weight: 400; font-size: 9.7pt; color: #33475b; }
+  .box {
+    border: 1px solid #c5d2e0;
+    border-left: 4px solid #1f6feb;
+    background: #f6f9fc;
+    padding: 8pt 12pt;
+    margin: 8pt 0 12pt;
+    border-radius: 3px;
+    page-break-inside: avoid;
+  }
+  .box.warn { border-left-color: #d9822b; background: #fdf6ef; }
+  .box.priv { border-left-color: #2e7d32; background: #f0f7f0; }
+  .layer-stack { margin: 8pt 0 14pt; page-break-inside: avoid; }
+  .layer {
+    border: 1px solid #9db8d2;
+    border-radius: 4px;
+    padding: 7pt 12pt;
+    margin: 4pt 0;
+    background: #eef4fb;
+  }
+  .layer .t { font-weight: 700; color: #0f2b46; }
+  .layer .d { font-size: 8.8pt; color: #45566a; }
+  .layer.db { background: #e6efe6; border-color: #9cc39c; }
+  .arrow { text-align: center; color: #6b7c8f; font-size: 9pt; margin: 2pt 0; }
+  .small { font-size: 8.8pt; color: #55677a; }
+  .pill { display: inline-block; background: #1f6feb; color: #fff; font-size: 8pt; padding: 1px 6px; border-radius: 9px; margin-left: 5px; vertical-align: middle; }
+  section { page-break-inside: auto; }
+  .nobreak { page-break-inside: avoid; }
+  hr { border: 0; border-top: 1px solid #d0dae5; margin: 16pt 0; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">System Architecture Document</div>
+  <h1>Katuwang</h1>
+  <div class="sub">A Web-Based Peer Tutoring &amp; Academic Mentoring Platform<br>Taysan Resettlement Integrated School (TRIS) &mdash; Grades 7&ndash;12</div>
+  <div class="meta">
+    <table>
+      <tr><td><strong>Document</strong></td><td>Finalized Architecture Design</td></tr>
+      <tr><td><strong>Version</strong></td><td>1.0 (baseline)</td></tr>
+      <tr><td><strong>Date</strong></td><td>8 September 2026</td></tr>
+      <tr><td><strong>Status</strong></td><td>Finalized &mdash; reflects the implemented system on <code>main</code></td></tr>
+      <tr><td><strong>Scope</strong></td><td>Modules 1&ndash;6, all three roles, data &amp; security architecture</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="toc">
+  <h2 style="border:0">Table of Contents</h2>
+  <ol>
+    <li>Introduction &amp; Purpose
+      <ol><li>Objectives</li><li>Audience</li><li>Reference Documents</li></ol>
+    </li>
+    <li>System Overview</li>
+    <li>Architectural Drivers
+      <ol><li>Quality Attributes</li><li>Constraints</li><li>Assumptions</li></ol>
+    </li>
+    <li>Architectural Style &amp; Guiding Principles</li>
+    <li>Technology Stack</li>
+    <li>Logical Architecture &mdash; Layered View
+      <ol><li>Presentation Layer</li><li>API / Route-Handler Layer</li><li>Domain &amp; Service Layer</li><li>Data-Access Layer</li><li>Persistence Layer</li></ol>
+    </li>
+    <li>Module / Component View
+      <ol><li>Module-to-Code Map</li><li>Cross-Module Dependencies</li></ol>
+    </li>
+    <li>Runtime Views (Key Scenarios)
+      <ol><li>Registration</li><li>Authentication &amp; RBAC Enforcement</li><li>Tutor Matching</li><li>Tutor Certification Assessment</li><li>Session Pre-/Post-Test</li></ol>
+    </li>
+    <li>Data Architecture
+      <ol><li>Entity Groups</li><li>Normalization &amp; Denormalization</li><li>Anonymous Identity Generation</li><li>Entity-Relationship Diagram</li></ol>
+    </li>
+    <li>Security &amp; Privacy Architecture
+      <ol><li>Authentication</li><li>Authorization</li><li>Double-Blind Anonymity (RA 10173)</li><li>Account Lifecycle</li><li>Auditability</li></ol>
+    </li>
+    <li>Cross-Cutting Concerns</li>
+    <li>Deployment &amp; Infrastructure View</li>
+    <li>Source Tree Layout</li>
+    <li>Architecture Decision Record (Summary)</li>
+    <li>Non-Functional Considerations &amp; Known Limitations</li>
+    <li>Appendix A &mdash; Data Model Inventory</li>
+    <li>Appendix B &mdash; API Surface Summary</li>
+  </ol>
+</div>
+
+<section>
+<h2>1. Introduction &amp; Purpose</h2>
+<p>This document is the finalized architecture baseline for <strong>Katuwang</strong> (Tagalog for <em>&ldquo;helper&rdquo;</em> / <em>&ldquo;partner&rdquo;</em>), a free, non-profit, web-based peer-tutoring management platform built for Taysan Resettlement Integrated School (TRIS), a Philippine public secondary school operating under classroom overcrowding and split shifts. It describes the system <em>as actually built</em> on the <code>main</code> branch, not the original thesis proposal.</p>
+
+<h3>1.1 Objectives</h3>
+<ul>
+  <li>Give a single authoritative description of the runtime, logical, data, and security architecture.</li>
+  <li>Record the architectural style and the decisions that shaped it, with rationale.</li>
+  <li>Serve as the onboarding reference for developers and the evaluation artifact for the capstone defense.</li>
+</ul>
+
+<h3>1.2 Audience</h3>
+<p>Project developers and maintainers, the capstone advisory panel, and TRIS technical stakeholders responsible for future operation.</p>
+
+<h3>1.3 Reference Documents</h3>
+<table>
+  <tr><th>Document</th><th>Role</th></tr>
+  <tr><td><code>CLAUDE.md</code></td><td>Engineering conventions, stack table, RBAC/API patterns</td></tr>
+  <tr><td><code>docs/reference/project-overview.md</code></td><td>Domain / business context digest</td></tr>
+  <tr><td><code>docs/reference/decisions.md</code></td><td>Authoritative record of divergences from the thesis proposal</td></tr>
+  <tr><td><code>docs/feature-checklist.md</code></td><td>Thesis-spec vs. implemented status per module</td></tr>
+  <tr><td><code>docs/reference/auth-implementation.md</code></td><td>Auth build guide (NextAuth, RBAC, anonymous IDs)</td></tr>
+  <tr><td><code>docs/erd.md</code> / <code>prisma/schema.prisma</code></td><td>Generated ERD and the schema source of truth</td></tr>
+  <tr><td><code>docs/roles/{LEARNER,TUTOR,ADMIN}.md</code></td><td>Per-role feature &amp; API reference</td></tr>
+</table>
+</section>
+
+<section>
+<h2>2. System Overview</h2>
+<p>Katuwang connects <strong>student tutors</strong> (peers who volunteer to teach) with <strong>student learners</strong> (peers who need help) so that tutoring can be organized, scheduled, assessed, and moderated instead of being ad hoc. Everything is voluntary and free &mdash; there is no payment or monetization anywhere in the system, and no upload/storage of learning materials because tutoring physically happens on school premises.</p>
+<p>The platform is delivered as a <strong>single full-stack Next.js 16 application</strong> (App Router) backed by a MariaDB/MySQL database. It exposes three role-scoped portals from one deployable unit:</p>
+<table>
+  <tr><th>Role (Prisma <code>Role</code>)</th><th>Portal</th><th>Core capability</th></tr>
+  <tr><td><code>STUDENT_LEARNER</code></td><td><code>/learner</code></td><td>Browse/enroll in classes, get matched to tutors, post class requests, take pre/post-tests, view progress</td></tr>
+  <tr><td><code>STUDENT_TUTOR</code></td><td><code>/tutor</code></td><td>Create/run classes &amp; sessions, get certified per topic, fulfill class requests, build session tests</td></tr>
+  <tr><td><code>ADMIN</code></td><td><code>/admin</code></td><td>User &amp; class moderation, question bank, certification review, subjects/topics, settings, analytics, audit log</td></tr>
+</table>
+<p>The system is scoped into <strong>six core modules</strong>: (1) User Management, (2) Session Management, (3) Tutor Matching, (4) Assessment, (5) Chatbot Assistant, and (6) Analytics Dashboard. All six are implemented; the chatbot is a deterministic rule-based intent matcher (no LLM), consistent with the thesis delimitation.</p>
+<div class="box"><strong>Scope note.</strong> The thesis proposal named a fourth &ldquo;Teacher Moderator&rdquo; role. It was intentionally cut &mdash; the platform ships with exactly three roles and moderation duties fold into <code>ADMIN</code>. See <code>docs/reference/decisions.md</code>.</div>
+</section>
+
+<section>
+<h2>3. Architectural Drivers</h2>
+
+<h3>3.1 Quality Attributes (ranked)</h3>
+<table>
+  <tr><th>#</th><th>Attribute</th><th>Why it drives the architecture</th></tr>
+  <tr><td>1</td><td><strong>Privacy / Confidentiality</strong></td><td>RA 10173 mandates double-blind anonymity between peers. Drives the anonymous-ID scheme, peer-facing DTO discipline, and an admin-gated real-name override.</td></tr>
+  <tr><td>2</td><td><strong>Security</strong></td><td>Minors' data. Drives edge RBAC + per-route re-checks, bcrypt hashing, JWT sessions, account lifecycle gating at login, and an immutable audit log.</td></tr>
+  <tr><td>3</td><td><strong>Maintainability</strong></td><td>Student-built, must be handed over. Drives one language end-to-end (TypeScript), one ORM, lean Server Components, service logic in <code>src/lib/</code>, and Zod-validated boundaries.</td></tr>
+  <tr><td>4</td><td><strong>Correctness / Integrity</strong></td><td>Enrollment caps, certification gates, request lifecycles. Drives Prisma transactions, compound unique constraints, and pure testable domain functions.</td></tr>
+  <tr><td>5</td><td><strong>Usability &amp; Accessibility</strong></td><td>Low-resource devices. Drives responsive DaisyUI/Tailwind layout, server rendering, and no heavy client frameworks.</td></tr>
+  <tr><td>6</td><td><strong>Deployability</strong></td><td>Minimal ops capacity at TRIS. Drives a single monolith, no background workers, no message broker, no external service hard-dependency.</td></tr>
+</table>
+
+<h3>3.2 Constraints</h3>
+<ul>
+  <li><strong>Regulatory:</strong> RA 10173 (Data Privacy Act) &mdash; parental/guardian consent captured at registration; peer identities never crossed.</li>
+  <li><strong>Non-profit:</strong> no billing, payment, or monetization code anywhere.</li>
+  <li><strong>No file storage:</strong> no upload endpoints or blob storage &mdash; tutoring materials are handled in person.</li>
+  <li><strong>No scheduler/queue infrastructure:</strong> all work is request-driven; there is no cron, SSE, polling worker, or background job runner. Time-based notifications (e.g. &ldquo;class starts in 1 h&rdquo;) are therefore out of scope.</li>
+  <li><strong>Chatbot:</strong> nav/FAQ/recommendation only, deterministic, no generative model, no new runtime dependency.</li>
+  <li><strong>Analytics:</strong> descriptive aggregates only &mdash; no ML, prediction, or educational data mining.</li>
+  <li><strong>Three roles only</strong> (see &sect;2).</li>
+</ul>
+
+<h3>3.3 Assumptions</h3>
+<ul>
+  <li>Single institution (TRIS); no multi-tenancy.</li>
+  <li>School-day-length engagement &mdash; JWT sessions expire after 8 hours.</li>
+  <li>SMTP is available for password-reset mail; when unset, the app logs the link to the console (dev fallback).</li>
+  <li>Modest concurrent load (hundreds of students), well within a single Node process + one MariaDB instance.</li>
+</ul>
+</section>
+
+<section>
+<h2>4. Architectural Style &amp; Guiding Principles</h2>
+<p>Katuwang is a <strong>modular monolith</strong> built on the <strong>Next.js App Router</strong>, combining React Server Components (RSC) for data-fetching pages with client &ldquo;islands&rdquo; for interactivity, plus co-located REST route handlers for mutations.</p>
+<table>
+  <tr><th>Principle</th><th>Application in Katuwang</th></tr>
+  <tr><td>Server-authoritative</td><td>Every privileged decision is re-checked on the server (<code>getServerSession</code> + role guard in each route handler). UI hiding is cosmetic only.</td></tr>
+  <tr><td>Lean pages, thick components</td><td><code>src/app/**/page.tsx</code> are Server Components that fetch session + initial data; interaction/state lives in <code>"use client"</code> components under <code>src/components/</code>.</td></tr>
+  <tr><td>Domain logic is pure &amp; centralized</td><td>Ranking, grading, access rules, serialization, config resolution live as framework-free functions in <code>src/lib/</code> and are unit-tested in isolation.</td></tr>
+  <tr><td>Validated boundaries</td><td>All request bodies parse through Zod schemas (<code>src/lib/validations/</code>); first validation error returns HTTP 400.</td></tr>
+  <tr><td>One ORM, one client</td><td>All DB access goes through the singleton <code>prisma</code> (<code>@/lib/prisma</code>); multi-table writes are wrapped in <code>prisma.$transaction</code>.</td></tr>
+  <tr><td>Feature flags over branches</td><td>Runtime behavior toggled by <code>PlatformSetting</code> rows (e.g. <code>matchingEnabled</code>, <code>chatbotEnabled</code>) read through <code>src/lib/settings.ts</code>.</td></tr>
+  <tr><td>Privacy by construction</td><td>Peer-facing queries <code>select</code> only <code>id</code> + <code>anonymousId</code> (+ non-identifying fields); real names require an admin route or the explicit <code>showTutorRealNames</code> override.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>5. Technology Stack</h2>
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Role</th></tr>
+  <tr><td>Framework</td><td>Next.js (App Router)</td><td>16.2</td><td>Full-stack: RSC pages, client components, REST route handlers, edge middleware</td></tr>
+  <tr><td>UI runtime</td><td>React</td><td>19.2</td><td>Component model, server + client rendering</td></tr>
+  <tr><td>Language</td><td>TypeScript</td><td>5.x</td><td>Strict static typing across models, validation, APIs</td></tr>
+  <tr><td>Styling</td><td>Tailwind CSS 4 + DaisyUI 5</td><td>4 / 5</td><td>OKLCH semantic theme tokens, responsive layout</td></tr>
+  <tr><td>Icons</td><td>lucide-react</td><td>1.x</td><td>Action / status / nav iconography</td></tr>
+  <tr><td>Charts</td><td>Recharts</td><td>3.x</td><td>Admin analytics &amp; learner progress visualizations</td></tr>
+  <tr><td>Auth</td><td>NextAuth.js</td><td>4.24</td><td>Credentials provider, JWT session strategy</td></tr>
+  <tr><td>ORM</td><td>Prisma</td><td>7.8</td><td>Schema modeling, migrations, typed queries</td></tr>
+  <tr><td>Database</td><td>MariaDB / MySQL</td><td>MariaDB 3.5 driver</td><td>Relational persistence via <code>@prisma/adapter-mariadb</code></td></tr>
+  <tr><td>Validation</td><td>Zod</td><td>4.x</td><td>Runtime request validation, discriminated unions</td></tr>
+  <tr><td>Hashing</td><td>bcrypt / bcryptjs</td><td>6 / 3</td><td>One-way password hashing (cost factor 12)</td></tr>
+  <tr><td>Mail</td><td>Nodemailer</td><td>7.x</td><td>SMTP password-reset mail, console fallback when unconfigured</td></tr>
+  <tr><td>Testing</td><td>Vitest</td><td>4.x</td><td>Unit + route-handler integration tests</td></tr>
+  <tr><td>Package manager</td><td>pnpm</td><td>&mdash;</td><td>Dependency management with pinned overrides</td></tr>
+</table>
+</section>
+
+<section>
+<h2>6. Logical Architecture &mdash; Layered View</h2>
+<div class="layer-stack">
+  <div class="layer">
+    <div class="t">1 &mdash; Presentation Layer</div>
+    <div class="d">Server Components (<code>src/app/**/page.tsx</code>) fetch session + initial data &middot; Client Components (<code>src/components/**</code>, <code>"use client"</code>) hold interaction/state &middot; <code>PortalLayout</code> shell, DaisyUI theme, Recharts, chatbot widget</div>
+  </div>
+  <div class="arrow">&#8595; &nbsp; HTTP / RSC payload &nbsp; &#8593;</div>
+  <div class="layer">
+    <div class="t">2 &mdash; Edge Middleware (<code>src/proxy.ts</code>)</div>
+    <div class="d">Runs before every <code>/dashboard</code>, <code>/admin</code>, <code>/tutor</code>, <code>/learner</code> request &middot; requires a valid JWT &middot; enforces role-to-path prefix, redirects to <code>/unauthorized</code></div>
+  </div>
+  <div class="arrow">&#8595;</div>
+  <div class="layer">
+    <div class="t">3 &mdash; API / Route-Handler Layer (<code>src/app/api/**/route.ts</code>)</div>
+    <div class="d">~55 REST endpoints &middot; per-route <code>getServerSession</code> + role check &middot; Zod body validation &middot; standard <code>{ error }</code> / payload response contract &middot; HTTP 400/401/403/404/409/500</div>
+  </div>
+  <div class="arrow">&#8595;</div>
+  <div class="layer">
+    <div class="t">4 &mdash; Domain &amp; Service Layer (<code>src/lib/**</code>)</div>
+    <div class="d">Pure logic: <code>matching.ts</code> (weighted ranking), <code>assessmentPicker</code>/<code>gradeAttempt</code> (quiz build &amp; grading), <code>sessionTestAccess</code>/<code>sessionTestResults</code>, <code>moderation.ts</code>, <code>notifications.ts</code>, <code>settings.ts</code> (feature flags), <code>subjects.ts</code> (taxonomy + cache), <code>idGenerator.ts</code>, <code>auditLog.ts</code>, <code>mail.ts</code>, <code>chatbot/*</code> (tokenise &rarr; intent scoring)</div>
+  </div>
+  <div class="arrow">&#8595;</div>
+  <div class="layer">
+    <div class="t">5 &mdash; Data-Access Layer (<code>src/lib/prisma.ts</code>)</div>
+    <div class="d">Singleton Prisma client &middot; <code>$transaction</code> for multi-table writes &middot; compound unique keys &middot; generated types shared with the app</div>
+  </div>
+  <div class="arrow">&#8595; &nbsp; SQL (MariaDB adapter)</div>
+  <div class="layer db">
+    <div class="t">6 &mdash; Persistence Layer &mdash; MariaDB / MySQL</div>
+    <div class="d">28 tables &middot; enum-backed status columns &middot; 3NF core with deliberate denormalization of <code>topic</code> strings &middot; migration history under <code>prisma/migrations/</code></div>
+  </div>
+</div>
+
+<h3>6.1 Presentation Layer</h3>
+<p>Pages are Server Components by default: they call <code>getServerSession(authOptions)</code>, load only the data the first paint needs, and pass it as props into client components. Client components own forms, modals, tables with client-side sort/filter, and optimistic UI. The shared <code>PortalLayout</code> provides the role-aware sidebar, top-bar global search (&#8984;K), and the notification bell.</p>
+
+<h3>6.2 API / Route-Handler Layer</h3>
+<p>Each mutation or protected read is a route handler under <code>src/app/api/</code>. The canonical shape is: authenticate &rarr; authorize by role &rarr; Zod-parse &rarr; execute (often inside a transaction) &rarr; return payload or <code>{ error }</code>. Server errors are logged with <code>console.error</code> and returned as a generic 500 so internals never leak.</p>
+
+<h3>6.3 Domain &amp; Service Layer</h3>
+<p>Business rules live here as framework-free modules so they can be reasoned about and unit-tested without HTTP or a database. Examples: <code>rankMatches()</code> scores classes for a learner using explicit tunable weights (topic overlap, certified-topic bonus, schedule fit, grade proximity, soonness tiebreak); <code>gradeAttempt</code> grades an assessment; <code>sessionTestAccess</code> decides whether a learner may open a PRE or POST attempt given the session lifecycle.</p>
+
+<h3>6.4 Data-Access Layer</h3>
+<p>A single Prisma client instance is reused across hot reloads via a <code>globalThis</code> guard. All dependent multi-row writes (e.g. tutor registration creating <code>User</code> + <code>TutorProfile</code>; accepting a class request creating a <code>TutorClass</code> and transitioning the request) are wrapped in <code>prisma.$transaction</code> for atomicity.</p>
+
+<h3>6.5 Persistence Layer</h3>
+<p>MariaDB via the Prisma MariaDB adapter. Status fields use Prisma enums for integrity; the subject taxonomy moved from a compile-time enum to admin-editable <code>Subject</code>/<code>Topic</code> tables, with <code>subject</code> columns storing the immutable slug as a plain string.</p>
+</section>
+
+<section>
+<h2>7. Module / Component View</h2>
+
+<h3>7.1 Module-to-Code Map</h3>
+<table>
+  <tr><th>Module</th><th>Primary models</th><th>Key API roots</th><th>Domain logic</th><th>Status</th></tr>
+  <tr>
+    <td><strong>1. User Management</strong></td>
+    <td>User, TutorProfile, PasswordResetToken, IdCounter</td>
+    <td><code>/api/register</code>, <code>/api/auth/*</code>, <code>/api/{learner,tutor}/profile</code>, <code>/api/admin/users</code>, <code>/api/admin/registrations</code></td>
+    <td><code>idGenerator</code>, <code>registration</code>, <code>passwordReset</code>, <code>moderation</code></td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>2. Session Management</strong></td>
+    <td>TutorClass, ClassTopic, ClassSession, ClassEnrollment, ClassAppeal</td>
+    <td><code>/api/tutor/classes/**</code>, <code>/api/classes/[id]/enroll</code>, <code>/api/admin/classes</code>, <code>/api/admin/class-appeals</code></td>
+    <td><code>classQueries</code>, <code>classSessions</code>, <code>classBrowserCache</code>, <code>derivedAvailability</code></td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>3. Tutor Matching</strong></td>
+    <td>TopicRequest, TopicRequestTopic, TopicRequestSlot, Notification</td>
+    <td><code>/api/learner/match</code>, <code>/api/learner/topic-requests</code>, <code>/api/tutor/topic-requests/[id]/accept</code>, <code>/api/admin/topic-requests</code></td>
+    <td><code>matching</code> (<code>rankMatches</code>), <code>browseRanking</code>, <code>topicRequestVisibility</code>, <code>notifications</code></td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><strong>4. Assessment</strong></td>
+    <td>AssessmentQuestion, AssessmentOption, AssessmentAttempt(+Item), TopicCertification, QuestionRequest, SessionTest, SessionTestQuestion, SessionTestAttempt(+Item)</td>
+    <td><code>/api/tutor/assessments/**</code>, <code>/api/tutor/.../sessions/[id]/test/**</code>, <code>/api/learner/session-test-attempts/**</code>, <code>/api/admin/assessment-*</code>, <code>/api/admin/session-tests/**</code></td>
+    <td><code>assessmentPicker</code>, <code>assessmentConfig</code>, <code>assessmentStatus</code>, <code>gradeAttempt</code>, <code>sessionTestAccess</code>, <code>sessionTestResults</code></td>
+    <td>Complete (tutor certification + per-session learner pre/post-test)</td>
+  </tr>
+  <tr>
+    <td><strong>5. Chatbot Assistant</strong></td>
+    <td>ChatbotMiss</td>
+    <td><code>/api/chatbot</code>, <code>/api/admin/chatbot-misses</code></td>
+    <td><code>chatbot/classifier</code>, <code>chatbot/intents</code>, <code>chatbot/faq</code>, <code>chatbot/recommend</code></td>
+    <td>Complete (deterministic, no LLM)</td>
+  </tr>
+  <tr>
+    <td><strong>6. Analytics Dashboard</strong></td>
+    <td>(read-only aggregates), AuditLog</td>
+    <td><code>/api/admin/reports</code>, <code>/api/admin/audit-log</code></td>
+    <td>in-route aggregation, <code>auditLog</code></td>
+    <td>Complete (descriptive only)</td>
+  </tr>
+  <tr>
+    <td><em>Cross-cutting: Taxonomy</em></td>
+    <td>Subject, Topic</td>
+    <td><code>/api/subjects</code>, <code>/api/admin/subjects/**</code>, <code>/api/admin/topics/**</code></td>
+    <td><code>subjects</code> (cache + fallback), <code>subjectTopics</code> (<code>normalizeTopic</code>)</td>
+    <td>Complete</td>
+  </tr>
+  <tr>
+    <td><em>Cross-cutting: Settings &amp; Notifications</em></td>
+    <td>PlatformSetting, Notification</td>
+    <td><code>/api/admin/settings</code>, <code>/api/notifications</code></td>
+    <td><code>settings</code>, <code>notifications</code></td>
+    <td>Complete</td>
+  </tr>
+</table>
+
+<h3>7.2 Cross-Module Dependencies</h3>
+<ul>
+  <li><strong>Matching &rarr; Session Management:</strong> <code>rankMatches</code> reads live <code>TutorClass</code> + <code>ClassSession</code> + enrollment counts; accepting a <code>TopicRequest</code> creates a <code>TutorClass</code>.</li>
+  <li><strong>Matching &rarr; Assessment:</strong> ranking gives a bonus for topics the teaching tutor holds a <code>CERTIFIED</code> <code>TopicCertification</code> for.</li>
+  <li><strong>Assessment (session tests) &rarr; Question Bank:</strong> session-test questions are drawn from <code>AssessmentQuestion</code> filtered to <code>origin: BANK</code> plus the tutor's own <code>origin: TUTOR</code> questions; the tutor certification quiz pool is bank-only.</li>
+  <li><strong>Chatbot &rarr; Matching:</strong> the learner &ldquo;recommend&rdquo; intent calls the same <code>rankMatches</code> engine.</li>
+  <li><strong>All modules &rarr; Notifications &amp; Audit:</strong> lifecycle events emit <code>Notification</code> rows; every admin moderation action writes an <code>AuditLog</code> row.</li>
+  <li><strong>All modules &rarr; Settings:</strong> <code>matchingEnabled</code>, <code>chatbotEnabled</code>, <code>sessionTestsEnabled</code>, <code>requireRegistrationApproval</code>, <code>requireCertificationForClassCreation</code>, <code>autoCertifyOnAssessmentPass</code>, <code>registrationOpen</code>, <code>showTutorRealNames</code> gate behavior at runtime.</li>
+</ul>
+</section>
+
+<section>
+<h2>8. Runtime Views (Key Scenarios)</h2>
+
+<h3>8.1 Registration (learner or tutor)</h3>
+<ol>
+  <li>Client form (<code>LearnerRegisterForm</code> / <code>TutorRegisterForm</code>) does local validation, then <code>POST /api/register</code> with a <code>type</code> discriminator.</li>
+  <li>Route handler Zod-validates, enforces guardian <code>consentGiven</code>, checks e-mail uniqueness (409 on conflict).</li>
+  <li><code>bcrypt.hash(password, 12)</code>; <code>generateAnonymousId("LEARNER"|"TUTOR")</code> atomically increments the <code>IdCounter</code> row (<code>STU-####</code> / <code>TUT-####</code>).</li>
+  <li><code>prisma.$transaction</code> creates <code>User</code> (+ <code>TutorProfile</code> for tutors). If <code>requireRegistrationApproval</code> is on, status is <code>PENDING</code>; otherwise <code>ACTIVE</code>.</li>
+  <li>201 with the new anonymous ID; client redirects to <code>/login</code> (or <code>/pending-approval</code>).</li>
+</ol>
+
+<h3>8.2 Authentication &amp; RBAC Enforcement</h3>
+<ol>
+  <li><code>signIn("credentials", &hellip;)</code> &rarr; NextAuth <code>authorize()</code> in <code>src/lib/auth.ts</code>.</li>
+  <li>Look up user by e-mail, <code>bcrypt.compare</code> the password.</li>
+  <li>Account-status gate: expired <code>SUSPENDED</code> auto-reactivates; active <code>SUSPENDED</code>/<code>BANNED</code> rejected; <code>PENDING</code>/<code>DECLINED</code> return sentinel errors that the login page maps to <code>/pending-approval</code> / <code>/account-declined</code>.</li>
+  <li>On success, <code>jwt</code> callback embeds <code>id</code>, <code>anonymousId</code>, <code>role</code>, <code>fullName</code>; session strategy is JWT, <code>maxAge</code> 8 h.</li>
+  <li>Every subsequent protected request passes through <code>src/proxy.ts</code>: valid token required, then path-prefix&hairsp;&rarr;&hairsp;role check (<code>/admin</code>&rarr;<code>ADMIN</code>, etc.), redirect to <code>/unauthorized</code> on mismatch.</li>
+  <li>The target route handler independently re-runs <code>getServerSession</code> + role check (defense in depth).</li>
+</ol>
+
+<h3>8.3 Tutor Matching</h3>
+<ol>
+  <li>Learner submits <code>MatchCriteria</code> (subject slug, topics, grade, preferred time slots, class format) to <code>POST /api/learner/match</code>.</li>
+  <li>Handler checks <code>matchingEnabled</code>, loads candidate published <code>SCHEDULED</code> classes in the subject with sessions, enrollment counts, and the teaching tutor's certified topics.</li>
+  <li><code>rankMatches()</code> scores each: +10 per matched topic, +5 per certified matched topic, +3 per session landing in a preferred slot, +6/+3/+2 for exact/adjacent/any grade, up to +2 soonness tiebreak; full-classes excluded.</li>
+  <li>Ranked results with human-readable <code>MatchReasons</code> return to the learner. If nothing scores well, the UI routes the learner to post a <strong>class request</strong> (<code>TopicRequest</code>), optionally directed at one tutor.</li>
+  <li>A tutor accepts an open request &rarr; <code>POST /api/tutor/topic-requests/[id]/accept</code> transactionally creates a <code>TutorClass</code> and moves the request <code>OPEN &rarr; ACCEPTED</code>; enroll/unenroll and class status changes drive it through <code>ENROLLED &rarr; FULFILLED</code> (or re-open). Each transition emits notifications.</li>
+</ol>
+
+<h3>8.4 Tutor Certification Assessment</h3>
+<ol>
+  <li>Tutor requests certification for a (subject, topic) &rarr; <code>TopicCertification</code> row (<code>PENDING</code>).</li>
+  <li>Tutor starts a quiz: <code>assessmentPicker.pickQuestionIds()</code> selects N bank questions (<code>origin: BANK</code>) per the global <code>getAssessmentConfig()</code> (question count, pass %, min bank size).</li>
+  <li><code>AssessmentAttempt</code> + <code>AssessmentAttemptItem</code> rows track the run; on submit, <code>gradeAttempt</code> computes <code>scorePercent</code> and sets <code>PASSED</code>/<code>FAILED</code>.</li>
+  <li>If <code>autoCertifyOnAssessmentPass</code> is on, a pass flips the certification to <code>CERTIFIED</code>; otherwise an admin reviews at <code>/admin/certifications</code> (<code>CERTIFIED</code>/<code>REJECTED</code> + note). Result notification is emitted.</li>
+  <li>Tutors may raise a <code>QuestionRequest</code> asking an admin to add bank questions for a thin topic.</li>
+</ol>
+
+<h3>8.5 Session Pre-/Post-Test (learner progress)</h3>
+<ol>
+  <li>Tutor builds one <code>SessionTest</code> per <code>ClassSession</code> (unique) from bank + self-authored questions; publishing sets <code>PUBLISHED</code>.</li>
+  <li>Learner takes the <em>same</em> question set twice: a <code>PRE</code> attempt opens once the test is published; the <code>POST</code> attempt opens automatically when the tutor marks that session <code>COMPLETED</code> (<code>kind</code> lives on <code>SessionTestAttempt</code>, not the test).</li>
+  <li><code>sessionTestAccess</code> authorizes each attempt against the session lifecycle; <code>sessionTestResults</code> computes per-question and per-learner PRE&rarr;POST deltas.</li>
+  <li>Results feed the tutor's charts, the learner's <code>/learner/progress</code>, and the admin read-only views. Diagnostic only &mdash; no pass/fail. <code>sessionTestsEnabled</code> is the kill switch.</li>
+</ol>
+</section>
+
+<section>
+<h2>9. Data Architecture</h2>
+<p>The schema has <strong>28 models</strong> and 17 enums. The database is MariaDB/MySQL; Prisma owns the schema and migration history.</p>
+
+<h3>9.1 Entity Groups</h3>
+<table>
+  <tr><th>Group</th><th>Models</th></tr>
+  <tr><td>Identity &amp; access</td><td>User, TutorProfile, PasswordResetToken, IdCounter</td></tr>
+  <tr><td>Taxonomy</td><td>Subject, Topic</td></tr>
+  <tr><td>Classes &amp; sessions</td><td>TutorClass, ClassTopic, ClassSession, ClassEnrollment, ClassAppeal</td></tr>
+  <tr><td>Matching / requests</td><td>TopicRequest, TopicRequestTopic, TopicRequestSlot</td></tr>
+  <tr><td>Assessment &mdash; tutor certification</td><td>AssessmentQuestion, AssessmentOption, AssessmentAttempt, AssessmentAttemptItem, TopicCertification, QuestionRequest</td></tr>
+  <tr><td>Assessment &mdash; session pre/post tests</td><td>SessionTest, SessionTestQuestion, SessionTestAttempt, SessionTestAttemptItem</td></tr>
+  <tr><td>Platform / cross-cutting</td><td>PlatformSetting, Notification, AuditLog, ChatbotMiss</td></tr>
+</table>
+
+<h3>9.2 Normalization &amp; Denormalization</h3>
+<ul>
+  <li><strong>3NF for the core.</strong> One-to-many child tables (<code>ClassTopic</code>, <code>ClassSession</code>, <code>TopicRequestTopic</code>, <code>TopicRequestSlot</code>, option/item tables) rather than JSON blobs or repeating columns.</li>
+  <li><strong>Deliberate denormalization of <code>topic</code>.</strong> Topics are plain strings on ~7 child tables, not foreign keys to <code>Topic</code>. <code>Topic</code> is the editable catalogue and validation source (<code>topicExists()</code>); renaming a topic fans the new string out to all denormalized columns inside one transaction. Rationale: the app never had DB-level referential integrity on <code>subject</code>/<code>topic</code>, and a full FK rewrite carried a far larger blast radius for no operational gain (decision B in <code>subject-topic-management.md</code>).</li>
+  <li><strong>Compound unique constraints</strong> enforce business rules at the DB (e.g. one enrollment per <code>(classId, learnerId)</code>, one <code>SessionTest</code> per <code>sessionId</code>, one certification per <code>(tutorProfileId, subject, topic)</code>).</li>
+  <li><strong>Enum-backed status</strong> columns (<code>AccountStatus</code>, <code>ClassStatus</code>, <code>TopicRequestStatus</code>, <code>AssessmentAttemptStatus</code>, <code>SessionTestStatus</code>, &hellip;) keep lifecycle state valid without a lookup table.</li>
+</ul>
+
+<h3>9.3 Anonymous Identity Generation</h3>
+<p><code>generateAnonymousId(role)</code> performs an atomic <code>prisma.idCounter.update({ data: { count: { increment: 1 } } })</code> &mdash; the increment is executed by the database, so concurrent registrations cannot collide &mdash; then zero-pads to <code>TUT-0001</code> / <code>STU-0001</code>. The same pattern (<code>generateClassCode</code>) issues <code>C-0001</code> class codes, upserting the counter row so it works on a fresh database.</p>
+
+<h3>9.4 Entity-Relationship Diagram</h3>
+<p>The authoritative ERD is generated from <code>prisma/schema.prisma</code> into <code>docs/erd.md</code> (Mermaid) on every <code>prisma generate</code> via <code>prisma-erd-generator</code>. Summary of the principal relationships:</p>
+<pre>User 1&mdash;0..1 TutorProfile
+TutorProfile 1&mdash;* TopicCertification | AssessmentAttempt | TutorClass | QuestionRequest | ClassAppeal
+TutorClass 1&mdash;* ClassTopic | ClassSession | ClassEnrollment ; TutorClass 1&mdash;* ClassAppeal
+ClassEnrollment *&mdash;1 User (learner)
+ClassSession 1&mdash;0..1 SessionTest
+SessionTest 1&mdash;* SessionTestQuestion (&rarr; AssessmentQuestion) | SessionTestAttempt
+SessionTestAttempt 1&mdash;* SessionTestAttemptItem (&rarr; AssessmentQuestion, AssessmentOption)
+TopicRequest *&mdash;1 User (learner) ; 1&mdash;* TopicRequestTopic | TopicRequestSlot
+TopicRequest *&mdash;0..1 TutorClass (fulfilledClass) ; *&mdash;0..1 TutorProfile (directedTutor)
+AssessmentQuestion 1&mdash;* AssessmentOption ; *&mdash;1 User (createdBy) ; *&mdash;0..1 TutorProfile (owner)
+AssessmentAttempt 1&mdash;* AssessmentAttemptItem
+Subject 1&mdash;* Topic
+AuditLog *&mdash;1 User (admin) ; Notification *&mdash;1 User ; ChatbotMiss *&mdash;0..1 User</pre>
+</section>
+
+<section>
+<h2>10. Security &amp; Privacy Architecture</h2>
+
+<h3>10.1 Authentication</h3>
+<ul>
+  <li>NextAuth Credentials provider; passwords stored only as bcrypt hashes (cost 12).</li>
+  <li>Stateless JWT sessions signed with <code>NEXTAUTH_SECRET</code>, 8-hour expiry, carried in an HTTP-only cookie.</li>
+  <li>Password reset: single-use, hashed, expiring <code>PasswordResetToken</code>; link delivered by SMTP (<code>src/lib/mail.ts</code>), console fallback when SMTP is unset.</li>
+</ul>
+
+<h3>10.2 Authorization</h3>
+<ul>
+  <li><strong>Layer 1 &mdash; edge middleware</strong> (<code>src/proxy.ts</code>): authenticated + path-prefix&hairsp;&rarr;&hairsp;role match for <code>/dashboard</code>, <code>/admin</code>, <code>/tutor</code>, <code>/learner</code>.</li>
+  <li><strong>Layer 2 &mdash; route handler</strong>: every API route re-derives the session with <code>getServerSession(authOptions)</code> and checks <code>session.user.role</code>, returning 401/403 on failure. UI affordances are never the control.</li>
+  <li><strong>Resource-scoped checks</strong>: handlers verify ownership (e.g. a tutor may only edit their own class, a learner may only open their own attempt) via <code>sessionTestAccess</code>, <code>topicRequestVisibility</code>, and explicit <code>where</code> clauses.</li>
+</ul>
+
+<h3>10.3 Double-Blind Anonymity (RA 10173)</h3>
+<div class="box priv">
+  <p><strong>Core non-negotiable constraint.</strong> Learners and tutors must never see each other's real name, e-mail, or contact info across the peer boundary.</p>
+  <ul>
+    <li>Every student receives a sequential anonymous ID at registration; peer-facing UI and API responses expose only <code>id</code> + <code>anonymousId</code> plus non-identifying attributes (grade level, section).</li>
+    <li>Peer-facing Prisma queries use explicit <code>select</code> to exclude <code>firstName</code>/<code>lastName</code>/<code>email</code>.</li>
+    <li>Admins can see real identities (required for moderation). The <code>showTutorRealNames</code> platform setting is an explicit, admin-gated, default-off override &mdash; not a normal code path.</li>
+    <li>Real name / e-mail changes require an admin route; grade level + section are self-service because they are not identity anchors.</li>
+  </ul>
+</div>
+
+<h3>10.4 Account Lifecycle</h3>
+<p><code>AccountStatus</code>: <code>ACTIVE</code>, <code>SUSPENDED</code> (optionally time-boxed via <code>statusExpiresAt</code>, auto-reactivated at next login), <code>BANNED</code>, <code>PENDING</code> (awaiting approval, cannot log in), <code>DECLINED</code> (registration rejected, reason surfaced on <code>/account-declined</code>). Classes have a parallel lifecycle (<code>ClassStatus</code>) with a tutor <code>ClassAppeal</code> path that notifies admins.</p>
+
+<h3>10.5 Auditability</h3>
+<p>Every admin moderation action (suspend/ban user, moderate class, review certification, resolve request, edit settings) writes an <code>AuditLog</code> row (<code>adminId</code>, <code>action</code>, <code>targetType</code>, <code>targetId</code>, <code>reason</code>, timestamp) through <code>src/lib/auditLog.ts</code>, surfaced read-only at <code>/admin/audit-log</code>.</p>
+</section>
+
+<section>
+<h2>11. Cross-Cutting Concerns</h2>
+<table>
+  <tr><th>Concern</th><th>Mechanism</th></tr>
+  <tr><td>Input validation</td><td>Zod schemas in <code>src/lib/validations/</code>; first error &rarr; HTTP 400 with <code>{ error }</code>.</td></tr>
+  <tr><td>Error handling</td><td>Typed status codes (400/401/403/404/409/500); server errors logged via <code>console.error</code>, generic message returned.</td></tr>
+  <tr><td>Feature flags</td><td><code>PlatformSetting</code> key/value rows read through <code>src/lib/settings.ts</code> with typed keys and defaults; edited at <code>/admin/settings</code>.</td></tr>
+  <tr><td>Notifications</td><td><code>Notification</code> rows created as side effects of lifecycle events; polled by the client bell in <code>PortalLayout</code>; per-row read-on-click. No push/real-time transport.</td></tr>
+  <tr><td>Taxonomy resolution</td><td><code>src/lib/subjects.ts</code> caches the <code>Subject</code>/<code>Topic</code> catalogue and falls back to the static <code>SUBJECT_TOPICS</code> map when the DB is unreachable (e.g. unit tests).</td></tr>
+  <tr><td>Caching</td><td>In-process caches for the class browser and subject catalogue; no external cache tier.</td></tr>
+  <tr><td>Mail</td><td>Nodemailer transport from env; console fallback keeps dev/offline usable.</td></tr>
+  <tr><td>Testing</td><td>Vitest; <code>@/lib/prisma</code> mocked via <code>vi.hoisted</code>, <code>getServerSession</code> mocked; positive, 400, 401/403, 409, and 500 paths covered per route.</td></tr>
+  <tr><td>Theming</td><td>OKLCH DaisyUI token palette in <code>src/app/globals.css</code>; components use semantic classes only.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>12. Deployment &amp; Infrastructure View</h2>
+<pre>            +---------------------------+
+            |        Browser            |   responsive web, no native app
+            +------------+--------------+
+                         | HTTPS
+            +------------v--------------+
+            |   Node.js runtime         |   single process
+            |   Next.js 16 server       |
+            |   - RSC + route handlers  |
+            |   - edge middleware       |
+            |   - NextAuth (JWT)        |
+            +----+-----------------+----+
+                 | Prisma (MariaDB |  SMTP (Nodemailer)
+                 |  adapter)       |  -> password-reset mail
+            +----v----+       +----v---------+
+            | MariaDB |       | SMTP server  |  optional; console fallback
+            | / MySQL |       +--------------+
+            +---------+</pre>
+<h4>Runtime characteristics</h4>
+<ul>
+  <li><strong>One deployable unit</strong> &mdash; <code>pnpm build</code> then <code>pnpm start</code>. No separate API service, worker, broker, or cache.</li>
+  <li><strong>Stateless app tier</strong> &mdash; sessions are JWTs, so the Node process holds no session state; horizontal scaling is possible but unnecessary at TRIS scale.</li>
+  <li><strong>Single stateful dependency</strong> &mdash; the MariaDB database. SMTP is optional.</li>
+  <li><strong>Schema changes</strong> &mdash; <code>prisma migrate deploy</code> against the versioned history in <code>prisma/migrations/</code>; seed via <code>pnpm exec tsx prisma/seed.ts</code>.</li>
+</ul>
+<h4>Required environment</h4>
+<table>
+  <tr><th>Variable</th><th>Purpose</th></tr>
+  <tr><td><code>DATABASE_URL</code></td><td>MariaDB/MySQL connection string</td></tr>
+  <tr><td><code>NEXTAUTH_URL</code></td><td>Canonical app origin</td></tr>
+  <tr><td><code>NEXTAUTH_SECRET</code></td><td>JWT signing secret (long, random, never shared)</td></tr>
+  <tr><td><code>SMTP_*</code> (host/port/user/pass/from)</td><td>Password-reset mail; omit to use console fallback</td></tr>
+</table>
+</section>
+
+<section>
+<h2>13. Source Tree Layout</h2>
+<pre>katuwang/
+  prisma/
+    schema.prisma        28 models, 17 enums  (source of truth)
+    migrations/          versioned SQL history
+    seed.ts              baseline data (id counters, admin, subjects...)
+  src/
+    app/
+      api/               ~55 REST route handlers
+        auth/[...nextauth]/  NextAuth handler
+        register/ | search/ | subjects/ | notifications/
+        admin/ | tutor/ | learner/ | classes/ | chatbot/ | dev/
+      admin/ tutor/ learner/   role portals (Server Component pages)
+      dashboard/          role dispatcher -> portal redirect
+      login/ logout/ register/ forgot-password/ reset-password/
+      pending-approval/ account-declined/ unauthorized/
+      globals.css         Tailwind 4 + DaisyUI 5 OKLCH theme
+      layout.tsx          root layout
+    components/
+      auth/ tutor/ learner/ admin/ charts/ chatbot/ providers/
+      PortalLayout, GlobalSearch, ...
+    lib/
+      auth.ts prisma.ts idGenerator.ts settings.ts
+      matching.ts browseRanking.ts
+      assessmentPicker.ts assessmentConfig.ts gradeAttempt.ts
+      sessionTestAccess.ts sessionTestResults.ts
+      moderation.ts auditLog.ts notifications.ts mail.ts
+      subjects.ts subjectTopics.ts
+      chatbot/ (classifier, intents, faq, recommend)
+      validations/ (Zod schemas)
+      __tests__/
+    proxy.ts             NextAuth edge middleware (RBAC guards)
+    types/               NextAuth session type augmentation
+  docs/                  reference, roles, plans, ERD, checklists
+  vitest.config.ts</pre>
+</section>
+
+<section>
+<h2>14. Architecture Decision Record (Summary)</h2>
+<p>Full rationale lives in <code>docs/reference/decisions.md</code> and the per-feature plans under <code>docs/plans/</code>. The decisions that shaped this architecture:</p>
+<table>
+  <tr><th>#</th><th>Decision</th><th>Rationale</th></tr>
+  <tr><td>ADR-1</td><td>Modular monolith on Next.js App Router, not a separate SPA + API</td><td>One language, one deploy, minimal ops for a school with little technical capacity; RSC removes most client data-fetching code.</td></tr>
+  <tr><td>ADR-2</td><td>Three roles only; &ldquo;Teacher Moderator&rdquo; dropped</td><td>Owner decision (2026-09-03). Moderation folds into <code>ADMIN</code>; avoids a fourth portal and guard set.</td></tr>
+  <tr><td>ADR-3</td><td>JWT session strategy (no DB session table)</td><td>Stateless app tier; school-day (8 h) lifetime; no session store to operate.</td></tr>
+  <tr><td>ADR-4</td><td>Two-layer RBAC (edge middleware + per-route re-check)</td><td>Defense in depth; middleware is coarse and fast, route handlers own resource-level authorization.</td></tr>
+  <tr><td>ADR-5</td><td>Anonymous IDs via atomic <code>IdCounter</code> increment</td><td>Race-free sequential IDs (<code>TUT-/STU-/C-</code>) without a UUID's opacity cost to users; satisfies RA 10173 double-blind.</td></tr>
+  <tr><td>ADR-6</td><td>Subjects/topics: catalogue tables + denormalized string columns (Path B)</td><td>Admin-editable taxonomy with a small blast radius; no FK migration; slug stays equal to the old enum value (lossless cast).</td></tr>
+  <tr><td>ADR-7</td><td>Global assessment config, not per-(subject, topic)</td><td>One <code>PlatformSetting</code>-backed set (question count, pass %, min bank size); the per-topic config table was removed.</td></tr>
+  <tr><td>ADR-8</td><td>Session pre/post-test scoped per <code>ClassSession</code>, one question set served twice (<code>kind</code> on the attempt)</td><td>Per-session granularity makes score change attributable to that session's material; identical question set makes per-question PRE&rarr;POST deltas meaningful.</td></tr>
+  <tr><td>ADR-9</td><td>Chatbot is deterministic intent matching, no LLM</td><td>Matches the thesis delimitation (&ldquo;no free-form generative chat&rdquo;); zero new runtime dependency; misses logged to <code>ChatbotMiss</code> to grow the FAQ.</td></tr>
+  <tr><td>ADR-10</td><td>No scheduler / queue / real-time transport</td><td>Keeps the deployment a single process; all work is request-driven; time-based reminders are explicitly out of scope.</td></tr>
+  <tr><td>ADR-11</td><td>No file upload / storage</td><td>Tutoring happens on school premises; removes a whole class of storage, quota, and moderation concerns.</td></tr>
+  <tr><td>ADR-12</td><td>Domain logic as pure modules in <code>src/lib/</code></td><td>Unit-testable without HTTP/DB; keeps route handlers thin and readable.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>15. Non-Functional Considerations &amp; Known Limitations</h2>
+<table>
+  <tr><th>Area</th><th>Current position</th><th>Extension point</th></tr>
+  <tr><td>Scalability</td><td>Single Node process + one MariaDB instance; ample for hundreds of concurrent students.</td><td>App tier is stateless (JWT) &mdash; can run multiple instances behind a load balancer; DB read replicas if ever needed.</td></tr>
+  <tr><td>Availability</td><td>No HA design; a single DB is the SPOF.</td><td>Managed MariaDB with automated backups / failover.</td></tr>
+  <tr><td>Notifications</td><td>Client-poll only; no time-based or push notifications.</td><td>Would require introducing a scheduler/queue (deliberately deferred, ADR-10).</td></tr>
+  <tr><td>Chatbot knowledge base</td><td>26 grounded FAQ entries; still pending real TRIS stakeholder interviews.</td><td>Grow from the <code>ChatbotMiss</code> table via <code>/admin/chatbot</code>.</td></tr>
+  <tr><td>Referential integrity of topics</td><td>Enforced in application code, not by FK.</td><td>Acceptable per ADR-6; a future FK rewrite (Path A) is possible but unplanned.</td></tr>
+  <tr><td>Observability</td><td><code>console.error</code> logging + the audit log; no APM/metrics stack.</td><td>Structured logging / metrics exporter if operationalized beyond TRIS.</td></tr>
+  <tr><td>Rate limiting</td><td>None at the app layer.</td><td>Reverse-proxy rate limiting for auth and registration endpoints.</td></tr>
+  <tr><td>Internationalization</td><td>English UI with Filipino domain vocabulary; not localized.</td><td>Next.js i18n routing if bilingual UI is required.</td></tr>
+</table>
+</section>
+
+<section>
+<h2>16. Appendix A &mdash; Data Model Inventory</h2>
+<p>28 models in <code>prisma/schema.prisma</code>:</p>
+<table>
+  <tr><th>Model</th><th>Purpose</th></tr>
+  <tr><td>User</td><td>Every person; identity, credentials (hash), role, grade/section, consent, account status</td></tr>
+  <tr><td>PasswordResetToken</td><td>Single-use, hashed, expiring reset tokens</td></tr>
+  <tr><td>TutorProfile</td><td>1:1 extension of a tutor User; anchor for certifications, classes, attempts</td></tr>
+  <tr><td>TopicCertification</td><td>Per-(tutor, subject, topic) qualification state (PENDING/CERTIFIED/REJECTED)</td></tr>
+  <tr><td>IdCounter</td><td>Atomic counters for TUT-/STU-/C- sequential IDs</td></tr>
+  <tr><td>Subject / Topic</td><td>Admin-editable subject taxonomy + validation source</td></tr>
+  <tr><td>TutorClass</td><td>Course container: subject, target grade, capacity, location/link, status</td></tr>
+  <tr><td>ClassTopic</td><td>Topics covered by a class (child rows)</td></tr>
+  <tr><td>ClassSession</td><td>One scheduled meeting within a class, tackling one topic</td></tr>
+  <tr><td>ClassEnrollment</td><td>Learner&harr;class join with unique (classId, learnerId)</td></tr>
+  <tr><td>ClassAppeal</td><td>Tutor appeal against class moderation; admin-reviewed</td></tr>
+  <tr><td>TopicRequest / TopicRequestTopic / TopicRequestSlot</td><td>Learner &ldquo;class request&rdquo; ticket with topics and availability slots; public or directed</td></tr>
+  <tr><td>AssessmentQuestion / AssessmentOption</td><td>MCQ bank; <code>origin</code> BANK (admin) or TUTOR (self-authored)</td></tr>
+  <tr><td>AssessmentAttempt / AssessmentAttemptItem</td><td>A tutor's certification quiz run and its per-question answers</td></tr>
+  <tr><td>QuestionRequest</td><td>Tutor request for more bank questions on a topic</td></tr>
+  <tr><td>SessionTest / SessionTestQuestion</td><td>One diagnostic test per ClassSession; ordered question set drawn from the bank + tutor questions</td></tr>
+  <tr><td>SessionTestAttempt / SessionTestAttemptItem</td><td>A learner's PRE or POST run of a session test (<code>kind</code> on the attempt) and its answers</td></tr>
+  <tr><td>PlatformSetting</td><td>Key/value runtime feature flags &amp; assessment config</td></tr>
+  <tr><td>Notification</td><td>Per-user in-app notification (type, message, link, readAt)</td></tr>
+  <tr><td>AuditLog</td><td>Immutable record of admin moderation actions</td></tr>
+  <tr><td>ChatbotMiss</td><td>Unmatched chatbot queries, for growing the FAQ</td></tr>
+</table>
+</section>
+
+<section>
+<h2>17. Appendix B &mdash; API Surface Summary</h2>
+<p>~55 route handlers under <code>src/app/api/</code>. Grouped by consumer:</p>
+<table>
+  <tr><th>Prefix</th><th>Consumer</th><th>Representative endpoints</th></tr>
+  <tr><td><code>/api/auth/*</code></td><td>All</td><td><code>[...nextauth]</code> (login/session), <code>forgot-password</code>, <code>reset-password</code></td></tr>
+  <tr><td><code>/api/register</code></td><td>Public</td><td>Learner + tutor registration (discriminated body)</td></tr>
+  <tr><td><code>/api/subjects</code>, <code>/api/search</code>, <code>/api/notifications</code>, <code>/api/chatbot</code></td><td>Authenticated (role-scoped results)</td><td>Taxonomy read, global quick search, notification list/read, chatbot turn</td></tr>
+  <tr><td><code>/api/learner/*</code></td><td>STUDENT_LEARNER</td><td><code>match</code>, <code>topic-requests</code>, <code>tutors</code>, <code>profile</code>, <code>progress</code>, <code>session-test-attempts/**</code></td></tr>
+  <tr><td><code>/api/tutor/*</code></td><td>STUDENT_TUTOR</td><td><code>classes/**</code> (+ <code>sessions/**</code>, <code>test/**</code>, <code>appeal</code>), <code>assessments/**</code>, <code>question-bank</code>, <code>questions/**</code>, <code>question-requests</code>, <code>topic-requests/[id]/accept</code>, <code>students</code>, <code>profile</code>, <code>topic-certifications</code></td></tr>
+  <tr><td><code>/api/classes/*</code></td><td>Learner (enroll)</td><td><code>classes</code> (browse), <code>classes/[id]/enroll</code></td></tr>
+  <tr><td><code>/api/admin/*</code></td><td>ADMIN</td><td><code>users/**</code>, <code>registrations/**</code>, <code>classes/**</code>, <code>class-appeals/**</code>, <code>topic-requests/**</code>, <code>certifications/**</code>, <code>assessment-questions/**</code>, <code>assessment-attempts/**</code>, <code>assessment-configs</code>, <code>question-requests/**</code>, <code>session-tests/**</code>, <code>subjects/**</code>, <code>topics/**</code>, <code>settings</code>, <code>reports</code>, <code>audit-log</code>, <code>chatbot-misses</code></td></tr>
+</table>
+<p class="small">All non-public routes: authenticate with <code>getServerSession(authOptions)</code> &rarr; check <code>session.user.role</code> &rarr; Zod-validate body &rarr; execute (transaction where multi-row) &rarr; return payload or <code>{ error }</code> with a typed status code.</p>
+</section>
+
+<hr>
+<p class="small">End of document &mdash; Katuwang Finalized Architecture Design v1.0, 8 September 2026. Generated from the implemented system on <code>main</code>. The living sources are <code>prisma/schema.prisma</code>, <code>src/</code>, and the reference docs under <code>docs/</code>.</p>
+
+</body>
+</html>

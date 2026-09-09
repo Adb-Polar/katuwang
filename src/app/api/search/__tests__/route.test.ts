@@ -8,6 +8,7 @@ const {
   tutorProfileFindUnique,
   topicRequestFindMany,
   getSubjectsMock,
+  resolveSubjectSlugsMock,
   getSettingMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
@@ -16,6 +17,7 @@ const {
   tutorProfileFindUnique: vi.fn(),
   topicRequestFindMany: vi.fn(),
   getSubjectsMock: vi.fn(),
+  resolveSubjectSlugsMock: vi.fn(),
   getSettingMock: vi.fn(),
 }));
 
@@ -28,18 +30,25 @@ vi.mock("@/lib/prisma", () => ({
     topicRequest: { findMany: topicRequestFindMany },
   },
 }));
-vi.mock("@/lib/subjects", () => ({ getSubjects: getSubjectsMock }));
+vi.mock("@/lib/subjects", () => ({
+  getSubjects: getSubjectsMock,
+  resolveSubjectSlugs: resolveSubjectSlugsMock,
+}));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 // browseClassesWhere is a pure helper — keep the real one.
 
 import { GET } from "@/app/api/search/route";
 
-const req = (q: string) => new NextRequest(`http://localhost/api/search?q=${encodeURIComponent(q)}`);
+const req = (q: string, scope?: string) =>
+  new NextRequest(
+    `http://localhost/api/search?q=${encodeURIComponent(q)}${scope ? `&scope=${scope}` : ""}`,
+  );
 
 describe("GET /api/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(false);
+    resolveSubjectSlugsMock.mockResolvedValue([]);
     getSubjectsMock.mockResolvedValue([
       { slug: "MATH", name: "Mathematics", topics: [{ name: "Linear equations" }, { name: "Fractions" }] },
     ]);
@@ -95,5 +104,34 @@ describe("GET /api/search", () => {
     expect(g).toBeTruthy();
     expect(g.items[0].href).toBe("/tutor/requests/r1/accept");
     expect(g.items[0].subtitle).toBe("Directed to you");
+  });
+
+  it("learner scope=classCode: only searches the class code, no tutor/topic groups", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    const json = await (await GET(req("C-0231", "classCode"))).json();
+    const kinds = json.groups.map((g: { kind: string }) => g.kind);
+    expect(kinds).not.toContain("tutor");
+    expect(kinds).not.toContain("topic");
+    expect(classFindMany.mock.calls[0][0].where.OR).toEqual([{ code: { contains: "C-0231" } }]);
+    expect(userFindMany).not.toHaveBeenCalled();
+  });
+
+  it("learner scope=tutorCode: only searches tutors by anonymous ID", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    const json = await (await GET(req("TUT-0148", "tutorCode"))).json();
+    const kinds = json.groups.map((g: { kind: string }) => g.kind);
+    expect(kinds).toEqual(["tutor"]);
+    expect(classFindMany).not.toHaveBeenCalled();
+    expect(userFindMany.mock.calls[0][0].where.OR).toEqual([{ anonymousId: { contains: "TUT-0148" } }]);
+  });
+
+  it("learner scope=subject: resolves a subject name to slugs for the class query", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);
+    await GET(req("Mathematics", "subject"));
+    expect(classFindMany.mock.calls[0][0].where.OR).toEqual(
+      expect.arrayContaining([{ subject: { in: ["MATH"] } }]),
+    );
+    expect(userFindMany).not.toHaveBeenCalled();
   });
 });

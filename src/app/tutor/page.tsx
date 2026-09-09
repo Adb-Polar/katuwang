@@ -16,7 +16,7 @@ import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
-import WeeklyTimetable from "@/components/tutor/WeeklyTimetable";
+import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 
 function fmt(d: Date) {
   return d.toLocaleString(undefined, {

@@ -7,6 +7,7 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
 import { browseClassesWhere, myClassesWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
 import { rankBrowseClasses, BrowseRankContext } from "@/lib/browseRanking";
+import { resolveSubjectSlugs } from "@/lib/subjects";
 
 const DEFAULT_PAGE_SIZE = 12;
 const MAX_PAGE_SIZE = 50;
@@ -67,6 +68,10 @@ export async function GET(req: NextRequest) {
     const subjectParam = searchParams.get("subject");
     const gradeParam = searchParams.get("gradeLevel");
 
+    // `TutorClass.subject` stores the slug, so free-text "Mathematics" only
+    // reaches those rows once resolved to slugs against the subject catalog.
+    const qSubjectSlugs = q ? await resolveSubjectSlugs(q) : [];
+
     const listFilters: Prisma.TutorClassWhereInput = {
       ...(subjectParam ? { subject: subjectParam } : {}),
       ...(gradeParam && gradeParam in GradeLevel ? { gradeLevel: gradeParam as GradeLevel } : {}),
@@ -74,6 +79,8 @@ export async function GET(req: NextRequest) {
         ? {
             OR: [
               { code: { contains: q } },
+              { subject: { contains: q } },
+              ...(qSubjectSlugs.length ? [{ subject: { in: qSubjectSlugs } }] : []),
               { topics: { some: { topic: { contains: q } } } },
               { tutorProfile: { user: { anonymousId: { contains: q } } } },
             ],

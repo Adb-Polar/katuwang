@@ -37,8 +37,18 @@ describe("GET /api/learner/tutors", () => {
           ],
           _count: { classes: 2 },
           classes: [
-            { sessions: [{ scheduledAt: new Date("2999-01-02T08:00:00Z") }] },
-            { sessions: [{ scheduledAt: new Date("2999-01-01T08:00:00Z") }] },
+            {
+              code: "C-0001",
+              subject: "MATH",
+              topics: [{ topic: "Linear equations" }],
+              sessions: [{ scheduledAt: new Date("2999-01-02T08:00:00Z") }],
+            },
+            {
+              code: "C-0002",
+              subject: "SCIENCE",
+              topics: [{ topic: "Forces" }],
+              sessions: [{ scheduledAt: new Date("2999-01-01T08:00:00Z") }],
+            },
           ],
         },
       },
@@ -60,20 +70,33 @@ describe("GET /api/learner/tutors", () => {
       anonymousId: "TUT-0148",
       verifiedTopicCount: 3,
       subjects: ["MATH", "SCIENCE"],
+      verifiedClasses: [
+        { code: "C-0001", subject: "MATH" },
+        { code: "C-0002", subject: "SCIENCE" },
+      ],
       publishedClassCount: 2,
       nextSessionAt: "2999-01-01T08:00:00.000Z",
     });
     expect(json.tutors[0].name).toBeUndefined();
   });
 
-  it("passes the subject filter into the certification where clause", async () => {
+  it("legacy single ?subject= filters to a CERTIFIED cert in that subject", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     await GET(req("http://localhost/api/learner/tutors?subject=SCIENCE"));
     const call = findManyMock.mock.calls[0][0];
-    expect(call.where.tutorProfile.topicCertifications.some).toMatchObject({
-      status: "CERTIFIED",
-      subject: "SCIENCE",
-    });
+    expect(call.where.tutorProfile.AND).toEqual([
+      { topicCertifications: { some: { status: "CERTIFIED", subject: "SCIENCE" } } },
+    ]);
+  });
+
+  it("multi-select ?subjects= ANDs one CERTIFIED clause per subject", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    await GET(req("http://localhost/api/learner/tutors?subjects=MATH,SCIENCE"));
+    const call = findManyMock.mock.calls[0][0];
+    expect(call.where.tutorProfile.AND).toEqual([
+      { topicCertifications: { some: { status: "CERTIFIED", subject: "MATH" } } },
+      { topicCertifications: { some: { status: "CERTIFIED", subject: "SCIENCE" } } },
+    ]);
   });
 
   it("includes the real name only when showTutorRealNames is on", async () => {

@@ -5,20 +5,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 
 export const metadata = {
   title: "Learner Portal | Katuwang",
 };
-
-function fmt(d: Date) {
-  return d.toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default async function LearnerDashboard() {
   const session = await getServerSession(authOptions);
@@ -27,7 +18,7 @@ export default async function LearnerDashboard() {
   const now = new Date();
   const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  const [enrolledCount, openRequestCount, upcomingSessions, sessionsThisWeek] = await Promise.all([
+  const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
     prisma.classEnrollment.count({ where: { learnerId } }),
     prisma.topicRequest.count({ where: { learnerId, status: "OPEN" } }),
     prisma.classSession.findMany({
@@ -46,19 +37,54 @@ export default async function LearnerDashboard() {
         class: { select: { id: true, subject: true } },
       },
     }),
-    prisma.classSession.count({
+    prisma.classSession.findMany({
       where: {
         status: "SCHEDULED",
         scheduledAt: { gt: now, lte: weekAhead },
         class: { enrollments: { some: { learnerId } } },
       },
+      orderBy: { scheduledAt: "asc" },
+      select: {
+        id: true,
+        topic: true,
+        scheduledAt: true,
+        duration: true,
+        class: { select: { id: true, subject: true } },
+      },
     }),
   ]);
 
+  const timetableSessions = weeklySessions.map((s) => ({
+    id: s.id,
+    topic: s.topic,
+    subject: s.class.subject,
+    classId: s.class.id,
+    scheduledAt: s.scheduledAt.toISOString(),
+    duration: s.duration,
+  }));
+
   const stats = [
-    { label: "Enrolled classes", value: enrolledCount, href: "/learner/my-classes", icon: BookOpen },
-    { label: "Sessions this week", value: sessionsThisWeek, href: "/learner/my-classes", icon: CalendarClock },
-    { label: "Open requests", value: openRequestCount, href: "/learner/requests", icon: Inbox },
+    {
+      label: "Enrolled classes",
+      value: enrolledCount,
+      href: "/learner/my-classes",
+      icon: BookOpen,
+      tint: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Sessions this week",
+      value: weeklySessions.length,
+      href: "/learner/my-classes",
+      icon: CalendarClock,
+      tint: "bg-secondary/10 text-secondary",
+    },
+    {
+      label: "Open requests",
+      value: openRequestCount,
+      href: "/learner/requests",
+      icon: Inbox,
+      tint: "bg-accent/10 text-accent",
+    },
   ];
 
   return (
@@ -75,15 +101,15 @@ export default async function LearnerDashboard() {
           <Link
             key={s.label}
             href={s.href}
-            className="card kt-card kt-stat p-5 hover:border-primary/40 transition-colors"
+            className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
           >
-            <div className="kt-stat-top">
-              <span className="kt-tile w-9 h-9">
-                <s.icon className="h-4 w-4" />
-              </span>
+            <div>
               <span className="kt-stat-title">{s.label}</span>
+              <span className="kt-stat-value">{s.value}</span>
             </div>
-            <span className="kt-stat-value">{s.value}</span>
+            <span className={`p-2 rounded-lg shrink-0 ${s.tint}`}>
+              <s.icon className="h-4 w-4" />
+            </span>
           </Link>
         ))}
       </div>
@@ -91,31 +117,48 @@ export default async function LearnerDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
-            <h2 className="card-title text-sm font-bold">Upcoming sessions</h2>
+            <h2 className="card-title text-sm font-bold flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-primary" />
+              Upcoming sessions
+            </h2>
             {upcomingSessions.length === 0 ? (
               <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
                 No scheduled sessions yet. Browse classes to enroll.
               </p>
             ) : (
-              <ul className="divide-y divide-base-200">
-                {upcomingSessions.map((s) => (
-                  <li key={s.id}>
-                    <Link
-                      href={`/learner/classes/${s.class.id}`}
-                      className="flex items-center justify-between gap-3 py-2.5 text-xs hover:bg-base-200/40 -mx-2 px-2 rounded"
-                    >
-                      <div className="min-w-0">
-                        <span className="kt-badge kt-badge--neutral uppercase mr-2">
-                          {s.class.subject}
-                        </span>
-                        <span className="text-base-content/80">{s.topic}</span>
-                      </div>
-                      <span className="text-base-content/60 shrink-0">
-                        {fmt(s.scheduledAt)} · {s.duration}m
-                      </span>
-                    </Link>
-                  </li>
-                ))}
+              <ul className="space-y-2">
+                {upcomingSessions.map((s) => {
+                  const d = new Date(s.scheduledAt);
+                  return (
+                    <li key={s.id}>
+                      <Link
+                        href={`/learner/classes/${s.class.id}?from=browse`}
+                        className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
+                      >
+                        <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
+                          <span className="text-2xs font-bold uppercase leading-none">
+                            {d.toLocaleDateString(undefined, { weekday: "short" })}
+                          </span>
+                          <span className="text-base font-bold leading-tight">{d.getDate()}</span>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
+                              {s.class.subject}
+                            </span>
+                            <span className="text-sm font-semibold text-base-content/85 truncate">
+                              {s.topic}
+                            </span>
+                          </div>
+                          <p className="text-2xs text-base-content/55 mt-0.5">
+                            {d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                            {s.duration} min
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </div>
@@ -144,6 +187,23 @@ export default async function LearnerDashboard() {
           </div>
         </section>
       </div>
+
+      <section className="card kt-card">
+        <div className="card-body gap-2">
+          <h2 className="card-title text-sm font-bold flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            This week
+          </h2>
+          <p className="text-2xs text-base-content/50">
+            Sessions across your enrolled classes over the next 7 days.
+          </p>
+          <WeeklyTimetable
+            sessions={timetableSessions}
+            hrefFor={(classId) => `/learner/classes/${classId}?from=browse`}
+            emptyMessage="No sessions in the next 7 days. Browse classes to enroll."
+          />
+        </div>
+      </section>
     </div>
   );
 }

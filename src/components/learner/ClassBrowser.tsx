@@ -204,7 +204,9 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                     tutorAnonymousId={c.tutor.anonymousId}
                     tutorName={c.tutor.name}
                     tutorSection={c.tutor.section}
-                    onClick={() => router.push(`/learner/classes/${c.id}`)}
+                    onClick={() =>
+                      router.push(`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`)
+                    }
                   />
                 ))}
               </div>

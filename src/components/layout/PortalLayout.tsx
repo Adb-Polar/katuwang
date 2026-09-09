@@ -34,6 +34,8 @@ interface PortalLayoutProps {
   notificationsHref?: string;
   /** portal-specific Help & FAQs page, e.g. "/tutor/help"; drives the topbar help button */
   helpHref?: string;
+  /** portal-specific profile page, e.g. "/learner/profile"; makes the topbar avatar a link */
+  profileHref?: string;
   /** when true, mounts the floating intent-based help assistant */
   chatbotEnabled?: boolean;
   children: React.ReactNode;
@@ -49,6 +51,7 @@ export default function PortalLayout({
   unreadCount = 0,
   notificationsHref = "/dashboard",
   helpHref,
+  profileHref,
   chatbotEnabled = false,
   children,
 }: PortalLayoutProps) {
@@ -184,9 +187,15 @@ export default function PortalLayout({
             </button>
           )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
-          <span className="kt-avatar" aria-hidden="true">
-            {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
-          </span>
+          {profileHref ? (
+            <Link href={profileHref} className="kt-avatar" aria-label="Your profile">
+              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            </Link>
+          ) : (
+            <span className="kt-avatar" aria-hidden="true">
+              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            </span>
+          )}
         </header>
 
         <main className="flex-1 p-4 md:p-8">

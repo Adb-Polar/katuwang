@@ -34,12 +34,12 @@ export default function DeltaBar({
           <p className="py-8 text-center text-xs italic text-base-content/40">{emptyHint}</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
-            {rows.map((r) => {
+            {rows.map((r, i) => {
               const d = r.delta;
               const pct = d == null ? 0 : (Math.abs(d) / maxAbs) * 50;
               const down = d != null && d < 0;
               return (
-                <li key={r.label} className="flex items-center gap-3 text-xs">
+                <li key={`${r.label}::${i}`} className="flex items-center gap-3 text-xs">
                   <span className="w-20 shrink-0 font-mono text-base-content/70">{r.label}</span>
                   <div className="relative h-4 flex-1 rounded bg-base-200">
                     <span className="absolute inset-y-0 left-1/2 w-px bg-base-300" />
@@ -84,8 +84,8 @@ export default function DeltaBar({
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
-                <tr key={r.label}>
+              {rows.map((r, i) => (
+                <tr key={`${r.label}::${i}`}>
                   <td className="text-base-content/70 font-mono">{r.label}</td>
                   <td className="text-right">{r.pre == null ? "—" : `${r.pre}${unit}`}</td>
                   <td className="text-right">{r.post == null ? "—" : `${r.post}${unit}`}</td>

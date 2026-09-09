@@ -49,6 +49,7 @@ export default async function LearnerLayout({
       unreadCount={unreadCount}
       notificationsHref="/learner/notifications"
       helpHref="/learner/help"
+      profileHref="/learner/profile"
       chatbotEnabled={chatbotEnabled}
     >
       {children}

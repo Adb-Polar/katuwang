@@ -22,12 +22,22 @@ const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
   topic: <Tag className="h-3.5 w-3.5 text-base-content/40" />,
 };
 
+const SCOPES = [
+  { value: "all", label: "Everything", placeholder: "Search classes, tutors, topics…" },
+  { value: "tutorCode", label: "Tutor code", placeholder: "Search by tutor code, e.g. TUT-0007" },
+  { value: "subject", label: "Subject", placeholder: "Search by subject, e.g. Mathematics" },
+  { value: "topic", label: "Topic", placeholder: "Search by topic, e.g. Fractions" },
+  { value: "classCode", label: "Class code", placeholder: "Search by class code" },
+] as const;
+type Scope = (typeof SCOPES)[number]["value"];
+
 export default function GlobalSearch() {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [q, setQ] = useState("");
+  const [scope, setScope] = useState<Scope>("all");
   const [groups, setGroups] = useState<SearchGroup[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -51,7 +61,9 @@ export default function GlobalSearch() {
       }
       if (!cancelled) setLoading(true);
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(term)}`);
+        const res = await fetch(
+          `/api/search?q=${encodeURIComponent(term)}&scope=${scope}`,
+        );
         if (!res.ok) throw new Error();
         const json = await res.json();
         if (cancelled) return;
@@ -67,7 +79,7 @@ export default function GlobalSearch() {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [q]);
+  }, [q, scope]);
 
   // ⌘K / Ctrl+K / "/" focuses the box from anywhere.
   useEffect(() => {
@@ -125,9 +137,26 @@ export default function GlobalSearch() {
 
   const term = q.trim();
   const showPanel = open && term.length >= 2;
+  const scopePlaceholder =
+    SCOPES.find((s) => s.value === scope)?.placeholder ?? "Search…";
 
   return (
     <div ref={rootRef} className="kt-search relative hidden sm:flex">
+      <select
+        aria-label="Search scope"
+        value={scope}
+        onChange={(e) => {
+          setScope(e.target.value as Scope);
+          setOpen(true);
+        }}
+        className="shrink-0 border-r border-base-300 bg-transparent pr-1.5 text-2xs font-medium text-base-content/60 focus:outline-none"
+      >
+        {SCOPES.map((s) => (
+          <option key={s.value} value={s.value}>
+            {s.label}
+          </option>
+        ))}
+      </select>
       <Search className="h-4 w-4 shrink-0" />
       <input
         ref={inputRef}
@@ -138,7 +167,7 @@ export default function GlobalSearch() {
         role="combobox"
         aria-expanded={showPanel}
         aria-controls="global-search-results"
-        placeholder="Search classes, tutors, topics, requests…"
+        placeholder={scopePlaceholder}
         aria-label="Search"
         value={q}
         onChange={(e) => {

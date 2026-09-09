@@ -19,10 +19,15 @@ export const metadata = {
 
 export default async function LearnerClassDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ classId: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { classId } = await params;
+  const { from } = await searchParams;
+  // Return the in-page "Back" link to whichever list the learner came from.
+  const backHref = from === "my-classes" ? "/learner/my-classes" : "/learner/classes";
   const session = await getServerSession(authOptions);
 
   await reinstateExpiredClasses();
@@ -89,7 +94,7 @@ export default async function LearnerClassDetailPage({
           You&apos;re still enrolled. Your tutor has temporarily hidden the class details —
           check back once it&apos;s published again.
         </p>
-        <Link href="/learner/classes" className="btn btn-neutral btn-sm">
+        <Link href="/learner/my-classes" className="btn btn-neutral btn-sm">
           Back to my classes
         </Link>
       </div>
@@ -104,7 +109,7 @@ export default async function LearnerClassDetailPage({
 
   return (
     <ClassDetailsView
-      backHref="/learner/classes"
+      backHref={backHref}
       code={tutorClass.code}
       subject={tutorClass.subject}
       topics={tutorClass.topics.map((t) => t.topic)}

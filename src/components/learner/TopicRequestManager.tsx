@@ -63,6 +63,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
 
   const startEdit = (r: TopicRequest) => {
     setError("");
+    setShowForm(false);
     setEditId(r.id);
     setEditCriteria({
       subject: r.subject,
@@ -100,6 +101,11 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       setSavingEdit(false);
     }
   };
+
+  const editingRequest = editId ? requests.find((r) => r.id === editId) ?? null : null;
+  // Adding or editing takes over the panel — the list and the "New request"
+  // button are hidden until the learner is done.
+  const formMode = showForm || editId !== null;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,21 +164,28 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="flex items-center justify-between">
-            <h2 className="card-title text-sm font-bold">Your class requests</h2>
-            <button
-              onClick={() => {
-                setShowForm((v) => !v);
-                setError("");
-              }}
-              className="btn btn-primary btn-sm text-xs gap-1"
-            >
-              {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-              {showForm ? "Close" : "New request"}
-            </button>
+            <h2 className="card-title text-sm font-bold">
+              {editId ? "Edit request" : showForm ? "New request" : "Your class requests"}
+            </h2>
+            {!formMode && (
+              <button
+                onClick={() => {
+                  setShowForm(true);
+                  setError("");
+                }}
+                className="btn btn-primary btn-sm text-xs gap-1"
+              >
+                <Plus className="h-4 w-4" />
+                New request
+              </button>
+            )}
           </div>
-          <p className="text-xs text-base-content/60">
-            Post what you want to learn and when you&apos;re free. A tutor can attach a class, then you review and enroll.
-          </p>
+
+          {!formMode && (
+            <p className="text-xs text-base-content/60">
+              Post what you want to learn and when you&apos;re free. A tutor can attach a class, then you review and enroll.
+            </p>
+          )}
 
           {showForm && (
             <form onSubmit={submit} className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20">
@@ -187,13 +200,66 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                 />
                 <CharCount value={note} max={500} />
               </FormField>
-              <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
-                {submitting ? <span className="loading loading-spinner loading-xs" /> : "Post request"}
-              </button>
+              <div className="flex items-center gap-2">
+                <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
+                  {submitting ? <span className="loading loading-spinner loading-xs" /> : "Post request"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false);
+                    resetForm();
+                    setError("");
+                  }}
+                  className="btn btn-ghost btn-sm text-xs gap-1"
+                >
+                  <X className="h-4 w-4" />
+                  Back to requests
+                </button>
+              </div>
             </form>
           )}
 
-          {loading ? (
+          {editingRequest && (
+            <form
+              onSubmit={saveEdit}
+              className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20"
+            >
+              <div className="flex items-center gap-2 text-2xs text-base-content/50">
+                <span className="badge badge-neutral text-2xs font-bold uppercase">
+                  {editingRequest.subject}
+                </span>
+                Editing your open request
+              </div>
+              <MatchCriteriaFields value={editCriteria} onChange={setEditCriteria} />
+              <FormField label="Note" hint="Optional — anything a tutor should know.">
+                <textarea
+                  value={editNote}
+                  onChange={(e) => setEditNote(e.target.value)}
+                  className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                  placeholder="e.g. I struggle with word problems the most."
+                />
+              </FormField>
+              <div className="flex items-center gap-2">
+                <button type="submit" disabled={savingEdit} className="btn btn-primary btn-sm text-xs">
+                  {savingEdit ? <span className="loading loading-spinner loading-xs" /> : "Save changes"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditId(null);
+                    setError("");
+                  }}
+                  className="btn btn-ghost btn-sm text-xs gap-1"
+                >
+                  <X className="h-4 w-4" />
+                  Back to requests
+                </button>
+              </div>
+            </form>
+          )}
+
+          {formMode ? null : loading ? (
             <div className="flex justify-center py-10">
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
@@ -205,7 +271,6 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             <div className="space-y-3">
               {requests.map((r) => {
                 const meta = STATUS_TONE[r.status];
-                const editing = editId === r.id;
                 return (
                   <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
                     <div className="flex items-start justify-between gap-2">
@@ -219,7 +284,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                           {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}
                         </span>
                       </div>
-                      {!editing && (r.status === "OPEN" || r.status === "ACCEPTED") && (
+                      {(r.status === "OPEN" || r.status === "ACCEPTED") && (
                         <div className="flex items-center gap-1 shrink-0">
                           {r.status === "OPEN" && (
                             <button
@@ -240,39 +305,6 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                       )}
                     </div>
 
-                    {editing ? (
-                      <form
-                        onSubmit={saveEdit}
-                        className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20 mt-1"
-                      >
-                        <MatchCriteriaFields value={editCriteria} onChange={setEditCriteria} />
-                        <FormField label="Note" hint="Optional — anything a tutor should know.">
-                          <textarea
-                            value={editNote}
-                            onChange={(e) => setEditNote(e.target.value)}
-                            className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
-                            placeholder="e.g. I struggle with word problems the most."
-                          />
-                        </FormField>
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="submit"
-                            disabled={savingEdit}
-                            className="btn btn-primary btn-sm text-xs"
-                          >
-                            {savingEdit ? <span className="loading loading-spinner loading-xs" /> : "Save changes"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditId(null)}
-                            className="btn btn-ghost btn-sm text-xs"
-                          >
-                            Discard
-                          </button>
-                        </div>
-                      </form>
-                    ) : (
-                      <>
                     <div className="flex flex-wrap gap-1">
                       {r.topics.map((t) => (
                         <span key={t} className="badge badge-outline badge-sm text-2xs py-2.5">
@@ -294,8 +326,6 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
-                      </>
-                    )}
 
                     {r.status === "ACCEPTED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">

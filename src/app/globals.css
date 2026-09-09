@@ -236,12 +236,14 @@ b, strong { font-weight: var(--font-weight-bold); }
     font-family: var(--font-mono); font-size: 0.72rem; font-weight: var(--font-weight-bold);
     background: var(--kt-tint-tutor); color: var(--kt-tutor-text);
   }
+  a.kt-avatar { text-decoration: none; transition: filter 0.15s ease; }
+  a.kt-avatar:hover { filter: brightness(0.93); }
 
   .kt-stat { display: flex; flex-direction: column; gap: 0.75rem; }
   .kt-stat-top { display: flex; align-items: center; gap: 0.75rem; }
   .kt-stat-top .kt-tile { width: 2.25rem; height: 2.25rem; font-size: 0.8rem; }
-  .kt-stat-title { font-size: 0.85rem; font-weight: 500; color: var(--kt-muted); }
-  .kt-stat-value { font-family: var(--font-mono); font-size: 1.9rem; letter-spacing: -0.02em; }
+  .kt-stat-title { display: block; font-size: 0.85rem; font-weight: 500; color: var(--kt-muted); }
+  .kt-stat-value { display: block; font-family: var(--font-mono); font-size: 1.9rem; letter-spacing: -0.02em; }
   .kt-delta {
     font-family: var(--font-mono); font-size: 0.72rem; padding: 0.12em 0.5em; border-radius: 999px;
     background: var(--kt-tint-success); color: var(--color-success);

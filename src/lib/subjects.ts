@@ -109,6 +109,22 @@ export async function getSubjectSlugs(): Promise<string[]> {
   return (await getSubjects()).map((s) => s.slug);
 }
 
+/**
+ * Active subject slugs whose display `name` or `slug` contains `q`
+ * (case-insensitive). `TutorClass.subject` stores the slug, so this is how a
+ * free-text search by subject *name* ("Mathematics") reaches those rows.
+ * Returns `[]` for a blank/no-match query.
+ */
+export async function resolveSubjectSlugs(q: string): Promise<string[]> {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [];
+  return (await getSubjects())
+    .filter(
+      (s) => s.name.toLowerCase().includes(needle) || s.slug.toLowerCase().includes(needle),
+    )
+    .map((s) => s.slug);
+}
+
 export async function subjectExists(slug: string, opts: { includeInactive?: boolean } = {}): Promise<boolean> {
   const all = await loadAll();
   const s = all.find((x) => x.slug === slug);

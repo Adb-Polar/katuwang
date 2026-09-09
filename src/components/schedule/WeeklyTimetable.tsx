@@ -13,16 +13,19 @@ export interface TimetableSession {
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 /**
- * A Mon–Sun grid of the tutor's sessions in the next 7 days — one column per
- * weekday, each a time-ordered stack of session chips. Replaces the flat
- * "weekly schedule" list on the dashboard.
+ * A Mon–Sun grid of sessions in the next 7 days — one column per weekday, each a
+ * time-ordered stack of session chips. Used on the tutor dashboard and (with a
+ * learner-facing `hrefFor`) the learner dashboard + tutor-profile page.
  */
 export default function WeeklyTimetable({
   sessions,
   emptyMessage = "No sessions in the next 7 days.",
+  hrefFor = (classId) => `/tutor/classes/${classId}`,
 }: {
   sessions: TimetableSession[];
   emptyMessage?: string;
+  /** where a session chip links to; defaults to the tutor class page */
+  hrefFor?: (classId: string) => string;
 }) {
   if (sessions.length === 0) {
     return (
@@ -55,7 +58,7 @@ export default function WeeklyTimetable({
               byDay[i].map((s) => (
                 <Link
                   key={s.id}
-                  href={`/tutor/classes/${s.classId}`}
+                  href={hrefFor(s.classId)}
                   className="block rounded-md bg-primary/10 hover:bg-primary/20 border border-primary/20 px-1.5 py-1 text-2xs transition-colors"
                 >
                   <div className="font-bold text-primary/90">

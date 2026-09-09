@@ -28,6 +28,20 @@ export default function ProfileEditForm({
   const [contactError, setContactError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Live feedback while typing a number: once the value is all phone characters
+  // (digits / spaces / + ( ) . -), hold it to the PH mobile format immediately
+  // rather than waiting for submit. A free-text handle is left alone.
+  const validateContactLive = (next: string) => {
+    const trimmed = next.trim();
+    const looksNumeric = /\d/.test(trimmed) && /^[\d\s()+.-]+$/.test(trimmed);
+    if (!looksNumeric) {
+      setContactError("");
+      return;
+    }
+    const check = normalizeContactInfo(next);
+    setContactError(check.ok ? "" : check.error);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -103,10 +117,12 @@ export default function ProfileEditForm({
       >
         <input
           type="text"
+          inputMode="tel"
+          autoComplete="tel"
           value={contactInfo}
           onChange={(e) => {
             setContactInfo(e.target.value);
-            if (contactError) setContactError("");
+            validateContactLive(e.target.value);
           }}
           className="input input-bordered input-md text-sm w-full"
           placeholder="0917 123 4567"

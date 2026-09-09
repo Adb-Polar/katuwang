@@ -18,6 +18,7 @@ interface TutorRow {
   section?: string;
   verifiedTopicCount: number;
   subjects: string[];
+  verifiedClasses: { code: string; subject: string }[];
   publishedClassCount: number;
   nextSessionAt: string | null;
 }
@@ -32,7 +33,10 @@ export default function TutorBrowser() {
   const router = useRouter();
   const { subjects: catalog } = useSubjectCatalog();
   const [q, setQ] = useState("");
-  const [subject, setSubject] = useState("");
+  const [subjects, setSubjects] = useState<string[]>([]);
+
+  const toggleSubject = (slug: string) =>
+    setSubjects((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug]));
 
   const {
     data: tutors,
@@ -48,7 +52,7 @@ export default function TutorBrowser() {
     "tutors",
     {
       ...(q.trim() ? { q: q.trim() } : {}),
-      ...(subject ? { subject } : {}),
+      ...(subjects.length ? { subjects: [...subjects].sort().join(",") } : {}),
     },
     PAGE_SIZE,
     "Could not load tutors.",
@@ -61,7 +65,7 @@ export default function TutorBrowser() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
+          <div className="space-y-2.5">
             <label className="input input-bordered input-sm flex items-center gap-2 text-xs">
               <Search className="h-3.5 w-3.5 opacity-50" />
               <input
@@ -72,18 +76,36 @@ export default function TutorBrowser() {
                 onChange={(e) => setQ(e.target.value.toUpperCase())}
               />
             </label>
-            <select
-              className="select select-bordered select-sm text-xs"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-            >
-              <option value="">Any subject they teach</option>
-              {catalog.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/40">
+                Teaches
+              </span>
+              {catalog.map((s) => {
+                const on = subjects.includes(s.slug);
+                return (
+                  <button
+                    key={s.slug}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() => toggleSubject(s.slug)}
+                    className={`badge badge-sm cursor-pointer text-2xs transition-colors ${
+                      on ? "badge-primary" : "badge-ghost hover:badge-neutral"
+                    }`}
+                  >
+                    {s.name}
+                  </button>
+                );
+              })}
+              {subjects.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSubjects([])}
+                  className="text-2xs text-base-content/50 underline hover:text-base-content"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -115,6 +137,22 @@ export default function TutorBrowser() {
                       {t.subjects.map((s) => (
                         <span key={s} className="badge badge-neutral badge-sm text-2xs">
                           {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {t.verifiedClasses.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      <span className="text-2xs text-base-content/45">Verified classes</span>
+                      {t.verifiedClasses.map((c) => (
+                        <span
+                          key={c.code}
+                          className="badge badge-success badge-sm gap-1 text-2xs"
+                          title={`${c.subject} · ${c.code}`}
+                        >
+                          <BadgeCheck className="h-2.5 w-2.5" />
+                          {c.code}
                         </span>
                       ))}
                     </div>

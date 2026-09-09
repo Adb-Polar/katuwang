@@ -1,0 +1,13 @@
+Admin
+  Dashboard
+    - re-use the card from other role and put collors on the need atension count badges
+  Users
+    - Add a filter by grade
+  Registration
+    - User code doesnt have sort button at the header
+  Classes
+    - Scheduled date has `invalid date` value
+    - doesnt have the row number config
+  Report
+    - add export csv report
+    -

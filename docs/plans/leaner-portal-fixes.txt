@@ -1,0 +1,32 @@
+Layout
+  - Avatar should be linked to profile page
+Chart problem
+  Learner
+    - the floating label card that shows the percentage of post and pretest is showing result even if the student havent taken the post test
+    - also swap the position of post and pre test on the card pre test should come first then post test also swap the label on the bottom of the chart
+
+
+Learner
+  Dashboard
+    - upcomming session redesign same as the tutors
+    - Cards redesign same as tutor
+  Browse Classes
+    - subject cant be searched only topics, tutor and code make it so this can be search too
+  Find tutor
+    - tutor card should show verified classes as badges
+    - filter select: allow users to select multiple filters(eg. Math and Science)
+    - view tutor profile must use the upcomming session timetable components
+    Tutor profile
+      - 404 when opening completed class
+      - suspended and banned classes shouldnt be shown on tutors profile unless the student is enrolled to that class
+      - completed classes should have its own tab on the tutors profile and can be only viewed by students enrolled to it so if the student isnt enrolled to that completed class the card shouldnot show at all
+  My classes
+    - when viewing class from this page when i back it redirects it to /Learner/classes which is different page from this feels clunky
+  Auto match
+    - Feels like schedule isnt part of the scoring re check, sort by score
+  My Request
+    - should hide the Request cards when adding new and editing request also hide the new request button when editing
+  Profile
+   - add a number validation
+check search
+  need to specify what the student is searching for(tutor,tutor code, subject, topic, class code)

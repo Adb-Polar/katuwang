@@ -23,9 +23,14 @@ export default function DevHomePage() {
               and an <code className="rounded bg-base-300 px-1">@dev.test</code> email.
             </p>
           </div>
-          <Link href="/dev/login" className="btn btn-outline btn-sm shrink-0">
-            Quick Login →
-          </Link>
+          <div className="flex shrink-0 gap-2">
+            <Link href="/dev/charts" className="btn btn-outline btn-sm">
+              Chart Lab →
+            </Link>
+            <Link href="/dev/login" className="btn btn-outline btn-sm">
+              Quick Login →
+            </Link>
+          </div>
         </div>
 
         <DevDataFactory />

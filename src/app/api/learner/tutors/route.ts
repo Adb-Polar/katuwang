@@ -23,7 +23,13 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
-    const subject = searchParams.get("subject")?.trim() || "";
+    // `subjects` is a comma-separated slug list (multi-select); `subject` is the
+    // legacy single-value param, still accepted.
+    const subjectsParam = searchParams.get("subjects")?.trim() || "";
+    const legacySubject = searchParams.get("subject")?.trim() || "";
+    const subjectSlugs = (subjectsParam ? subjectsParam.split(",") : legacySubject ? [legacySubject] : [])
+      .map((s) => s.trim())
+      .filter(Boolean);
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(
       MAX_PAGE_SIZE,
@@ -35,11 +41,15 @@ export async function GET(req: NextRequest) {
     const where: Prisma.UserWhereInput = {
       role: "STUDENT_TUTOR",
       status: "ACTIVE",
-      tutorProfile: {
-        topicCertifications: {
-          some: { status: "CERTIFIED", ...(subject ? { subject } : {}) },
-        },
-      },
+      // Multi-select is AND: the tutor must be CERTIFIED in every chosen subject.
+      tutorProfile:
+        subjectSlugs.length > 0
+          ? {
+              AND: subjectSlugs.map((s) => ({
+                topicCertifications: { some: { status: "CERTIFIED", subject: s } },
+              })),
+            }
+          : { topicCertifications: { some: { status: "CERTIFIED" } } },
       ...(q ? { anonymousId: { contains: q } } : {}),
     };
 
@@ -60,6 +70,9 @@ export async function GET(req: NextRequest) {
               classes: {
                 where: { published: true, status: "SCHEDULED" },
                 select: {
+                  code: true,
+                  subject: true,
+                  topics: { select: { topic: true } },
                   sessions: {
                     where: { status: "SCHEDULED", scheduledAt: { gte: new Date() } },
                     orderBy: { scheduledAt: "asc" },
@@ -81,9 +94,18 @@ export async function GET(req: NextRequest) {
     const tutors = rows.map((u) => {
       const certs = u.tutorProfile?.topicCertifications ?? [];
       const subjects = [...new Set(certs.map((c) => c.subject))].sort();
-      const upcoming = (u.tutorProfile?.classes ?? [])
+      const classes = u.tutorProfile?.classes ?? [];
+      const upcoming = classes
         .flatMap((c) => c.sessions.map((s) => s.scheduledAt))
         .sort((a, b) => a.getTime() - b.getTime());
+
+      // A class is "verified" when at least one of its topics is a CERTIFIED
+      // topic for the tutor in that class's subject.
+      const certKey = new Set(certs.map((c) => `${c.subject}::${c.topic}`));
+      const verifiedClasses = classes
+        .filter((c) => (c.topics ?? []).some((t) => certKey.has(`${c.subject}::${t.topic}`)))
+        .map((c) => ({ code: c.code, subject: c.subject }));
+
       return {
         id: u.id,
         anonymousId: u.anonymousId,
@@ -92,6 +114,7 @@ export async function GET(req: NextRequest) {
           : {}),
         verifiedTopicCount: certs.length,
         subjects,
+        verifiedClasses,
         publishedClassCount: u.tutorProfile?._count.classes ?? 0,
         nextSessionAt: upcoming[0]?.toISOString() ?? null,
       };

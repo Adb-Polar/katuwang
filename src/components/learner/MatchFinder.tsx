@@ -151,8 +151,14 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       tutorAnonymousId={m.class.tutor.anonymousId}
                       tutorName={m.class.tutor.name}
                       tutorSection={m.class.tutor.section}
-                      onClick={() => router.push(`/learner/classes/${m.class.id}`)}
+                      onClick={() => router.push(`/learner/classes/${m.class.id}?from=browse`)}
                     />
+                    <div className="flex items-center gap-1.5 px-1">
+                      <span className="badge badge-primary badge-sm text-2xs font-bold">
+                        Match {Math.round(m.score)}
+                      </span>
+                      <span className="text-2xs text-base-content/40">ranked by fit</span>
+                    </div>
                     <ul className="text-2xs text-base-content/60 space-y-0.5 px-1">
                       {reasonChips(m.reasons).map((c, i) => (
                         <li key={i} className="flex items-center gap-1">

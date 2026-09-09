@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [52](#part-52) | **Learner portal fixes (`docs/plans/leaner-portal-fixes.txt`)** | 10-part usability pass on the learner portal: topbar avatar links to the profile; progress-chart hover card null-safe + pre-before-post everywhere; learner dashboard restyled to match the tutor's (colored stat cards, bordered upcoming tiles, "This week" grid); browse + global search now match subject *names*, and global search gains a scope selector (Everything / Tutor code / Subject / Topic / Class code); "Find Tutors" cards show verified-class badges + a multi-select subject filter; tutor profile uses the weekly timetable, hides suspended/banned classes from non-enrollees, and puts completed classes in an enrolled-only tab (fixes the 404); "My Classes" back button returns to the right list; "My Requests" hides the list + button while adding/editing; profile validates the phone number live; auto-match surfaces the numeric score. | `PortalLayout` gains `profileHref`; `WeeklyTimetable` moved to `src/components/schedule/` + `hrefFor` prop; new `src/lib/subjects.ts#resolveSubjectSlugs`, `src/components/learner/TutorProfileClassTabs.tsx`; `?from=` param on the learner class-detail route; `GroupedBarChart` reuses `buildProgressTooltipRows` with a `missingLabel` prop; `src/app/api/{classes,search,learner/tutors}` query changes; `TopicRequestManager` edit form lifted out of the card map; `ProfileEditForm` live `normalizeContactInfo` check. New tests in `api/{search,classes,learner/tutors}` + `lib/matching`; 635/635, `tsc`/`lint`/`build` clean. `WeeklyScheduleView`/`deriveWeeklyAvailability` now unused. Not committed. |
 | [1](#part-1) | **Bug fix — Admin "Registration Approvals" crash** | The approvals table crashed on render with `Cannot read properties of undefined (reading 'map')`. | `RegistrationApprovalTable` asked `usePaginatedList` for the wrong response key (`registrations` vs. the API's `users`); fixed the key + kept the URL-prefix arg, and hardened `usePaginatedList` to fall back to `[]` on a key mismatch. |
 | [2](#part-2) | **Assessment-taking system (question bank + auto-graded quizzes)** | Replaces the manual "request assessment → admin certifies" flow with a real auto-graded single-answer MCQ quiz backed by an admin-managed, per-topic question bank; passing either auto-certifies or creates a PENDING certification for admin confirmation. | 6 new Prisma models + 2 enums (additive migration `20260902052746_assessment_question_bank`); new libs (`assessmentConfig`, `assessmentPicker`, `assessmentStatus`, `assessmentSerialize`, `validations/assessment`); ~15 new API routes under `admin/assessment-*`, `admin/question-requests`, `tutor/assessments`, `tutor/question-requests`; new Admin "Question Bank" portal (`QuestionBankManager`) + tutor quiz runner (`AssessmentQuizRunner`); new platform setting `autoCertifyOnAssessmentPass` (default OFF); seed generator (645 bank questions); 8 new Vitest files. |
 | [3](#part-3-docs) | **Docs — assessment plan** | Records the approved implementation plan for the assessment system. | Added `docs/plans/assessment-taking-system.md` (copied from the plan-mode file per the CLAUDE.md convention) and this changes file. |
@@ -37,6 +38,10 @@
 | [17](#part-17) | **Schema — drop the dormant `TopicAssessmentConfig`** | Part 15 left the per-topic config model in the schema unused. Now removed: `model TopicAssessmentConfig`, the `topic_assessment_configs` table, and the `User.updatedAssessmentConfigs` relation. | `prisma/schema.prisma` edited (model + relation deleted, a comment left pointing to the global config). Applied to the dev DB with `prisma db push --accept-data-loss` (dropped the table + its 2 seed rows) instead of `migrate dev` — the local migration history is already drifted (`20260902081727_class_pre_post_tests` applied but only on an unmerged branch), so `migrate dev` would have forced a full DB reset. No new migration file. `prisma generate` re-run; `tsc` + `lint` clean, 394/394 tests. `docs/plans/global-assessment-config.md` + `docs/feature-checklist.md` updated; TODO item removed. Not committed. |
 | [29](#part-29) | **Session pre/post-tests (`docs/plans/pre-test-post-test-plan.md`)** | Per-session PRE/POST diagnostic tests: a tutor builds one ordered question set per `ClassSession`, served twice (as a PRE attempt, then a POST attempt); learners take/resume/review; tutor + learner + admin analytics with four charts. Adapts the stale `class-pre-post-tests` branch, re-grained from per-class to per-session. Delivered in phases. | **Phase 0** — extracted `recharts` primitives out of `ReportsView.tsx` into a shared `src/components/charts/` module (`useThemeColors` widened to `--color-accent/success/error`; `DataTable` now `{rows,labelKey}` **or** `{rows,columns}`; `BarChartCard` moved verbatim) + new `GroupedBarChart` / `ProgressAreaChart` / `RateBarChart` / `DeltaBar` (the last pure-CSS, uses the `.kt-delta` badge); dead `.kt-chart-*` CSS removed. **Phase 1** — schema: 4 enums (`QuestionOrigin`, `SessionTestStatus`, `SessionTestKind`, `SessionTestAttemptStatus`) + 4 models (`SessionTest` `@@unique(sessionId)`, `SessionTestQuestion`, `SessionTestAttempt` with `kind` + `@@unique([sessionTestId,learnerId,kind])`, `SessionTestAttemptItem`) + `AssessmentQuestion.origin`/`ownerTutorProfileId` and index `[subject,topic,active,origin]` (origin appended last to keep existing prefixes). Applied via `prisma db push` (Option 1 — additive, no reset; history stays drifted). 478/478 throughout. Not committed. |
 | [30](#part-30) | **Chatbot v1.1 — usability pass (admin misses review + matching robustness + KB growth)** | The deterministic chatbot's `chatbot_misses` feedback loop was dead (no admin UI ever read it), an over-broad `smalltalk_capabilities` intent swallowed unclear messages before they could be logged as misses, and matching was brittle (no typo tolerance, no length-normalized confidence). Closes the loop, hardens matching, and roughly doubles the FAQ KB — no LLM, no new dependency, no schema change. | New `/admin/chatbot` page + `GET /api/admin/chatbot-misses` (JS-side `aggregateMisses()` groups misses by role + normalised token string — Prisma `groupBy` can't group by a derived value — role/text filter, sort by count/first/last seen, pagination); new admin nav item. `classifier.ts`: typo-correction step (`correctToken`, Levenshtein-1 via new `editDistance`/`fuzzyHit` in `normalize.ts`) snaps a misspelled token to its nearest known keyword before scoring *and* before pattern-matching, so e.g. "enrol" still lights up `/\benroll\b/`; added a length-normalized `MIN_CONFIDENCE = 0.35` gate (score / max(3, tokenCount)) alongside the existing absolute `MIN_SCORE` floor, per the original plan's un-implemented spec; `respond.ts`/`route.ts` now surface the winning score as a non-production `debugScore` field. `intents.ts`: narrowed `smalltalk_capabilities` (dropped the bare `/\bhelp\b/` pattern + generic keywords that swallowed most unclear messages) and added 12 new nav intents (find tutors, help page, search, tutor class-appeal/sessions/question-request, admin users/class-appeals/audit-log/subjects/question-requests/chatbot). `faq.ts`: 11 new grounded entries (26 total), each cited to its source doc line; purged 2 dead stopword-colliding keywords (`"my"`, `"you"`). `normalize.ts`: exported `STOPWORDS`, ~12 new `SYNONYMS`. New tests: `normalize.test.ts`, `faq.test.ts`, `misses.test.ts`, `chatbot-misses/route.test.ts`, extended `classifier.test.ts` (fuzzy matching, narrowed capabilities, confidence gate) — 586/586. `tsc`/`lint`/`test` all clean. `docs/reference/decisions.md` reviewed — no new entry (implementation refinement, not a thesis divergence). Not committed. |
+| [48](#part-48) | **Dev — Chart Lab page (`/dev/charts`)** | A dev-only playground that renders the real analytics chart components (`GroupedBarChart`, `ProgressAreaChart`, `RateBarChart`, `DeltaBar`, `BarChartCard`) against **editable in-memory data** — add/delete rows, type any pre/post value, leave a cell blank for `null` ("not taken"), or one-click scenario presets (duplicate labels, all-post-missing, negative/zero deltas, single row, empty). Lets any data shape be eyeballed without touching the DB. Also fixed `DeltaBar`'s React `key={r.label}` → `key={\`${label}::${i}\`}` (crashed the console with duplicate labels). | New `src/app/dev/charts/page.tsx` (hard-404s in prod, same as `/dev`), `src/components/dev/DevChartLab.tsx` (client: `PairEditor` / `CountEditor` + `useMemo` parsed datasets + presets). `/dev` home gains a "Chart Lab →" link. `DeltaBar.tsx` key fix (2 spots). `tsc`/`lint` clean, 629/629 tests. Verified in-browser — all 5 charts render, duplicate labels stay distinct, blank = gap. |
+| [47](#part-47) | **Chart fix — phantom post score + pre/post order on the pre-vs-post charts** | Root cause: **duplicate x-axis category labels**. A learner (or class) with two sessions on the same topic produced two chart points with an identical `label`; recharts collapses duplicate categories on a `type="category"` axis, so hovering the *second* "… Linear Equations" point showed the *first* one's row — a real post score on a session whose post-test was never taken. Plus recharts' default alphabetical sort put **Post-test above Pre-test** in the tooltip + legend. | Both `ProgressAreaChart` (chart b) and `GroupedBarChart` (charts a + c) now run the x-axis on a unique synthetic index (`__x: "0".."n"`), rendering the real label via `tickFormatter` and (bar chart) `labelFormatter`; the area-chart tooltip title reads the hovered row's own `xKey` field. New recharts-free `progressTooltip.ts` / `buildProgressTooltipRows()` builds the area-chart hover rows in `series` order (pre → post) and prints `"not taken yet"` for a null/empty/missing value instead of running the number formatter. `itemSorter={() => 0}` on both charts' `<Tooltip>`/`<Legend>` (stable sort = declared order). New `__tests__/progressTooltip.test.ts` (6 cases). Verified live in-browser: hovering the pre-only session now reads `Pre-test: 33% / Post-test: not taken yet`. `tsc`/`lint` clean, 629/629 tests. |
+| [46](#part-46) | **Seed — session pre/post-test results sized for every chart** | New standalone `prisma/seed-session-tests.ts` populates the demo MATH class (`demo@tutor.test`) with a session-test dataset built to exercise all four analytics charts: 6 sessions (4 fully paired, 1 pre-only, 1 with no test), a ~12-learner roster, a 6-question `[seed-st]` pool per topic, and per-session score plans that produce positive / negative / exactly-zero / unpaired-null deltas. Idempotent (wipes + rebuilds this class's sessions, its `SessionTest`s, and its `[seed-st]` questions; enrolments are additive). Does **not** touch the DB — run it after `prisma/seed.ts`. | New file only. `import { PrismaClient }` + `@prisma/adapter-mariadb` mirroring `seed.ts`; deterministic RNG; `SESSIONS[]` spec array driving `classSession` → `sessionTest` → `sessionTestAttempt` + items creation. `tsc` clean. No schema/API/test change. Not run, not committed. |
+| [45](#part-45) | **UI fix — tutor dashboard stat cards: label/value stacked, not inline** | On `/tutor` the four stat cards (`kt-stat`) rendered the title, the number, and the icon all on one line — `.kt-stat-title` / `.kt-stat-value` are `<span>`s with no block context, so inside their wrapper `<div>` they flowed inline. | `src/app/globals.css` — added `display: block` to `.kt-stat-title` and `.kt-stat-value`. One-line CSS change; fixes every `kt-stat` card (tutor + learner + admin dashboards, `MyProgressView`, `SessionTestResults`) consistently. No TS/JSX/schema/test change. |
 | [44](#part-44) | **fixes.md Phase 6 — class appeals notify admins** | Filing a class appeal now notifies every active admin with a link to the review queue. **No migration needed** — `Notification.type` is a free-text `String` column and `NotificationType` (`src/lib/notifications.ts`) is a TS union, so this is the `"CLASS_APPEAL_NEW"` string added there. | `NotificationType` union + `notificationMeta.tsx` `TYPE_ICON` gain `CLASS_APPEAL_NEW` (`Gavel`, warning tone). `POST /api/tutor/classes/[classId]/appeal` now wraps the `classAppeal.create` in `prisma.$transaction`, fetches `role:"ADMIN", status:"ACTIVE"` users, and `notifyMany(..., "CLASS_APPEAL_NEW", "<TUT-id> appealed the moderation on <subject> · <code>.", "/admin/class-appeals")`; the class query gained `code`/`subject`, the tutor-profile query `user.anonymousId`. Route test rewired for `$transaction` + 1 new case (`notifyMany` called with the admin ids). `tsc`/`lint` clean, 623/623 tests. |
 | [43](#part-43) | **fixes.md Phase 5 — "Topic request" → "Class request" (UI copy only)** | All learner/tutor/admin-facing text for the feature now says "class request" — headings, nav labels (`Class Requests`), page titles, help/FAQ/chatbot copy, notification subtitles, the tutor dashboard stat card. | Text-only replacement across `helpContent.ts`, `chatbot/{faq,intents,respond}.ts`, `PlatformSettingsForm`, `TopicRequestModerationTable`, `MatchFinder`, `TopicRequestManager`, `admin/layout.tsx`, `validations/admin.ts` message, `{learner,tutor}/requests` + `{learner,tutor}/notifications` + `admin/{topic-requests,subjects}` pages, `tutor/page.tsx`, `learner/page.tsx`, and dev tooling copy. **No** changes to models (`TopicRequest*`), API/page routes (`/tutor/requests`, `/admin/topic-requests`, `/api/**/topic-requests`), or `docs/` that describe the implementation. `docs/reference/decisions.md` entry added. `tsc`/`lint` clean, 622/622 tests. |
 | [42](#part-42) | **fixes.md Phase 4c — tutor dashboard polish + weekly timetable + profile edit page** | The tutor dashboard stat cards get an icon each; the "Upcoming sessions" list is a readable date-chip layout; the flat "weekly schedule" widget is replaced by a Mon–Sun timetable grid of the next 7 days' sessions. The self-service profile edit form moves to its own page (like class editing) — `/{role}/profile` is now read-only with an "Edit details" link. | `src/app/tutor/page.tsx` — 4 stat cards → `flex-row` with a tinted lucide icon (`BookOpen`/`BadgeCheck`/`Users`/`Inbox`); upcoming-sessions `<ul>` → bordered rows with a weekday/day badge + `text-sm` topic; the `weeklySessions` query now selects `id`/`topic`/`class{id,subject}` and is bounded to `now … now+7d`. New `src/components/tutor/WeeklyTimetable.tsx` (7 weekday columns, time-ordered session chips linking to the class) replaces `WeeklyScheduleView` on the dashboard (still used on the public tutor profile). New `src/components/profile/ProfileEditView.tsx` + routes `src/app/{learner,tutor}/profile/edit/page.tsx`; `ProfileView` drops the inline `<ProfileEditForm>` for a read-only summary (grade/section/contact) + an "Edit details" `<Link>` (`endpoint` prop → `editHref`). `tsc`/`lint` clean, 622/622 tests. |
@@ -2587,3 +2592,347 @@ Fix (`src/components/tutor/SessionActions.tsx`,
 
 No API, schema, validation, or test change. `tsc` / `lint` clean, 621/621
 tests pass.
+
+---
+
+<a id="part-45"></a>
+
+## Part 45 — Tutor dashboard stat cards: label/value stacked, not inline (2026-09-07)
+
+On `/tutor` the four stat cards (`div.card.kt-card.kt-stat`) showed the title,
+the number, and the tinted icon all on the **same line**.
+
+Cause: the card's inner wrapper `<div>` holds `.kt-stat-title` and
+`.kt-stat-value`, both plain `<span>`s. `.kt-stat` itself is a flex column, but
+that only governs the wrapper `<div>` vs. the icon `<span>` — inside the
+wrapper the two spans had no block/flex context, so they flowed inline next to
+each other (and, with the icon as a flex sibling, everything read as one row).
+
+Fix (`src/app/globals.css`):
+
+- `.kt-stat-title` — added `display: block`.
+- `.kt-stat-value` — added `display: block`.
+
+The title now sits above the number; the icon stays top-right (unchanged
+`flex-row items-start justify-between` on the card). One-line-each CSS change,
+no markup touched, so it fixes every `kt-stat` consumer the same way — the
+tutor, learner and admin dashboards plus `MyProgressView` and
+`SessionTestResults`.
+
+No TS/JSX, API, schema, or test change.
+
+---
+
+<a id="part-46"></a>
+
+## Part 46 — Seed: session pre/post-test results sized for every chart (2026-09-07)
+
+New standalone script **`prisma/seed-session-tests.ts`**:
+
+```
+pnpm exec tsx prisma/seed-session-tests.ts   # run AFTER prisma/seed.ts
+```
+
+It targets the demo MATH class owned by `demo@tutor.test`
+("Algebraic Expressions" / "Linear Equations & Inequalities") and fills it with
+a session-test dataset shaped to make each of the four analytics charts show
+something meaningful:
+
+| # | Chart | Where | Seeded so that… |
+|---|-------|-------|-----------------|
+| a | `GroupedBarChart` (`ClassProgressPanel`) | tutor class page → Progress | 6 sessions: 4 fully paired, **S4** pre-only (post avg `null`), **S6** has no test at all (gap row, not a fake 0) |
+| b | `ProgressAreaChart` (`MyProgressView`) | learner → `/learner/progress` (log in as `demo@learner.test`) | that learner has a pre/post point per session incl. a `null`-post one and a regression, so the line moves both ways |
+| c | `RateBarChart` (`SessionTestResults`) | tutor → session → View results | every test has 6 questions; correctness is spread per question (deterministic RNG) so each column's pre/post/delta differ |
+| d | `DeltaBar` (`SessionTestResults`) | same page | **S2** has positive, negative and exactly-zero per-learner deltas; **S3** has unpaired learners (`null` delta rows) |
+
+Mechanics:
+
+- ~12-learner roster (`demo@learner.test` forced to index 0). Enrolments are
+  **added** to whatever the class already has — never removed.
+- A 6-question pool per topic, created as `origin: TUTOR` questions owned by the
+  demo tutor and prefixed `[seed-st]` so re-runs can find and drop them.
+- `SESSIONS[]` spec array: each entry carries a `plan(i, email, total)` that
+  returns `{ pre, post|null }` score fractions per learner; a deterministic RNG
+  picks *which* questions are right so per-question rates vary.
+- Idempotent: deletes this class's `ClassSession`s (cascades to `SessionTest`
+  → `SessionTestQuestion` / `SessionTestAttempt` / items), deletes the
+  `[seed-st]` questions, then rebuilds all of it.
+
+Standalone runner (own `PrismaClient` + `@prisma/adapter-mariadb`, `dotenv`),
+mirroring `prisma/seed.ts`. `tsc` clean. No schema / API / component / test
+change. Run once against the local dev DB with the owner's go-ahead (class
+`C-0012`, 6 sessions, 84 attempts, 13 enrolled); **not committed**.
+
+---
+
+<a id="part-48"></a>
+
+## Part 48 — Dev Chart Lab (`/dev/charts`) (2026-09-07)
+
+A dev-only playground for the analytics charts, so any data shape can be
+eyeballed without seeding the DB or logging in as a specific user.
+
+- **`src/app/dev/charts/page.tsx`** — lean server page, `notFound()` in
+  production (same guard as `/dev` and `/dev/login`), links back to `/dev`.
+  `/dev` home gains a "Chart Lab →" button next to "Quick Login →".
+- **`src/components/dev/DevChartLab.tsx`** — client. Three editors feeding the
+  real components:
+  - *Pre / post series* (label + pre + post, blank = `null`) → `GroupedBarChart`
+    (a), `ProgressAreaChart` (b), and `DeltaBar` (d) (delta computed as
+    `post − pre` when both present). Presets: *Typical (one unpaired)*,
+    *Duplicate labels*, *All post missing*, *Negative & zero deltas*,
+    *Single row*, *Empty*. A "Parsed JSON" `<details>` shows exactly what's
+    passed to the charts.
+  - *Per-question rate* (label + pre% + post%) → `RateBarChart` (c), with
+    `deltaRate` computed.
+  - *Single-series* (label + count) → `BarChartCard` (admin Reports).
+  - Row ids come from a `useRef` counter so keys stay stable while editing;
+    each cell is stored as raw text and parsed (`"" → null`).
+- **`src/components/charts/DeltaBar.tsx`** — `key={r.label}` → `key={\`${r.label}::${i}\`}`
+  in both the bar list and the data-table body. `DeltaBar` is the only chart
+  keyed on the label; duplicate labels (which the lab can now produce, and
+  which Part 47 showed are real) spammed *"two children with the same key"*.
+
+No API / schema / test change. `tsc` / `lint` clean, 629/629 tests. Verified
+in-browser: all five charts render, the duplicate-label presets stay distinct
+(Part 47 fix holds here too), and a blank cell shows as a gap / "not taken".
+**Not committed.**
+
+---
+
+<a id="part-47"></a>
+
+## Part 47 — Pre-vs-post charts: phantom post score + pre/post order (2026-09-07)
+
+Symptom (learner "My Progress", `ProgressAreaChart` at `/learner/progress`):
+hovering a session where only the pre-test was taken showed a **Post-test
+number** in the hover card, and "Post-test" was listed **above** "Pre-test" in
+the card and the legend.
+
+### Root cause — duplicate x-axis categories
+
+Both `MyProgressView` (chart b) and `ClassProgressPanel` (chart a) built the
+x-axis value from a **non-unique label** (`"<code> · <topic>"` and `<topic>`).
+A learner/class with two sessions on the same topic → two chart points with the
+identical `label`. recharts' `type="category"` x-axis **collapses duplicate
+category values**, so the 2nd "… Linear Equations" point resolved to the 1st
+one's data row — which has a real post score. That's the "phantom": you were
+looking at session 4 but recharts handed the tooltip session 2's numbers.
+(Verified in-browser: `activeDot` `cx` was identical for every duplicate before
+the fix, distinct after.)
+
+### Fix
+
+- **`ProgressAreaChart.tsx` + `GroupedBarChart.tsx`** — build `chartData` by
+  tagging every row with a unique synthetic index `__x: "0".."n"` and run the
+  axis on `dataKey="__x"`. The real label is rendered back via
+  `XAxis tickFormatter` (both) and `Tooltip labelFormatter` (bar chart). The
+  area chart's custom tooltip title now reads the hovered row's own `xKey`
+  field, never recharts' collapsed `label`. `DataTable` still gets the
+  untouched `data`.
+- **`src/components/charts/progressTooltip.ts`** (new, recharts-free) — pure
+  `buildProgressTooltipRows(row, payload, series, unit)`: one row per `series`
+  in declared order (pre → post); a `null` / `""` / missing value →
+  `text: "not taken yet"`, `value: null` (the number formatter never runs on
+  it); the recharts `payload` is only a fallback for a partial row and matches
+  by `dataKey`, so a neighbour's score can't bleed in.
+- **`ProgressAreaChart.tsx`** renders it via `<Tooltip content={(props) => …}>`
+  (function form — recharts' generic `TooltipContentProps` fights a plain
+  arrow). `<Legend itemSorter={() => 0} />` on both charts + `itemSorter` /
+  `<Tooltip itemSorter>` on `GroupedBarChart` (`() => 0` = stable sort = keep
+  `series` order → pre before post; recharts' default sorts by name).
+
+Charts touched: (a) `ClassProgressPanel`, (b) `MyProgressView`, (c)
+`RateBarChart` (delegates to `GroupedBarChart`; its "Q1…Qn" labels were already
+unique so behaviour there is unchanged). (d) `DeltaBar` is a CSS component — not
+affected.
+
+Tests: new `src/components/charts/__tests__/progressTooltip.test.ts` — 6 cases.
+`tsc` / `lint` clean, 629/629. **Verified live in the running app**: hovering
+the pre-only session now reads `Pre-test: 33% / Post-test: not taken yet`, and
+each of the 5 points shows its own distinct row.
+
+## Part 49 — IT124 M01 group presentation deck (2026-09-08)
+
+Built the group presentation deliverable required at the bottom of the M01
+learning module (`docs/to-submit/IT124_M01_D3_System-Design-Refinement_Learning-Module_v02.pdf`
+pp.19–20 — "Finalizing and Presenting Your System Design Document", 10–15 min,
+every member speaks, graded on a separate 4×25 rubric).
+
+- **`docs/to-submit/m01-presentation/Katuwang_M01_System-Design-Refinement.pptx`**
+  (new, 16 slides) — follows the module's Suggested Presentation Outline:
+  title → problem recap → panel-recommendations recap → finalized architecture
+  (modular-monolith diagram + pattern justification + tech-stack table) →
+  finalized ERD (trimmed to the `TopicCertification` lifecycle + data
+  dictionary + six schema-refinement checks) → UI/UX refinements (empty/error
+  states) → Context + Level 1 DFDs + traceability cross-check → four-part
+  justification (functionality / security / scalability / problem alignment for
+  the tutor-certification change) → summary traceability table → Q&A →
+  appendix (speaker map + timing). Diagrams are native editable PowerPoint
+  shapes. Per-slide speaker notes assign a member and timing to every section.
+- **`docs/to-submit/m01-presentation/Katuwang_M01_System-Design-Refinement.pdf`**
+  — LibreOffice render, for quick preview / sharing.
+- **`docs/to-submit/m01-presentation/assets/`** — empty; holds UI screenshots
+  and any exported diagrams the team adds before presenting.
+- Plan: `/home/hikaru/.claude/plans/check-the-docs-to-submit-it124-m01-d3-sy-groovy-hartmanis.md`.
+
+Content sourced from `prisma/schema.prisma`, `docs/erd.md`,
+`docs/reference/project-overview.md`, `docs/reference/decisions.md`, `CLAUDE.md`,
+and the existing written answers
+(`docs/to-submit/IT124_M01_D3_..._Katuwang-answered.docx`). Only panel
+recommendation R1 (tutor per-topic certification) is documented in the repo;
+slides 3 and 14 carry marked placeholders for R2/R3 to be filled from the
+team's actual Capstone 1 panel recommendation sheet. No app code touched.
+
+### Follow-up — Mermaid DFDs (Level 0 & Level 1)
+
+Added proper data-flow diagrams reflecting the built system, derived from the
+API route map (`src/app/api/**`), the portal pages, and `prisma/schema.prisma`:
+
+- **`docs/to-submit/m01-presentation/assets/dfd-level0.mmd`** + rendered
+  `dfd-level0.png` / `.svg` — context diagram: process 0 with four external
+  entities (Student Learner, Student Tutor, Administrator, Email/SMTP Service),
+  grouped in/out data flows, anonymity boundary noted.
+- **`docs/to-submit/m01-presentation/assets/dfd-level1.mmd`** + rendered
+  `dfd-level1.png` / `.svg` — decomposition into 8 processes (1.0 Registration &
+  Authentication, 2.0 Account & Platform Administration, 3.0 Tutor Topic
+  Certification, 4.0 Class & Session Management, 5.0 Class Discovery &
+  Enrolment, 6.0 Class Requests, 7.0 Session Pre/Post Testing, 8.0 Notification
+  Delivery) and 12 data stores (DS1–DS12), each store mapped to its Prisma
+  model(s). The R1 eligibility gate `DS3 Topic Certifications → 4.0` is called
+  out as the flow the panel recommendation created.
+- **`docs/to-submit/m01-presentation/assets/DFD.md`** — both diagrams as live
+  Mermaid, Yourdon/DeMarco notation key, process catalogue (with route
+  groups), data-store → Prisma-model map, and the Design Review Checklist
+  traceability notes.
+- Deck rebuilt to 18 slides: slide 10 now embeds the Level 0 render; slide 11
+  is a clean 8-process map with the 4.0 walkthrough; slides 17–18 are new
+  appendices (process/data-store tables, full Level 1 render).
+- Rendered with `@mermaid-js/mermaid-cli` (installed under the session
+  scratchpad, not added to the project) using the system Chromium; regenerate
+  with `mmdc -i dfd-levelN.mmd -o dfd-levelN.png`.
+
+---
+
+## Part 50 — Docs: raw-mermaid ERD (`docs/erd.mmd`) (2026-09-08)
+
+Regenerated `docs/erd.md` from `prisma/schema.prisma` (`npx prisma generate`;
+the `erd` generator block already targets it) — no diff, the checked-in ERD was
+already in sync.
+
+Added **`docs/erd.mmd`** — the same diagram as un-fenced Mermaid source (the
+`erd.md` body with the ```` ```mermaid ```` / ```` ``` ```` wrapper stripped), for
+tools that consume `.mmd` directly (mermaid-cli, IDE preview, live editor). Kept
+as a sibling of `erd.md` rather than a second Prisma generator output. The
+Prisma-generated key/optional glyphs (`🗝️` / `❓`) are replaced with plain
+`key` / `?` in the `.mmd` for renderer compatibility. Docs only;
+no code/schema/migration change. Not committed.
+
+<a id="part-51"></a>
+## Part 51 — Docs: finalized architecture design (PDF) (2026-09-08)
+
+Added **`docs/architecture-design.pdf`** (15 pp, A4) and its **`docs/architecture-design.html`**
+source — a single finalized architecture baseline for the system as built on
+`main`. Sections: introduction/reference-doc map, system overview, architectural
+drivers (ranked quality attributes + constraints), architectural style (modular
+monolith on Next.js App Router, server-authoritative, pure domain logic in
+`src/lib/`), tech-stack table, a 6-layer logical view (presentation → edge
+middleware → route handlers → domain/service → Prisma → MariaDB), module-to-code
+map for the six modules + cross-module dependencies, five runtime scenarios
+(registration, auth + two-layer RBAC, matching, tutor certification, session
+pre/post-test), data architecture (28-model inventory, 3NF + deliberate `topic`
+denormalization, atomic `IdCounter` anon-ID generation, ERD relationship
+summary), security & privacy architecture (NextAuth JWT, `src/proxy.ts` guards,
+RA 10173 double-blind, `AccountStatus` lifecycle, audit log), cross-cutting
+concerns, a deployment view (single stateless Node process + one MariaDB, no
+scheduler/queue), source-tree layout, a 12-entry ADR summary distilled from
+`docs/reference/decisions.md` + `docs/plans/`, non-functional limitations, and
+two appendices (data model inventory, ~55-route API surface).
+
+Grounded entirely in existing sources — `prisma/schema.prisma`, `src/lib/auth.ts`,
+`src/proxy.ts`, `src/lib/{matching,idGenerator,settings}.ts`, the API route tree,
+`docs/reference/{project-overview,decisions,auth-implementation}.md`,
+`docs/feature-checklist.md`, `docs/erd.md`. PDF rendered from the HTML with
+headless Chromium (A4, `@page` margins, generated page numbers). No "Teacher
+Moderator" anywhere (3 roles only). Docs only; no code/schema/migration change.
+Not committed.
+
+<a id="part-52"></a>
+## Part 52 — Learner portal fixes (`docs/plans/leaner-portal-fixes.txt`) (2026-09-09)
+
+A 10-part usability pass on the learner portal. Each part is independent.
+
+**1 — Avatar links to profile.** `PortalLayout` gains an optional `profileHref`;
+when set the topbar `.kt-avatar` renders as a `<Link>` (`aria-label="Your
+profile"`) instead of a decorative `<span>`. Learner + tutor layouts pass
+`/{role}/profile`; admin has no profile route so stays a span. `a.kt-avatar`
+hover style added to `globals.css`.
+
+**2 — Progress chart hover card.** Finished the in-progress `ProgressAreaChart`
+rewrite and applied the same treatment to `GroupedBarChart` (was still on the
+recharts default `<Tooltip>`): a custom `renderTooltip` reusing
+`buildProgressTooltipRows`, so rows stay in `series` order (Pre-test before
+Post-test) and a series with no value at the hovered point reads a `missingLabel`
+(new prop, default `"—"`; `RateBarChart` inherits it) instead of a phantom
+number. `<Legend itemSorter={() => 0}>` on both.
+
+**3 — Learner dashboard restyled to match the tutor's** (`src/app/learner/page.tsx`):
+stat cards → `flex-row` with a tinted icon tile (primary/secondary/accent);
+"Upcoming sessions" → bordered tiles with a weekday/day date chip; new "This
+week" Mon–Sun grid via `WeeklyTimetable`; "Quick links" kept. Added a
+`weeklySessions` query; dropped the separate `sessionsThisWeek` count.
+**3a —** `src/components/tutor/WeeklyTimetable.tsx` → `src/components/schedule/WeeklyTimetable.tsx`
+with a `hrefFor(classId)` prop (default `/tutor/classes/${id}`); tutor dashboard
+import updated.
+
+**4 — Search by subject name.** New `resolveSubjectSlugs(q)` in `src/lib/subjects.ts`
+(matches `q` against `Subject.name`/`slug` → slugs, since `TutorClass.subject`
+stores the slug). `GET /api/classes` adds `{ subject: { contains } }` +
+`{ subject: { in: resolvedSlugs } }` to its search `OR`.
+**4c —** `GlobalSearch` gains a scope `<select>` (Everything / Tutor code /
+Subject / Topic / Class code); `GET /api/search` reads `scope` and narrows the
+class `OR` (`classOrFor`), the tutor lookup (anonymous-ID-only for `tutorCode`),
+the topic group, and the tutor/admin branches accordingly.
+
+**5 — Find Tutors.** `GET /api/learner/tutors` now returns `verifiedClasses`
+(`{ code, subject }[]` — published classes with ≥1 CERTIFIED topic in that
+subject); `TutorBrowser` renders them as `badge-success` chips. Subject filter is
+now multi-select toggle chips → repeated `subjects=` (comma-joined) param; the
+API ANDs one `topicCertifications.some({ status: CERTIFIED, subject })` clause per
+selected subject (legacy single `subject=` still accepted).
+**5c —** the tutor-profile page swaps `WeeklyScheduleView` for `WeeklyTimetable`
+(next-7-days SCHEDULED sessions, `hrefFor` → `/learner/classes/${id}`).
+
+**6 — Tutor-profile class visibility.** The page now loads whether the viewer is
+enrolled in each class (`enrollments: { where: { learnerId } }`). Classes render
+only if `SCHEDULED` **or** the viewer is enrolled — suspended/banned classes are
+hidden from strangers. New client `TutorProfileClassTabs`: a "Classes" tab plus a
+"Completed" tab shown **only** when the viewer has ≥1 completed enrolled class.
+This also fixes the 404 when opening a completed class from the profile — a
+stranger no longer gets a link, and an enrolled viewer already passes the
+class-detail guard.
+
+**7 — "My Classes" back nav.** `src/app/learner/classes/[classId]/page.tsx` reads
+a `?from=` search param → `backHref` resolves to `/learner/my-classes` when
+`from=my-classes`, else `/learner/classes`. `ClassBrowser` appends
+`?from=${isMine ? "my-classes" : "browse"}` to the card push; dashboard + match
+links pass `?from=browse`.
+
+**8 — "My Requests" add/edit.** `TopicRequestManager`: the inline edit form is
+lifted out of the card `.map()` into a standalone form (like the add form);
+while `showForm` or `editId` is set, the request list **and** the "New request"
+button are hidden, and both add/edit forms get a "Back to requests" button.
+
+**9 — Profile number validation.** `ProfileEditForm` contact input gains
+`inputMode="tel"` / `autoComplete="tel"` and a live check: once the value is all
+phone characters it runs `normalizeContactInfo` on every keystroke and shows the
+inline error immediately (server truth unchanged).
+
+**10 — Auto-match score.** `MatchFinder` shows a `Match <n>` badge
+(`Math.round(m.score)`) on each result. Scoring/sort already correct
+(`src/lib/matching.ts` unchanged); added a `rankMatches` test asserting the
+returned `score` sequence is non-increasing.
+
+New/updated tests: `api/search`, `api/classes`, `api/learner/tutors`,
+`lib/matching`. `tsc`/`lint`/`build` clean, 635/635. `WeeklyScheduleView` and
+`deriveWeeklyAvailability` are now unused (left in place). Not committed.

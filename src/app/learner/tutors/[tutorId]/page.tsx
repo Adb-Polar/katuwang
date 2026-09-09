@@ -9,10 +9,11 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import ClassCard from "@/components/classes/ClassCard";
-import WeeklyScheduleView from "@/components/tutor/WeeklyScheduleView";
+import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
-import { deriveWeeklyAvailability } from "@/lib/derivedAvailability";
+import TutorProfileClassTabs, {
+  type TutorProfileClass,
+} from "@/components/learner/TutorProfileClassTabs";
 
 export const metadata = {
   title: "Tutor Profile | Katuwang",
@@ -29,8 +30,9 @@ export default async function LearnerTutorProfilePage({
 
   const showRealNames = await getSetting("showTutorRealNames");
   const session = await getServerSession(authOptions);
-  const me = session
-    ? await prisma.user.findUnique({ where: { id: session.user.id }, select: { gradeLevel: true } })
+  const meId = session?.user.id ?? null;
+  const me = meId
+    ? await prisma.user.findUnique({ where: { id: meId }, select: { gradeLevel: true } })
     : null;
 
   const tutor = await prisma.user.findFirst({
@@ -53,6 +55,9 @@ export default async function LearnerTutorProfilePage({
               topics: { select: { topic: true } },
               sessions: { orderBy: { scheduledAt: "asc" } },
               _count: { select: { enrollments: true } },
+              // Whether *this* learner is enrolled — gates visibility of
+              // suspended/banned/completed classes.
+              enrollments: { where: { learnerId: meId ?? "__no_user__" }, select: { id: true } },
             },
           },
         },
@@ -68,17 +73,55 @@ export default async function LearnerTutorProfilePage({
     bySubject.set(c.subject, [...(bySubject.get(c.subject) ?? []), c.topic]);
   }
 
-  const classes = tutor.tutorProfile.classes;
+  const allClasses = tutor.tutorProfile.classes;
 
-  const scheduleSlots = deriveWeeklyAvailability(
-    classes.flatMap((c) =>
-      c.sessions.map((s) => ({
-        scheduledAt: s.scheduledAt,
-        duration: s.duration,
-        status: s.status,
-      }))
-    )
+  const toDto = (c: (typeof allClasses)[number]): TutorProfileClass => ({
+    id: c.id,
+    code: c.code,
+    subject: c.subject,
+    gradeLevel: c.gradeLevel,
+    topics: c.topics.map((t) => t.topic),
+    verifiedTopics: certifiedTopics
+      .filter((cert) => cert.subject === c.subject)
+      .map((cert) => cert.topic),
+    description: c.description,
+    sessions: c.sessions.map((s) => ({
+      scheduledAt: s.scheduledAt.toISOString(),
+      duration: s.duration,
+      status: s.status,
+    })),
+    status: c.status,
+    enrolledCount: c._count.enrollments,
+    maxStudents: c.maxStudents,
+  });
+
+  // A stranger only sees SCHEDULED classes; suspended/banned/completed classes
+  // surface only to a learner enrolled in them.
+  const visibleClasses = allClasses.filter(
+    (c) => c.status === "SCHEDULED" || c.enrollments.length > 0,
   );
+  const activeClasses = visibleClasses.filter((c) => c.status !== "COMPLETED").map(toDto);
+  const completedClasses = visibleClasses
+    .filter((c) => c.status === "COMPLETED" && c.enrollments.length > 0)
+    .map(toDto);
+
+  // Mon–Sun timetable: upcoming SCHEDULED sessions in the next 7 days.
+  const now = new Date();
+  const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const timetableSessions = allClasses
+    .filter((c) => c.status === "SCHEDULED")
+    .flatMap((c) =>
+      c.sessions
+        .filter((s) => s.status === "SCHEDULED" && s.scheduledAt > now && s.scheduledAt <= weekAhead)
+        .map((s) => ({
+          id: s.id,
+          topic: s.topic,
+          subject: c.subject,
+          classId: c.id,
+          scheduledAt: s.scheduledAt.toISOString(),
+          duration: s.duration,
+        })),
+    );
 
   return (
     <div className="space-y-6">
@@ -149,55 +192,22 @@ export default async function LearnerTutorProfilePage({
 
       <section className="card kt-card">
         <div className="card-body gap-2">
-          <h2 className="card-title text-sm font-bold">Typical Weekly Schedule</h2>
+          <h2 className="card-title text-sm font-bold">This week</h2>
           <p className="text-2xs text-base-content/50">
-            Automatically derived from this tutor&apos;s upcoming class sessions.
+            This tutor&apos;s scheduled sessions over the next 7 days.
           </p>
-          <WeeklyScheduleView
-            slots={scheduleSlots}
-            emptyMessage="This tutor has no upcoming sessions scheduled."
+          <WeeklyTimetable
+            sessions={timetableSessions}
+            hrefFor={(classId) => `/learner/classes/${classId}`}
+            emptyMessage="This tutor has no sessions in the next 7 days."
           />
         </div>
       </section>
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Published Classes ({classes.length})</h2>
-          {classes.length === 0 ? (
-            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-              This tutor has no published classes right now.
-            </p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
-              {classes.map((c) => {
-                const topics = c.topics.map((t) => t.topic);
-                const verifiedTopics = certifiedTopics
-                  .filter((cert) => cert.subject === c.subject)
-                  .map((cert) => cert.topic);
-                return (
-                  <ClassCard
-                    key={c.id}
-                    code={c.code}
-                    subject={c.subject}
-                    gradeLevel={c.gradeLevel}
-                    topics={topics}
-                    verifiedTopics={verifiedTopics}
-                    description={c.description}
-                    sessions={c.sessions.map((s) => ({
-                      scheduledAt: s.scheduledAt.toISOString(),
-                      duration: s.duration,
-                      status: s.status,
-                    }))}
-                    status={c.status}
-                    enrolledCount={c._count.enrollments}
-                    maxStudents={c.maxStudents}
-                    activeLabel="Open"
-                    href={`/learner/classes/${c.id}`}
-                  />
-                );
-              })}
-            </div>
-          )}
+          <h2 className="card-title text-sm font-bold">Classes</h2>
+          <TutorProfileClassTabs active={activeClasses} completed={completedClasses} />
         </div>
       </section>
     </div>
