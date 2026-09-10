@@ -12,6 +12,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 import { formatDate, formatDateTime } from "@/lib/datetime";
+import { gradeSection } from "@/lib/gradeLevels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -132,7 +133,7 @@ export default function TopicRequestBrowser() {
                     {r.directed && <StatusBadge tone="info" label="Directed to you" size="xs" />}
                     <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
                     <span className="text-base-content/50">
-                      {r.learner.gradeLevel.replace("_", " ")} · {r.learner.section}
+                      {gradeSection(r.learner.gradeLevel, r.learner.section)}
                     </span>
                   </div>
                   <Link

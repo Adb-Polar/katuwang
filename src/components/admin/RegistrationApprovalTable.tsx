@@ -6,7 +6,7 @@ import { Role, GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, gradeSection } from "@/lib/gradeLevels";
 import { formatDateTime } from "@/lib/datetime";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -174,7 +174,7 @@ export default function RegistrationApprovalTable() {
                         {u.role === "STUDENT_TUTOR" ? "Tutor" : "Learner"}
                       </td>
                       <td className="text-base-content/60">
-                        {u.gradeLevel.replace("_", " ")} · {u.section}
+                        {gradeSection(u.gradeLevel, u.section)}
                       </td>
                       <td className="text-2xs text-base-content/50">{formatDateTime(u.createdAt)}</td>
                       <td>

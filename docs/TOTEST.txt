@@ -723,3 +723,9 @@ Security-review fixes (Changes.md Part 57)
  [] Back links still work + look right on: /admin/users/[id], /tutor/students/[id],
     /learner/tutors/[id], class details view, edit-class page, session test results,
     profile edit page. ProfileEditView's back link is now a ghost button (was inline text).
+
+--- Part 61 (repeated-markup C3: gradeLabel/gradeSection) ---
+ [] Grade + section still renders as "GRADE 10 · Rizal" on: admin user detail, admin
+    class detail roster, tutor student profile, tutor roster + its grade filter, admin
+    Users + Registrations tables, learner topic-request cards, tutor topic-request browser,
+    ClassCard, enrolled-learners table, profile view.

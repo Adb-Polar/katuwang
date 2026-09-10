@@ -4,6 +4,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import { formatDateTime, formatWeekday } from "@/lib/datetime";
+import { gradeLabel } from "@/lib/gradeLevels";
 
 interface SessionLike {
   scheduledAt: string;
@@ -98,7 +99,7 @@ export default function ClassCard({
           <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subject}</h3>
           {gradeLevel && (
             <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">
-              {gradeLevel.replace("_", " ")}
+              {gradeLabel(gradeLevel)}
             </p>
           )}
         </div>

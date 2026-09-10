@@ -3,7 +3,7 @@ import { ShieldCheck, Pencil } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import TopicChip from "@/components/ui/TopicChip";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, gradeLabel } from "@/lib/gradeLevels";
 
 /**
  * Read-only account page for learners and tutors — identity fields only an
@@ -39,12 +39,12 @@ export default function ProfileView({
   /** Tutor only: their CERTIFIED topics, grouped and shown as a card. */
   certifiedTopics?: { subject: string; topic: string }[];
 }) {
-  const gradeLabel =
+  const gradeText =
     GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ??
-    gradeLevel?.replace("_", " ") ??
+    (gradeLevel ? gradeLabel(gradeLevel) : undefined) ??
     "—";
   const editableRows: { label: string; value: string }[] = [
-    { label: "Grade level", value: gradeLabel },
+    { label: "Grade level", value: gradeText },
     { label: "Section", value: section || "—" },
     { label: "Contact info", value: contactInfo || "Not set" },
   ];

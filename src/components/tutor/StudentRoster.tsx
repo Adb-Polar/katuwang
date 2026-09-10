@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 import { GradeLevel } from "@prisma/client";
+import { gradeLabel, gradeSection } from "@/lib/gradeLevels";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -89,7 +90,7 @@ export default function StudentRoster() {
             <option value="">All grades</option>
             {GRADE_LEVELS.map((g) => (
               <option key={g} value={g}>
-                {g.replace("_", " ")}
+                {gradeLabel(g)}
               </option>
             ))}
           </select>
@@ -148,7 +149,7 @@ export default function StudentRoster() {
                     <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
                   </td>
                   <td className="text-xs text-base-content/70">
-                    {student.gradeLevel.replace("_", " ")} · {student.section}
+                    {gradeSection(student.gradeLevel, student.section)}
                   </td>
                   <td>
                     <div className="flex flex-wrap gap-1">

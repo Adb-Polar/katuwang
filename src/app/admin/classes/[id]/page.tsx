@@ -6,6 +6,7 @@ import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDateTime } from "@/lib/datetime";
+import { gradeSection } from "@/lib/gradeLevels";
 
 export const metadata = { title: "Class Detail | Katuwang" };
 
@@ -114,7 +115,7 @@ export default async function AdminClassDetailPage({
                           <AnonymousIdBadge id={e.learner.anonymousId} role="LEARNER" />
                         </td>
                         <td className="text-base-content/60">
-                          {e.learner.gradeLevel.replace("_", " ")} · {e.learner.section}
+                          {gradeSection(e.learner.gradeLevel, e.learner.section)}
                         </td>
                         <td className="text-base-content/60">{formatDateTime(e.enrolledAt)}</td>
                       </tr>

@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [61](#part-61) | **`gradeLabel()` / `gradeSection()` helpers (repeated-markup C3)** | `src/lib/gradeLevels.ts` gains `gradeLabel(grade)` + `gradeSection(grade, section)`; ~12 hand-written `gradeLevel.replace("_", " ")` call sites migrated. Output identical. | New exports in `gradeLevels.ts`; imports added to 3 pages + 8 components. `charts/labelize` left as the separate generic helper. 680/680. |
 | [60](#part-60) | **`<BackLink>` component (repeated-markup C2)** | The `‹ Back to X` ghost-button link extracted to `src/components/ui/BackLink.tsx`; 7 detail-page / sub-view headers migrated. No behaviour change. | New `BackLink.tsx` (`href` + children over `btn btn-ghost btn-sm` + `ArrowLeft`). Migrated `admin/users/[id]`, `tutor/students/[studentId]`, `learner/tutors/[tutorId]`, `ClassDetailsView`, `EditClassForm`, `SessionTestResults`, `ProfileEditView`; dead `ArrowLeft`/`Link` imports removed. 680/680. |
 | [59](#part-59) | **Design-review fixes (`docs/reviews/design-review-2026-09-10.md`), part 2** | D5/D7: retires the drifted `docs/reference/theme.md` to a pointer at `globals.css`, adds two `decisions.md` entries (live palette; Lucide supersedes no-SVG) and strikes ROUND-2 invariant #6; darkens `--kt-tutor-text`, `--kt-muted`, `--kt-faint` to clear 4.5:1 on `base-100` at shipped text sizes. Docs + 3 token lines. | `docs/reference/theme.md` rewritten; `docs/reference/decisions.md` + `design/ROUND-2-CONTEXT.md` updated; `globals.css` `--kt-*` text tokens. No test impact. |
 | [58](#part-58) | **Design-review fixes (`docs/reviews/design-review-2026-09-10.md`), part 1** | D1/D2/D3: restores a real heavy weight (700 Fett) for the page H1 + card titles via a new `font-heavy` utility while the everyday emphasis utilities stay at 500; finishes the `font-serif` → `font-sans` sweep and drops the dead `--font-serif` alias; puts nav items and buttons in Fragment Mono per the notation brief. No layout/API change. | `globals.css`: `--font-weight-heavy: 700` in `@theme`, `.kt-card-head > h2/h3` + `.kt-nav-item` + `.btn` updated, `--font-serif` removed from `@theme inline`. `PageHeader.tsx` `font-bold` → `font-heavy`. `font-serif` → `font-sans` codemod across 28 files. 680/680, `tsc` clean. |
@@ -3012,6 +3013,21 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-61"></a>
+## Part 61 — `gradeLabel()` / `gradeSection()` helpers (repeated-markup C3) (2026-09-10)
+
+`docs/reviews/repeated-markup-review-2026-09-10.md` **C3**. `src/lib/gradeLevels.ts`
+gains `gradeLabel(grade)` (`"GRADE_10"` → `"GRADE 10"`, global underscore replace —
+the hand-written `.replace("_", " ")` only swapped the first) and
+`gradeSection(grade, section)` (`"GRADE 10 · Rizal"`). The ~12
+`gradeLevel.replace("_", " ")` call sites now import one of the two:
+`admin/users/[id]`, `admin/classes/[id]`, `tutor/students/[studentId]` pages;
+`TopicRequestManager`, `UserManagementTable`, `RegistrationApprovalTable`,
+`StudentRoster` (×2), `TopicRequestBrowser`, `ClassCard`, `EnrolledLearnersTable`,
+`ProfileView`. Output is byte-identical to before. `charts/BarChartCard` +
+`charts/DataTable` keep their generic `labelize()` — not grade-specific, left
+alone. 680/680, `tsc` clean.
 
 <a id="part-60"></a>
 ## Part 60 — `<BackLink>` component (repeated-markup C2) (2026-09-10)

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import { gradeSection } from "@/lib/gradeLevels";
 
 interface Learner {
   id: string;
@@ -57,7 +58,7 @@ export default function EnrolledLearnersTable({
                     <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
                   </td>
                   <td className="text-base-content/60">
-                    {enr.learner.gradeLevel.replace("_", " ")} · {enr.learner.section}
+                    {gradeSection(enr.learner.gradeLevel, enr.learner.section)}
                   </td>
                   <td className="text-right">
                     <ChevronRight className="h-4 w-4 text-base-content/30 inline" />

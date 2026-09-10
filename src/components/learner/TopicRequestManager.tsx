@@ -8,6 +8,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
 import { formatDate, formatDateTime } from "@/lib/datetime";
+import { gradeLabel } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import MatchCriteriaFields, {
@@ -279,7 +280,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
                           {r.subject}
                         </span>
-                        <span className="text-base-content/50">{r.gradeLevel.replace("_", " ")}</span>
+                        <span className="text-base-content/50">{gradeLabel(r.gradeLevel)}</span>
                         <StatusBadge tone={meta.tone} label={meta.label} size="xs" />
                         <span className="badge badge-outline badge-sm text-2xs">
                           {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}

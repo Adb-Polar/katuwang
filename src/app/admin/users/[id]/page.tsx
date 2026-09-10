@@ -7,6 +7,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { formatDateTime } from "@/lib/datetime";
+import { gradeSection } from "@/lib/gradeLevels";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -75,7 +76,7 @@ export default async function AdminUserDetailPage({
     { label: "Email", value: user.email },
     { label: "Contact info", value: user.contactInfo || "—" },
     { label: "Role", value: user.role.replace("STUDENT_", "").toLowerCase() },
-    { label: "Grade & section", value: `${user.gradeLevel.replace("_", " ")} · ${user.section}` },
+    { label: "Grade & section", value: gradeSection(user.gradeLevel, user.section) },
     { label: "Joined", value: formatDateTime(user.createdAt) },
   ];
 

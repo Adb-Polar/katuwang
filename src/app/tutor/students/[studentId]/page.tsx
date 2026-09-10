@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDate } from "@/lib/datetime";
+import { gradeSection } from "@/lib/gradeLevels";
 
 export const metadata = {
   title: "Student Profile | Katuwang",
@@ -60,7 +61,7 @@ export default async function TutorStudentProfilePage({
           <div className="flex items-center gap-1.5 text-base-content/70">
             <GraduationCap className="h-4 w-4 text-primary shrink-0" />
             <span>
-              {learner.gradeLevel.replace("_", " ")} · {learner.section}
+              {gradeSection(learner.gradeLevel, learner.section)}
             </span>
           </div>
         </div>

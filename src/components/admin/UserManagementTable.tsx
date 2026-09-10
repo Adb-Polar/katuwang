@@ -13,7 +13,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, gradeSection } from "@/lib/gradeLevels";
 import { formatDateTime } from "@/lib/datetime";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -215,7 +215,7 @@ export default function UserManagementTable() {
                       </td>
                       <td className="text-base-content/60">{u.email}</td>
                       <td className="text-base-content/60">
-                        {u.gradeLevel.replace("_", " ")} · {u.section}
+                        {gradeSection(u.gradeLevel, u.section)}
                       </td>
                       <td>
                         <StatusBadge tone={STATUS_TONE[u.status]} label={u.status} size="xs" />
