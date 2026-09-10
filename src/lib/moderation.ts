@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { addDays } from "@/lib/datetime";
 
 export function computeExpiresAt(durationDays: number | undefined): Date | null {
   if (!durationDays) return null;
-  return new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+  return addDays(new Date(), durationDays);
 }
 
 // Lazily lifts any class suspensions whose duration has elapsed — there is no

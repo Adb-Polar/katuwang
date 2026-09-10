@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma, Role, GradeLevel } from "@prisma/client";
 import { parseSort } from "@/lib/sortParams";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 const REG_SORT_COLUMN: Record<string, "createdAt" | "lastName" | "role" | "anonymousId"> = {
   createdAt: "createdAt",

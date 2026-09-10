@@ -6,6 +6,7 @@ import { getSetting } from "@/lib/settings";
 import { acceptTopicRequestSchema } from "@/lib/validations/match";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
+import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { notify } from "@/lib/notifications";
@@ -138,7 +139,7 @@ export async function POST(
     }
 
     for (const s of parsedSessions) {
-      const end = new Date(s.start.getTime() + s.duration * 60 * 1000);
+      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
       const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
       if (conflict) {
         return NextResponse.json(

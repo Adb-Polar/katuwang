@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 import { GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -10,7 +11,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface StudentEnrollment {
   classId: string;

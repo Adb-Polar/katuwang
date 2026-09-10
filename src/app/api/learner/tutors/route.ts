@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
@@ -6,8 +7,8 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 
-const DEFAULT_PAGE_SIZE = 12;
-const MAX_PAGE_SIZE = 48;
+const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
+const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
 
 // ─── GET: Browsable tutors (learner-facing, anonymized) ────────────────────
 // A tutor is worth browsing once they hold at least one CERTIFIED topic. Real

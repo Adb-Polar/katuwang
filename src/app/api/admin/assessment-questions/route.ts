@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
@@ -7,7 +8,7 @@ import { createAssessmentQuestionSchema } from "@/lib/validations/assessment";
 import { topicExists } from "@/lib/subjects";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 // ─── GET: List Bank Questions (filtered / paginated) ─────────────────────────
 export async function GET(req: NextRequest) {

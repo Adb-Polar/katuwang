@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import { formatDateTime } from "@/lib/datetime";
 
 interface MissGroup {
   normalized: string;
@@ -21,17 +23,9 @@ const ROLE_LABELS: Record<MissGroup["role"], string> = {
   ADMIN: "Admin",
 };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = AUDIT_PAGE_SIZE;
 
 type SortKey = "lastSeen" | "count" | "firstSeen";
-
-const formatWhen = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 
 export default function ChatbotMissesTable() {
   const [role, setRole] = useState<"" | MissGroup["role"]>("");
@@ -143,8 +137,8 @@ export default function ChatbotMissesTable() {
                         <span className="badge badge-ghost badge-sm">{ROLE_LABELS[g.role]}</span>
                       </td>
                       <td className="text-base-content/60">{g.count}</td>
-                      <td className="text-base-content/50">{formatWhen(g.firstSeen)}</td>
-                      <td className="text-base-content/50">{formatWhen(g.lastSeen)}</td>
+                      <td className="text-base-content/50">{formatDateTime(g.firstSeen)}</td>
+                      <td className="text-base-content/50">{formatDateTime(g.lastSeen)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -5,15 +5,12 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { formatDateTime } from "@/lib/datetime";
 import { Metadata } from "next";
 
 export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
 };
-
-function fmt(d: Date) {
-  return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-}
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -119,7 +116,7 @@ export default async function AdminDashboard() {
                         {log.action.replace(/_/g, " ")}
                         <span className="font-normal text-base-content/50"> · {log.targetType.toLowerCase()}</span>
                       </span>
-                      <span className="text-base-content/50 shrink-0">{fmt(log.createdAt)}</span>
+                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)}</span>
                     </div>
                     <div className="text-2xs text-base-content/50 mt-0.5">
                       by {log.admin.anonymousId}

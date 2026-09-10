@@ -60,6 +60,9 @@ export const SUBJECT_TOPICS: Record<string, string[]> = {
   ],
 };
 
+/** Subject slugs in catalogue order — the single derived list, no re-casting at call sites. */
+export const SUBJECT_SLUGS: string[] = Object.keys(SUBJECT_TOPICS);
+
 /**
  * Normalizes a user-typed topic: trims and collapses internal whitespace.
  * Custom topics are stored verbatim (after this pass), so keep it conservative.

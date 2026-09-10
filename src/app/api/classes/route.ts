@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { BROWSE_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma, GradeLevel } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
@@ -9,8 +10,7 @@ import { browseClassesWhere, myClassesWhere, learnerClassInclude, toLearnerClass
 import { rankBrowseClasses, BrowseRankContext } from "@/lib/browseRanking";
 import { resolveSubjectSlugs } from "@/lib/subjects";
 
-const DEFAULT_PAGE_SIZE = 12;
-const MAX_PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
 
 /**
  * The signals used to personalize the default browse order: the learner's grade

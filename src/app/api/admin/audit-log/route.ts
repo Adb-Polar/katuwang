@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = AUDIT_PAGE_SIZE;
 const SORTABLE = new Set(["createdAt", "action", "targetType"]);
 
 // ─── GET: Admin Moderation Action History (filtered / sorted / paginated) ─────

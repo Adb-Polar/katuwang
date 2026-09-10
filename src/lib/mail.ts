@@ -1,5 +1,6 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { RESET_TOKEN_TTL_MS } from "@/lib/passwordReset";
+import { MINUTE_MS } from "@/lib/datetime";
 
 /**
  * Transactional email. Transport is plain SMTP, configured entirely from the
@@ -70,7 +71,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
   });
 }
 
-const RESET_TTL_MINUTES = Math.round(RESET_TOKEN_TTL_MS / 60_000);
+const RESET_TTL_MINUTES = Math.round(RESET_TOKEN_TTL_MS / MINUTE_MS);
 
 /** Password-reset email body for a ready-to-use reset link. */
 export function renderPasswordResetEmail(resetUrl: string): MailContent {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Flag } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { VIOLATION_LABEL } from "@/lib/reportViolations";
+import { formatDate } from "@/lib/datetime";
 
 interface MyReport {
   id: string;
@@ -22,14 +23,6 @@ const STATUS_BADGE: Record<MyReport["status"], string> = {
   RESOLVED: "badge-success",
   DISMISSED: "badge-ghost",
 };
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 function targetLabel(r: MyReport) {
   if (r.targetType === "TUTOR") return r.target.anonymousId ?? "Tutor";
@@ -107,13 +100,13 @@ export default function MyReportsList() {
                 <p className="text-xs text-base-content/70 whitespace-pre-wrap">{r.details}</p>
               )}
 
-              <p className="text-2xs text-base-content/40">Filed {fmt(r.createdAt)}</p>
+              <p className="text-2xs text-base-content/40">Filed {formatDate(r.createdAt)}</p>
 
               {r.status !== "PENDING" && (
                 <div className="rounded-lg border border-base-200 bg-base-200/30 p-3 text-xs space-y-1 mt-1">
                   <p className="font-semibold text-base-content/70">
                     {r.status === "RESOLVED" ? "An admin acted on this report." : "Closed without action."}
-                    {r.reviewedAt ? ` · ${fmt(r.reviewedAt)}` : ""}
+                    {r.reviewedAt ? ` · ${formatDate(r.reviewedAt)}` : ""}
                   </p>
                   {r.resolutionNote && (
                     <p className="text-base-content/70">

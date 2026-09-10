@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Prisma, GradeLevel } from "@prisma/client";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface StudentEntry {
   id: string;

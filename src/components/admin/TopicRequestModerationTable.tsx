@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -14,7 +15,7 @@ import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 type RequestStatus = "OPEN" | "ACCEPTED" | "ENROLLED" | "FULFILLED" | "CANCELLED";
 

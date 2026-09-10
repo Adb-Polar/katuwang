@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -11,7 +12,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import SortableTh from "@/components/ui/SortableTh";
 import SessionTestResults from "@/components/tutor/SessionTestResults";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Row {
   id: string;

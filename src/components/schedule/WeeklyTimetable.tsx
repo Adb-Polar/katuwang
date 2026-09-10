@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatTime } from "@/lib/datetime";
 
 export interface TimetableSession {
   id: string;
@@ -62,10 +63,7 @@ export default function WeeklyTimetable({
                   className="block rounded-md bg-primary/10 hover:bg-primary/20 border border-primary/20 px-1.5 py-1 text-2xs transition-colors"
                 >
                   <div className="font-bold text-primary/90">
-                    {new Date(s.scheduledAt).toLocaleTimeString(undefined, {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatTime(s.scheduledAt)}
                   </div>
                   <div className="truncate text-base-content/70" title={`${s.subject} — ${s.topic}`}>
                     {s.topic}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -13,8 +14,9 @@ import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { formatDateTime } from "@/lib/datetime";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface AdminUser {
   id: string;
@@ -29,16 +31,6 @@ interface AdminUser {
   statusReason: string | null;
   statusUpdatedAt: string | null;
   statusExpiresAt: string | null;
-}
-
-function formatExpiry(dateStr: string) {
-  return new Date(dateStr).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
@@ -123,7 +115,7 @@ export default function UserManagementTable() {
 
       setSuccess(
         status === "SUSPENDED" && data.statusExpiresAt
-          ? `${target.anonymousId} is now SUSPENDED until ${formatExpiry(data.statusExpiresAt)}.`
+          ? `${target.anonymousId} is now SUSPENDED until ${formatDateTime(data.statusExpiresAt)}.`
           : `${target.anonymousId} is now ${status}.`
       );
       setTarget(null);
@@ -229,7 +221,7 @@ export default function UserManagementTable() {
                         <StatusBadge tone={STATUS_TONE[u.status]} label={u.status} size="xs" />
                         {u.status === "SUSPENDED" && u.statusExpiresAt && (
                           <div className="text-2xs text-base-content/50 mt-1">
-                            Until {formatExpiry(u.statusExpiresAt)}
+                            Until {formatDateTime(u.statusExpiresAt)}
                           </div>
                         )}
                       </td>

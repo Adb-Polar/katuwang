@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -11,11 +12,12 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import { formatDateTime } from "@/lib/datetime";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Tutor {
   id: string;
@@ -35,16 +37,6 @@ interface AdminClass {
   suspendedUntil: string | null;
   tutor: Tutor;
   _count: { enrollments: number };
-}
-
-function formatExpiry(dateStr: string) {
-  return new Date(dateStr).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export default function ClassModerationTable() {
@@ -105,7 +97,7 @@ export default function ClassModerationTable() {
       setSuccess(
         status === "SUSPENDED"
           ? data.suspendedUntil
-            ? `Class suspended until ${formatExpiry(data.suspendedUntil)}.`
+            ? `Class suspended until ${formatDateTime(data.suspendedUntil)}.`
             : "Class suspended."
           : status === "BANNED"
           ? "Class banned permanently."
@@ -202,21 +194,14 @@ export default function ClassModerationTable() {
                           </div>
                         </td>
                         <td className="text-base-content/60">
-                          {c.nextSessionAt
-                            ? new Date(c.nextSessionAt).toLocaleDateString(undefined, {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
-                            : "—"}
+                          {c.nextSessionAt ? formatDateTime(c.nextSessionAt) : "—"}
                         </td>
                         <td className="text-base-content/60">{c._count.enrollments}</td>
                         <td>
                           <StatusBadge tone={tone} label={label} size="xs" />
                           {c.status === "SUSPENDED" && c.suspendedUntil && (
                             <div className="text-2xs text-base-content/50 mt-1">
-                              Until {formatExpiry(c.suspendedUntil)}
+                              Until {formatDateTime(c.suspendedUntil)}
                             </div>
                           )}
                         </td>

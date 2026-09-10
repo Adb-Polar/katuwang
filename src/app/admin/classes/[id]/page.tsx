@@ -5,12 +5,9 @@ import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import { formatDateTime } from "@/lib/datetime";
 
 export const metadata = { title: "Class Detail | Katuwang" };
-
-function fmt(d: Date) {
-  return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-}
 
 export default async function AdminClassDetailPage({
   params,
@@ -119,7 +116,7 @@ export default async function AdminClassDetailPage({
                         <td className="text-base-content/60">
                           {e.learner.gradeLevel.replace("_", " ")} · {e.learner.section}
                         </td>
-                        <td className="text-base-content/60">{fmt(e.enrolledAt)}</td>
+                        <td className="text-base-content/60">{formatDateTime(e.enrolledAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -142,7 +139,7 @@ export default async function AdminClassDetailPage({
                   <span className="font-semibold">
                     {tutorClass.suspendedUntil ? "Until:" : "Duration:"}
                   </span>{" "}
-                  {tutorClass.suspendedUntil ? fmt(tutorClass.suspendedUntil) : "Indefinite"}
+                  {tutorClass.suspendedUntil ? formatDateTime(tutorClass.suspendedUntil) : "Indefinite"}
                 </p>
               </div>
             </div>

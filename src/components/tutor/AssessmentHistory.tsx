@@ -1,6 +1,7 @@
 import Link from "next/link";
 import StatusBadge from "@/components/ui/StatusBadge";
 import type { AttemptSummary } from "@/app/tutor/assessments/page";
+import { formatDate } from "@/lib/datetime";
 
 export interface CertificationDetail {
   id: string;
@@ -25,14 +26,6 @@ const ATTEMPT_BADGE = {
   FAILED: { tone: "error", label: "Failed" },
   IN_PROGRESS: { tone: "warning", label: "In progress" },
 } as const;
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
 
 export default function AssessmentHistory({
   certifications,

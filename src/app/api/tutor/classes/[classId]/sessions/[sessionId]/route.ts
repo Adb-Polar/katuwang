@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateSessionSchema } from "@/lib/validations/class";
 import { hasSessionOverlap } from "@/lib/classSessions";
+import { MINUTE_MS } from "@/lib/datetime";
 import { notifyMany } from "@/lib/notifications";
 
 // ─── PATCH: Reschedule or Change Status of a Single Session ───────────────────
@@ -85,7 +86,7 @@ export async function PATCH(
         );
       }
 
-      const effectiveEnd = new Date(effectiveStart.getTime() + effectiveDuration * 60 * 1000);
+      const effectiveEnd = new Date(effectiveStart.getTime() + effectiveDuration * MINUTE_MS);
       const conflict = await hasSessionOverlap(tutorProfile.id, effectiveStart, effectiveEnd, sessionId);
       if (conflict) {
         return NextResponse.json(

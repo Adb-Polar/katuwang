@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { formatTime } from "@/lib/datetime";
 
 type Snapshot = {
   counts: { tutors: number; learners: number; admins: number; classes: number; devUsers: number };
@@ -18,7 +19,7 @@ type Snapshot = {
 };
 
 const GRADES = ["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"];
-const SUBJECTS = Object.keys(SUBJECT_TOPICS);
+const SUBJECTS = SUBJECT_SLUGS;
 const ROLES = [
   { value: "STUDENT_LEARNER", label: "Learners" },
   { value: "STUDENT_TUTOR", label: "Tutors" },
@@ -58,12 +59,12 @@ export default function DevDataFactory() {
         });
         const json = await res.json();
         setLog((l) => [
-          { ok: res.ok, text: res.ok ? json.message : json.error ?? "Request failed.", at: new Date().toLocaleTimeString() },
+          { ok: res.ok, text: res.ok ? json.message : json.error ?? "Request failed.", at: formatTime(new Date()) },
           ...l,
         ].slice(0, 30));
         await refresh();
       } catch {
-        setLog((l) => [{ ok: false, text: "Network error.", at: new Date().toLocaleTimeString() }, ...l]);
+        setLog((l) => [{ ok: false, text: "Network error.", at: formatTime(new Date()) }, ...l]);
       } finally {
         setBusy(null);
       }

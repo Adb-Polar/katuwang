@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -9,8 +10,9 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
+import { formatDateTime } from "@/lib/datetime";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Tutor {
   id: string;
@@ -38,16 +40,6 @@ const TAB_STATUS: Record<Tab, string> = {
   certified: "CERTIFIED",
   rejected: "REJECTED",
 };
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default function CertificationReviewTable() {
   const [tab, setTab] = useState<Tab>("pending");
@@ -202,13 +194,13 @@ export default function CertificationReviewTable() {
                       <td className="text-base-content/60">
                         {tab === "certified"
                           ? c.certifiedAt
-                            ? fmt(c.certifiedAt)
+                            ? formatDateTime(c.certifiedAt)
                             : "—"
                           : tab === "rejected"
                           ? c.reviewedAt
-                            ? fmt(c.reviewedAt)
+                            ? formatDateTime(c.reviewedAt)
                             : "—"
-                          : fmt(c.requestedAt)}
+                          : formatDateTime(c.requestedAt)}
                       </td>
                       {tab === "rejected" && (
                         <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">

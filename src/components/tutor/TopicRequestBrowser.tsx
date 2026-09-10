@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -10,8 +11,9 @@ import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
+import { formatDate, formatDateTime } from "@/lib/datetime";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface OpenRequest {
   id: string;
@@ -161,7 +163,7 @@ export default function TopicRequestBrowser() {
                 {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
 
                 <p className="text-2xs text-base-content/40">
-                  Requested {new Date(r.createdAt).toLocaleDateString()}
+                  Requested {formatDate(r.createdAt)}
                 </p>
               </div>
             ))}
@@ -205,14 +207,7 @@ export default function TopicRequestBrowser() {
               {r.class && (
                 <p className="text-2xs text-base-content/60">
                   {r.class.enrolledCount}/{r.class.maxStudents} enrolled
-                  {r.class.nextSessionAt
-                    ? ` · next ${new Date(r.class.nextSessionAt).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}`
-                    : ""}
+                  {r.class.nextSessionAt ? ` · next ${formatDateTime(r.class.nextSessionAt)}` : ""}
                 </p>
               )}
             </div>

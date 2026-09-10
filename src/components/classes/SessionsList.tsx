@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Calendar, Clock } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { getSessionStatusBadge, SessionLifecycleStatus } from "./classStatus";
+import { formatDateTime } from "@/lib/datetime";
 
 export interface SessionSummary {
   id: string;
@@ -41,7 +42,7 @@ export default function SessionsList({
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-base-content/50">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {new Date(s.scheduledAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
+                  {formatDateTime(s.scheduledAt)}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />

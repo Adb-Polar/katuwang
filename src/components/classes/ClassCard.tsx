@@ -3,6 +3,7 @@ import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle, GraduationCap } 
 import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
+import { formatDateTime, formatWeekday } from "@/lib/datetime";
 
 interface SessionLike {
   scheduledAt: string;
@@ -68,13 +69,7 @@ export default function ClassCard({
     .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
 
   const formattedDate = nextSession
-    ? new Date(nextSession.scheduledAt).toLocaleDateString(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? `${formatWeekday(nextSession.scheduledAt)}, ${formatDateTime(nextSession.scheduledAt)}`
     : null;
 
   const isModerated = status === "SUSPENDED" || status === "BANNED";

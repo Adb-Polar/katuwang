@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
+import { addDays, formatTime, formatWeekday } from "@/lib/datetime";
 
 export const metadata = {
   title: "Learner Portal | Katuwang",
@@ -16,7 +17,7 @@ export default async function LearnerDashboard() {
   const learnerId = session!.user.id;
 
   const now = new Date();
-  const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const weekAhead = addDays(now, 7);
 
   const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
     prisma.classEnrollment.count({ where: { learnerId } }),
@@ -137,7 +138,7 @@ export default async function LearnerDashboard() {
                       >
                         <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
                           <span className="text-2xs font-bold uppercase leading-none">
-                            {d.toLocaleDateString(undefined, { weekday: "short" })}
+                            {formatWeekday(d)}
                           </span>
                           <span className="text-base font-bold leading-tight">{d.getDate()}</span>
                         </div>
@@ -151,7 +152,7 @@ export default async function LearnerDashboard() {
                             </span>
                           </div>
                           <p className="text-2xs text-base-content/55 mt-0.5">
-                            {d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                            {formatTime(d)} ·{" "}
                             {s.duration} min
                           </p>
                         </div>

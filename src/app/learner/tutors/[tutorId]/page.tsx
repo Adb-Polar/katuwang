@@ -6,6 +6,7 @@ import TopicChip from "@/components/ui/TopicChip";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
+import { addDays } from "@/lib/datetime";
 import { getSetting } from "@/lib/settings";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -111,7 +112,7 @@ export default async function LearnerTutorProfilePage({
 
   // Mon–Sun timetable: upcoming SCHEDULED sessions in the next 7 days.
   const now = new Date();
-  const weekAhead = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const weekAhead = addDays(now, 7);
   const timetableSessions = allClasses
     .filter((c) => c.status === "SCHEDULED")
     .flatMap((c) =>

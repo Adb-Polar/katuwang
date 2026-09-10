@@ -1,15 +1,24 @@
 import { GradeLevel } from "@prisma/client";
+import { daysBetween } from "@/lib/datetime";
 
 // ─── Scoring weights (tunable, kept explicit for transparency in the UI) ──────
 const WEIGHTS = {
   topicMatch: 10, // per requested topic the class also covers
   verifiedTopicMatch: 5, // extra, per matched topic the tutor is CERTIFIED for
   scheduleFit: 3, // per upcoming session that lands inside a preferred slot
-  gradeExact: 6, // class targets exactly the learner's grade
-  gradeAdjacent: 3, // class targets a grade within one of the learner's
-  gradeAny: 2, // class has no target grade (open to anyone)
   soonnessMax: 2, // tiebreak: full points for a session today, decaying over 14 days
 } as const;
+
+/**
+ * Points awarded by how well a class's target grade matches the learner's.
+ * Shared with the criteria-free browse rank (`browseRanking.ts`) so the ladder
+ * "exact beats adjacent beats open beats none" has one source of truth.
+ */
+export const GRADE_WEIGHTS = { exact: 6, adjacent: 3, any: 2, none: 0 } as const;
+
+export function gradeScore(match: GradeMatch): number {
+  return GRADE_WEIGHTS[match];
+}
 
 const SOONNESS_HORIZON_DAYS = 14;
 
@@ -142,16 +151,8 @@ export function scoreClass<T extends ClassForMatching>(
     slots.length === 0 ? 0 : upcoming.filter((start) => sessionFitsAnySlot(start, slots)).length;
 
   const gradeMatch = gradeMatchFor(criteria.gradeLevel, klass.gradeLevel);
-  const gradeScore =
-    gradeMatch === "exact"
-      ? WEIGHTS.gradeExact
-      : gradeMatch === "adjacent"
-        ? WEIGHTS.gradeAdjacent
-        : gradeMatch === "any"
-          ? WEIGHTS.gradeAny
-          : 0;
 
-  const daysUntilNext = (upcoming[0].getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+  const daysUntilNext = daysBetween(now, upcoming[0]);
   const soonness =
     daysUntilNext >= SOONNESS_HORIZON_DAYS
       ? 0
@@ -161,7 +162,7 @@ export function scoreClass<T extends ClassForMatching>(
     matchedTopics.length * WEIGHTS.topicMatch +
     verifiedMatchedTopics.length * WEIGHTS.verifiedTopicMatch +
     scheduleFitCount * WEIGHTS.scheduleFit +
-    gradeScore +
+    gradeScore(gradeMatch) +
     soonness;
 
   return {

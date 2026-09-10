@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 
 export interface CatalogSubject {
   slug: string;
@@ -11,7 +11,7 @@ export interface CatalogSubject {
 
 // Static SUBJECT_TOPICS as the instant, offline-safe seed; `/api/subjects`
 // (admin-managed) replaces it once fetched.
-const STATIC: CatalogSubject[] = (Object.keys(SUBJECT_TOPICS) as string[]).map((slug) => ({
+const STATIC: CatalogSubject[] = SUBJECT_SLUGS.map((slug) => ({
   slug,
   name: slug,
   topics: [...SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS]],

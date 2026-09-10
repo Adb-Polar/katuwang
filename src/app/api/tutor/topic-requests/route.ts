@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
@@ -6,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 
-const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 // ─── GET: Topic requests a tutor can act on ──────────────────────────────────
 //   tab=open     (default) — OPEN requests this tutor is eligible to accept

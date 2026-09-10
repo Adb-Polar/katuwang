@@ -1,4 +1,5 @@
 import type { Intent } from "@/lib/chatbot/types";
+import { portalPath } from "@/lib/portalPaths";
 
 // ─── Intent catalogue ─────────────────────────────────────────────────────
 // Ordered roughly by specificity. `classify()` scores every intent whose
@@ -107,12 +108,7 @@ export const INTENTS: Intent[] = [
     response: {
       text: "The bell in the top bar shows a red dot when you have unread notifications — click it for the latest, or open the Notifications page for the full list.",
     },
-    link: (ctx) =>
-      ctx.role === LEARNER
-        ? { href: "/learner/notifications", label: "Notifications" }
-        : ctx.role === TUTOR
-        ? { href: "/tutor/notifications", label: "Notifications" }
-        : { href: "/admin/notifications", label: "Notifications" },
+    link: (ctx) => ({ href: portalPath(ctx.role, "/notifications"), label: "Notifications" }),
   },
   {
     id: "nav_profile",
@@ -158,12 +154,7 @@ export const INTENTS: Intent[] = [
     keywords: ["help", "guide", "faq", "tutorial", "documentation"],
     patterns: [/\bhelp (page|centre|center)\b/, /\bfaqs?\b/, /\buser guide\b/],
     response: { text: "Open Help & FAQs for a full walkthrough of the platform, organised by topic." },
-    link: (ctx) =>
-      ctx.role === LEARNER
-        ? { href: "/learner/help", label: "Help & FAQs" }
-        : ctx.role === TUTOR
-        ? { href: "/tutor/help", label: "Help & FAQs" }
-        : { href: "/admin/help", label: "Help & FAQs" },
+    link: (ctx) => ({ href: portalPath(ctx.role, "/help"), label: "Help & FAQs" }),
   },
   {
     id: "nav_search",

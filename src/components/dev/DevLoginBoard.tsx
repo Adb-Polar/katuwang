@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DEV_PAGE_SIZE } from "@/lib/pagination";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +17,7 @@ export type DevUser = {
   section: string;
 };
 
-const PAGE_SIZE = 8;
+const PAGE_SIZE = DEV_PAGE_SIZE;
 
 export default function DevLoginBoard({
   title,

@@ -648,3 +648,24 @@ Learner reports for tutors & classes (Changes.md Part 55)
     already been reviewed." (400).
  [] No real name or email of the reporter or the reported tutor appears anywhere in the
     learner flow, the admin queue, or any notification message.
+
+Clean-code cleanup backlog (Changes.md Part 56) — behaviour-preserving, spot-check only
+ [] Dates render consistently after the datetime.ts consolidation. Eyeball a few pages
+    that used to have their own format: /admin (recent audit rows), /admin/audit-log,
+    /admin/users/[id] + /admin/classes/[id] (Joined / Enrolled / suspended-until),
+    /admin/abuse-reports, /admin/registrations, /admin/users (suspension "Until"),
+    /tutor (status banner + "Upcoming sessions" tile day/time), /tutor/students/[id],
+    /tutor/assessments (AssessmentHistory), /learner (upcoming-session tile),
+    /learner/reports, /learner/requests (fulfilled-class "next ..."), a class card's
+    "next session", a class detail Sessions list, the weekly timetable time labels.
+    Each should show a valid localised date/time (no "Invalid Date", no raw ISO).
+ [] Learner/tutor/admin top-bar search: a topic hit still links into the right portal's
+    /classes?q=... ( /learner, /tutor, /admin respectively).
+ [] Chatbot: ask "where are my notifications" and "open help" as each role — the reply's
+    link points at /{portal}/notifications and /{portal}/help for that role
+    (admin help -> /admin/help, admin profile question still -> /admin/settings).
+ [] Pagination unchanged: admin tables still page at 10, class/tutor browse at 12,
+    audit-log + chatbot-misses at 25, dev login board at 8; the rows-per-page selector
+    still works where present.
+ [] Auto-match / browse ordering unchanged: run /learner/match and the browse list and
+    confirm results and scores look the same as before (grade weighting still 6/3/2).

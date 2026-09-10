@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { ChevronRight, CornerUpLeft } from "lucide-react";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { formatDateTime } from "@/lib/datetime";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -15,8 +17,8 @@ import Pagination from "@/components/ui/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 
-const PAGE_SIZE = 10;
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as string[];
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
+const SUBJECTS = SUBJECT_SLUGS;
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -92,14 +94,7 @@ interface AttemptDetail {
 }
 
 function fmt(iso: string | null) {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return iso ? formatDateTime(iso) : "—";
 }
 
 const ATTEMPT_TONE = {

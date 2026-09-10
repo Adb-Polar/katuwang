@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -12,8 +13,9 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { VIOLATION_LABEL } from "@/lib/reportViolations";
+import { formatDateTime } from "@/lib/datetime";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Report {
   id: string;
@@ -35,16 +37,6 @@ const TAB_STATUS: Record<Tab, string> = {
   resolved: "RESOLVED",
   dismissed: "DISMISSED",
 };
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function label(type: string) {
   return VIOLATION_LABEL[type as keyof typeof VIOLATION_LABEL] ?? type;
@@ -228,9 +220,9 @@ export default function AbuseReportTable() {
                       </td>
                       <td className="text-2xs text-base-content/50">
                         {tab === "pending"
-                          ? fmt(r.createdAt)
+                          ? formatDateTime(r.createdAt)
                           : r.reviewedAt
-                            ? fmt(r.reviewedAt)
+                            ? formatDateTime(r.reviewedAt)
                             : "—"}
                       </td>
                       {tab !== "pending" && (

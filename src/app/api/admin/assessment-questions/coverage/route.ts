@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 import { getAssessmentConfig } from "@/lib/settings";
 
 const keyOf = (subject: string, topic: string) => `${subject}::${topic}`;
@@ -36,7 +36,7 @@ export async function GET() {
     const countMap = new Map(counts.map((c) => [keyOf(c.subject, c.topic), c._count._all]));
     const requestMap = new Map(openRequests.map((r) => [keyOf(r.subject, r.topic), r._count._all]));
 
-    const coverage = (Object.keys(SUBJECT_TOPICS) as string[]).flatMap((subject) =>
+    const coverage = SUBJECT_SLUGS.flatMap((subject) =>
       SUBJECT_TOPICS[subject].map((topic) => {
         const k = keyOf(subject, topic);
         const activeCount = countMap.get(k) ?? 0;

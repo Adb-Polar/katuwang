@@ -13,20 +13,11 @@ import {
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
+import { addDays, formatDateTime, formatTime, formatWeekday } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
-
-function fmt(d: Date) {
-  return d.toLocaleString(undefined, {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
@@ -85,7 +76,7 @@ export default async function TutorDashboard() {
       ? prisma.classSession.findMany({
           where: {
             status: "SCHEDULED",
-            scheduledAt: { gt: now, lt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000) },
+            scheduledAt: { gt: now, lt: addDays(now, 7) },
             class: { tutorProfileId: tutorProfile.id },
           },
           orderBy: { scheduledAt: "asc" },
@@ -151,7 +142,7 @@ export default async function TutorDashboard() {
           )}
           <p className="text-xs text-base-content/70">
             {user?.statusExpiresAt
-              ? `In effect until ${fmt(user.statusExpiresAt)}.`
+              ? `In effect until ${formatDateTime(user.statusExpiresAt)}.`
               : "In effect indefinitely. Contact an administrator for details."}
           </p>
         </div>
@@ -224,7 +215,7 @@ export default async function TutorDashboard() {
                     >
                       <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
                         <span className="text-2xs font-bold uppercase leading-none">
-                          {d.toLocaleDateString(undefined, { weekday: "short" })}
+                          {formatWeekday(d)}
                         </span>
                         <span className="text-base font-bold leading-tight">{d.getDate()}</span>
                       </div>
@@ -238,7 +229,7 @@ export default async function TutorDashboard() {
                           </span>
                         </div>
                         <p className="text-2xs text-base-content/55 mt-0.5">
-                          {d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })} ·{" "}
+                          {formatTime(d)} ·{" "}
                           {s.duration} min
                         </p>
                       </div>

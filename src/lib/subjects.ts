@@ -1,6 +1,6 @@
 import type { Subject, Topic } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { normalizeTopic, SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { normalizeTopic, SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 
 // ─── Admin-editable subject / topic taxonomy ─────────────────────────────────
 // DB-backed replacement for the static SUBJECT_TOPICS map. Cached in-process
@@ -33,7 +33,7 @@ let warnedFallback = false;
 /** Static SUBJECT_TOPICS shaped like the DB rows — used only if the DB read fails. */
 function staticFallback(): SubjectWithTopics[] {
   const now = new Date();
-  return (Object.keys(SUBJECT_TOPICS) as string[]).map((slug, i) => ({
+  return SUBJECT_SLUGS.map((slug, i) => ({
     id: `static-${slug}`,
     slug,
     name: slug,

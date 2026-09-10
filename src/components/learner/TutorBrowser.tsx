@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 import { Search, BadgeCheck, CalendarClock, GraduationCap } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -8,8 +9,9 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import { formatDayMonth, formatTime, formatWeekday } from "@/lib/datetime";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = BROWSE_PAGE_SIZE;
 
 interface TutorRow {
   id: string;
@@ -24,9 +26,7 @@ interface TutorRow {
 }
 
 function fmtNext(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" }) +
-    " · " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  return `${formatWeekday(iso)}, ${formatDayMonth(iso)} · ${formatTime(iso)}`;
 }
 
 export default function TutorBrowser() {

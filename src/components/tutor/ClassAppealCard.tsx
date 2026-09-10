@@ -6,6 +6,7 @@ import { Gavel } from "lucide-react";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import CharCount from "@/components/ui/CharCount";
+import { formatDate } from "@/lib/datetime";
 
 const REASON_MAX = 500;
 
@@ -16,10 +17,6 @@ export interface ClassAppealSummary {
   reviewNote: string | null;
   createdAt: string;
   reviewedAt: string | null;
-}
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
 /**
@@ -67,7 +64,7 @@ export default function ClassAppealCard({
           <Gavel className="h-4 w-4 shrink-0" />
           Appeal submitted — awaiting admin review
         </div>
-        <p className="text-base-content/70">Filed {fmt(appeal.createdAt)}.</p>
+        <p className="text-base-content/70">Filed {formatDate(appeal.createdAt)}.</p>
         <p className="text-base-content/80">
           <span className="font-semibold">Your reason:</span> {appeal.reason}
         </p>

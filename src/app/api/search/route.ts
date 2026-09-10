@@ -7,6 +7,7 @@ import { browseClassesWhere } from "@/lib/classQueries";
 import { getSubjects, resolveSubjectSlugs } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
+import { portalPath } from "@/lib/portalPaths";
 
 const PER_GROUP = 6;
 
@@ -96,12 +97,7 @@ export async function GET(req: NextRequest) {
             id: `${s.slug}:${t.name}`,
             title: t.name,
             subtitle: s.name,
-            href:
-              role === "STUDENT_LEARNER"
-                ? `/learner/classes?q=${encodeURIComponent(t.name)}`
-                : role === "STUDENT_TUTOR"
-                ? `/tutor/classes?q=${encodeURIComponent(t.name)}`
-                : `/admin/classes?q=${encodeURIComponent(t.name)}`,
+            href: portalPath(role, `/classes?q=${encodeURIComponent(t.name)}`),
           });
         }
         if (topicMatches.length >= PER_GROUP) break;

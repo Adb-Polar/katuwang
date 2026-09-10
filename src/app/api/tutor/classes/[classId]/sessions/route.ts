@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { addSessionSchema } from "@/lib/validations/class";
 import { hasSessionOverlap } from "@/lib/classSessions";
+import { MINUTE_MS } from "@/lib/datetime";
 
 // ─── POST: Add a New Session to an Existing Class ──────────────────────────────
 export async function POST(
@@ -73,7 +74,7 @@ export async function POST(
     }
 
     const start = new Date(scheduledAt);
-    const end = new Date(start.getTime() + duration * 60 * 1000);
+    const end = new Date(start.getTime() + duration * MINUTE_MS);
 
     if (start.getTime() < Date.now()) {
       return NextResponse.json(

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Role } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { aggregateMisses, type MissSort } from "@/lib/chatbot/misses";
 
-const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE = AUDIT_PAGE_SIZE;
 const SORTABLE = new Set<MissSort>(["lastSeen", "count", "firstSeen"]);
 // Bounded window of most-recent misses to aggregate over — volume is low
 // (rows only appear when the classifier fails) so this comfortably covers

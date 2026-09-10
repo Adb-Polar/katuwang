@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { formatDateTime } from "@/lib/datetime";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -17,10 +18,6 @@ const STATUS_TONE = {
   PENDING: "warning",
   DECLINED: "error",
 } as const;
-
-function fmt(d: Date) {
-  return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-}
 
 export default async function AdminUserDetailPage({
   params,
@@ -80,7 +77,7 @@ export default async function AdminUserDetailPage({
     { label: "Contact info", value: user.contactInfo || "—" },
     { label: "Role", value: user.role.replace("STUDENT_", "").toLowerCase() },
     { label: "Grade & section", value: `${user.gradeLevel.replace("_", " ")} · ${user.section}` },
-    { label: "Joined", value: fmt(user.createdAt) },
+    { label: "Joined", value: formatDateTime(user.createdAt) },
   ];
 
   const counts =
@@ -126,11 +123,11 @@ export default async function AdminUserDetailPage({
                 <span className="font-semibold">
                   {user.statusExpiresAt ? "In effect until:" : "Duration:"}
                 </span>{" "}
-                {user.statusExpiresAt ? fmt(user.statusExpiresAt) : "Indefinite"}
+                {user.statusExpiresAt ? formatDateTime(user.statusExpiresAt) : "Indefinite"}
               </p>
               {user.statusUpdatedAt && (
                 <p>
-                  <span className="font-semibold">Updated:</span> {fmt(user.statusUpdatedAt)}
+                  <span className="font-semibold">Updated:</span> {formatDateTime(user.statusUpdatedAt)}
                 </p>
               )}
             </div>
@@ -179,7 +176,7 @@ export default async function AdminUserDetailPage({
                 <li key={a.id} className="py-2.5 text-xs">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold text-base-content/80">{a.action.replace(/_/g, " ")}</span>
-                    <span className="text-base-content/50 shrink-0">{fmt(a.createdAt)}</span>
+                    <span className="text-base-content/50 shrink-0">{formatDateTime(a.createdAt)}</span>
                   </div>
                   <div className="text-2xs text-base-content/50 mt-0.5">
                     by {a.admin.anonymousId}

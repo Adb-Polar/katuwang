@@ -8,6 +8,7 @@ import { normalizeTopic } from "@/lib/subjectTopics";
 import { subjectExists } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
+import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
@@ -166,7 +167,7 @@ export async function POST(req: NextRequest) {
 
     // Each session must not overlap any of the tutor's existing sessions (any class)
     for (const s of parsedSessions) {
-      const end = new Date(s.start.getTime() + s.duration * 60 * 1000);
+      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
       const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
       if (conflict) {
         return NextResponse.json(

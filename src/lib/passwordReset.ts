@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "crypto";
+import { MINUTE_MS } from "@/lib/datetime";
 
 /**
  * Password-reset token helpers. The raw token is a 64-char hex string that only
@@ -7,7 +8,7 @@ import { createHash, randomBytes } from "crypto";
  */
 
 /** How long an issued reset token stays valid. */
-export const RESET_TOKEN_TTL_MS = 30 * 60 * 1000; // 30 minutes
+export const RESET_TOKEN_TTL_MS = 30 * MINUTE_MS;
 
 /** Cryptographically-random raw token for the emailed link. */
 export function generateResetToken(): string {

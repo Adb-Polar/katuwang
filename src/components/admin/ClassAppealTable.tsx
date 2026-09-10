@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -11,8 +12,9 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
+import { formatDateTime } from "@/lib/datetime";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Appeal {
   id: string;
@@ -37,16 +39,6 @@ const TAB_STATUS: Record<Tab, string> = {
   approved: "APPROVED",
   rejected: "REJECTED",
 };
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 export default function ClassAppealTable() {
   const [tab, setTab] = useState<Tab>("pending");
@@ -173,7 +165,7 @@ export default function ClassAppealTable() {
                       </td>
                       <td className="text-2xs text-base-content/70 max-w-xs whitespace-normal">{a.reason}</td>
                       <td className="text-2xs text-base-content/50">
-                        {tab === "pending" ? fmt(a.createdAt) : a.reviewedAt ? fmt(a.reviewedAt) : "—"}
+                        {tab === "pending" ? formatDateTime(a.createdAt) : a.reviewedAt ? formatDateTime(a.reviewedAt) : "—"}
                       </td>
                       {tab !== "pending" && (
                         <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">

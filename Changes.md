@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [56](#part-56) | **Clean-code cleanup backlog (`docs/reviews/clean-code-review-2026-09-09.md`)** | Behaviour-preserving refactor pass: one source of truth for the grade-match scoring ladder, day/minute millisecond constants + `addDays`/`daysBetween` helpers, app-wide date/time formatting, the role→portal-path prefix, and page-size constants. No feature or API change; the only user-visible effect is that a handful of dates now render in one consistent style. | New `src/lib/portalPaths.ts` (`portalPath(role, sub)`) and `src/lib/pagination.ts` (`ADMIN_PAGE_SIZE`/`BROWSE_PAGE_SIZE`/`AUDIT_PAGE_SIZE`/`DEV_PAGE_SIZE`/`MAX_PAGE_SIZE`/`MAX_BROWSE_PAGE_SIZE`). `src/lib/matching.ts` gains exported `GRADE_WEIGHTS` + `gradeScore(match)`; `browseRanking.ts` reuses them (kills the duplicated `6/3/2` ladder). `src/lib/datetime.ts` grows `MINUTE_MS`/`HOUR_MS`/`DAY_MS`, `daysBetween`, `addDays`, and `formatDate`/`formatDayMonth`/`formatDateTime`/`formatTime`/`formatWeekday`; ~30 files lose their local `fmt`/`formatDate` copies and inline `toLocale*` option objects. `SUBJECT_SLUGS` exported from `subjectTopics.ts` replaces 6× `Object.keys(SUBJECT_TOPICS) as string[]`. ~14 API routes + ~17 table components alias their page size to the shared constant. `search/route.ts` + `chatbot/intents.ts` use `portalPath()` for the 3-way role ternaries. M1 (oversized `QuestionBankManager`/`SessionTestBuilder`/`SubjectTopicManager`) deferred per the review. 68 files, net −62 lines; `tsc`/`lint`/`build` clean, 672/672. |
 | [55](#part-55) | **Learner reports for tutors & classes** | An enrolled learner can report a tutor or a class from a checklist of common violations plus an "Other" free-text message. Reports land in a new admin "Abuse Reports" queue where an admin marks each Resolved or Dismissed with an optional note back to the reporter; any suspension/ban stays on the existing Users/Classes pages. Relationship-gated: a tutor report needs a past/current enrollment in one of that tutor's classes, a class report needs enrollment in that class. | New `Report` + `ReportViolation` models (3NF child rows) + `ReportTargetType`/`ReportStatus`/`ReportViolationType` enums, synced with `prisma db push` (dev-DB drift blocks `migrate dev`). New `src/lib/reportViolations.ts` (shared checklist config/labels), `src/lib/validations/report.ts` (`createReportSchema` w/ "Other requires 10+ chars" refine, `reviewReportSchema`). New routes `GET|POST /api/learner/reports`, `GET /api/admin/abuse-reports`, `PATCH /api/admin/abuse-reports/[reportId]` (audit + `REPORT_REVIEWED` notify). New `REPORT_NEW`/`REPORT_REVIEWED` notification types + `Flag` icons; `REPORT_RESOLVED`/`REPORT_DISMISSED` audit actions + `REPORT` target. New `ReportButton` (learner, checklist modal) wired into the tutor profile header + `LearnerClassActions`; new `/learner/reports` page (`MyReportsList`) + nav entry; new `/admin/abuse-reports` page (`AbuseReportTable`, status tabs + a Tutor/Class target filter — `?targetType=` on the list route) + "Review" nav entry. Tests: 4 new files (learner submit, admin list, admin review, schema) — 672/672, `tsc`/`lint` clean. Not committed. |
 | [54](#part-54) | **Minimalist scrollbars, app-wide** | Every scrollbar (page, sidebar, tables, modals) is now a thin rounded grey pill with no visible track, darkening slightly on hover. | `src/app/globals.css` — one global rule: Firefox `scrollbar-width/color`, Chromium/Safari `::-webkit-scrollbar` 8px w/ transparent track + `background-clip: padding-box` inset thumb (~4px visible), `9999px` radius. `--kt-scrollbar-thumb`/`-hover` tokens (`color-mix` of `--color-base-content` at 18%/34%). CSS only, no other changes. Not committed. |
 | [53](#part-53) | **Admin portal fixes (`docs/plans/admin-portal-fixes.txt`)** | 7-part admin polish: collapsible sidebar nav groups (persisted per portal, essentials expanded, active group auto-open); admin dashboard stat cards restyled to the tutor pattern + "needs attention" badges go amber/red only when the count is > 0 (added an "Open class appeals" row); grade-level filter on the Users list; sortable "ID" column on Registrations; Classes list showed `Invalid Date` (class has no `scheduledAt` — now a derived `nextSessionAt` with a "—" fallback) and gained a rows-per-page selector; Reports gained an "Export CSV" button; the Subjects/Topics row "⋯" menu was clipped by the card's `overflow` — now portalled to `document.body` and fixed-positioned. | `PortalLayout` `defaultExpandedGroups` prop + `localStorage["kt-nav:<portal>"]` collapse state + `.kt-nav-group-toggle`/`.kt-nav-chev` CSS; `src/app/admin/page.tsx` `statCards`/`actions` with `tone`; `GradeLevel` added to `GET /api/admin/users` + a `<select>` in `UserManagementTable`; `code→anonymousId` in `REG_SORT_COLUMN` + `<SortableTh field="code">`; `GET /api/admin/classes` maps `nextSessionAt` and stops leaking `sessions`, `ClassModerationTable` renders it + wires `onPageSizeChange`; new `src/lib/csv.ts` (`toCsv` RFC-4180 + `downloadCsv`) used by `ReportsView`; `RowMenu` in `SubjectTopicManager` rewritten with `createPortal` + `getBoundingClientRect` + outside-click/Escape/scroll close. New `src/lib/__tests__/csv.test.ts`; route-test cases for `?gradeLevel`, `?sort=code`, `nextSessionAt`. `tsc`/`lint`/`build` clean, 643/643. Not committed. |
@@ -3007,6 +3008,58 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-56"></a>
+## Part 56 — Clean-code cleanup backlog (2026-09-10)
+
+Works through `docs/reviews/clean-code-review-2026-09-09.md` — items M2, M3, L1–L6.
+Every change is behaviour-preserving; the suite (672/672), `tsc`, `lint`, and `build`
+are green before and after.
+
+**M2 — grade scoring ladder had two owners.** `matching.ts` and `browseRanking.ts` both
+hard-coded the `exact 6 / adjacent 3 / any 2 / none 0` weights and the matching ternary.
+`matching.ts` now exports `GRADE_WEIGHTS` + `gradeScore(match: GradeMatch)`; `browseRanking.ts`
+imports both. One place to retune the ladder.
+
+**L1 / L6 — millisecond arithmetic.** `datetime.ts` gains `MINUTE_MS` / `HOUR_MS` / `DAY_MS`
+plus `daysBetween(from, to)` and `addDays(date, n)`. Replaces hand-written
+`24 * 60 * 60 * 1000`, `1000 * 60 * 60 * 24`, `s.duration * 60_000`, and
+`7 * 24 * 60 * 60 * 1000` across `moderation.ts`, `classSessions.ts`, `passwordReset.ts`,
+`mail.ts`, `matching.ts`, `browseRanking.ts`, `notificationMeta.ts`, the four tutor
+session/class routes, and the three dashboard pages. `60_000` vs `60 * 1000` split resolved
+to `MINUTE_MS` (the remaining bare `60_000` are unrelated cache TTLs).
+
+**L3 / L4 — date formatting.** `datetime.ts` is now the one formatting module:
+`formatDate` ("Aug 30, 2026"), `formatDayMonth` ("Aug 30"), `formatDateTime`
+("Aug 30, 2026, 3:00 PM"), `formatTime` ("3:00 PM"), `formatWeekday` ("Mon"), all taking
+`string | number | Date`. Deleted ~13 copy-pasted local `fmt` / `formatDate` / `formatWhen`
+helpers and rewrote ~20 inline `toLocale*` call sites across the admin tables, tutor cards,
+learner components, dashboards, and shared class/session/timetable views. Presentation is now
+uniform — a few spots that previously showed `"8/30/2026"` or dropped the year now match the
+house style.
+
+**M3 — role → portal path.** New `src/lib/portalPaths.ts` with `portalPath(role, sub)` over a
+`Record<Role, "/learner" | "/tutor" | "/admin">`. Collapses the 3-way `role === …` ternaries
+in `api/search/route.ts` (topic href) and `chatbot/intents.ts` (`nav_notifications`,
+`nav_help_page`). `nav_profile` left alone — ADMIN genuinely maps to `/admin/settings`, not a
+prefix swap.
+
+**L2 — page sizes.** New `src/lib/pagination.ts`: `ADMIN_PAGE_SIZE = 10`,
+`BROWSE_PAGE_SIZE = 12`, `AUDIT_PAGE_SIZE = 25`, `DEV_PAGE_SIZE = 8`, `MAX_PAGE_SIZE = 50`,
+`MAX_BROWSE_PAGE_SIZE = 48`. ~14 API routes (`const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;`
+etc.) and ~17 table components (`const PAGE_SIZE = ADMIN_PAGE_SIZE;`) alias to it, so a
+client table and its route can't drift apart. `Pagination.tsx`'s option list is a different
+concept and untouched.
+
+**L5 — `SUBJECT_SLUGS`.** `subjectTopics.ts` exports the derived key list once; the 6
+`Object.keys(SUBJECT_TOPICS) as string[]` copies (`subjects.ts`, `useSubjectCatalog.ts`,
+`QuestionBankManager.tsx`, `DevDataFactory.tsx`, `api/dev/route.ts`,
+`assessment-questions/coverage/route.ts`) import it instead.
+
+**Deferred.** M1 (split the three 500–1000-LOC god components) is scheduled as its own task
+per the review — do it opportunistically when next editing those files.
+
+68 files, net −62 lines.
 
 <a id="part-55"></a>
 ## Part 55 — Learner reports for tutors & classes (2026-09-10)

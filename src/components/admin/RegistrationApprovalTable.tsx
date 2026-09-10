@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { Role, GradeLevel } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { formatDateTime } from "@/lib/datetime";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 import Tabs from "@/components/ui/Tabs";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
   all: "",
@@ -30,16 +32,6 @@ interface PendingUser {
   gradeLevel: GradeLevel;
   section: string;
   createdAt: string;
-}
-
-function fmt(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export default function RegistrationApprovalTable() {
@@ -184,7 +176,7 @@ export default function RegistrationApprovalTable() {
                       <td className="text-base-content/60">
                         {u.gradeLevel.replace("_", " ")} · {u.section}
                       </td>
-                      <td className="text-2xs text-base-content/50">{fmt(u.createdAt)}</td>
+                      <td className="text-2xs text-base-content/50">{formatDateTime(u.createdAt)}</td>
                       <td>
                         <div className="flex gap-2 justify-end">
                           <button

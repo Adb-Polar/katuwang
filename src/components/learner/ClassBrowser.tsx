@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
@@ -20,7 +21,7 @@ const MINE_TABS: { key: MineTab; label: string }[] = [
   { key: "cancelled", label: "Cancelled" },
 ];
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = BROWSE_PAGE_SIZE;
 
 interface ClassSession {
   scheduledAt: string;

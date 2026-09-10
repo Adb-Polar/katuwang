@@ -6,14 +6,11 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import { formatDate } from "@/lib/datetime";
 
 export const metadata = {
   title: "Student Profile | Katuwang",
 };
-
-function formatDate(d: Date) {
-  return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
-}
 
 export default async function TutorStudentProfilePage({
   params,

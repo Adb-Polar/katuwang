@@ -7,6 +7,7 @@ import { useFetchList } from "@/hooks/useFetchList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
+import { formatDate, formatDateTime } from "@/lib/datetime";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import MatchCriteriaFields, {
@@ -332,12 +333,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         <span className="text-2xs text-base-content/70">
                           {r.fulfilledClass.tutorAnonymousId} created a class
                           {r.fulfilledClass.nextSessionAt
-                            ? ` · next ${new Date(r.fulfilledClass.nextSessionAt).toLocaleDateString(undefined, {
-                                month: "short",
-                                day: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}`
+                            ? ` · next ${formatDateTime(r.fulfilledClass.nextSessionAt)}`
                             : ""}
                         </span>
                         <Link
@@ -368,7 +364,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     <p className="text-2xs text-base-content/40">
-                      Posted {new Date(r.createdAt).toLocaleDateString()}
+                      Posted {formatDate(r.createdAt)}
                     </p>
                   </div>
                 );

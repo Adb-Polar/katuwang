@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { formatDateTime } from "@/lib/datetime";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 
@@ -26,7 +28,7 @@ const ACTION_LABELS: Record<string, string> = {
   USER_DECLINED: "Registration Declined",
 };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = AUDIT_PAGE_SIZE;
 const ACTIONS = Object.values(AUDIT_ACTIONS);
 const TARGET_TYPES = Object.values(AUDIT_TARGET_TYPES);
 
@@ -158,12 +160,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                       </td>
                       <td className="text-base-content/60">{log.reason || "—"}</td>
                       <td className="text-base-content/50">
-                        {new Date(log.createdAt).toLocaleString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
+                        {formatDateTime(log.createdAt)}
                       </td>
                     </tr>
                   ))}

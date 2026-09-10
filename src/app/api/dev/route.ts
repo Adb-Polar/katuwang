@@ -4,7 +4,7 @@ import { Role, GradeLevel, ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateClassCode } from "@/lib/idGenerator";
 import { registerAccount } from "@/lib/registration";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev-only data factory. Spawns throwaway users / classes / enrolments / topic
@@ -29,7 +29,7 @@ const SECTIONS = ["Rizal", "Bonifacio", "Mabini", "Aguinaldo", "Luna", "Del Pila
 const GRADES: GradeLevel[] = [
   "GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12",
 ];
-const SUBJECTS = Object.keys(SUBJECT_TOPICS) as string[];
+const SUBJECTS = SUBJECT_SLUGS;
 
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const sample = <T,>(arr: readonly T[], n: number): T[] => {
