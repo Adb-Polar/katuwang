@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { formatDateTime } from "@/lib/datetime";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import SortableTh from "@/components/ui/SortableTh";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
 
@@ -34,14 +35,14 @@ const PAGE_SIZE = AUDIT_PAGE_SIZE;
 const ACTIONS = Object.values(AUDIT_ACTIONS);
 const TARGET_TYPES = Object.values(AUDIT_TARGET_TYPES);
 
-type SortKey = "createdAt" | "action" | "targetType";
-
 export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: string }) {
   const [action, setAction] = useState("");
   const [targetType, setTargetType] = useState("");
   const [q, setQ] = useState(initialQuery);
-  const [sort, setSort] = useState<SortKey>("createdAt");
-  const [dir, setDir] = useState<"asc" | "desc">("desc");
+  const { sort, dir, toggle } = useTableSort("createdAt", "desc", {
+    action: "asc",
+    targetType: "asc",
+  });
 
   const {
     data: logs,
@@ -65,29 +66,6 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
     PAGE_SIZE,
     "Could not retrieve the audit log.",
     "audit"
-  );
-
-  const toggleSort = (key: SortKey) => {
-    if (sort === key) {
-      setDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSort(key);
-      setDir(key === "createdAt" ? "desc" : "asc");
-    }
-  };
-
-  const sortHeader = (label: string, k: SortKey) => (
-    <th>
-      <button
-        type="button"
-        onClick={() => toggleSort(k)}
-        className="inline-flex items-center gap-1 font-semibold hover:text-primary cursor-pointer"
-      >
-        {label}
-        {sort === k &&
-          (dir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-      </button>
-    </th>
   );
 
   return (
@@ -139,11 +117,11 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
-                    {sortHeader("Action", "action")}
-                    {sortHeader("Target", "targetType")}
+                    <SortableTh label="Action" field="action" sort={sort} dir={dir} onSort={toggle} />
+                    <SortableTh label="Target" field="targetType" sort={sort} dir={dir} onSort={toggle} />
                     <th>Admin</th>
                     <th>Reason</th>
-                    {sortHeader("When", "createdAt")}
+                    <SortableTh label="When" field="createdAt" sort={sort} dir={dir} onSort={toggle} />
                   </tr>
                 </thead>
                 <tbody>

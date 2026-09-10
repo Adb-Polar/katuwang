@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
+import { useTableSort } from "@/hooks/useTableSort";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import SortableTh from "@/components/ui/SortableTh";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
@@ -27,13 +28,10 @@ const ROLE_LABELS: Record<MissGroup["role"], string> = {
 
 const PAGE_SIZE = AUDIT_PAGE_SIZE;
 
-type SortKey = "lastSeen" | "count" | "firstSeen";
-
 export default function ChatbotMissesTable() {
   const [role, setRole] = useState<"" | MissGroup["role"]>("");
   const [q, setQ] = useState("");
-  const [sort, setSort] = useState<SortKey>("lastSeen");
-  const [dir, setDir] = useState<"asc" | "desc">("desc");
+  const { sort, dir, toggle } = useTableSort("lastSeen", "desc");
 
   const {
     data: groups,
@@ -56,29 +54,6 @@ export default function ChatbotMissesTable() {
     PAGE_SIZE,
     "Could not load chatbot misses.",
     "misses"
-  );
-
-  const toggleSort = (key: SortKey) => {
-    if (sort === key) {
-      setDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSort(key);
-      setDir("desc");
-    }
-  };
-
-  const sortHeader = (label: string, k: SortKey) => (
-    <th>
-      <button
-        type="button"
-        onClick={() => toggleSort(k)}
-        className="inline-flex items-center gap-1 font-semibold hover:text-primary cursor-pointer"
-      >
-        {label}
-        {sort === k &&
-          (dir === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />)}
-      </button>
-    </th>
   );
 
   return (
@@ -122,9 +97,9 @@ export default function ChatbotMissesTable() {
                   <tr className="text-xs">
                     <th>Message</th>
                     <th>Role</th>
-                    {sortHeader("Count", "count")}
-                    {sortHeader("First seen", "firstSeen")}
-                    {sortHeader("Last seen", "lastSeen")}
+                    <SortableTh label="Count" field="count" sort={sort} dir={dir} onSort={toggle} />
+                    <SortableTh label="First seen" field="firstSeen" sort={sort} dir={dir} onSort={toggle} />
+                    <SortableTh label="Last seen" field="lastSeen" sort={sort} dir={dir} onSort={toggle} />
                   </tr>
                 </thead>
                 <tbody>

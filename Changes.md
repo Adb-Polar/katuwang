@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [66](#part-66) | **`AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6)** | Deleted both tables' local `sortHeader()` + `toggleSort` and switched to `useTableSort` + `<SortableTh>`, matching every other admin table (incl. the neutral unsorted chevron). | ~20 lines removed per file; `AuditLogTable` keeps its per-column start direction via `defaultDirs`. 680/680. |
 | [65](#part-65) | **`<LoadingRow>` + `<EmptyState>` (component-reuse R4)** | Centered-spinner and muted-empty-row one-liners extracted to `components/ui`; codemod swapped 17 spinner blocks + 12 empty rows across 16 files (admin tables + a few others). Output identical. | New `LoadingRow.tsx` / `EmptyState.tsx`; imports added to the 16 files. 680/680. |
 | [64](#part-64) | **`violationLabel()` + `<AuditLogLink>` (component-reuse R8)** | Two shared helpers: `violationLabel(type)` from `reportViolations.ts` (3 inline copies removed) and `<AuditLogLink targetId>` in `components/ui` (2 magic-query-string links removed). | New `violationLabel` export + `AuditLogLink.tsx`; `MyReportsList`, `AbuseReportTable`, `ClassAppealTable` migrated. 680/680. |
 | [63](#part-63) | **`<SearchInput>` component (repeated-markup C4)** | The bordered search-pill extracted to `src/components/ui/SearchInput.tsx` (`value` / `onChange` / `placeholder` / `transform?`); `ClassBrowser` + `TutorBrowser` migrated. No behaviour change. | New `SearchInput.tsx`; `transform="upper"` replaces TutorBrowser's inline `.toUpperCase()`. Dead `Search` icon imports removed. 680/680. |
@@ -3017,6 +3018,22 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-66"></a>
+## Part 66 — `AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6) (2026-09-10)
+
+`docs/reviews/component-reuse-review-2026-09-10.md` **R6**. Both tables carried a
+local `sortHeader()` helper + a hand-rolled `toggleSort` (a re-implementation of
+`useTableSort` + `SortableTh`, which every other admin table already uses).
+`ChatbotMissesTable`'s version drew no neutral "unsorted" chevron, so its headers
+looked different from the rest of the portal.
+
+Both now use `const { sort, dir, toggle } = useTableSort(...)` and render
+`<SortableTh>` — `AuditLogTable` with `{ action: "asc", targetType: "asc" }`
+default dirs to preserve its per-column start direction. ~20 lines removed from
+each; the portal's sort affordance (incl. the faint `ChevronsUpDown` on inactive
+columns) is now uniform. Local `SortKey` types and `ArrowUp`/`ArrowDown` imports
+dropped. 680/680, `tsc` clean.
 
 <a id="part-65"></a>
 ## Part 65 — `<LoadingRow>` + `<EmptyState>` (component-reuse R4) (2026-09-10)
