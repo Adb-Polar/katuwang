@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import CharCount from "./CharCount";
+import Modal from "./Modal";
 
 /**
  * `ConfirmDialog` + a note textarea: the "confirm this action and optionally
@@ -48,13 +49,11 @@ export default function PromptDialog({
     setNote("");
   }
 
-  if (!open) return null;
-
   const confirmDisabled = loading || (noteRequired && note.trim().length === 0);
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-sm p-6 kt-card" style={{ boxShadow: "var(--kt-shadow-pop)" }}>
+    <Modal open={open} onClose={onCancel} title={title} bare>
+      <div>
         <div className="flex items-start gap-3">
           {tone === "danger" && (
             <div className="p-2 rounded-lg bg-error/10 text-error shrink-0">
@@ -102,11 +101,6 @@ export default function PromptDialog({
           </button>
         </div>
       </div>
-      <label
-        className="modal-backdrop"
-        onClick={loading ? undefined : onCancel}
-        aria-label="Close"
-      />
-    </div>
+    </Modal>
   );
 }

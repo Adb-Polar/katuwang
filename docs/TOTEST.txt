@@ -760,3 +760,10 @@ Security-review fixes (Changes.md Part 57)
     reporter notified. Dismiss with/without note still works.
  [] Admin Certifications: reject a request with feedback -> tutor sees outcome; note saved.
  [] Re-opening any of these dialogs starts with an empty textarea (no stale note).
+
+--- Part 68 (component-reuse R3: Modal) ---
+ [] Every ConfirmDialog + PromptDialog (delete confirms, moderation prompts, appeal/
+    certification reject, etc.): Escape closes it; Tab cycles within the dialog and
+    does not reach the page behind; on close, focus returns to the button that opened it.
+    Visuals unchanged (no new X button on these two).
+ [] Backdrop click still cancels; while a submit is in flight the buttons are disabled.
