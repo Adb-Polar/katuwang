@@ -47,6 +47,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Learner enrollment/unenrollment | ✅ | `ClassEnrollment` model, `/api/classes/[classId]/enroll` |
 | Roster / enrolled learners view | ✅ | `EnrolledLearnersTable.tsx`, `StudentRoster.tsx` |
 | Class moderation (suspend/ban/cancel) | ✅ | `ClassStatus` (`SUSPENDED`/`BANNED`), `ClassModerationPanel.tsx`, `/admin/classes` |
+| Learner reports a tutor or class | ✅ | `Report` / `ReportViolation` models, `ReportButton.tsx`, `POST /api/learner/reports`, admin review at `/admin/abuse-reports` (resolve/dismiss + note only; enforcement stays on Users/Classes pages) — added 2026-09-10 |
 
 ## 3. Tutor Matching Module
 

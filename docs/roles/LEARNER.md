@@ -103,11 +103,20 @@ only — no pass/fail, no grade impact.
 - **When a tutor accepts your request** — they build a full class from it (subject/topics/schedule pre-filled), and the request flips to `ACCEPTED`, linked to that class. Your requests page shows a "Review & enroll" link to the class's detail page. You are **not** auto-enrolled — you decide. Enrolling flips the request to `ENROLLED`; unenrolling flips it back to `ACCEPTED`.
 - **If the tutor cancels the linked class** — your request automatically re-opens (`→ OPEN`, unlinked) and you get a notification. **If the tutor completes the class** — your request is marked `FULFILLED` (terminal) and you get a notification.
 
+## Reporting a tutor or class (`/learner/reports`)
+
+- You can **report a tutor** from their profile (`/learner/tutors/[tutorId]`) — the "Report this tutor" button appears **only if you have joined at least one of that tutor's classes**.
+- You can **report a class** from its detail page (`/learner/classes/[classId]`) — the "Report this class" button appears **only while you are enrolled**.
+- The report form is a checklist of common violations (different sets for a tutor vs. a class) plus an **Other** option; ticking Other requires a written description of at least 10 characters. You must tick at least one reason.
+- Only administrators see the report. Your identity is **not** shared with the tutor. You cannot have two open reports about the same target at once.
+- **My Reports** (sidebar, under Tools) lists every report you filed with its status — `PENDING`, `RESOLVED` (an admin acted on it), or `DISMISSED` (closed with no action) — plus the admin's note once reviewed. You're also sent a `REPORT_REVIEWED` notification when an admin closes a report.
+  (`GET`/`POST /api/learner/reports`)
+
 ## Notifications (`/learner/notifications`)
 
 - A **Notifications** sidebar item (bell icon) shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both are sourced from `Notification` rows addressed to you and refresh on navigation.
 - The page (and the dropdown) list notifications newest first (icon by type, message, relative time, unread dot). Clicking a row marks **just that one** read and follows its link if it has one; a "Mark all read" button clears the rest.
-- Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed), `REGISTRATION_APPROVED` (your account was approved), `CLASS_CANCELLED` / `CLASS_COMPLETED` (a class you were enrolled in — sent to browse-enrolled learners; request-linked learners get the `TOPIC_REQUEST_*` one instead).
+- Notification types you'll see: `TOPIC_REQUEST_ACCEPTED` (a tutor built a class for your request), `TOPIC_REQUEST_REOPENED` (a linked class was cancelled, or an admin closed/re-opened your request), `TOPIC_REQUEST_FULFILLED` (a linked class completed), `REGISTRATION_APPROVED` (your account was approved), `CLASS_CANCELLED` / `CLASS_COMPLETED` (a class you were enrolled in — sent to browse-enrolled learners; request-linked learners get the `TOPIC_REQUEST_*` one instead), `REPORT_REVIEWED` (an admin resolved or dismissed a report you filed).
   (`GET /api/notifications`, `POST /api/notifications/read`)
 
 ## Chatbot assistant (floating widget)
@@ -265,6 +274,25 @@ Cancel one of the caller's own `OPEN` or `ACCEPTED` requests, or edit an `OPEN` 
 **200** → `{ id, status }` (cancel) or the updated request (edit).
 **400** → body invalid, the request is in a terminal state (cancel), or not `OPEN` (edit).
 **401** → not a learner. **404** → request not found or not the caller's.
+**500** → `{ error }`.
+
+### `GET /api/learner/reports`
+The caller's own reports, newest first. Requires `role === "STUDENT_LEARNER"` (`401`).
+
+**200** → `{ reports: [{ id, targetType: "TUTOR"|"CLASS", target: { anonymousId? } | { code?, subject? }, violations: string[], details, status, resolutionNote, reviewedAt, createdAt }] }`. The reviewing admin's identity is never included.
+**500** → `{ error }`.
+
+### `POST /api/learner/reports`
+File a report against a tutor or a class.
+
+**Body**: `{ targetType: "TUTOR"|"CLASS", targetId, violations: ReportViolationType[], details? }`. `targetId` is the tutor's **user id** for `TUTOR` and the **class id** for `CLASS`. `violations` must have at least one value from the target's checklist; `details` is required (≥10 chars) when `violations` contains `"OTHER"`.
+
+**201** → the created report.
+**400** → body invalid (no violation, or `OTHER` without a description).
+**401** → not a learner.
+**403** → no enrollment relationship with the target (must have joined one of the tutor's classes / be enrolled in the class).
+**404** → tutor or class not found.
+**409** → the caller already has a `PENDING` report about that target.
 **500** → `{ error }`.
 
 ### `GET /api/learner/tutors`

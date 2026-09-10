@@ -13,6 +13,7 @@ import {
   CalendarCheck,
   Gavel,
   ClipboardList,
+  Flag,
 } from "lucide-react";
 
 // Shared shape + presentation helpers for notifications, used by both the
@@ -55,6 +56,9 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   CLASS_APPEAL_NEW: <Gavel className="h-4 w-4 text-warning" />,
   CLASS_APPEAL_APPROVED: <Gavel className="h-4 w-4 text-success" />,
   CLASS_APPEAL_REJECTED: <Gavel className="h-4 w-4 text-error" />,
+  // abuse reports — filed (admin-facing), reviewed (reporter-facing)
+  REPORT_NEW: <Flag className="h-4 w-4 text-warning" />,
+  REPORT_REVIEWED: <Flag className="h-4 w-4 text-info" />,
   // session pre/post tests (learner-facing)
   SESSION_PRETEST_OPEN: <ClipboardList className="h-4 w-4 text-info" />,
   SESSION_POSTTEST_OPEN: <ClipboardList className="h-4 w-4 text-success" />,

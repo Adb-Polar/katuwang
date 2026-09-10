@@ -184,6 +184,7 @@ export default async function LearnerClassDetailPage({
           status={tutorClass.status}
           isEnrolled={isEnrolled}
           isFull={tutorClass._count.enrollments >= tutorClass.maxStudents}
+          reportLabel={`${tutorClass.subject} · ${tutorClass.code}`}
         />
       }
     />

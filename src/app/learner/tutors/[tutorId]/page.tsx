@@ -11,6 +11,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
+import ReportButton from "@/components/learner/ReportButton";
 import TutorProfileClassTabs, {
   type TutorProfileClass,
 } from "@/components/learner/TutorProfileClassTabs";
@@ -74,6 +75,9 @@ export default async function LearnerTutorProfilePage({
   }
 
   const allClasses = tutor.tutorProfile.classes;
+
+  // A learner may only report a tutor whose class they have joined.
+  const canReport = allClasses.some((c) => c.enrollments.length > 0);
 
   const toDto = (c: (typeof allClasses)[number]): TutorProfileClass => ({
     id: c.id,
@@ -147,6 +151,9 @@ export default async function LearnerTutorProfilePage({
               defaultGrade={me?.gradeLevel ?? undefined}
               verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
             />
+            {canReport && (
+              <ReportButton targetType="TUTOR" targetId={tutorId} targetLabel={tutor.anonymousId} />
+            )}
           </div>
         }
       />

@@ -6,17 +6,21 @@ import { CheckCircle, XCircle } from "lucide-react";
 import { clearClassBrowserCache } from "@/lib/classBrowserCache";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import ReportButton from "@/components/learner/ReportButton";
 
 export default function LearnerClassActions({
   classId,
   status,
   isEnrolled,
   isFull,
+  reportLabel,
 }: {
   classId: string;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   isEnrolled: boolean;
   isFull: boolean;
+  /** Anonymised class label ("MATH · C-0231") for the report modal; report shown only when enrolled. */
+  reportLabel: string;
 }) {
   const router = useRouter();
   const [confirmUnenroll, setConfirmUnenroll] = useState(false);
@@ -90,6 +94,10 @@ export default function LearnerClassActions({
             {isFull ? "Full" : "Enroll"}
           </button>
         )
+      )}
+
+      {isEnrolled && (
+        <ReportButton targetType="CLASS" targetId={classId} targetLabel={reportLabel} />
       )}
 
       <ConfirmDialog

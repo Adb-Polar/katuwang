@@ -36,6 +36,14 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - All class moderation actions are recorded in the audit log.
 - **Banning** a class re-opens any topic request still linked to it (`status in ACCEPTED, ENROLLED` → `OPEN`, `fulfilledClassId` nulled, learner notified) in the same transaction.
 
+## Abuse Reports (`/admin/abuse-reports`)
+
+- Learners report a **tutor** or a **class** from a checklist of common violations plus an optional "Other" free-text message (a learner can only report a tutor whose class they joined, or a class they're enrolled in). The queue has Pending / Resolved / Dismissed tabs plus a **target filter** (All / Tutor reports / Class reports); each row shows the target (tutor `TUT-XXXX` or a link to the class), the reporter as `STU-XXXX` only (never a real name), the ticked reasons, and any free-text detail.
+- **Resolve** (confirm dialog, optional note) → the report is `RESOLVED`, an audit row is written (`REPORT_RESOLVED`, target `REPORT`), and the reporter gets a `REPORT_REVIEWED` notification. Use this once you've acted on it.
+- **Dismiss** (optional note) → the report is `DISMISSED`, audit `REPORT_DISMISSED`, reporter gets `REPORT_REVIEWED`.
+- This screen does **not** suspend or ban anyone — apply enforcement from the Users or Classes pages. A report can only be reviewed once.
+  (`GET /api/admin/abuse-reports`, `PATCH /api/admin/abuse-reports/[reportId]`)
+
 ## Topic Request Moderation (`/admin/topic-requests`)
 
 - **List & search all topic requests** platform-wide — paginated, filterable by status, subject, and `scope` (`public` vs `directed`), free-text search across the learner's name/anonymous ID and topic text. Each row shows the learner (anonymized + real name, admin accountability view), the directed-to tutor (if any), and the linked class summary (if any).
@@ -214,6 +222,25 @@ Close or re-open a topic request.
 **200** → `{ id, status }`.
 **400** → invalid state transition or failed validation.
 **401** → not an admin. **404** → request not found.
+**500** → `{ error }`.
+
+### `GET /api/admin/abuse-reports`
+List learner abuse reports, tabbed by status. Requires `role === "ADMIN"` (`401`).
+
+**Query params** (all optional): `status` (`PENDING` default / `RESOLVED` / `DISMISSED`), `targetType` (`TUTOR` / `CLASS` — omit for all), `page` (default `1`), `pageSize` (default `10`, max `100`), `sort` (`createdAt` / `reviewedAt` / `targetType` / `status`) + `dir` (`asc` / `desc`).
+
+**200** → `{ reports: [{ id, targetType, status, details, resolutionNote, createdAt, reviewedAt, violations: string[], reporter: { anonymousId }, class: { id, code, subject, status } | null, tutor: { id, anonymousId } | null }], total, page, pageSize }`.
+**500** → `{ error }`.
+
+### `PATCH /api/admin/abuse-reports/[reportId]`
+Resolve or dismiss a pending report.
+
+**Body**: `{ "decision": "RESOLVE" | "DISMISS", "resolutionNote": "string (≤500, optional)" }`.
+- Sets `status` to `RESOLVED` / `DISMISSED` plus `reviewedById` / `reviewedAt`, writes an `AuditLog` (`REPORT_RESOLVED` / `REPORT_DISMISSED`, target `REPORT`), and notifies the reporter (`REPORT_REVIEWED` → `/learner/reports`), all in one transaction. Does not change any account or class status.
+
+**200** → the updated report.
+**400** → invalid body, or the report is not `PENDING`.
+**401** → not an admin. **404** → report not found.
 **500** → `{ error }`.
 
 ### `GET /api/admin/certifications`

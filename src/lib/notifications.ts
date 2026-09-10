@@ -30,6 +30,9 @@ export type NotificationType =
   | "CLASS_APPEAL_NEW"
   | "CLASS_APPEAL_APPROVED"
   | "CLASS_APPEAL_REJECTED"
+  // abuse reports — filed (admin-facing), reviewed (reporter-facing)
+  | "REPORT_NEW"
+  | "REPORT_REVIEWED"
   // session pre/post tests (learner-facing)
   | "SESSION_PRETEST_OPEN"
   | "SESSION_POSTTEST_OPEN";

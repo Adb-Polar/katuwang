@@ -619,3 +619,32 @@ Minimalist scrollbars (Changes.md Part 54)
  [] Scrollable areas (page body, sidebar, wide tables, modals, code blocks) show a
     thin rounded grey thumb with no visible track in Chrome/Edge and Firefox;
     thumb darkens slightly on hover. No layout shift where scrollbars appear.
+
+Learner reports for tutors & classes (Changes.md Part 55)
+ [] /learner/tutors/[id] for a tutor whose class you have NOT joined: no "Report this
+    tutor" button in the header. Enroll in one of that tutor's classes, reload -> the
+    button appears next to "Request a topic from this tutor".
+ [] Report modal (tutor): ticking only checklist items submits; ticking "Other" reveals
+    a textarea and the submit button stays disabled until 10+ chars are typed. On success
+    the button is replaced by "Report sent to the admins."
+ [] File a second report about the same tutor while the first is still pending -> inline
+    error "You already have a report about this tutor awaiting review." (409).
+ [] /learner/classes/[id] while enrolled: a "Report this class" button shows in the
+    actions area with the class checklist; not shown when not enrolled.
+ [] /learner/reports lists every report you filed with a status badge
+    (PENDING amber / RESOLVED green / DISMISSED grey), the ticked reasons, and the admin
+    note once reviewed.
+ [] /admin/abuse-reports: "Abuse Reports" appears in the sidebar "Review" group after
+    "Class Appeals". Pending tab lists new reports; the reporter shows only as STU-XXXX
+    (never a real name), tutor target as TUT-XXXX, class target links to /admin/classes/[id].
+ [] /admin/abuse-reports: the "All targets / Tutor reports / Class reports" dropdown next
+    to the status tabs filters the list to that target type; combine it with each status
+    tab; "All targets" restores the full list; the list resets to page 1 on change.
+ [] Admin "Resolve" (confirm dialog) and "Dismiss" (optional-note modal) move the report
+    to the matching tab, write a row to /admin/audit-log (REPORT_RESOLVED / REPORT_DISMISSED,
+    searchable by the report id), and send the reporter a REPORT_REVIEWED notification
+    linking to /learner/reports.
+ [] Reviewing an already-reviewed report (e.g. via a stale tab) returns "This report has
+    already been reviewed." (400).
+ [] No real name or email of the reporter or the reported tutor appears anywhere in the
+    learner flow, the admin queue, or any notification message.

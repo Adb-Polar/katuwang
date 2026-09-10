@@ -12,6 +12,37 @@ Format: newest first.
 
 ---
 
+## Learner reports for tutors & classes (2026-09-10)
+
+**Decision:** Learners can now report a tutor or a class for admin review. Scope
+choices, locked with the project owner:
+
+- **Relationship-gated.** A learner may report a tutor only if they are/were
+  enrolled in one of that tutor's classes, and may report a class only if
+  enrolled in it. Prevents drive-by spam reports; enforced in
+  `POST /api/learner/reports` (403 otherwise) and mirrored in the UI (the
+  "Report" button is hidden without the relationship).
+- **Both targets get a checklist + "Other".** `ReportViolationType` enum with
+  per-target option sets in `src/lib/reportViolations.ts`; "Other" requires a
+  10+ char message.
+- **Admin review is Resolve / Dismiss + note only.** The `/admin/abuse-reports`
+  queue does **not** suspend or ban anyone. Any enforcement is still done from
+  `/admin/users` or `/admin/classes`. Keeps the report a routing/tracking
+  record, not a second enforcement surface.
+- **Data model:** one `Report` table with `targetType` + a nullable
+  `reportedTutorProfileId` **or** `classId` (exactly one, enforced in the API),
+  and a `ReportViolation` child table for the ticked items (3NF, mirrors
+  `ClassTopic`).
+
+**Thesis text says otherwise:** the proposal doc does not describe a
+learner-initiated reporting flow at all — this is an addition, not a
+contradiction. Logged here because it's a moderation-scope decision future
+agents should not re-litigate (e.g. "add inline ban to the report queue").
+
+**Implication for agents:** enforcement lives on the Users/Classes pages, not
+the report queue. Don't add account/class status mutations to
+`PATCH /api/admin/abuse-reports/[reportId]`.
+
 ## "Topic request" is called "Class request" in the UI (2026-09-06)
 
 **Decision:** All learner/tutor/admin-facing copy now says **"class request"**

@@ -1,8 +1,4 @@
 ```mermaid
----
-config:
-  layout: elk
----
 erDiagram
 
         Role {
@@ -56,6 +52,39 @@ BANNED BANNED
             PENDING PENDING
 APPROVED APPROVED
 REJECTED REJECTED
+        }
+    
+
+
+        ReportTargetType {
+            TUTOR TUTOR
+CLASS CLASS
+        }
+    
+
+
+        ReportStatus {
+            PENDING PENDING
+RESOLVED RESOLVED
+DISMISSED DISMISSED
+        }
+    
+
+
+        ReportViolationType {
+            HARASSMENT_OR_BULLYING HARASSMENT_OR_BULLYING
+ANONYMITY_BREACH ANONYMITY_BREACH
+SOLICITING_PAYMENT SOLICITING_PAYMENT
+DISCRIMINATION DISCRIMINATION
+UNPROFESSIONAL_CONDUCT UNPROFESSIONAL_CONDUCT
+NO_SHOW_OR_ABSENCE NO_SHOW_OR_ABSENCE
+MISLEADING_ACADEMIC_INFO MISLEADING_ACADEMIC_INFO
+MISLEADING_CLASS_INFO MISLEADING_CLASS_INFO
+OFF_TOPIC_SESSIONS OFF_TOPIC_SESSIONS
+SPAM_OR_DUPLICATE SPAM_OR_DUPLICATE
+SCHEDULE_ABUSE SCHEDULE_ABUSE
+INAPPROPRIATE_CONTENT INAPPROPRIATE_CONTENT
+OTHER OTHER
         }
     
 
@@ -392,6 +421,28 @@ SUBMITTED SUBMITTED
     }
   
 
+  "reports" {
+    String id "🗝️"
+    String reporterId 
+    ReportTargetType targetType 
+    String reportedTutorProfileId "❓"
+    String classId "❓"
+    String details "❓"
+    ReportStatus status 
+    String resolutionNote "❓"
+    String reviewedById "❓"
+    DateTime reviewedAt "❓"
+    DateTime createdAt 
+    }
+  
+
+  "report_violations" {
+    String id "🗝️"
+    String reportId 
+    ReportViolationType type 
+    }
+  
+
   "session_tests" {
     String id "🗝️"
     String sessionId 
@@ -479,6 +530,14 @@ SUBMITTED SUBMITTED
     "class_appeals" }o--|| "tutor_profiles" : "tutorProfile"
     "class_appeals" |o--|| "ClassAppealStatus" : "enum:status"
     "class_appeals" }o--|o "users" : "reviewedBy"
+    "reports" }o--|| "users" : "reporter"
+    "reports" |o--|| "ReportTargetType" : "enum:targetType"
+    "reports" }o--|o "tutor_profiles" : "reportedTutorProfile"
+    "reports" }o--|o "tutor_classes" : "class"
+    "reports" |o--|| "ReportStatus" : "enum:status"
+    "reports" }o--|o "users" : "reviewedBy"
+    "report_violations" }o--|| "reports" : "report"
+    "report_violations" |o--|| "ReportViolationType" : "enum:type"
     "session_tests" |o--|| "class_sessions" : "session"
     "session_tests" |o--|| "SessionTestStatus" : "enum:status"
     "session_test_questions" }o--|| "session_tests" : "sessionTest"

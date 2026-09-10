@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [55](#part-55) | **Learner reports for tutors & classes** | An enrolled learner can report a tutor or a class from a checklist of common violations plus an "Other" free-text message. Reports land in a new admin "Abuse Reports" queue where an admin marks each Resolved or Dismissed with an optional note back to the reporter; any suspension/ban stays on the existing Users/Classes pages. Relationship-gated: a tutor report needs a past/current enrollment in one of that tutor's classes, a class report needs enrollment in that class. | New `Report` + `ReportViolation` models (3NF child rows) + `ReportTargetType`/`ReportStatus`/`ReportViolationType` enums, synced with `prisma db push` (dev-DB drift blocks `migrate dev`). New `src/lib/reportViolations.ts` (shared checklist config/labels), `src/lib/validations/report.ts` (`createReportSchema` w/ "Other requires 10+ chars" refine, `reviewReportSchema`). New routes `GET|POST /api/learner/reports`, `GET /api/admin/abuse-reports`, `PATCH /api/admin/abuse-reports/[reportId]` (audit + `REPORT_REVIEWED` notify). New `REPORT_NEW`/`REPORT_REVIEWED` notification types + `Flag` icons; `REPORT_RESOLVED`/`REPORT_DISMISSED` audit actions + `REPORT` target. New `ReportButton` (learner, checklist modal) wired into the tutor profile header + `LearnerClassActions`; new `/learner/reports` page (`MyReportsList`) + nav entry; new `/admin/abuse-reports` page (`AbuseReportTable`, status tabs + a Tutor/Class target filter — `?targetType=` on the list route) + "Review" nav entry. Tests: 4 new files (learner submit, admin list, admin review, schema) — 672/672, `tsc`/`lint` clean. Not committed. |
 | [54](#part-54) | **Minimalist scrollbars, app-wide** | Every scrollbar (page, sidebar, tables, modals) is now a thin rounded grey pill with no visible track, darkening slightly on hover. | `src/app/globals.css` — one global rule: Firefox `scrollbar-width/color`, Chromium/Safari `::-webkit-scrollbar` 8px w/ transparent track + `background-clip: padding-box` inset thumb (~4px visible), `9999px` radius. `--kt-scrollbar-thumb`/`-hover` tokens (`color-mix` of `--color-base-content` at 18%/34%). CSS only, no other changes. Not committed. |
 | [53](#part-53) | **Admin portal fixes (`docs/plans/admin-portal-fixes.txt`)** | 7-part admin polish: collapsible sidebar nav groups (persisted per portal, essentials expanded, active group auto-open); admin dashboard stat cards restyled to the tutor pattern + "needs attention" badges go amber/red only when the count is > 0 (added an "Open class appeals" row); grade-level filter on the Users list; sortable "ID" column on Registrations; Classes list showed `Invalid Date` (class has no `scheduledAt` — now a derived `nextSessionAt` with a "—" fallback) and gained a rows-per-page selector; Reports gained an "Export CSV" button; the Subjects/Topics row "⋯" menu was clipped by the card's `overflow` — now portalled to `document.body` and fixed-positioned. | `PortalLayout` `defaultExpandedGroups` prop + `localStorage["kt-nav:<portal>"]` collapse state + `.kt-nav-group-toggle`/`.kt-nav-chev` CSS; `src/app/admin/page.tsx` `statCards`/`actions` with `tone`; `GradeLevel` added to `GET /api/admin/users` + a `<select>` in `UserManagementTable`; `code→anonymousId` in `REG_SORT_COLUMN` + `<SortableTh field="code">`; `GET /api/admin/classes` maps `nextSessionAt` and stops leaking `sessions`, `ClassModerationTable` renders it + wires `onPageSizeChange`; new `src/lib/csv.ts` (`toCsv` RFC-4180 + `downloadCsv`) used by `ReportsView`; `RowMenu` in `SubjectTopicManager` rewritten with `createPortal` + `getBoundingClientRect` + outside-click/Escape/scroll close. New `src/lib/__tests__/csv.test.ts`; route-test cases for `?gradeLevel`, `?sort=code`, `nextSessionAt`. `tsc`/`lint`/`build` clean, 643/643. Not committed. |
 | [52](#part-52) | **Learner portal fixes (`docs/plans/leaner-portal-fixes.txt`)** | 10-part usability pass on the learner portal: topbar avatar links to the profile; progress-chart hover card null-safe + pre-before-post everywhere; learner dashboard restyled to match the tutor's (colored stat cards, bordered upcoming tiles, "This week" grid); browse + global search now match subject *names*, and global search gains a scope selector (Everything / Tutor code / Subject / Topic / Class code); "Find Tutors" cards show verified-class badges + a multi-select subject filter; tutor profile uses the weekly timetable, hides suspended/banned classes from non-enrollees, and puts completed classes in an enrolled-only tab (fixes the 404); "My Classes" back button returns to the right list; "My Requests" hides the list + button while adding/editing; profile validates the phone number live; auto-match surfaces the numeric score. | `PortalLayout` gains `profileHref`; `WeeklyTimetable` moved to `src/components/schedule/` + `hrefFor` prop; new `src/lib/subjects.ts#resolveSubjectSlugs`, `src/components/learner/TutorProfileClassTabs.tsx`; `?from=` param on the learner class-detail route; `GroupedBarChart` reuses `buildProgressTooltipRows` with a `missingLabel` prop; `src/app/api/{classes,search,learner/tutors}` query changes; `TopicRequestManager` edit form lifted out of the card map; `ProfileEditForm` live `normalizeContactInfo` check. New tests in `api/{search,classes,learner/tutors}` + `lib/matching`; 635/635, `tsc`/`lint`/`build` clean. `WeeklyScheduleView`/`deriveWeeklyAvailability` now unused. Not committed. |
@@ -3006,6 +3007,64 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-55"></a>
+## Part 55 — Learner reports for tutors & classes (2026-09-10)
+
+Learners had no way to flag misconduct — the double-blind anonymity mandate means the
+platform has to carry the complaint. This adds a report flow mirroring the existing
+`ClassAppeal` slice end-to-end, in the opposite direction.
+
+**Schema.** New `Report` model (`reporterId`, `targetType`, nullable `reportedTutorProfileId`
+**or** `classId`, `details` free-text, `status`, `resolutionNote`, `reviewedById/At`) +
+`ReportViolation` child table (`@@unique([reportId, type])`, 3NF — mirrors `ClassTopic`).
+New enums `ReportTargetType {TUTOR CLASS}`, `ReportStatus {PENDING RESOLVED DISMISSED}`,
+`ReportViolationType` (tutor + class + shared `INAPPROPRIATE_CONTENT`/`OTHER`). Back-relations
+on `User` (`reportsFiled`, `reviewedReports`), `TutorProfile` (`reportsReceived`),
+`TutorClass` (`reports`). Applied with `npx prisma db push` — the dev DB was built by
+`db push` and has no migration history, so `migrate dev` wanted a destructive reset.
+
+**Shared config / validation.** `src/lib/reportViolations.ts` — `REPORT_VIOLATIONS` (per-target
+checkbox options + labels), `ALL_VIOLATION_VALUES` (Zod enum source), `VIOLATION_LABEL`.
+`src/lib/validations/report.ts` — `createReportSchema` (`violations` min 1, `details` ≤1000,
+`.refine` requiring ≥10 chars when `OTHER` is ticked), `reviewReportSchema`
+(`decision: RESOLVE|DISMISS`, `resolutionNote` ≤500).
+
+**APIs.** `src/app/api/learner/reports/route.ts` — `POST` resolves the target, requires a
+`ClassEnrollment` relationship (403 otherwise), blocks a second `PENDING` report on the same
+target (409), creates the report + nested violation rows and notifies every active admin
+(`REPORT_NEW` → `/admin/abuse-reports`); the notify message names only the anonymised target.
+`GET` returns the caller's own reports (reviewer identity omitted).
+`src/app/api/admin/abuse-reports/route.ts` — `GET`, tabbed (`PENDING`/`RESOLVED`/`DISMISSED`)
++ `parseSort` + pagination. `src/app/api/admin/abuse-reports/[reportId]/route.ts` — `PATCH`,
+404 / 400-already-reviewed guards, `$transaction` sets status + `reviewedBy`, writes an
+`AuditLog` (`REPORT_RESOLVED`/`REPORT_DISMISSED`, target `REPORT`) and notifies the reporter
+(`REPORT_REVIEWED` → `/learner/reports`). Enforcement (suspend/ban) is left to the existing
+Users / Classes admin pages.
+
+**Cross-cutting.** `src/lib/notifications.ts` — `REPORT_NEW` / `REPORT_REVIEWED`.
+`notificationMeta.tsx` — `Flag` icons for both. `src/lib/auditLog.ts` — `REPORT_RESOLVED`,
+`REPORT_DISMISSED`, `REPORT`.
+
+**UI.** `src/components/learner/ReportButton.tsx` — `"use client"` checklist modal (checkbox
+list from `REPORT_VIOLATIONS[targetType]`; ticking "Other" reveals a `CharCount` textarea;
+submit gated on ≥1 box and, if Other, ≥10 chars). Rendered in the tutor profile
+`PageHeader` actions (only when the learner has a class with that tutor — page computes
+`canReport`) and in `LearnerClassActions` (only when `isEnrolled`; page passes
+`reportLabel="<subject> · <code>"`). New `/learner/reports` page + `MyReportsList` card list;
+"My Reports" nav item under "Tools". New `/admin/abuse-reports` page + `AbuseReportTable`
+(near-copy of `ClassAppealTable`: status tabs, a Tutor/Class target `<select>` filter
+(`?targetType=` on the list route, validated against `ReportTargetType`), `usePaginatedList`,
+`SortableTh`, `Pagination`, `AnonymousIdBadge`, Resolve via `ConfirmDialog` / Dismiss via
+note modal, audit-log link); "Abuse Reports" nav item in the "Review" group after
+"Class Appeals".
+
+**Tests.** `src/app/api/learner/reports/__tests__/route.test.ts` (13 — auth, validation,
+404/403/409, happy path asserts nested violations + admin notify without the reporter id,
+class variant), `src/app/api/admin/abuse-reports/__tests__/route.test.ts` (5 — incl. the
+target-type filter), `src/app/api/admin/abuse-reports/[reportId]/__tests__/route.test.ts` (6),
+`src/lib/validations/__tests__/report.test.ts` (6). `pnpm test` 672/672, `tsc`/`lint` clean.
+Not committed.
 
 <a id="part-54"></a>
 ## Part 54 — Minimalist scrollbars, app-wide (2026-09-09)

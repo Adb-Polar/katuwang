@@ -60,6 +60,38 @@ enum ClassAppealStatus {
   REJECTED // Admin upheld the moderation
 }
 
+enum ReportTargetType {
+  TUTOR
+  CLASS
+}
+
+enum ReportStatus {
+  PENDING // Filed by a learner, awaiting admin review
+  RESOLVED // Admin acted on it (or judged it valid)
+  DISMISSED // Admin judged it did not need action
+}
+
+// Common reasons a learner can tick when reporting a tutor or a class.
+// Labels + which set applies to which target live in src/lib/reportViolations.ts.
+enum ReportViolationType {
+  // tutor conduct
+  HARASSMENT_OR_BULLYING
+  ANONYMITY_BREACH // asked for real name / contact details / socials
+  SOLICITING_PAYMENT
+  DISCRIMINATION
+  UNPROFESSIONAL_CONDUCT
+  NO_SHOW_OR_ABSENCE
+  MISLEADING_ACADEMIC_INFO
+  // class content
+  MISLEADING_CLASS_INFO
+  OFF_TOPIC_SESSIONS
+  SPAM_OR_DUPLICATE
+  SCHEDULE_ABUSE
+  // shared
+  INAPPROPRIATE_CONTENT
+  OTHER
+}
+
 enum SessionStatus {
   SCHEDULED
   COMPLETED
@@ -147,6 +179,10 @@ model User {
   resolvedQuestionRequests QuestionRequest[]    @relation("ResolvedQuestionRequests")
   reviewedClassAppeals     ClassAppeal[]        @relation("ReviewedClassAppeals")
 
+  // Abuse reports (learner-facing "filed", admin-facing "reviewed")
+  reportsFiled    Report[] @relation("ReportsFiled")
+  reviewedReports Report[] @relation("ReviewedReports")
+
   notifications Notification[]
   chatbotMisses ChatbotMiss[]
 
@@ -196,6 +232,9 @@ model TutorProfile {
 
   // Appeals this tutor has filed against class moderation
   classAppeals ClassAppeal[]
+
+  // Abuse reports learners have filed against this tutor
+  reportsReceived Report[] @relation("ReportsReceived")
 
   // Custom questions this tutor authored for their session tests
   ownedQuestions AssessmentQuestion[] @relation("OwnedQuestions")
@@ -296,6 +335,7 @@ model TutorClass {
   enrollments       ClassEnrollment[]
   fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
   appeals           ClassAppeal[]
+  reports           Report[]
 
   @@map("tutor_classes")
 }
@@ -590,6 +630,44 @@ model ClassAppeal {
   @@index([status, createdAt])
   @@index([classId])
   @@map("class_appeals")
+}
+
+// ─── Report (learner flags a tutor or a class for admin review) ────────────
+// Exactly one of `reportedTutorProfileId` / `classId` is set, chosen by
+// `targetType` — enforced in the API, not the DB. The ticked checklist items
+// are child rows (3NF), mirroring ClassTopic / TopicRequestTopic.
+
+model Report {
+  id                     String            @id @default(cuid())
+  reporterId             String
+  reporter               User              @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
+  targetType             ReportTargetType
+  reportedTutorProfileId String?
+  reportedTutorProfile   TutorProfile?     @relation("ReportsReceived", fields: [reportedTutorProfileId], references: [id], onDelete: Cascade)
+  classId                String?
+  class                  TutorClass?       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  details                String?           @db.Text // free-text message (required when "Other" is ticked)
+  status                 ReportStatus      @default(PENDING)
+  resolutionNote         String?           @db.Text // admin's note back to the reporter
+  reviewedById           String?
+  reviewedBy             User?             @relation("ReviewedReports", fields: [reviewedById], references: [id], onDelete: SetNull)
+  reviewedAt             DateTime?
+  createdAt              DateTime          @default(now())
+  violations             ReportViolation[]
+
+  @@index([status, createdAt])
+  @@index([reporterId])
+  @@map("reports")
+}
+
+model ReportViolation {
+  id       String              @id @default(cuid())
+  reportId String
+  report   Report              @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  type     ReportViolationType
+
+  @@unique([reportId, type])
+  @@map("report_violations")
 }
 
 // ─── Per-Session Pre/Post Test ──────────────────────────────────────────────
