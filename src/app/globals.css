@@ -45,10 +45,8 @@
 
 @theme inline {
   /* Redesign: Apfel Grotezk = speech (sans + display), Fragment Mono = notation.
-     --font-serif kept pointing at the display face so existing `font-serif`
-     headings render Apfel until they are swept to `font-sans`. */
+     There is no serif/sans pairing — every heading is `font-sans`. */
   --font-sans: var(--font-apfel), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-apfel), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-fragment-mono), ui-monospace, "SFMono-Regular", monospace;
 }
 
@@ -57,8 +55,8 @@
   text-2xs = badge/meta/micro-label text only (status pills, ID chips, timestamps)
   text-xs  = dense UI body: form labels, buttons, table cells
   text-sm  = default body copy
-  text-base/text-lg = section and card titles (font-sans, bold)
-  text-xl and up, with font-serif = page-level H1 only — never blanket-applied to h2-h6
+  text-base/text-lg = section and card titles (font-sans, font-heavy)
+  text-xl and up = page-level H1 only — never blanket-applied to h2-h6
 */
 @theme {
   --text-2xs: 0.6875rem;
@@ -66,11 +64,15 @@
 
   /* Weight scale. Apfel Grotezk ships 400 / 500 / 700 / 900 only — there is no
      600 face, so `font-semibold` was snapping up to 700 and every emphasised run
-     rendered as heavy Fett. Pin the emphasis utilities to the 500 Mittel face so
-     "bold" text across the app is a step lighter. */
+     rendered as heavy Fett. The emphasis utilities stay pinned to the 500 Mittel
+     face so blanket `font-bold` on small UI text (table headers, badges,
+     buttons, prose <strong>) reads as one step, not a shout. The 700 Fett face
+     is reserved for the two runs the type-scale contract names as the sole heavy
+     elements — page H1 and card titles — reached via `font-heavy`. */
   --font-weight-medium: 500;
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
+  --font-weight-heavy: 700;
 }
 
 /* ============================================================================
@@ -171,7 +173,7 @@ b, strong { font-weight: var(--font-weight-bold); }
     gap: 0.75rem; margin-bottom: 1rem;
   }
   .kt-card-head > h2, .kt-card-head > h3 {
-    font-size: 1rem; font-weight: var(--font-weight-bold); letter-spacing: -0.01em;
+    font-size: 1rem; font-weight: var(--font-weight-heavy); letter-spacing: -0.01em;
     display: flex; align-items: center; gap: 0.5rem;
   }
 
@@ -233,7 +235,10 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-nav-item {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 0.55rem 0.5rem; border-radius: var(--kt-radius-field);
-    font-size: 0.875rem; font-weight: 500; color: var(--kt-muted); text-decoration: none;
+    /* Fragment Mono governs navigation labels per the notation brief — a
+       monospace nav column is on-thesis and distinctive. */
+    font-family: var(--font-mono);
+    font-size: 0.82rem; font-weight: 500; color: var(--kt-muted); text-decoration: none;
   }
   .kt-nav-item:hover { background: var(--color-base-200); color: var(--color-base-content); }
   .kt-nav-item .kt-ic {
@@ -309,4 +314,8 @@ b, strong { font-weight: var(--font-weight-bold); }
   }
   .kt-day > span:first-child { font-size: 0.66rem; font-weight: var(--font-weight-semibold); letter-spacing: 0.1em; text-transform: uppercase; color: var(--kt-faint); }
   .kt-slot { font-family: var(--font-mono); font-size: 0.76rem; background: var(--kt-tint-primary); color: var(--color-primary); border-radius: 0.4rem; padding: 0.15rem 0.4rem; }
+
+  /* Buttons are notation, not speech — Fragment Mono per the ROUND-2 brief.
+     Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
+  .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
 }

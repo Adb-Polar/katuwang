@@ -272,7 +272,7 @@ export default function TopicRequestModerationTable() {
             >
               ✕
             </button>
-            <h3 className="font-serif text-base font-semibold mb-1">Close request</h3>
+            <h3 className="font-sans text-base font-semibold mb-1">Close request</h3>
             <p className="text-2xs text-base-content/50 mb-4">
               {closeTarget.subject} · {closeTarget.topics.join(", ")}
             </p>

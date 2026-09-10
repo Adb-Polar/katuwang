@@ -43,7 +43,7 @@ export default function ForgotPasswordForm() {
       <div className="card-body gap-6">
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
-          <h1 className="font-serif text-xl font-semibold text-base-content">Reset your password</h1>
+          <h1 className="font-sans text-xl font-semibold text-base-content">Reset your password</h1>
           <p className="text-xs text-base-content/60">
             Enter your account email or your recovery email and we&apos;ll send a reset link.
           </p>

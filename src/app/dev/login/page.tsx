@@ -37,7 +37,7 @@ export default async function DevLoginPage() {
       <div className="mx-auto max-w-8xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl font-semibold text-base-content">Dev Quick Login</h1>
+            <h1 className="font-sans text-2xl font-semibold text-base-content">Dev Quick Login</h1>
             <p className="text-xs text-base-content/60">
               Click any account to sign in as them. Not available in production. Password used:{" "}
               <code className="rounded bg-base-300 px-1">{DEV_PASSWORD}</code>

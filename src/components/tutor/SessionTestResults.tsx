@@ -137,7 +137,7 @@ export default function SessionTestResults({
         <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
           {data.test.classCode} · {data.test.sessionTopic}
         </p>
-        <h1 className="text-lg font-serif">{data.test.title}</h1>
+        <h1 className="text-lg font-sans">{data.test.title}</h1>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

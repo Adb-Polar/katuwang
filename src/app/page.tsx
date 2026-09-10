@@ -9,7 +9,7 @@ export default function Home() {
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2.5">
           <BrandMark size="sm" />
-          <span className="font-serif font-semibold tracking-tight">Katuwang</span>
+          <span className="font-sans font-semibold tracking-tight">Katuwang</span>
         </div>
         <div className="flex items-center gap-2">
           <Link href="/login" className="btn btn-ghost btn-sm text-xs">
@@ -24,7 +24,7 @@ export default function Home() {
       {/* Hero */}
       <section className="max-w-3xl mx-auto px-6 pt-10 pb-24 lg:pt-20 lg:pb-32 flex flex-col items-center text-center gap-6">
         <p className="text-2xs font-semibold uppercase tracking-wider text-primary">Peer tutoring, Grades 7–12</p>
-        <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-base-content">
+        <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.1] text-base-content">
           Learn with a peer who gets it.
         </h1>
         <p className="text-sm lg:text-base text-base-content/70 max-w-sm lg:max-w-xl leading-relaxed">

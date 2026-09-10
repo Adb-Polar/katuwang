@@ -265,7 +265,7 @@ export default function UserManagementTable() {
             >
               ✕
             </button>
-            <h3 className="font-serif text-base font-semibold mb-1">Manage Account</h3>
+            <h3 className="font-sans text-base font-semibold mb-1">Manage Account</h3>
             <p className="text-2xs text-base-content/50 mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>

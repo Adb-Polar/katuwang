@@ -107,7 +107,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
         {/* Card Header */}
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
-          <h1 className="font-serif text-xl font-semibold [word-spacing:-0.2em]">{copy.heading}</h1>
+          <h1 className="font-sans text-xl font-semibold [word-spacing:-0.2em]">{copy.heading}</h1>
           <p className="text-xs text-base-content/60">{copy.subheading}</p>
         </div>
 

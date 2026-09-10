@@ -112,7 +112,7 @@ export default function ReportButton({
             >
               ✕
             </button>
-            <h3 className="font-serif text-base font-semibold mb-1">
+            <h3 className="font-sans text-base font-semibold mb-1">
               Report {noun} {targetLabel}
             </h3>
             <p className="text-xs text-base-content/60 mb-4">

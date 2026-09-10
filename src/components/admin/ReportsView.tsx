@@ -114,11 +114,11 @@ export default function ReportsView() {
           <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto flex-wrap stats-vertical sm:stats-horizontal">
             <div className="stat py-4">
               <div className="stat-title text-2xs">Total Enrollments</div>
-              <div className="stat-value text-lg font-serif font-medium">{reports.enrollments.total}</div>
+              <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.total}</div>
             </div>
             <div className="stat py-4">
               <div className="stat-title text-2xs">Enrollments (Last 30 Days)</div>
-              <div className="stat-value text-lg font-serif font-medium">{reports.enrollments.last30Days}</div>
+              <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.last30Days}</div>
             </div>
           </div>
 

@@ -55,7 +55,7 @@ export default function ResetPasswordForm() {
       <div className="card-body gap-6">
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
-          <h1 className="font-serif text-xl font-semibold text-base-content">Choose a new password</h1>
+          <h1 className="font-sans text-xl font-semibold text-base-content">Choose a new password</h1>
           <p className="text-xs text-base-content/60">Enter and confirm your new password below.</p>
         </div>
 
@@ -66,7 +66,7 @@ export default function ResetPasswordForm() {
             <div className="w-12 h-12 rounded-full bg-success/20 text-success flex items-center justify-center">
               <Check className="w-6 h-6" strokeWidth={3} />
             </div>
-            <h3 className="font-serif text-base font-semibold">Password updated</h3>
+            <h3 className="font-sans text-base font-semibold">Password updated</h3>
             <p className="text-xs text-base-content/60">Redirecting you to sign in...</p>
           </div>
         ) : !token ? (

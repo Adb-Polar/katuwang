@@ -16,7 +16,7 @@ export default function DevHomePage() {
       <div className="mx-auto max-w-5xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl font-semibold text-base-content">Dev Data Factory</h1>
+            <h1 className="font-sans text-2xl font-semibold text-base-content">Dev Data Factory</h1>
             <p className="text-xs text-base-content/60">
               Spawn throwaway users, classes, enrolments and class requests against the current database.
               Not available in production. All accounts use <code className="rounded bg-base-300 px-1">password123</code>{" "}

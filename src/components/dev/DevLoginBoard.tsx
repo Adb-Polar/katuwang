@@ -72,7 +72,7 @@ export default function DevLoginBoard({
     <div className="card border border-base-200 bg-base-100 shadow-sm">
       <div className="card-body gap-3 p-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-serif text-sm font-semibold">
+          <h2 className="font-sans text-sm font-semibold">
             {title} <span className="text-base-content/40">({filtered.length})</span>
           </h2>
           <span className={`badge badge-sm ${tone}`}>{title}</span>

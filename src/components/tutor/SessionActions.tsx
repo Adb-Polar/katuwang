@@ -159,7 +159,7 @@ export default function SessionActions({
             >
               ✕
             </button>
-            <h3 className="font-serif text-base font-semibold mb-4">Reschedule Session</h3>
+            <h3 className="font-sans text-base font-semibold mb-4">Reschedule Session</h3>
 
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 

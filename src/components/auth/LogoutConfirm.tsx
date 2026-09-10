@@ -23,7 +23,7 @@ export default function LogoutConfirm() {
         <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center">
           <LogOut className="w-8 h-8" strokeWidth={2} />
         </div>
-        <h1 className="font-serif text-xl font-semibold tracking-tight text-base-content">
+        <h1 className="font-sans text-xl font-semibold tracking-tight text-base-content">
           Sign out of Katuwang?
         </h1>
         <p className="text-xs text-base-content/60 leading-relaxed">

@@ -15,7 +15,7 @@ export default function PendingApprovalPage() {
         <div className="card-body gap-6 text-center">
           <div className="flex flex-col items-center gap-2">
             <BrandMark />
-            <h1 className="font-serif text-xl font-semibold text-base-content">
+            <h1 className="font-sans text-xl font-semibold text-base-content">
               Account pending approval
             </h1>
           </div>

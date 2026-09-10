@@ -279,7 +279,7 @@ export default function ClassModerationTable() {
             >
               ✕
             </button>
-            <h3 className="font-serif text-base font-semibold mb-1">
+            <h3 className="font-sans text-base font-semibold mb-1">
               {moderateTarget.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
             </h3>
             <p className="text-2xs text-base-content/50 mb-4">

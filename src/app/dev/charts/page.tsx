@@ -19,7 +19,7 @@ export default function DevChartsPage() {
       <div className="mx-auto max-w-6xl space-y-4">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="font-serif text-2xl font-semibold text-base-content">Chart Lab</h1>
+            <h1 className="font-sans text-2xl font-semibold text-base-content">Chart Lab</h1>
             <p className="text-xs text-base-content/60">
               The live pre/post analytics chart components (<code className="rounded bg-base-300 px-1">GroupedBarChart</code>,{" "}
               <code className="rounded bg-base-300 px-1">ProgressAreaChart</code>,{" "}

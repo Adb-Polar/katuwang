@@ -19,7 +19,7 @@ export default function PageHeader({
             {eyebrow}
           </p>
         )}
-        <h1 className="font-sans text-2xl sm:text-[1.75rem] font-bold tracking-tight text-base-content leading-tight">
+        <h1 className="font-sans text-2xl sm:text-[1.75rem] font-heavy tracking-tight text-base-content leading-tight">
           {title}
         </h1>
         {subtitle && <p className="text-sm text-base-content/60">{subtitle}</p>}

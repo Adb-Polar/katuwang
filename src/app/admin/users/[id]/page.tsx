@@ -156,7 +156,7 @@ export default async function AdminUserDetailPage({
             {counts.map((c) => (
               <div key={c.label} className="flex items-center justify-between text-sm py-1.5">
                 <span className="text-base-content/60">{c.label}</span>
-                <span className="font-serif font-bold">{c.value}</span>
+                <span className="font-sans font-bold">{c.value}</span>
               </div>
             ))}
           </div>

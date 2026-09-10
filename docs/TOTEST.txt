@@ -698,3 +698,14 @@ Security-review fixes (Changes.md Part 57)
     reject a 73+ character password, and still accept a normal 8+ char password.
  [] Rate limiting is off under `pnpm test` (suite stays green) and can be disabled locally
     with RATE_LIMIT_DISABLED=1 if it gets in the way during manual QA.
+
+--- Part 58 (design-review D1/D2/D3) ---
+ [] Weight contrast: page H1s (PageHeader) and card titles (.kt-card-head h2) now
+    render in the heavy 700 Fett face; body emphasis / table headers / badges / buttons
+    stay at 500. Nothing small-text looks heavier than before.
+ [] font-serif sweep: no visual change anywhere (alias pointed at Apfel already) —
+    spot-check auth screens, /register, /dev/*, admin moderation tables, MyProgressView,
+    SessionTestResults still render their headings in Apfel.
+ [] Fragment Mono nav + buttons: sidebar nav labels and every .btn now render in
+    Fragment Mono. Check the nav column doesn't wrap at the default width and button
+    labels aren't clipped (Approve/Reject pairs, modal action rows, PageHeader actions).

@@ -16,7 +16,7 @@ export default function RegisterPage() {
           {/* Card Header */}
           <div className="flex flex-col items-center gap-2 text-center">
             <BrandMark />
-            <h1 className="font-serif text-xl font-semibold tracking-tight text-base-content">Join Katuwang</h1>
+            <h1 className="font-sans text-xl font-semibold tracking-tight text-base-content">Join Katuwang</h1>
             <p className="text-xs text-base-content/60">Select your role to get started.</p>
           </div>
 

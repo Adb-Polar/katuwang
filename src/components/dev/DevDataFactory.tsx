@@ -322,7 +322,7 @@ export default function DevDataFactory() {
       {log.length > 0 && (
         <div className="card border border-base-200 bg-base-100 shadow-sm">
           <div className="card-body gap-1 p-4">
-            <h2 className="font-serif text-sm font-semibold">Activity</h2>
+            <h2 className="font-sans text-sm font-semibold">Activity</h2>
             <ul className="space-y-1">
               {log.map((entry, i) => (
                 <li key={i} className="flex items-start gap-2 text-2xs">
@@ -352,7 +352,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
   return (
     <div className="card border border-base-200 bg-base-100 shadow-sm">
       <div className="card-body gap-3 p-4">
-        <h2 className="font-serif text-sm font-semibold">{title}</h2>
+        <h2 className="font-sans text-sm font-semibold">{title}</h2>
         {children}
       </div>
     </div>

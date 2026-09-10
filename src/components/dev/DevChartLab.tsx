@@ -289,7 +289,7 @@ export default function DevChartLab() {
       {/* ── shared pre/post dataset ── */}
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-serif text-lg text-base-content">Pre / post series</h2>
+          <h2 className="font-sans text-lg text-base-content">Pre / post series</h2>
           <span className="text-2xs text-base-content/50">
             feeds charts (a) grouped bars · (b) area · (d) per-row delta
           </span>
@@ -341,7 +341,7 @@ export default function DevChartLab() {
 
       {/* ── per-question rate ── */}
       <section className="space-y-3">
-        <h2 className="font-serif text-lg text-base-content">
+        <h2 className="font-sans text-lg text-base-content">
           Per-question rate <span className="text-2xs text-base-content/50">feeds chart (c)</span>
         </h2>
         <div className="flex flex-wrap gap-1.5">
@@ -367,7 +367,7 @@ export default function DevChartLab() {
 
       {/* ── single-series category bars ── */}
       <section className="space-y-3">
-        <h2 className="font-serif text-lg text-base-content">
+        <h2 className="font-sans text-lg text-base-content">
           Single-series bars{" "}
           <span className="text-2xs text-base-content/50">BarChartCard (admin Reports)</span>
         </h2>
