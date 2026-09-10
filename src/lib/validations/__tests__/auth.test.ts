@@ -7,7 +7,7 @@ function baseLearner(overrides: Record<string, unknown> = {}) {
     firstName: "Juan",
     lastName: "Dela Cruz",
     email: "juan@example.com",
-    password: "password123",
+    password: "Tr4vel-mug-lantern",
     gradeLevel: "GRADE_10",
     section: "Rizal",
     consentGiven: true,
@@ -51,6 +51,16 @@ describe("registerSchema", () => {
 
   it("rejects a password shorter than 8 characters", () => {
     const result = registerSchema.safeParse(baseLearner({ password: "short" }));
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a common password", () => {
+    const result = registerSchema.safeParse(baseLearner({ password: "password123" }));
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects a password longer than 72 bytes (bcrypt truncation)", () => {
+    const result = registerSchema.safeParse(baseLearner({ password: "a".repeat(73) }));
     expect(result.success).toBe(false);
   });
 

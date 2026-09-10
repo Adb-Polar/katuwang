@@ -1,5 +1,7 @@
 import NextAuth from "next-auth";
 
+type AccountStatus = "ACTIVE" | "SUSPENDED" | "BANNED" | "PENDING" | "DECLINED";
+
 declare module "next-auth" {
   interface Session {
     user: {
@@ -8,6 +10,7 @@ declare module "next-auth" {
       role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
       fullName: string;
       email: string;
+      status: AccountStatus;
     };
   }
 
@@ -25,5 +28,8 @@ declare module "next-auth/jwt" {
     anonymousId: string;
     role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
+    status: AccountStatus;
+    /** Epoch ms of the last DB re-sync of `role`/`status`. */
+    checkedAt: number;
   }
 }

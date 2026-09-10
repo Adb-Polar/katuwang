@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validations/passwordReset";
 import { generateResetToken, hashResetToken, resetTokenExpiry } from "@/lib/passwordReset";
 import { sendMail, renderPasswordResetEmail } from "@/lib/mail";
+import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
+import { MINUTE_MS } from "@/lib/datetime";
 
 // Neutral response — never reveals whether an account matched.
 const NEUTRAL = {
@@ -21,6 +23,17 @@ export async function POST(req: NextRequest) {
     }
 
     const { email } = result.data;
+
+    // Throttle so this route can't be used to email-bomb an address or spray
+    // reset-token rows. Both checks answer with the same neutral 429.
+    if (rateLimitEnabled()) {
+      const ip = clientIp(req.headers);
+      const byIp = rateLimit(`forgot:ip:${ip}`, 5, 15 * MINUTE_MS);
+      const byEmail = rateLimit(`forgot:email:${email}`, 3, 15 * MINUTE_MS);
+      if (!byIp.ok || !byEmail.ok) {
+        return tooManyRequests(Math.max(byIp.retryAfter, byEmail.retryAfter));
+      }
+    }
 
     const user = await prisma.user.findFirst({
       where: { OR: [{ email }, { recoveryEmail: email }] },

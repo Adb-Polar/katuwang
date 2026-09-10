@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordField } from "@/lib/validations/password";
 
 /** `POST /api/auth/forgot-password` — an email address (primary or recovery). */
 export const forgotPasswordSchema = z.object({
@@ -12,7 +13,7 @@ export const forgotPasswordSchema = z.object({
 /** `POST /api/auth/reset-password` — the emailed token plus the new password. */
 export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Reset token is required."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  password: passwordField,
 });
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 import { Role, GradeLevel, ClassStatus } from "@prisma/client";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateClassCode } from "@/lib/idGenerator";
 import { registerAccount } from "@/lib/registration";
@@ -51,8 +53,15 @@ function inDays(days: number, hour = 15): Date {
   return d;
 }
 
-function devGuard(): NextResponse | null {
+// Two gates, both required: never in a production build, and only for a
+// signed-in ADMIN. Answers 404 (not 403) so the route's existence isn't
+// confirmed to an unauthenticated caller on a non-prod deploy.
+async function devGuard(): Promise<NextResponse | null> {
   if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
   return null;
@@ -61,7 +70,7 @@ function devGuard(): NextResponse | null {
 // ─── GET: snapshot for the UI ────────────────────────────────────────────────
 
 export async function GET() {
-  const blocked = devGuard();
+  const blocked = await devGuard();
   if (blocked) return blocked;
 
   const [tutors, learners, admins, classes] = await Promise.all([
@@ -106,7 +115,7 @@ export async function GET() {
 // ─── POST: run one factory action ───────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const blocked = devGuard();
+  const blocked = await devGuard();
   if (blocked) return blocked;
 
   let body: Record<string, unknown>;

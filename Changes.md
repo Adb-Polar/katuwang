@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [57](#part-57) | **Security-review fixes (`docs/reviews/security-review-2026-09-09.md`)** | Closes all six findings. Adds an in-memory rate limiter on login, forgot/reset-password, register, chatbot, and search; locks `/api/dev` behind an ADMIN session on top of the prod 404; makes the login error generic ("Invalid email or password.") with a dummy bcrypt compare on the no-user path (kills user enumeration + the timing side-channel); rebuilds `next.config.ts` (the broken `module.exports` + `export default` is fixed, `allowedDevOrigins` no longer dropped) with a security-headers block (CSP w/ `frame-ancestors 'none'`, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`); re-syncs the JWT's `role`/`status` from the DB every ~5 min so an admin suspend/ban takes effect mid-session (enforced in `src/proxy.ts`); and caps passwords at 72 bytes with a small common-password blocklist. | New `src/lib/rateLimit.ts` (`rateLimit()` fixed-window Map + `clientIp()` + `tooManyRequests()` + `rateLimitEnabled()` — off under Vitest / `RATE_LIMIT_DISABLED=1`) and `src/lib/validations/password.ts` (`passwordField`, reused by `auth.ts` + `passwordReset.ts` schemas). `src/lib/auth.ts`: per-IP+email login throttle (10/10min), `DUMMY_PASSWORD_HASH`, generic `INVALID_CREDENTIALS`, `jwt` callback DB re-check gated on `TOKEN_STALE_MS`, `session` exposes `user.status`. `src/types/next-auth.d.ts`: `status` on `Session.user` + `JWT`, `checkedAt` on `JWT`. `src/proxy.ts`: redirect to `/login?reason=account-inactive` when `token.status !== "ACTIVE"`. `/api/dev` `devGuard()` now async + `getServerSession` ADMIN check. Rate limits: forgot 5/IP + 3/email per 15min, reset 10/IP/15min, register 5/IP/hr, chatbot 20/user/min, search 40/user/min. New tests: `rateLimit.test.ts` (8), common-password + 72-byte cases in `validations/auth.test.ts`; auth-error assertions updated. 680/680, `tsc`/`lint`/`build` clean. |
 | [56](#part-56) | **Clean-code cleanup backlog (`docs/reviews/clean-code-review-2026-09-09.md`)** | Behaviour-preserving refactor pass: one source of truth for the grade-match scoring ladder, day/minute millisecond constants + `addDays`/`daysBetween` helpers, app-wide date/time formatting, the role→portal-path prefix, and page-size constants. No feature or API change; the only user-visible effect is that a handful of dates now render in one consistent style. | New `src/lib/portalPaths.ts` (`portalPath(role, sub)`) and `src/lib/pagination.ts` (`ADMIN_PAGE_SIZE`/`BROWSE_PAGE_SIZE`/`AUDIT_PAGE_SIZE`/`DEV_PAGE_SIZE`/`MAX_PAGE_SIZE`/`MAX_BROWSE_PAGE_SIZE`). `src/lib/matching.ts` gains exported `GRADE_WEIGHTS` + `gradeScore(match)`; `browseRanking.ts` reuses them (kills the duplicated `6/3/2` ladder). `src/lib/datetime.ts` grows `MINUTE_MS`/`HOUR_MS`/`DAY_MS`, `daysBetween`, `addDays`, and `formatDate`/`formatDayMonth`/`formatDateTime`/`formatTime`/`formatWeekday`; ~30 files lose their local `fmt`/`formatDate` copies and inline `toLocale*` option objects. `SUBJECT_SLUGS` exported from `subjectTopics.ts` replaces 6× `Object.keys(SUBJECT_TOPICS) as string[]`. ~14 API routes + ~17 table components alias their page size to the shared constant. `search/route.ts` + `chatbot/intents.ts` use `portalPath()` for the 3-way role ternaries. M1 (oversized `QuestionBankManager`/`SessionTestBuilder`/`SubjectTopicManager`) deferred per the review. 68 files, net −62 lines; `tsc`/`lint`/`build` clean, 672/672. |
 | [55](#part-55) | **Learner reports for tutors & classes** | An enrolled learner can report a tutor or a class from a checklist of common violations plus an "Other" free-text message. Reports land in a new admin "Abuse Reports" queue where an admin marks each Resolved or Dismissed with an optional note back to the reporter; any suspension/ban stays on the existing Users/Classes pages. Relationship-gated: a tutor report needs a past/current enrollment in one of that tutor's classes, a class report needs enrollment in that class. | New `Report` + `ReportViolation` models (3NF child rows) + `ReportTargetType`/`ReportStatus`/`ReportViolationType` enums, synced with `prisma db push` (dev-DB drift blocks `migrate dev`). New `src/lib/reportViolations.ts` (shared checklist config/labels), `src/lib/validations/report.ts` (`createReportSchema` w/ "Other requires 10+ chars" refine, `reviewReportSchema`). New routes `GET|POST /api/learner/reports`, `GET /api/admin/abuse-reports`, `PATCH /api/admin/abuse-reports/[reportId]` (audit + `REPORT_REVIEWED` notify). New `REPORT_NEW`/`REPORT_REVIEWED` notification types + `Flag` icons; `REPORT_RESOLVED`/`REPORT_DISMISSED` audit actions + `REPORT` target. New `ReportButton` (learner, checklist modal) wired into the tutor profile header + `LearnerClassActions`; new `/learner/reports` page (`MyReportsList`) + nav entry; new `/admin/abuse-reports` page (`AbuseReportTable`, status tabs + a Tutor/Class target filter — `?targetType=` on the list route) + "Review" nav entry. Tests: 4 new files (learner submit, admin list, admin review, schema) — 672/672, `tsc`/`lint` clean. Not committed. |
 | [54](#part-54) | **Minimalist scrollbars, app-wide** | Every scrollbar (page, sidebar, tables, modals) is now a thin rounded grey pill with no visible track, darkening slightly on hover. | `src/app/globals.css` — one global rule: Firefox `scrollbar-width/color`, Chromium/Safari `::-webkit-scrollbar` 8px w/ transparent track + `background-clip: padding-box` inset thumb (~4px visible), `9999px` radius. `--kt-scrollbar-thumb`/`-hover` tokens (`color-mix` of `--color-base-content` at 18%/34%). CSS only, no other changes. Not committed. |
@@ -3008,6 +3009,70 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-57"></a>
+## Part 57 — Security-review fixes (2026-09-10)
+
+Closes every finding in `docs/reviews/security-review-2026-09-09.md`. Suite 680/680
+(8 new), `tsc` / `lint` / `build` green.
+
+**Finding 1 — no rate limiting.** New `src/lib/rateLimit.ts`: `rateLimit(key, limit, windowMs)`
+over an in-memory `Map` (fixed window, self-sweeping), `clientIp(headers)` (reads
+`x-forwarded-for` / `x-real-ip`, handles both a `Headers` object and NextAuth's plain
+header bag), `tooManyRequests(retryAfter)` → 429 + `Retry-After`, and `rateLimitEnabled()`
+(false under Vitest and when `RATE_LIMIT_DISABLED=1`, so unit tests never trip it). Per-process
+only — documented as an accepted trade-off for a single-instance deploy. Applied:
+
+| Route | Key | Limit |
+|---|---|---|
+| login (`authorize()`) | IP + email | 10 / 10 min |
+| `POST /api/auth/forgot-password` | IP, and separately email | 5 / 15 min, 3 / 15 min |
+| `POST /api/auth/reset-password` | IP | 10 / 15 min |
+| `POST /api/register` | IP | 5 / hr |
+| `POST /api/chatbot` | user id | 20 / min |
+| `GET /api/search` | user id | 40 / min |
+
+**Finding 2 — `/api/dev` unauthenticated.** `devGuard()` is now `async` and, in addition to the
+existing production hard-404, calls `getServerSession(authOptions)` and 404s unless the caller
+is a signed-in `ADMIN`. So even on a `NODE_ENV != "production"` preview deploy the user dump
+and the ADMIN-account factory are unreachable without an admin login.
+
+**Finding 3 — login user enumeration + timing.** `authorize()` now throws one generic
+`"Invalid email or password."` for both "no such account" and "wrong password", and runs
+`bcrypt.compare` against a fixed `DUMMY_PASSWORD_HASH` on the no-user path so the two cases take
+the same time. The `ACCOUNT_PENDING` / `ACCOUNT_DECLINED` / suspended / banned sentinels
+(product requirements — the user must be told) are unchanged.
+
+**Finding 4 — no security headers / broken `next.config`.** `next.config.ts` rewritten: the
+stray `module.exports = { allowedDevOrigins }` (silently dropped, Next used the default export)
+is folded into the single `nextConfig`, and an `async headers()` block sends
+`Content-Security-Policy` (`default-src 'self'`, `frame-ancestors 'none'`, `object-src 'none'`,
+`'unsafe-inline'` still allowed for script/style — App Router injects both without a nonce;
+nonce-based CSP is a follow-up), `Strict-Transport-Security`, `X-Frame-Options: DENY`,
+`X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
+`Permissions-Policy: camera=(), microphone=(), geolocation=()`.
+
+**Finding 5 — JWT sessions not revocable.** The `jwt` callback stamps `status` + `checkedAt`
+on sign-in and, on later requests, re-reads `role` + `status` from the DB once the token is
+older than `TOKEN_STALE_MS` (5 min); a deleted user is treated as `BANNED`. `session` exposes
+`session.user.status`. `src/proxy.ts` redirects any request whose `token.status !== "ACTIVE"`
+to `/login?reason=account-inactive`, so an admin suspend/ban cuts the session within ~5 min
+instead of waiting out the 8 h expiry. `src/types/next-auth.d.ts` extended accordingly.
+(API routes under `/api/**` aren't in the middleware matcher — route-level status enforcement
+is a documented follow-up; the portal pages are covered.)
+
+**Finding 6 — weak password policy.** New `src/lib/validations/password.ts` `passwordField`:
+`min(8)`, `.max(72 bytes)` (bcrypt truncates silently past that), and an 18-entry
+common-password blocklist. Reused by `registerSchema` and `resetPasswordSchema`. Dev-seed /
+`/api/dev` users (`password123`) are created via `registerAccount()` directly, bypassing the
+schema, so they're unaffected.
+
+**Tests.** New `src/lib/__tests__/rateLimit.test.ts` (limiter window/reset/key-isolation,
+`clientIp` parsing). `validations/auth.test.ts` gains common-password + 72-byte rejection
+cases; the two `authorize()` error-message assertions updated to the generic string; register
++ validation fixtures moved off `"password123"`.
+
+Not committed.
 
 <a id="part-56"></a>
 ## Part 56 — Clean-code cleanup backlog (2026-09-10)

@@ -44,7 +44,7 @@ const validLearner = {
   firstName: "Juan",
   lastName: "Dela Cruz",
   email: "juan@example.com",
-  password: "password123",
+  password: "Tr4vel-mug-lantern",
   gradeLevel: "GRADE_10",
   section: "Rizal",
   consentGiven: true,

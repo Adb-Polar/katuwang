@@ -1,5 +1,11 @@
 # Security Review — Katuwang codebase
 
+> **Status:** all six findings addressed in **Changes.md Part 57** (2026-09-10) —
+> rate limiting, `/api/dev` ADMIN gate, generic login error + dummy compare,
+> security headers + `next.config` fix, JWT role/status re-sync, password
+> max-72-bytes + common-password blocklist. Nonce-based CSP and `/api/**`
+> status enforcement remain as noted follow-ups.
+
 - **Date:** 2026-09-09
 - **Scope:** local repo, `cleanup` branch
 - **Method:** static analysis only — no code executed, no live target contacted

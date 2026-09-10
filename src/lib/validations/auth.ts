@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GradeLevel } from "@prisma/client";
+import { passwordField } from "@/lib/validations/password";
 
 /**
  * Shared registration fields validation schema.
@@ -20,7 +21,7 @@ export const commonRegisterSchema = z.object({
     .trim()
     .toLowerCase()
     .pipe(z.string().email("Invalid email address.")),
-  password: z.string().min(8, "Password must be at least 8 characters."),
+  password: passwordField,
   recoveryEmail: z
     .string()
     .trim()

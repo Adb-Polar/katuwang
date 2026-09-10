@@ -49,12 +49,12 @@ describe("auth authorize()", () => {
     );
   });
 
-  it("throws when no user is found for the email", async () => {
+  it("throws a generic message when no user is found for the email", async () => {
     userFindUnique.mockResolvedValue(null);
 
     await expect(
       authorize({ email: "nobody@example.com", password: "password123" })
-    ).rejects.toThrow("No account found with that email.");
+    ).rejects.toThrow("Invalid email or password.");
   });
 
   it("throws when the password does not match", async () => {
@@ -71,7 +71,7 @@ describe("auth authorize()", () => {
 
     await expect(
       authorize({ email: "juan@example.com", password: "wrong" })
-    ).rejects.toThrow("Incorrect password.");
+    ).rejects.toThrow("Invalid email or password.");
   });
 
   it("throws when the account is suspended", async () => {

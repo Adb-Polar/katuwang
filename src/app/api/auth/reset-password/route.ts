@@ -3,12 +3,19 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { resetPasswordSchema } from "@/lib/validations/passwordReset";
 import { hashResetToken } from "@/lib/passwordReset";
+import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
+import { MINUTE_MS } from "@/lib/datetime";
 
 const INVALID = { error: "This reset link is invalid or has expired." };
 
 // ─── POST: Complete a password reset ──────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
+    if (rateLimitEnabled()) {
+      const limited = rateLimit(`reset:ip:${clientIp(req.headers)}`, 10, 15 * MINUTE_MS);
+      if (!limited.ok) return tooManyRequests(limited.retryAfter);
+    }
+
     const body = await req.json();
     const result = resetPasswordSchema.safeParse(body);
 

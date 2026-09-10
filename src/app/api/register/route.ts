@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validations/auth";
 import { getSetting } from "@/lib/settings";
 import { registerAccount } from "@/lib/registration";
+import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
+import { MINUTE_MS } from "@/lib/datetime";
 
 // ─── Registration Handler ─────────────────────────────────────────────────────
 
@@ -13,6 +15,11 @@ const TUTOR_SUCCESS_MESSAGE =
 
 export async function POST(req: NextRequest) {
   try {
+    if (rateLimitEnabled()) {
+      const limited = rateLimit(`register:ip:${clientIp(req.headers)}`, 5, 60 * MINUTE_MS);
+      if (!limited.ok) return tooManyRequests(limited.retryAfter);
+    }
+
     const registrationOpen = await getSetting("registrationOpen");
     if (!registrationOpen) {
       return NextResponse.json({ error: "Registration is currently closed." }, { status: 403 });

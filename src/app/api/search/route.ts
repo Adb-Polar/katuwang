@@ -8,6 +8,8 @@ import { getSubjects, resolveSubjectSlugs } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { portalPath } from "@/lib/portalPaths";
+import { rateLimit, rateLimitEnabled, tooManyRequests } from "@/lib/rateLimit";
+import { MINUTE_MS } from "@/lib/datetime";
 
 const PER_GROUP = 6;
 
@@ -68,6 +70,11 @@ export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    if (rateLimitEnabled()) {
+      const limited = rateLimit(`search:user:${session.user.id}`, 40, MINUTE_MS);
+      if (!limited.ok) return tooManyRequests(limited.retryAfter);
     }
 
     const params = new URL(req.url).searchParams;

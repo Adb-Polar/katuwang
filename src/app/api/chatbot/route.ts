@@ -6,6 +6,8 @@ import { getSetting } from "@/lib/settings";
 import { chatbotMessageSchema } from "@/lib/validations/chatbot";
 import { getBotReplyWithScore } from "@/lib/chatbot/respond";
 import type { ChatContext } from "@/lib/chatbot/types";
+import { rateLimit, rateLimitEnabled, tooManyRequests } from "@/lib/rateLimit";
+import { MINUTE_MS } from "@/lib/datetime";
 
 // ─── POST: ask the intent-based assistant ────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -14,6 +16,11 @@ export async function POST(req: NextRequest) {
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+
+    if (rateLimitEnabled()) {
+      const limited = rateLimit(`chatbot:user:${session.user.id}`, 20, MINUTE_MS);
+      if (!limited.ok) return tooManyRequests(limited.retryAfter);
     }
 
     if (!(await getSetting("chatbotEnabled"))) {

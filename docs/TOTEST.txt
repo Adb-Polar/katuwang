@@ -669,3 +669,32 @@ Clean-code cleanup backlog (Changes.md Part 56) — behaviour-preserving, spot-c
     still works where present.
  [] Auto-match / browse ordering unchanged: run /learner/match and the browse list and
     confirm results and scores look the same as before (grade weighting still 6/3/2).
+
+Security-review fixes (Changes.md Part 57)
+ [] Login throttle: from one browser/IP, submit ~11 wrong-password logins for the same
+    email within 10 min -> the 11th shows "Too many sign-in attempts. Please wait a few
+    minutes and try again." A different email from the same IP still works.
+ [] Login error is generic: a nonexistent email and a real email + wrong password both
+    show "Invalid email or password." (no "no account" vs "incorrect password" tell).
+    Response time for the two is visually similar (no fast-fail on unknown email).
+ [] Suspended/banned/pending/declined accounts still get their specific screens
+    (/pending-approval, /account-declined, inline suspended/banned message).
+ [] Forgot-password throttle: 6 requests for any address from one IP within 15 min ->
+    429 neutral copy; still no signal about whether the address exists.
+ [] /api/dev on a local (non-production) dev server: hit GET /api/dev while logged OUT
+    or as a learner/tutor -> 404 {"error":"Not found."}. As an ADMIN -> normal payload.
+    The Dev Data Factory UI still works when signed in as admin.
+ [] Security headers: load any page, check response headers include
+    Content-Security-Policy, Strict-Transport-Security, X-Frame-Options: DENY,
+    X-Content-Type-Options: nosniff, Referrer-Policy, Permissions-Policy. App renders
+    with no CSP console errors (charts, icons, fonts, client nav all still work).
+ [] allowedDevOrigins still honoured (LAN IP 192.168.219.123 can load the dev server
+    without the Next cross-origin warning).
+ [] Mid-session ban: log in as a learner in browser A; as admin in browser B, ban that
+    learner. Within ~5 min (or after the learner's tab refetches the session / navigates)
+    browser A is bounced to /login?reason=account-inactive on the next /learner navigation.
+    Un-ban -> access returns.
+ [] Password policy: registration + reset-password reject "password123" ("too common"),
+    reject a 73+ character password, and still accept a normal 8+ char password.
+ [] Rate limiting is off under `pnpm test` (suite stays green) and can be disabled locally
+    with RATE_LIMIT_DISABLED=1 if it gets in the way during manual QA.
