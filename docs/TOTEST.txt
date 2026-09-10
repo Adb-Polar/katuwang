@@ -709,3 +709,12 @@ Security-review fixes (Changes.md Part 57)
  [] Fragment Mono nav + buttons: sidebar nav labels and every .btn now render in
     Fragment Mono. Check the nav column doesn't wrap at the default width and button
     labels aren't clipped (Approve/Reject pairs, modal action rows, PageHeader actions).
+
+--- Part 59 (design-review D5/D7) ---
+ [] Contrast: run --kt-tutor-text (on the tutor tint), --kt-muted and --kt-faint
+    (on base-100) through a real contrast checker at text-2xs (0.6875rem). Target 4.5:1.
+    Darken further if any misses. Confirm muted-vs-faint hierarchy still reads (they're
+    close now).
+ [] Visual sweep: tutor ID badges / avatars / --kt-badge--tutor are a touch darker gold
+    but still clearly the tutor colour; secondary text and micro uppercase labels are
+    a little darker everywhere — no layout shift.

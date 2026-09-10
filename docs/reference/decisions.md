@@ -12,6 +12,52 @@ Format: newest first.
 
 ---
 
+## Lucide icon set supersedes the no-SVG invariant (2026-09-10)
+
+**Decision:** The app uses `lucide-react` for navigation, row, action, and status
+icons (imported in ~70 files). The Fragment Mono letter-tile survives only as the
+nav-group glyph (`.kt-ic`).
+
+**Design doc says otherwise:** `design/ROUND-2-CONTEXT.md` invariant #6 ("No
+pictographic SVG icons — letter-tiles / text glyphs only") and its "Prohibited
+normalisation" section both ban an SVG icon set. That invariant is now marked
+SUPERSEDED in place.
+
+**Why:** ROUND-2's own "Open issues carried into Round 2 verification" flagged the
+letter-tiles as a placeholder — "decide keep-letters vs. icon-font vs. CSS icons
+(no SVG) at implementation." Lucide was chosen at implementation for legibility
+and coverage; the decision was just never written down. Recorded now per the
+`CLAUDE.md` rule.
+
+**Implication for agents:** Lucide icons are fine to use and add. Do not "restore"
+letter-tiles for row/action icons. Keep icons decorative (`aria-hidden`) with a
+real text label alongside.
+
+---
+
+## Live palette supersedes `docs/reference/theme.md` (2026-09-10)
+
+**Decision:** The authoritative theme is the `@plugin "daisyui/theme"` block in
+`src/app/globals.css`. `docs/reference/theme.md` has been retired to a pointer at
+that block.
+
+**Doc said otherwise:** the old `theme.md` documented an earlier palette
+(`--color-primary: oklch(69% 0.17 162.48)` bright emerald, `--color-secondary:
+oklch(0% 0 0)` pure black, `--color-accent: oklch(62% 0.265 303.9)` vivid violet).
+The shipped palette is muted deep teal / ube violet / marigold gold
+(`oklch(40% 0.09 174)` / `oklch(48% 0.16 300)` / `oklch(76% 0.14 80)`). Anyone
+building from the old file got the wrong colours.
+
+**Why:** the palette was retuned during implementation (warm-neutral surfaces,
+role colours pulled apart in hue so gold and orange-red don't collide) and
+`theme.md` was never regenerated. One source of truth is `globals.css`.
+
+**Implication for agents:** read colour tokens from `src/app/globals.css`, never
+from `theme.md`. The `--kt-*` derived tokens (tints, badge text, muted/faint)
+live in the same file just below the theme block.
+
+---
+
 ## Learner reports for tutors & classes (2026-09-10)
 
 **Decision:** Learners can now report a tutor or a class for admin review. Scope

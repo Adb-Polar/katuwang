@@ -127,7 +127,11 @@ two colour families carry over unchanged; the shell is new.
    grouped sidebar with a green active-pill; sticky top bar; pill badges. See
    §Composition.
 5. Radius: `.5rem` controls · `.5rem` cards · pill on badges/search/avatar.
-6. No pictographic SVG icons — letter-tiles / text glyphs only.
+6. ~~No pictographic SVG icons — letter-tiles / text glyphs only.~~
+   **SUPERSEDED 2026-09-10** — the build uses `lucide-react` for row/action/nav
+   icons; the Fragment Mono letter-tile survives only as the nav-group glyph.
+   See `docs/reference/decisions.md` → "Lucide icon set supersedes the no-SVG
+   invariant".
 
 ## Allowed variation
 

@@ -97,11 +97,17 @@
   --kt-tint-error: color-mix(in oklch, var(--color-error) 13%, var(--color-base-100));
   --kt-tint-neutral: color-mix(in oklch, var(--color-base-content) 6%, var(--color-base-100));
 
-  /* the accent is a light marigold used as a fill; darken it for use as ID text */
-  --kt-tutor-text: oklch(50% 0.12 80);
+  /* the accent is a light marigold used as a fill; darken it for use as ID text.
+     Was oklch(50% 0.12 80) — ~3.8:1 on the 24%-accent tint at 0.72rem, under the
+     4.5:1 floor for small text (design-review D7). */
+  --kt-tutor-text: oklch(44% 0.11 80);
   --kt-warning-text: color-mix(in oklch, var(--color-warning) 80%, black);
-  --kt-muted: color-mix(in oklch, var(--color-base-content) 60%, transparent);
-  --kt-faint: color-mix(in oklch, var(--color-base-content) 42%, transparent);
+  /* muted = secondary body text, faint = micro uppercase labels. Both were too
+     light on base-100 for text-xs / text-2xs (D7): muted 60% ≈ 3.8:1,
+     faint 42% ≈ 2.3:1. Darkened to clear 4.5:1; the two tiers stay ordered but
+     the gap between them is now deliberately small. */
+  --kt-muted: color-mix(in oklch, var(--color-base-content) 66%, transparent);
+  --kt-faint: color-mix(in oklch, var(--color-base-content) 60%, transparent);
 }
 
 body { background: var(--color-base-200); }
