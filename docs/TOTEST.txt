@@ -752,3 +752,11 @@ Security-review fixes (Changes.md Part 57)
  [] Admin Audit Log: sorting by Action / Target / When still works, direction toggles,
     inactive columns now show a faint up/down chevron. Chatbot Misses: Count / First seen /
     Last seen sort the same, headers now match the rest of the portal.
+
+--- Part 67 (component-reuse R2: PromptDialog) ---
+ [] Admin Class Appeals: reject an appeal with + without a note -> tutor notified, note
+    stored; char counter shows; cancel/backdrop closes.
+ [] Admin Abuse Reports: Resolve now shows an optional note field (new) -> resolves,
+    reporter notified. Dismiss with/without note still works.
+ [] Admin Certifications: reject a request with feedback -> tutor sees outcome; note saved.
+ [] Re-opening any of these dialogs starts with an empty textarea (no stale note).

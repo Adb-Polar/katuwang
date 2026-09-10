@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [67](#part-67) | **`<PromptDialog>` (component-reuse R2)** | `ConfirmDialog` + a note textarea (with `CharCount`) extracted to `components/ui/PromptDialog.tsx`; migrated the 3 clean "confirm + note" modals (`ClassAppealTable`, `AbuseReportTable` ×2, `CertificationReviewTable`) and deleted their parent note state. `AbuseReportTable`'s resolve modal gains an optional note (was confirm-only). 5 harder sites deferred to after R3. | New `PromptDialog.tsx` (own note state via render-time prop-change reset, no effect). 680/680. |
 | [66](#part-66) | **`AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6)** | Deleted both tables' local `sortHeader()` + `toggleSort` and switched to `useTableSort` + `<SortableTh>`, matching every other admin table (incl. the neutral unsorted chevron). | ~20 lines removed per file; `AuditLogTable` keeps its per-column start direction via `defaultDirs`. 680/680. |
 | [65](#part-65) | **`<LoadingRow>` + `<EmptyState>` (component-reuse R4)** | Centered-spinner and muted-empty-row one-liners extracted to `components/ui`; codemod swapped 17 spinner blocks + 12 empty rows across 16 files (admin tables + a few others). Output identical. | New `LoadingRow.tsx` / `EmptyState.tsx`; imports added to the 16 files. 680/680. |
 | [64](#part-64) | **`violationLabel()` + `<AuditLogLink>` (component-reuse R8)** | Two shared helpers: `violationLabel(type)` from `reportViolations.ts` (3 inline copies removed) and `<AuditLogLink targetId>` in `components/ui` (2 magic-query-string links removed). | New `violationLabel` export + `AuditLogLink.tsx`; `MyReportsList`, `AbuseReportTable`, `ClassAppealTable` migrated. 680/680. |
@@ -3018,6 +3019,33 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-67"></a>
+## Part 67 — `<PromptDialog>` (component-reuse R2) (2026-09-10)
+
+`docs/reviews/component-reuse-review-2026-09-10.md` **R2**. New
+`src/components/ui/PromptDialog.tsx` = the `ConfirmDialog` shell + a note
+`<textarea>` with a `<CharCount>` (which the hand-rolled copies skipped despite
+`maxLength={500}`). It owns the note state via the "adjust state on prop change
+during render" pattern, so it needs no `useEffect` and can stay mounted;
+`onConfirm` receives the trimmed note.
+
+Migrated the three clean copies:
+
+- **`ClassAppealTable`** — reject-appeal modal; parent `reviewNote` state deleted.
+- **`AbuseReportTable`** — both the resolve and dismiss modals; parent `note`
+  state deleted. The **resolve** modal was previously `ConfirmDialog` with no
+  input — it now has the same optional "Note for the reporter" field as dismiss
+  (the API already accepted `resolutionNote`).
+- **`CertificationReviewTable`** — reject-request modal; parent `rejectNote`
+  state deleted.
+
+Deferred: `RegistrationApprovalTable`, `ClassModerationTable`,
+`TopicRequestModerationTable`, `UserManagementTable`, `QuestionBankManager` each
+have an in-modal `FeedbackBanner` and/or extra fields (duration, status select) —
+they want the R3 `<Modal>` shell first, not a plain `PromptDialog`.
+
+680/680, `tsc` clean.
 
 <a id="part-66"></a>
 ## Part 66 — `AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6) (2026-09-10)

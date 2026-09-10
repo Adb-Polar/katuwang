@@ -10,7 +10,7 @@ import SortableTh from "@/components/ui/SortableTh";
 import AuditLogLink from "@/components/ui/AuditLogLink";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { violationLabel } from "@/lib/reportViolations";
@@ -47,7 +47,6 @@ export default function AbuseReportTable() {
   const [success, setSuccess] = useState("");
   const [resolveTarget, setResolveTarget] = useState<Report | null>(null);
   const [dismissTarget, setDismissTarget] = useState<Report | null>(null);
-  const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const dateField = tab === "pending" ? "createdAt" : "reviewedAt";
   const { sort, dir, toggle } = useTableSort(dateField, tab === "pending" ? "asc" : "desc");
@@ -98,7 +97,6 @@ export default function AbuseReportTable() {
       );
       setResolveTarget(null);
       setDismissTarget(null);
-      setNote("");
       refetch();
       setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
@@ -233,10 +231,7 @@ export default function AbuseReportTable() {
                             Resolve
                           </button>
                           <button
-                            onClick={() => {
-                              setNote("");
-                              setDismissTarget(r);
-                            }}
+                            onClick={() => setDismissTarget(r)}
                             className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
                           >
                             Dismiss
@@ -263,7 +258,7 @@ export default function AbuseReportTable() {
         </div>
       </section>
 
-      <ConfirmDialog
+      <PromptDialog
         open={resolveTarget !== null}
         title="Mark this report as resolved?"
         description={
@@ -271,60 +266,30 @@ export default function AbuseReportTable() {
             ? `Confirms you have acted on the report about ${targetName(resolveTarget)}. The reporter is notified. Apply any suspension or ban from the Users or Classes pages.`
             : undefined
         }
+        noteLabel="Note for the reporter (optional)"
+        notePlaceholder="What was done."
         confirmLabel="Mark resolved"
-        tone="default"
         loading={saving}
-        onConfirm={() => resolveTarget && review(resolveTarget, "RESOLVE", note)}
+        onConfirm={(reviewNote) => resolveTarget && review(resolveTarget, "RESOLVE", reviewNote)}
         onCancel={() => setResolveTarget(null)}
       />
 
-      {dismissTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl shadow-xl space-y-3">
-            <h3 className="font-semibold text-sm text-base-content">Dismiss this report?</h3>
-            <p className="text-xs text-base-content/60">
-              No action is taken on {targetName(dismissTarget)}. The reporter is notified.
-            </p>
-            <label className="form-control">
-              <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
-                Note for the reporter (optional)
-              </span>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                rows={3}
-                maxLength={500}
-                placeholder="Why no action was needed."
-                className="textarea textarea-bordered text-xs w-full focus:textarea-primary"
-              />
-            </label>
-            <div className="modal-action pt-1">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => setDismissTarget(null)}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-error btn-sm"
-                onClick={() => review(dismissTarget, "DISMISS", note)}
-                disabled={saving}
-              >
-                {saving && <span className="loading loading-spinner loading-xs" />}
-                Dismiss
-              </button>
-            </div>
-          </div>
-          <label
-            className="modal-backdrop"
-            onClick={() => setDismissTarget(null)}
-            aria-label="Close"
-          />
-        </div>
-      )}
+      <PromptDialog
+        open={dismissTarget !== null}
+        title="Dismiss this report?"
+        description={
+          dismissTarget
+            ? `No action is taken on ${targetName(dismissTarget)}. The reporter is notified.`
+            : undefined
+        }
+        noteLabel="Note for the reporter (optional)"
+        notePlaceholder="Why no action was needed."
+        confirmLabel="Dismiss"
+        tone="danger"
+        loading={saving}
+        onConfirm={(reviewNote) => dismissTarget && review(dismissTarget, "DISMISS", reviewNote)}
+        onCancel={() => setDismissTarget(null)}
+      />
     </div>
   );
 }

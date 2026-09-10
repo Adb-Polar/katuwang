@@ -8,6 +8,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
@@ -52,7 +53,6 @@ export default function CertificationReviewTable() {
   const [success, setSuccess] = useState("");
   const [approveTarget, setApproveTarget] = useState<Certification | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Certification | null>(null);
-  const [rejectNote, setRejectNote] = useState("");
   const [saving, setSaving] = useState(false);
 
   const {
@@ -102,7 +102,6 @@ export default function CertificationReviewTable() {
       );
       setApproveTarget(null);
       setRejectTarget(null);
-      setRejectNote("");
       refetch();
       setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
@@ -216,10 +215,7 @@ export default function CertificationReviewTable() {
                             Approve
                           </button>
                           <button
-                            onClick={() => {
-                              setRejectNote("");
-                              setRejectTarget(c);
-                            }}
+                            onClick={() => setRejectTarget(c)}
                             className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
                           >
                             Reject
@@ -267,50 +263,22 @@ export default function CertificationReviewTable() {
         onCancel={() => setApproveTarget(null)}
       />
 
-      {rejectTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl shadow-xl space-y-3">
-            <h3 className="font-semibold text-sm text-base-content">Reject this certification request?</h3>
-            <p className="text-xs text-base-content/60">
-              The request for &quot;{rejectTarget.topic}&quot; will be marked <strong>Rejected</strong>. The tutor
-              can see the outcome and may request it again.
-            </p>
-            <label className="form-control">
-              <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
-                Feedback for the tutor (optional)
-              </span>
-              <textarea
-                value={rejectNote}
-                onChange={(e) => setRejectNote(e.target.value)}
-                rows={3}
-                maxLength={500}
-                placeholder="e.g. Re-take after reviewing quadratic factoring."
-                className="textarea textarea-bordered text-xs w-full focus:textarea-primary"
-              />
-            </label>
-            <div className="modal-action pt-1">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => setRejectTarget(null)}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-error btn-sm"
-                onClick={() => review(rejectTarget, "REJECTED", rejectNote)}
-                disabled={saving}
-              >
-                {saving && <span className="loading loading-spinner loading-xs" />}
-                Reject
-              </button>
-            </div>
-          </div>
-          <label className="modal-backdrop" onClick={() => setRejectTarget(null)} aria-label="Close" />
-        </div>
-      )}
+      <PromptDialog
+        open={rejectTarget !== null}
+        title="Reject this certification request?"
+        description={
+          rejectTarget
+            ? `The request for "${rejectTarget.topic}" will be marked Rejected. The tutor can see the outcome and may request it again.`
+            : undefined
+        }
+        noteLabel="Feedback for the tutor (optional)"
+        notePlaceholder="e.g. Re-take after reviewing quadratic factoring."
+        confirmLabel="Reject"
+        tone="danger"
+        loading={saving}
+        onConfirm={(note) => rejectTarget && review(rejectTarget, "REJECTED", note)}
+        onCancel={() => setRejectTarget(null)}
+      />
     </div>
   );
 }

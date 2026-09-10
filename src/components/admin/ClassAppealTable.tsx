@@ -10,6 +10,7 @@ import AuditLogLink from "@/components/ui/AuditLogLink";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
@@ -47,7 +48,6 @@ export default function ClassAppealTable() {
   const [success, setSuccess] = useState("");
   const [approveTarget, setApproveTarget] = useState<Appeal | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Appeal | null>(null);
-  const [reviewNote, setReviewNote] = useState("");
   const [saving, setSaving] = useState(false);
   const dateField = tab === "pending" ? "createdAt" : "reviewedAt";
   const { sort, dir, toggle } = useTableSort(dateField, tab === "pending" ? "asc" : "desc");
@@ -90,7 +90,6 @@ export default function ClassAppealTable() {
       );
       setApproveTarget(null);
       setRejectTarget(null);
-      setReviewNote("");
       refetch();
       setTimeout(() => setSuccess(""), 4000);
     } catch (err) {
@@ -176,10 +175,7 @@ export default function ClassAppealTable() {
                             Approve
                           </button>
                           <button
-                            onClick={() => {
-                              setReviewNote("");
-                              setRejectTarget(a);
-                            }}
+                            onClick={() => setRejectTarget(a)}
                             className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
                           >
                             Reject
@@ -221,50 +217,22 @@ export default function ClassAppealTable() {
         onCancel={() => setApproveTarget(null)}
       />
 
-      {rejectTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl shadow-xl space-y-3">
-            <h3 className="font-semibold text-sm text-base-content">Reject this appeal?</h3>
-            <p className="text-xs text-base-content/60">
-              {rejectTarget.class.subject} · {rejectTarget.class.code} stays moderated. The tutor is
-              notified and can appeal again.
-            </p>
-            <label className="form-control">
-              <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
-                Note for the tutor (optional)
-              </span>
-              <textarea
-                value={reviewNote}
-                onChange={(e) => setReviewNote(e.target.value)}
-                rows={3}
-                maxLength={500}
-                placeholder="Why the moderation stands."
-                className="textarea textarea-bordered text-xs w-full focus:textarea-primary"
-              />
-            </label>
-            <div className="modal-action pt-1">
-              <button
-                type="button"
-                className="btn btn-ghost btn-sm"
-                onClick={() => setRejectTarget(null)}
-                disabled={saving}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="btn btn-error btn-sm"
-                onClick={() => review(rejectTarget, "REJECT", reviewNote)}
-                disabled={saving}
-              >
-                {saving && <span className="loading loading-spinner loading-xs" />}
-                Reject
-              </button>
-            </div>
-          </div>
-          <label className="modal-backdrop" onClick={() => setRejectTarget(null)} aria-label="Close" />
-        </div>
-      )}
+      <PromptDialog
+        open={rejectTarget !== null}
+        title="Reject this appeal?"
+        description={
+          rejectTarget
+            ? `${rejectTarget.class.subject} · ${rejectTarget.class.code} stays moderated. The tutor is notified and can appeal again.`
+            : undefined
+        }
+        noteLabel="Note for the tutor (optional)"
+        notePlaceholder="Why the moderation stands."
+        confirmLabel="Reject"
+        tone="danger"
+        loading={saving}
+        onConfirm={(note) => rejectTarget && review(rejectTarget, "REJECT", note)}
+        onCancel={() => setRejectTarget(null)}
+      />
     </div>
   );
 }
