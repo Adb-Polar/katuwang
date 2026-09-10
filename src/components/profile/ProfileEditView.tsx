@@ -1,5 +1,4 @@
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
 
@@ -29,12 +28,7 @@ export default function ProfileEditView({
         title="Edit your details"
         subtitle="Update your grade level, section, and contact info."
       />
-      <Link
-        href={backHref}
-        className="inline-flex items-center gap-1 text-xs text-base-content/60 hover:text-primary"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to profile
-      </Link>
+      <BackLink href={backHref}>Back to profile</BackLink>
       <section className="card kt-card max-w-2xl">
         <div className="card-body gap-4 p-6">
           <ProfileEditForm

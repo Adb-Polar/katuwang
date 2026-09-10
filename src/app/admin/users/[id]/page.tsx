@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { ArrowLeft } from "lucide-react";
+import BackLink from "@/components/ui/BackLink";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
@@ -94,10 +93,7 @@ export default async function AdminUserDetailPage({
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/users" className="btn btn-ghost btn-sm text-xs gap-1.5">
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to accounts
-      </Link>
+      <BackLink href="/admin/users">Back to accounts</BackLink>
 
       <PageHeader
         eyebrow="Admin Portal"

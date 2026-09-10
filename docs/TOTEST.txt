@@ -718,3 +718,8 @@ Security-review fixes (Changes.md Part 57)
  [] Visual sweep: tutor ID badges / avatars / --kt-badge--tutor are a touch darker gold
     but still clearly the tutor colour; secondary text and micro uppercase labels are
     a little darker everywhere — no layout shift.
+
+--- Part 60 (repeated-markup C2: BackLink) ---
+ [] Back links still work + look right on: /admin/users/[id], /tutor/students/[id],
+    /learner/tutors/[id], class details view, edit-class page, session test results,
+    profile edit page. ProfileEditView's back link is now a ghost button (was inline text).

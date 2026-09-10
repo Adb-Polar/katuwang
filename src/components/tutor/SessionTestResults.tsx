@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import BackLink from "@/components/ui/BackLink";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -85,11 +84,7 @@ export default function SessionTestResults({
     }
   };
 
-  const backControl = backHref ? (
-    <Link href={backHref} className="btn btn-ghost btn-sm text-xs gap-1.5">
-      <ArrowLeft className="h-3.5 w-3.5" /> Back
-    </Link>
-  ) : null;
+  const backControl = backHref ? <BackLink href={backHref}>Back</BackLink> : null;
 
   if (error) {
     return (

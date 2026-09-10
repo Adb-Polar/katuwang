@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [60](#part-60) | **`<BackLink>` component (repeated-markup C2)** | The `‹ Back to X` ghost-button link extracted to `src/components/ui/BackLink.tsx`; 7 detail-page / sub-view headers migrated. No behaviour change. | New `BackLink.tsx` (`href` + children over `btn btn-ghost btn-sm` + `ArrowLeft`). Migrated `admin/users/[id]`, `tutor/students/[studentId]`, `learner/tutors/[tutorId]`, `ClassDetailsView`, `EditClassForm`, `SessionTestResults`, `ProfileEditView`; dead `ArrowLeft`/`Link` imports removed. 680/680. |
 | [59](#part-59) | **Design-review fixes (`docs/reviews/design-review-2026-09-10.md`), part 2** | D5/D7: retires the drifted `docs/reference/theme.md` to a pointer at `globals.css`, adds two `decisions.md` entries (live palette; Lucide supersedes no-SVG) and strikes ROUND-2 invariant #6; darkens `--kt-tutor-text`, `--kt-muted`, `--kt-faint` to clear 4.5:1 on `base-100` at shipped text sizes. Docs + 3 token lines. | `docs/reference/theme.md` rewritten; `docs/reference/decisions.md` + `design/ROUND-2-CONTEXT.md` updated; `globals.css` `--kt-*` text tokens. No test impact. |
 | [58](#part-58) | **Design-review fixes (`docs/reviews/design-review-2026-09-10.md`), part 1** | D1/D2/D3: restores a real heavy weight (700 Fett) for the page H1 + card titles via a new `font-heavy` utility while the everyday emphasis utilities stay at 500; finishes the `font-serif` → `font-sans` sweep and drops the dead `--font-serif` alias; puts nav items and buttons in Fragment Mono per the notation brief. No layout/API change. | `globals.css`: `--font-weight-heavy: 700` in `@theme`, `.kt-card-head > h2/h3` + `.kt-nav-item` + `.btn` updated, `--font-serif` removed from `@theme inline`. `PageHeader.tsx` `font-bold` → `font-heavy`. `font-serif` → `font-sans` codemod across 28 files. 680/680, `tsc` clean. |
 | [57](#part-57) | **Security-review fixes (`docs/reviews/security-review-2026-09-09.md`)** | Closes all six findings. Adds an in-memory rate limiter on login, forgot/reset-password, register, chatbot, and search; locks `/api/dev` behind an ADMIN session on top of the prod 404; makes the login error generic ("Invalid email or password.") with a dummy bcrypt compare on the no-user path (kills user enumeration + the timing side-channel); rebuilds `next.config.ts` (the broken `module.exports` + `export default` is fixed, `allowedDevOrigins` no longer dropped) with a security-headers block (CSP w/ `frame-ancestors 'none'`, HSTS, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`); re-syncs the JWT's `role`/`status` from the DB every ~5 min so an admin suspend/ban takes effect mid-session (enforced in `src/proxy.ts`); and caps passwords at 72 bytes with a small common-password blocklist. | New `src/lib/rateLimit.ts` (`rateLimit()` fixed-window Map + `clientIp()` + `tooManyRequests()` + `rateLimitEnabled()` — off under Vitest / `RATE_LIMIT_DISABLED=1`) and `src/lib/validations/password.ts` (`passwordField`, reused by `auth.ts` + `passwordReset.ts` schemas). `src/lib/auth.ts`: per-IP+email login throttle (10/10min), `DUMMY_PASSWORD_HASH`, generic `INVALID_CREDENTIALS`, `jwt` callback DB re-check gated on `TOKEN_STALE_MS`, `session` exposes `user.status`. `src/types/next-auth.d.ts`: `status` on `Session.user` + `JWT`, `checkedAt` on `JWT`. `src/proxy.ts`: redirect to `/login?reason=account-inactive` when `token.status !== "ACTIVE"`. `/api/dev` `devGuard()` now async + `getServerSession` ADMIN check. Rate limits: forgot 5/IP + 3/email per 15min, reset 10/IP/15min, register 5/IP/hr, chatbot 20/user/min, search 40/user/min. New tests: `rateLimit.test.ts` (8), common-password + 72-byte cases in `validations/auth.test.ts`; auth-error assertions updated. 680/680, `tsc`/`lint`/`build` clean. |
@@ -3011,6 +3012,21 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-60"></a>
+## Part 60 — `<BackLink>` component (repeated-markup C2) (2026-09-10)
+
+`docs/reviews/repeated-markup-review-2026-09-10.md` **C2**. New
+`src/components/ui/BackLink.tsx` — the `‹ Back to X` ghost-button link
+(`btn btn-ghost btn-sm text-xs gap-1.5` + `<ArrowLeft className="h-3.5 w-3.5" />`)
+as one component taking `href` + children. Migrated 7 detail-page / sub-view
+headers: `admin/users/[id]`, `tutor/students/[studentId]`,
+`learner/tutors/[tutorId]` pages, and `ClassDetailsView`, `EditClassForm`,
+`SessionTestResults`, `ProfileEditView` components. `ProfileEditView`'s
+inline-text variant is normalised to the ghost-button look in the process.
+No behaviour change; the contextual `router.back()` fallback (B4) is deliberately
+left for the back-navigation pass. Unused `ArrowLeft` / `next/link` imports
+removed from the touched files. 680/680, `tsc` clean.
 
 <a id="part-59"></a>
 ## Part 59 — Design-review fixes: doc drift + contrast (2026-09-10)

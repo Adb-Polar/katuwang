@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { ArrowLeft, Link as LinkIcon, Users, EyeOff, MapPin } from "lucide-react";
+import { Link as LinkIcon, Users, EyeOff, MapPin } from "lucide-react";
+import BackLink from "@/components/ui/BackLink";
 import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
@@ -77,10 +77,7 @@ export default function ClassDetailsView({
   return (
     <div className={`space-y-6 rounded-box ${!published ? "bg-base-300 border border-base-content/10 p-4" : ""}`}>
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Link href={backHref} className="btn btn-ghost btn-sm text-xs gap-1.5">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Classes
-        </Link>
+        <BackLink href={backHref}>Back to Classes</BackLink>
         <div className="flex items-center gap-2">{actions}</div>
       </div>
 

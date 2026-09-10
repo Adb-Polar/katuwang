@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { ArrowLeft, User } from "lucide-react";
+import { User } from "lucide-react";
+import BackLink from "@/components/ui/BackLink";
 import TopicChip from "@/components/ui/TopicChip";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -130,10 +130,7 @@ export default async function LearnerTutorProfilePage({
 
   return (
     <div className="space-y-6">
-      <Link href="/learner/classes" className="btn btn-ghost btn-sm text-xs gap-1.5">
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to classes
-      </Link>
+      <BackLink href="/learner/classes">Back to classes</BackLink>
 
       <PageHeader
         eyebrow="Tutor Profile"

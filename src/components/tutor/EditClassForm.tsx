@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import BackLink from "@/components/ui/BackLink";
 import {
-  ArrowLeft,
   Link as LinkIcon,
   Users,
   BadgeCheck,
@@ -153,10 +153,7 @@ export default function EditClassForm({
       }`}
     >
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Link href={backHref} className="btn btn-ghost btn-sm text-xs gap-1.5">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Class
-        </Link>
+        <BackLink href={backHref}>Back to Class</BackLink>
         <div className="flex items-center gap-2">
           <Link href={backHref} className="btn btn-neutral btn-outline btn-sm text-xs">
             {locked ? "Back" : "Cancel"}
