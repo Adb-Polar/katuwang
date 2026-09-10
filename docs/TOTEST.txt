@@ -729,3 +729,7 @@ Security-review fixes (Changes.md Part 57)
     class detail roster, tutor student profile, tutor roster + its grade filter, admin
     Users + Registrations tables, learner topic-request cards, tutor topic-request browser,
     ClassCard, enrolled-learners table, profile view.
+
+--- Part 62 (repeated-markup C1: StatCard) ---
+ [] Dashboard stat tiles unchanged on all 3 portals: admin (4 plain), learner (3 linked),
+    tutor (2 plain + 2 linked). Linked ones still navigate + show the hover border.

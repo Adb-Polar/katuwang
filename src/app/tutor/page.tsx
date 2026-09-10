@@ -16,6 +16,7 @@ import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { addDays, formatDateTime, formatTime, formatWeekday } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import StatCard from "@/components/ui/StatCard";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 
@@ -149,48 +150,22 @@ export default async function TutorDashboard() {
       )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2">
-          <div>
-            <span className="kt-stat-title">Topics Taught</span>
-            <span className="kt-stat-value">{taughtTopics.length}</span>
-          </div>
-          <span className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
-            <BookOpen className="h-4 w-4" />
-          </span>
-        </div>
-        <div className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2">
-          <div>
-            <span className="kt-stat-title">Verified Topics</span>
-            <span className="kt-stat-value">{certifiedCount}</span>
-          </div>
-          <span className="p-2 rounded-lg bg-success/10 text-success shrink-0">
-            <BadgeCheck className="h-4 w-4" />
-          </span>
-        </div>
-        <Link
+        <StatCard label="Topics Taught" value={taughtTopics.length} icon={BookOpen} tint="primary" />
+        <StatCard label="Verified Topics" value={certifiedCount} icon={BadgeCheck} tint="success" />
+        <StatCard
+          label="Enrolled Learners"
+          value={enrolledLearnerCount}
+          icon={Users}
+          tint="secondary"
           href="/tutor/students"
-          className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
-        >
-          <div>
-            <span className="kt-stat-title">Enrolled Learners</span>
-            <span className="kt-stat-value">{enrolledLearnerCount}</span>
-          </div>
-          <span className="p-2 rounded-lg bg-secondary/10 text-secondary shrink-0">
-            <Users className="h-4 w-4" />
-          </span>
-        </Link>
-        <Link
+        />
+        <StatCard
+          label="Open Class Requests"
+          value={openRequestCount}
+          icon={Inbox}
+          tint="accent"
           href="/tutor/requests"
-          className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
-        >
-          <div>
-            <span className="kt-stat-title">Open Class Requests</span>
-            <span className="kt-stat-value">{openRequestCount}</span>
-          </div>
-          <span className="p-2 rounded-lg bg-accent/10 text-accent shrink-0">
-            <Inbox className="h-4 w-4" />
-          </span>
-        </Link>
+        />
       </div>
 
       <section className="card kt-card">

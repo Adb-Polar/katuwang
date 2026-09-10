@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import { addDays, formatTime, formatWeekday } from "@/lib/datetime";
 
@@ -64,27 +65,27 @@ export default async function LearnerDashboard() {
     duration: s.duration,
   }));
 
-  const stats = [
+  const stats: StatCardProps[] = [
     {
       label: "Enrolled classes",
       value: enrolledCount,
       href: "/learner/my-classes",
       icon: BookOpen,
-      tint: "bg-primary/10 text-primary",
+      tint: "primary",
     },
     {
       label: "Sessions this week",
       value: weeklySessions.length,
       href: "/learner/my-classes",
       icon: CalendarClock,
-      tint: "bg-secondary/10 text-secondary",
+      tint: "secondary",
     },
     {
       label: "Open requests",
       value: openRequestCount,
       href: "/learner/requests",
       icon: Inbox,
-      tint: "bg-accent/10 text-accent",
+      tint: "accent",
     },
   ];
 
@@ -99,19 +100,7 @@ export default async function LearnerDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
-          <Link
-            key={s.label}
-            href={s.href}
-            className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2 hover:border-primary/40 transition-colors"
-          >
-            <div>
-              <span className="kt-stat-title">{s.label}</span>
-              <span className="kt-stat-value">{s.value}</span>
-            </div>
-            <span className={`p-2 rounded-lg shrink-0 ${s.tint}`}>
-              <s.icon className="h-4 w-4" />
-            </span>
-          </Link>
+          <StatCard key={s.label} {...s} />
         ))}
       </div>
 

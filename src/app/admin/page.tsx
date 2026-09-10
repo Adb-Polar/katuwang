@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
+import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import { formatDateTime } from "@/lib/datetime";
 import { Metadata } from "next";
 
@@ -51,11 +52,11 @@ export default async function AdminDashboard() {
       }),
     ]);
 
-  const statCards = [
-    { label: "Learners", value: learnerCount, icon: Users, tint: "bg-primary/10 text-primary" },
-    { label: "Tutors", value: tutorCount, icon: GraduationCap, tint: "bg-accent/10 text-accent" },
-    { label: "Flagged Accounts", value: flaggedAccountCount, icon: ShieldAlert, tint: "bg-error/10 text-error" },
-    { label: "Active Classes", value: activeClassCount, icon: CalendarClock, tint: "bg-success/10 text-success" },
+  const statCards: StatCardProps[] = [
+    { label: "Learners", value: learnerCount, icon: Users, tint: "primary" },
+    { label: "Tutors", value: tutorCount, icon: GraduationCap, tint: "accent" },
+    { label: "Flagged Accounts", value: flaggedAccountCount, icon: ShieldAlert, tint: "error" },
+    { label: "Active Classes", value: activeClassCount, icon: CalendarClock, tint: "success" },
   ];
 
   // `tone` drives the count badge colour — only applied when value > 0, except
@@ -81,18 +82,7 @@ export default async function AdminDashboard() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
-          <div
-            key={s.label}
-            className="card kt-card kt-stat p-4 flex-row items-start justify-between gap-2"
-          >
-            <div>
-              <span className="kt-stat-title">{s.label}</span>
-              <span className="kt-stat-value">{s.value}</span>
-            </div>
-            <span className={`p-2 rounded-lg shrink-0 ${s.tint}`}>
-              <s.icon className="h-4 w-4" />
-            </span>
-          </div>
+          <StatCard key={s.label} {...s} />
         ))}
       </div>
 
