@@ -11,6 +11,8 @@ import Pagination from "@/components/ui/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import SortableTh from "@/components/ui/SortableTh";
 import SessionTestResults from "@/components/tutor/SessionTestResults";
+import LoadingRow from "@/components/ui/LoadingRow";
+import EmptyState from "@/components/ui/EmptyState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -126,9 +128,7 @@ export default function SessionTestsTable() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -171,9 +171,7 @@ export default function SessionTestsTable() {
                 </tbody>
               </table>
               {sorted.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-sm">
-                  No session tests match these filters.
-                </div>
+                <EmptyState>No session tests match these filters.</EmptyState>
               )}
             </div>
           )}

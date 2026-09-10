@@ -13,6 +13,7 @@ import SearchInput from "@/components/ui/SearchInput";
 import Tabs from "@/components/ui/Tabs";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
+import LoadingRow from "@/components/ui/LoadingRow";
 
 type MineTab = "upcoming" | "completed" | "cancelled";
 const MINE_TABS: { key: MineTab; label: string }[] = [
@@ -144,9 +145,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : classes.length === 0 ? (
             <ClassEmptyState
               message={

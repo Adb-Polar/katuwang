@@ -11,6 +11,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Tabs from "@/components/ui/Tabs";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
+import LoadingRow from "@/components/ui/LoadingRow";
 
 interface Learner {
   id: string;
@@ -99,9 +100,7 @@ export default function ClassManagement() {
           />
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : displayedClasses.length === 0 ? (
             <ClassEmptyState
               message={activeTab === "active" ? "No active classes scheduled." : "No past classes found."}

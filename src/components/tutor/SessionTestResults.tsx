@@ -7,6 +7,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { RateBarChart, DeltaBar, type DeltaRow } from "@/components/charts";
 import type { SessionTestResults as SessionTestResultsPayload } from "@/lib/sessionTestResults";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface AttemptDetail {
   learner: { anonymousId: string };
@@ -215,7 +216,7 @@ export default function SessionTestResults({
               </tbody>
             </table>
             {data.learners.length === 0 && (
-              <div className="text-center py-8 text-base-content/40 italic text-sm">No learners enrolled yet.</div>
+              <EmptyState>No learners enrolled yet.</EmptyState>
             )}
           </div>
         </div>

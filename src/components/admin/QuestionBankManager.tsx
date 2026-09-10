@@ -16,6 +16,8 @@ import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
+import LoadingRow from "@/components/ui/LoadingRow";
+import EmptyState from "@/components/ui/EmptyState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 const SUBJECTS = SUBJECT_SLUGS;
@@ -418,9 +420,7 @@ function QuestionsTab({
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-10">
-          <span className="loading loading-spinner loading-md text-primary"></span>
-        </div>
+        <LoadingRow />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -497,9 +497,7 @@ function QuestionsTab({
             </tbody>
           </table>
           {questions.length === 0 && (
-            <div className="text-center py-8 text-base-content/40 italic text-sm">
-              No questions for this topic yet.
-            </div>
+            <EmptyState>No questions for this topic yet.</EmptyState>
           )}
         </div>
       )}
@@ -686,9 +684,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
       />
 
       {loading ? (
-        <div className="flex justify-center items-center py-10">
-          <span className="loading loading-spinner loading-md text-primary"></span>
-        </div>
+        <LoadingRow />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -750,9 +746,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
             </tbody>
           </table>
           {requests.length === 0 && (
-            <div className="text-center py-8 text-base-content/40 italic text-sm">
-              No {status.toLowerCase()} requests.
-            </div>
+            <EmptyState>No {status.toLowerCase()} requests.</EmptyState>
           )}
         </div>
       )}
@@ -884,9 +878,7 @@ function ResultsTab() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-10">
-          <span className="loading loading-spinner loading-md text-primary"></span>
-        </div>
+        <LoadingRow />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -935,9 +927,7 @@ function ResultsTab() {
             </tbody>
           </table>
           {attempts.length === 0 && (
-            <div className="text-center py-8 text-base-content/40 italic text-sm">
-              No attempts match these filters.
-            </div>
+            <EmptyState>No attempts match these filters.</EmptyState>
           )}
         </div>
       )}

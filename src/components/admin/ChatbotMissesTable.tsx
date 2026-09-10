@@ -7,6 +7,8 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
+import LoadingRow from "@/components/ui/LoadingRow";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface MissGroup {
   normalized: string;
@@ -112,9 +114,7 @@ export default function ChatbotMissesTable() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -144,9 +144,7 @@ export default function ChatbotMissesTable() {
                 </tbody>
               </table>
               {groups.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-sm">
-                  No unanswered questions match these filters.
-                </div>
+                <EmptyState>No unanswered questions match these filters.</EmptyState>
               )}
             </div>
           )}

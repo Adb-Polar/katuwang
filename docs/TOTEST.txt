@@ -742,3 +742,8 @@ Security-review fixes (Changes.md Part 57)
  [] Admin Abuse Reports + Class Appeals: violation labels still render; "View audit log"
     link still opens the audit log filtered to the right id. Learner "My Reports"
     violation chips unchanged.
+
+--- Part 65 (component-reuse R4: LoadingRow/EmptyState) ---
+ [] Every admin table + Question Bank tabs: loading spinner and "nothing here" empty row
+    still appear (and look unchanged) on slow network / empty filters. Also check
+    ClassBrowser, tutor ClassManagement, PlatformSettingsForm, ReportsView, SessionTestResults.

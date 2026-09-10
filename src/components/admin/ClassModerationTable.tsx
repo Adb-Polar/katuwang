@@ -16,6 +16,7 @@ import { formatDateTime } from "@/lib/datetime";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
+import LoadingRow from "@/components/ui/LoadingRow";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -158,9 +159,7 @@ export default function ClassModerationTable() {
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">

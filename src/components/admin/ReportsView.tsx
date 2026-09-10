@@ -14,6 +14,7 @@ import { Download } from "lucide-react";
 import { BarChartCard, DataTable, useThemeColors } from "@/components/charts";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { toCsv, downloadCsv } from "@/lib/csv";
+import LoadingRow from "@/components/ui/LoadingRow";
 
 interface Breakdown {
   count: number;
@@ -59,9 +60,7 @@ export default function ReportsView() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-10">
-        <span className="loading loading-spinner loading-md text-primary"></span>
-      </div>
+      <LoadingRow />
     );
   }
 

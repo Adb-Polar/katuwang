@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [65](#part-65) | **`<LoadingRow>` + `<EmptyState>` (component-reuse R4)** | Centered-spinner and muted-empty-row one-liners extracted to `components/ui`; codemod swapped 17 spinner blocks + 12 empty rows across 16 files (admin tables + a few others). Output identical. | New `LoadingRow.tsx` / `EmptyState.tsx`; imports added to the 16 files. 680/680. |
 | [64](#part-64) | **`violationLabel()` + `<AuditLogLink>` (component-reuse R8)** | Two shared helpers: `violationLabel(type)` from `reportViolations.ts` (3 inline copies removed) and `<AuditLogLink targetId>` in `components/ui` (2 magic-query-string links removed). | New `violationLabel` export + `AuditLogLink.tsx`; `MyReportsList`, `AbuseReportTable`, `ClassAppealTable` migrated. 680/680. |
 | [63](#part-63) | **`<SearchInput>` component (repeated-markup C4)** | The bordered search-pill extracted to `src/components/ui/SearchInput.tsx` (`value` / `onChange` / `placeholder` / `transform?`); `ClassBrowser` + `TutorBrowser` migrated. No behaviour change. | New `SearchInput.tsx`; `transform="upper"` replaces TutorBrowser's inline `.toUpperCase()`. Dead `Search` icon imports removed. 680/680. |
 | [62](#part-62) | **`<StatCard>` component (repeated-markup C1)** | The `kt-stat` dashboard tile extracted to `src/components/ui/StatCard.tsx` (`tint` token + optional `href`); admin/learner/tutor dashboards migrated — the tutor one drops ~42 lines of hand-unrolled tiles. Rendered markup unchanged. | New `StatCard.tsx` + `StatCardProps`. `admin/page.tsx` + `learner/page.tsx` map their arrays to it; `tutor/page.tsx` uses four `<StatCard>` calls. 680/680. |
@@ -3016,6 +3017,25 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-65"></a>
+## Part 65 — `<LoadingRow>` + `<EmptyState>` (component-reuse R4) (2026-09-10)
+
+`docs/reviews/component-reuse-review-2026-09-10.md` **R4**. Two one-liner
+primitives:
+
+- `<LoadingRow size? padding?>` — the centered spinner
+  (`flex justify-center items-center py-10` + `loading loading-spinner loading-md
+  text-primary`).
+- `<EmptyState padding?>{message}</EmptyState>` — the muted italic empty row
+  (`text-center py-8 text-base-content/40 italic text-sm`).
+
+Codemod replaced the exact-match blocks across 16 files (all the admin tables +
+`ClassBrowser`, `ClassManagement`, `PlatformSettingsForm`, `ReportsView`,
+`SessionTestResults`): 17 spinner blocks and 12 empty rows. Rendered output is
+identical (the primitives' defaults reproduce the old class strings). Spinner
+sites with a different wrapper / padding (`py-12`, `mx-auto`, quiz runners) were
+left for a judgement call. 680/680, `tsc` clean.
 
 <a id="part-64"></a>
 ## Part 64 — `violationLabel()` + `<AuditLogLink>` (component-reuse R8) (2026-09-10)

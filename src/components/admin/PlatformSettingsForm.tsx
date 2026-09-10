@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useFetchList } from "@/hooks/useFetchList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import LoadingRow from "@/components/ui/LoadingRow";
 
 interface Setting {
   key: string;
@@ -222,9 +223,7 @@ export default function PlatformSettingsForm() {
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">General</h2>
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : (
             <div className="divide-y divide-base-200">{generalToggles.map(renderToggle)}</div>
           )}

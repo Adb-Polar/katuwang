@@ -8,6 +8,8 @@ import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { formatDateTime } from "@/lib/datetime";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import LoadingRow from "@/components/ui/LoadingRow";
+import EmptyState from "@/components/ui/EmptyState";
 
 interface AuditLogEntry {
   id: string;
@@ -131,9 +133,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
           </div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <span className="loading loading-spinner loading-md text-primary"></span>
-            </div>
+            <LoadingRow />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -167,9 +167,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                 </tbody>
               </table>
               {logs.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-sm">
-                  No moderation actions match these filters.
-                </div>
+                <EmptyState>No moderation actions match these filters.</EmptyState>
               )}
             </div>
           )}
