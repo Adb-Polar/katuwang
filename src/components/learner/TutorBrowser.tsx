@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
-import { Search, BadgeCheck, CalendarClock, GraduationCap } from "lucide-react";
+import { BadgeCheck, CalendarClock, GraduationCap } from "lucide-react";
+import SearchInput from "@/components/ui/SearchInput";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -66,16 +67,12 @@ export default function TutorBrowser() {
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="space-y-2.5">
-            <label className="input input-bordered input-sm flex items-center gap-2 text-xs">
-              <Search className="h-3.5 w-3.5 opacity-50" />
-              <input
-                type="text"
-                className="grow"
-                placeholder="Search a tutor by ID (e.g. TUT-0148)…"
-                value={q}
-                onChange={(e) => setQ(e.target.value.toUpperCase())}
-              />
-            </label>
+            <SearchInput
+              value={q}
+              onChange={setQ}
+              placeholder="Search a tutor by ID (e.g. TUT-0148)…"
+              transform="upper"
+            />
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/40">
                 Teaches

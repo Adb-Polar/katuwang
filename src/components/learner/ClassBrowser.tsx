@@ -3,13 +3,13 @@
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
+import SearchInput from "@/components/ui/SearchInput";
 import Tabs from "@/components/ui/Tabs";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
@@ -112,16 +112,11 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <label className="input input-bordered input-sm flex items-center gap-2 text-xs">
-              <Search className="h-3.5 w-3.5 opacity-50" />
-              <input
-                type="text"
-                className="grow"
-                placeholder="Search code, subject, or topic..."
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-              />
-            </label>
+            <SearchInput
+              value={q}
+              onChange={setQ}
+              placeholder="Search code, subject, or topic..."
+            />
             <select
               className="select select-bordered select-sm text-xs"
               value={subject}

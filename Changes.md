@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [63](#part-63) | **`<SearchInput>` component (repeated-markup C4)** | The bordered search-pill extracted to `src/components/ui/SearchInput.tsx` (`value` / `onChange` / `placeholder` / `transform?`); `ClassBrowser` + `TutorBrowser` migrated. No behaviour change. | New `SearchInput.tsx`; `transform="upper"` replaces TutorBrowser's inline `.toUpperCase()`. Dead `Search` icon imports removed. 680/680. |
 | [62](#part-62) | **`<StatCard>` component (repeated-markup C1)** | The `kt-stat` dashboard tile extracted to `src/components/ui/StatCard.tsx` (`tint` token + optional `href`); admin/learner/tutor dashboards migrated — the tutor one drops ~42 lines of hand-unrolled tiles. Rendered markup unchanged. | New `StatCard.tsx` + `StatCardProps`. `admin/page.tsx` + `learner/page.tsx` map their arrays to it; `tutor/page.tsx` uses four `<StatCard>` calls. 680/680. |
 | [61](#part-61) | **`gradeLabel()` / `gradeSection()` helpers (repeated-markup C3)** | `src/lib/gradeLevels.ts` gains `gradeLabel(grade)` + `gradeSection(grade, section)`; ~12 hand-written `gradeLevel.replace("_", " ")` call sites migrated. Output identical. | New exports in `gradeLevels.ts`; imports added to 3 pages + 8 components. `charts/labelize` left as the separate generic helper. 680/680. |
 | [60](#part-60) | **`<BackLink>` component (repeated-markup C2)** | The `‹ Back to X` ghost-button link extracted to `src/components/ui/BackLink.tsx`; 7 detail-page / sub-view headers migrated. No behaviour change. | New `BackLink.tsx` (`href` + children over `btn btn-ghost btn-sm` + `ArrowLeft`). Migrated `admin/users/[id]`, `tutor/students/[studentId]`, `learner/tutors/[tutorId]`, `ClassDetailsView`, `EditClassForm`, `SessionTestResults`, `ProfileEditView`; dead `ArrowLeft`/`Link` imports removed. 680/680. |
@@ -3014,6 +3015,18 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-63"></a>
+## Part 63 — `<SearchInput>` component (repeated-markup C4) (2026-09-10)
+
+`docs/reviews/repeated-markup-review-2026-09-10.md` **C4**. New
+`src/components/ui/SearchInput.tsx` — the `input input-bordered input-sm` pill
+with the `<Search>` magnifier and a `grow` text input. `ClassBrowser` and
+`TutorBrowser` rendered this byte-identically apart from the placeholder and one
+`.toUpperCase()`; both now use `<SearchInput value onChange placeholder
+transform?>` (`transform="upper"` covers the TutorBrowser ID-search case).
+`GlobalSearch`'s `.kt-search` topbar pill is a different component, untouched.
+680/680, `tsc` clean.
 
 <a id="part-62"></a>
 ## Part 62 — `<StatCard>` component (repeated-markup C1) (2026-09-10)

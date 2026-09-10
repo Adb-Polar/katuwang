@@ -733,3 +733,7 @@ Security-review fixes (Changes.md Part 57)
 --- Part 62 (repeated-markup C1: StatCard) ---
  [] Dashboard stat tiles unchanged on all 3 portals: admin (4 plain), learner (3 linked),
     tutor (2 plain + 2 linked). Linked ones still navigate + show the hover border.
+
+--- Part 63 (repeated-markup C4: SearchInput) ---
+ [] Learner "Browse classes" search still filters by code/subject/topic; "Find tutors"
+    search still upper-cases as you type and matches TUT-#### IDs. Pill looks unchanged.
