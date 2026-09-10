@@ -44,3 +44,7 @@ next-env.d.ts
 
 # local design exploration — not tracked
 /design/round-3/
+
+# Local scratch & agent skills (not part of the app)
+/scratchpad/
+/docs/reviews/scratchpad/
