@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Flag } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import { VIOLATION_LABEL } from "@/lib/reportViolations";
+import { violationLabel } from "@/lib/reportViolations";
 import { formatDate } from "@/lib/datetime";
 
 interface MyReport {
@@ -91,7 +91,7 @@ export default function MyReportsList() {
               <div className="flex flex-wrap gap-1">
                 {r.violations.map((v) => (
                   <span key={v} className="badge badge-outline badge-sm text-2xs">
-                    {VIOLATION_LABEL[v as keyof typeof VIOLATION_LABEL] ?? v}
+                    {violationLabel(v)}
                   </span>
                 ))}
               </div>

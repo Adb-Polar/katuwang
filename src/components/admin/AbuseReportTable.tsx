@@ -7,12 +7,13 @@ import Link from "next/link";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
+import AuditLogLink from "@/components/ui/AuditLogLink";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
-import { VIOLATION_LABEL } from "@/lib/reportViolations";
+import { violationLabel } from "@/lib/reportViolations";
 import { formatDateTime } from "@/lib/datetime";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -37,10 +38,6 @@ const TAB_STATUS: Record<Tab, string> = {
   resolved: "RESOLVED",
   dismissed: "DISMISSED",
 };
-
-function label(type: string) {
-  return VIOLATION_LABEL[type as keyof typeof VIOLATION_LABEL] ?? type;
-}
 
 export default function AbuseReportTable() {
   const [tab, setTab] = useState<Tab>("pending");
@@ -194,12 +191,7 @@ export default function AbuseReportTable() {
                         {r.targetType === "CLASS" && r.class && (
                           <div className="text-2xs text-base-content/50 mt-0.5">{r.class.subject}</div>
                         )}
-                        <Link
-                          href={`/admin/audit-log?q=${r.id}`}
-                          className="text-2xs text-primary hover:underline mt-1 inline-block"
-                        >
-                          View audit log
-                        </Link>
+                        <AuditLogLink targetId={r.id} />
                       </td>
                       <td>
                         <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" />
@@ -208,7 +200,7 @@ export default function AbuseReportTable() {
                         <div className="flex flex-wrap gap-1">
                           {r.violations.map((v) => (
                             <span key={v} className="badge badge-outline badge-xs text-2xs">
-                              {label(v)}
+                              {violationLabel(v)}
                             </span>
                           ))}
                         </div>

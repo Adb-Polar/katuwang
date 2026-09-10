@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [64](#part-64) | **`violationLabel()` + `<AuditLogLink>` (component-reuse R8)** | Two shared helpers: `violationLabel(type)` from `reportViolations.ts` (3 inline copies removed) and `<AuditLogLink targetId>` in `components/ui` (2 magic-query-string links removed). | New `violationLabel` export + `AuditLogLink.tsx`; `MyReportsList`, `AbuseReportTable`, `ClassAppealTable` migrated. 680/680. |
 | [63](#part-63) | **`<SearchInput>` component (repeated-markup C4)** | The bordered search-pill extracted to `src/components/ui/SearchInput.tsx` (`value` / `onChange` / `placeholder` / `transform?`); `ClassBrowser` + `TutorBrowser` migrated. No behaviour change. | New `SearchInput.tsx`; `transform="upper"` replaces TutorBrowser's inline `.toUpperCase()`. Dead `Search` icon imports removed. 680/680. |
 | [62](#part-62) | **`<StatCard>` component (repeated-markup C1)** | The `kt-stat` dashboard tile extracted to `src/components/ui/StatCard.tsx` (`tint` token + optional `href`); admin/learner/tutor dashboards migrated — the tutor one drops ~42 lines of hand-unrolled tiles. Rendered markup unchanged. | New `StatCard.tsx` + `StatCardProps`. `admin/page.tsx` + `learner/page.tsx` map their arrays to it; `tutor/page.tsx` uses four `<StatCard>` calls. 680/680. |
 | [61](#part-61) | **`gradeLabel()` / `gradeSection()` helpers (repeated-markup C3)** | `src/lib/gradeLevels.ts` gains `gradeLabel(grade)` + `gradeSection(grade, section)`; ~12 hand-written `gradeLevel.replace("_", " ")` call sites migrated. Output identical. | New exports in `gradeLevels.ts`; imports added to 3 pages + 8 components. `charts/labelize` left as the separate generic helper. 680/680. |
@@ -3015,6 +3016,23 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-64"></a>
+## Part 64 — `violationLabel()` + `<AuditLogLink>` (component-reuse R8) (2026-09-10)
+
+`docs/reviews/component-reuse-review-2026-09-10.md` **R8** — two trivial shared
+helpers.
+
+- `violationLabel(type)` exported from `src/lib/reportViolations.ts` (where
+  `VIOLATION_LABEL` lives). Replaces the inline
+  `VIOLATION_LABEL[x as keyof typeof VIOLATION_LABEL] ?? x` in `MyReportsList`
+  and the private `label()` copy in `AbuseReportTable`.
+- `<AuditLogLink targetId>` (`src/components/ui/AuditLogLink.tsx`) wraps the
+  `/admin/audit-log?q=${id}` "View audit log" link used in `ClassAppealTable`
+  and `AbuseReportTable`, removing the magic query string from the call sites.
+  `ClassAppealTable`'s now-unused `next/link` import is dropped.
+
+680/680, `tsc` clean.
 
 <a id="part-63"></a>
 ## Part 63 — `<SearchInput>` component (repeated-markup C4) (2026-09-10)

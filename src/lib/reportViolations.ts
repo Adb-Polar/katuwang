@@ -45,3 +45,8 @@ export const ALL_VIOLATION_VALUES = Array.from(
 export const VIOLATION_LABEL: Record<ReportViolationType, string> = Object.fromEntries(
   [...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS].map((v) => [v.value, v.label])
 ) as Record<ReportViolationType, string>;
+
+/** Human label for a violation value, falling back to the raw value if unknown. */
+export function violationLabel(type: string): string {
+  return VIOLATION_LABEL[type as ReportViolationType] ?? type;
+}

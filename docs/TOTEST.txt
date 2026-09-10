@@ -737,3 +737,8 @@ Security-review fixes (Changes.md Part 57)
 --- Part 63 (repeated-markup C4: SearchInput) ---
  [] Learner "Browse classes" search still filters by code/subject/topic; "Find tutors"
     search still upper-cases as you type and matches TUT-#### IDs. Pill looks unchanged.
+
+--- Part 64 (component-reuse R8) ---
+ [] Admin Abuse Reports + Class Appeals: violation labels still render; "View audit log"
+    link still opens the audit log filtered to the right id. Learner "My Reports"
+    violation chips unchanged.

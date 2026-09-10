@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import Link from "next/link";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
+import AuditLogLink from "@/components/ui/AuditLogLink";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -153,12 +153,7 @@ export default function ClassAppealTable() {
                             Mod reason: {a.class.suspendedReason}
                           </div>
                         )}
-                        <Link
-                          href={`/admin/audit-log?q=${a.class.id}`}
-                          className="text-2xs text-primary hover:underline mt-1 inline-block"
-                        >
-                          View audit log
-                        </Link>
+                        <AuditLogLink targetId={a.class.id} />
                       </td>
                       <td>
                         <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
