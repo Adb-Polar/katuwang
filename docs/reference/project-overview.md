@@ -1,7 +1,7 @@
 # Project Overview
 
 Condensed domain context for agents. The full source is the capstone thesis at
-`docs/reference/Katuwang_...md` (~450KB — do not open it wholesale; this file
+`docs/reference/thesis.md` (~450KB — do not open it wholesale; this file
 is the digest, and `docs/reference/decisions.md` covers where the app has
 deliberately diverged from it).
 
@@ -57,7 +57,7 @@ boundary holds. See `CLAUDE.md` §1 for the enforcement rule.
 ## The six core modules
 
 The thesis scopes the system into six modules. Status of each (as actually
-built) is tracked in `docs/feature-checklist.md` — summary:
+built) is tracked in `docs/reference/feature-checklist.md` — summary:
 
 1. **User Management** — registration, auth, anonymous IDs, bcrypt hashing,
    RBAC, profile management, account moderation. ✅ built.
@@ -68,13 +68,21 @@ built) is tracked in `docs/feature-checklist.md` — summary:
    grade-level compatibility, schedule fit) ranks classes for a learner;
    falls back to a learner-submitted topic request when nothing scores well.
    ✅ built — see `src/lib/matching.ts`.
-4. **Assessment** — tutors must pass a per-topic qualifying quiz before being
-   `CERTIFIED` to teach that topic (question bank is admin-authored).
-   ✅ built. A **separate** learner pre-test/post-test (administered around a
-   tutoring session, to measure the learner's own progress) is spec'd but
-   **not built** — do not confuse the two; see `docs/feature-checklist.md`.
+4. **Assessment** — two distinct pieces, both ✅ built:
+   (a) tutors must pass a per-topic qualifying quiz before being `CERTIFIED`
+   to teach that topic (question bank is admin-authored); (b) a **separate**
+   learner pre-test/post-test — one `SessionTest` per `ClassSession`, the same
+   question set served twice (`kind: PRE|POST` on the attempt), diagnostic
+   only, with pre→post score-gain reporting for tutor/learner/admin. Don't
+   conflate the two. Kill switch: `sessionTestsEnabled`. See
+   `docs/reference/feature-checklist.md` §4 and `docs/reference/decisions.md`.
 5. **Chatbot Assistant** — intent-based nav help / FAQ / session
-   recommendations. **Not built at all** — zero code in the repo.
+   recommendations. ✅ built as a **deterministic** rule-based intent matcher
+   (`src/lib/chatbot/`) — tokenise + keyword/synonym/regex scoring with
+   typo tolerance and a confidence gate, **no LLM**. ~35 role-aware intents,
+   a 26-entry FAQ knowledge base, a per-portal `ChatWidget`, unmatched-query
+   logging (`ChatbotMiss`) reviewed at `/admin/chatbot`. Kill switch:
+   `chatbotEnabled`. See `docs/reference/chatbot.md`.
 6. **Analytics Dashboard** — admin-facing aggregate stats (users, classes,
    certifications, enrollment trend) and an audit log of moderation actions.
    ✅ built.
@@ -91,11 +99,16 @@ built) is tracked in `docs/feature-checklist.md` — summary:
 
 ## Domain vocabulary
 
-- **Subjects** (`SubjectArea` enum): `MATH`, `ENGLISH`, `SCIENCE`,
-  `FILIPINO`, `ARALING_PANLIPUNAN`, `TLE`, `MAPEH` — each with a fixed list
-  of **topics** defined in `src/lib/subjectTopics.ts` (the only valid source
-  of topic strings; topics are plain strings elsewhere in the schema, not
-  their own table).
+- **Subjects & topics** — admin-editable `Subject` / `Topic` tables
+  (`/admin/subjects`), managed since 2026-09-04. The `SubjectArea` enum was
+  removed; every `subject` column is now a plain `String` storing
+  `Subject.slug` (slugs match the old enum values — `MATH`, `ENGLISH`,
+  `SCIENCE`, `FILIPINO`, `ARALING_PANLIPUNAN`, `TLE`, `MAPEH` — as seeded).
+  Validate with `subjectExists()` / `topicExists()` from `src/lib/subjects.ts`
+  (cached; falls back to the static `SUBJECT_TOPICS` map in
+  `src/lib/subjectTopics.ts` when the DB is unreachable, e.g. unit tests).
+  Topics stay denormalised as strings on child rows; `Topic` is the editable
+  catalogue + validation source. See `docs/reference/decisions.md`.
 - **Grade levels**: `GRADE_7`..`GRADE_12`.
 - **Class vs. session**: a `TutorClass` is a course container (subject,
   topics, capacity, one roster); a `ClassSession` is one scheduled meeting

@@ -211,7 +211,7 @@ production.
 ## 6. Pre-deployment code changes
 
 Small changes to make before the first deploy. Track each in `Changes.md` and
-`docs/TOTEST.txt` when done.
+`docs/backlog/TOTEST.txt` when done.
 
 1. **Fix `next.config.ts`.** It currently has both `module.exports = { ... }`
    and `export default nextConfig`. Next 16 reads the ESM default export, so
@@ -332,7 +332,7 @@ guard, not instead of it.
 
 ## 10. Post-deploy verification checklist
 
-Add these to `docs/TOTEST.txt` when executing:
+Add these to `docs/backlog/TOTEST.txt` when executing:
 
 - [ ] `https://<domain>` loads over HTTPS, valid cert, no mixed-content warnings
 - [ ] `/dev`, `/dev/login`, `/api/dev` all return **404** in production

@@ -33,7 +33,7 @@ comment). Every new type is additive — no migration, no `db push`, no DB confi
   everything read on page mount.
 - **No polling.** Dot/badge refresh on navigation / `router.refresh()` — same model as today.
 - `REGISTRATION_REJECTED` is **not delivered** (recipient is set `BANNED` in the same transaction
-  and can never log in). Add a line to `docs/TODO.txt` for a future appeals/return path.
+  and can never log in). Add a line to `docs/backlog/TODO.txt` for a future appeals/return path.
 - Class cancelled/completed notifications **fan out to every enrolled learner**, de-duping learners
   already covered by the topic-request path.
 - Tutor-facing enrolment messages **name the learner by `STU-xxxx`** anonymous ID.
@@ -162,7 +162,7 @@ Update these existing route test files — add `notification: { create, createMa
   `CLASS_CANCELLED` for non-request-linked learners and that request-linked learners are excluded.
 
 `NotificationBell.tsx` and `NotificationList.tsx` changes have **no test harness** (repo has zero
-`.tsx` tests, no testing-library) → covered by `docs/TOTEST.txt` instead.
+`.tsx` tests, no testing-library) → covered by `docs/backlog/TOTEST.txt` instead.
 
 Reference to reuse: `notify` / `notifyMany` (`src/lib/notifications.ts`), existing trigger-test
 patterns in `src/app/api/tutor/classes/[classId]/__tests__/route.test.ts`.
@@ -171,16 +171,16 @@ patterns in `src/app/api/tutor/classes/[classId]/__tests__/route.test.ts`.
 
 - Copy this plan to `docs/plans/notification-system-expansion.md`.
 - `Changes.md` — new `## Part N` entry + Changes Overview row. Note: no schema change, not committed.
-- `docs/TODO.txt` — add: "REGISTRATION_REJECTED — deliver a rejection/appeal message via a path a
+- `docs/backlog/TODO.txt` — add: "REGISTRATION_REJECTED — deliver a rejection/appeal message via a path a
   BANNED applicant can actually reach (blocked-login screen or email)."
-- `docs/TOTEST.txt` — add `[ ]` lines: bell opens/closes (click, outside-click, Escape, navigation)
+- `docs/backlog/TOTEST.txt` — add `[ ]` lines: bell opens/closes (click, outside-click, Escape, navigation)
   in all three portals; dot appears when unread > 0 and clears after read; dropdown row with link →
   marks read + navigates, without link → marks read only; notifications page no longer bulk-marks on
   open, per-row read works, "Mark all read" works, sidebar badge + bell dot both update; admin
   `/admin/notifications` page + sidebar item under "Review"; end-to-end per new event (registration
   approve, cert certified/rejected, question-request resolved/dismissed, class enrol/unenrol, class
   cancel/complete fan-out with no duplicate for request-linked learners, admin class ban).
-- `docs/feature-checklist.md` — update the Notifications row (event coverage, bell dropdown + dot,
+- `docs/reference/feature-checklist.md` — update the Notifications row (event coverage, bell dropdown + dot,
   admin parity).
 - `docs/reference/decisions.md` — short note: session reminders and assessment-unlocked
   notifications are out of scope (need cron/fan-out infra the repo doesn't have);

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 /**
  * The "‹ Back to X" ghost-button link that sits above a detail page or an
  * in-page sub-view. One place to later add a `router.back()` fallback or a
- * keyboard shortcut (see `docs/reviews/back-navigation-review-2026-09-10.md` B4).
+ * keyboard shortcut (see `docs/reviews/reviews.md`, Back-Navigation Review B4).
  */
 export default function BackLink({
   href,

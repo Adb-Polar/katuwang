@@ -2,21 +2,21 @@
 
 ## Context
 
-`docs/plans/fixes.txt` is a raw, unordered dump of ~55 fix/redesign items collected
+`../archive/plans/fixes.txt` (was `docs/plans/fixes.txt`) is a raw, unordered dump of ~55 fix/redesign items collected
 over the Sept 5–6 review sessions plus later "Additions" and a "Redesign" wishlist.
 Most Sept 5/6 items were already shipped (Changes.md Parts 29–35) but the txt file
 was never reconciled. This doc audits every line, then sequences the remaining work
 into low-risk, dependency-ordered phases. Each phase is committed separately.
 
-`fixes.txt` stays as the raw source until an item actually ships.
+`fixes.txt` (now in `../archive/plans/`) stays as the raw source until an item actually ships.
 
 Legend: ✅ done · 🟡 partial · ⬜ not started
 
 **Status (2026-09-06): Phases 1–6 all shipped** — Changes.md Parts 37–44
 (commits after `1f8bc8c`). Phase 6 needed no migration after all
-(`Notification.type` is a free-text column). Remaining `fixes.txt` items not
+(`Notification.type` is a free-text column). Remaining `../archive/plans/fixes.txt` items not
 picked up by a phase are lower-priority visual polish (dashboard card copy,
-403 page styling) — leave in `fixes.txt` for a later pass.
+403 page styling) — leave in `../archive/plans/fixes.txt` for a later pass.
 
 ---
 
@@ -144,7 +144,7 @@ Also shipped: nested-`<form>` / self-closing modals on the Edit Class page (Part
 ---
 
 ## Per-phase rules
-- One `Changes.md` entry per phase; add `docs/TOTEST.txt` lines for every non-docs item.
+- One `Changes.md` entry per phase; add `docs/backlog/TOTEST.txt` lines for every non-docs item.
 - Phases 1–5 need no DB confirmation; Phase 6 does — stop and ask before the migration.
 - Run `pnpm exec tsc --noEmit && pnpm lint && pnpm test` before each commit.
 - Re-check `decisions.md` / `feature-checklist.md` when a rename or scope item lands.

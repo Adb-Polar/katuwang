@@ -767,3 +767,14 @@ Security-review fixes (Changes.md Part 57)
     does not reach the page behind; on close, focus returns to the button that opened it.
     Visuals unchanged (no new X button on these two).
  [] Backdrop click still cancels; while a submit is in flight the buttons are disabled.
+
+--- Part 69 (docs/ reorganisation) ---
+ [] `npx prisma generate` writes the ERD to docs/reference/erd.md (not docs/erd.md)
+    and the file is non-empty.
+ [] Skim docs/README.md: every linked path resolves (no 404s), including archive/
+    and to-submit/ entries.
+ [] CLAUDE.md convention paths point at real files: docs/backlog/TODO.txt,
+    docs/backlog/TOTEST.txt, docs/reference/feature-checklist.md,
+    docs/reference/thesis.md, docs/reference/decisions.md.
+ [] docs/reviews/reviews.md Contents links jump to the right sections;
+    docs/reference/chatbot.md appendix anchor works.

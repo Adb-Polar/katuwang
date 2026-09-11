@@ -1,6 +1,6 @@
 # Decisions & Divergences from the Thesis Reference Doc
 
-The checked-in thesis document (`docs/reference/Katuwang_...md`) is the
+The checked-in thesis document (`docs/reference/thesis.md`) is the
 academic paper backing this capstone project. It is **not** kept in sync
 with implementation decisions made afterward — treat it as a historical
 snapshot of the original proposal, not a live spec. This file is the
@@ -159,7 +159,7 @@ topic, the post-test measures retention right after *that* session.
 class-level test routes — they don't exist on `main`. The real models are
 `SessionTest` / `SessionTestQuestion` / `SessionTestAttempt(+Item)`
 (`prisma/schema.prisma`), one `SessionTest` per `sessionId` (unique). See
-`docs/plans/pre-test-post-test-plan.md` for the full re-graining rationale.
+`docs/plans/assessments.md` for the full re-graining rationale.
 
 ## Session pre/post-tests: one question set served twice, not two separate tests
 
@@ -237,22 +237,22 @@ file wins over the thesis doc.
 
 ---
 
-## Known unbuilt modules (not divergences — genuinely pending)
+## Known unbuilt modules — all resolved (2026-09-10 review)
 
-Unlike the roles decision above, these are modules the thesis specs that
-simply haven't been built yet. Listed here so agents don't waste time
-re-deriving this from scratch; full detail in `docs/feature-checklist.md`.
+There are no thesis modules left unbuilt. This section previously tracked two
+pending items; both have shipped:
 
-- **Learner pre-test / post-test assessment** — the built assessment system
-  (`AssessmentAttempt`, `AssessmentAttemptItem`, `TopicCertification`) is
-  scoped entirely to `TutorProfile` (tutor qualifying exams). There is no
-  learner-facing pre/post-test tied to a `ClassSession`, and no
-  before/after progress-delta reporting. This is a distinct feature from
-  tutor certification — don't conflate the two when asked about "the
-  assessment module."
+- **Chatbot Assistant** — built 2026-09-04 (see the dated section below).
+- **Learner pre-test / post-test assessment** — built 2026-09-05, Changes.md
+  Part 29. `SessionTest` / `SessionTestQuestion` / `SessionTestAttempt(+Item)`,
+  one test per `ClassSession`, served twice via `SessionTestAttempt.kind`, with
+  pre→post score-gain reporting. See the two "Session pre/post-tests" sections
+  above for the design decisions. It is a distinct feature from tutor
+  certification (`AssessmentAttempt` / `TopicCertification`, scoped to
+  `TutorProfile`) — don't conflate the two when asked about "the assessment
+  module."
 
-When either of these gets built, update this file (move the entry into a
-dated "resolved" note or delete it) and `docs/feature-checklist.md` together.
+`docs/reference/feature-checklist.md` now marks all six modules complete.
 
 ---
 
@@ -285,7 +285,7 @@ message, score it against a fixed catalogue of ~25 role-aware intents + a
 15-entry FAQ knowledge base by keyword/synonym/regex overlap, and return a
 predefined response (optionally with a deep link or, for the learner
 recommendation intent, live class matches from `rankMatches`). See
-`docs/plans/chatbot-assistant.md` and Changes.md Part 19.
+`docs/reference/chatbot.md` and Changes.md Part 19.
 
 **Thesis alignment:** this matches the thesis exactly — it describes
 "intent-based response logic" and the delimitations say "no free-form
@@ -298,9 +298,17 @@ runtime dependency.
 - The FAQ set in `src/lib/chatbot/faq.ts` is a **starter** — the thesis wants
   it refined from TRIS stakeholder interviews. Grow it from the
   `chatbot_misses` table (unmatched queries logged there).
-- The only new table is `ChatbotMiss`. There is **no admin UI** to review
-  misses in v1 — read the table directly.
+- The only new table is `ChatbotMiss`.
 - The widget is gated by the `chatbotEnabled` platform setting (default ON).
+
+**Update (2026-09-10):** a usability pass shipped the same day (Changes.md
+Part 30) and later growth means the numbers above are historical. Current
+state: **~35** role-aware intents, a **26-entry** FAQ knowledge base, typo
+tolerance + a length-normalised confidence gate in `classifier.ts`, and an
+**admin review page at `/admin/chatbot`** (`ChatbotMissesTable`, backed by
+`GET /api/admin/chatbot-misses`) that groups misses by role + normalised
+wording — the "grow from misses" loop is now closed in-app, no need to read
+the table directly. See `docs/reference/chatbot.md` for the live architecture.
 
 ---
 

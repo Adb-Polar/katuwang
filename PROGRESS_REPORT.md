@@ -284,18 +284,27 @@ erDiagram
 ```
 katuwang/
 ├── docs/
-│   ├── README.md                    # Docs index
-│   ├── erd.md                       # Auto-generated Prisma ERD (current schema)
-│   ├── TODO.txt / TOTEST.txt        # Flat backlog + manual test scratchpads
-│   ├── plans/                       # Implementation plans (active + historical)
+│   ├── README.md                    # Preview index of every doc (start here)
+│   ├── backlog/                     # TODO.txt / TOTEST.txt flat backlog + manual test scratchpads
+│   ├── plans/                       # Active implementation plans
 │   │   ├── README.md                # Plan index with status
-│   │   ├── ui-redesign-tailwind-port.md
-│   │   ├── todo-cleanup-sprint.md   # (+ .totest.txt manual checklist)
-│   │   └── topic-requests-v2.md
+│   │   ├── assessments.md           # (merged: question bank + global config + pre/post tests)
+│   │   ├── deployment.md
+│   │   └── fixes.md
 │   ├── roles/                       # Role reference: LEARNER / TUTOR / ADMIN
-│   └── reference/
-│       ├── auth-implementation.md   # Registration & login build guide
-│       └── theme.md                 # DaisyUI OKLCH theme tokens
+│   ├── reference/                   # Standing reference
+│   │   ├── project-overview.md      # Domain/business context — start here
+│   │   ├── decisions.md             # Divergences from the thesis spec
+│   │   ├── feature-checklist.md     # Thesis-spec vs. actual build status
+│   │   ├── erd.md                   # Auto-generated Prisma ERD (current schema)
+│   │   ├── auth-implementation.md   # Registration & login build guide
+│   │   ├── chatbot.md               # Chatbot architecture (+ merged plan appendix)
+│   │   ├── theme.md                 # DaisyUI OKLCH theme tokens
+│   │   └── thesis.md                # Full ~450KB capstone thesis (don't open wholesale)
+│   ├── reviews/reviews.md           # Consolidated code & design reviews
+│   ├── reports/                     # Current sprint/feature-status spreadsheet
+│   ├── to-submit/                   # Course module deliverables
+│   └── archive/                     # Superseded plans, completed plans, old reports
 ├── prisma/
 │   ├── migrations/                  # SQL migration history files
 │   ├── schema.prisma                # Core Prisma database schema

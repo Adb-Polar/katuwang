@@ -4,7 +4,7 @@ import { tokenize } from "@/lib/chatbot/normalize";
 // ─── Admin misses review — group raw ChatbotMiss rows by normalised message ──
 // `chatbot_misses` only gains a row when the classifier fails, so volume is
 // low; grouping happens in JS (not SQL) because the group key is a derived
-// token string, not a stored column — see docs/plans/chatbot-assistant.md.
+// token string, not a stored column — see docs/reference/chatbot.md.
 
 export interface MissRow {
   message: string;

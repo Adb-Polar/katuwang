@@ -2,7 +2,7 @@
 
 **Katuwang** (Tagalog for *"helper"* / *"partner"*) is a free, web-based peer
 tutoring management platform built for **Taysan Resettlement Integrated
-School (TRIS)** in Legazpi City, Albay — a Philippine public secondary
+School (TRIS)** in Legazpi City, Albay 
 school serving Grades 7–12. It connects student tutors with student learners
 so peer academic support can be organized and moderated instead of ad hoc,
 under a strict double-blind anonymity model (RA 10173 compliance).
@@ -83,7 +83,7 @@ pnpm exec tsx prisma/seed.ts  # seed the database
 | [`CLAUDE.md`](CLAUDE.md) | Engineering conventions, tech stack, project structure, RBAC/API/DB patterns |
 | [`docs/reference/project-overview.md`](docs/reference/project-overview.md) | Domain/business context — start here for "what is this and why" |
 | [`docs/reference/decisions.md`](docs/reference/decisions.md) | Where the app deliberately diverges from the original thesis spec |
-| [`docs/feature-checklist.md`](docs/feature-checklist.md) | Thesis-spec vs. actual build status, module by module |
+| [`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md) | Thesis-spec vs. actual build status, module by module |
 | [`docs/roles/`](docs/roles/) | Per-role feature + API reference (Learner, Tutor, Admin) |
 | [`docs/plans/`](docs/plans/) | Implementation plans, active and historical |
 | [`docs/README.md`](docs/README.md) | Full docs index |
@@ -94,5 +94,5 @@ Five of six core modules are built and working (User Management, Session
 Management, Tutor Matching, tutor-side Assessment/Certification, Analytics
 Dashboard). The Chatbot Assistant module and a learner-facing pre-/post-test
 assessment are not yet implemented — see
-[`docs/feature-checklist.md`](docs/feature-checklist.md) for the full
+[`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md) for the full
 breakdown.

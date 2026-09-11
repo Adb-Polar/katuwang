@@ -8,6 +8,8 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [70](#part-70) | **`docs/reference/` refresh** | Brought the reference docs to the current build. `project-overview.md`: chatbot and learner pre/post-tests are ✅ built (were "not built"); subjects are admin-editable tables, not the `SubjectArea` enum. `decisions.md`: "Known unbuilt modules" section resolved (all six modules built); chatbot decision gets a 2026-09-10 update (35 intents / 26 FAQ / `/admin/chatbot` review UI). `feature-checklist.md`: review date → 2026-09-10, matching row wording. `auth-implementation.md`: added a "build guide, not a code mirror" status banner. `erd.mmd` regenerated from the schema (was missing the `Report*` enums). `chatbot.md`, `theme.md`, `architecture-design.*`, `thesis.md` already current / historical — unchanged. | Docs only — no code/schema/test change. `npx prisma generate` re-run (erd.md unchanged). |
+| [69](#part-69) | **`docs/` reorganisation** | Every file moved into a subfolder; `docs/README.md` is now a preview index of all docs. Merged the 6 `reviews/` docs → `reviews/reviews.md` and 3 assessment plans → `plans/assessments.md`; folded `plans/chatbot-assistant.md` into `reference/chatbot.md`. Archived completed/superseded plans + old spreadsheets under `docs/archive/`. `TODO.txt`/`TOTEST.txt` → `docs/backlog/`; `feature-checklist.md`/`erd.md`/`architecture-design.*` + renamed `thesis.md` → `docs/reference/`; xlsx → `docs/reports/`. | Path refs updated in `CLAUDE.md`, `README.md`, `PROGRESS_REPORT.md`, `docs/plans/README.md`, `docs/plans/fixes.md`, and 4 `src/` comments. `prisma/schema.prisma` erd `output` → `../docs/reference/erd.md`. Docs only — no test impact. |
 | [68](#part-68) | **`<Modal>` shell with focus trap (component-reuse R3)** | New `components/ui/Modal.tsx` — backdrop + box, Escape / backdrop close, Tab focus-trap, focus-restore on close. `ConfirmDialog` + `PromptDialog` re-based on `<Modal bare>` (pixel-identical) so every confirm/prompt dialog gains the a11y behaviour. Bespoke modals can adopt it later. | New `Modal.tsx`; `ConfirmDialog`/`PromptDialog` rewritten as thin bodies. No API change. 680/680. |
 | [67](#part-67) | **`<PromptDialog>` (component-reuse R2)** | `ConfirmDialog` + a note textarea (with `CharCount`) extracted to `components/ui/PromptDialog.tsx`; migrated the 3 clean "confirm + note" modals (`ClassAppealTable`, `AbuseReportTable` ×2, `CertificationReviewTable`) and deleted their parent note state. `AbuseReportTable`'s resolve modal gains an optional note (was confirm-only). 5 harder sites deferred to after R3. | New `PromptDialog.tsx` (own note state via render-time prop-change reset, no effect). 680/680. |
 | [66](#part-66) | **`AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6)** | Deleted both tables' local `sortHeader()` + `toggleSort` and switched to `useTableSort` + `<SortableTh>`, matching every other admin table (incl. the neutral unsorted chevron). | ~20 lines removed per file; `AuditLogTable` keeps its per-column start direction via `defaultDirs`. 680/680. |
@@ -3020,6 +3022,101 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-70"></a>
+## Part 70 — `docs/reference/` refresh (2026-09-10)
+
+Audited every file in `docs/reference/` against the current codebase and fixed
+the stale content. Docs only — no code, schema, or test change.
+
+**`project-overview.md`**
+- Module 4 (Assessment): the learner pre-test/post-test is now described as
+  ✅ built — one `SessionTest` per `ClassSession`, same set served twice
+  (`kind: PRE|POST` on the attempt), `sessionTestsEnabled` kill switch. It had
+  said "spec'd but **not built**".
+- Module 5 (Chatbot): now ✅ built — deterministic intent matcher, no LLM,
+  ~35 intents, 26-entry FAQ, per-portal widget, `/admin/chatbot` misses review,
+  `chatbotEnabled` kill switch. It had said "**Not built at all**".
+- Domain vocabulary: subjects/topics are admin-editable `Subject` / `Topic`
+  tables (`SubjectArea` enum removed 2026-09-04); `subject` columns are `String`
+  slugs validated via `src/lib/subjects.ts`.
+
+**`decisions.md`**
+- "Known unbuilt modules (not divergences — genuinely pending)" → "Known
+  unbuilt modules — all resolved (2026-09-10 review)": the pre/post-test entry
+  contradicted the two "Session pre/post-tests" decision sections directly above
+  it. All six modules are built.
+- "Chatbot Assistant — built deterministic" section: kept as the dated
+  2026-09-04 record, added an **Update (2026-09-10)** note — the "~25 intents /
+  15-entry FAQ / no admin UI" line is historical; current is ~35 / 26 / the
+  `/admin/chatbot` review page.
+
+**`feature-checklist.md`** — review date `2026-09-03` → `2026-09-10`; header
+notes the thesis names four roles / app ships three, and that Changes.md
+Parts 54–68 are refactors with no status change. Matching-row wording:
+"availability" → "schedule fit" (tutor availability is derived from upcoming
+`ClassSession` rows, not stored).
+
+**`auth-implementation.md`** — added a status banner: it is a build guide, the
+auth architecture is still current, but the `SubjectArea` enum is gone, many
+models were added (`SessionTest*`, `Report*`, `Notification`, `ChatbotMiss`,
+`PasswordResetToken`, `Subject`/`Topic`), and the security-review pass
+(Part 57) changed login/error/session behaviour. Snippets are illustrative;
+`prisma/schema.prisma` + `src/lib/auth.ts` are authoritative.
+
+**`erd.mmd`** — regenerated from the freshly-generated `erd.md` (mermaid body +
+the `elk` layout frontmatter). It was missing `ReportStatus` /
+`ReportTargetType` / `ReportViolationType` (the abuse-report feature, Part 55).
+
+**Unchanged** — `chatbot.md` (its main body is current; the appendix is
+correctly labelled the historical plan), `theme.md` (retired pointer, accurate),
+`erd.md` (auto-generated, schema unchanged), `architecture-design.html`/`.pdf`
+(dated 8 Sep 2026 but already reflects three roles, all six modules,
+`SessionTest`/`Report`/`ChatbotMiss`, current settings), `thesis.md` (the
+historical academic proposal — deliberately not kept in sync).
+
+Not committed.
+
+<a id="part-69"></a>
+## Part 69 — `docs/` reorganisation (2026-09-10)
+
+Cleanup pass over `docs/`. No behaviour change; docs + a few path references only.
+
+**Structure.** Every file now lives in a subfolder; `docs/` root holds only
+`README.md`, which was rewritten as a **preview index** of every document
+(one-line summary per file, grouped by folder).
+
+- `docs/backlog/` — `TODO.txt`, `TOTEST.txt` (were at `docs/` root).
+- `docs/reference/` — gains `feature-checklist.md`, `erd.md` + `erd.mmd`,
+  `architecture-design.html/.pdf` (were at root), and `thesis.md` (renamed from
+  the ~450KB `Katuwang_ A web-based Peer Tutoring…​.md`).
+- `docs/reports/` — `feature-status-and-sprint-report.xlsx`.
+- `docs/archive/` — completed plans (`ui-redesign-tailwind-port`,
+  `todo-cleanup-sprint` + `.totest.txt`, `topic-requests-v2`,
+  `help-and-faq-pages`, `pre-test-post-test-plan`), superseded fragments
+  (`sept-5-fixes.md`, `fixes.txt`, `admin-portal-fixes.txt`,
+  `leaner-portal-fixes.txt`), and old dated spreadsheets (`…-2026-09-02.xlsx`,
+  `…-2026-09-06.xlsx`).
+
+**Merges.**
+
+- `docs/reviews/` six docs → **`docs/reviews/reviews.md`** (each section is the
+  original verbatim, headings demoted one level, newest first).
+- `plans/pre-test-post-test-plan.md` + `assessment-taking-system.md` +
+  `global-assessment-config.md` → **`docs/plans/assessments.md`**.
+- `plans/chatbot-assistant.md` → appendix of **`docs/reference/chatbot.md`**.
+
+**Reference updates.** `CLAUDE.md` (convention paths `docs/backlog/TODO.txt`,
+`docs/backlog/TOTEST.txt`, `docs/reference/feature-checklist.md`,
+`docs/reference/thesis.md`), root `README.md`, `PROGRESS_REPORT.md` tree,
+`docs/plans/README.md` (rewritten: Active vs. Archived), `docs/plans/fixes.md`
+(`fixes.txt` → `../archive/plans/`), `docs/reference/{decisions,project-overview,
+feature-checklist,chatbot}.md`, and comment paths in
+`src/lib/validations/sessionTest.ts`, `src/lib/chatbot/{types,misses}.ts`,
+`src/components/ui/BackLink.tsx`. `prisma/schema.prisma` — erd generator
+`output` `../docs/erd.md` → `../docs/reference/erd.md` (regenerated, verified).
+
+Not committed.
 
 <a id="part-68"></a>
 ## Part 68 — `<Modal>` shell with focus trap (component-reuse R3) (2026-09-10)

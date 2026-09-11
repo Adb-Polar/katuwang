@@ -59,6 +59,39 @@ REJECTED REJECTED
     
 
 
+        ReportTargetType {
+            TUTOR TUTOR
+CLASS CLASS
+        }
+    
+
+
+        ReportStatus {
+            PENDING PENDING
+RESOLVED RESOLVED
+DISMISSED DISMISSED
+        }
+    
+
+
+        ReportViolationType {
+            HARASSMENT_OR_BULLYING HARASSMENT_OR_BULLYING
+ANONYMITY_BREACH ANONYMITY_BREACH
+SOLICITING_PAYMENT SOLICITING_PAYMENT
+DISCRIMINATION DISCRIMINATION
+UNPROFESSIONAL_CONDUCT UNPROFESSIONAL_CONDUCT
+NO_SHOW_OR_ABSENCE NO_SHOW_OR_ABSENCE
+MISLEADING_ACADEMIC_INFO MISLEADING_ACADEMIC_INFO
+MISLEADING_CLASS_INFO MISLEADING_CLASS_INFO
+OFF_TOPIC_SESSIONS OFF_TOPIC_SESSIONS
+SPAM_OR_DUPLICATE SPAM_OR_DUPLICATE
+SCHEDULE_ABUSE SCHEDULE_ABUSE
+INAPPROPRIATE_CONTENT INAPPROPRIATE_CONTENT
+OTHER OTHER
+        }
+    
+
+
         SessionStatus {
             SCHEDULED SCHEDULED
 COMPLETED COMPLETED
@@ -121,64 +154,64 @@ SUBMITTED SUBMITTED
         }
     
   "users" {
-    String id "key"
+    String id "🗝️"
     String anonymousId 
     String firstName 
     String lastName 
     String email 
     String password 
-    String recoveryEmail "?"
+    String recoveryEmail "❓"
     Role role 
     GradeLevel gradeLevel 
     String section 
-    String contactInfo "?"
+    String contactInfo "❓"
     Boolean consentGiven 
     AccountStatus status 
-    String statusReason "?"
-    DateTime statusUpdatedAt "?"
-    DateTime statusExpiresAt "?"
+    String statusReason "❓"
+    DateTime statusUpdatedAt "❓"
+    DateTime statusExpiresAt "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "password_reset_tokens" {
-    String id "key"
+    String id "🗝️"
     String userId 
     String tokenHash 
     DateTime expiresAt 
-    DateTime usedAt "?"
+    DateTime usedAt "❓"
     DateTime createdAt 
     }
   
 
   "tutor_profiles" {
-    String id "key"
+    String id "🗝️"
     String userId 
     }
   
 
   "topic_certifications" {
-    String id "key"
+    String id "🗝️"
     String tutorProfileId 
     String subject 
     String topic 
     TopicCertificationStatus status 
     DateTime requestedAt 
-    DateTime certifiedAt "?"
-    DateTime reviewedAt "?"
-    String reviewNote "?"
+    DateTime certifiedAt "❓"
+    DateTime reviewedAt "❓"
+    String reviewNote "❓"
     }
   
 
   "id_counters" {
-    String role "key"
+    String role "🗝️"
     Int count 
     }
   
 
   "subjects" {
-    String id "key"
+    String id "🗝️"
     String slug 
     String name 
     Int order 
@@ -189,7 +222,7 @@ SUBMITTED SUBMITTED
   
 
   "topics" {
-    String id "key"
+    String id "🗝️"
     String subjectId 
     String name 
     Int order 
@@ -199,34 +232,34 @@ SUBMITTED SUBMITTED
   
 
   "tutor_classes" {
-    String id "key"
+    String id "🗝️"
     String code 
     String tutorProfileId 
     String subject 
-    GradeLevel gradeLevel "?"
-    String description "?"
+    GradeLevel gradeLevel "❓"
+    String description "❓"
     Int maxStudents 
-    String building "?"
-    String room "?"
-    String meetingLink "?"
+    String building "❓"
+    String room "❓"
+    String meetingLink "❓"
     Boolean published 
     ClassStatus status 
-    String suspendedReason "?"
-    DateTime suspendedUntil "?"
+    String suspendedReason "❓"
+    DateTime suspendedUntil "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "class_topics" {
-    String id "key"
+    String id "🗝️"
     String classId 
     String topic 
     }
   
 
   "class_sessions" {
-    String id "key"
+    String id "🗝️"
     String classId 
     String topic 
     DateTime scheduledAt 
@@ -238,7 +271,7 @@ SUBMITTED SUBMITTED
   
 
   "class_enrollments" {
-    String id "key"
+    String id "🗝️"
     String classId 
     String learnerId 
     DateTime enrolledAt 
@@ -246,28 +279,28 @@ SUBMITTED SUBMITTED
   
 
   "topic_requests" {
-    String id "key"
+    String id "🗝️"
     String learnerId 
     String subject 
     GradeLevel gradeLevel 
-    String note "?"
+    String note "❓"
     TopicRequestStatus status 
-    String fulfilledClassId "?"
-    String directedTutorProfileId "?"
+    String fulfilledClassId "❓"
+    String directedTutorProfileId "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "topic_request_topics" {
-    String id "key"
+    String id "🗝️"
     String requestId 
     String topic 
     }
   
 
   "topic_request_slots" {
-    String id "key"
+    String id "🗝️"
     String requestId 
     String day 
     String startTime 
@@ -276,40 +309,40 @@ SUBMITTED SUBMITTED
   
 
   "audit_logs" {
-    String id "key"
+    String id "🗝️"
     String adminId 
     String action 
     String targetType 
     String targetId 
-    String reason "?"
+    String reason "❓"
     DateTime createdAt 
     }
   
 
   "platform_settings" {
-    String key "key"
+    String key "🗝️"
     String value 
     DateTime updatedAt 
     }
   
 
   "assessment_questions" {
-    String id "key"
+    String id "🗝️"
     String subject 
     String topic 
     String prompt 
-    String explanation "?"
+    String explanation "❓"
     Boolean active 
     QuestionOrigin origin 
     String createdById 
-    String ownerTutorProfileId "?"
+    String ownerTutorProfileId "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "assessment_options" {
-    String id "key"
+    String id "🗝️"
     String questionId 
     String text 
     Boolean isCorrect 
@@ -318,7 +351,7 @@ SUBMITTED SUBMITTED
   
 
   "assessment_attempts" {
-    String id "key"
+    String id "🗝️"
     String tutorProfileId 
     String subject 
     String topic 
@@ -329,83 +362,105 @@ SUBMITTED SUBMITTED
     Int scorePercent 
     Int passPercent 
     DateTime startedAt 
-    DateTime submittedAt "?"
+    DateTime submittedAt "❓"
     }
   
 
   "assessment_attempt_items" {
-    String id "key"
+    String id "🗝️"
     String attemptId 
     String questionId 
     Int position 
-    String selectedOptionId "?"
-    Boolean isCorrect "?"
+    String selectedOptionId "❓"
+    Boolean isCorrect "❓"
     }
   
 
   "question_requests" {
-    String id "key"
+    String id "🗝️"
     String tutorProfileId 
     String subject 
     String topic 
-    String note "?"
+    String note "❓"
     QuestionRequestStatus status 
-    String resolvedById "?"
-    DateTime resolvedAt "?"
-    String resolutionNote "?"
+    String resolvedById "❓"
+    DateTime resolvedAt "❓"
+    String resolutionNote "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "notifications" {
-    String id "key"
+    String id "🗝️"
     String userId 
     String type 
     String message 
-    String link "?"
-    DateTime readAt "?"
+    String link "❓"
+    DateTime readAt "❓"
     DateTime createdAt 
     }
   
 
   "chatbot_misses" {
-    String id "key"
+    String id "🗝️"
     String message 
     Role role 
-    String userId "?"
+    String userId "❓"
     DateTime createdAt 
     }
   
 
   "class_appeals" {
-    String id "key"
+    String id "🗝️"
     String classId 
     String tutorProfileId 
     String reason 
     ClassAppealStatus status 
-    String reviewNote "?"
-    String reviewedById "?"
-    DateTime reviewedAt "?"
+    String reviewNote "❓"
+    String reviewedById "❓"
+    DateTime reviewedAt "❓"
     DateTime createdAt 
     }
   
 
+  "reports" {
+    String id "🗝️"
+    String reporterId 
+    ReportTargetType targetType 
+    String reportedTutorProfileId "❓"
+    String classId "❓"
+    String details "❓"
+    ReportStatus status 
+    String resolutionNote "❓"
+    String reviewedById "❓"
+    DateTime reviewedAt "❓"
+    DateTime createdAt 
+    }
+  
+
+  "report_violations" {
+    String id "🗝️"
+    String reportId 
+    ReportViolationType type 
+    }
+  
+
   "session_tests" {
-    String id "key"
+    String id "🗝️"
     String sessionId 
     String title 
-    String instructions "?"
+    String instructions "❓"
     SessionTestStatus status 
-    DateTime publishedAt "?"
-    DateTime closedAt "?"
+    DateTime publishedAt "❓"
+    DateTime closedAt "❓"
     DateTime createdAt 
     DateTime updatedAt 
     }
   
 
   "session_test_questions" {
-    String id "key"
+    String id "🗝️"
     String sessionTestId 
     String questionId 
     Int position 
@@ -413,7 +468,7 @@ SUBMITTED SUBMITTED
   
 
   "session_test_attempts" {
-    String id "key"
+    String id "🗝️"
     String sessionTestId 
     String learnerId 
     SessionTestKind kind 
@@ -422,17 +477,17 @@ SUBMITTED SUBMITTED
     Int correctCount 
     Int scorePercent 
     DateTime startedAt 
-    DateTime submittedAt "?"
+    DateTime submittedAt "❓"
     }
   
 
   "session_test_attempt_items" {
-    String id "key"
+    String id "🗝️"
     String attemptId 
     String questionId 
     Int position 
-    String selectedOptionId "?"
-    Boolean isCorrect "?"
+    String selectedOptionId "❓"
+    Boolean isCorrect "❓"
     }
   
     "users" |o--|| "Role" : "enum:role"
@@ -478,6 +533,14 @@ SUBMITTED SUBMITTED
     "class_appeals" }o--|| "tutor_profiles" : "tutorProfile"
     "class_appeals" |o--|| "ClassAppealStatus" : "enum:status"
     "class_appeals" }o--|o "users" : "reviewedBy"
+    "reports" }o--|| "users" : "reporter"
+    "reports" |o--|| "ReportTargetType" : "enum:targetType"
+    "reports" }o--|o "tutor_profiles" : "reportedTutorProfile"
+    "reports" }o--|o "tutor_classes" : "class"
+    "reports" |o--|| "ReportStatus" : "enum:status"
+    "reports" }o--|o "users" : "reviewedBy"
+    "report_violations" }o--|| "reports" : "report"
+    "report_violations" |o--|| "ReportViolationType" : "enum:type"
     "session_tests" |o--|| "class_sessions" : "session"
     "session_tests" |o--|| "SessionTestStatus" : "enum:status"
     "session_test_questions" }o--|| "session_tests" : "sessionTest"

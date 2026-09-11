@@ -68,13 +68,11 @@ export default function AbuseReportTable() {
     { status: TAB_STATUS[tab], sort, dir, ...(targetFilter ? { targetType: targetFilter } : {}) },
     PAGE_SIZE,
     "Could not retrieve abuse reports.",
-    "reports"
+    "reports",
   );
 
   const targetName = (r: Report) =>
-    r.targetType === "TUTOR"
-      ? r.tutor?.anonymousId ?? "—"
-      : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
+    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
 
   const review = async (report: Report, decision: "RESOLVE" | "DISMISS", reviewNote?: string) => {
     setSaving(true);
@@ -93,7 +91,7 @@ export default function AbuseReportTable() {
       setSuccess(
         decision === "RESOLVE"
           ? `Report about ${targetName(report)} marked resolved.`
-          : `Report about ${targetName(report)} dismissed.`
+          : `Report about ${targetName(report)} dismissed.`,
       );
       setResolveTarget(null);
       setDismissTarget(null);
@@ -109,10 +107,7 @@ export default function AbuseReportTable() {
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner
-        variant="error"
-        message={resolveTarget || dismissTarget ? null : error || null}
-      />
+      <FeedbackBanner variant="error" message={resolveTarget || dismissTarget ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -165,9 +160,7 @@ export default function AbuseReportTable() {
                   {reports.map((r) => (
                     <tr key={r.id} className="text-sm align-top">
                       <td>
-                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">
-                          {r.targetType}
-                        </span>
+                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType}</span>
                         <div className="font-mono text-xs">
                           {r.targetType === "TUTOR" ? (
                             r.tutor ? (
@@ -176,10 +169,7 @@ export default function AbuseReportTable() {
                               "—"
                             )
                           ) : r.class ? (
-                            <Link
-                              href={`/admin/classes/${r.class.id}`}
-                              className="text-primary hover:underline"
-                            >
+                            <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
                               {r.class.code}
                             </Link>
                           ) : (
@@ -203,9 +193,7 @@ export default function AbuseReportTable() {
                           ))}
                         </div>
                         {r.details && (
-                          <p className="text-2xs text-base-content/60 mt-1 whitespace-normal">
-                            {r.details}
-                          </p>
+                          <p className="text-2xs text-base-content/60 mt-1 whitespace-normal">{r.details}</p>
                         )}
                       </td>
                       <td className="text-2xs text-base-content/50">
@@ -217,9 +205,7 @@ export default function AbuseReportTable() {
                       </td>
                       {tab !== "pending" && (
                         <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
-                          {r.resolutionNote || (
-                            <span className="text-base-content/30 italic">No note</span>
-                          )}
+                          {r.resolutionNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}
                       {tab === "pending" && (
@@ -278,9 +264,7 @@ export default function AbuseReportTable() {
         open={dismissTarget !== null}
         title="Dismiss this report?"
         description={
-          dismissTarget
-            ? `No action is taken on ${targetName(dismissTarget)}. The reporter is notified.`
-            : undefined
+          dismissTarget ? `No action is taken on ${targetName(dismissTarget)}. The reporter is notified.` : undefined
         }
         noteLabel="Note for the reporter (optional)"
         notePlaceholder="Why no action was needed."

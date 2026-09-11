@@ -2,7 +2,7 @@ import type { GradeLevel, Role } from "@prisma/client";
 
 // ─── Intent-based chatbot: shared types ────────────────────────────────────
 // The assistant is deliberately NOT generative — every reply is a predefined
-// response chosen by keyword/pattern matching. See docs/plans/chatbot-assistant.md.
+// response chosen by keyword/pattern matching. See docs/reference/chatbot.md.
 
 export type IntentCategory = "nav" | "faq" | "recommend" | "smalltalk" | "fallback";
 

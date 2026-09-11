@@ -4,7 +4,7 @@ generator client {
 
 generator erd {
   provider                  = "prisma-erd-generator"
-  output                    = "../docs/erd.md"
+  output                    = "../docs/reference/erd.md"
   includeRelationFromFields = true
 }
 
@@ -513,7 +513,7 @@ model AssessmentOption {
 // minBankSize), stored as `PlatformSetting` rows and read via
 // `getAssessmentConfig()` in src/lib/settings.ts. The old per-(subject, topic)
 // `TopicAssessmentConfig` model was dropped 2026-09-03 — see
-// docs/plans/global-assessment-config.md.
+// docs/plans/assessments.md.
 
 // ─── Assessment Attempt (one quiz run) ──────────────────────────────────────
 
@@ -676,7 +676,7 @@ model ReportViolation {
 // `kind` therefore lives on the ATTEMPT, not on the test — so `position` refers
 // to the same question in both runs, which is what makes per-question pre-vs-post
 // comparison and same-row delta possible. Diagnostic only; no pass mark.
-// Editable only while DRAFT and with zero attempts (see docs/plans/pre-test-post-test-plan.md).
+// Editable only while DRAFT and with zero attempts (see docs/plans/assessments.md).
 
 model SessionTest {
   id           String            @id @default(cuid())

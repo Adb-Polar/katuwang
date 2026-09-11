@@ -3,7 +3,7 @@ import { optionInputSchema } from "@/lib/validations/assessment";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 
 // One test per ClassSession, served twice (PRE then POST) — so `kind` is NOT a
-// field here; it lives on the attempt. See docs/plans/pre-test-post-test-plan.md.
+// field here; it lives on the attempt. See docs/plans/assessments.md.
 
 export const createSessionTestSchema = z.object({
   title: z

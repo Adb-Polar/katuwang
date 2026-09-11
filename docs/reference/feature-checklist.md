@@ -1,9 +1,11 @@
 # Katuwang — Feature Checklist (Thesis Spec vs. Implementation)
 
-Source: `docs/reference/Katuwang_...md`, §1.4 Scope and Delimitations + §3.2.1–3.2.3
-(six core modules, four user roles). Checked against current codebase
+Source: `docs/reference/thesis.md`, §1.4 Scope and Delimitations + §3.2.1–3.2.3
+(six core modules; the thesis names four user roles — the app ships three,
+see the Teacher Moderator note at the bottom). Checked against current codebase
 (`prisma/schema.prisma`, `src/app/api/**`, `src/app/**/page.tsx`, `src/components/**`)
-as of 2026-09-03.
+as of 2026-09-10. (Changes.md Parts 54–68 since the last review are component
+refactors / review fixes — no feature status changed.)
 
 Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 
@@ -53,7 +55,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 
 | Feature | Status | Notes |
 |---|---|---|
-| Weighted scoring algorithm (subject, grade compatibility, availability) | ✅ | `src/lib/matching.ts` → `rankMatches()`, called from `POST /api/learner/match` |
+| Weighted scoring algorithm (subject, grade compatibility, schedule fit) | ✅ | `src/lib/matching.ts` → `rankMatches()`, called from `POST /api/learner/match`. Scores topic overlap, certified-topic bonus, grade proximity, schedule/soonness of upcoming sessions (tutor "availability" is derived from upcoming `ClassSession` rows, not a stored field) |
 | Learner-submitted tutor/topic request (fallback when no match) | ✅ | `TopicRequest`, `TopicRequestTopic`, `TopicRequestSlot` models; `/learner/requests` |
 | Preferred setup selection (1-on-1 vs. group) in request | ✅ | `MatchCriteria.classFormat: "SOLO" \| "GROUP" \| "ANY"` in `src/lib/matching.ts`, applied in the match-ranking API |
 | Tutor accepts an open topic request (auto-creates a class) | ✅ | `POST /api/tutor/topic-requests/[id]/accept`, `AcceptRequestModal.tsx` (replaces the old `/fulfill` route, removed 2026-09-03 by `docs/plans/topic-requests-v2.md`) |
@@ -73,7 +75,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 |---|---|---|
 | Tutor qualifying assessment (must pass before teaching a topic) | ✅ | `TopicCertification`, `AssessmentAttempt`/`AssessmentAttemptItem`, `AssessmentQuizRunner.tsx`, `/tutor/assessments` |
 | Admin-authored question bank per subject/topic | ✅ | `AssessmentQuestion`/`AssessmentOption`, `/admin/assessment/question-bank`, `QuestionBankManager.tsx` (subject → topic → questions drill-down) |
-| Global assessment config (question count, pass %, min bank size) | ✅ | One platform-wide set on **Settings → Assessment**; stored as `PlatformSetting` rows, read via `getAssessmentConfig()`. Replaced per-`(subject, topic)` `TopicAssessmentConfig`, which was dropped entirely on 2026-09-03 — see `docs/plans/global-assessment-config.md`. |
+| Global assessment config (question count, pass %, min bank size) | ✅ | One platform-wide set on **Settings → Assessment**; stored as `PlatformSetting` rows, read via `getAssessmentConfig()`. Replaced per-`(subject, topic)` `TopicAssessmentConfig`, which was dropped entirely on 2026-09-03 — see `docs/plans/assessments.md`. |
 | Tutor can request more questions be added for a topic | ✅ | `QuestionRequest` model, `/api/admin/question-requests`, `/admin` review UI |
 | Admin certifies/rejects a tutor's topic request | ✅ | `TopicCertificationStatus`, `/api/admin/certifications` |
 | **Learner pre-test (before a session)** | ✅ | `SessionTest`/`SessionTestQuestion`/`SessionTestAttempt(+Item)`, one test per `ClassSession` served twice (`kind: PRE\|POST` on the attempt). Tutor builder (`/tutor/classes/[classId]/sessions/[sessionId]/test`), learner take/resume/review (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`), admin read-only list + results (`/admin/session-tests`). Scoped per-session, not per-class — see `docs/reference/decisions.md`. |

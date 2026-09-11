@@ -4,7 +4,7 @@ Prepared for the Capstone 2 panel presentation (IT 124, Module 01 — System
 Design Refinement). The diagrams reflect the **system as actually built**:
 every process maps to a real portal area + API route group, and every data
 store maps to one or a tight cluster of Prisma models in
-`prisma/schema.prisma` / `docs/erd.md`.
+`prisma/schema.prisma` / `docs/reference/erd.md`.
 
 Rendered images live beside this file: `dfd-level0.png/.svg`,
 `dfd-level1.png/.svg` (regenerate with `mmdc -i dfd-levelN.mmd -o dfd-levelN.png`).
@@ -238,7 +238,7 @@ flowchart TB
 
 - **Every data store maps to a real entity** — see the table above; each store
   is one or a tight cluster of Prisma models in `prisma/schema.prisma` /
-  `docs/erd.md`.
+  `docs/reference/erd.md`.
 - **Every process maps to an architecture component** — each row's route group
   is a slice of the modular-monolith app on the architecture slide (Route
   Handlers under `src/app/api/**` + the matching portal pages).

@@ -1,5 +1,19 @@
 **Stack:** Next.js 16.2.4 · React 19 · TypeScript · Tailwind CSS 4 · NextAuth.js 4.24.14 · Prisma 7.7.0 · MySQL 9.7.0 · bcrypt
 
+> **Status (reviewed 2026-09-10): build guide, not a mirror of the code.** The
+> auth *architecture* it describes is still current — NextAuth 4 credentials +
+> JWT (`src/lib/auth.ts`), `src/proxy.ts` route guards, RBAC via
+> `getServerSession`, atomic anonymous-ID generation (`src/lib/idGenerator.ts`),
+> Zod-validated boundaries. Moved on since: the `SubjectArea` enum is gone
+> (subjects/topics are admin-editable tables — see `decisions.md`); many models
+> were added (`SessionTest*`, `Report*`, `Notification`, `ChatbotMiss`,
+> `PasswordResetToken`, `Subject`/`Topic`); and the security-review pass
+> (Changes.md Part 57) added login rate-limiting, generic auth errors with a
+> dummy bcrypt compare, a mid-session JWT role/status re-check, a 72-byte
+> password cap, and `next.config.ts` security headers. Treat inline
+> schema/route snippets as illustrative of the pattern —
+> `prisma/schema.prisma` and `src/lib/auth.ts` are authoritative.
+
 ---
 
 ## Table of Contents

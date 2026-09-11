@@ -5,9 +5,9 @@
 ---
 ### 📚 Context & Reference Docs — read before assuming scope
 
-- **Start with [`docs/reference/project-overview.md`](docs/reference/project-overview.md)** for domain/business context (what Katuwang is, TRIS background, the 3 roles, the RA 10173 double-blind anonymity mandate, the six modules, domain vocabulary). It's the digest of the full capstone thesis at `docs/reference/Katuwang_...md` — that file is ~450KB; do not read it wholesale, use targeted `grep`/offset reads if you need the source text.
+- **Start with [`docs/reference/project-overview.md`](docs/reference/project-overview.md)** for domain/business context (what Katuwang is, TRIS background, the 3 roles, the RA 10173 double-blind anonymity mandate, the six modules, domain vocabulary). It's the digest of the full capstone thesis at `docs/reference/thesis.md` — that file is ~450KB; do not read it wholesale, use targeted `grep`/offset reads if you need the source text.
 - **Check [`docs/reference/decisions.md`](docs/reference/decisions.md) before flagging anything as a "missing feature."** The thesis doc is a historical proposal snapshot, not a live spec — the running app has deliberately diverged from it in places (e.g. 3 roles only, no "Teacher Moderator"). This file is the authoritative record of those divergences and wins over the thesis text when they conflict.
-- **[`docs/feature-checklist.md`](docs/feature-checklist.md)** tracks thesis-spec vs. actual build status per module — update it when a module's status changes.
+- **[`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md)** tracks thesis-spec vs. actual build status per module — update it when a module's status changes.
 - **[`docs/roles/{LEARNER,TUTOR,ADMIN}.md`](docs/roles/)** are the per-role feature + API reference — check the relevant one before building/changing anything in that role's portal.
 - **[`docs/README.md`](docs/README.md)** indexes everything else (plans, ERD, theme tokens, auth build guide).
 
@@ -19,9 +19,9 @@
 - tables should be normalize 3NF
 - every plan should be written on /docs/plans/{plan overview name}.md
 - All changes must be logged on Changes.md
-- When a `docs/TODO.txt` item is finished, **delete** its lines from `docs/TODO.txt` — do not leave it in place annotated with "DONE". The Changes.md entry is the permanent record.
-- Every change must also update `docs/TOTEST.txt`: add a `[ ]` line for anything that needs manual/in-app verification (something tests don't cover — a UI flow, a redirect, a schedule/permission edge case). Tick `[Good]` / note findings when verified. Skip only for pure docs changes.
-- When a decision diverges from the thesis reference doc (a role, a feature, a scope cut), log it in `docs/reference/decisions.md` and update `docs/feature-checklist.md` in the same change — don't let them go stale
+- When a `docs/backlog/TODO.txt` item is finished, **delete** its lines from `docs/backlog/TODO.txt` — do not leave it in place annotated with "DONE". The Changes.md entry is the permanent record.
+- Every change must also update `docs/backlog/TOTEST.txt`: add a `[ ]` line for anything that needs manual/in-app verification (something tests don't cover — a UI flow, a redirect, a schedule/permission edge case). Tick `[Good]` / note findings when verified. Skip only for pure docs changes.
+- When a decision diverges from the thesis reference doc (a role, a feature, a scope cut), log it in `docs/reference/decisions.md` and update `docs/reference/feature-checklist.md` in the same change — don't let them go stale
 - Commit when a feature is implemented, no errors ,test passed and 100% working
 ## 🚀 Common Commands
 
