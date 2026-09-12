@@ -28,13 +28,12 @@ export default function ProfileEditForm({
   const [contactError, setContactError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Live feedback while typing a number: once the value is all phone characters
-  // (digits / spaces / + ( ) . -), hold it to the PH mobile format immediately
-  // rather than waiting for submit. A free-text handle is left alone.
+  // Only phone characters (digits / spaces / + ( ) . -) are accepted at all —
+  // anything else is stripped as the user types.
+  const sanitizeContactInput = (next: string) => next.replace(/[^\d\s()+.-]/g, "");
+
   const validateContactLive = (next: string) => {
-    const trimmed = next.trim();
-    const looksNumeric = /\d/.test(trimmed) && /^[\d\s()+.-]+$/.test(trimmed);
-    if (!looksNumeric) {
+    if (!next.trim()) {
       setContactError("");
       return;
     }
@@ -111,18 +110,19 @@ export default function ProfileEditForm({
 
       <FormField
         label="Contact info"
-        hint="A mobile number (e.g. 0917 123 4567) or a Messenger / guardian contact. Visible only to you and admins."
+        hint="A Philippine mobile number, e.g. 0917 123 4567. Visible only to you and admins."
         error={contactError || undefined}
         orientation="horizontal"
       >
         <input
-          type="text"
+          type="tel"
           inputMode="tel"
           autoComplete="tel"
           value={contactInfo}
           onChange={(e) => {
-            setContactInfo(e.target.value);
-            validateContactLive(e.target.value);
+            const next = sanitizeContactInput(e.target.value);
+            setContactInfo(next);
+            validateContactLive(next);
           }}
           className="input input-bordered input-md text-sm w-full"
           placeholder="0917 123 4567"

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-import { classDetailsSchema } from "@/lib/validations/class";
+import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { notify, notifyMany } from "@/lib/notifications";
 
@@ -82,6 +82,20 @@ export async function PATCH(
 
     if (rawTopics && (!topics || topics.length === 0)) {
       return NextResponse.json({ error: "Please select at least one topic." }, { status: 400 });
+    }
+
+    if ("building" in updates || "room" in updates || "meetingLink" in updates) {
+      const effective = {
+        building: updates.building ?? existingClass.building ?? "",
+        room: updates.room ?? existingClass.room ?? "",
+        meetingLink: updates.meetingLink ?? existingClass.meetingLink ?? "",
+      };
+      if (!hasLocationOrMeetingLink(effective)) {
+        return NextResponse.json(
+          { error: "Please provide a location (building/room) or a meeting link." },
+          { status: 400 }
+        );
+      }
     }
 
     // Capacity validation if updating maxStudents

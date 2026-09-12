@@ -6,14 +6,19 @@ const {
   sessionTestAttemptFindUnique,
   sessionTestAttemptItemUpdate,
   sessionTestAttemptUpdate,
+  sessionTestFindUnique,
+  notifyMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   sessionTestAttemptFindUnique: vi.fn(),
   sessionTestAttemptItemUpdate: vi.fn(),
   sessionTestAttemptUpdate: vi.fn(),
+  sessionTestFindUnique: vi.fn(),
+  notifyMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/notifications", () => ({ notify: notifyMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     sessionTestAttempt: { findUnique: sessionTestAttemptFindUnique },
@@ -21,6 +26,7 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         sessionTestAttemptItem: { update: sessionTestAttemptItemUpdate },
         sessionTestAttempt: { update: sessionTestAttemptUpdate },
+        sessionTest: { findUnique: sessionTestFindUnique },
       }),
   },
 }));
@@ -108,5 +114,56 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
         data: expect.objectContaining({ status: "SUBMITTED", correctCount: 1, scorePercent: 100 }),
       }),
     );
+  });
+
+  it("notifies the tutor once a PRE attempt is submitted", async () => {
+    sessionTestAttemptUpdate.mockResolvedValue({
+      ...inProgressAttempt,
+      kind: "PRE",
+      sessionTestId: "st1",
+      status: "SUBMITTED",
+      correctCount: 1,
+      scorePercent: 100,
+      startedAt: new Date(),
+      submittedAt: new Date(),
+      items: [{ ...inProgressAttempt.items[0], selectedOptionId: "o2", isCorrect: true }],
+    });
+    sessionTestFindUnique.mockResolvedValue({
+      sessionId: "s1",
+      session: {
+        classId: "c1",
+        topic: "Algebra",
+        class: { tutorProfile: { userId: "T1" } },
+      },
+    });
+
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+    expect(res.status).toBe(200);
+    expect(notifyMock).toHaveBeenCalledWith(
+      expect.anything(),
+      "T1",
+      "SESSION_PRETEST_TAKEN",
+      expect.stringContaining("Algebra"),
+      "/tutor/classes/c1/sessions/s1/test/results",
+    );
+  });
+
+  it("does not notify anyone for a POST attempt", async () => {
+    sessionTestAttemptUpdate.mockResolvedValue({
+      ...inProgressAttempt,
+      kind: "POST",
+      sessionTestId: "st1",
+      status: "SUBMITTED",
+      correctCount: 1,
+      scorePercent: 100,
+      startedAt: new Date(),
+      submittedAt: new Date(),
+      items: [{ ...inProgressAttempt.items[0], selectedOptionId: "o2", isCorrect: true }],
+    });
+
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+    expect(res.status).toBe(200);
+    expect(notifyMock).not.toHaveBeenCalled();
+    expect(sessionTestFindUnique).not.toHaveBeenCalled();
   });
 });

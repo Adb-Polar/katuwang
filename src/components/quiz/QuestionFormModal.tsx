@@ -99,7 +99,7 @@ export default function QuestionFormModal({
             <select
               value={topicField.value}
               onChange={(e) => topicField.onChange(e.target.value)}
-              className="select select-bordered select-sm text-xs w-full focus:select-primary"
+              className="select select-bordered select-sm text-xs w-full focus:select-primary truncate"
             >
               {topicField.options.map((t) => (
                 <option key={t} value={t}>

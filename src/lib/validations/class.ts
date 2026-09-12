@@ -67,12 +67,22 @@ export const classDetailsSchema = z.object({
 
 export type ClassDetailsInput = z.infer<typeof classDetailsSchema>;
 
-export const createClassSchema = classDetailsSchema.extend({
-  sessions: z
-    .array(sessionSchema)
-    .min(1, "Please add at least one session.")
-    .max(20, "You can add up to 20 sessions at once."),
-});
+/** A class needs a way for learners to actually attend it — one of the two. */
+export function hasLocationOrMeetingLink(d: { building?: string; room?: string; meetingLink?: string }) {
+  return Boolean(d.building?.trim() || d.room?.trim() || d.meetingLink?.trim());
+}
+
+export const createClassSchema = classDetailsSchema
+  .extend({
+    sessions: z
+      .array(sessionSchema)
+      .min(1, "Please add at least one session.")
+      .max(20, "You can add up to 20 sessions at once."),
+  })
+  .refine(hasLocationOrMeetingLink, {
+    message: "Please provide a location (building/room) or a meeting link.",
+    path: ["meetingLink"],
+  });
 
 export type CreateClassInput = z.infer<typeof createClassSchema>;
 

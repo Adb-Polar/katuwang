@@ -559,7 +559,7 @@ function AddFromBankModal({
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <select value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs text-xs sm:col-span-1">
+          <select value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs text-xs sm:col-span-1 truncate">
             <option value="">All topics</option>
             {topics.map((t) => (
               <option key={t} value={t}>

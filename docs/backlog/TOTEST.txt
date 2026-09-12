@@ -778,3 +778,26 @@ Security-review fixes (Changes.md Part 57)
     docs/reference/thesis.md, docs/reference/decisions.md.
  [] docs/reviews/reviews.md Contents links jump to the right sections;
     docs/reference/chatbot.md appendix anchor works.
+
+--- Part 71 (9/11 tutor/learner bug-fix batch) ---
+ [] /tutor/profile/edit and /learner/profile/edit: Contact info field rejects
+    letters/symbols as you type (only digits/spaces/+().- get through); a full
+    PH mobile number (e.g. 0917 123 4567) still saves fine; a bare word like
+    "Messenger" is now rejected instead of accepted as a free-form handle.
+ [] Session-test builder (tutor, .../sessions/[id]/test): pick a long topic
+    name in the "add from bank" filter and in "Write a question" -> the select
+    text truncates with an ellipsis, does not overlap the dropdown arrow.
+    Same check on the per-session topic select in /tutor/classes/new.
+ [] /tutor/classes/new and /tutor/classes/[id]/edit: leave both Location AND
+    Meeting Link empty -> submit is blocked with an inline error; filling in
+    just one of the two (building/room OR meeting link) lets it through.
+ [] Publish a session's pre-test -> the class's tutor gets a notification once
+    an enrolled learner submits that pre-test (not on post-test submission),
+    linking to that session's test results page.
+ [] /tutor/classes: a SCHEDULED class whose every session is in the past and
+    that has zero enrolled students no longer shows under "Active Classes"
+    (moves to "Class History"); one with a future session, or with at least
+    one enrolled student despite only past sessions, still shows Active.
+ [] Learner: open a session's pre-test right after the tutor publishes it
+    (freshly, not resuming) -> loads without the intermittent "An unexpected
+    error occurred." that previously required a page refresh to clear.

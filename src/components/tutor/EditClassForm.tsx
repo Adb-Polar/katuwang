@@ -115,6 +115,10 @@ export default function EditClassForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (locked) return;
+    if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
+      setError("Please provide a location (building/room) or a meeting link.");
+      return;
+    }
     setLoading(true);
     setError("");
     try {
@@ -293,7 +297,7 @@ export default function EditClassForm({
                     </select>
                   </FormField>
 
-                  <FormField label="Location" hint="Optional — for an in-person class">
+                  <FormField label="Location" hint="A location or a meeting link is required — for an in-person class">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-4 w-4 text-primary shrink-0" />
                       <input
@@ -313,7 +317,7 @@ export default function EditClassForm({
                     </div>
                   </FormField>
 
-                  <FormField label="Meeting Link" hint="Optional">
+                  <FormField label="Meeting Link" hint="Required if no location is set">
                     <div className="flex items-center gap-1.5">
                       <LinkIcon className="h-4 w-4 text-primary shrink-0" />
                       <input

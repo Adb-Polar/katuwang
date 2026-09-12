@@ -64,7 +64,14 @@ export default function ClassManagement() {
   // with its reason. BANNED and expired suspensions fall through to History.
   const isCurrentlySuspended = (c: TutorClass) =>
     c.status === "SUSPENDED" && (!c.suspendedUntil || new Date(c.suspendedUntil) > new Date());
-  const isActive = (c: TutorClass) => c.status === "SCHEDULED" || isCurrentlySuspended(c);
+  // A SCHEDULED class with every session in the past is invisible to browse
+  // (see browseClassesWhere) — once it also has no enrolled students, keep it
+  // out of "Active" too, since there's nothing left for the tutor to act on.
+  const hasFutureSession = (c: TutorClass) =>
+    c.sessions.some((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date());
+  const isActive = (c: TutorClass) =>
+    isCurrentlySuspended(c) ||
+    (c.status === "SCHEDULED" && (hasFutureSession(c) || c.enrollments.length > 0));
 
   const activeClasses = classes.filter(isActive);
   const pastClasses = classes.filter((c) => !isActive(c));

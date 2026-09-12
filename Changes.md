@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [71](#part-71) | **9/11 tutor/learner bug-fix batch** | Six fixes from manual-testing notes: numbers-only contact info, truncated long topic names in `<select>`s, class scheduling requires a location or meeting link, tutors are notified when a learner takes a pre-test, a fully-past class with no enrollees drops out of "Active", and a pre-test start race condition (`P2002`) that surfaced as "posted but errors, refresh fixes it". Two reported items (a stale test-page 404 and a class-report error) turned out to be dev-DB-reseed artifacts, not code bugs — verified by re-testing live, no fix applied. | See Part 71 below. |
 | [70](#part-70) | **`docs/reference/` refresh** | Brought the reference docs to the current build. `project-overview.md`: chatbot and learner pre/post-tests are ✅ built (were "not built"); subjects are admin-editable tables, not the `SubjectArea` enum. `decisions.md`: "Known unbuilt modules" section resolved (all six modules built); chatbot decision gets a 2026-09-10 update (35 intents / 26 FAQ / `/admin/chatbot` review UI). `feature-checklist.md`: review date → 2026-09-10, matching row wording. `auth-implementation.md`: added a "build guide, not a code mirror" status banner. `erd.mmd` regenerated from the schema (was missing the `Report*` enums). `chatbot.md`, `theme.md`, `architecture-design.*`, `thesis.md` already current / historical — unchanged. | Docs only — no code/schema/test change. `npx prisma generate` re-run (erd.md unchanged). |
 | [69](#part-69) | **`docs/` reorganisation** | Every file moved into a subfolder; `docs/README.md` is now a preview index of all docs. Merged the 6 `reviews/` docs → `reviews/reviews.md` and 3 assessment plans → `plans/assessments.md`; folded `plans/chatbot-assistant.md` into `reference/chatbot.md`. Archived completed/superseded plans + old spreadsheets under `docs/archive/`. `TODO.txt`/`TOTEST.txt` → `docs/backlog/`; `feature-checklist.md`/`erd.md`/`architecture-design.*` + renamed `thesis.md` → `docs/reference/`; xlsx → `docs/reports/`. | Path refs updated in `CLAUDE.md`, `README.md`, `PROGRESS_REPORT.md`, `docs/plans/README.md`, `docs/plans/fixes.md`, and 4 `src/` comments. `prisma/schema.prisma` erd `output` → `../docs/reference/erd.md`. Docs only — no test impact. |
 | [68](#part-68) | **`<Modal>` shell with focus trap (component-reuse R3)** | New `components/ui/Modal.tsx` — backdrop + box, Escape / backdrop close, Tab focus-trap, focus-restore on close. `ConfirmDialog` + `PromptDialog` re-based on `<Modal bare>` (pixel-identical) so every confirm/prompt dialog gains the a11y behaviour. Bespoke modals can adopt it later. | New `Modal.tsx`; `ConfirmDialog`/`PromptDialog` rewritten as thin bodies. No API change. 680/680. |
@@ -3022,6 +3023,78 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-71"></a>
+## Part 71 — 9/11 tutor/learner bug-fix batch (2026-09-12)
+
+Six fixes from a round of manual testing notes (`docs/backlog` items were not
+pre-filed — worked directly from the report). Two items in the original list
+turned out **not to be code bugs** on investigation (see below) and were left
+alone.
+
+1. **Contact info accepted free text.** `normalizeContactInfo()` used to allow
+   a Messenger-handle fallback alongside a PH mobile number; the tutor/learner
+   profile-edit request wants numbers only now. `src/lib/contactInfo.ts`
+   rejects anything that isn't a valid PH mobile number (no more free-form
+   branch); `ProfileEditForm.tsx` strips non-phone characters as you type
+   (`sanitizeContactInput`) instead of just live-validating. Scoped to the
+   self-service profile routes only — registration's `contactInfo` field uses
+   its own (unrelated) validation and is untouched.
+2. **Long topic names overlapped the select-arrow icon.** Added `truncate` to
+   the three topic `<select>`s that can show catalog topic names: the "add
+   from bank" filter and `QuestionFormModal`'s topic picker (both reachable
+   from the session-test builder), and `ClassScheduleFields`' per-session
+   topic select.
+3. **A class could be scheduled with neither a location nor a meeting link.**
+   `classDetailsSchema`/`createClassSchema` (`src/lib/validations/class.ts`)
+   gains `hasLocationOrMeetingLink()` + a `.refine` on `createClassSchema`
+   (covers both `/tutor/classes` POST and `acceptTopicRequestSchema`, which
+   reuses it); the edit route (`PATCH /api/tutor/classes/[classId]`) checks
+   the same rule against the *merged* (existing ∪ submitted) values since it's
+   a partial update. Client-side: `ClassScheduleFields.tsx` and
+   `EditClassForm.tsx` both block submit with the same message; hints on the
+   Location/Meeting Link fields updated to say one is required.
+4. **No tutor notification when a learner takes a pre-test.** New
+   `SESSION_PRETEST_TAKEN` notification type
+   (`src/lib/notifications.ts`); the submit route
+   (`session-test-attempts/[attemptId]/submit/route.ts`) notifies the class's
+   tutor (via `sessionTest → session → class → tutorProfile.userId`) inside
+   the same transaction, only for `kind === "PRE"`, linking to that session's
+   test-results page.
+5. **A fully-past `SCHEDULED` class with no enrollees still showed "Active."**
+   Browse hides a class once it has no future `SCHEDULED` session
+   (`browseClassesWhere`), so a tutor-side class in that state with zero
+   enrollments is dead weight in the Active tab. `ClassManagement.tsx`'s
+   `isActive()` now also requires a future session **or** at least one
+   enrollment (suspended classes are unaffected — that branch is unchanged).
+6. **Pre-test start race: "An unexpected error occurred."** Reproduced
+   directly against the dev DB (two concurrent `POST .../test/PRE/start`
+   calls — the shape React Strict Mode's double-effect produces in dev): the
+   existing-attempt check and the `create()` aren't atomic, so a loser hits
+   the `sessionTestId_learnerId_kind` unique constraint and 500s; the caller
+   saw this as "pre-test posted but taking it errors, refresh fixes it"
+   because the refreshed page re-reads an attempt that now exists and takes
+   the GET path instead of POST-start. `.../test/[kind]/start/route.ts` now
+   catches `P2002` on that create and returns the winning concurrent
+   attempt instead of erroring.
+
+**Investigated, not code bugs:**
+- *Pre-test URL 404s* and *class-report error* from the original report both
+  used class/session ids from a dev DB state that no longer exists (the local
+  DB was reseeded since — see [[dev-db-uses-db-push-not-migrate]] memory
+  note). Re-tested the class-report flow directly against a live class +
+  enrolled learner in the current dev DB (`POST /api/learner/reports`) and it
+  returned `201` cleanly — no fix applied there.
+
+**Tests.** New race-condition test in
+`test/[kind]/start/__tests__/route.test.ts` (mocks a `P2002` rejection,
+asserts the graceful 200 resume); new `SESSION_PRETEST_TAKEN` notify
+assertions in `submit/__tests__/route.test.ts` (PRE fires it, POST doesn't);
+`contactInfo.test.ts` updated for numbers-only; `class.test.ts` +
+`tutor/classes/__tests__/route.test.ts` +
+`tutor/topic-requests/[id]/accept/__tests__/route.test.ts` updated for the new
+location-or-link requirement. 683/683, `tsc`/`lint` clean (one pre-existing
+`PortalLayout.tsx` lint error, unrelated/untouched). Not committed.
 
 <a id="part-70"></a>
 ## Part 70 — `docs/reference/` refresh (2026-09-10)

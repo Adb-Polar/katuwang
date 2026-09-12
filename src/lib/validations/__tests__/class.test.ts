@@ -59,17 +59,28 @@ describe("classDetailsSchema", () => {
 });
 
 describe("createClassSchema", () => {
+  const withMeetingLink = { ...validDetails, meetingLink: "https://meet.google.com/abc-defg-hij" };
+
   it("accepts class details plus at least one session", () => {
-    expect(createClassSchema.safeParse({ ...validDetails, sessions: [validSession] }).success).toBe(true);
+    expect(createClassSchema.safeParse({ ...withMeetingLink, sessions: [validSession] }).success).toBe(true);
   });
 
   it("rejects zero sessions", () => {
-    expect(createClassSchema.safeParse({ ...validDetails, sessions: [] }).success).toBe(false);
+    expect(createClassSchema.safeParse({ ...withMeetingLink, sessions: [] }).success).toBe(false);
   });
 
   it("rejects more than 20 sessions", () => {
     const sessions = Array.from({ length: 21 }, () => validSession);
-    expect(createClassSchema.safeParse({ ...validDetails, sessions }).success).toBe(false);
+    expect(createClassSchema.safeParse({ ...withMeetingLink, sessions }).success).toBe(false);
+  });
+
+  it("rejects when neither a location nor a meeting link is given", () => {
+    expect(createClassSchema.safeParse({ ...validDetails, sessions: [validSession] }).success).toBe(false);
+  });
+
+  it("accepts a building/room location instead of a meeting link", () => {
+    const withLocation = { ...validDetails, building: "Main Hall", sessions: [validSession] };
+    expect(createClassSchema.safeParse(withLocation).success).toBe(true);
   });
 
   // Note: whether each session's topic actually belongs to the submitted `topics`

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 
 const {
   getServerSessionMock,
@@ -167,5 +168,34 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect(sessionTestAttemptCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ learnerId: "L1", kind: "PRE" }) }),
     );
+  });
+
+  it("200 resume — a concurrent start that loses the unique-constraint race returns the winner's attempt instead of erroring", async () => {
+    const raceWinner = {
+      id: "at1",
+      kind: "PRE",
+      status: "IN_PROGRESS",
+      totalQuestions: 1,
+      correctCount: 0,
+      scorePercent: 0,
+      startedAt: new Date(),
+      submittedAt: null,
+      sessionTest: { id: "st1", title: "t", instructions: null },
+      items: [],
+    };
+    sessionTestAttemptCreate.mockRejectedValue(
+      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "test",
+      }),
+    );
+    // First lookup (before create) finds nothing; second lookup (after the race
+    // loss) finds the attempt the concurrent request just created.
+    sessionTestAttemptFindUnique.mockResolvedValueOnce(null).mockResolvedValueOnce(raceWinner);
+
+    const res = await POST(req(), ctx("PRE"));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.id).toBe("at1");
   });
 });

@@ -20,18 +20,7 @@ describe("normalizeContactInfo", () => {
     expect(normalizeContactInfo("+1 555 000 1111").ok).toBe(false);
   });
 
-  it("keeps a free-form handle as-is", () => {
-    expect(normalizeContactInfo("  Juan's mom on Messenger  ")).toEqual({
-      ok: true,
-      value: "Juan's mom on Messenger",
-    });
-  });
-
-  it("rejects a handle that is too short", () => {
-    expect(normalizeContactInfo("ab").ok).toBe(false);
-  });
-
-  it("rejects contact info over 200 characters", () => {
-    expect(normalizeContactInfo("a".repeat(201)).ok).toBe(false);
+  it("rejects a free-form handle — numbers only", () => {
+    expect(normalizeContactInfo("Juan's mom on Messenger").ok).toBe(false);
   });
 });

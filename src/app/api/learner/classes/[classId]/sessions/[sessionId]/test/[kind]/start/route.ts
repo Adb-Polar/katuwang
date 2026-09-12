@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { isAccessError, loadEnrolledSession } from "@/lib/sessionTestAccess";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 import { getSetting } from "@/lib/settings";
+import { Prisma } from "@prisma/client";
 import type { SessionStatus, SessionTestKind } from "@prisma/client";
 
 type Ctx = { params: Promise<{ classId: string; sessionId: string; kind: string }> };
@@ -83,18 +84,35 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: message, code: blocked }, { status: 409 });
     }
 
-    const attempt = await prisma.sessionTestAttempt.create({
-      data: {
-        sessionTestId: test.id,
-        learnerId: session.user.id,
-        kind,
-        totalQuestions: test.questions.length,
-        items: {
-          create: test.questions.map((q) => ({ questionId: q.questionId, position: q.position })),
+    let attempt;
+    try {
+      attempt = await prisma.sessionTestAttempt.create({
+        data: {
+          sessionTestId: test.id,
+          learnerId: session.user.id,
+          kind,
+          totalQuestions: test.questions.length,
+          items: {
+            create: test.questions.map((q) => ({ questionId: q.questionId, position: q.position })),
+          },
         },
-      },
-      include: ATTEMPT_INCLUDE,
-    });
+        include: ATTEMPT_INCLUDE,
+      });
+    } catch (err) {
+      // Two concurrent "start" calls (e.g. a double-fired effect) can both pass the
+      // `existing` check above before either inserts — the loser hits the compound
+      // unique constraint. Treat that as a resume, not a failure.
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+        const raceWinner = await prisma.sessionTestAttempt.findUnique({
+          where: { sessionTestId_learnerId_kind: { sessionTestId: test.id, learnerId: session.user.id, kind } },
+          include: ATTEMPT_INCLUDE,
+        });
+        if (raceWinner) {
+          return NextResponse.json(serializeSessionTestAttempt(raceWinner, { reveal: false }), { status: 200 });
+        }
+      }
+      throw err;
+    }
 
     return NextResponse.json(serializeSessionTestAttempt(attempt, { reveal: false }), { status: 201 });
   } catch (error) {

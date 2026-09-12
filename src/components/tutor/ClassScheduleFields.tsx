@@ -178,6 +178,9 @@ export default function ClassScheduleFields({
     if (sessionRows.some((r) => !r.topic || !r.scheduledAt)) {
       return setFormError("Every session needs a topic and a date/time.");
     }
+    if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
+      return setFormError("Please provide a location (building/room) or a meeting link.");
+    }
 
     onSubmit({
       ...form,
@@ -368,7 +371,7 @@ export default function ClassScheduleFields({
                   <select
                     value={row.topic}
                     onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
-                    className={`select select-bordered ${rowSelectCls} flex-1 min-w-0`}
+                    className={`select select-bordered ${rowSelectCls} flex-1 min-w-0 truncate`}
                   >
                     {selectedTopics.map((t) => (
                       <option key={t} value={t}>
@@ -417,7 +420,7 @@ export default function ClassScheduleFields({
         )}
       </FormField>
 
-      <FormField size={fieldSize} label="Location" hint="Optional — for an in-person class">
+      <FormField size={fieldSize} label="Location" hint="A location or a meeting link is required — for an in-person class">
         <div className="flex flex-wrap items-center gap-1.5">
           <input
             type="text"
@@ -452,7 +455,7 @@ export default function ClassScheduleFields({
           />
         </FormField>
 
-        <FormField size={fieldSize} label="Meeting Link" hint="Optional">
+        <FormField size={fieldSize} label="Meeting Link" hint="Required if no location is set">
           <input
             type="url"
             name="meetingLink"

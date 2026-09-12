@@ -35,7 +35,9 @@ export type NotificationType =
   | "REPORT_REVIEWED"
   // session pre/post tests (learner-facing)
   | "SESSION_PRETEST_OPEN"
-  | "SESSION_POSTTEST_OPEN";
+  | "SESSION_POSTTEST_OPEN"
+  // session pre-test submitted (tutor-facing)
+  | "SESSION_PRETEST_TAKEN";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

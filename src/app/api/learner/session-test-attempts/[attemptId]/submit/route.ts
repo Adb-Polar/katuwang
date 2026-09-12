@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 import { gradeAttempt } from "@/lib/gradeAttempt";
+import { notify } from "@/lib/notifications";
 
 const ATTEMPT_INCLUDE = {
   items: { include: { question: { include: { options: true } } } },
@@ -57,7 +58,7 @@ export async function POST(
           data: { selectedOptionId: g.selectedOptionId, isCorrect: g.isCorrect },
         });
       }
-      return tx.sessionTestAttempt.update({
+      const submitted = await tx.sessionTestAttempt.update({
         where: { id: attemptId },
         data: {
           status: "SUBMITTED",
@@ -67,6 +68,33 @@ export async function POST(
         },
         include: ATTEMPT_INCLUDE,
       });
+
+      if (submitted.kind === "PRE") {
+        const owner = await tx.sessionTest.findUnique({
+          where: { id: submitted.sessionTestId },
+          select: {
+            sessionId: true,
+            session: {
+              select: {
+                classId: true,
+                topic: true,
+                class: { select: { tutorProfile: { select: { userId: true } } } },
+              },
+            },
+          },
+        });
+        if (owner) {
+          await notify(
+            tx,
+            owner.session.class.tutorProfile.userId,
+            "SESSION_PRETEST_TAKEN",
+            `A learner took the pre-test for your "${owner.session.topic}" session.`,
+            `/tutor/classes/${owner.session.classId}/sessions/${owner.sessionId}/test/results`,
+          );
+        }
+      }
+
+      return submitted;
     });
 
     return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true }));

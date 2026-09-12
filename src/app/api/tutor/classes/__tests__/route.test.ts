@@ -58,6 +58,7 @@ function validBody(overrides: Record<string, unknown> = {}) {
     topics: ["Algebraic Expressions"],
     maxStudents: 2,
     sessions: [validSession],
+    meetingLink: "https://meet.google.com/abc-defg-hij",
     ...overrides,
   };
 }
