@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [76](#part-76) | **Platform logo assets** | Added `public/logos/` (full-color, dark, white, anchor SVG variants). Not yet wired into any component. | See Part 76 below. |
 | [75](#part-75) | **Admin recommends a class to a learner** | Admins can recommend a specific class to a learner from the class detail page — notification-only, no auto-enrollment. | See Part 75 below. |
 | [74](#part-74) | **Change password (self-service)** | Learner/tutor/admin can change their own password from a "Change password" card on their profile-edit page (admin: `/admin/settings`). | See Part 74 below. |
 | [73](#part-73) | **Privacy Policy page** | Static `/privacy-policy` page, linked from the registration consent checkbox. | See Part 73 below. |
@@ -3027,6 +3028,16 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-76"></a>
+## Part 76 — Platform logo assets (2026-09-14)
+
+Added `public/logos/logo-{full-color,dark,white,anchor}.svg` — the fifth
+item from the backlog note behind Parts 72–75 (see Part 72), handled by
+the user directly rather than generated. Not yet referenced from any
+component; wiring them into `BrandMark`/favicons is a follow-up.
+
+**Tests.** None — static assets only, no code change.
 
 <a id="part-75"></a>
 ## Part 75 — Admin recommends a class to a learner (2026-09-14)
