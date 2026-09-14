@@ -37,6 +37,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Admin approval of new registrations (optional gate) | ✅ | `AccountStatus.PENDING`, `/admin/registrations`, `requireRegistrationApproval` platform setting |
 | Account moderation (suspend/ban) | ✅ | `AccountStatus` (`SUSPENDED`/`BANNED`), `statusExpiresAt`, `/admin/users` |
 | Double-blind anonymity (no real names across peer boundary) | ✅ | peer-facing DTOs expose only `id`/`anonymousId`; `showTutorRealNames` admin toggle exists as an override |
+| Privacy Policy page | ✅ | landed 2026-09-14 (Changes.md Part 73): static `/privacy-policy`, linked from the registration consent checkbox |
 
 ## 2. Session Management Module
 

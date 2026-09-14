@@ -8,7 +8,7 @@ Source: `src/app/learner/**`, `src/app/api/classes/**`, `src/components/learner/
 
 ## Registration
 
-- **Register as a learner** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent. Only accepted while the `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.
+- **Register as a learner** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent (linked to `/privacy-policy`). Only accepted while the `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.
   (`POST /api/register`)
 - Receives a sequential anonymous ID in the form `STU-XXXX`, generated atomically via `generateAnonymousId("LEARNER")`.
 

@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [73](#part-73) | **Privacy Policy page** | Static `/privacy-policy` page, linked from the registration consent checkbox. | See Part 73 below. |
 | [72](#part-72) | **Email verification (optional gate)** | Optional admin-toggleable email-verification gate on login (`requireEmailVerification`), checked before `PENDING`/`DECLINED` approval status. | See Part 72 below. |
 | [71](#part-71) | **9/11 tutor/learner bug-fix batch** | Six fixes from manual-testing notes: numbers-only contact info, truncated long topic names in `<select>`s, class scheduling requires a location or meeting link, tutors are notified when a learner takes a pre-test, a fully-past class with no enrollees drops out of "Active", and a pre-test start race condition (`P2002`) that surfaced as "posted but errors, refresh fixes it". Two reported items (a stale test-page 404 and a class-report error) turned out to be dev-DB-reseed artifacts, not code bugs — verified by re-testing live, no fix applied. | See Part 71 below. |
 | [70](#part-70) | **`docs/reference/` refresh** | Brought the reference docs to the current build. `project-overview.md`: chatbot and learner pre/post-tests are ✅ built (were "not built"); subjects are admin-editable tables, not the `SubjectArea` enum. `decisions.md`: "Known unbuilt modules" section resolved (all six modules built); chatbot decision gets a 2026-09-10 update (35 intents / 26 FAQ / `/admin/chatbot` review UI). `feature-checklist.md`: review date → 2026-09-10, matching row wording. `auth-implementation.md`: added a "build guide, not a code mirror" status banner. `erd.mmd` regenerated from the schema (was missing the `Report*` enums). `chatbot.md`, `theme.md`, `architecture-design.*`, `thesis.md` already current / historical — unchanged. | Docs only — no code/schema/test change. `npx prisma generate` re-run (erd.md unchanged). |
@@ -3024,6 +3025,21 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-73"></a>
+## Part 73 — Privacy Policy page (2026-09-14)
+
+Second of four features from the same backlog note (see Part 72).
+
+**Privacy Policy page.** New static `src/app/privacy-policy/page.tsx` —
+data collected/why, double-blind anonymity summary, consent, retention/
+RA 10173 rights, contact. Linked from the registration consent checkbox
+(`RegisterForm.tsx`); no global footer added (out of proportion to a
+content page).
+
+**Tests.** Covered by the combined 729/729 batch (no new automated tests —
+a static content page). Manually verified the consent-checkbox link opens
+`/privacy-policy` in a new tab without checking the checkbox.
 
 <a id="part-72"></a>
 ## Part 72 — Email verification (optional gate) (2026-09-14)

@@ -8,7 +8,7 @@ Source: `src/app/tutor/**`, `src/app/api/tutor/**`, `src/components/tutor/**`
 
 ## Registration
 
-- **Register as a tutor** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent. A `TutorProfile` is created in the same transaction as the `User`. Only accepted while `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.
+- **Register as a tutor** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent (linked to `/privacy-policy`). A `TutorProfile` is created in the same transaction as the `User`. Only accepted while `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.
   (`POST /api/register`)
 - Receives a sequential anonymous ID in the form `TUT-XXXX`, generated atomically via `generateAnonymousId("TUTOR")`.
 

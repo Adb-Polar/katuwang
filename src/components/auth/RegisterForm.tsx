@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -259,8 +260,16 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             />
             <label htmlFor="consent" className="cursor-pointer select-none leading-relaxed">
               I confirm that a parent or guardian has consented to this registration. Personal information collected is
-              used solely for academic support purposes in accordance with RA 10173 (Data Privacy Act of 2012).{" "}
-              <span className="text-error">*</span>
+              used solely for academic support purposes in accordance with RA 10173 (Data Privacy Act of 2012) and our{" "}
+              <Link
+                href="/privacy-policy"
+                target="_blank"
+                className="link link-primary font-semibold"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Privacy Policy
+              </Link>
+              . <span className="text-error">*</span>
             </label>
           </div>
 
