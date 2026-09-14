@@ -41,6 +41,12 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
       "When enabled, new learner and tutor accounts are created as PENDING and cannot log in until an admin approves them from the Registrations queue.",
     group: "General",
   },
+  requireEmailVerification: {
+    label: "Require email verification",
+    description:
+      "When enabled, new accounts must confirm their email via a link before they can log in. Existing accounts without a verified email will also be blocked — only enable after confirming this is safe for your current users.",
+    group: "General",
+  },
   autoCertifyOnAssessmentPass: {
     label: "Auto-certify tutors who pass an assessment",
     description:
