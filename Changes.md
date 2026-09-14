@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [77](#part-77) | **Deploy-essentials seed script** | New `prisma/seedEssentials.ts` — seeds only `IdCounter` rows and the `Subject`/`Topic` catalogue for a fresh deploy, no demo users/classes. | See Part 77 below. |
 | [76](#part-76) | **Platform logo assets** | Added `public/logos/` (full-color, dark, white, anchor SVG variants). Not yet wired into any component. | See Part 76 below. |
 | [75](#part-75) | **Admin recommends a class to a learner** | Admins can recommend a specific class to a learner from the class detail page — notification-only, no auto-enrollment. | See Part 75 below. |
 | [74](#part-74) | **Change password (self-service)** | Learner/tutor/admin can change their own password from a "Change password" card on their profile-edit page (admin: `/admin/settings`). | See Part 74 below. |
@@ -3028,6 +3029,18 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-77"></a>
+## Part 77 — Deploy-essentials seed script (2026-09-14)
+
+New `prisma/seedEssentials.ts` — an alternative to `prisma/seed.ts` for a
+fresh deploy: seeds only `IdCounter` (TUTOR/LEARNER/CLASS) and the
+`Subject`/`Topic` catalogue from `SUBJECT_TOPICS`, with no demo users,
+classes, or other dummy data. Idempotent (`upsert`, keyed by slug/name),
+safe to re-run. Not wired into `package.json` scripts — run directly via
+`pnpm exec tsx prisma/seedEssentials.ts`.
+
+**Tests.** None — a standalone one-off script, no route/component surface.
 
 <a id="part-76"></a>
 ## Part 76 — Platform logo assets (2026-09-14)
