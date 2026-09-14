@@ -818,3 +818,11 @@ Security-review fixes (Changes.md Part 57)
 --- Part 73 (Privacy Policy page) ---
  [] Register page: the "Privacy Policy" link in the consent checkbox text
     opens /privacy-policy in a new tab without checking the checkbox.
+
+--- Part 74 (Change password, self-service) ---
+ [] /learner/profile/edit and /tutor/profile/edit: the new "Change password"
+    card rejects the wrong current password with an inline error, and a
+    correct current password + valid new password lets you log back in with
+    the new one.
+ [] /admin/settings: the new "My Account" change-password section works the
+    same way for the admin's own login.

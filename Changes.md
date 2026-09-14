@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [74](#part-74) | **Change password (self-service)** | Learner/tutor/admin can change their own password from a "Change password" card on their profile-edit page (admin: `/admin/settings`). | See Part 74 below. |
 | [73](#part-73) | **Privacy Policy page** | Static `/privacy-policy` page, linked from the registration consent checkbox. | See Part 73 below. |
 | [72](#part-72) | **Email verification (optional gate)** | Optional admin-toggleable email-verification gate on login (`requireEmailVerification`), checked before `PENDING`/`DECLINED` approval status. | See Part 72 below. |
 | [71](#part-71) | **9/11 tutor/learner bug-fix batch** | Six fixes from manual-testing notes: numbers-only contact info, truncated long topic names in `<select>`s, class scheduling requires a location or meeting link, tutors are notified when a learner takes a pre-test, a fully-past class with no enrollees drops out of "Active", and a pre-test start race condition (`P2002`) that surfaced as "posted but errors, refresh fixes it". Two reported items (a stale test-page 404 and a class-report error) turned out to be dev-DB-reseed artifacts, not code bugs — verified by re-testing live, no fix applied. | See Part 71 below. |
@@ -3025,6 +3026,26 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-74"></a>
+## Part 74 — Change password (self-service) (2026-09-14)
+
+Third of four features from the same backlog note (see Part 72).
+
+**Change password (learner/tutor/admin).** New shared core
+`changeOwnPassword()` (`src/lib/changePassword.ts`, inline bcryptjs cost
+12, matching the existing convention) behind three thin routes —
+`POST /api/{learner,tutor,admin}/profile/password` — each with its own
+RBAC check (401, matching this app's existing profile-route convention).
+New `ChangePasswordForm.tsx`, rendered as a second card on
+`ProfileEditView` (learner/tutor) and under a new "My Account" section on
+`/admin/settings` (admins previously had no self-service account surface
+at all).
+
+**Tests.** `{learner,tutor,admin}/profile/password/__tests__` (6 each),
+part of the combined 729/729 batch. Manually verified: wrong current
+password is rejected inline; a correct current password + valid new
+password lets you log back in with the new one, for all three roles.
 
 <a id="part-73"></a>
 ## Part 73 — Privacy Policy page (2026-09-14)

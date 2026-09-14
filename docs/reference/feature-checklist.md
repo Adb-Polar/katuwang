@@ -32,6 +32,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Password hashing (bcrypt) | ✅ | used in `/api/register`, auth callbacks |
 | Password reset flow | ✅ | `/forgot-password`, `/reset-password`, `PasswordResetToken` model (token hashed, expiring, single-use); reset link emailed via `src/lib/mail.ts` (Nodemailer/SMTP, env-configured, console fallback when unset) |
 | Email verification (optional gate) | ✅ | landed 2026-09-14 (Changes.md Part 72): `User.emailVerifiedAt`, `VerificationToken` model, `requireEmailVerification` platform setting (defaults **off** — enabling it retroactively blocks unverified existing accounts, see `decisions.md`); checked before `PENDING`/`DECLINED` in `authorize()` |
+| Change password (self-service) | ✅ | landed 2026-09-14 (Changes.md Part 74): `POST /api/{learner,tutor,admin}/profile/password`, `ChangePasswordForm` on the profile-edit page (learner/tutor) and `/admin/settings` (admin) |
 | Role-Based Access Control | ✅ | `src/proxy.ts` middleware + per-route `getServerSession` checks |
 | Profile management | ✅ | `/learner/profile`, `/tutor/profile`, `ProfileEditForm`/`ProfileView` |
 | Admin approval of new registrations (optional gate) | ✅ | `AccountStatus.PENDING`, `/admin/registrations`, `requireRegistrationApproval` platform setting |

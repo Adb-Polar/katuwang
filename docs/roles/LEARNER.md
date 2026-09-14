@@ -132,10 +132,12 @@ only — no pass/fail, no grade impact.
 - **Edit `contactInfo`, `section`, and `gradeLevel`** — the self-service editable fields.
   (`PATCH /api/learner/profile`) `contactInfo` is format-checked: a phone-like value must be a
   PH mobile number and is normalised to `09XXXXXXXXX`; anything else is kept as a free-form handle.
-- Name, email, and password are **not** self-editable: email/password changes need a dedicated
-  security flow (not yet built); name changes are avoided on an anonymity-sensitive platform where
-  the session's cached `fullName` only refreshes on next login. Grade level became self-service on
-  2026-09-06 (see `docs/reference/decisions.md`).
+- **Change password** — a separate card on `/learner/profile/edit`, requiring the current password.
+  (`POST /api/learner/profile/password`, `401` on a wrong current password.) Added 2026-09-14.
+- Name and email are **not** self-editable: email changes need a dedicated security flow (not yet
+  built); name changes are avoided on an anonymity-sensitive platform where the session's cached
+  `fullName` only refreshes on next login. Grade level became self-service on 2026-09-06 (see
+  `docs/reference/decisions.md`).
 
 ## Privacy & Identity
 

@@ -155,10 +155,12 @@ Two tabs on one page:
 - **Edit `contactInfo`, `section`, and `gradeLevel`** — the self-service editable fields.
   (`PATCH /api/tutor/profile`) `contactInfo` is format-checked: a phone-like value must be a
   PH mobile number and is normalised to `09XXXXXXXXX`; anything else is kept as a free-form handle.
-- Name, email, and password are **not** self-editable: email/password changes need a dedicated,
-  security-sensitive flow (not yet built); name changes are avoided since the session's cached
-  `fullName` only refreshes on next login and this is an anonymity-sensitive platform. Grade level
-  became self-service on 2026-09-06 (see `docs/reference/decisions.md`).
+- **Change password** — a separate card on `/tutor/profile/edit`, requiring the current password.
+  (`POST /api/tutor/profile/password`, `401` on a wrong current password.) Added 2026-09-14.
+- Name and email are **not** self-editable: email changes need a dedicated, security-sensitive flow
+  (not yet built); name changes are avoided since the session's cached `fullName` only refreshes on
+  next login and this is an anonymity-sensitive platform. Grade level became self-service on
+  2026-09-06 (see `docs/reference/decisions.md`).
 
 ## Privacy & Identity
 

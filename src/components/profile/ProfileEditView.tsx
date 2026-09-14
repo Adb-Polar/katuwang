@@ -1,6 +1,7 @@
 import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
+import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
 
 /**
  * The self-service edit form on its own page (`/{role}/profile/edit`), mirroring
@@ -37,6 +38,13 @@ export default function ProfileEditView({
             initialSection={section}
             initialGradeLevel={gradeLevel}
           />
+        </div>
+      </section>
+
+      <section className="card kt-card max-w-2xl">
+        <div className="card-body gap-4 p-6">
+          <h2 className="card-title text-sm font-bold">Change password</h2>
+          <ChangePasswordForm endpoint={`${endpoint}/password`} />
         </div>
       </section>
     </div>

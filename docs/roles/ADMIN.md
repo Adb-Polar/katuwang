@@ -78,6 +78,10 @@ Admin-configurable boolean flags stored in `PlatformSetting`:
 
 (`GET`/`PATCH /api/admin/settings`)
 
+This page also has a **My Account** section (added 2026-09-14) to change your own password — the
+first self-service account surface admins have had, since this page previously covered only
+platform-wide settings. (`POST /api/admin/profile/password`, `401` on a wrong current password.)
+
 ## Reports & Analytics (`/admin/reports`)
 
 Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
