@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { GradeLevel, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateAnonymousId } from "@/lib/idGenerator";
+import { generateVerificationToken, hashVerificationToken, verificationTokenExpiry } from "@/lib/emailVerification";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared account-registration core. This is the single place that turns a set
@@ -23,10 +24,19 @@ export type RegisterAccountInput = {
   consentGiven: boolean;
   /** When true, the account is created with status PENDING (awaiting admin approval). */
   requireApproval?: boolean;
+  /** When true, a VerificationToken is issued and its raw value returned for the caller to email. */
+  requireEmailVerification?: boolean;
 };
 
 export type RegisterAccountResult =
-  | { ok: true; anonymousId: string; role: Role; pendingApproval: boolean }
+  | {
+      ok: true;
+      anonymousId: string;
+      role: Role;
+      pendingApproval: boolean;
+      /** Raw (unhashed) verification token — only the caller ever sees this, to put in the emailed link. */
+      verificationToken: string | null;
+    }
   | { ok: false; code: "DUPLICATE_EMAIL" };
 
 export async function registerAccount(input: RegisterAccountInput): Promise<RegisterAccountResult> {
@@ -41,6 +51,7 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     contactInfo,
     consentGiven,
     requireApproval = false,
+    requireEmailVerification = false,
   } = input;
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -65,19 +76,37 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     consentGiven,
     ...(requireApproval ? { status: "PENDING" as const } : {}),
   };
-  const select = { anonymousId: true, email: true, role: true } as const;
+  const select = { id: true, anonymousId: true, email: true, role: true } as const;
 
-  const user = isTutor
-    ? // Mirror the public route: user + tutor profile in one transaction.
-      await prisma.$transaction(async (tx) =>
-        tx.user.create({ data: { ...data, tutorProfile: { create: {} } }, select }),
-      )
-    : await prisma.user.create({ data, select });
+  const rawVerificationToken = requireEmailVerification ? generateVerificationToken() : null;
+  const createData = isTutor ? { ...data, tutorProfile: { create: {} } } : data;
+
+  // Only reach for a transaction when there's more than one table to write —
+  // a plain learner signup with no verification stays a single insert.
+  const user =
+    isTutor || rawVerificationToken
+      ? await prisma.$transaction(async (tx) => {
+          const created = await tx.user.create({ data: createData, select });
+
+          if (rawVerificationToken) {
+            await tx.verificationToken.create({
+              data: {
+                userId: created.id,
+                tokenHash: hashVerificationToken(rawVerificationToken),
+                expiresAt: verificationTokenExpiry(),
+              },
+            });
+          }
+
+          return created;
+        })
+      : await prisma.user.create({ data: createData, select });
 
   return {
     ok: true,
     anonymousId: user.anonymousId,
     role: user.role,
     pendingApproval: requireApproval,
+    verificationToken: rawVerificationToken,
   };
 }

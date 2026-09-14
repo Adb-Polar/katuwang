@@ -7,6 +7,7 @@ export const PLATFORM_SETTING_KEYS = [
   "matchingEnabled",
   "showTutorRealNames",
   "requireRegistrationApproval",
+  "requireEmailVerification",
   "autoCertifyOnAssessmentPass",
   "chatbotEnabled",
   "sessionTestsEnabled",
@@ -20,6 +21,10 @@ const DEFAULTS: Record<PlatformSettingKey, boolean> = {
   matchingEnabled: true,
   showTutorRealNames: false,
   requireRegistrationApproval: false,
+  // Defaults off, like requireRegistrationApproval — flipping it on locks out
+  // every existing account with a null emailVerifiedAt, so an admin should only
+  // enable it after backfilling/communicating to the current user base.
+  requireEmailVerification: false,
   autoCertifyOnAssessmentPass: false,
   chatbotEnabled: true,
   sessionTestsEnabled: true,

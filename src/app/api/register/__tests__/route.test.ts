@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { userFindUnique, userCreate, transactionMock, platformSettingFindUnique } = vi.hoisted(() => ({
+const { userFindUnique, userCreate, transactionMock, platformSettingFindUnique, sendMailMock } = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   userCreate: vi.fn(),
   transactionMock: vi.fn(),
   platformSettingFindUnique: vi.fn(),
+  sendMailMock: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -27,6 +28,11 @@ vi.mock("bcryptjs", () => ({
   default: {
     hash: vi.fn().mockResolvedValue("hashed-password"),
   },
+}));
+
+vi.mock("@/lib/mail", () => ({
+  sendMail: sendMailMock,
+  renderVerificationEmail: (url: string) => ({ subject: "s", html: url, text: url }),
 }));
 
 import { POST } from "@/app/api/register/route";
@@ -153,6 +159,38 @@ describe("POST /api/register", () => {
         data: expect.objectContaining({ status: "PENDING" }),
       })
     );
+  });
+
+  it("issues a verification token and emails a link when verification is required", async () => {
+    platformSettingFindUnique.mockImplementation(({ where }: { where: { key: string } }) =>
+      where.key === "requireEmailVerification" ? { key: where.key, value: "true" } : null
+    );
+    userFindUnique.mockResolvedValue(null);
+    const verificationCreate = vi.fn().mockResolvedValue({});
+    transactionMock.mockImplementation(async (cb) =>
+      cb({
+        user: {
+          create: vi.fn().mockResolvedValue({
+            id: "U1",
+            anonymousId: "STU-0001",
+            email: validLearner.email,
+            role: "STUDENT_LEARNER",
+          }),
+        },
+        verificationToken: { create: verificationCreate },
+      })
+    );
+
+    const res = await POST(makeRequest(validLearner));
+    expect(res.status).toBe(201);
+    const json = await res.json();
+    expect(json.requiresVerification).toBe(true);
+    expect(json.message).toMatch(/verification/i);
+    expect(verificationCreate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ userId: "U1" }) })
+    );
+    expect(sendMailMock).toHaveBeenCalledTimes(1);
+    expect(sendMailMock.mock.calls[0][0].to).toBe(validLearner.email);
   });
 
   it("returns 500 when an unexpected error occurs", async () => {

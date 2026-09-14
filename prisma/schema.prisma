@@ -155,6 +155,11 @@ model User {
   contactInfo   String?
   consentGiven  Boolean    @default(false)
 
+  // Set once the account's email address is confirmed via a VerificationToken.
+  // Null = unverified. Orthogonal to `status` — gates login independently
+  // (see src/lib/auth.ts) of the PENDING admin-approval flow.
+  emailVerifiedAt DateTime?
+
   // Moderation
   status          AccountStatus @default(ACTIVE)
   statusReason    String?       @db.Text
@@ -173,6 +178,7 @@ model User {
   auditLogs           AuditLog[]
   topicRequests       TopicRequest[]       @relation("LearnerTopicRequests")
   passwordResetTokens PasswordResetToken[]
+  verificationTokens  VerificationToken[]
 
   // Assessment authoring / moderation (ADMIN only in practice)
   authoredQuestions        AssessmentQuestion[] @relation("AuthoredQuestions")
@@ -208,6 +214,24 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+// ─── Verification Token ───────────────────────────────────────────────────────
+// One row per issued email-verification link, mirroring PasswordResetToken:
+// only the SHA-256 hash is stored, single-use (`usedAt`), time-limited
+// (`expiresAt`). Consuming one sets `User.emailVerifiedAt`.
+
+model VerificationToken {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("verification_tokens")
 }
 
 // ─── Tutor Profile ────────────────────────────────────────────────────────────

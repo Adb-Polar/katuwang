@@ -237,6 +237,7 @@ async function ensureUser(
       gradeLevel: input.gradeLevel,
       section: input.section,
       consentGiven: true,
+      emailVerifiedAt: new Date(),
     },
   });
 }
@@ -975,6 +976,7 @@ async function main() {
       gradeLevel: "GRADE_12",
       section: "N/A",
       consentGiven: true,
+      emailVerifiedAt: new Date(),
     },
   });
 

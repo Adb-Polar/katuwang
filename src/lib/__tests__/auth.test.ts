@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { userFindUnique, userUpdate } = vi.hoisted(() => ({
+const { userFindUnique, userUpdate, getSettingMock } = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
+  getSettingMock: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -12,6 +13,10 @@ vi.mock("@/lib/prisma", () => ({
       update: userUpdate,
     },
   },
+}));
+
+vi.mock("@/lib/settings", () => ({
+  getSetting: getSettingMock,
 }));
 
 vi.mock("bcryptjs", () => ({
@@ -38,6 +43,8 @@ function authorize(credentials?: Record<"email" | "password", string>) {
 describe("auth authorize()", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Verification off by default — most tests exercise unrelated status branches.
+    getSettingMock.mockResolvedValue(false);
   });
 
   it("throws when email or password is missing", async () => {
@@ -215,6 +222,91 @@ describe("auth authorize()", () => {
     await expect(
       authorize({ email: "juan@example.com", password: "password123" })
     ).rejects.toThrow(/^ACCOUNT_DECLINED$/);
+  });
+
+  it("throws the ACCOUNT_UNVERIFIED sentinel when verification is required and unmet", async () => {
+    getSettingMock.mockResolvedValue(true);
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "ACTIVE",
+      emailVerifiedAt: null,
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow("ACCOUNT_UNVERIFIED");
+  });
+
+  it("checks verification before PENDING approval — an unverified pending account sees ACCOUNT_UNVERIFIED", async () => {
+    getSettingMock.mockResolvedValue(true);
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "PENDING",
+      emailVerifiedAt: null,
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow("ACCOUNT_UNVERIFIED");
+  });
+
+  it("still enforces ACCOUNT_PENDING once the email is verified", async () => {
+    getSettingMock.mockResolvedValue(true);
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "PENDING",
+      emailVerifiedAt: new Date(),
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    await expect(
+      authorize({ email: "juan@example.com", password: "password123" })
+    ).rejects.toThrow("ACCOUNT_PENDING");
+  });
+
+  it("allows login when verification is required and already met", async () => {
+    getSettingMock.mockResolvedValue(true);
+    userFindUnique.mockResolvedValue({
+      id: "1",
+      email: "juan@example.com",
+      password: "hashed",
+      anonymousId: "STU-0001",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      status: "ACTIVE",
+      emailVerifiedAt: new Date(),
+    });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+
+    const result = await authorize({ email: "juan@example.com", password: "password123" });
+    expect(result).toEqual({
+      id: "1",
+      anonymousId: "STU-0001",
+      email: "juan@example.com",
+      role: "STUDENT_LEARNER",
+      fullName: "Juan Dela Cruz",
+    });
   });
 
   it("returns the user payload when credentials are valid", async () => {

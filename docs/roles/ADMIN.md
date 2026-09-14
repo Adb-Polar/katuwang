@@ -15,6 +15,7 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - **Ban a user** — set a user's account status to `BANNED` (indefinite, with a reason).
 - **Reactivate a user** — restore a suspended/banned account back to `ACTIVE`.
 - **Registration approval** (`/admin/registrations`, active while `requireRegistrationApproval` is on) — approve → `ACTIVE`; decline → `DECLINED` (distinct from `BANNED`, which is a policy action on an already-active account). A declined applicant can't sign in; when they try, they're sent to `/account-declined`, which shows the decline reason. The Users table hides `DECLINED` accounts unless you filter for that status.
+- **Email verification** (toggle `requireEmailVerification` in Platform Settings, added 2026-09-14) — when on, new accounts must click an emailed link before they can log in (`User.emailVerifiedAt`, `VerificationToken` model), checked *before* `requireRegistrationApproval`. Defaults off: turning it on retroactively blocks every existing account with no verified email, so only enable it once that's accounted for.
 - Every status change is written to the audit log automatically.
 - Admin accounts cannot be modified through this endpoint (`400 Cannot modify an admin account`).
 
@@ -73,6 +74,7 @@ Admin-configurable boolean flags stored in `PlatformSetting`:
 - **`requireCertificationForClassCreation`** — when enabled, tutors may only create a class covering topics they hold a `CERTIFIED` `TopicCertification` for. Defaults to `false`.
 - **`matchingEnabled`** — when disabled, the learner "Find a Class" matcher (`POST /api/learner/match`), topic requests (`/api/learner/topic-requests`), and the tutor request queue (`/api/tutor/topic-requests`) all return `403`. Defaults to `true`.
 - **`sessionTestsEnabled`** — when disabled, a tutor cannot create or publish a session test and a learner cannot start a pre/post attempt; already-collected results stay fully readable regardless. Defaults to `true`.
+- **`requireEmailVerification`** (added 2026-09-14) — see User Management above. Defaults to `false`.
 
 (`GET`/`PATCH /api/admin/settings`)
 

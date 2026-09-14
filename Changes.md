@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [72](#part-72) | **Email verification (optional gate)** | Optional admin-toggleable email-verification gate on login (`requireEmailVerification`), checked before `PENDING`/`DECLINED` approval status. | See Part 72 below. |
 | [71](#part-71) | **9/11 tutor/learner bug-fix batch** | Six fixes from manual-testing notes: numbers-only contact info, truncated long topic names in `<select>`s, class scheduling requires a location or meeting link, tutors are notified when a learner takes a pre-test, a fully-past class with no enrollees drops out of "Active", and a pre-test start race condition (`P2002`) that surfaced as "posted but errors, refresh fixes it". Two reported items (a stale test-page 404 and a class-report error) turned out to be dev-DB-reseed artifacts, not code bugs — verified by re-testing live, no fix applied. | See Part 71 below. |
 | [70](#part-70) | **`docs/reference/` refresh** | Brought the reference docs to the current build. `project-overview.md`: chatbot and learner pre/post-tests are ✅ built (were "not built"); subjects are admin-editable tables, not the `SubjectArea` enum. `decisions.md`: "Known unbuilt modules" section resolved (all six modules built); chatbot decision gets a 2026-09-10 update (35 intents / 26 FAQ / `/admin/chatbot` review UI). `feature-checklist.md`: review date → 2026-09-10, matching row wording. `auth-implementation.md`: added a "build guide, not a code mirror" status banner. `erd.mmd` regenerated from the schema (was missing the `Report*` enums). `chatbot.md`, `theme.md`, `architecture-design.*`, `thesis.md` already current / historical — unchanged. | Docs only — no code/schema/test change. `npx prisma generate` re-run (erd.md unchanged). |
 | [69](#part-69) | **`docs/` reorganisation** | Every file moved into a subfolder; `docs/README.md` is now a preview index of all docs. Merged the 6 `reviews/` docs → `reviews/reviews.md` and 3 assessment plans → `plans/assessments.md`; folded `plans/chatbot-assistant.md` into `reference/chatbot.md`. Archived completed/superseded plans + old spreadsheets under `docs/archive/`. `TODO.txt`/`TOTEST.txt` → `docs/backlog/`; `feature-checklist.md`/`erd.md`/`architecture-design.*` + renamed `thesis.md` → `docs/reference/`; xlsx → `docs/reports/`. | Path refs updated in `CLAUDE.md`, `README.md`, `PROGRESS_REPORT.md`, `docs/plans/README.md`, `docs/plans/fixes.md`, and 4 `src/` comments. `prisma/schema.prisma` erd `output` → `../docs/reference/erd.md`. Docs only — no test impact. |
@@ -3023,6 +3024,47 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-72"></a>
+## Part 72 — Email verification (optional gate) (2026-09-14)
+
+First of four features from a stray personal to-do note found in the repo
+root (`add emailverification.txt` — deleted after flagging to the user, it
+contained what looked like a plaintext SMTP app password). The note's fifth
+item ("create a logo") is out of scope — the user is doing that directly.
+
+**Email verification (optional, admin-toggleable).** `User.emailVerifiedAt
+DateTime?` + new `VerificationToken` model (mirrors `PasswordResetToken`:
+SHA-256 hash stored, single-use, 24h TTL via `src/lib/emailVerification.ts`).
+New setting `requireEmailVerification` (`src/lib/settings.ts`,
+`PlatformSettingsForm.tsx`) — **defaults off**, unlike the plan's original
+"on by default": flipping it on would lock out every existing account with
+a null `emailVerifiedAt`, so an admin should only enable it after
+confirming that's safe for the current user base. `registerAccount()`
+issues a token (single insert stays a plain `user.create`; a tutor
+profile or a verification token pushes it into `$transaction`) and
+`POST /api/register` emails it via `sendMail`/`renderVerificationEmail`
+(new, `src/lib/mail.ts`). Login gate in `src/lib/auth.ts` `authorize()`:
+checked **before** `PENDING`/`DECLINED` — an unverified account shouldn't
+see an approval-pending message that implies verification already
+happened (see `decisions.md`). New routes `POST /api/auth/verify-email`,
+`POST /api/auth/resend-verification`; new pages `/verify-email`,
+`/verify-email/check-email`, `/account-unverified`
+(+`ResendVerificationButton`, `VerifyEmailForm`). `prisma/seed.ts` sets
+`emailVerifiedAt: new Date()` on every seeded account (including admin)
+so local/demo logins aren't affected regardless of the setting.
+
+**Also fixed in passing:** `updatePlatformSettingSchema`'s key enum
+(`src/lib/validations/admin.ts`) was missing `sessionTestsEnabled`, so that
+existing toggle's `PATCH /api/admin/settings` call would have 400'd — added
+alongside `requireEmailVerification`.
+
+**Tests.** `verify-email/__tests__`, `resend-verification/__tests__` (11),
+`lib/__tests__/auth.test.ts` (+4 precedence cases), `register/__tests__`
+(+1, token issuance). `pnpm test` and `tsc`/`lint` clean as part of the
+combined 729/729 batch covering all four Part 72–75 features. Manually
+smoke-tested against the dev DB: register → verify → login-blocked-then-
+allowed.
 
 <a id="part-71"></a>
 ## Part 71 — 9/11 tutor/learner bug-fix batch (2026-09-12)

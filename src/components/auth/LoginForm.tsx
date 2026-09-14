@@ -65,6 +65,10 @@ export default function LoginForm() {
           router.push(reason ? `/account-declined?reason=${encodeURIComponent(reason)}` : "/account-declined");
           return;
         }
+        if (result.error === "ACCOUNT_UNVERIFIED") {
+          router.push(`/account-unverified?email=${encodeURIComponent(email)}`);
+          return;
+        }
         setError(result.error);
         setLoading(false);
       } else {

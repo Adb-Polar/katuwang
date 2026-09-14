@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validations/auth";
 import { getSetting } from "@/lib/settings";
 import { registerAccount } from "@/lib/registration";
+import { sendMail, renderVerificationEmail } from "@/lib/mail";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 
@@ -9,6 +10,9 @@ import { MINUTE_MS } from "@/lib/datetime";
 
 const PENDING_MESSAGE =
   "Registration received. An administrator needs to approve your account before you can sign in.";
+
+const VERIFY_EMAIL_MESSAGE =
+  "Registration received. Check your email for a verification link before you can sign in.";
 
 const TUTOR_SUCCESS_MESSAGE =
   "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.";
@@ -26,6 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     const requireApproval = await getSetting("requireRegistrationApproval");
+    const requireEmailVerification = await getSetting("requireEmailVerification");
 
     const body = await req.json();
 
@@ -50,6 +55,7 @@ export async function POST(req: NextRequest) {
       contactInfo: data.contactInfo || null,
       consentGiven: data.consentGiven,
       requireApproval,
+      requireEmailVerification,
     });
 
     if (!account.ok) {
@@ -59,17 +65,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const message = account.pendingApproval
-      ? PENDING_MESSAGE
-      : data.type === "TUTOR"
-        ? TUTOR_SUCCESS_MESSAGE
-        : "Registration successful.";
+    if (account.verificationToken) {
+      const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
+      const verifyUrl = `${base}/verify-email?token=${account.verificationToken}`;
+      try {
+        await sendMail({ to: data.email, ...renderVerificationEmail(verifyUrl) });
+      } catch (err) {
+        // Registration already succeeded — a mail failure shouldn't fail the
+        // request. The account can request a new link via resend-verification.
+        console.error("[register] failed to send verification email:", err);
+      }
+    }
+
+    const requiresVerification = Boolean(account.verificationToken);
+    const message = requiresVerification
+      ? VERIFY_EMAIL_MESSAGE
+      : account.pendingApproval
+        ? PENDING_MESSAGE
+        : data.type === "TUTOR"
+          ? TUTOR_SUCCESS_MESSAGE
+          : "Registration successful.";
 
     return NextResponse.json(
       {
         message,
         anonymousId: account.anonymousId,
         pendingApproval: account.pendingApproval,
+        requiresVerification,
       },
       { status: 201 },
     );

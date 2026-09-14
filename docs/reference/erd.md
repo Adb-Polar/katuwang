@@ -163,6 +163,7 @@ SUBMITTED SUBMITTED
     String section 
     String contactInfo "❓"
     Boolean consentGiven 
+    DateTime emailVerifiedAt "❓"
     AccountStatus status 
     String statusReason "❓"
     DateTime statusUpdatedAt "❓"
@@ -173,6 +174,16 @@ SUBMITTED SUBMITTED
   
 
   "password_reset_tokens" {
+    String id "🗝️"
+    String userId 
+    String tokenHash 
+    DateTime expiresAt 
+    DateTime usedAt "❓"
+    DateTime createdAt 
+    }
+  
+
+  "verification_tokens" {
     String id "🗝️"
     String userId 
     String tokenHash 
@@ -491,6 +502,7 @@ SUBMITTED SUBMITTED
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
     "password_reset_tokens" }o--|| "users" : "user"
+    "verification_tokens" }o--|| "users" : "user"
     "tutor_profiles" |o--|| "users" : "user"
     "topic_certifications" }o--|| "tutor_profiles" : "tutorProfile"
     "topic_certifications" |o--|| "TopicCertificationStatus" : "enum:status"

@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 import { rateLimit, rateLimitEnabled, clientIp } from "./rateLimit";
+import { getSetting } from "./settings";
 
 // A real bcrypt hash (cost 12) of a throwaway string. Compared against on the
 // no-such-user path so a wrong email costs the same time as a wrong password —
@@ -73,6 +74,14 @@ export const authOptions: NextAuthOptions = {
 
         if (user.status === "BANNED") {
           throw new Error("Your account has been banned.");
+        }
+
+        // Verification is checked before approval/pending status — a user who
+        // hasn't confirmed their email shouldn't be told their account is
+        // "pending admin review", which implies verification already happened.
+        if (!user.emailVerifiedAt && (await getSetting("requireEmailVerification"))) {
+          // Sentinel — LoginForm redirects this to /account-unverified.
+          throw new Error("ACCOUNT_UNVERIFIED");
         }
 
         if (user.status === "PENDING") {

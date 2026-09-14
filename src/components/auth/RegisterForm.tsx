@@ -89,6 +89,11 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
         return;
       }
 
+      if (data.requiresVerification) {
+        router.push(`/verify-email/check-email?email=${encodeURIComponent(form.email)}`);
+        return;
+      }
+
       const roleParam = type === "TUTOR" ? "&role=tutor" : "";
       const pendingParam = data.pendingApproval ? "&pending=true" : "";
       router.push(

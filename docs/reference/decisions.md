@@ -12,6 +12,26 @@ Format: newest first.
 
 ---
 
+## Email verification checked before PENDING approval (2026-09-14)
+
+**Decision:** In `src/lib/auth.ts` `authorize()`, the (optional,
+admin-toggled via `requireEmailVerification`) email-verification check runs
+**before** the `PENDING`/`DECLINED` account-status checks. An account that
+hasn't confirmed its email sees the `ACCOUNT_UNVERIFIED` sentinel, not
+`ACCOUNT_PENDING`, even if both are true.
+
+**Why:** `PENDING` means "an admin still needs to review this" — that
+message implies the account is otherwise real and ready, which isn't true
+for an address that was never confirmed. Verification is the more
+fundamental gate. The setting itself defaults **off** (unlike
+`requireRegistrationApproval`'s pattern would suggest defaulting on) because
+turning it on retroactively blocks every existing account with a null
+`emailVerifiedAt` — an admin should only enable it after confirming that's
+safe for the current user base. Seeded accounts (`prisma/seed.ts`) always
+get `emailVerifiedAt` set so local/demo logins are unaffected either way.
+
+---
+
 ## Lucide icon set supersedes the no-SVG invariant (2026-09-10)
 
 **Decision:** The app uses `lucide-react` for navigation, row, action, and status

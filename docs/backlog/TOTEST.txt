@@ -801,3 +801,16 @@ Security-review fixes (Changes.md Part 57)
  [] Learner: open a session's pre-test right after the tutor publishes it
     (freshly, not resuming) -> loads without the intermittent "An unexpected
     error occurred." that previously required a page refresh to clear.
+
+--- Part 72 (Email verification, optional gate) ---
+ [] Toggle "Require email verification" on in /admin/settings, register a new
+    learner -> redirected to "check your email" instead of straight to login;
+    logging in before clicking the link redirects to /account-unverified with
+    a working "Resend verification email" button; clicking the emailed link
+    (or a fresh /verify-email?token=... link) verifies and allows login.
+ [] With both "Require email verification" and "Require admin approval" on,
+    register a new account -> before verifying, login shows the unverified
+    screen (not the pending-approval screen); after verifying but before
+    admin approval, login shows the pending-approval screen.
+ [] An expired or already-used verification link shows the invalid/expired
+    error on /verify-email, and "Resend verification email" issues a new one.
