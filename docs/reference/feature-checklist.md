@@ -53,6 +53,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Roster / enrolled learners view | ✅ | `EnrolledLearnersTable.tsx`, `StudentRoster.tsx` |
 | Class moderation (suspend/ban/cancel) | ✅ | `ClassStatus` (`SUSPENDED`/`BANNED`), `ClassModerationPanel.tsx`, `/admin/classes` |
 | Learner reports a tutor or class | ✅ | `Report` / `ReportViolation` models, `ReportButton.tsx`, `POST /api/learner/reports`, admin review at `/admin/abuse-reports` (resolve/dismiss + note only; enforcement stays on Users/Classes pages) — added 2026-09-10 |
+| Admin recommends a class to a specific learner | ✅ | landed 2026-09-14 (Changes.md Part 75): `ClassRecommendation` model, `POST /api/admin/classes/[classId]/recommendations`, `RecommendClassForm` on `/admin/classes/[id]`; notification-only (`CLASS_RECOMMENDED_BY_ADMIN`), learner still self-enrolls. Not the same feature as the chatbot's learner-initiated class recommendation (Module 5) — see `decisions.md` |
 
 ## 3. Tutor Matching Module
 

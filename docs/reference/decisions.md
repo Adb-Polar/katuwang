@@ -32,6 +32,21 @@ get `emailVerifiedAt` set so local/demo logins are unaffected either way.
 
 ---
 
+## `ClassRecommendation` is not the chatbot's "recommend classes" feature (2026-09-14)
+
+**Decision:** The admin-initiated "recommend a class to a learner" feature
+(`ClassRecommendation` model, `CLASS_RECOMMENDED_BY_ADMIN` notification type,
+`POST /api/admin/classes/[classId]/recommendations`) is a separate,
+unrelated feature from the learner-facing chatbot's own "recommend classes"
+intent (`src/lib/chatbot/recommend.ts`, `rankMatches`), which already
+shipped (see `feature-checklist.md`). Both use the word "recommend" but nothing else — the chatbot ranks live classes for a learner who asks; this
+feature is admin-initiated and notification-only (no ranking, no
+auto-enrollment). Naming stays distinct in code (`ClassRecommendation` vs.
+`recommend.ts`/`rankMatches`) specifically so a future read of the schema or
+notification types doesn't conflate the two.
+
+---
+
 ## Lucide icon set supersedes the no-SVG invariant (2026-09-10)
 
 **Decision:** The app uses `lucide-react` for navigation, row, action, and status

@@ -14,6 +14,7 @@ import {
   Gavel,
   ClipboardList,
   Flag,
+  Sparkles,
 } from "lucide-react";
 import { MINUTE_MS, formatDayMonth } from "@/lib/datetime";
 
@@ -63,6 +64,8 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   // session pre/post tests (learner-facing)
   SESSION_PRETEST_OPEN: <ClipboardList className="h-4 w-4 text-info" />,
   SESSION_POSTTEST_OPEN: <ClipboardList className="h-4 w-4 text-success" />,
+  // admin-recommended class (distinct from the chatbot's own recommend feature)
+  CLASS_RECOMMENDED_BY_ADMIN: <Sparkles className="h-4 w-4 text-secondary" />,
 };
 
 export function relativeTime(iso: string): string {

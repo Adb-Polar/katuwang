@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [75](#part-75) | **Admin recommends a class to a learner** | Admins can recommend a specific class to a learner from the class detail page — notification-only, no auto-enrollment. | See Part 75 below. |
 | [74](#part-74) | **Change password (self-service)** | Learner/tutor/admin can change their own password from a "Change password" card on their profile-edit page (admin: `/admin/settings`). | See Part 74 below. |
 | [73](#part-73) | **Privacy Policy page** | Static `/privacy-policy` page, linked from the registration consent checkbox. | See Part 73 below. |
 | [72](#part-72) | **Email verification (optional gate)** | Optional admin-toggleable email-verification gate on login (`requireEmailVerification`), checked before `PENDING`/`DECLINED` approval status. | See Part 72 below. |
@@ -3026,6 +3027,34 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-75"></a>
+## Part 75 — Admin recommends a class to a learner (2026-09-14)
+
+Fourth of four features from the same backlog note (see Part 72).
+
+**Admin recommends a class to a learner.** New `ClassRecommendation`
+model (mirrors `TopicRequest.directedTutorProfileId`'s "direct this at
+someone" shape): `classId`, `learnerId`, `adminId`, optional `note`,
+`@@unique([classId, learnerId])`. New notification type
+`CLASS_RECOMMENDED_BY_ADMIN` (`notifications.ts`, `notificationMeta.tsx`)
+— explicitly distinguished in comments/decisions.md from the *unrelated*
+learner-facing chatbot "recommend classes" feature
+(`src/lib/chatbot/recommend.ts`). New `GET`/`POST
+/api/admin/classes/[classId]/recommendations`; new
+`RecommendClassForm.tsx` (learner search via the existing
+`/api/admin/users` endpoint, optional note, audit-trail list) rendered on
+the admin class detail page — chosen over a learner-page action because
+that page is explicitly documented read-only ("Moderate from the accounts
+table"). Notification-only: the learner still self-enrolls through the
+existing `/api/classes/[classId]/enroll` flow, no auto-enrollment.
+
+**Tests.** `admin/classes/[classId]/recommendations/__tests__` (9), part
+of the combined 729/729 batch. Manually verified: recommending creates a
+notification on the learner's `/learner/notifications` with a working link
+back to the class; the class detail page's recommended-list shows it;
+recommending the same class to the same learner again is blocked with a
+clear message.
 
 <a id="part-74"></a>
 ## Part 74 — Change password (self-service) (2026-09-14)

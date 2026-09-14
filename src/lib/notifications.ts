@@ -37,7 +37,11 @@ export type NotificationType =
   | "SESSION_PRETEST_OPEN"
   | "SESSION_POSTTEST_OPEN"
   // session pre-test submitted (tutor-facing)
-  | "SESSION_PRETEST_TAKEN";
+  | "SESSION_PRETEST_TAKEN"
+  // admin recommends a specific class to a learner (learner-facing). NOT the
+  // same as the chatbot's learner-initiated "recommend classes" feature in
+  // src/lib/chatbot/recommend.ts — see docs/reference/decisions.md.
+  | "CLASS_RECOMMENDED_BY_ADMIN";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

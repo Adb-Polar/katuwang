@@ -26,6 +26,8 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - **Suspend a class** — only a `SCHEDULED` class can be suspended; requires a reason and optional duration (auto-reinstates when the duration elapses, see `reinstateExpiredClasses`).
 - **Ban a class** — a `SCHEDULED` or `SUSPENDED` class can be banned (indefinite, with a reason); the owning tutor can no longer modify it.
 - **Reinstate a class** — a `SUSPENDED` or `BANNED` class can be returned to `SCHEDULED`.
+- **Recommend a class to a learner** (added 2026-09-14) — from a class's detail page (`/admin/classes/[id]`), search for a learner by anonymous ID/name and recommend that class to them, with an optional internal note. Purely informational: creates a `ClassRecommendation` row and sends the learner a `CLASS_RECOMMENDED_BY_ADMIN` notification linking to the class; the learner still has to self-enroll, there's no auto-enrollment. A class can only be recommended once to the same learner (`409` on repeat). Unrelated to the chatbot's own learner-initiated class recommendation (see `docs/reference/decisions.md`).
+  (`GET`/`POST /api/admin/classes/[classId]/recommendations`)
 
 ## Class Appeals (`/admin/class-appeals`)
 
@@ -202,6 +204,22 @@ Suspend, ban, or reinstate a class.
 **200** → updated `TutorClass`.
 **400** → invalid state transition or failed validation.
 **404** → class not found.
+**500** → `{ error }`.
+
+### `GET`/`POST /api/admin/classes/[classId]/recommendations`
+List, or create, a `ClassRecommendation` directing this class at a specific learner. Added 2026-09-14.
+
+**POST body**
+```json
+{ "learnerId": "string (a STUDENT_LEARNER user id)", "note": "string (≤500 chars, optional)" }
+```
+- Creates the row and sends the learner a `CLASS_RECOMMENDED_BY_ADMIN` notification linking to the class, in the same transaction.
+
+**GET 200** → `{ recommendations: [{ id, note, createdAt, dismissedAt, learner: { anonymousId, gradeLevel, section } }] }`.
+**POST 201** → the created `ClassRecommendation`.
+**400** → invalid body.
+**404** → class not found, or `learnerId` doesn't resolve to a `STUDENT_LEARNER`.
+**409** → this class was already recommended to that learner.
 **500** → `{ error }`.
 
 ### `GET /api/admin/topic-requests`

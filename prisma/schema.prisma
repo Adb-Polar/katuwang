@@ -180,6 +180,12 @@ model User {
   passwordResetTokens PasswordResetToken[]
   verificationTokens  VerificationToken[]
 
+  // Admin-issued class recommendations (see ClassRecommendation) — received as a
+  // learner, issued as the admin who recommended. Distinct from the chatbot's
+  // learner-initiated recommend.ts feature (src/lib/chatbot/recommend.ts).
+  recommendationsReceived ClassRecommendation[] @relation("ClassRecommendationsReceived")
+  recommendationsIssued   ClassRecommendation[] @relation("ClassRecommendationsIssued")
+
   // Assessment authoring / moderation (ADMIN only in practice)
   authoredQuestions        AssessmentQuestion[] @relation("AuthoredQuestions")
   resolvedQuestionRequests QuestionRequest[]    @relation("ResolvedQuestionRequests")
@@ -357,9 +363,10 @@ model TutorClass {
   topics            ClassTopic[]
   sessions          ClassSession[]
   enrollments       ClassEnrollment[]
-  fulfilledRequests TopicRequest[]    @relation("FulfilledRequests")
+  fulfilledRequests TopicRequest[]        @relation("FulfilledRequests")
   appeals           ClassAppeal[]
   reports           Report[]
+  recommendations   ClassRecommendation[]
 
   @@map("tutor_classes")
 }
@@ -456,6 +463,29 @@ model TopicRequestSlot {
   endTime   String
 
   @@map("topic_request_slots")
+}
+
+// ─── Class Recommendation (admin directs a learner to a specific class) ──────
+// Purely informational — creating one only sends a Notification (see
+// src/lib/notifications.ts, type CLASS_RECOMMENDED_BY_ADMIN); the learner still
+// self-enrolls via the normal ClassEnrollment flow. Unrelated to the chatbot's
+// learner-initiated recommend.ts feature — see docs/reference/decisions.md.
+
+model ClassRecommendation {
+  id          String     @id @default(cuid())
+  classId     String
+  class       TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  learnerId   String
+  learner     User       @relation("ClassRecommendationsReceived", fields: [learnerId], references: [id], onDelete: Cascade)
+  adminId     String
+  admin       User       @relation("ClassRecommendationsIssued", fields: [adminId], references: [id])
+  note        String?    @db.Text
+  createdAt   DateTime   @default(now())
+  dismissedAt DateTime?
+
+  @@unique([classId, learnerId])
+  @@index([learnerId, dismissedAt])
+  @@map("class_recommendations")
 }
 
 // ─── Audit Log (admin moderation action history) ──────────────────────────────
@@ -609,7 +639,7 @@ model Notification {
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String // free-text; valid values are the NotificationType union in src/lib/notifications.ts
-  //           (TOPIC_REQUEST_*, REGISTRATION_*, CERTIFICATION_*, QUESTION_REQUEST_*, CLASS_ENROLLMENT_*, CLASS_CANCELLED, CLASS_COMPLETED, CLASS_APPEAL_*)
+  //           (TOPIC_REQUEST_*, REGISTRATION_*, CERTIFICATION_*, QUESTION_REQUEST_*, CLASS_ENROLLMENT_*, CLASS_CANCELLED, CLASS_COMPLETED, CLASS_APPEAL_*, CLASS_RECOMMENDED_BY_ADMIN)
   message   String    @db.Text
   link      String?
   readAt    DateTime?

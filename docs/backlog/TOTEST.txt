@@ -826,3 +826,11 @@ Security-review fixes (Changes.md Part 57)
     the new one.
  [] /admin/settings: the new "My Account" change-password section works the
     same way for the admin's own login.
+
+--- Part 75 (Admin recommends a class to a learner) ---
+ [] /admin/classes/[id]: "Recommend to a learner" — search finds a learner by
+    anonymous ID, submitting creates a notification on that learner's
+    /learner/notifications with a working link back to the class; the class
+    detail page's "Already recommended" list shows it; recommending the same
+    class to the same learner again is blocked with a clear message instead
+    of a raw error.

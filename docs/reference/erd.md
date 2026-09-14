@@ -316,6 +316,17 @@ SUBMITTED SUBMITTED
     }
   
 
+  "class_recommendations" {
+    String id "🗝️"
+    String classId 
+    String learnerId 
+    String adminId 
+    String note "❓"
+    DateTime createdAt 
+    DateTime dismissedAt "❓"
+    }
+  
+
   "audit_logs" {
     String id "🗝️"
     String adminId 
@@ -522,6 +533,9 @@ SUBMITTED SUBMITTED
     "topic_requests" }o--|o "tutor_profiles" : "directedTutor"
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
+    "class_recommendations" }o--|| "tutor_classes" : "class"
+    "class_recommendations" }o--|| "users" : "learner"
+    "class_recommendations" }o--|| "users" : "admin"
     "audit_logs" }o--|| "users" : "admin"
     "assessment_questions" |o--|| "QuestionOrigin" : "enum:origin"
     "assessment_questions" }o--|| "users" : "createdBy"

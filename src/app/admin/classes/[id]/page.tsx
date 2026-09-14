@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
+import RecommendClassForm from "@/components/classes/RecommendClassForm";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
@@ -127,24 +128,27 @@ export default async function AdminClassDetailPage({
           </>
         }
         sidebarExtra={
-          tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED" ? (
-            <div className="card kt-card border-error/40!">
-              <div className="card-body gap-1 p-4">
-                <h2 className="card-title text-sm font-bold text-error">Moderation</h2>
-                {tutorClass.suspendedReason && (
+          <>
+            {(tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED") && (
+              <div className="card kt-card border-error/40!">
+                <div className="card-body gap-1 p-4">
+                  <h2 className="card-title text-sm font-bold text-error">Moderation</h2>
+                  {tutorClass.suspendedReason && (
+                    <p className="text-xs text-base-content/70">
+                      <span className="font-semibold">Reason:</span> {tutorClass.suspendedReason}
+                    </p>
+                  )}
                   <p className="text-xs text-base-content/70">
-                    <span className="font-semibold">Reason:</span> {tutorClass.suspendedReason}
+                    <span className="font-semibold">
+                      {tutorClass.suspendedUntil ? "Until:" : "Duration:"}
+                    </span>{" "}
+                    {tutorClass.suspendedUntil ? formatDateTime(tutorClass.suspendedUntil) : "Indefinite"}
                   </p>
-                )}
-                <p className="text-xs text-base-content/70">
-                  <span className="font-semibold">
-                    {tutorClass.suspendedUntil ? "Until:" : "Duration:"}
-                  </span>{" "}
-                  {tutorClass.suspendedUntil ? formatDateTime(tutorClass.suspendedUntil) : "Indefinite"}
-                </p>
+                </div>
               </div>
-            </div>
-          ) : null
+            )}
+            <RecommendClassForm classId={id} />
+          </>
         }
         actions={null}
       />
