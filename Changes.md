@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [78](#part-78) | **Sidebar nav font face swap** | `.kt-nav-item` switched from Fragment Mono to the body sans face (Apfel Grotezk), same size/weight — reverses the Part 58 nav-in-mono decision. | See Part 78 below. |
 | [77](#part-77) | **Deploy-essentials seed script** | New `prisma/seedEssentials.ts` — seeds only `IdCounter` rows and the `Subject`/`Topic` catalogue for a fresh deploy, no demo users/classes. | See Part 77 below. |
 | [76](#part-76) | **Platform logo assets** | Added `public/logos/` (full-color, dark, white, anchor SVG variants). Not yet wired into any component. | See Part 76 below. |
 | [75](#part-75) | **Admin recommends a class to a learner** | Admins can recommend a specific class to a learner from the class detail page — notification-only, no auto-enrollment. | See Part 75 below. |
@@ -3029,6 +3030,19 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-78"></a>
+## Part 78 — Sidebar nav font face swap (2026-09-21)
+
+`src/app/globals.css` — `.kt-nav-item` (the sidebar nav label) now uses
+`var(--font-sans)` (Apfel Grotezk, the body face) instead of
+`var(--font-mono)` (Fragment Mono). Size (`0.82rem`) and weight (`500`)
+unchanged — only the face changed, reversing the Part 58 "nav items in
+Fragment Mono per the notation brief" call. The `.kt-ic` icon-tile glyph
+inside each nav item still uses mono (it's a small letter badge, not the
+label text). CSS only — no TS/component/schema/test change.
+
+**Tests.** None — pure CSS. `tsc`/`lint` unaffected (no source touched).
 
 <a id="part-77"></a>
 ## Part 77 — Deploy-essentials seed script (2026-09-14)

@@ -779,6 +779,12 @@ Security-review fixes (Changes.md Part 57)
  [] docs/reviews/reviews.md Contents links jump to the right sections;
     docs/reference/chatbot.md appendix anchor works.
 
+--- Part 78 (sidebar nav font face swap) ---
+ [] Every portal sidebar (admin/tutor/learner): nav item labels render in the
+    body sans face (not the mono/notation look), same size/weight as before;
+    the small icon-tile letter badge next to each label still looks mono.
+    Nav column doesn't wrap/reflow at the default width.
+
 --- Part 71 (9/11 tutor/learner bug-fix batch) ---
  [] /tutor/profile/edit and /learner/profile/edit: Contact info field rejects
     letters/symbols as you type (only digits/spaces/+().- get through); a full
