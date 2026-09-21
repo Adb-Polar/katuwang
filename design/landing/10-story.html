@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10 · Story — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--base-100); }
+  .hero { text-align: center; padding-block: clamp(3rem, 8vw, 6rem) 2rem; }
+  h1 { font-weight: 900; font-size: clamp(2.5rem, 6.2vw, 4.8rem); letter-spacing: -.04em; line-height: 1.02; max-width: 14ch; margin: 1rem auto; }
+  .lede { max-width: 34rem; margin: 0 auto; color: var(--muted); font-size: 1.08rem; }
+  .cta { display: flex; gap: .7rem; justify-content: center; margin-top: 1.6rem; flex-wrap: wrap; }
+  .scroll { font-family: var(--mono); font-size: .72rem; color: var(--faint); text-align: center; margin-top: 2.5rem; } .scroll b { display: block; font-size: 1.2rem; font-weight: 400; animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge { 50% { transform: translateY(5px); } }
+  .story { position: relative; max-width: 56rem; margin: 2rem auto 0; padding-block: 1rem 4rem; }
+  .story::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; background: linear-gradient(var(--learner), var(--primary) 50%, var(--tutor)); transform: translateX(-50%); opacity: .5; }
+  .ch { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; padding-block: 2.5rem; }
+  .ch::before { content: attr(data-n); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 2.6rem; height: 2.6rem; display: grid; place-items: center; border-radius: 50%; background: var(--base-100); border: 2px solid var(--primary); font-family: var(--mono); font-size: .8rem; color: var(--primary); z-index: 1; }
+  .ch .txt h2 { font-size: clamp(1.4rem, 2.6vw, 2rem); letter-spacing: -.025em; line-height: 1.12; margin: .5rem 0; } .ch .txt p { color: var(--muted); font-size: .95rem; }
+  .ch:nth-child(even) .txt { order: 2; }
+  .vis { padding: 1.3rem; box-shadow: var(--shadow-pop); }
+  .vis .q { font-size: 1.05rem; font-weight: 500; } .vis .row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .55rem 0; border-top: 1px solid var(--border); font-size: .82rem; } .vis .row:first-of-type { border-top: 0; }
+  .vis .row .mono { font-size: .72rem; color: var(--muted); }
+  .bars { display: flex; align-items: flex-end; justify-content: center; gap: 2.5rem; height: 7rem; } .bars .b { display: flex; flex-direction: column; align-items: center; gap: .4rem; height: 100%; justify-content: flex-end; font-family: var(--mono); font-size: .7rem; color: var(--muted); } .bars i { width: 3.2rem; border-radius: .4rem .4rem 0 0; display: block; }
+  .gain { text-align: center; margin-top: .8rem; } .gain b { font-family: var(--mono); font-weight: 400; font-size: 1.6rem; color: var(--success); }
+  .priv { background: var(--neutral); color: var(--neutral-c); } .priv .wrap { padding-block: clamp(3rem, 7vw, 5rem); display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .priv h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; line-height: 1.1; } .priv p { color: color-mix(in oklch, var(--neutral-c) 75%, transparent); margin-top: 1rem; }
+  .priv .stack { display: grid; gap: .6rem; } .priv .stack div { display: flex; justify-content: space-between; align-items: center; padding: .9rem 1.1rem; border-radius: var(--r); border: 1px solid oklch(100% 0 0 / .14); font-size: .88rem; }
+  .priv .id--l { color: oklch(76% .13 300); } .priv .id--t { color: oklch(84% .13 85); }
+  .priv .stack .mono { font-size: .72rem; color: var(--teal-soft); }
+  .end { text-align: center; padding-block: clamp(3.5rem, 8vw, 5.5rem); } .end h2 { font-size: clamp(1.9rem, 4vw, 3rem); letter-spacing: -.03em; margin-bottom: 1.4rem; }
+  @media (max-width: 760px) { .story::before { left: 1.3rem; } .ch { grid-template-columns: 1fr; gap: 1rem; padding-left: 3.6rem; } .ch::before { left: 1.3rem; top: 3.4rem; } .ch:nth-child(even) .txt { order: 0; } .priv .wrap { grid-template-columns: 1fr; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">Privacy</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--primary" href="#">Create account</a></nav></div>
+
+<header class="wrap hero">
+  <p class="eyebrow">Peer tutoring · Grades 7–12 · Free</p>
+  <h1>From “I’m stuck” to “I got it.”</h1>
+  <p class="lede">Here’s how one afternoon goes on Katuwang — from the first question to a score you can see improve.</p>
+  <div class="cta"><a class="btn btn--primary btn--lg" href="#">Create account →</a><a class="btn btn--lg" href="#">Log in</a></div>
+  <p class="scroll"><b>↓</b>follow a session</p>
+</header>
+
+<section class="wrap story">
+  <div class="ch" data-n="01"><div class="txt"><span class="chip chip--l">● Learner · STU-2071</span><h2>You’re stuck on linear equations.</h2><p>Sign up with your grade and section. Katuwang gives you an anonymous ID — that’s all anyone else will see.</p></div>
+    <div class="card vis"><span class="q">“I don’t get slope.”</span><div class="row"><span>Grade</span><span class="mono">8 · Rizal</span></div><div class="row"><span>Name shown to peers</span><span class="chip">hidden</span></div></div></div>
+  <div class="ch" data-n="02"><div class="txt"><span class="chip chip--p">● Auto Match</span><h2>Classes that fit are ranked for you.</h2><p>Topic, grade level and your free times are scored against every open class. Enrol in one tap.</p></div>
+    <div class="card vis"><div class="row"><span>Algebra: linear eq.</span><span class="chip chip--ok">92</span></div><div class="row"><span>Fractions review</span><span class="chip">78</span></div><div class="row"><span>Geometry basics</span><span class="chip">64</span></div></div></div>
+  <div class="ch" data-n="03"><div class="txt"><span class="chip chip--t">● Tutor · TUT-0148</span><h2>Your tutor is a verified classmate.</h2><p>They passed a quiz on this exact topic. You see their ID and ✓ badge — never their name.</p></div>
+    <div class="card vis"><div class="row"><span class="id id--t" style="font-size:1.2rem">TUT-0148</span><span class="chip chip--ok">✓ Verified</span></div><div class="row"><span>Algebra: linear equations</span><span class="mono">Tue 4:00 PM</span></div><div class="row"><span>Where</span><span class="mono">Room 12 · on campus</span></div></div></div>
+  <div class="ch" data-n="04"><div class="txt"><span class="chip chip--ok">● Progress</span><h2>Then you see it click.</h2><p>A short pre-test before and post-test after the session shows exactly what changed. Only you see your scores.</p></div>
+    <div class="card vis"><div class="bars"><div class="b"><i style="height:38%;background:color-mix(in oklch,var(--ink) 18%,transparent)"></i>pre 40%</div><div class="b"><i style="height:78%;background:var(--primary)"></i>post 80%</div></div><div class="gain"><b>▲ +40</b><br><span class="mono muted" style="font-size:.7rem">example gain</span></div></div></div>
+</section>
+
+<section class="priv"><div class="wrap">
+  <div><p class="eyebrow" style="color:var(--teal-soft)">The whole time</p><h2>Neither of you ever learned the other’s name.</h2><p>Under RA 10173, peers see only an ID, grade and section. Real identities are visible to admins alone — for approvals and moderation.</p><a class="btn btn--light" style="margin-top:1.4rem" href="#">Read the privacy policy →</a></div>
+  <div class="stack"><div><span class="id id--l">STU-2071</span><span class="mono">sees → TUT-0148</span></div><div><span class="id id--t">TUT-0148</span><span class="mono">sees → STU-2071</span></div><div><span class="mono" style="color:#fff">admin</span><span class="mono">sees → real identities (moderation only)</span></div></div>
+</div></section>
+
+<section class="end wrap"><h2>Your turn.</h2><div class="cta" style="margin-top:0"><a class="btn btn--primary btn--lg" href="#">Create account →</a><a class="btn btn--lg" href="#">Apply as a tutor</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">10 · Story · <a href="index.html">all</a></div>
+</body></html>

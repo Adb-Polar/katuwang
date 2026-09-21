@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 · Timetable — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  .hero { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; padding-block: clamp(2rem, 6vw, 4.5rem); }
+  h1 { font-weight: 900; font-size: clamp(2.3rem, 5.2vw, 4rem); letter-spacing: -.035em; line-height: 1.03; margin: .9rem 0 1rem; }
+  .lede { color: var(--muted); font-size: 1.05rem; }
+  .cta { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.5rem; }
+  .tt { padding: 1rem; box-shadow: var(--shadow-pop); }
+  .tt-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: .8rem; }
+  .tt-head b { font-size: 1rem; }
+  .tt-tabs { display: inline-flex; background: var(--base-200); padding: .2rem; border-radius: var(--r); gap: .1rem; }
+  .tt-tabs span { font-family: var(--mono); font-size: .7rem; padding: .3rem .6rem; border-radius: .35rem; color: var(--muted); }
+  .tt-tabs .on { background: var(--base-100); color: var(--ink); box-shadow: var(--shadow-card); }
+  .grid { display: grid; grid-template-columns: 3rem repeat(5, 1fr); grid-template-rows: 1.6rem repeat(5, 3.4rem); gap: 4px; font-family: var(--mono); font-size: .68rem; }
+  .gridwrap { position: relative; }
+  .grid.over { position: absolute; inset: 0; pointer-events: none; }
+  .grid .dh { text-align: center; color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
+  .grid .th { color: var(--faint); text-align: right; padding-right: .4rem; padding-top: .2rem; }
+  .grid .cell { background: var(--base-200); border-radius: .35rem; }
+  .blk { border-radius: .4rem; padding: .35rem .45rem; display: flex; flex-direction: column; justify-content: space-between; line-height: 1.2; overflow: hidden; }
+  .blk b { font-family: var(--sans); font-weight: 500; font-size: .74rem; }
+  .blk.tut { background: var(--tint-tutor); color: var(--tutor-text); border-left: 3px solid var(--tutor); }
+  .blk.pri { background: var(--tint-primary); color: var(--primary); border-left: 3px solid var(--primary); }
+  .blk.you { background: var(--tint-learner); color: var(--learner); border-left: 3px dashed var(--learner); }
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin-top: .9rem; font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+  .legend i { display: inline-block; width: .7rem; height: .7rem; border-radius: 2px; margin-right: .35rem; vertical-align: -1px; }
+  section.pad { padding-block: clamp(3rem, 7vw, 5rem); }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; line-height: 1.1; max-width: 20ch; }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; }
+  .fact { padding: 1.4rem; } .fact .n { font-family: var(--mono); font-size: 2rem; letter-spacing: -.03em; color: var(--primary); }
+  .fact h3 { margin: .3rem 0; font-size: 1.05rem; } .fact p { font-size: .88rem; color: var(--muted); }
+  .match { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }
+  .req { padding: 1.4rem; } .req label { display: block; font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); margin: .8rem 0 .3rem; }
+  .req .fld { border: 1px solid var(--border); background: var(--base-200); border-radius: var(--r); padding: .6rem .8rem; font-family: var(--mono); font-size: .8rem; }
+  .req .slots { display: flex; gap: .4rem; flex-wrap: wrap; }
+  .result { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding: .7rem .9rem; background: var(--tint-success); border-radius: var(--r); font-size: .85rem; }
+  .band { background: var(--primary); color: var(--primary-c); } .band .wrap { padding-block: 3.5rem; display: flex; justify-content: space-between; align-items: center; gap: 2rem; flex-wrap: wrap; }
+  .band h2 { max-width: 24ch; }
+  @media (max-width: 860px) { .hero, .match { grid-template-columns: 1fr; } .facts { grid-template-columns: 1fr; } .grid { grid-template-rows: 1.6rem repeat(5, 3.6rem); font-size: .6rem; } .blk b { font-size: .64rem; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">Classes</a><a class="lnk" href="#">Privacy</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--primary" href="#">Create account</a></nav></div>
+
+<header class="wrap hero">
+  <div>
+    <p class="eyebrow">Peer tutoring · Grades 7–12 · Free</p>
+    <h1>Help that fits your week.</h1>
+    <p class="lede">Tell Katuwang the topic and the times you’re free. It ranks classes taught by verified classmates — and you enrol in one tap.</p>
+    <div class="cta"><a class="btn btn--primary btn--lg" href="#">Find a class →</a><a class="btn btn--lg" href="#">Apply as tutor</a></div>
+  </div>
+  <div class="card tt" aria-label="Sample weekly schedule">
+    <div class="tt-head"><b>This week · sample</b><div class="tt-tabs"><span class="on">Open classes</span><span>My classes</span></div></div>
+    <div class="gridwrap">
+    <div class="grid base">
+      <span></span><span class="dh">Mon</span><span class="dh">Tue</span><span class="dh">Wed</span><span class="dh">Thu</span><span class="dh">Fri</span>
+      <span class="th">3 PM</span><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i>
+      <span class="th">4 PM</span><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i>
+      <span class="th">5 PM</span><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i>
+      <span class="th">6 PM</span><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i>
+      <span class="th">7 PM</span><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i><i class="cell"></i>
+    </div>
+    <div class="grid over">
+      <div class="blk pri" style="grid-column:4;grid-row:2"><b>Fractions</b><span>TUT-0091</span></div>
+      <div class="blk tut" style="grid-column:6;grid-row:2"><b>Reading</b><span>TUT-0212</span></div>
+      <div class="blk you" style="grid-column:3;grid-row:3/span 2"><b>Algebra ✓ enrolled</b><span>TUT-0148</span></div>
+      <div class="blk you" style="grid-column:5;grid-row:3"><b>Slope</b><span>TUT-0148</span></div>
+      <div class="blk pri" style="grid-column:2;grid-row:4"><b>Cells</b><span>TUT-0330</span></div>
+      <div class="blk tut" style="grid-column:6;grid-row:4"><b>Essay</b><span>TUT-0212</span></div>
+    </div>
+    </div>
+    <div class="legend"><span><i style="background:var(--learner)"></i>you (STU-2071)</span><span><i style="background:var(--tutor)"></i>tutor</span><span><i style="background:var(--primary)"></i>open class</span></div>
+  </div>
+</header>
+
+<section class="pad"><div class="wrap">
+  <p class="eyebrow">Why it works</p><h2>Right topic. Right person. Right time.</h2>
+  <div class="facts">
+    <div class="card fact"><span class="n">01</span><h3>Verified on the topic</h3><p>Every tutor passes a short quiz for each topic before they can teach it.</p></div>
+    <div class="card fact"><span class="n">02</span><h3>Names stay hidden</h3><p>You see <span class="mono">TUT-0148</span>, they see <span class="mono">STU-2071</span>. RA 10173 by design.</p></div>
+    <div class="card fact"><span class="n">03</span><h3>Progress you can see</h3><p>Pre- and post-tests around a session show exactly what improved.</p></div>
+  </div>
+</div></section>
+
+<section class="pad" style="padding-top:0"><div class="wrap match">
+  <div><p class="eyebrow">Auto Match</p><h2>Say what you need. We rank the rest.</h2><p class="muted" style="margin-top:1rem;max-width:32rem">Topic, grade and free times are scored against every open class. Nothing fits? Post a request and a tutor can build a class for it.</p></div>
+  <div class="card req"><b>What do you need?</b>
+    <label>Subject · topic</label><div class="fld">Math · Linear equations</div>
+    <label>Free times</label><div class="slots"><span class="chip chip--p">Tue 4–6</span><span class="chip chip--p">Thu 4–6</span><span class="chip">Sat 9–11</span></div>
+    <div class="result"><span><b>Algebra: linear equations</b> · <span class="id id--t">TUT-0148</span></span><span class="chip chip--ok">✓ 92 match</span></div>
+  </div>
+</div></section>
+
+<section class="band"><div class="wrap"><h2>Your next session is one tap away.</h2><a class="btn btn--light btn--lg" href="#">Create account →</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">04 · Timetable · <a href="index.html">all</a></div>
+</body></html>

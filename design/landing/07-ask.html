@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>07 · Ask — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: linear-gradient(180deg, var(--tint-primary), var(--base-100) 38rem); }
+  .hero { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; padding-block: clamp(2rem, 6vw, 5rem); }
+  h1 { font-weight: 900; font-size: clamp(2.4rem, 5.6vw, 4.3rem); letter-spacing: -.035em; line-height: 1.02; margin: 1rem 0; }
+  h1 span { background: linear-gradient(100deg, var(--primary), var(--learner)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { color: var(--muted); font-size: 1.08rem; max-width: 30rem; }
+  .ask { margin-top: 1.8rem; display: flex; align-items: center; gap: .6rem; background: var(--base-100); border: 1px solid var(--border); border-radius: 999px; padding: .5rem .5rem .5rem 1.2rem; box-shadow: var(--shadow-pop); max-width: 30rem; }
+  .ask span { flex: 1; font-size: .95rem; color: var(--faint); } .ask .btn { border-radius: 999px; }
+  .suggest { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .9rem; max-width: 30rem; }
+  .suggest a { font-family: var(--mono); font-size: .72rem; padding: .4rem .75rem; border-radius: 999px; background: var(--base-100); border: 1px solid var(--border); color: var(--muted); }
+  .suggest a:hover { color: var(--ink); border-color: var(--primary); }
+  .phone { width: min(22rem, 100%); margin-inline: auto; border-radius: 2rem; border: 8px solid var(--neutral); background: var(--base-100); box-shadow: var(--shadow-pop); overflow: hidden; }
+  .phone .head { display: flex; align-items: center; gap: .6rem; padding: .8rem 1rem; background: var(--primary); color: var(--primary-c); }
+  .phone .head img { width: 1.6rem; } .phone .head b { font-size: .92rem; } .phone .head span { display: block; font-family: var(--mono); font-size: .62rem; opacity: .8; }
+  .thread { padding: 1rem; display: grid; gap: .6rem; background: var(--base-200); min-height: 24rem; align-content: start; }
+  .m { max-width: 85%; padding: .6rem .85rem; border-radius: 1rem; font-size: .84rem; line-height: 1.4; }
+  .m.me { justify-self: end; background: var(--learner); color: #fff; border-bottom-right-radius: .3rem; }
+  .m.bot { background: var(--base-100); border: 1px solid var(--border); border-bottom-left-radius: .3rem; }
+  .m .rc { display: flex; justify-content: space-between; align-items: center; gap: .5rem; margin-top: .5rem; padding: .5rem .6rem; border-radius: .6rem; background: var(--base-200); font-family: var(--mono); font-size: .7rem; }
+  .typing { display: inline-flex; gap: 3px; padding: .7rem .85rem; } .typing i { width: 5px; height: 5px; border-radius: 50%; background: var(--faint); animation: dot 1.2s infinite; } .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes dot { 50% { transform: translateY(-3px); opacity: .4; } }
+  .note { text-align: center; font-family: var(--mono); font-size: .68rem; color: var(--faint); margin-top: .8rem; }
+  section.pad { padding-block: clamp(3rem, 7vw, 5rem); }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; line-height: 1.1; max-width: 20ch; }
+  .qa { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 2rem; }
+  .qa .card { padding: 1.4rem; } .qa q { display: block; font-weight: 700; font-size: 1.05rem; quotes: "“" "”"; margin-bottom: .5rem; } .qa p { font-size: .9rem; color: var(--muted); }
+  .qa .mono { font-size: .82rem; }
+  .band { background: var(--neutral); color: var(--neutral-c); text-align: center; } .band .wrap { padding-block: 4rem; display: grid; gap: 1.4rem; justify-items: center; }
+  @media (max-width: 860px) { .hero, .qa { grid-template-columns: 1fr; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">How it works</a><a class="lnk" href="#">Privacy</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--primary" href="#">Create account</a></nav></div>
+
+<header class="wrap hero">
+  <div>
+    <p class="eyebrow">Peer tutoring · Grades 7–12 · Free</p>
+    <h1>Stuck on something? <span>Just say so.</span></h1>
+    <p class="lede">Tell Katuwang what you’re stuck on. It finds classes taught by verified classmates — and no one ever learns your name.</p>
+    <div class="ask"><span>I need help with fractions…</span><a class="btn btn--primary" href="#">Find a class →</a></div>
+    <div class="suggest"><a href="#">Linear equations</a><a href="#">Reading comprehension</a><a href="#">Cell structure</a><a href="#">Essay writing</a></div>
+  </div>
+  <div>
+    <div class="phone" aria-label="Sample help assistant conversation">
+      <div class="head"><img src="logos/logo-white.svg" alt=""><div><b>Katuwang help</b><span>● online · rule-based assistant</span></div></div>
+      <div class="thread">
+        <div class="m me">I need help with fractions</div>
+        <div class="m bot">Found <b>3 open classes</b> that fit your grade. Best match:
+          <div class="rc"><span>Fractions · Wed 3 PM</span><span class="id id--t">TUT-0091</span></div>
+          <div class="rc"><span class="chip chip--ok">✓ Verified on Fractions</span><span style="white-space:nowrap">2 seats</span></div></div>
+        <div class="m me">Is my name shown to them?</div>
+        <div class="m bot">No. Tutors only see your ID, like <span class="id id--l">STU-2071</span>, plus grade and section.</div>
+        <div class="m bot typing"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+    <p class="note">Sample conversation · the assistant answers platform questions; it doesn’t replace a tutor.</p>
+  </div>
+</header>
+
+<section class="pad"><div class="wrap">
+  <p class="eyebrow">Common questions</p><h2>Ask away. Here’s what most students want to know.</h2>
+  <div class="qa">
+    <div class="card"><q>Is it really free?</q><p>Yes. Katuwang is a non-profit school project — no payments, no premium tier.</p></div>
+    <div class="card"><q>Who are the tutors?</q><p>Fellow students who passed a short quiz on the topic. Look for <span class="chip chip--ok">✓ Verified</span>.</p></div>
+    <div class="card"><q>Can my tutor see who I am?</q><p>Never. They see <span class="mono id id--l">STU-####</span>, grade and section — nothing else.</p></div>
+    <div class="card"><q>What if no class fits?</q><p>Post a topic request. A verified tutor can pick it up and schedule a class for you.</p></div>
+  </div>
+</div></section>
+
+<section class="band"><div class="wrap"><img src="logos/logo-white.svg" alt="" style="width:2.8rem"><h2 style="max-width:none">Ask your first question.</h2><a class="btn btn--light btn--lg" href="#">Create account →</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">07 · Ask · <a href="index.html">all</a></div>
+</body></html>

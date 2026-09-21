@@ -8,6 +8,12 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
+| [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
+| [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
+| [80](#part-80) | **Landing page — 04 Timetable implemented** | Public `/` rebuilt from prototype 04: session-aware nav with the real logo, weekly-timetable hero, "why it works", Auto Match demo, CTA band, footer. | See Part 80 below. |
+| [79](#part-79) | **Landing page — 10 design prototypes** | Ten static HTML explorations in `design/landing/` (+ gallery `index.html`) for the redesigned `/`. Not wired into the app. | See Part 79 below. |
+| [78](#part-78) | **Landing page redesign — plan** | Plan for a modern `/` landing page (`docs/plans/landing-page-redesign.md`). No code yet. | See Part 78 below. |
 | [77](#part-77) | **Deploy-essentials seed script** | New `prisma/seedEssentials.ts` — seeds only `IdCounter` rows and the `Subject`/`Topic` catalogue for a fresh deploy, no demo users/classes. | See Part 77 below. |
 | [76](#part-76) | **Platform logo assets** | Added `public/logos/` (full-color, dark, white, anchor SVG variants). Not yet wired into any component. | See Part 76 below. |
 | [75](#part-75) | **Admin recommends a class to a learner** | Admins can recommend a specific class to a learner from the class detail page — notification-only, no auto-enrollment. | See Part 75 below. |
@@ -3029,6 +3035,135 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-83"></a>
+## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
+
+On branch `feature/landing-page`. Part 82's chapter visuals were simplified lookalikes (`StoryVisuals.tsx`, deleted).
+Each chapter now renders the component the learner actually sees, with sample props (`landing/sampleData.ts` builds
+sessions relative to today so the sample classes always look upcoming):
+1. **Auto Match form** — a static server-component copy (`SampleMatchForm`) of `learner/MatchCriteriaFields`: same
+   markup/classes and the real `ui/FormField`, with hard-coded subjects, grades, the 8 MATH topics and one Tuesday
+   4–6 PM slot (`landing/sampleData.ts`), inside `<div inert>` so it is a non-focusable preview. It deliberately does
+   NOT use the real component or its `useSubjectCatalog` hook, so it makes no requests.
+2. **Match result** — the real `classes/ClassCard` (display-only: no `href`, wrapped in `pointer-events-none` so it has no click, hover lift or pointer cursor) plus the "Match 92 · ranked by fit" badge and reason
+   list, copied from how `MatchFinder` lays out a result (its `reasonChips` is private to a client file).
+3. **Tutor** — the `learner/tutors/[id]` layout: `AnonymousIdBadge` + "Verified Topics" card (`badge-neutral` subject +
+   `TopicChip verified`) and the real `classes/SessionsList` with `Scheduled` badges.
+4. **Progress** — the My Progress view minus its fetch: `kt-stat` tiles (sessions / paired / avg gain) + the real
+   `charts/ProgressAreaChart` (recharts), lazy-loaded with `next/dynamic({ ssr: false })` inside client `SampleProgress`
+   so it stays out of the initial landing bundle.
+Copy uses the app's real topic name ("Linear Equations & Inequalities") and subject slug (`MATH`, as cards show it).
+The Part 82 `DeltaBar`/hand-built rows are gone. Chapter text for 1 updated to describe the form.
+
+**No data fetching on the landing page.** A first version used the real `MatchCriteriaFields`, whose hook called the
+auth-only `/api/subjects` and logged a 401 for signed-out visitors; replaced by the static copy above (request log now shows only
+the app-wide `/api/auth/session` from the root `SessionProvider`). No shared component was modified. Verified: `tsc`/`eslint` clean on the touched files, `pnpm test` 729/729,
+`pnpm build` OK, headless-Edge at 1280 px and a 390 px emulated phone (`scrollWidth == innerWidth`). Not committed.
+
+**Follow-ups (same day, same part).** (0) *Class card made static:* removed `href="/register"` from the chapter 2 `ClassCard` and wrapped it in `pointer-events-none` (verified in a real browser: not inside an `<a>`, click stays on `/`). (a) *Form simplified for display:* `SampleMatchForm` trimmed from the full
+criteria form (subject, grade, class format, 8 topics, add/remove slot) to Subject + Grade, 4 topics, one time slot on a
+single row (stacked on phones) and the app's "Auto Match" button — ~90 px shorter on desktop; `sampleData.ts` now exports
+`SAMPLE_TOPIC_CHOICES` instead of the 8-topic list. Still static/inert, no requests. (b) *Copy made more professional:*
+casual lines rewritten across `LandingHero`, `StoryTimeline`, `PrivacyPayoff`, `StoryEnd` and the page `metadata` —
+headline "From first question to measurable progress.", chapter titles "Describe the help you need." / "Open classes are ranked
+by fit." / "Every tutor is verified per topic." / "Progress is measured.", privacy heading "Learners and tutors never see
+each other's real names.", closing "Get started with Katuwang."; "enrol" -> "enroll" to match the app. Layout, components and
+links unchanged. Verified: `tsc`/`eslint` clean, `pnpm test` 729/729, `pnpm build` OK, headless-Edge 1280 px + 390 px.
+
+<a id="part-82"></a>
+## Part 82 — Landing page switched to prototype 10 "Story" (2026-09-21) — *chapter visuals superseded by Part 83*
+
+Direction changed from 04 Timetable to 10 Story; Parts 80–81 describe the superseded timetable page (kept as history).
+`src/app/page.tsx` now composes: `LandingNav` (anchor -> `#story`), `LandingHero` (centred, Story headline), new
+`StoryTimeline` (`<ol>`, gradient spine, alternating chapters on md+, single left rail on phones), `PrivacyPayoff`
+(`bg-neutral` section, "sees ->" rows), `StoryEnd` ("Your turn."), `LandingFooter`. Still session-aware: signed-in
+visitors get one "Go to your portal" button (`/dashboard`).
+
+**Built from existing project components, not bespoke markup:** `kt-card`, `StatusBadge` (score chips, "Hidden"),
+`AnonymousIdBadge` (tutor/learner IDs, both on the timeline and the dark section), `TopicChip verified`, `kt-badge`
+variants for the chapter labels, and `charts/DeltaBar` (the pure-CSS pre/post gain chart with the `.kt-delta` badge)
+for chapter 4 — sample rows only, labelled "Example".
+
+**Typography:** per request, uses the system default — Apfel Grotezk via `font-sans` with the project weight scale
+(`font-heavy` for headings) and Fragment Mono for notation/buttons. The 900 Satt hero (`font-black`) and the
+type-scale exception comment from Part 80 are gone; `globals.css` is back to its committed state. Headline uses
+non-breaking spaces so it never orphans `"I`.
+
+Cleanup: deleted `LandingTimetable`, `WhyItWorks`, `AutoMatchDemo`, `LandingCtaBand`; reverted the Part 81 additions
+to `schedule/WeeklyTimetable.tsx` (file identical to HEAD again — the learner/tutor dashboards are untouched). No
+schema/API/dependency change. Verified: `tsc` + `eslint` clean on the touched files, `pnpm test` 729/729, `pnpm build`
+OK, headless-Edge at 1280 px and a 390 px emulated phone (`scrollWidth == innerWidth`). `TOTEST.txt` Parts 80/81
+lines replaced by a Part 82 block. Not committed.
+
+<a id="part-81"></a>
+## Part 81 — Landing timetable now uses the project's own components (2026-09-21) — *superseded by Part 82*
+
+Follow-up to Part 80: the hand-built two-layer CSS grid (`SampleTimetable`, deleted) is replaced by the app's
+`WeeklyTimetable` — the same Mon–Sun day-column component the learner/tutor dashboards use — so the landing
+preview looks like the product. New `src/components/landing/LandingTimetable.tsx` wraps it in the dashboard's
+`card kt-card` + `CalendarClock` heading pattern, builds six sample sessions relative to the current week
+(`addDays`), and shows a legend of `StatusBadge` chips with the project's status codes (`OPN Open`, `ENR Enrolled`,
+`FUL Full`). Tutor IDs render via `AnonymousIdBadge role="TUTOR"`.
+
+`WeeklyTimetable` gained two **optional** things, defaults unchanged for existing callers: `TimetableSession.
+tutorAnonymousId` / `.status` (rendered under the topic), and `hrefFor` may return `null` for a non-link chip
+(extracted into a local `SessionChip`). `LandingHero` restructured: headline + CTAs on top, the full-width timetable
+below (seven day columns need the width). Status colours are now the project's state tones (success/info/warning)
+rather than my earlier custom violet/orange blocks, so identity colour stays only on IDs. Removed the decorative
+Open/My-classes tabs and the sideways-scroll workaround; the grid uses `WeeklyTimetable`'s own 2/4/7 responsive columns
+and real text (no `role="img"` hack). Session times render in the server's locale/time zone exactly as the
+dashboards do. `TOTEST.txt` Part 80 lines rewritten to match, plus a regression line for the three existing
+`WeeklyTimetable` pages. No schema/API/dependency change. Verified: `tsc` clean, `eslint` clean on the touched files,
+`pnpm test` 729/729, `pnpm build` OK, headless-Edge at 1280 px and a 390 px emulated phone. Not committed.
+
+Note: `eslint` over all of `src/components` reports one pre-existing `react-hooks/set-state-in-effect` error in
+`layout/PortalLayout.tsx:73` (file untouched by this work).
+
+<a id="part-80"></a>
+## Part 80 — Landing page: 04 Timetable implemented (2026-09-21) — *superseded by Part 82*
+
+Replaced the placeholder `src/app/page.tsx` with the chosen prototype (`design/landing/04-timetable.html`).
+Page stays a lean server component: reads `getServerSession(authOptions)` and passes `signedIn` down, exports
+page `metadata`. New `src/components/landing/`: `Logo` (inline SVG, `color`/`white` — first use of the
+`public/logos` artwork; `BrandMark` untouched elsewhere), `LandingNav`, `LandingHero`, `SampleTimetable`,
+`WhyItWorks`, `AutoMatchDemo`, `LandingCtaBand`, `LandingFooter`. Signed-in visitors get one "Go to your portal"
+(`/dashboard`) button instead of Log in / Create account; signed-out CTAs go to `/register`,
+`/register/learner`, `/register/tutor`.
+
+**(Superseded by Part 81 — the timetable now reuses `WeeklyTimetable`; the grid described in this paragraph no longer exists.)** Timetable was a two-layer CSS grid (empty cells + explicit-placed blocks) driven by a `SAMPLE_BLOCKS` array.
+Deviation from the prototype: the two gold "tutor" blocks are now orange **full** blocks, so identity colour
+(violet/gold) stays on people and state colour marks state (ROUND-2 invariant 2). Below `sm` the grid scrolls
+sideways inside its card (`min-w-0` on the grid item is required or it stretches the page) so `TUT-####` IDs
+never wrap. The grid is `role="img"` with a description; cells are `aria-hidden`.
+
+`globals.css`: comment documenting the marketing exception to the type-scale contract (display sizes, `font-black`
+on the hero H1 only). No token, schema, API or dependency change. Logged the exception; no `decisions.md`
+change needed (no thesis divergence). Verified: `tsc`/`eslint` clean, `pnpm test` 729/729, `pnpm build` OK,
+headless-Edge screenshots at 1280 px and a 390 px emulated phone (`scrollWidth == innerWidth`). Manual checks
+in `docs/backlog/TOTEST.txt`. Not committed.
+
+<a id="part-79"></a>
+## Part 79 — Landing page: 10 design prototypes (2026-09-21)
+
+New `design/landing/` folder: `01-the-key` … `10-story` (`.html`), a gallery `index.html`, shared
+`base.css` (tokens mirroring `src/app/globals.css`), `fonts/` (Apfel Grotezk 400/500/700/900 +
+Fragment Mono, copied from `design/round-*`), and `logos/` (clean `logo-color|white|anchor.svg` —
+the `public/logos` files minus the C2PA metadata blob). Directions: The Key, School ID, Legend,
+Timetable, Midnight (dark), Two Doors, Ask, Product, Poster, Story. Static HTML/CSS only — no app
+code, schema, or test change. Rendered with headless Edge at 1280 px and a 390 px iframe viewport
+to fix layout bugs (06 seam overlap, 08 clipped dashboard, 04 grid placement, 05 nav contrast).
+Summary table added to `docs/plans/landing-page-redesign.md` §6b. `public/logos` untouched.
+
+<a id="part-78"></a>
+## Part 78 — Landing page redesign: plan (2026-09-21)
+
+Added `docs/plans/landing-page-redesign.md` (+ row in `docs/plans/README.md`). Audit of the
+current placeholder `src/app/page.tsx`, the design system (`globals.css`, `design/ROUND-2-CONTEXT.md`,
+`docs/reviews/reviews.md` D1/D6), the unused `public/logos/` assets, and content limits from
+`decisions.md`. Proposes an 11-section page built from the app's own UI atoms, with the
+`STU-` ⇄ `TUT-` pairing as the hero, a new inline-SVG `Logo`, and `src/components/landing/*`.
+Docs only — no code, schema, or test change. Awaiting answers to the plan's open questions.
 
 <a id="part-77"></a>
 ## Part 77 — Deploy-essentials seed script (2026-09-14)

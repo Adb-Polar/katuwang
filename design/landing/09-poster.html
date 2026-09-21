@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>09 · Poster — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: oklch(96% .03 100); --line: var(--ink); }
+  .frame { border-bottom: 2px solid var(--line); }
+  .nav { display: flex; justify-content: space-between; align-items: center; padding: .8rem clamp(1rem, 3vw, 2rem); border-bottom: 2px solid var(--line); font-family: var(--mono); font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  .nav .brand { font-family: var(--sans); text-transform: none; }
+  .nav nav { display: flex; gap: 1.4rem; align-items: center; } .nav a:hover { text-decoration: underline; }
+  .nav .go { background: var(--ink); color: var(--base-100); padding: .5rem .9rem; border-radius: 0; }
+  .mega { padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2rem) 0; overflow: hidden; }
+  .mega h1 { font-weight: 900; font-size: clamp(3.6rem, 17vw, 15rem); letter-spacing: -.055em; line-height: .84; text-transform: lowercase; }
+  .mega h1 span { display: block; } .mega h1 .t { color: var(--primary); } .mega h1 .o { -webkit-text-stroke: 2px var(--ink); color: transparent; }
+  .sub { display: grid; grid-template-columns: 1.2fr 1fr; border-top: 2px solid var(--line); margin-top: 1.5rem; }
+  .sub > div { padding: 1.6rem clamp(1rem, 3vw, 2rem); } .sub > div + div { border-left: 2px solid var(--line); }
+  .sub p.big { font-size: clamp(1.2rem, 2.2vw, 1.7rem); line-height: 1.25; letter-spacing: -.02em; max-width: 28ch; }
+  .sub .cta { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1.4rem; }
+  .btn { border-radius: 0; border: 2px solid var(--ink); } .btn:hover { box-shadow: 4px 4px 0 var(--ink); transform: translate(-2px, -2px); }
+  .btn--primary { background: var(--primary); border-color: var(--ink); } .btn--y { background: var(--tutor); color: var(--ink); border-color: var(--ink); }
+  .ids { display: grid; gap: .6rem; align-content: center; height: 100%; }
+  .ids .id { font-size: clamp(1.6rem, 3.6vw, 2.8rem); letter-spacing: -.03em; display: block; }
+  .ids small { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); }
+  .marq { overflow: hidden; border-bottom: 2px solid var(--line); background: var(--tutor); }
+  .marq .track { display: flex; gap: 2rem; width: max-content; animation: slide 28s linear infinite; padding: .7rem 0; font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em; font-size: .95rem; }
+  .marq span::after { content: "✦"; margin-left: 2rem; }
+  @keyframes slide { to { transform: translateX(-50%); } }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .grid4 > div { padding: 1.6rem clamp(1rem, 2vw, 1.6rem) 2rem; border-left: 2px solid var(--line); min-height: 15rem; display: flex; flex-direction: column; justify-content: space-between; }
+  .grid4 > div:first-child { border-left: 0; }
+  .grid4 .n { font-family: var(--mono); font-size: 3.4rem; letter-spacing: -.05em; line-height: 1; }
+  .grid4 h3 { font-size: 1.3rem; letter-spacing: -.02em; margin-bottom: .4rem; } .grid4 p { font-size: .88rem; color: var(--muted); }
+  .grid4 > div:nth-child(2) { background: var(--tint-learner); } .grid4 > div:nth-child(3) { background: var(--tint-tutor); } .grid4 > div:nth-child(4) { background: var(--primary); color: var(--primary-c); } .grid4 > div:nth-child(4) p { color: inherit; opacity: .85; }
+  .end { padding: clamp(2rem, 6vw, 4rem) clamp(1rem, 3vw, 2rem); display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 1.5rem; }
+  .end h2 { font-weight: 900; font-size: clamp(2.4rem, 8vw, 6rem); letter-spacing: -.045em; line-height: .9; }
+  .foot { padding-inline: clamp(1rem, 3vw, 2rem); border-top: 2px solid var(--line); font-family: var(--mono); font-size: .72rem; text-transform: uppercase; }
+  @media (max-width: 820px) { .sub, .grid4 { grid-template-columns: 1fr 1fr; } .sub { grid-template-columns: 1fr; } .sub > div + div { border-left: 0; border-top: 2px solid var(--line); } .grid4 > div:nth-child(3) { border-left: 0; } .grid4 > div:nth-child(n+3) { border-top: 2px solid var(--line); } .nav nav a:not(.go) { display: none; } }
+</style></head>
+<body>
+<div class="frame"><div class="nav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a href="#">How</a><a href="#">Privacy</a><a href="#">Log in</a><a class="go" href="#">Create account</a></nav></div>
+<header><div class="mega"><h1><span>learn with</span><span class="t">a peer</span><span class="o">who gets it.</span></h1></div>
+<div class="sub"><div><p class="big">Peer tutoring for Grades 7–12. Free. Checked on the topic. Anonymous to each other.</p><div class="cta"><a class="btn btn--primary btn--lg" href="#">Create account →</a><a class="btn btn--y btn--lg" href="#">Apply to tutor</a></div></div>
+<div><div class="ids"><small>Learner</small><span class="id id--l">STU-2071</span><small>meets tutor</small><span class="id id--t">TUT-0148</span></div></div></div></header></div>
+
+<div class="marq frame" aria-hidden="true"><div class="track"><span>Math</span><span>English</span><span>Science</span><span>Filipino</span><span>Araling Panlipunan</span><span>TLE</span><span>MAPEH</span><span>Math</span><span>English</span><span>Science</span><span>Filipino</span><span>Araling Panlipunan</span><span>TLE</span><span>MAPEH</span></div></div>
+
+<section class="frame"><div class="grid4">
+  <div><span class="n">01</span><div><h3>Sign up</h3><p>Grade, section, guardian consent. You get an anonymous ID.</p></div></div>
+  <div><span class="n id--l">02</span><div><h3>Find a class</h3><p>Browse, Auto Match, or request a topic.</p></div></div>
+  <div><span class="n id--t">03</span><div><h3>Learn</h3><p>Sessions on campus, with a verified classmate.</p></div></div>
+  <div><span class="n">04</span><div><h3>See it click</h3><p>Pre- and post-tests show what improved.</p></div></div>
+</div></section>
+
+<section class="frame end"><h2>free.<br>private.<br>yours.</h2><div style="max-width:24rem"><p class="muted" style="margin-bottom:1rem">Real names never cross between learners and tutors. RA 10173, by design.</p><a class="btn btn--dark btn--lg" href="#">Create account →</a></div></section>
+<footer class="foot"><div class="wrap row" style="width:100%"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a></span></div></footer>
+<div class="proto-tag">09 · Poster · <a href="index.html">all</a></div>
+</body></html>

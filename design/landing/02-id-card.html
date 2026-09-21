@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 · School ID — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--base-200); }
+  .hero { padding-block: clamp(2.5rem, 6vw, 5rem) clamp(3rem, 7vw, 6rem); text-align: center; }
+  h1 { font-weight: 900; font-size: clamp(2.4rem, 6vw, 4.4rem); letter-spacing: -.035em; line-height: 1.04; max-width: 16ch; margin: 1rem auto; }
+  .lede { max-width: 36rem; margin: 0 auto; color: var(--muted); font-size: 1.08rem; }
+  .cta { display: flex; gap: .75rem; justify-content: center; margin-top: 1.6rem; flex-wrap: wrap; }
+  .lanyards { display: flex; justify-content: center; gap: clamp(1rem, 6vw, 5rem); margin-top: 3rem; perspective: 1200px; }
+  .lan { position: relative; width: min(17rem, 42vw); transform-origin: top center; }
+  .lan::before { content: ""; position: absolute; left: 50%; top: -3rem; width: 14px; height: 3.4rem; background: var(--primary); transform: translateX(-50%); border-radius: 0 0 3px 3px; }
+  .lan.l { transform: rotate(-4deg); animation: sway 6s ease-in-out infinite; }
+  .lan.t { transform: rotate(3.5deg); animation: sway 7s ease-in-out infinite reverse; }
+  .lan.l::before { background: var(--learner); }
+  .lan.t::before { background: var(--tutor); }
+  @keyframes sway { 50% { transform: rotate(2deg); } }
+  .idc { position: relative; text-align: left; overflow: hidden; border-radius: 1rem; background: var(--base-100); border: 1px solid var(--border); box-shadow: var(--shadow-pop); padding: 0 0 1.1rem; }
+  .idc .slot { width: 2.6rem; height: .5rem; background: var(--base-300); border-radius: 999px; margin: .8rem auto .6rem; }
+  .idc .band { display: flex; align-items: center; gap: .5rem; padding: .35rem 1rem; font-family: var(--mono); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; color: #fff; }
+  .l .band { background: var(--learner); } .t .band { background: var(--tutor-text); }
+  .band img { width: 1.1rem; height: 1.1rem; }
+  .avatar { margin: 1rem auto .6rem; width: 5.5rem; height: 5.5rem; border-radius: 50%; display: grid; place-items: center; font-size: 2.2rem; background: repeating-linear-gradient(45deg, var(--base-200), var(--base-200) 6px, var(--base-300) 6px, var(--base-300) 7px); border: 3px solid var(--base-100); box-shadow: 0 0 0 1px var(--border); }
+  .idc .num { display: block; text-align: center; font-family: var(--mono); font-size: 1.7rem; letter-spacing: -.01em; }
+  .l .num { color: var(--learner); } .t .num { color: var(--tutor-text); }
+  .idc dl { margin: .9rem 1.1rem 0; display: grid; grid-template-columns: auto 1fr; gap: .25rem .8rem; font-size: .78rem; }
+  .idc dt { font-family: var(--mono); color: var(--faint); font-size: .68rem; text-transform: uppercase; letter-spacing: .06em; }
+  .redact { background: var(--ink); color: transparent; border-radius: 2px; user-select: none; }
+  .barcode { margin: 1rem 1.1rem 0; height: 1.6rem; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 4px, var(--ink) 4px 5px, transparent 5px 8px, var(--ink) 8px 11px, transparent 11px 12px); opacity: .8; }
+  .caption { font-family: var(--mono); font-size: .72rem; color: var(--muted); margin-top: 1.6rem; }
+  section.pad { padding-block: clamp(3rem, 7vw, 5.5rem); }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; line-height: 1.1; }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; }
+  .step { padding: 1.4rem; position: relative; }
+  .step .n { font-family: var(--mono); font-size: .75rem; color: var(--primary); background: var(--tint-primary); border-radius: 999px; padding: .25em .7em; display: inline-block; }
+  .step h3 { margin: .8rem 0 .4rem; font-size: 1.1rem; }
+  .step p { font-size: .9rem; color: var(--muted); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+  .role { padding: 1.6rem; border-top: 4px solid; }
+  .role.l { border-color: var(--learner); } .role.t { border-color: var(--tutor); }
+  .role h3 { font-size: 1.3rem; margin: .6rem 0; } .role li { font-size: .9rem; color: var(--muted); padding: .2rem 0; } .role li::before { content: "✓ "; color: var(--success); }
+  .role .btn { margin-top: 1rem; }
+  @media (max-width: 800px) { .steps, .two { grid-template-columns: 1fr; } .lanyards { gap: .9rem; } .lan { width: 44vw; } .idc .num { font-size: 1.05rem; } .idc dl { font-size: .66rem; margin-inline: .7rem; } .avatar { width: 4rem; height: 4rem; font-size: 1.6rem; } .barcode { margin-inline: .7rem; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#steps">How it works</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--primary" href="#">Get your ID</a></nav></div>
+
+<header class="hero wrap">
+  <p class="eyebrow">Peer tutoring · Grades 7–12</p>
+  <h1>Your ID is your name here.</h1>
+  <p class="lede">On Katuwang every student is a number. Learners and tutors meet as <span class="mono id id--l">STU-####</span> and <span class="mono id id--t">TUT-####</span> — so help stays about the lesson, not who you are.</p>
+  <div class="cta"><a class="btn btn--primary btn--lg" href="#">Get your ID →</a><a class="btn btn--lg" href="#">Log in</a></div>
+
+  <div class="lanyards">
+    <div class="lan l"><div class="idc"><div class="slot"></div><div class="band"><img src="logos/logo-white.svg" alt="">Learner · Katuwang</div>
+      <div class="avatar" aria-hidden="true">🙂</div><span class="num">STU-2071</span>
+      <dl><dt>Grade</dt><dd>8</dd><dt>Section</dt><dd>Rizal</dd><dt>Name</dt><dd><span class="redact">Juan D. Cruz</span></dd></dl><div class="barcode"></div></div></div>
+    <div class="lan t"><div class="idc"><div class="slot"></div><div class="band"><img src="logos/logo-white.svg" alt="">Tutor · Katuwang</div>
+      <div class="avatar" aria-hidden="true">😎</div><span class="num">TUT-0148</span>
+      <dl><dt>Grade</dt><dd>11</dd><dt>Verified</dt><dd>✓ Algebra</dd><dt>Name</dt><dd><span class="redact">Maria L. Santos</span></dd></dl><div class="barcode"></div></div></div>
+  </div>
+  <p class="caption">Sample IDs. Real names are never shown to the other side.</p>
+</header>
+
+<section class="pad" id="steps"><div class="wrap">
+  <p class="eyebrow">How it works</p><h2>Three steps from “I’m stuck” to “I got it”.</h2>
+  <div class="steps">
+    <div class="card step"><span class="n">01</span><h3>Get your ID</h3><p>Sign up with your grade and section. We issue an anonymous ID and keep your name private.</p></div>
+    <div class="card step"><span class="n">02</span><h3>Find or build a class</h3><p>Browse, use Auto Match, or — if you’re a tutor — schedule sessions on topics you’re verified for.</p></div>
+    <div class="card step"><span class="n">03</span><h3>Learn, then see it</h3><p>Pre- and post-tests show what changed. Only you see your scores.</p></div>
+  </div>
+</div></section>
+
+<section class="pad" style="padding-top:0"><div class="wrap">
+  <div class="two">
+    <div class="card role l"><span class="chip chip--l">● STU</span><h3>I need help</h3><ul><li>Browse open classes</li><li>Auto Match by topic and time</li><li>Request a topic if none fit</li></ul><a class="btn btn--primary" href="#">Join as learner →</a></div>
+    <div class="card role t"><span class="chip chip--t">● TUT</span><h3>I can help</h3><ul><li>Pass a short quiz to get verified</li><li>Run 1-on-1 or group classes</li><li>See your learners’ gains</li></ul><a class="btn btn--dark" href="#">Apply as tutor →</a></div>
+  </div>
+</div></section>
+
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · Built for TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">02 · School ID · <a href="index.html">all</a></div>
+</body></html>

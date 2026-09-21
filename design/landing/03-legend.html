@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>03 · Legend — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: oklch(98% .006 90); }
+  .sheet { width: min(56rem, 100% - 2rem); margin: 1.5rem auto 3rem; border: 1px solid var(--ink); background: oklch(99% .004 90); }
+  .hd { display: flex; justify-content: space-between; align-items: center; padding: .7rem 1.2rem; border-bottom: 1px solid var(--ink); font-family: var(--mono); font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; }
+  .hd .brand { font-family: var(--sans); text-transform: none; letter-spacing: -.01em; font-size: 1rem; }
+  .hd nav { display: flex; gap: 1.2rem; }
+  .title { text-align: center; padding: clamp(2.5rem, 7vw, 5rem) 1.5rem 2.5rem; border-bottom: 1px solid var(--ink); }
+  .title .eyebrow { color: var(--ink); }
+  h1 { font-weight: 700; font-size: clamp(2.3rem, 6vw, 4.2rem); letter-spacing: -.03em; line-height: 1.04; margin: .9rem auto; max-width: 15ch; }
+  .title p.lede { max-width: 32rem; margin: 0 auto; color: var(--muted); }
+  .title .cta { margin-top: 1.5rem; display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--ink); }
+  .legend > div { padding: 2rem 1.5rem; }
+  .legend > div + div { border-left: 1px solid var(--ink); }
+  .legend h2 { font-family: var(--mono); font-weight: 400; font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); margin-bottom: 1.2rem; }
+  .key { display: grid; grid-template-columns: 7.5rem 1fr; gap: .9rem 1rem; align-items: baseline; padding-block: .9rem; border-top: 1px dotted var(--faint); }
+  .key:first-of-type { border-top: 0; }
+  .key .id { font-size: 1.15rem; }
+  .key p { font-size: .9rem; color: var(--muted); }
+  .ruled { padding: 2.5rem 1.5rem; border-bottom: 1px solid var(--ink); }
+  .ruled h2 { text-align: center; font-size: 1.7rem; letter-spacing: -.02em; margin-bottom: 1.6rem; }
+  .row { display: grid; grid-template-columns: 8.5rem 1fr auto; gap: 1rem; align-items: center; padding: .85rem 0; border-top: 1px solid var(--border); font-size: .92rem; }
+  .row .when { font-family: var(--mono); font-size: .8rem; color: var(--muted); }
+  .row .meta { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+  .codes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-bottom: 1px solid var(--ink); text-align: center; }
+  .codes div { padding: 1.4rem .5rem; border-left: 1px solid var(--border); }
+  .codes div:first-child { border-left: 0; }
+  .codes b { display: block; font-family: var(--mono); font-weight: 400; font-size: 1.5rem; letter-spacing: -.02em; }
+  .codes span { font-size: .78rem; color: var(--muted); }
+  .close { padding: 3rem 1.5rem; text-align: center; }
+  .close h2 { font-size: 1.9rem; letter-spacing: -.02em; margin-bottom: .6rem; }
+  .sheet .foot { border-top: 1px solid var(--ink); padding: .8rem 1.2rem; font-family: var(--mono); font-size: .7rem; }
+  @media (max-width: 700px) { .legend { grid-template-columns: 1fr; } .legend > div + div { border-left: 0; border-top: 1px solid var(--ink); } .row { grid-template-columns: 1fr; gap: .3rem; } .row .meta { justify-content: flex-start; } .codes { grid-template-columns: 1fr 1fr; } .hd nav a:not(:last-child) { display: none; } }
+</style></head>
+<body>
+<div class="sheet">
+  <div class="hd"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a href="#">Legend</a><a href="#">Log in</a><a href="#" style="text-decoration:underline">Create account</a></nav></div>
+
+  <header class="title">
+    <p class="eyebrow">A key to peer tutoring · Grades 7–12</p>
+    <h1>Learn with a peer who gets it.</h1>
+    <p class="lede">Katuwang replaces names with a notation. Read the legend below and you can follow every class, every tutor, every status — without anyone’s name.</p>
+    <div class="cta"><a class="btn btn--dark btn--lg" href="#">Create account</a><a class="btn btn--lg" href="#">Log in</a></div>
+  </header>
+
+  <section class="legend">
+    <div><h2>Who</h2>
+      <div class="key"><span class="id id--l">STU-2071</span><p>A learner asking for help. Their tutor never sees their real name.</p></div>
+      <div class="key"><span class="id id--t">TUT-0148</span><p>A tutor who passed a quiz on the topic. Their learner never sees their real name.</p></div>
+      <div class="key"><span class="mono muted">admin</span><p>Reviews accounts and keeps the audit log. The only role that can see identities.</p></div>
+    </div>
+    <div><h2>What</h2>
+      <div class="key"><span class="chip chip--ok">OPN Open</span><p>Seats available; you can enrol.</p></div>
+      <div class="key"><span class="chip" style="background:var(--tint-tutor);color:var(--tutor-text)">FUL Full</span><p>Capacity reached. Try Auto Match for another.</p></div>
+      <div class="key"><span class="chip chip--ok">✓ Verified</span><p>Tutor passed the topic assessment.</p></div>
+    </div>
+  </section>
+
+  <section class="ruled">
+    <h2>A class, the way you would see it</h2>
+    <div class="row"><span class="when">Tue 4:00–5:30 PM</span><span>Algebra: linear equations</span><span class="meta"><span class="id id--t">TUT-0148</span><span class="chip chip--ok">OPN Open</span></span></div>
+    <div class="row"><span class="when">Thu 4:00–5:00 PM</span><span>Algebra: slope and intercepts</span><span class="meta"><span class="id id--t">TUT-0148</span><span class="chip chip--ok">OPN Open</span></span></div>
+    <div class="row"><span class="when">Fri 3:00–4:00 PM</span><span>English: reading comprehension</span><span class="meta"><span class="id id--t">TUT-0212</span><span class="chip" style="background:var(--tint-tutor);color:var(--tutor-text)">FUL Full</span></span></div>
+  </section>
+
+  <section class="codes">
+    <div><b>Free</b><span>no payments, ever</span></div><div><b>7–12</b><span>Junior + Senior High</span></div><div><b>3</b><span>roles, one platform</span></div><div><b>RA 10173</b><span>student data protected</span></div>
+  </section>
+
+  <section class="close"><h2>Ready to read the key?</h2><p class="muted" style="margin-bottom:1.2rem">Join as a learner, or apply to tutor.</p><a class="btn btn--primary btn--lg" href="#">Create account →</a></section>
+  <div class="foot">Katuwang — academic match and support portal · Built for TRIS, Legazpi City · <a href="#">Privacy Policy</a></div>
+</div>
+<div class="proto-tag">03 · Legend · <a href="index.html">all</a></div>
+</body></html>

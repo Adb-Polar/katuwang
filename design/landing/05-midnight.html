@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>05 · Midnight — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  :root { --bg: oklch(19% .025 258); --bg2: oklch(23% .03 258); --line: oklch(100% 0 0 / .1); --tx: oklch(96% .005 258); --tm: oklch(100% 0 0 / .62); --learner-d: oklch(74% .13 300); --tutor-d: oklch(84% .13 85); --teal-d: oklch(78% .11 174); }
+  body { background: var(--bg); color: var(--tx); }
+  .muted, .lede { color: var(--tm); }
+  .id--l { color: var(--learner-d); } .id--t { color: var(--tutor-d); }
+  .btn { background: transparent; color: var(--tx); border-color: var(--line); }
+  .btn--primary { background: var(--teal-d); color: oklch(20% .05 174); border-color: var(--teal-d); }
+  .eyebrow { color: var(--teal-d); }
+  .topnav nav a.lnk { color: var(--tm); } .topnav nav a.lnk:hover { color: var(--tx); }
+  .foot, .foot a { color: var(--tm); }
+  .hero { position: relative; text-align: center; padding-block: clamp(3.5rem, 10vw, 8rem) clamp(2rem, 5vw, 4rem); overflow: hidden; }
+  .hero::before { content: ""; position: absolute; left: 50%; top: -10rem; width: 60rem; height: 34rem; transform: translateX(-50%); background: radial-gradient(closest-side, oklch(55% .12 174 / .45), transparent); filter: blur(30px); pointer-events: none; }
+  .hero::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px); background-size: 56px 56px; mask-image: radial-gradient(ellipse at 50% 30%, #000, transparent 70%); pointer-events: none; }
+  .hero > * { position: relative; z-index: 1; }
+  .pill { display: inline-flex; gap: .5rem; align-items: center; border: 1px solid var(--line); background: oklch(100% 0 0 / .05); border-radius: 999px; padding: .35rem .8rem; font-family: var(--mono); font-size: .72rem; color: var(--tm); }
+  .pill b { color: var(--teal-d); font-weight: 400; }
+  h1 { font-weight: 900; font-size: clamp(2.8rem, 8vw, 6.2rem); letter-spacing: -.04em; line-height: .98; margin: 1.4rem auto 1.2rem; max-width: 14ch; background: linear-gradient(180deg, #fff, oklch(100% 0 0 / .62)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { max-width: 34rem; margin: 0 auto; font-size: 1.1rem; }
+  .cta { display: flex; gap: .75rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
+  .shot { margin: 3.5rem auto 0; max-width: 54rem; border: 1px solid var(--line); border-radius: .9rem; background: linear-gradient(180deg, var(--bg2), var(--bg)); box-shadow: 0 30px 80px oklch(0% 0 0 / .5), 0 0 0 1px oklch(100% 0 0 / .03) inset; text-align: left; overflow: hidden; }
+  .shot .bar { display: flex; gap: .4rem; padding: .7rem .9rem; border-bottom: 1px solid var(--line); } .shot .bar i { width: .6rem; height: .6rem; border-radius: 50%; background: oklch(100% 0 0 / .18); }
+  .shot .body { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--line); }
+  .shot .body > div { background: var(--bg2); padding: 1.3rem; }
+  .shot h3 { font-family: var(--mono); font-size: .68rem; font-weight: 400; text-transform: uppercase; letter-spacing: .1em; color: var(--tm); margin-bottom: .9rem; }
+  .shot .big { font-family: var(--mono); font-size: 1.5rem; letter-spacing: -.02em; }
+  .shot p { font-size: .82rem; color: var(--tm); margin-top: .3rem; }
+  .arrow { align-self: stretch; display: grid; place-content: center; text-align: center; font-family: var(--mono); font-size: .75rem; color: var(--teal-d); }
+  .arrow b { display: block; font-size: 1.6rem; font-weight: 400; }
+  section.pad { padding-block: clamp(3.5rem, 8vw, 6rem); }
+  h2 { font-size: clamp(1.8rem, 3.8vw, 2.8rem); letter-spacing: -.03em; line-height: 1.08; max-width: 20ch; }
+  .feat { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; margin-top: 2.5rem; background: var(--line); border: 1px solid var(--line); border-radius: .9rem; overflow: hidden; }
+  .feat > div { background: var(--bg); padding: 1.7rem; transition: background .15s; } .feat > div:hover { background: var(--bg2); }
+  .feat .ic { display: grid; place-items: center; width: 2.4rem; height: 2.4rem; border-radius: .6rem; background: oklch(78% .11 174 / .14); color: var(--teal-d); font-family: var(--mono); margin-bottom: 1rem; }
+  .feat h3 { font-size: 1.05rem; margin-bottom: .4rem; } .feat p { font-size: .88rem; color: var(--tm); }
+  .cta2 { text-align: center; border-top: 1px solid var(--line); } .cta2 h2 { margin: 0 auto 1.5rem; }
+  @media (max-width: 800px) { .shot .body, .feat { grid-template-columns: 1fr; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-white.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">How it works</a><a class="lnk" href="#">Privacy</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--primary" href="#">Create account</a></nav></div>
+
+<header class="wrap hero">
+  <span class="pill"><b>●</b> Free for TRIS students · Grades 7–12</span>
+  <h1>Learn with a peer who gets it.</h1>
+  <p class="lede">A study partner who’s been checked on the topic — and never knows your name. Peer tutoring, organised.</p>
+  <div class="cta"><a class="btn btn--primary btn--lg" href="#">Create account →</a><a class="btn btn--lg" href="#">Log in</a></div>
+  <div class="shot" aria-label="Sample match preview">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="body">
+      <div><h3>Learner</h3><span class="big id id--l">STU-2071</span><p>Grade 8 · needs help with linear equations</p></div>
+      <div class="arrow"><b>⇄</b>matched · Tue 4:00 PM<br><span style="color:var(--tm)">real names hidden</span></div>
+      <div><h3>Tutor · ✓ verified</h3><span class="big id id--t">TUT-0148</span><p>Grade 11 · Algebra · passed topic quiz</p></div>
+    </div>
+  </div>
+</header>
+
+<section class="pad"><div class="wrap">
+  <p class="eyebrow">Built different</p><h2>Tutoring that respects who you are — by not asking.</h2>
+  <div class="feat">
+    <div><div class="ic">01</div><h3>Anonymous by design</h3><p>Peers only ever see <span class="mono">STU-####</span> / <span class="mono">TUT-####</span>. RA 10173 compliant.</p></div>
+    <div><div class="ic">02</div><h3>Verified tutors</h3><p>Pass a quiz per topic before teaching it. Look for the ✓ badge.</p></div>
+    <div><div class="ic">03</div><h3>Auto Match</h3><p>Topic, grade and schedule, ranked for you. Nothing fits? Request a class.</p></div>
+    <div><div class="ic">04</div><h3>Pre / post tests</h3><p>See what actually improved after each session. Only you see your scores.</p></div>
+    <div><div class="ic">05</div><h3>Help assistant</h3><p>Ask how anything works and get an instant answer.</p></div>
+    <div><div class="ic">06</div><h3>Free, always</h3><p>A non-profit school project. No payments, no premium tier.</p></div>
+  </div>
+</div></section>
+
+<section class="pad cta2"><div class="wrap"><h2>Start in under two minutes.</h2><a class="btn btn--primary btn--lg" href="#">Create account →</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">05 · Midnight (dark) · <a href="index.html">all</a></div>
+</body></html>

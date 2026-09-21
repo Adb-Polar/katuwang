@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Katuwang landing — 10 prototypes</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  header { padding-block: 3rem 1.5rem; } h1 { font-weight: 900; font-size: clamp(2rem, 5vw, 3.4rem); letter-spacing: -.035em; line-height: 1.05; margin-top: .6rem; }
+  header p.d { max-width: 44rem; color: var(--muted); margin-top: .8rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: 1.2rem; padding-block: 1.5rem 4rem; }
+  .p { display: flex; flex-direction: column; overflow: hidden; transition: transform .12s, box-shadow .12s; } .p:hover { transform: translateY(-3px); box-shadow: var(--shadow-pop); }
+  .thumb { position: relative; aspect-ratio: 16/10; overflow: hidden; border-bottom: 1px solid var(--border); background: var(--base-200); }
+  .thumb iframe { position: absolute; top: 0; left: 0; width: 1280px; height: 800px; border: 0; transform: scale(.3); transform-origin: top left; pointer-events: none; }
+  .thumb a { position: absolute; inset: 0; z-index: 2; }
+  .info { padding: 1rem 1.1rem 1.2rem; display: grid; gap: .4rem; }
+  .info .n { font-family: var(--mono); font-size: .72rem; color: var(--primary); }
+  .info h2 { font-size: 1.15rem; letter-spacing: -.01em; } .info p { font-size: .85rem; color: var(--muted); }
+  .info .tags { display: flex; gap: .35rem; flex-wrap: wrap; margin-top: .3rem; }
+  .note { font-size: .82rem; color: var(--muted); border-left: 3px solid var(--primary); padding-left: .9rem; max-width: 46rem; margin-top: 1.2rem; }
+</style></head>
+<body>
+<header class="wrap">
+  <span class="eyebrow">Katuwang · landing page · exploration</span>
+  <h1>Ten directions for <span style="color:var(--primary)">/</span></h1>
+  <p class="d">Static HTML prototypes sharing the live theme tokens and fonts (Apfel Grotezk + Fragment Mono; teal / ube / marigold). Each takes a different bet on the hero and page rhythm. Sample IDs and numbers are fictional.</p>
+  <p class="note">Every prototype keeps the invariants: IDs always carry <span class="mono">STU-</span>/<span class="mono">TUT-</span>; violet = learner, gold = tutor; no payments, no fake stats, help assistant is rule-based (not “AI”). Prototype 05 is dark, which the live theme does not currently support.</p>
+</header>
+<main class="wrap grid">
+  <article class="card p"><div class="thumb"><iframe src="01-the-key.html" loading="lazy" title="01" tabindex="-1"></iframe><a href="01-the-key.html" aria-label="Open 01"></a></div><div class="info"><span class="n">01 · RECOMMENDED</span><h2>The Key</h2><p>STU ⇄ TUT pairing hero, bento features, dark privacy band. The plan’s direction.</p><div class="tags"><span class="chip">light</span><span class="chip">bento</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="02-id-card.html" loading="lazy" title="02" tabindex="-1"></iframe><a href="02-id-card.html" aria-label="Open 02"></a></div><div class="info"><span class="n">02</span><h2>School ID</h2><p>Two swaying lanyard ID cards, names redacted. “Your ID is your name here.”</p><div class="tags"><span class="chip">light</span><span class="chip">playful</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="03-legend.html" loading="lazy" title="03" tabindex="-1"></iframe><a href="03-legend.html" aria-label="Open 03"></a></div><div class="info"><span class="n">03</span><h2>Legend</h2><p>A ruled map-key sheet. Editorial, symmetric, mono-heavy. The original Direction E, turned up.</p><div class="tags"><span class="chip">light</span><span class="chip">editorial</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="04-timetable.html" loading="lazy" title="04" tabindex="-1"></iframe><a href="04-timetable.html" aria-label="Open 04"></a></div><div class="info"><span class="n">04</span><h2>Timetable</h2><p>Schedule-first: a weekly grid hero plus an Auto Match request mock. “Help that fits your week.”</p><div class="tags"><span class="chip">light</span><span class="chip">functional</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="05-midnight.html" loading="lazy" title="05" tabindex="-1"></iframe><a href="05-midnight.html" aria-label="Open 05"></a></div><div class="info"><span class="n">05</span><h2>Midnight</h2><p>Full dark, teal glow, gradient headline, grid-lined feature wall. SaaS-modern.</p><div class="tags"><span class="chip">dark</span><span class="chip">needs theme decision</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="06-two-doors.html" loading="lazy" title="06" tabindex="-1"></iframe><a href="06-two-doors.html" aria-label="Open 06"></a></div><div class="info"><span class="n">06</span><h2>Two Doors</h2><p>Split screen: violet “I need help” / gold “I can help”, logo on the seam. Role-first.</p><div class="tags"><span class="chip">light</span><span class="chip">split</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="07-ask.html" loading="lazy" title="07" tabindex="-1"></iframe><a href="07-ask.html" aria-label="Open 07"></a></div><div class="info"><span class="n">07</span><h2>Ask</h2><p>Conversation-led: an ask bar and a help-assistant chat in a phone frame. Friendly, mobile-feeling.</p><div class="tags"><span class="chip">light</span><span class="chip">conversational</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="08-product.html" loading="lazy" title="08" tabindex="-1"></iframe><a href="08-product.html" aria-label="Open 08"></a></div><div class="info"><span class="n">08</span><h2>Product</h2><p>Tilted browser frame showing the real learner dashboard. Shows the app before asking for a signup.</p><div class="tags"><span class="chip">light</span><span class="chip">product-led</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="09-poster.html" loading="lazy" title="09" tabindex="-1"></iframe><a href="09-poster.html" aria-label="Open 09"></a></div><div class="info"><span class="n">09</span><h2>Poster</h2><p>Neo-brutalist: giant lowercase Satt type, hard borders, subject marquee. Loudest and most youthful.</p><div class="tags"><span class="chip">light</span><span class="chip">bold</span></div></div></article>
+  <article class="card p"><div class="thumb"><iframe src="10-story.html" loading="lazy" title="10" tabindex="-1"></iframe><a href="10-story.html" aria-label="Open 10"></a></div><div class="info"><span class="n">10</span><h2>Story</h2><p>Vertical timeline: “I’m stuck” → match → tutor → progress, then the privacy payoff. Narrative scroll.</p><div class="tags"><span class="chip">light</span><span class="chip">narrative</span></div></div></article>
+</main>
+</body></html>
