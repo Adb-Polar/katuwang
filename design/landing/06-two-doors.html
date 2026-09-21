@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>06 · Two Doors — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--base-100); }
+  .top { position: absolute; inset: 0 0 auto 0; z-index: 5; }
+  .split { position: relative; display: grid; grid-template-columns: 1fr 1fr; min-height: min(46rem, 100svh); }
+  .door { position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding: 7rem clamp(1.5rem, 5vw, 4.5rem) clamp(2.5rem, 6vw, 4.5rem); overflow: hidden; transition: flex .3s; }
+  .door.l { background: color-mix(in oklch, var(--learner) 9%, var(--base-100)); }
+  .door.t { background: color-mix(in oklch, var(--tutor) 30%, var(--base-100)); }
+  .door .big { position: absolute; top: 5rem; right: 1.5rem; font-family: var(--mono); font-size: clamp(3rem, 9vw, 8rem); letter-spacing: -.05em; opacity: .1; line-height: 1; user-select: none; }
+  .door.l .big { color: var(--learner); } .door.t .big { color: var(--tutor-text); opacity: .16; }
+  .door h2 { font-weight: 900; font-size: clamp(2.2rem, 5vw, 3.8rem); letter-spacing: -.035em; line-height: 1; margin: .8rem 0 1rem; }
+  .door p.d { color: var(--muted); max-width: 26rem; }
+  .door ul { margin: 1.2rem 0 1.6rem; display: grid; gap: .35rem; font-size: .9rem; }
+  .door li::before { content: "→ "; font-family: var(--mono); }
+  .door.l li::before { color: var(--learner); } .door.t li::before { color: var(--tutor-text); }
+  .door .btn { align-self: flex-start; }
+  .btn--l { background: var(--learner); color: #fff; border-color: var(--learner); }
+  .btn--t { background: var(--ink); color: var(--tutor); border-color: var(--ink); }
+  .door:hover .btn { transform: translateX(3px); }
+  .door.l .big { right: auto; left: 1.5rem; }
+  .seam { position: absolute; left: 50%; top: 5.5rem; transform: translateX(-50%); z-index: 4; background: var(--base-100); border: 1px solid var(--border); border-radius: 1.2rem; box-shadow: var(--shadow-pop); padding: 1.1rem 1.4rem; text-align: center; width: min(19rem, 80vw); }
+  .seam img { width: 2.6rem; margin: 0 auto .5rem; }
+  .seam b { display: block; font-size: 1.15rem; letter-spacing: -.02em; }
+  .seam span { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+  .seam .m { display: flex; justify-content: center; gap: .6rem; align-items: center; margin-top: .7rem; font-family: var(--mono); font-size: .78rem; }
+  .under { text-align: center; padding: clamp(3rem, 7vw, 5rem) 0 1rem; }
+  .under h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; max-width: 24ch; margin: .6rem auto 0; }
+  .flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; padding-block: 2.5rem 4rem; counter-reset: s; }
+  .flow > div { counter-increment: s; padding: 1.3rem; } .flow > div::before { content: "0" counter(s); font-family: var(--mono); font-size: .75rem; color: var(--primary); }
+  .flow h3 { margin: .5rem 0 .3rem; font-size: 1rem; } .flow p { font-size: .86rem; color: var(--muted); }
+  .privacy { background: var(--neutral); color: var(--neutral-c); } .privacy .wrap { display: flex; gap: 1.5rem 3rem; align-items: center; justify-content: space-between; flex-wrap: wrap; padding-block: 2.5rem; }
+  .privacy p { max-width: 38rem; color: color-mix(in oklch, var(--neutral-c) 78%, transparent); } .privacy b { color: #fff; font-weight: 500; }
+  @media (max-width: 800px) { .split { grid-template-columns: 1fr; } .door { padding-top: 4rem; } .door.l { padding-top: 7rem; } .seam { position: static; transform: none; margin: -2rem auto; } .flow { grid-template-columns: 1fr 1fr; } }
+</style></head>
+<body>
+<div class="split">
+  <div class="top"><div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">How it works</a><a class="btn" href="#">Log in</a></nav></div></div>
+  <section class="door l"><span class="big" aria-hidden="true">STU</span><span class="chip chip--l" style="align-self:flex-start">● Learners</span><h2>I need help.</h2><p class="d">Find a classmate who’s been checked on the exact topic you’re stuck on.</p><ul><li>Browse open classes or use Auto Match</li><li>Request a topic if nothing fits</li><li>See your pre → post progress</li></ul><a class="btn btn--l btn--lg" href="#">Join as a learner →</a></section>
+  <div class="seam"><img src="logos/logo-color.svg" alt=""><b>Two people. One lesson.</b><span>Names stay hidden on both sides.</span><div class="m"><span class="id id--l">STU-2071</span>⇄<span class="id id--t">TUT-0148</span></div></div>
+  <section class="door t"><span class="big" aria-hidden="true">TUT</span><span class="chip chip--t" style="align-self:flex-start">● Tutors</span><h2>I can help.</h2><p class="d">Turn what you’re good at into a class. Get verified, schedule sessions, see learners improve.</p><ul><li>Pass a short quiz per topic → ✓ Verified</li><li>Run 1-on-1 or small-group classes</li><li>Track your learners’ gains</li></ul><a class="btn btn--t btn--lg" href="#">Apply as a tutor →</a></section>
+</div>
+
+<section class="under wrap"><p class="eyebrow">Peer tutoring · Grades 7–12 · Free</p><h2>Learn with a peer who gets it.</h2></section>
+<div class="wrap flow">
+  <div class="card"><h3>Sign up</h3><p>Grade, section, and guardian consent.</p></div>
+  <div class="card"><h3>Get matched</h3><p>By topic, grade level and schedule.</p></div>
+  <div class="card"><h3>Meet on campus</h3><p>Sessions happen at school — nothing to upload.</p></div>
+  <div class="card"><h3>See it click</h3><p>Pre- and post-tests show real gains.</p></div>
+</div>
+<section class="privacy"><div class="wrap"><p><b>Private by design.</b> Under RA 10173, learners and tutors never see each other’s real name, email, or contact details. Only admins can, for moderation.</p><a class="btn btn--light" href="#">Read the privacy policy →</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Log in</a> · <a href="#">Create account</a></span></div></footer>
+<div class="proto-tag">06 · Two Doors · <a href="index.html">all</a></div>
+</body></html>

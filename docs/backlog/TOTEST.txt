@@ -834,3 +834,41 @@ Security-review fixes (Changes.md Part 57)
     detail page's "Already recommended" list shows it; recommending the same
     class to the same learner again is blocked with a clear message instead
     of a raw error.
+
+--- Part 82 (Landing page — 10 Story) ---
+ [] / signed out: nav shows Log in + Create account; hero "Create account" and
+    the closing "Get started with Katuwang." button go to /register, "Log in" to /login,
+    "Apply as tutor" to /register/tutor, "How it works" and "see how
+    it works" scroll to the timeline, "Privacy" and "Read the privacy policy"
+    open /privacy-policy.
+ [] / signed in as learner, tutor and admin: nav, hero and closing section show
+    a single "Go to your portal" button that lands in the right portal.
+ [] / at 360, 390, 768 and 1280px: no horizontal page scroll; the timeline line
+    sits at the left on phones and down the centre from md up, the chapters
+    alternate sides on md+, and the hero headline "From first question to measurable progress."
+    wraps to two lines on desktop with no orphaned word.
+ [] / chapter 1: the Auto Match form preview shows MATH, Grade 8, "Linear Equations
+    & Inequalities" ticked, Tuesday 4-6 PM, looks like /learner/match, and cannot
+    be edited or tabbed into (inert). Compare it side by side with the real form.
+ [] / DevTools Network + Console, signed out: NO request to /api/subjects and no
+    401 error (only the app-wide /api/auth/session); the recharts JS chunk loads
+    after the page.
+ [] / chapter 2: the sample class card looks like a /learner/classes card (code,
+    verified topic chip, next-session date in the future, 3/6 Enrolled, TUT-0148)
+    but is display-only: clicking it does nothing (stays on /), the cursor stays
+    an arrow and it does not lift on hover. The "Match 92" badge + 4 reason lines
+    sit under it.
+ [] / chapter 3: "Verified Topics" card and 3 "Scheduled" session rows render;
+    dates are all in the future.
+ [] / chapter 4: stat tiles + the pre/post area chart appear a moment after load
+    (lazy chunk, no layout jump on the tiles), hover shows the tooltip, and
+    "Show data table" opens by mouse and keyboard. Check the Network tab: the
+    recharts chunk is NOT requested until the page has loaded.
+ [] / keyboard: Tab order is logo -> nav -> hero buttons -> "see how it works"
+    -> chapter chart toggle -> privacy button -> closing buttons -> footer, with a
+    visible focus ring each (the chapter 1 form is skipped - inert); the numbered
+    timeline dots are decorative.
+ [] / dark privacy section: The STU-2071 and TUT-0148 ID pills and the mono
+    "sees ->" text are readable on the dark background (contrast).
+ [] / with registrationOpen turned off in /admin/settings: Create account still
+    lands on a register page that explains it is closed (no dead end).

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>08 · Product — Katuwang landing</title>
+<link rel="stylesheet" href="base.css">
+<style>
+  body { background: var(--base-100); }
+  .hero { text-align: center; padding-top: clamp(2rem, 6vw, 4.5rem); position: relative; }
+  .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(50rem 24rem at 50% 100%, color-mix(in oklch, var(--primary) 16%, transparent), transparent 70%); pointer-events: none; }
+  .hero > .wrap { position: relative; }
+  h1 { font-weight: 900; font-size: clamp(2.5rem, 6.4vw, 5rem); letter-spacing: -.04em; line-height: 1; max-width: 15ch; margin: 1rem auto; }
+  .lede { max-width: 36rem; margin: 0 auto; color: var(--muted); font-size: 1.1rem; }
+  .cta { display: flex; gap: .7rem; justify-content: center; margin: 1.7rem 0 3rem; flex-wrap: wrap; }
+  .stage { position: relative; z-index: 2; perspective: 1800px; margin-bottom: -6rem; }
+  .win { max-width: 62rem; margin: 0 auto; border: 1px solid var(--border); border-radius: .9rem .9rem 0 0; background: var(--base-200); box-shadow: 0 -8px 60px oklch(0% 0 0 / .1), var(--shadow-pop); transform: rotateX(9deg); transform-origin: bottom; overflow: hidden; text-align: left; }
+  .win .bar { display: flex; align-items: center; gap: .4rem; padding: .6rem .9rem; background: var(--base-100); border-bottom: 1px solid var(--border); }
+  .win .bar i { width: .6rem; height: .6rem; border-radius: 50%; background: var(--base-300); }
+  .win .url { margin-left: 1rem; flex: 1; max-width: 18rem; font-family: var(--mono); font-size: .68rem; color: var(--faint); background: var(--base-200); padding: .25rem .7rem; border-radius: 999px; }
+  .app { display: grid; grid-template-columns: 11rem 1fr; min-height: 22rem; }
+  .side { background: var(--base-100); border-right: 1px solid var(--border); padding: .9rem .7rem; font-family: var(--mono); font-size: .72rem; }
+  .side .brand { font-family: var(--sans); font-size: .85rem; margin: 0 .3rem .9rem; } .side .brand img { width: 1.4rem; height: 1.4rem; }
+  .side .lbl { font-size: .58rem; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); margin: .8rem .4rem .3rem; }
+  .side a { display: flex; gap: .5rem; align-items: center; padding: .42rem .4rem; border-radius: .4rem; color: var(--muted); }
+  .side a i { width: 1.15rem; height: 1.15rem; border-radius: .3rem; background: var(--base-200); display: grid; place-items: center; font-style: normal; font-size: .58rem; }
+  .side a.on { background: var(--tint-primary); color: var(--primary); } .side a.on i { background: var(--primary); color: var(--primary-c); }
+  .main { padding: 1rem; display: grid; gap: .8rem; align-content: start; }
+  .top { display: flex; justify-content: space-between; align-items: center; } .top b { font-size: 1.1rem; letter-spacing: -.02em; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; }
+  .stat { padding: .8rem; } .stat span { font-size: .7rem; color: var(--muted); } .stat b { display: block; font-family: var(--mono); font-weight: 400; font-size: 1.5rem; letter-spacing: -.03em; }
+  .lists { display: grid; grid-template-columns: 1.3fr 1fr; gap: .6rem; }
+  .lists .card { padding: .8rem; } .lists h4 { font-size: .8rem; margin-bottom: .5rem; }
+  .li { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .45rem 0; border-top: 1px solid var(--border); font-size: .75rem; }
+  .li:first-of-type { border-top: 0; } .li .mono { font-size: .68rem; color: var(--muted); }
+  .mini { display: flex; align-items: flex-end; gap: 6px; height: 4.2rem; } .mini i { flex: 1; border-radius: 3px 3px 0 0; background: var(--tint-primary); } .mini i.h { background: var(--primary); }
+  section.pad { background: var(--base-200); padding-block: 11rem 5rem; }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); letter-spacing: -.025em; line-height: 1.1; max-width: 22ch; }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; }
+  .three .card { padding: 1.5rem; } .three h3 { margin: .7rem 0 .4rem; font-size: 1.1rem; } .three p { font-size: .9rem; color: var(--muted); }
+  .cta2 { background: var(--primary); color: var(--primary-c); text-align: center; } .cta2 .wrap { padding-block: 3.5rem; display: grid; gap: 1.3rem; justify-items: center; }
+  @media (max-width: 800px) { .app { grid-template-columns: 1fr; } .side { display: none; } .stats, .lists, .three { grid-template-columns: 1fr; } .win { transform: none; } .stage { margin-bottom: -3rem; } section.pad { padding-top: 8rem; } }
+</style></head>
+<body>
+<div class="wrap topnav"><a class="brand" href="#"><img src="logos/logo-color.svg" alt="">Katuwang</a><nav><a class="lnk" href="#">Learners</a><a class="lnk" href="#">Tutors</a><a class="lnk" href="#">Privacy</a><a class="btn btn--ghost" href="#">Log in</a><a class="btn btn--dark" href="#">Create account</a></nav></div>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Peer tutoring management · Grades 7–12</p>
+  <h1>Peer tutoring, finally organised.</h1>
+  <p class="lede">One place to find a class, teach one, and see who’s improving — with every student kept anonymous to their peers.</p>
+  <div class="cta"><a class="btn btn--primary btn--lg" href="#">Create account →</a><a class="btn btn--lg" href="#">Log in</a></div>
+  <div class="stage"><div class="win" aria-label="Sample learner dashboard">
+    <div class="bar"><i></i><i></i><i></i><span class="url">katuwang/learner</span></div>
+    <div class="app">
+      <aside class="side"><div class="brand"><img src="logos/logo-color.svg" alt="">Katuwang</div>
+        <div class="lbl">Learn</div><a class="on" href="#"><i>D</i>Dashboard</a><a href="#"><i>B</i>Browse classes</a><a href="#"><i>M</i>Auto match</a><a href="#"><i>P</i>My progress</a>
+        <div class="lbl">People</div><a href="#"><i>T</i>Find tutors</a><a href="#"><i>R</i>Requests</a></aside>
+      <div class="main">
+        <div class="top"><b>Good afternoon</b><span class="chip chip--l"><span class="id">STU-2071</span></span></div>
+        <div class="stats"><div class="card stat"><span>Enrolled classes</span><b>3</b></div><div class="card stat"><span>Next session</span><b>Tue 4:00</b></div><div class="card stat"><span>Avg. gain</span><b>+18%</b></div></div>
+        <div class="lists">
+          <div class="card"><h4>Upcoming sessions</h4>
+            <div class="li"><span>Algebra: linear equations</span><span class="mono">Tue 4:00 PM · <span class="id id--t">TUT-0148</span></span></div>
+            <div class="li"><span>Fractions review</span><span class="mono">Wed 3:00 PM · <span class="id id--t">TUT-0091</span></span></div>
+            <div class="li"><span>Reading: main idea</span><span class="mono">Fri 3:00 PM · <span class="id id--t">TUT-0212</span></span></div></div>
+          <div class="card"><h4>Pre → post score</h4><div class="mini"><i style="height:38%"></i><i class="h" style="height:66%"></i><i style="height:44%"></i><i class="h" style="height:78%"></i><i style="height:52%"></i><i class="h" style="height:88%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div></header>
+
+<section class="pad"><div class="wrap">
+  <p class="eyebrow">Three portals, one platform</p><h2>Built for the people who make tutoring happen.</h2>
+  <div class="three">
+    <div class="card"><span class="chip chip--l">● Learner</span><h3>Find the right help</h3><p>Browse, Auto Match, or request a topic. Enrol in a class and take pre/post tests.</p></div>
+    <div class="card"><span class="chip chip--t">● Tutor</span><h3>Run your classes</h3><p>Get verified per topic, schedule sessions, manage rosters, and see learner gains.</p></div>
+    <div class="card"><span class="chip">● Admin</span><h3>Keep it safe</h3><p>Approve accounts, moderate classes, manage the question bank, and review the audit log.</p></div>
+  </div>
+</div></section>
+
+<section class="cta2"><div class="wrap"><h2 style="max-width:none">Get help. Give help. Both count.</h2><a class="btn btn--light btn--lg" href="#">Create account →</a></div></section>
+<footer class="foot"><div class="wrap row"><span>Katuwang — academic match and support portal · TRIS, Legazpi City</span><span><a href="#">Privacy Policy</a> · RA 10173</span></div></footer>
+<div class="proto-tag">08 · Product · <a href="index.html">all</a></div>
+</body></html>
