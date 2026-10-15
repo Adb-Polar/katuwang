@@ -8,6 +8,8 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [85](#part-85) | **`docs/README.md` / `docs/plans/README.md` de-duplication** | `docs/README.md`'s plans index was missing `landing-page-redesign.md` and had drifted from `docs/plans/README.md`'s own (more current) status table — two files independently tracking the same plan-status info. Merged the status detail into `docs/README.md`'s one table and deleted `docs/plans/README.md`. | See Part 85 below. Docs only. |
+| [84](#part-84) | **Full documentation audit — repo-wide** | Reviewed every doc file against the current implementation. Rewrote `PROGRESS_REPORT.md` (had drifted to describing shipped modules as "Pending"); fixed `README.md`'s stale "5/6 modules" status; archived the root `plan.md` session artifact; expanded `CLAUDE.md`'s project-structure tree and role summary; corrected `docs/roles/{LEARNER,TUTOR,ADMIN}.md` against the actual API/route surface (each had real drift — see Part 84 below). `docs/reference/*` and `docs/plans/*` were already current, spot-checked, mostly unchanged. | See Part 84 below. Docs only. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
 | [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
 | [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
@@ -3036,6 +3038,101 @@ clean, 643/643.
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
 
+<a id="part-85"></a>
+## Part 85 — `docs/README.md` / `docs/plans/README.md` de-duplication (2026-09-23)
+
+User reported the docs felt "messy, no category groupings." The category folders
+(`reference/`, `roles/`, `plans/`, `reviews/`, `backlog/`, `reports/`, `to-submit/`,
+`archive/`) already existed from Part 69's reorg, so the real issues were drift and
+one duplicate-maintenance surface, both in `docs/`:
+
+- `docs/README.md`'s `plans/` preview table had no row for
+  `docs/plans/landing-page-redesign.md` (shipped, tied to Parts 78–83), even
+  though `docs/plans/README.md`'s own status table already listed it correctly.
+- `docs/plans/README.md` existed only to hold a second "Active plans" status
+  table, an "Archived" table, and a "Related reference docs" list — all three
+  already covered by `docs/README.md` in slightly different form. Two files
+  tracking the same plan-status information independently is exactly how the
+  missing row above happened.
+
+Merged the status column from `docs/plans/README.md`'s Active table into
+`docs/README.md`'s existing plans table (now Preview + Status per plan,
+including the missing `landing-page-redesign.md` row), confirmed the Archived
+table and reference links there are unaffected, then deleted
+`docs/plans/README.md` and its one inbound link. Root `.md` files and
+`design/` were explicitly out of scope for this pass (user chose "docs/ only,
+conservative" — no deleting archived/superseded content).
+
+Docs only — no application code, schema, or test changes. Not committed.
+
+<a id="part-84"></a>
+## Part 84 — Full documentation audit, repo-wide (2026-09-23)
+
+Requested pass: compare every doc against the current implementation (source code, schema, config)
+and fix drift, without inventing unbuilt features or deleting history. `docs/reference/*` and
+`docs/plans/*` turned out to already be well-maintained (self-aware status banners, `decisions.md`
+kept current) — spot-checked and left unchanged except two small additions. The real drift was in
+root-level docs and the three per-role references.
+
+**Root docs.**
+- `README.md` — "Status" section said 5/6 modules built, Chatbot + pre/post-tests "not yet
+  implemented." Both shipped 2026-09-04/05 per `feature-checklist.md`/`decisions.md`. Fixed to "all
+  six."
+- `PROGRESS_REPORT.md` — rewritten. The old version's embedded ER diagram, API table, and
+  "Implementation Status Matrix" had drifted badly (still listed the admin portal, tutor class
+  management UI, and learner portal as "Pending" long after all shipped; schema/API sections covered
+  ~4 of 32 models and 4 of 190+ routes). Replaced those duplicated, driftable sections with pointers
+  to the docs that are actually kept current (`feature-checklist.md`, `erd.md`, `docs/roles/`),
+  keeping only the still-accurate executive summary/architecture/security overview, refreshed to
+  current stack versions and feature set.
+- `plan.md` (repo root) — a completed, pre-`docs/plans/` convention session plan for tutor class
+  creation + learner enrollment; the feature is long since shipped and outgrew the plan (`ClassSession`,
+  `ClassTopic`, moderation, etc. added since). Moved to
+  `docs/archive/plans/tutor-class-creation-learner-enrollment.md` with a "Done" banner, matching how
+  other completed plans are archived; added to `docs/README.md`'s archive table.
+- `CLAUDE.md` — Project Structure tree was missing `components/{admin,chatbot,notifications,dev,
+  symbols}`, several `app/` routes (`dev/`, `forgot-password/`, `reset-password/`, `verify-email/`,
+  `privacy-policy/`, `account-declined/`, `account-unverified/`, `pending-approval/`), and most of
+  `lib/` (`matching.ts`, `notifications.ts`, `settings.ts`, `subjects.ts`, `auditLog.ts`, `mail.ts`,
+  `chatbot/`). Added. "User Roles & Route Permissions" undersold each role (e.g. admin bullet said
+  "manages users, platform settings, and reports" with no mention of classes, subjects, certifications,
+  chatbot, or the audit log) — expanded, with a pointer to `docs/roles/`. Fixed a stray typo
+  ("Generate Prisma clie").
+- `docs/backlog/TODO.txt` — the bulk-import backlog item's mechanism description referenced
+  `TopicAssessmentConfig`, a model dropped 2026-09-03 (replaced by a platform-wide `PlatformSetting`
+  read via `getAssessmentConfig()`) and `SUBJECT_TOPICS[subject].includes(topic)`, superseded by
+  `topicExists()`. Fixed both references; the backlog item itself is still open/unbuilt, unchanged.
+- `docs/plans/dev-data-factory.md`, `notification-system-expansion.md` — both fully implemented
+  (`/api/dev`, `/dev`, `DevDataFactory.tsx`; `NotificationBell.tsx`, `/admin/notifications`) but had no
+  status banner, unlike every other file in `docs/plans/`. Added "Status: DONE" to both for consistency.
+- `docs/reference/erd.md` — regenerated via `npx prisma generate` to confirm freshness; came back
+  byte-identical (already current).
+
+**Per-role docs** (`docs/roles/{LEARNER,TUTOR,ADMIN}.md`) — each audited by a separate pass against
+its full API/route/component surface; all three had real, previously-undetected drift:
+- `LEARNER.md` — missing query params/response fields on `GET /api/classes` (status filter, browse
+  ranking, `counts.mineTabs`) and `GET /api/learner/tutors` (multi-subject filter, `verifiedClasses`);
+  the tutor-profile page's real-name/timetable/tab behavior was wrong; `classFormat` matching filter,
+  rate limits (register/chatbot/search), `SESSION_PRETEST_OPEN`/`POST_OPEN` notification types, and
+  `recoveryEmail`/`gradeLevel` on the profile PATCH were all undocumented; a session-test 403 was
+  documented as 404; "topic request" renamed to "class request" in prose per `decisions.md`.
+- `TUTOR.md` — `building`/`room` class-location fields were entirely missing; per-session
+  reschedule/complete/cancel controls were attributed to the wrong page (they're on the Edit Class
+  page, not the read-only class detail page); the Assessments section described a superseded
+  manual-request flow instead of the actual auto-graded quiz (`POST /api/tutor/assessments` +
+  `/submit`, `autoCertifyOnAssessmentPass`); Topic Requests tabs were wrong (3 tabs — Directed/Public/
+  Accepted — not 2); a claimed "Typical Weekly Schedule" derived-availability display doesn't
+  actually render anywhere in the code; roster search param and profile PATCH body were incomplete.
+- `ADMIN.md` — three entire admin pages were undocumented (Question Bank, Question Requests,
+  Assessment Results, all under the Assessment nav group); the Platform Settings list covered 5 of 9
+  real setting keys and omitted the global assessment-config endpoint entirely; several
+  `/api/admin/**` endpoints (registrations, assessment-questions, question-requests,
+  assessment-attempts, assessment-configs) had no reference entries; `GET /api/admin/reports`'s
+  30-day enrollment series was undocumented; the audit-log section described 3 of 20+ logged action
+  categories.
+
+Docs only — no application code, schema, or test changes. Not committed.
+
 <a id="part-83"></a>
 ## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
 
@@ -3863,3 +3960,11 @@ pill is ~4px). Thumb colour is `color-mix` of `--color-base-content` at 18%
 (→ 34% on hover), added as `--kt-scrollbar-thumb` / `--kt-scrollbar-thumb-hover`
 tokens on `:root`. CSS only — no TS/component/schema/test change. `build` clean.
 Not committed.
+
+<a id="part-55"></a>
+## Part 55 — Health-check API endpoint (`/api/health`) (2026-10-15)
+
+`src/app/api/health/route.ts` — lightweight unauthenticated health-check route handler for uptime monitoring and cron triggers (e.g. cron-job.org). Configured with dynamic rendering (`export const dynamic = "force-dynamic"`) and `nodejs` runtime (`export const runtime = "nodejs"`), returning `Cache-Control: no-store, no-cache, must-revalidate`. Verifies application responsiveness and executes `prisma.$queryRaw\`SELECT 1\`` using the existing `@/lib/prisma` client to verify database connectivity. Returns HTTP 200 `{ status: "healthy", database: "connected", timestamp }` on success, or HTTP 503 `{ status: "unhealthy", database: "disconnected", timestamp }` on database check failure. Safely logs diagnostic details on the server via `console.error` without leaking connection strings, credentials, or stack traces in client responses.
+
+**Tests.** `src/app/api/health/__tests__/route.test.ts` (2 tests — 200 healthy response with cache-control header, 503 error response ensuring no sensitive data leakage and server logging). `pnpm test` 731/731 passing, `tsc` clean, Next.js build clean. Not committed.
+
