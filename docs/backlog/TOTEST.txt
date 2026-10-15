@@ -879,5 +879,9 @@ Security-review fixes (Changes.md Part 57)
  [] / database connection on Render: Verify production service connects to Aiven MySQL without
     `DriverAdapterError: pool failed to retrieve a connection from pool` or RSA public key errors.
     Verify /api/health responds with 200 {"status":"healthy","database":"connected"}.
+ [] / TLS CA certificate on Render: Add Aiven Project CA certificate via AIVEN_CA_CERT env var
+    or Secret File /etc/secrets/aiven-ca.pem. Verify application establishes connection without
+    `self-signed certificate in certificate chain` error. Verify /api/health returns 200.
+
 
 

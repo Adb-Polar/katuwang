@@ -3978,4 +3978,16 @@ Not committed.
 
 **Tests.** `src/lib/__tests__/prisma.test.ts` (5 tests verifying URL normalization, Aiven SSL mapping, localhost handling, and parameter preservation). `pnpm test` 736/736 passing, `tsc` clean, Next.js production build clean.
 
+<a id="part-57"></a>
+## Part 57 — Aiven Project CA certificate verification fix (2026-10-15)
+
+`src/lib/prisma.ts` — resolved production TLS certificate verification failure on Render connecting to Aiven MySQL (`DriverAdapterError: pool failed to retrieve a connection from pool` with root cause `self-signed certificate in certificate chain`).
+1. Added `getCaCertificate` to detect and load Aiven's official Project CA certificate from environment variables (`AIVEN_CA_CERT`, `DATABASE_CA_CERT`, `CA_CERT`, unescaping literal `\n` characters) or file paths (`AIVEN_CA_CERT_PATH`, `DATABASE_CA_CERT_PATH`, or standard Render Secret File mounts at `/etc/secrets/aiven-ca.pem` / `/etc/secrets/ca.pem`). Added `/*turbopackIgnore: true*/` to suppress dynamic NFT tracing warnings.
+2. Added `getDatabaseConfig` to construct a typed `mariadb.PoolConfig` object for `@prisma/adapter-mariadb`, configuring `ssl: { ca: caCert, rejectUnauthorized: true }` when a CA certificate is provided.
+3. Preserved strict TLS certificate verification (`rejectUnauthorized: true`). Did not disable TLS or allow unverified certificates.
+4. Added explicit production diagnostic logging if the CA certificate is missing for an Aiven host without leaking credentials, connection strings, or certificate data.
+
+**Tests.** `src/lib/__tests__/prisma.test.ts` expanded to 10 tests covering certificate parsing, file path loading, CA injection into adapter config, localhost handling, and explicit warning generation. `pnpm test` 741/741 passing, `tsc` clean, Next.js build clean with 0 warnings.
+
+
 
