@@ -876,4 +876,8 @@ Security-review fixes (Changes.md Part 57)
     Verify it returns 200 with {"status":"healthy","database":"connected","timestamp":...}
     when database is reachable, and 503 with {"status":"unhealthy","database":"disconnected","timestamp":...}
     when database is down or unreachable. Verify Cache-Control header has no-store.
+ [] / database connection on Render: Verify production service connects to Aiven MySQL without
+    `DriverAdapterError: pool failed to retrieve a connection from pool` or RSA public key errors.
+    Verify /api/health responds with 200 {"status":"healthy","database":"connected"}.
+
 

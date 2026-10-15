@@ -3966,5 +3966,16 @@ Not committed.
 
 `src/app/api/health/route.ts` — lightweight unauthenticated health-check route handler for uptime monitoring and cron triggers (e.g. cron-job.org). Configured with dynamic rendering (`export const dynamic = "force-dynamic"`) and `nodejs` runtime (`export const runtime = "nodejs"`), returning `Cache-Control: no-store, no-cache, must-revalidate`. Verifies application responsiveness and executes `prisma.$queryRaw\`SELECT 1\`` using the existing `@/lib/prisma` client to verify database connectivity. Returns HTTP 200 `{ status: "healthy", database: "connected", timestamp }` on success, or HTTP 503 `{ status: "unhealthy", database: "disconnected", timestamp }` on database check failure. Safely logs diagnostic details on the server via `console.error` without leaking connection strings, credentials, or stack traces in client responses.
 
-**Tests.** `src/app/api/health/__tests__/route.test.ts` (2 tests — 200 healthy response with cache-control header, 503 error response ensuring no sensitive data leakage and server logging). `pnpm test` 731/731 passing, `tsc` clean, Next.js build clean. Not committed.
+**Tests.** `src/app/api/health/__tests__/route.test.ts` (2 tests — 200 healthy response with cache-control header, 503 error response ensuring no sensitive data leakage and server logging). `pnpm test` 731/731 passing, `tsc` clean, Next.js build clean. Committed.
+
+<a id="part-56"></a>
+## Part 56 — MariaDB adapter TLS and RSA authentication handshake fix (2026-10-15)
+
+`src/lib/prisma.ts` — fixed production database connection failures on Render connecting to Aiven MySQL/MariaDB (`DriverAdapterError: pool failed to retrieve a connection from pool` with root cause `RSA public key is not available client side. Either set option cachingRsaPublicKey or allow public key retrieval with option allowPublicKeyRetrieval`). Normalized the connection URL for `@prisma/adapter-mariadb`:
+1. Maps `ssl-mode=REQUIRED` / remote hosts to `ssl=true` (the exact parameter expected by the underlying `mariadb` driver) ensuring TLS encryption with certificate verification (`rejectUnauthorized: true`) is retained.
+2. Configures `allowPublicKeyRetrieval=true` to satisfy MySQL 8+ `caching_sha2_password` authentication requirements.
+3. Caches and reuses a single `PrismaClient` instance globally across both development and production module evaluations to eliminate redundant connection pools.
+
+**Tests.** `src/lib/__tests__/prisma.test.ts` (5 tests verifying URL normalization, Aiven SSL mapping, localhost handling, and parameter preservation). `pnpm test` 736/736 passing, `tsc` clean, Next.js production build clean.
+
 
