@@ -30,6 +30,7 @@ type LogEntry = { ok: boolean; text: string; at: string };
 
 export default function DevDataFactory() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [log, setLog] = useState<LogEntry[]>([]);
   const [version, setVersion] = useState(0);
@@ -39,8 +40,21 @@ export default function DevDataFactory() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const res = await fetch("/api/dev");
-      if (!cancelled && res.ok) setSnap(await res.json());
+      try {
+        const res = await fetch("/api/dev");
+        if (cancelled) return;
+        if (res.ok) {
+          setSnap(await res.json());
+          setLoadError(null);
+        } else {
+          const data = await res.json().catch(() => null);
+          setLoadError(data?.error ?? `Failed to load snapshot (${res.status})`);
+        }
+      } catch {
+        if (!cancelled) {
+          setLoadError("Network error while connecting to dev API.");
+        }
+      }
     }
     load();
     return () => {
@@ -102,6 +116,10 @@ export default function DevDataFactory() {
             <Stat label="Classes" value={snap.counts.classes} />
             <Stat label="@dev.test users" value={snap.counts.devUsers} />
           </>
+        ) : loadError ? (
+          <div className="stat p-4 text-xs text-error">
+            {loadError}
+          </div>
         ) : (
           <div className="stat">
             <span className="loading loading-spinner loading-sm" />

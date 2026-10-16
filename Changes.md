@@ -3989,5 +3989,47 @@ Not committed.
 
 **Tests.** `src/lib/__tests__/prisma.test.ts` expanded to 10 tests covering certificate parsing, file path loading, CA injection into adapter config, localhost handling, and explicit warning generation. `pnpm test` 741/741 passing, `tsc` clean, Next.js build clean with 0 warnings.
 
+<a id="part-58"></a>
+## Part 58 — Idempotent database seeding and unique class code collision fix (2026-10-15)
+
+`prisma/seed.ts` — resolved Prisma seed failure `Unique constraint failed on the constraint: tutor_classes_code_key` (P2002) at `prisma.tutorClass.create()` and eliminated destructive `deleteMany` workarounds to ensure safe and fully idempotent re-runs:
+1. **Dynamic Class Code Tracking & Allocation**: Replaced the in-memory reset counter `let classCodeSeq = 0` with `initMaxClassCode` (which scans both `IdCounter` for `"CLASS"` and existing class codes in `tutor_classes`), `recordCodeNumber`, and `allocateClassCode(preferredCode)`. Guaranteed that sequential codes never collide with existing classes or user-created records. Synchronized `IdCounter` for `"CLASS"` to `Math.max(currentCount, highestObservedCode)` so application-created classes continue the sequence without collisions.
+2. **Idempotent `ensureTutorClass`**: Added an upsert/find-and-update handler that first looks for an existing class by preferred code (ensuring it matches the tutor profile) or by `(tutorProfileId, subject, description)`. If found, updates the class record and synchronizes topics, sessions, and enrollments while preserving existing IDs and existing `ClassSession` rows (preventing cascade deletion of session test attempts). If not found, allocates a guaranteed unique code and creates the class.
+3. **Idempotent Curated & Procedural Classes**: Assigned deterministic class codes `C-0001` through `C-0013` to the 13 curated classes in `buildClasses()`, `C-0014` and `C-0015` to request-fulfilled classes, and deterministic codes `C-${pad(16 + index, 4)}` to procedurally generated classes.
+4. **Eliminated All `deleteMany` Workarounds**: Removed `tutorClass.deleteMany`, `topicRequest.deleteMany`, `notification.deleteMany`, and `assessmentQuestion.deleteMany` / `assessmentAttemptItem.deleteMany`.
+5. **Idempotent Helpers for Requests, Notifications, and Tests**: Added `ensureTopicRequest` (reusing existing requests by `learnerId, subject, note`), `ensureNotification` (reusing notifications by `userId, type, link`), idempotent question bank creation (checking `findFirst` by `subject, topic, prompt, origin: "BANK"`), and guarded `seedSessionTests` from duplicate `sessionId` creation.
+
+**Verification.** Plan created at `docs/plans/idempotent-seed-fix.md`. `npx prisma db seed` executed successfully twice consecutively on the local database (exit code 0, 0 errors, 0 duplicates). Verified `seed-session-tests.ts` executes cleanly and test attempts (84/84) remain preserved after subsequent seed re-runs. `tsc --noEmit` clean, `pnpm test` 101/101 test files and 741/741 tests passing.
+
+<a id="part-59"></a>
+## Part 59 — Dev Data Factory fix, full database seed expansion, and realtime logging (2026-10-16)
+
+1. **Dev Data Factory Fix & Tests**:
+   - `src/app/api/dev/route.ts`: Removed restrictive role checks on dev data generator endpoint so developers can reliably generate fixture data on dev environments. Ensured all newly created users have `emailVerifiedAt: new Date()` set so generated accounts can log in immediately without email verification barriers.
+   - `src/components/dev/DevDataFactory.tsx`: Enhanced error handling and message extraction from JSON response bodies.
+   - `src/app/api/dev/__tests__/route.test.ts`: Added Vitest unit test suite covering 200 success, 403 in production, and 500 error scenarios using `vi.stubEnv`.
+
+2. **Full Database Seed Expansion**:
+   - `prisma/seed.ts`: Extended seed coverage to all models feeding the frontend application:
+     - Users across all status states (`APPROVED`, `REJECTED`, `PENDING_VERIFICATION`, `PENDING_APPROVAL`).
+     - Tutors and learners with populated profiles.
+     - TutorClasses with complete schedules, topics, and enrollments.
+     - Class appeals across statuses (`PENDING`, `APPROVED`, `REJECTED`).
+     - Reports and report violations.
+     - Recommendations and chatbot misses (`ChatbotMiss`).
+     - System audit logs (`AuditLog`).
+     - Pre- and post-test assessments with attempts (`AssessmentAttempt`, `AssessmentAttemptItem`).
+     - Verification and password reset tokens (`Token`).
+   - `.env.seed`: Added support for `.env.seed` to customize data volume knobs (`SEED_SCALE`, `SEED_REPORTS_COUNT`, `SEED_AUDIT_LOGS_COUNT`, `SEED_CHATBOT_MISSES_COUNT`, etc.).
+
+3. **Driver Connection & Seeding Optimization**:
+   - `src/lib/prisma.ts`: Updated `connectTimeout` from 10,000ms to 30,000ms for stable remote database connections (e.g. Aiven MySQL over TLS).
+   - `prisma/seed.ts`: Prefetched existing question bank prompts into an in-memory `Set` before question seeding, eliminating thousands of sequential network round-trips over remote TLS links.
+
+4. **Realtime Console Logging**:
+   - `prisma/seed.ts`: Added live color-coded ANSI logging across all 12 provisioning phases displaying `[+]` added, `[~]` updated, `[=]` verified existing, and `[i]` system settings in real time.
+
+**Verification.** `prisma/seed.ts` executed twice against cloud dev/test database with exit code 0; second run verified 100% idempotency (`[=] ... verified`). All 746 tests pass (`pnpm test`), `npx tsc --noEmit` passes with 0 errors, and ESLint is clean.
+
 
 

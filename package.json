@@ -9,7 +9,14 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:local": "node scripts/switch-db.mjs local",
+    "db:cloud": "node scripts/switch-db.mjs cloud",
+    "db:target": "node scripts/switch-db.mjs target",
+    "db:status": "prisma migrate status",
+    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",

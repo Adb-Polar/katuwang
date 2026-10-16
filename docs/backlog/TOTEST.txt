@@ -882,6 +882,9 @@ Security-review fixes (Changes.md Part 57)
  [] / TLS CA certificate on Render: Add Aiven Project CA certificate via AIVEN_CA_CERT env var
     or Secret File /etc/secrets/aiven-ca.pem. Verify application establishes connection without
     `self-signed certificate in certificate chain` error. Verify /api/health returns 200.
+ [] / database seeding idempotency: Run `npx prisma db seed` multiple times.
+    Verify that consecutive runs succeed with exit code 0 without `Unique constraint failed on the constraint: tutor_classes_code_key` (P2002),
+    and that existing test attempt history and class relationships are preserved.
 
 
 

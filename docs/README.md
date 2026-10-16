@@ -36,6 +36,8 @@ docs/
 | [`chatbot.md`](reference/chatbot.md) | Chatbot Assistant architecture & workflow — a deterministic intent/FAQ responder, no LLM. Now includes the original implementation plan as an appendix. |
 | [`theme.md`](reference/theme.md) | **Retired 2026-09-10** to a pointer at `src/app/globals.css` — it had drifted to an older palette. Kept so old links don't 404. |
 | [`thesis.md`](reference/thesis.md) | The full ~450KB capstone thesis ("A web-based Peer Tutoring Management Platform … for Taysan Resettlement Integrated School"). A historical proposal snapshot — **do not read wholesale**; use `grep`/offset reads, and prefer `project-overview.md`. |
+| [`thesis-implementation-audit.md`](reference/thesis-implementation-audit.md) | Point-in-time (2026-09-23) thesis-vs-code defense-prep audit: requirements traceability matrix, objectives/scope/role/DB/security comparisons, thesis self-contradictions, and ranked defense-readiness issues. Not a living doc — re-run rather than trust blindly if the thesis or code changes materially. |
+| [`qa-iso-25010-checklist.md`](reference/qa-iso-25010-checklist.md) | Formal ISO/IEC 25010 QA testing & evaluation checklist across all 8 quality characteristics with concrete test steps, expected behaviors, and sign-off criteria for the Katuwang peer tutoring platform. |
 
 Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture diagram).
 
@@ -49,16 +51,15 @@ Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture di
 
 ## `plans/` — active implementation plans
 
-See [`plans/README.md`](plans/README.md) for the status table.
-
-| File | Preview |
-|---|---|
-| [`assessments.md`](plans/assessments.md) | **Merged.** Admin question bank + auto-graded topic quizzes, per-topic config → one global config, and learner per-session pre/post-tests (`SessionTest` per `ClassSession`). Mostly shipped (Changes.md Parts 29–33). |
-| [`deployment.md`](plans/deployment.md) | Free-tier path from local dev to a public URL: Oracle Cloud **or** Render hosting, TiDB Cloud Serverless MySQL, free `.tech`/`.me` domain. Planning only. |
-| [`fixes.md`](plans/fixes.md) | Status audit of the ~55-item fixes/redesign backlog (raw source now `archive/plans/fixes.txt`) and a 6-phase implementation sequence. Phases 1–6 shipped. |
-| [`notification-system-expansion.md`](plans/notification-system-expansion.md) | Broaden the DB-backed notification system beyond topic requests; add the unread dot. |
-| [`subject-topic-management.md`](plans/subject-topic-management.md) | Admin-editable subjects & topics. **Done 2026-09-04** — `SubjectArea` enum removed, `subject` columns are string slugs, `/admin/subjects` CRUD live. |
-| [`dev-data-factory.md`](plans/dev-data-factory.md) | Dev-only page + API to spawn test data (users, classes, enrollments, topic requests) on demand without re-seeding. |
+| File | Preview | Status |
+|---|---|---|
+| [`assessments.md`](plans/assessments.md) | Merged assessments plan: admin question bank + auto-graded topic quizzes, per-topic config → one global config, and learner per-session pre/post-tests (`SessionTest` per `ClassSession`). | **Mostly shipped** — Changes.md Parts 29–33. Question bank, global config, and per-session pre/post tests all implemented and `db push`ed; the pre-test-post-test section is retained as history (also in `archive/plans/`). Not committed. |
+| [`deployment.md`](plans/deployment.md) | Free-tier path from local dev to a public URL: Oracle Cloud **or** Render hosting, TiDB Cloud Serverless MySQL, free `.tech`/`.me` domain. | **Planning** — Changes.md Part 34. Hosting options + setup, DB bootstrap via `prisma migrate deploy`, env-var reference, pre-deploy code changes, `main → production` branching, verification checklist. Not executed. |
+| [`fixes.md`](plans/fixes.md) | Status audit of the ~55-item fixes/redesign backlog (raw source now `archive/plans/fixes.txt`) and a 6-phase implementation sequence. | **In progress** — Changes.md Part 36+. Sept 5/6 items reconciled as shipped (Parts 29–35); remaining work grouped Phase 1 (bugs/guardrails) → Phase 6 (appeal-notify schema change, needs DB confirmation). One commit per phase. |
+| [`landing-page-redesign.md`](plans/landing-page-redesign.md) | Modern redesign of the public `/` landing page: "The Key" direction — STU ⇄ TUT pairing hero, bento features, dark privacy section, real logo wired in. | **Prototype 10 (Story) implemented** — Changes.md Parts 78–82 (04 Timetable was built first, then superseded). Plan's original "The Key" scope is historical; all 10 prototypes kept in `design/landing/`. |
+| [`notification-system-expansion.md`](plans/notification-system-expansion.md) | Broaden the DB-backed notification system beyond topic requests; add the unread dot. | See the plan for current status. |
+| [`subject-topic-management.md`](plans/subject-topic-management.md) | Admin-editable subjects & topics. | **Done 2026-09-04** — `SubjectArea` enum removed, `subject` columns are string slugs, `/admin/subjects` CRUD live. |
+| [`dev-data-factory.md`](plans/dev-data-factory.md) | Dev-only page + API to spawn test data (users, classes, enrollments, topic requests) on demand without re-seeding. | See the plan for current status. |
 
 ## `reviews/`
 
@@ -100,5 +101,6 @@ Kept for history; not part of the living dev docs.
 | [`pre-test-post-test-plan.md`](archive/plans/pre-test-post-test-plan.md) | **Done** (Changes.md Part 29) — learner per-session pre/post-tests. Also folded into `plans/assessments.md`. |
 | [`sept-5-fixes.md`](archive/plans/sept-5-fixes.md) | **Done** (Changes.md Part 31) — a 9-item bug/UX batch from the Sept 5 review. |
 | `fixes.txt`, `admin-portal-fixes.txt`, `leaner-portal-fixes.txt` | Raw, unordered backlog fragments now tracked through `plans/fixes.md`. |
+| [`tutor-class-creation-learner-enrollment.md`](archive/plans/tutor-class-creation-learner-enrollment.md) | **Done** — original tutor class scheduling + learner browse/enroll/unenroll build. Predates the `docs/plans/` convention (was `plan.md` at repo root); moved here 2026-09-23. |
 
 **`archive/reports/`** — `feature-status-and-sprint-report-2026-09-02.xlsx`, `-2026-09-06.xlsx` (superseded by the undated copy in `reports/`).

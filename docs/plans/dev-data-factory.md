@@ -1,5 +1,9 @@
 # Dev Data Factory
 
+> **Status: DONE.** Implemented as described below — `POST /api/dev`
+> (`src/app/api/dev/route.ts`), `/dev` hub (`src/app/dev/page.tsx`), and
+> `DevDataFactory.tsx`.
+
 A development-only page + API for spawning test data (users, classes, enrollments,
 topic requests) on demand, without re-running the full seed script.
 

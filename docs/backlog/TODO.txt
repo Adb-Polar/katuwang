@@ -9,16 +9,17 @@ Open items
  - Admin bulk import for the assessment question bank — today the only way to
    add questions is QuestionFormModal in QuestionBankManager.tsx, one at a
    time. A topic isn't assessable until it has minBankSize (default 5) active
-   questions (TopicAssessmentConfig), so real content entry needs a batch
-   path. NO schema change: reuses AssessmentQuestion + AssessmentOption as-is;
+   questions (the platform-wide assessment config, getAssessmentConfig() in
+   src/lib/settings.ts), so real content entry needs a batch path. NO schema
+   change: reuses AssessmentQuestion + AssessmentOption as-is;
    at most add an AUDIT_ACTIONS.QUESTIONS_IMPORTED constant (a TS const, not a
    migration).
    Suggested shape:
      * New POST /api/admin/assessment-questions/bulk — ADMIN-only, reuses
        createAssessmentQuestionSchema (src/lib/validations/assessment.ts) per
        row inside one prisma.$transaction, keeps the existing
-       SUBJECT_TOPICS[subject].includes(topic) check, writes one summary audit
-       row.
+       topicExists(subject, topic) check (src/lib/subjects.ts), writes one
+       summary audit row.
      * New "Import" modal in QuestionBankManager (Questions tab): paste input
        -> client-side preview table (row #, prompt, subject.topic, valid/error
        + first message) -> "Import N valid" button.

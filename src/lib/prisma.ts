@@ -1,3 +1,4 @@
+import "dotenv/config";
 import fs from "node:fs";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
@@ -115,7 +116,9 @@ export function parseDatabaseUrl(rawUrl: string): {
     database: decodeURIComponent(url.pathname.replace(/^\//, "")),
     connectTimeout: url.searchParams.has("connectTimeout")
       ? parseInt(url.searchParams.get("connectTimeout")!, 10)
-      : undefined,
+      : url.searchParams.has("connect_timeout")
+        ? parseInt(url.searchParams.get("connect_timeout")!, 10) * 1000
+        : undefined,
     connectionLimit: url.searchParams.has("connectionLimit")
       ? parseInt(url.searchParams.get("connectionLimit")!, 10)
       : undefined,
@@ -163,7 +166,7 @@ export function getDatabaseConfig(
         password: parsed.password,
         database: parsed.database,
         allowPublicKeyRetrieval: true,
-        connectTimeout: parsed.connectTimeout ?? 10000,
+        connectTimeout: parsed.connectTimeout ?? 30000,
         connectionLimit: parsed.connectionLimit,
         ssl: caCert
           ? {
