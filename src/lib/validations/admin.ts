@@ -67,3 +67,20 @@ export const reviewRegistrationSchema = z.object({
 });
 
 export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;
+
+export const createAdminAccountSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required.").max(50, "First name is too long."),
+  lastName: z.string().trim().min(1, "Last name is required.").max(50, "Last name is too long."),
+  email: z.string().trim().email("Enter a valid email address.").toLowerCase(),
+  contactInfo: z.string().trim().max(100, "Contact info cannot exceed 100 characters.").optional().nullable(),
+});
+
+export type CreateAdminAccountInput = z.infer<typeof createAdminAccountSchema>;
+
+export const updateAdminStatusSchema = z.object({
+  status: z.enum(["ACTIVE", "SUSPENDED"], { message: "Invalid status for admin account." }),
+  reason: z.string().trim().max(500, "Reason cannot exceed 500 characters.").optional().or(z.literal("")),
+});
+
+export type UpdateAdminStatusInput = z.infer<typeof updateAdminStatusSchema>;
+

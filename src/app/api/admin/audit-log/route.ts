@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { isAdminRole } from "@/lib/permissions";
 
 const DEFAULT_PAGE_SIZE = AUDIT_PAGE_SIZE;
 const SORTABLE = new Set(["createdAt", "action", "targetType"]);
@@ -13,7 +14,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 

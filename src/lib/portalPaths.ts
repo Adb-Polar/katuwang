@@ -9,6 +9,7 @@ const PORTAL_PREFIX: Record<Role, string> = {
   STUDENT_LEARNER: "/learner",
   STUDENT_TUTOR: "/tutor",
   ADMIN: "/admin",
+  SUPER_ADMIN: "/admin",
 };
 
 export function portalPath(role: Role, sub: string): string {

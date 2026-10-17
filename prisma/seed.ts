@@ -1654,7 +1654,7 @@ async function main() {
       password: passwordHash,
       role: "ADMIN",
       gradeLevel: "GRADE_12",
-      section: "N/A",
+      section: "ADMIN",
       consentGiven: true,
       emailVerifiedAt: new Date(),
     },
@@ -1664,6 +1664,35 @@ async function main() {
   } else {
     log.exist("Admin", `${adminUser.email} [${adminUser.anonymousId}]`);
   }
+
+  const existingSuperAdmin = await prisma.user.findUnique({ where: { email: "superadmin@katuwang.test" } });
+  const superAdminUser = await prisma.user.upsert({
+    where: { email: "superadmin@katuwang.test" },
+    update: { role: "SUPER_ADMIN" },
+    create: {
+      anonymousId: "ADM-0002",
+      firstName: "Super",
+      lastName: "Admin",
+      email: "superadmin@katuwang.test",
+      password: passwordHash,
+      role: "SUPER_ADMIN",
+      gradeLevel: "GRADE_12",
+      section: "ADMIN",
+      consentGiven: true,
+      emailVerifiedAt: new Date(),
+    },
+  });
+  if (!existingSuperAdmin) {
+    log.add("Super Admin", `${superAdminUser.email} [${superAdminUser.anonymousId}]`);
+  } else {
+    log.exist("Super Admin", `${superAdminUser.email} [${superAdminUser.anonymousId}]`);
+  }
+
+  await prisma.idCounter.upsert({
+    where: { role: "ADMIN" },
+    create: { role: "ADMIN", count: 2 },
+    update: {},
+  });
 
   log.header("[3/12] Tutor Accounts & Topic Certifications");
   const tutorUsers: Record<string, User> = {};
@@ -2045,8 +2074,9 @@ async function main() {
   console.log(`  - Chatbot Misses:         ${missesCreated}`);
   console.log(`  - Admin Audit Logs:       ${auditLogsCreated}`);
 
-  console.log("\nAdmin Account:");
-  console.log("  ADM-0001  admin@katuwang.test");
+  console.log("\nAdministrative Accounts:");
+  console.log("  ADM-0001  admin@katuwang.test (ADMIN)");
+  console.log("  ADM-0002  superadmin@katuwang.test (SUPER_ADMIN)");
   console.log("\nDemo Tutors:");
   for (const t of TUTORS) console.log(`  ${tutorUsers[t.email]?.anonymousId}  ${t.email}`);
   console.log("\nDemo Learners:");

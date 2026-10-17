@@ -48,10 +48,11 @@ export default async function DevLoginPage() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <DevLoginBoard title="Tutors" tone="badge-primary" users={byRole("STUDENT_TUTOR")} password={DEV_PASSWORD} />
           <DevLoginBoard title="Learners" tone="badge-secondary" users={byRole("STUDENT_LEARNER")} password={DEV_PASSWORD} />
           <DevLoginBoard title="Admins" tone="badge-error" users={byRole("ADMIN")} password={DEV_PASSWORD} />
+          <DevLoginBoard title="Super Admins" tone="badge-accent" users={byRole("SUPER_ADMIN")} password={DEV_PASSWORD} />
         </div>
       </div>
     </div>

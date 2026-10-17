@@ -7,7 +7,7 @@ declare module "next-auth" {
     user: {
       id: string;
       anonymousId: string;
-      role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+      role: "SUPER_ADMIN" | "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
       fullName: string;
       email: string;
       status: AccountStatus;
@@ -17,7 +17,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "SUPER_ADMIN" | "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
   }
 }
@@ -26,7 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     anonymousId: string;
-    role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    role: "SUPER_ADMIN" | "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
     status: AccountStatus;
     /** Epoch ms of the last DB re-sync of `role`/`status`. */

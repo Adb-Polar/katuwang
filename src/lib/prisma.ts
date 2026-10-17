@@ -157,7 +157,7 @@ export function getDatabaseConfig(
       );
     }
 
-    if (caCert || needsTls) {
+    if (needsTls) {
       const parsed = parseDatabaseUrl(rawUrl);
       const poolConfig: PoolConfig = {
         host: parsed.host,

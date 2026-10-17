@@ -8,6 +8,7 @@ import RecommendClassForm from "@/components/classes/RecommendClassForm";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
+import { isAdminRole } from "@/lib/permissions";
 
 export const metadata = { title: "Class Detail | Katuwang" };
 
@@ -18,7 +19,7 @@ export default async function AdminClassDetailPage({
 }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") notFound();
+  if (!session || !isAdminRole(session.user.role)) notFound();
 
   const tutorClass = await prisma.tutorClass.findUnique({
     where: { id },

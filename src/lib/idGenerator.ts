@@ -8,16 +8,40 @@ import { prisma } from "./prisma";
  * Uses a DB transaction/update to prevent race conditions.
  */
 export async function generateAnonymousId(
-  role: "TUTOR" | "LEARNER"
+  role: "TUTOR" | "LEARNER" | "ADMIN"
 ): Promise<string> {
-  const prefix = role === "TUTOR" ? "TUT" : "STU";
+  const prefix = role === "TUTOR" ? "TUT" : role === "ADMIN" ? "ADM" : "STU";
 
-  const updated = await prisma.idCounter.update({
-    where: { role },
-    data: { count: { increment: 1 } },
-  });
+  let updated;
+  if (role === "ADMIN") {
+    updated = await prisma.idCounter.upsert({
+      where: { role },
+      create: { role, count: 1 },
+      update: { count: { increment: 1 } },
+    });
+  } else {
+    updated = await prisma.idCounter.update({
+      where: { role },
+      data: { count: { increment: 1 } },
+    });
+  }
 
-  const padded = String(updated.count).padStart(4, "0");
+  let count = updated.count;
+  if (role === "ADMIN" && count === 1) {
+    const existing = await prisma.user.findUnique({
+      where: { anonymousId: `${prefix}-0001` },
+      select: { id: true },
+    });
+    if (existing) {
+      const bumped = await prisma.idCounter.update({
+        where: { role },
+        data: { count: { increment: 1 } },
+      });
+      count = bumped.count;
+    }
+  }
+
+  const padded = String(count).padStart(4, "0");
   return `${prefix}-${padded}`;
 }
 
