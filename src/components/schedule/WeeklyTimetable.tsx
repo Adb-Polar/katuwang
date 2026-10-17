@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatTime } from "@/lib/datetime";
+import { formatTime, formatWeekday } from "@/lib/datetime";
 
 export interface TimetableSession {
   id: string;
@@ -38,8 +38,11 @@ export default function WeeklyTimetable({
 
   const byDay: Record<number, TimetableSession[]> = {};
   for (const s of sessions) {
-    const idx = (new Date(s.scheduledAt).getDay() + 6) % 7; // Mon = 0 … Sun = 6
-    (byDay[idx] ??= []).push(s);
+    const weekday = formatWeekday(s.scheduledAt);
+    const idx = DAYS.indexOf(weekday);
+    if (idx >= 0) {
+      (byDay[idx] ??= []).push(s);
+    }
   }
   for (const list of Object.values(byDay)) {
     list.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));

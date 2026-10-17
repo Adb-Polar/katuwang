@@ -118,13 +118,15 @@ export default function LoginForm() {
               </label>
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
                 placeholder="example@katuwang.ph"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (error) setError("");
                 }}
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
                 disabled={loading}
                 required
               />
@@ -140,13 +142,15 @@ export default function LoginForm() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (error) setError("");
                   }}
-                  className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
+                  className="input input-bordered input-sm w-full pr-10 focus:input-primary text-base sm:text-sm"
                   disabled={loading}
                   required
                 />

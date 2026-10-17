@@ -83,13 +83,15 @@ export default function ResetPasswordForm() {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="password"
+                  autoComplete="new-password"
                   placeholder="At least 8 characters"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value);
                     if (error) setError("");
                   }}
-                  className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
+                  className="input input-bordered input-sm w-full pr-10 focus:input-primary text-base sm:text-sm"
                   disabled={loading}
                   minLength={8}
                   required
@@ -111,13 +113,15 @@ export default function ResetPasswordForm() {
               </label>
               <input
                 type={showPassword ? "text" : "password"}
+                name="confirmPassword"
+                autoComplete="new-password"
                 placeholder="Repeat your new password"
                 value={confirm}
                 onChange={(e) => {
                   setConfirm(e.target.value);
                   if (error) setError("");
                 }}
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
                 disabled={loading}
                 required
               />

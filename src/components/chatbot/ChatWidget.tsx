@@ -141,7 +141,7 @@ export default function ChatWidget() {
               maxLength={500}
               placeholder="Ask about Katuwang…"
               aria-label="Message"
-              className="input input-sm input-bordered flex-1 text-xs"
+              className="input input-sm input-bordered flex-1 text-base sm:text-sm"
             />
             <button
               type="submit"

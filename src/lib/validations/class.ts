@@ -60,6 +60,10 @@ export const classDetailsSchema = z.object({
     .string()
     .trim()
     .url("Invalid URL format.")
+    .refine(
+      (u) => /^https?:\/\//i.test(u),
+      "Meeting link must start with http:// or https://."
+    )
     .optional()
     .or(z.literal("")),
   published: z.boolean().optional(),

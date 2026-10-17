@@ -60,13 +60,15 @@ export default function ForgotPasswordForm() {
               </label>
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
                 placeholder="example@katuwang.ph"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                   if (error) setError("");
                 }}
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
                 disabled={loading}
                 required
               />

@@ -126,11 +126,12 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <input
                 type="text"
                 name="firstName"
+                autoComplete="given-name"
                 value={form.firstName}
                 onChange={handleChange}
                 required
                 placeholder="First name"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
               />
             </FormField>
 
@@ -138,11 +139,12 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <input
                 type="text"
                 name="lastName"
+                autoComplete="family-name"
                 value={form.lastName}
                 onChange={handleChange}
                 required
                 placeholder="Last name"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
               />
             </FormField>
           </div>
@@ -151,11 +153,12 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="email"
               name="email"
+              autoComplete="email"
               value={form.email}
               onChange={handleChange}
               required
               placeholder="you@example.com"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
             />
           </FormField>
 
@@ -167,7 +170,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
                 value={form.gradeLevel}
                 onChange={handleChange}
                 required
-                className="select select-bordered select-sm w-full focus:select-primary text-xs"
+                className="select select-bordered select-sm w-full focus:select-primary text-base sm:text-sm"
               >
                 <option value="">Select grade</option>
                 {GRADE_LEVELS.map((g) => (
@@ -186,7 +189,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
                 onChange={handleChange}
                 required
                 placeholder="e.g., Rizal"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
               />
             </FormField>
           </div>
@@ -195,10 +198,11 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="contactInfo"
+              autoComplete="tel"
               value={form.contactInfo}
               onChange={handleChange}
               placeholder="Phone or guardian contact"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              className="input input-bordered input-sm w-full focus:input-primary text-base sm:text-sm"
             />
           </FormField>
 
@@ -207,12 +211,13 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
+                autoComplete="new-password"
                 value={form.password}
                 onChange={handleChange}
                 required
                 minLength={8}
                 placeholder="At least 8 characters"
-                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-base sm:text-sm"
               />
               <button
                 type="button"
@@ -230,11 +235,12 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <input
                 type={showConfirmPassword ? "text" : "password"}
                 name="confirmPassword"
+                autoComplete="new-password"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 required
                 placeholder="Repeat your password"
-                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
+                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-base sm:text-sm"
               />
               <button
                 type="button"

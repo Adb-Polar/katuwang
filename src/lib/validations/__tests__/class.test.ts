@@ -83,6 +83,16 @@ describe("createClassSchema", () => {
     expect(createClassSchema.safeParse(withLocation).success).toBe(true);
   });
 
+  it("rejects non-http(s) meeting links such as javascript: URLs", () => {
+    const withJsLink = { ...validDetails, meetingLink: "javascript:alert(1)", sessions: [validSession] };
+    expect(createClassSchema.safeParse(withJsLink).success).toBe(false);
+  });
+
+  it("accepts http and https meeting links", () => {
+    const withHttp = { ...validDetails, meetingLink: "http://meet.example.com/room", sessions: [validSession] };
+    expect(createClassSchema.safeParse(withHttp).success).toBe(true);
+  });
+
   // Note: whether each session's topic actually belongs to the submitted `topics`
   // list is a DB-context-dependent business rule enforced in the route handler,
   // not something Zod can check here (Zod only validates shape, not cross-field
