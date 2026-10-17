@@ -67,3 +67,40 @@ export const reviewRegistrationSchema = z.object({
 });
 
 export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;
+
+export const moderateAvatarSchema = z
+  .object({
+    action: z.enum(["WARN", "REMOVE", "LOCK", "UNLOCK"], {
+      message: "Invalid avatar moderation action.",
+    }),
+    reason: z
+      .string()
+      .trim()
+      .max(500, "Reason cannot exceed 500 characters.")
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine(
+    (data) => {
+      if (data.action === "WARN") {
+        return Boolean(data.reason && data.reason.trim().length > 0);
+      }
+      return true;
+    },
+    {
+      message: "A warning reason is required.",
+      path: ["reason"],
+    }
+  );
+
+export type ModerateAvatarInput = z.infer<typeof moderateAvatarSchema>;
+
+export const updateProfilePictureRequirementSchema = z.object({
+  value: z.enum(["OPTIONAL", "TUTORS_ONLY", "ALL_USERS"], {
+    message: "Invalid requirement option.",
+  }),
+});
+
+export type UpdateProfilePictureRequirementInput = z.infer<
+  typeof updateProfilePictureRequirementSchema
+>;

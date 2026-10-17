@@ -8,6 +8,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
+import UserAvatarModerationCard from "@/components/admin/UserAvatarModerationCard";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -44,6 +45,9 @@ export default async function AdminUserDetailPage({
       statusReason: true,
       statusUpdatedAt: true,
       statusExpiresAt: true,
+      image: true,
+      profilePictureLocked: true,
+      profilePictureUpdatedAt: true,
       createdAt: true,
       _count: { select: { enrollments: true, topicRequests: true } },
       tutorProfile: {
@@ -131,6 +135,14 @@ export default async function AdminUserDetailPage({
           )}
         </div>
       </section>
+
+      <UserAvatarModerationCard
+        userId={user.id}
+        userName={`${user.firstName} ${user.lastName}`}
+        initialImage={user.image}
+        locked={user.profilePictureLocked}
+        updatedAt={user.profilePictureUpdatedAt ? user.profilePictureUpdatedAt.toISOString() : null}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 card kt-card">

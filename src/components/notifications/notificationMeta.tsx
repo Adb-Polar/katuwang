@@ -15,6 +15,10 @@ import {
   ClipboardList,
   Flag,
   Sparkles,
+  Camera,
+  CameraOff,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { MINUTE_MS, formatDayMonth } from "@/lib/datetime";
 
@@ -66,6 +70,11 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   SESSION_POSTTEST_OPEN: <ClipboardList className="h-4 w-4 text-success" />,
   // admin-recommended class (distinct from the chatbot's own recommend feature)
   CLASS_RECOMMENDED_BY_ADMIN: <Sparkles className="h-4 w-4 text-secondary" />,
+  // profile picture moderation
+  PROFILE_PICTURE_WARNING: <Camera className="h-4 w-4 text-warning" />,
+  PROFILE_PICTURE_REMOVED: <CameraOff className="h-4 w-4 text-error" />,
+  PROFILE_PICTURE_LOCKED: <Lock className="h-4 w-4 text-error" />,
+  PROFILE_PICTURE_UNLOCKED: <Unlock className="h-4 w-4 text-success" />,
 };
 
 export function relativeTime(iso: string): string {

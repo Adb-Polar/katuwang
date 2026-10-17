@@ -16,6 +16,7 @@ export default async function TutorProfilePage() {
       contactInfo: true,
       section: true,
       gradeLevel: true,
+      image: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -42,6 +43,7 @@ export default async function TutorProfilePage() {
       section={user?.section ?? ""}
       contactInfo={user?.contactInfo ?? ""}
       certifiedTopics={user?.tutorProfile?.topicCertifications ?? []}
+      image={user?.image}
     />
   );
 }

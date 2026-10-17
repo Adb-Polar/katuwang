@@ -73,6 +73,8 @@ export async function GET(req: NextRequest) {
           statusReason: true,
           statusUpdatedAt: true,
           statusExpiresAt: true,
+          image: true,
+          profilePictureLocked: true,
           createdAt: true,
         },
         orderBy: { [USER_SORT_COLUMN[sort]]: dir },

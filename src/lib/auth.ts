@@ -104,6 +104,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           fullName: `${user.firstName} ${user.lastName}`.trim(),
+          ...(user.image ? { image: user.image } : {}),
         };
       },
     }),
@@ -117,6 +118,7 @@ export const authOptions: NextAuthOptions = {
         token.anonymousId = user.anonymousId;
         token.role = user.role;
         token.fullName = user.fullName;
+        if (user.image) token.image = user.image;
         token.status = "ACTIVE";
         token.checkedAt = Date.now();
         return token;
@@ -127,11 +129,14 @@ export const authOptions: NextAuthOptions = {
       if (token.id && (!token.checkedAt || Date.now() - token.checkedAt > TOKEN_STALE_MS)) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, status: true },
+          select: { role: true, status: true, image: true },
         });
         token.checkedAt = Date.now();
         token.status = fresh ? fresh.status : "BANNED";
-        if (fresh) token.role = fresh.role;
+        if (fresh) {
+          token.role = fresh.role;
+          token.image = fresh.image ?? null;
+        }
       }
       return token;
     },
@@ -144,6 +149,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.fullName = token.fullName;
         session.user.status = token.status ?? "ACTIVE";
+        session.user.image = token.image ?? null;
       }
       return session;
     },

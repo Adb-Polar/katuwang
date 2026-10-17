@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { User } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
 import TopicChip from "@/components/ui/TopicChip";
 import { authOptions } from "@/lib/auth";
@@ -13,6 +12,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
 import ReportButton from "@/components/learner/ReportButton";
+import UserAvatar from "@/components/profile/UserAvatar";
 import TutorProfileClassTabs, {
   type TutorProfileClass,
 } from "@/components/learner/TutorProfileClassTabs";
@@ -41,6 +41,7 @@ export default async function LearnerTutorProfilePage({
     where: { id: tutorId, role: "STUDENT_TUTOR" },
     select: {
       anonymousId: true,
+      image: true,
       firstName: true,
       lastName: true,
       section: true,
@@ -156,20 +157,34 @@ export default async function LearnerTutorProfilePage({
         }
       />
 
-      {showRealNames && (
-        <section className="card kt-card">
-          <div className="card-body gap-2">
-            <h2 className="card-title text-sm font-bold">Tutor</h2>
-            <div className="flex items-center gap-2 text-xs text-base-content/80">
-              <User className="h-4 w-4 text-primary shrink-0" />
-              <span className="font-semibold">
-                {tutor.firstName} {tutor.lastName}
-              </span>
-              <span className="text-base-content/50">· Section {tutor.section}</span>
+      <section className="card kt-card">
+        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <UserAvatar
+            src={tutor.image}
+            name={showRealNames ? `${tutor.firstName} ${tutor.lastName}` : null}
+            anonymousId={tutor.anonymousId}
+            size="xl"
+            role="TUTOR"
+            subtitle={showRealNames && tutor.section ? `Section ${tutor.section}` : null}
+          />
+          <div className="text-center sm:text-left space-y-1">
+            <h2 className="text-base font-bold text-base-content">
+              {showRealNames ? `${tutor.firstName} ${tutor.lastName}` : "Certified Student Tutor"}
+            </h2>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="sm" showIcon />
+              {showRealNames && tutor.section && (
+                <span className="text-xs text-base-content/60">Section {tutor.section}</span>
+              )}
             </div>
+            <p className="text-2xs text-base-content/50 pt-1">
+              {tutor.image
+                ? "Click profile picture to view full size."
+                : "Student tutor is using their anonymous monogram."}
+            </p>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <section className="card kt-card">
         <div className="card-body gap-3">

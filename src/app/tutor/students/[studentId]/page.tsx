@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
-import { GraduationCap, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
@@ -34,7 +35,7 @@ export default async function TutorStudentProfilePage({
     select: {
       enrolledAt: true,
       class: { select: { id: true, subject: true, topics: { select: { topic: true } } } },
-      learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+      learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
     },
     orderBy: { enrolledAt: "desc" },
   });
@@ -55,14 +56,29 @@ export default async function TutorStudentProfilePage({
       />
 
       <section className="card kt-card">
-        <div className="card-body gap-3 text-xs">
-          <h2 className="card-title text-sm font-bold">Details</h2>
-          <div className="divider my-0" />
-          <div className="flex items-center gap-1.5 text-base-content/70">
-            <GraduationCap className="h-4 w-4 text-primary shrink-0" />
-            <span>
-              {gradeSection(learner.gradeLevel, learner.section)}
-            </span>
+        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <UserAvatar
+            src={learner.image}
+            anonymousId={learner.anonymousId}
+            size="xl"
+            role="LEARNER"
+            subtitle={gradeSection(learner.gradeLevel, learner.section)}
+          />
+          <div className="text-center sm:text-left space-y-1">
+            <h2 className="text-base font-bold text-base-content">
+              Enrolled Student
+            </h2>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="sm" showIcon />
+              <span className="text-xs text-base-content/60">
+                {gradeSection(learner.gradeLevel, learner.section)}
+              </span>
+            </div>
+            <p className="text-2xs text-base-content/50 pt-1">
+              {learner.image
+                ? "Click profile picture to view full size."
+                : "Student is using their anonymous monogram."}
+            </p>
           </div>
         </div>
       </section>

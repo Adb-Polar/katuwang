@@ -12,6 +12,8 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 
+import UserAvatar from "@/components/profile/UserAvatar";
+
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface StudentEnrollment {
@@ -25,6 +27,7 @@ interface StudentEnrollment {
 interface Student {
   id: string;
   anonymousId: string;
+  image?: string | null;
   gradeLevel: GradeLevel;
   section: string;
   enrollments: StudentEnrollment[];
@@ -146,7 +149,16 @@ export default function StudentRoster() {
                   className="cursor-pointer hover:bg-base-200/40"
                 >
                   <td>
-                    <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
+                    <div className="flex items-center gap-2">
+                      <UserAvatar
+                        src={student.image}
+                        anonymousId={student.anonymousId}
+                        size="sm"
+                        role="LEARNER"
+                        subtitle={gradeSection(student.gradeLevel, student.section)}
+                      />
+                      <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
+                    </div>
                   </td>
                   <td className="text-xs text-base-content/70">
                     {gradeSection(student.gradeLevel, student.section)}

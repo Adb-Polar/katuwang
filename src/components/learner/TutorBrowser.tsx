@@ -12,11 +12,14 @@ import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDayMonth, formatTime, formatWeekday } from "@/lib/datetime";
 
+import UserAvatar from "@/components/profile/UserAvatar";
+
 const PAGE_SIZE = BROWSE_PAGE_SIZE;
 
 interface TutorRow {
   id: string;
   anonymousId: string;
+  image?: string | null;
   name?: string;
   section?: string;
   verifiedTopicCount: number;
@@ -123,10 +126,22 @@ export default function TutorBrowser() {
                   className="flex flex-col gap-2.5 rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <AnonymousIdBadge id={t.anonymousId} role="TUTOR" size="sm" showIcon />
-                    {t.name && (
-                      <span className="truncate text-2xs text-base-content/50">{t.name}</span>
-                    )}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <UserAvatar
+                        src={t.image}
+                        name={t.name}
+                        anonymousId={t.anonymousId}
+                        size="sm"
+                        role="TUTOR"
+                        subtitle={t.subjects.length > 0 ? t.subjects.join(", ") : undefined}
+                      />
+                      <div className="min-w-0">
+                        <AnonymousIdBadge id={t.anonymousId} role="TUTOR" size="sm" showIcon />
+                        {t.name && (
+                          <span className="block truncate text-2xs text-base-content/50 mt-0.5">{t.name}</span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   {t.subjects.length > 0 && (

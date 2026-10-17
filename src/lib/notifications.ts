@@ -41,7 +41,12 @@ export type NotificationType =
   // admin recommends a specific class to a learner (learner-facing). NOT the
   // same as the chatbot's learner-initiated "recommend classes" feature in
   // src/lib/chatbot/recommend.ts — see docs/reference/decisions.md.
-  | "CLASS_RECOMMENDED_BY_ADMIN";
+  | "CLASS_RECOMMENDED_BY_ADMIN"
+  // profile picture moderation (user-facing)
+  | "PROFILE_PICTURE_WARNING"
+  | "PROFILE_PICTURE_REMOVED"
+  | "PROFILE_PICTURE_LOCKED"
+  | "PROFILE_PICTURE_UNLOCKED";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

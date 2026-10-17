@@ -76,11 +76,17 @@ export function getDatabaseUrl(rawUrl = process.env.DATABASE_URL): string {
   try {
     const url = new URL(rawUrl);
 
-    const sslMode = url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode");
-    const isRemote = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+    const rawSslMode = url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode");
+    const sslMode = rawSslMode?.toLowerCase();
+    const isExplicitlyDisabled = sslMode === "disable" || sslMode === "disabled" || url.searchParams.get("ssl") === "false";
+    const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+    const isRemote = !isLocal;
+    const isExplicitlyEnabled = sslMode === "required" || sslMode === "verify_ca" || sslMode === "verify_identity" || url.searchParams.get("ssl") === "true";
 
-    // Enable TLS for remote cloud databases or when ssl-mode is specified
-    if ((sslMode || isRemote || process.env.NODE_ENV === "production") && !url.searchParams.has("ssl")) {
+    // Enable TLS for remote cloud databases or when ssl-mode is explicitly requested, unless explicitly disabled
+    const enableTls = !isExplicitlyDisabled && (isExplicitlyEnabled || isRemote || (process.env.NODE_ENV === "production" && !isLocal));
+
+    if (enableTls && !url.searchParams.has("ssl")) {
       url.searchParams.set("ssl", "true");
     }
 
@@ -145,10 +151,17 @@ export function getDatabaseConfig(
 
   try {
     const url = new URL(rawUrl);
-    const sslMode = url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode");
-    const isRemote = url.hostname !== "localhost" && url.hostname !== "127.0.0.1";
+    const rawSslMode = url.searchParams.get("ssl-mode") || url.searchParams.get("sslmode");
+    const sslMode = rawSslMode?.toLowerCase();
+    const isExplicitlyDisabled = sslMode === "disable" || sslMode === "disabled" || url.searchParams.get("ssl") === "false";
+    const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+    const isRemote = !isLocal;
     const isAiven = url.hostname.includes("aivencloud.com");
-    const needsTls = Boolean(sslMode || isRemote || env.NODE_ENV === "production");
+    const isExplicitlyEnabled = sslMode === "required" || sslMode === "verify_ca" || sslMode === "verify_identity" || url.searchParams.get("ssl") === "true";
+
+    // TLS is needed for remote cloud databases or when explicitly requested, unless explicitly disabled.
+    // Local development databases do not require TLS unless explicitly configured.
+    const needsTls = !isExplicitlyDisabled && (isExplicitlyEnabled || isRemote || (env.NODE_ENV === "production" && !isLocal));
 
     // Handle missing certificate configuration explicitly and safely in production
     if (!caCert && isAiven && env.NODE_ENV === "production") {
@@ -157,7 +170,9 @@ export function getDatabaseConfig(
       );
     }
 
-    if (caCert || needsTls) {
+    // Only inject TLS/SSL PoolConfig if TLS is actually required for this host.
+    // Prevents applying remote/Aiven CA certificates to local development instances.
+    if (needsTls) {
       const parsed = parseDatabaseUrl(rawUrl);
       const poolConfig: PoolConfig = {
         host: parsed.host,

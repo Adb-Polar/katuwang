@@ -12,7 +12,13 @@ export default async function LearnerProfileEditPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },
-    select: { contactInfo: true, section: true, gradeLevel: true },
+    select: {
+      contactInfo: true,
+      section: true,
+      gradeLevel: true,
+      image: true,
+      profilePictureLocked: true,
+    },
   });
 
   return (
@@ -23,6 +29,8 @@ export default async function LearnerProfileEditPage() {
       contactInfo={user?.contactInfo ?? ""}
       section={user?.section ?? ""}
       gradeLevel={user?.gradeLevel ?? ""}
+      image={user?.image}
+      profilePictureLocked={user?.profilePictureLocked ?? false}
     />
   );
 }

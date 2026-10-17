@@ -11,6 +11,7 @@ declare module "next-auth" {
       fullName: string;
       email: string;
       status: AccountStatus;
+      image?: string | null;
     };
   }
 
@@ -19,6 +20,7 @@ declare module "next-auth" {
     anonymousId: string;
     role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
+    image?: string | null;
   }
 }
 
@@ -29,6 +31,7 @@ declare module "next-auth/jwt" {
     role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
     status: AccountStatus;
+    image?: string | null;
     /** Epoch ms of the last DB re-sync of `role`/`status`. */
     checkedAt: number;
   }

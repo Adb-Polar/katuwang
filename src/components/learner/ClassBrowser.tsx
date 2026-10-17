@@ -43,7 +43,7 @@ interface TutorClass {
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
   suspendedReason: string | null;
-  tutor: { id: string; anonymousId: string; name?: string; section?: string };
+  tutor: { id: string; anonymousId: string; name?: string; section?: string; image?: string | null };
   _count: { enrollments: number };
 }
 
@@ -199,6 +199,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                     tutorAnonymousId={c.tutor.anonymousId}
                     tutorName={c.tutor.name}
                     tutorSection={c.tutor.section}
+                    tutorImage={c.tutor.image}
                     onClick={() =>
                       router.push(`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`)
                     }

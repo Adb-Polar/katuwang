@@ -95,7 +95,7 @@ describe("GET /api/tutor/students", () => {
     expect(classEnrollmentFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         select: expect.objectContaining({
-          learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+          learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
         }),
       })
     );

@@ -10,6 +10,7 @@ const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 interface StudentEntry {
   id: string;
   anonymousId: string;
+  image?: string | null;
   gradeLevel: GradeLevel;
   section: string;
   enrollments: {
@@ -70,7 +71,7 @@ export async function GET(req: NextRequest) {
       select: {
         enrolledAt: true,
         class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
-        learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+        learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
       },
       orderBy: { enrolledAt: "desc" },
     });
@@ -91,6 +92,7 @@ export async function GET(req: NextRequest) {
         byLearner.set(enr.learner.id, {
           id: enr.learner.id,
           anonymousId: enr.learner.anonymousId,
+          image: enr.learner.image ?? null,
           gradeLevel: enr.learner.gradeLevel,
           section: enr.learner.section,
           enrollments: [entry],

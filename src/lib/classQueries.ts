@@ -42,7 +42,7 @@ export function learnerClassInclude(learnerId: string) {
     tutorProfile: {
       select: {
         id: true,
-        user: { select: { id: true, anonymousId: true, firstName: true, lastName: true, section: true } },
+        user: { select: { id: true, anonymousId: true, image: true, firstName: true, lastName: true, section: true } },
         topicCertifications: {
           where: { status: "CERTIFIED" as const },
           select: { subject: true, topic: true },
@@ -65,7 +65,7 @@ type LearnerClassRow = Prisma.TutorClassGetPayload<{ include: ReturnType<typeof 
  */
 export function toLearnerClassDTO(klass: LearnerClassRow, showRealNames = false) {
   const { tutorProfile, topics, ...rest } = klass;
-  const { id, anonymousId, firstName, lastName, section } = tutorProfile.user;
+  const { id, anonymousId, image, firstName, lastName, section } = tutorProfile.user;
   return {
     ...rest,
     topics: topics.map((t) => t.topic),
@@ -75,6 +75,7 @@ export function toLearnerClassDTO(klass: LearnerClassRow, showRealNames = false)
     tutor: {
       id,
       anonymousId,
+      image,
       ...(showRealNames ? { name: `${firstName} ${lastName}`.trim(), section } : {}),
     },
   };

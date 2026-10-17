@@ -56,7 +56,7 @@ export default async function LearnerClassDetailPage({
         tutorProfile: {
           select: {
             user: {
-              select: { id: true, anonymousId: true, firstName: true, lastName: true, section: true },
+              select: { id: true, anonymousId: true, image: true, firstName: true, lastName: true, section: true },
             },
             topicCertifications: {
               where: { status: "CERTIFIED" },
@@ -136,6 +136,7 @@ export default async function LearnerClassDetailPage({
               anonymousId={tutorUser.anonymousId}
               name={showRealNames ? `${tutorUser.firstName} ${tutorUser.lastName}`.trim() : null}
               section={showRealNames ? tutorUser.section : null}
+              image={tutorUser.image}
             />
           </div>
         </div>

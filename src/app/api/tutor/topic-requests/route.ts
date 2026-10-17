@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
           where,
           include: {
             topics: { select: { topic: true } },
-            learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+            learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
             fulfilledClass: {
               select: {
                 id: true,
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
         include: {
           topics: { select: { topic: true } },
           slots: { select: { day: true, startTime: true, endTime: true } },
-          learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+          learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
         },
         orderBy: [{ directedTutorProfileId: "desc" }, { createdAt: "asc" }],
         skip: (page - 1) * pageSize,

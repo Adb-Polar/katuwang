@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ChevronDown, HelpCircle, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -28,6 +29,8 @@ interface PortalLayoutProps {
   portalLabel: string;
   accent: PortalAccent;
   idRole?: "LEARNER" | "TUTOR";
+  /** optional user profile picture URL override */
+  userImage?: string | null;
   /** unread notification count — drives the topbar bell dot; refreshed on navigation */
   unreadCount?: number;
   /** portal-specific notifications page, e.g. "/tutor/notifications" */
@@ -50,6 +53,7 @@ export default function PortalLayout({
   anonymousId,
   portalLabel,
   idRole,
+  userImage,
   unreadCount = 0,
   notificationsHref = "/dashboard",
   helpHref,
@@ -59,31 +63,31 @@ export default function PortalLayout({
   children,
 }: PortalLayoutProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const avatarUrl = userImage ?? session?.user?.image ?? null;
 
   // Per-group collapse state, persisted per portal. `true` = collapsed. A group
   // absent from the map falls back to `defaultExpandedGroups`. Starts empty so
   // the first client render matches SSR; the stored prefs load post-mount.
   const navPrefKey = `kt-nav:${portalLabel}`;
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [prefsLoaded, setPrefsLoaded] = useState(false);
-  useEffect(() => {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
     try {
       const raw = window.localStorage.getItem(navPrefKey);
-      if (raw) setCollapsed(JSON.parse(raw) as Record<string, boolean>);
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
     } catch {
-      /* private mode / storage disabled — non-fatal */
+      return {};
     }
-    setPrefsLoaded(true);
-  }, [navPrefKey]);
+  });
+
   useEffect(() => {
-    if (!prefsLoaded) return;
     try {
       window.localStorage.setItem(navPrefKey, JSON.stringify(collapsed));
     } catch {
       /* private mode / storage disabled — non-fatal */
     }
-  }, [navPrefKey, collapsed, prefsLoaded]);
+  }, [navPrefKey, collapsed]);
   const toggleGroup = (name: string) =>
     setCollapsed((cur) => {
       const openByDefault = defaultExpandedGroups?.includes(name) ?? false;
@@ -244,12 +248,42 @@ export default function PortalLayout({
           )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           {profileHref ? (
-            <Link href={profileHref} className="kt-avatar" aria-label="Your profile">
-              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            <Link
+              href={profileHref}
+              className="kt-avatar overflow-hidden"
+              aria-label="Your profile"
+            >
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Your profile"
+                  width={34}
+                  height={34}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()
+              )}
             </Link>
           ) : (
-            <span className="kt-avatar" aria-hidden="true">
-              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            <span className="kt-avatar overflow-hidden" aria-hidden="true">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  width={34}
+                  height={34}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()
+              )}
             </span>
           )}
         </header>

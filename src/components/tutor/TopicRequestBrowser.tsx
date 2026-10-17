@@ -9,6 +9,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import UserAvatar from "@/components/profile/UserAvatar";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 import { formatDate, formatDateTime } from "@/lib/datetime";
@@ -24,7 +25,7 @@ interface OpenRequest {
   createdAt: string;
   topics: string[];
   slots: { day: string; startTime: string; endTime: string }[];
-  learner: { anonymousId: string; gradeLevel: string; section: string };
+  learner: { anonymousId: string; image?: string | null; gradeLevel: string; section: string };
   directed: boolean;
 }
 
@@ -34,7 +35,7 @@ interface AcceptedRequest {
   gradeLevel: string;
   status: "ACCEPTED" | "ENROLLED";
   topics: string[];
-  learner: { anonymousId: string; gradeLevel: string; section: string };
+  learner: { anonymousId: string; image?: string | null; gradeLevel: string; section: string };
   class: { id: string; nextSessionAt: string | null; enrolledCount: number; maxStudents: number } | null;
 }
 
@@ -131,7 +132,16 @@ export default function TopicRequestBrowser() {
                       {r.subject}
                     </span>
                     {r.directed && <StatusBadge tone="info" label="Directed to you" size="xs" />}
-                    <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                    <div className="flex items-center gap-1.5">
+                      <UserAvatar
+                        src={r.learner.image}
+                        anonymousId={r.learner.anonymousId}
+                        size="xs"
+                        role="LEARNER"
+                        subtitle={gradeSection(r.learner.gradeLevel, r.learner.section)}
+                      />
+                      <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                    </div>
                     <span className="text-base-content/50">
                       {gradeSection(r.learner.gradeLevel, r.learner.section)}
                     </span>
@@ -183,7 +193,16 @@ export default function TopicRequestBrowser() {
                   <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
                     {r.subject}
                   </span>
-                  <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                  <div className="flex items-center gap-1.5">
+                    <UserAvatar
+                      src={r.learner.image}
+                      anonymousId={r.learner.anonymousId}
+                      size="xs"
+                      role="LEARNER"
+                      subtitle={gradeSection(r.learner.gradeLevel, r.learner.section)}
+                    />
+                    <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                  </div>
                   <StatusBadge
                     tone={r.status === "ENROLLED" ? "success" : "info"}
                     label={r.status === "ENROLLED" ? "Enrolled" : "Awaiting enrollment"}

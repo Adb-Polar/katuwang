@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle, GraduationCap } from "lucide-react";
+import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { formatDateTime, formatWeekday } from "@/lib/datetime";
 import { gradeLabel } from "@/lib/gradeLevels";
 
@@ -29,6 +30,7 @@ export default function ClassCard({
   tutorAnonymousId,
   tutorName,
   tutorSection,
+  tutorImage,
   onClick,
   href,
 }: {
@@ -56,6 +58,8 @@ export default function ClassCard({
   tutorName?: string | null;
   /** Learner-facing: the tutor's section, shown as a muted suffix when `tutorName` is set. */
   tutorSection?: string | null;
+  /** Learner-facing: the tutor's profile picture URL */
+  tutorImage?: string | null;
   /** Click handler (client callers). Ignored when `href` is set. */
   onClick?: () => void;
   /** When set, the card renders as a link to this path (usable from Server Components). */
@@ -162,9 +166,16 @@ export default function ClassCard({
           </span>
         </div>
         {tutorAnonymousId && (
-          <div className="flex items-center gap-1">
-            <GraduationCap className="h-3.5 w-3.5 text-primary" />
-            <span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <UserAvatar
+              src={tutorImage}
+              name={tutorName}
+              anonymousId={tutorAnonymousId}
+              size="xs"
+              role="TUTOR"
+              subtitle={tutorName && tutorSection ? `Section ${tutorSection}` : undefined}
+            />
+            <span className="truncate">
               {tutorName || tutorAnonymousId}
               {tutorName && tutorSection && (
                 <span className="text-base-content/40"> · {tutorSection}</span>

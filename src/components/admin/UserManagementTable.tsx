@@ -17,6 +17,7 @@ import { GRADE_LEVELS, gradeSection } from "@/lib/gradeLevels";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import UserAvatar from "@/components/profile/UserAvatar";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -33,6 +34,8 @@ interface AdminUser {
   statusReason: string | null;
   statusUpdatedAt: string | null;
   statusExpiresAt: string | null;
+  image?: string | null;
+  profilePictureLocked?: boolean;
 }
 
 const STATUS_TONE: Record<AccountStatus, "success" | "warning" | "error"> = {
@@ -211,7 +214,19 @@ export default function UserManagementTable() {
                         />
                       </td>
                       <td className="text-base-content/70">
-                        {u.firstName} {u.lastName}
+                        <div className="flex items-center gap-2.5">
+                          <UserAvatar
+                            src={u.image}
+                            name={`${u.firstName} ${u.lastName}`.trim()}
+                            anonymousId={u.anonymousId}
+                            size="sm"
+                            role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
+                            modalTitle={`${u.firstName} ${u.lastName} - Profile Picture`}
+                          />
+                          <span>
+                            {u.firstName} {u.lastName}
+                          </span>
+                        </div>
                       </td>
                       <td className="text-base-content/60">{u.email}</td>
                       <td className="text-base-content/60">

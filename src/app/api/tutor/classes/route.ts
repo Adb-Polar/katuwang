@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { subjectExists } from "@/lib/subjects";
-import { getSetting } from "@/lib/settings";
+import { getSetting, getProfilePictureRequirement } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -79,11 +79,24 @@ export async function POST(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { image: true } } },
     });
 
     if (!tutorProfile) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
+    }
+
+    const picReq = await getProfilePictureRequirement();
+    if (picReq === "TUTORS_ONLY" || picReq === "ALL_USERS") {
+      if (!tutorProfile.user?.image) {
+        return NextResponse.json(
+          {
+            error:
+              "A profile picture is required to create classes. Please upload one in your profile settings.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const body = await req.json();

@@ -99,6 +99,19 @@ describe("getDatabaseConfig", () => {
     expect(parsed.searchParams.get("ssl")).toBeNull();
     expect(parsed.searchParams.get("allowPublicKeyRetrieval")).toBe("true");
   });
+
+  it("does not force SSL for local development databases even when AIVEN_CA_CERT is configured", () => {
+    const localUrl = "mysql://root:@localhost:3306/katuwang_db";
+    const config = getDatabaseConfig(localUrl, {
+      NODE_ENV: "development",
+      AIVEN_CA_CERT: "-----BEGIN CERTIFICATE-----\nMockCert\n-----END CERTIFICATE-----",
+    });
+
+    expect(typeof config).toBe("string");
+    const parsed = new URL(config as string);
+    expect(parsed.searchParams.get("ssl")).toBeNull();
+    expect(parsed.searchParams.get("allowPublicKeyRetrieval")).toBe("true");
+  });
 });
 
 describe("getDatabaseUrl", () => {

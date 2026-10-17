@@ -31,7 +31,7 @@ interface MatchedClass {
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
   suspendedReason: string | null;
-  tutor: { id: string; anonymousId: string; name?: string; section?: string };
+  tutor: { id: string; anonymousId: string; name?: string; section?: string; image?: string | null };
   maxStudents: number;
   _count: { enrollments: number };
 }
@@ -151,6 +151,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       tutorAnonymousId={m.class.tutor.anonymousId}
                       tutorName={m.class.tutor.name}
                       tutorSection={m.class.tutor.section}
+                      tutorImage={m.class.tutor.image}
                       onClick={() => router.push(`/learner/classes/${m.class.id}?from=browse`)}
                     />
                     <div className="flex items-center gap-1.5 px-1">

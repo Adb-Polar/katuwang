@@ -41,7 +41,7 @@ export default async function TutorClassDetailPage({
       },
       enrollments: {
         include: {
-          learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+          learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
         },
       },
       appeals: { orderBy: { createdAt: "desc" }, take: 1 },

@@ -9,6 +9,7 @@ const {
   sessionFindMany,
   topicCertificationFindMany,
   getSettingMock,
+  getProfilePictureRequirementMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
@@ -17,6 +18,7 @@ const {
   sessionFindMany: vi.fn(),
   topicCertificationFindMany: vi.fn(),
   getSettingMock: vi.fn(),
+  getProfilePictureRequirementMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -34,6 +36,7 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/lib/settings", () => ({
   getSetting: getSettingMock,
+  getProfilePictureRequirement: getProfilePictureRequirementMock,
 }));
 
 vi.mock("@/lib/idGenerator", () => ({
@@ -105,7 +108,29 @@ describe("POST /api/tutor/classes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(false);
+    getProfilePictureRequirementMock.mockResolvedValue("OPTIONAL");
     sessionFindMany.mockResolvedValue([]);
+  });
+
+  it("rejects class creation when profile picture is mandatory for tutors and tutor has no picture", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null } });
+    getProfilePictureRequirementMock.mockResolvedValue("TUTORS_ONLY");
+
+    const res = await POST(makeRequest(validBody()));
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toContain("A profile picture is required");
+  });
+
+  it("permits class creation when profile picture is mandatory for tutors and tutor has a picture", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: "https://utfs.io/f/pic.jpg" } });
+    getProfilePictureRequirementMock.mockResolvedValue("TUTORS_ONLY");
+    classCreate.mockResolvedValue({ id: "c1", classCode: "C-0001", topics: [], sessions: [] });
+
+    const res = await POST(makeRequest(validBody()));
+    expect(res.status).toBe(201);
   });
 
   it("returns 401 for the wrong role", async () => {

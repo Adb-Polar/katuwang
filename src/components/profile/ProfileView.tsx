@@ -3,6 +3,7 @@ import { ShieldCheck, Pencil } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import TopicChip from "@/components/ui/TopicChip";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { GRADE_LEVELS, gradeLabel } from "@/lib/gradeLevels";
 
 /**
@@ -24,6 +25,7 @@ export default function ProfileView({
   section,
   contactInfo,
   certifiedTopics,
+  image,
 }: {
   eyebrow: string;
   roleLabel: string;
@@ -38,6 +40,7 @@ export default function ProfileView({
   contactInfo: string;
   /** Tutor only: their CERTIFIED topics, grouped and shown as a card. */
   certifiedTopics?: { subject: string; topic: string }[];
+  image?: string | null;
 }) {
   const gradeText =
     GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ??
@@ -61,7 +64,6 @@ export default function ProfileView({
     },
     { label: "Role", value: <span className={`font-semibold ${roleLabelClass}`}>{roleLabel}</span> },
   ];
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -75,12 +77,22 @@ export default function ProfileView({
         {/* Read-only identity */}
         <section className="card kt-card lg:col-span-2">
           <div className="card-body gap-4 p-6">
-            <div>
-              <h2 className="card-title text-sm font-bold">Identity</h2>
-              <p className="text-2xs text-base-content/60 mt-1 flex items-start gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 shrink-0 mt-px text-success" />
-                Name and email are managed by an administrator.
-              </p>
+            <div className="flex items-center gap-4">
+              <UserAvatar
+                src={image}
+                name={fullName}
+                anonymousId={anonymousId}
+                size="lg"
+                role={idRole}
+                modalTitle={`${fullName} - Profile Picture`}
+              />
+              <div>
+                <h2 className="card-title text-sm font-bold">Identity</h2>
+                <p className="text-2xs text-base-content/60 mt-0.5 flex items-start gap-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 mt-px text-success" />
+                  Name and email are managed by an administrator.
+                </p>
+              </div>
             </div>
             <dl className="divide-y divide-base-200">
               {identityRows.map((r) => (

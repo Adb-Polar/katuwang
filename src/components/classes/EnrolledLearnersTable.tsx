@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { gradeSection } from "@/lib/gradeLevels";
 
 interface Learner {
   id: string;
   anonymousId: string;
+  image?: string | null;
   gradeLevel: string;
   section: string;
 }
@@ -55,7 +57,16 @@ export default function EnrolledLearnersTable({
                   className="cursor-pointer hover:bg-base-200/40"
                 >
                   <td>
-                    <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
+                    <div className="flex items-center gap-2">
+                      <UserAvatar
+                        src={enr.learner.image}
+                        anonymousId={enr.learner.anonymousId}
+                        size="sm"
+                        role="LEARNER"
+                        subtitle={gradeSection(enr.learner.gradeLevel, enr.learner.section)}
+                      />
+                      <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
+                    </div>
                   </td>
                   <td className="text-base-content/60">
                     {gradeSection(enr.learner.gradeLevel, enr.learner.section)}

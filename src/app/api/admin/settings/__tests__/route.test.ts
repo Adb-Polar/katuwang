@@ -102,4 +102,28 @@ describe("PATCH /api/admin/settings", () => {
       })
     );
   });
+
+  it("updates profilePictureRequirement setting with valid enum option", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    platformSettingUpsert.mockResolvedValue({
+      key: "profilePictureRequirement",
+      value: "TUTORS_ONLY",
+    });
+
+    const res = await PATCH(
+      makeRequest({ key: "profilePictureRequirement", value: "TUTORS_ONLY" })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json).toEqual({ key: "profilePictureRequirement", value: "TUTORS_ONLY" });
+  });
+
+  it("rejects invalid profilePictureRequirement setting value", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+
+    const res = await PATCH(
+      makeRequest({ key: "profilePictureRequirement", value: "INVALID_VALUE" })
+    );
+    expect(res.status).toBe(400);
+  });
 });

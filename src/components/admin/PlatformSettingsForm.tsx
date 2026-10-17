@@ -7,7 +7,7 @@ import LoadingRow from "@/components/ui/LoadingRow";
 
 interface Setting {
   key: string;
-  value: boolean;
+  value: boolean | string;
 }
 
 type SettingGroup = "General" | "Assessment";
@@ -198,6 +198,27 @@ export default function PlatformSettingsForm() {
     }
   };
 
+  const updateProfilePicRequirement = async (nextValue: string) => {
+    setSavingKey("profilePictureRequirement");
+    setError("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "profilePictureRequirement", value: nextValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update profile picture requirement.");
+      setSuccess("Profile picture policy updated successfully.");
+      refetch();
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update setting.");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
   const renderToggle = (setting: Setting) => {
     const meta = SETTING_META[setting.key];
     return (
@@ -209,7 +230,7 @@ export default function PlatformSettingsForm() {
         <input
           type="checkbox"
           className="toggle toggle-primary shrink-0"
-          checked={setting.value}
+          checked={Boolean(setting.value)}
           disabled={savingKey === setting.key}
           onChange={(e) => toggle(setting.key, e.target.checked)}
         />
@@ -217,8 +238,12 @@ export default function PlatformSettingsForm() {
     );
   };
 
-  const generalToggles = settings.filter((s) => (SETTING_META[s.key]?.group ?? "General") === "General");
+  const generalToggles = settings.filter(
+    (s) => s.key !== "profilePictureRequirement" && (SETTING_META[s.key]?.group ?? "General") === "General"
+  );
   const assessmentToggles = settings.filter((s) => SETTING_META[s.key]?.group === "Assessment");
+  const profilePicSetting = settings.find((s) => s.key === "profilePictureRequirement");
+  const profilePicValue = String(profilePicSetting?.value ?? "OPTIONAL");
 
   return (
     <div className="space-y-6">
@@ -231,7 +256,27 @@ export default function PlatformSettingsForm() {
           {loading ? (
             <LoadingRow />
           ) : (
-            <div className="divide-y divide-base-200">{generalToggles.map(renderToggle)}</div>
+            <div className="divide-y divide-base-200">
+              {generalToggles.map(renderToggle)}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
+                <div>
+                  <p className="text-sm font-semibold text-base-content">Profile picture requirement</p>
+                  <p className="text-xs text-base-content/60 mt-0.5">
+                    Control whether profile pictures are optional, mandatory for tutors before creating classes, or mandatory for all users.
+                  </p>
+                </div>
+                <select
+                  className="select select-bordered select-sm w-full sm:w-56 text-xs focus:select-primary"
+                  value={profilePicValue}
+                  disabled={savingKey === "profilePictureRequirement"}
+                  onChange={(e) => updateProfilePicRequirement(e.target.value)}
+                >
+                  <option value="OPTIONAL">Fully optional</option>
+                  <option value="TUTORS_ONLY">Mandatory for tutors</option>
+                  <option value="ALL_USERS">Mandatory for all users</option>
+                </select>
+              </div>
+            </div>
           )}
         </div>
       </section>

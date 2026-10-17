@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           anonymousId: true,
+          image: true,
           ...(showRealNames ? { firstName: true, lastName: true, section: true } : {}),
           tutorProfile: {
             select: {
@@ -110,6 +111,7 @@ export async function GET(req: NextRequest) {
       return {
         id: u.id,
         anonymousId: u.anonymousId,
+        image: u.image ?? null,
         ...(showRealNames && "firstName" in u
           ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(), section: u.section }
           : {}),
