@@ -36,6 +36,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.10.1",
+    "resend": "^6.34.1",
     "sharp": "^0.35.4",
     "uploadthing": "^7.7.4",
     "zod": "^4.4.3"

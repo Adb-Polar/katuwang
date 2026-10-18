@@ -1,22 +1,31 @@
 import nodemailer, { type Transporter } from "nodemailer";
+import { Resend } from "resend";
 import { RESET_TOKEN_TTL_MS } from "@/lib/passwordReset";
 import { VERIFICATION_TOKEN_TTL_MS } from "@/lib/emailVerification";
 import { MINUTE_MS, HOUR_MS } from "@/lib/datetime";
 
 /**
- * Transactional email. Transport is plain SMTP, configured entirely from the
- * environment so no provider SDK or secret ever lives in the app or its DB:
+ * Transactional email service.
  *
- *   SMTP_HOST    required to send at all
- *   SMTP_PORT    default 587
- *   SMTP_SECURE  "true" for TLS-on-connect; defaults to true only on port 465
- *   SMTP_USER    optional (omit for an open relay / Mailpit)
- *   SMTP_PASS    optional
- *   MAIL_FROM    required to send at all, e.g. "Katuwang <no-reply@example.com>"
+ * Supported Providers:
+ * 1. Resend (HTTP REST API over port 443 — works on Render Free & Paid tiers):
+ *    - RESEND_API_KEY: required to use Resend
+ *    - RESEND_FROM:    optional sender (defaults to MAIL_FROM or "Katuwang <onboarding@resend.dev>")
  *
- * When SMTP_HOST / MAIL_FROM are unset, `sendMail` logs what it would have sent
- * and returns — so local dev works with zero setup.
+ * 2. Plain SMTP via Nodemailer (blocked on Render Free tier, allowed on Paid tier):
+ *    - SMTP_HOST:    required to send via SMTP
+ *    - SMTP_PORT:    default 587
+ *    - SMTP_SECURE:  "true" for TLS-on-connect; defaults to true only on port 465
+ *    - SMTP_USER:    optional (omit for an open relay)
+ *    - SMTP_PASS:    optional
+ *    - MAIL_FROM:    required for SMTP, e.g. "Katuwang <no-reply@example.com>"
+ *
+ * When neither Resend nor SMTP is configured, `sendMail` logs what it would have sent
+ * and returns gracefully — so local development works with zero setup.
  */
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM;
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
@@ -29,11 +38,24 @@ const MAIL_FROM = process.env.MAIL_FROM;
 
 /** True when there is enough configuration to actually send an email. */
 export function isMailConfigured(): boolean {
+  if (Boolean(RESEND_API_KEY)) {
+    return true;
+  }
   return Boolean(SMTP_HOST && MAIL_FROM);
 }
 
-// Cache the transporter across dev HMR reloads, same pattern as `src/lib/prisma.ts`.
-const globalForMail = globalThis as unknown as { mailTransporter: Transporter | undefined };
+// Cache clients across dev HMR reloads, same pattern as `src/lib/prisma.ts`.
+const globalForMail = globalThis as unknown as {
+  mailTransporter: Transporter | undefined;
+  resendClient: Resend | undefined;
+};
+
+function getResendClient(): Resend {
+  if (!globalForMail.resendClient) {
+    globalForMail.resendClient = new Resend(RESEND_API_KEY);
+  }
+  return globalForMail.resendClient;
+}
 
 function getTransporter(): Transporter {
   if (!globalForMail.mailTransporter) {
@@ -63,6 +85,28 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
     console.info("[mail] not configured — would send:", { to: opts.to, subject: opts.subject });
     return;
   }
+
+  // Priority 1: Resend (HTTPS over Port 443 — guaranteed compatibility with Render)
+  if (RESEND_API_KEY) {
+    const from = RESEND_FROM || MAIL_FROM || "Katuwang <onboarding@resend.dev>";
+    const resend = getResendClient();
+    const { error } = await resend.emails.send({
+      from,
+      to: [opts.to],
+      subject: opts.subject,
+      html: opts.html,
+      text: opts.text,
+    });
+
+    if (error) {
+      console.error("[resend] failed to send email:", error);
+      throw new Error(`Resend email delivery failed: ${error.message} (${error.name})`);
+    }
+
+    return;
+  }
+
+  // Priority 2: SMTP via Nodemailer
   await getTransporter().sendMail({
     from: MAIL_FROM,
     to: opts.to,
