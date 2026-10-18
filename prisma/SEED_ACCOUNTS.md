@@ -9,11 +9,11 @@ password123
 
 Re-running the seed script is safe — it reuses these accounts by email and only resets the dummy classes/enrollments.
 
-## Admin
+## Super Admin
 
-| Anonymous ID | Email                  | Name           |
-| ------------ | ----------------------- | -------------- |
-| ADM-0001     | admin@katuwang.test     | Katuwang Admin |
+| Anonymous ID | Email                    | Name        | Role        |
+| ------------ | ------------------------ | ----------- | ----------- |
+| ADM-0001     | superadmin@katuwang.test | Super Admin | SUPER_ADMIN |
 
 ## Tutors
 

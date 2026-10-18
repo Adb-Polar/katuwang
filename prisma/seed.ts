@@ -1642,35 +1642,12 @@ async function main() {
   log.header("[2/12] Administrator Provisioning");
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
 
-  const existingAdmin = await prisma.user.findUnique({ where: { email: "admin@katuwang.test" } });
-  const adminUser = await prisma.user.upsert({
-    where: { email: "admin@katuwang.test" },
-    update: {},
-    create: {
-      anonymousId: "ADM-0001",
-      firstName: "Katuwang",
-      lastName: "Admin",
-      email: "admin@katuwang.test",
-      password: passwordHash,
-      role: "ADMIN",
-      gradeLevel: "GRADE_12",
-      section: "ADMIN",
-      consentGiven: true,
-      emailVerifiedAt: new Date(),
-    },
-  });
-  if (!existingAdmin) {
-    log.add("Admin", `${adminUser.email} [${adminUser.anonymousId}]`);
-  } else {
-    log.exist("Admin", `${adminUser.email} [${adminUser.anonymousId}]`);
-  }
-
   const existingSuperAdmin = await prisma.user.findUnique({ where: { email: "superadmin@katuwang.test" } });
   const superAdminUser = await prisma.user.upsert({
     where: { email: "superadmin@katuwang.test" },
-    update: { role: "SUPER_ADMIN" },
+    update: { role: "SUPER_ADMIN", anonymousId: "ADM-0001" },
     create: {
-      anonymousId: "ADM-0002",
+      anonymousId: "ADM-0001",
       firstName: "Super",
       lastName: "Admin",
       email: "superadmin@katuwang.test",
@@ -1690,8 +1667,8 @@ async function main() {
 
   await prisma.idCounter.upsert({
     where: { role: "ADMIN" },
-    create: { role: "ADMIN", count: 2 },
-    update: {},
+    create: { role: "ADMIN", count: 1 },
+    update: { count: 1 },
   });
 
   log.header("[3/12] Tutor Accounts & Topic Certifications");
@@ -1974,7 +1951,7 @@ async function main() {
 
   log.header("[7/12] Assessment Question Bank & Platform Rules");
   const questionsCreated = await seedQuestionBank(
-    adminUser.id,
+    superAdminUser.id,
     Object.values(tutorProfiles)[0]?.id ?? null
   );
 
@@ -1996,11 +1973,11 @@ async function main() {
   const sessionTestsSeeded = await seedSessionTests();
 
   log.header("[10/12] Class Moderation Appeals");
-  const appealsCreated = await seedClassAppeals(adminUser.id, classesList);
+  const appealsCreated = await seedClassAppeals(superAdminUser.id, classesList);
 
   log.header("[11/12] Abuse Reports & Moderation Violations");
   const reportsCreated = await seedReports(
-    adminUser.id,
+    superAdminUser.id,
     Object.values(learnerUsers),
     tutorUsers,
     tutorProfiles,
@@ -2009,7 +1986,7 @@ async function main() {
 
   log.header("[12/12] Recommendations, Chatbot Misses, Audit Logs & Auth Tokens");
   const recommendationsCreated = await seedClassRecommendations(
-    adminUser.id,
+    superAdminUser.id,
     classesList,
     Object.values(learnerUsers)
   );
@@ -2017,25 +1994,25 @@ async function main() {
   const missesCreated = await seedChatbotMisses(Object.values(learnerUsers), tutorUsers);
 
   const auditLogsCreated = await seedAuditLogs(
-    adminUser.id,
+    superAdminUser.id,
     Object.values(learnerUsers),
     classesList
   );
 
   // Demo tokens
   if (juan) {
-    const existingReset = await prisma.passwordResetToken.findFirst({ where: { userId: adminUser.id } });
+    const existingReset = await prisma.passwordResetToken.findFirst({ where: { userId: superAdminUser.id } });
     if (!existingReset) {
       await prisma.passwordResetToken.create({
         data: {
-          userId: adminUser.id,
+          userId: superAdminUser.id,
           tokenHash: "demo_admin_reset_token_hash_seed",
           expiresAt: inDays(1),
         },
       });
-      log.add("AuthToken", `Created PasswordResetToken for ${adminUser.email}`);
+      log.add("AuthToken", `Created PasswordResetToken for ${superAdminUser.email}`);
     } else {
-      log.exist("AuthToken", `Verified PasswordResetToken for ${adminUser.email}`);
+      log.exist("AuthToken", `Verified PasswordResetToken for ${superAdminUser.email}`);
     }
 
     const existingVerify = await prisma.verificationToken.findFirst({ where: { userId: juan.id } });
@@ -2075,8 +2052,7 @@ async function main() {
   console.log(`  - Admin Audit Logs:       ${auditLogsCreated}`);
 
   console.log("\nAdministrative Accounts:");
-  console.log("  ADM-0001  admin@katuwang.test (ADMIN)");
-  console.log("  ADM-0002  superadmin@katuwang.test (SUPER_ADMIN)");
+  console.log("  ADM-0001  superadmin@katuwang.test (SUPER_ADMIN)");
   console.log("\nDemo Tutors:");
   for (const t of TUTORS) console.log(`  ${tutorUsers[t.email]?.anonymousId}  ${t.email}`);
   console.log("\nDemo Learners:");

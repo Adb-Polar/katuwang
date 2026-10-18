@@ -22,9 +22,21 @@ async function main() {
   });
 
   if (existing) {
+    let targetAnonymousId = existing.anonymousId;
+    if (targetAnonymousId !== "ADM-0001") {
+      const adm1User = await prisma.user.findUnique({
+        where: { anonymousId: "ADM-0001" },
+        select: { id: true },
+      });
+      if (!adm1User || adm1User.id === existing.id) {
+        targetAnonymousId = "ADM-0001";
+      }
+    }
+
     const updated = await prisma.user.update({
       where: { id: existing.id },
       data: {
+        anonymousId: targetAnonymousId,
         role: Role.SUPER_ADMIN,
         status: AccountStatus.ACTIVE,
         password: passwordHash,
@@ -42,6 +54,12 @@ async function main() {
       },
     });
 
+    await prisma.idCounter.upsert({
+      where: { role: "ADMIN" },
+      create: { role: "ADMIN", count: 1 },
+      update: {},
+    });
+
     console.log("✅ Super Admin account updated successfully:");
     console.log(`   - ID:          ${updated.anonymousId}`);
     console.log(`   - Name:        ${updated.firstName} ${updated.lastName}`);
@@ -52,14 +70,20 @@ async function main() {
     return;
   }
 
-  // Use ADM-0002 if available, otherwise generate next sequential ADM-xxxx
-  let anonymousId = "ADM-0002";
+  // Use ADM-0001 if available, otherwise generate next sequential ADM-xxxx
+  let anonymousId = "ADM-0001";
   const idTaken = await prisma.user.findUnique({
     where: { anonymousId },
   });
 
   if (idTaken) {
     anonymousId = await generateAnonymousId("ADMIN");
+  } else {
+    await prisma.idCounter.upsert({
+      where: { role: "ADMIN" },
+      create: { role: "ADMIN", count: 1 },
+      update: {},
+    });
   }
 
   const created = await prisma.user.create({
