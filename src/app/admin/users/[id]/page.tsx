@@ -9,6 +9,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
 import UserAvatarModerationCard from "@/components/admin/UserAvatarModerationCard";
+import { isAdminRole } from "@/lib/permissions";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -27,10 +28,10 @@ export default async function AdminUserDetailPage({
 }) {
   const { id } = await params;
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") notFound();
+  if (!session || !isAdminRole(session.user.role)) notFound();
 
   const user = await prisma.user.findFirst({
-    where: { id, role: { not: "ADMIN" } },
+    where: { id, role: { notIn: ["ADMIN", "SUPER_ADMIN"] } },
     select: {
       id: true,
       anonymousId: true,

@@ -559,6 +559,7 @@ model SessionTestAttemptItem {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   STUDENT_TUTOR
   STUDENT_LEARNER

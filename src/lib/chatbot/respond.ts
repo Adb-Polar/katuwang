@@ -9,6 +9,7 @@ const FALLBACK_SUGGESTIONS_BY_ROLE: Record<ChatContext["role"], string[]> = {
   STUDENT_LEARNER: ["How do I enroll?", "Recommend a class", "Why can't I see real names?"],
   STUDENT_TUTOR: ["How do I get certified?", "How do I create a class?", "Where are my requests?"],
   ADMIN: ["Where do I approve registrations?", "Open reports", "Platform settings"],
+  SUPER_ADMIN: ["Where do I approve registrations?", "Platform settings", "Open reports"],
 };
 
 function resolveLink(intent: Intent, ctx: ChatContext): BotLink | undefined {

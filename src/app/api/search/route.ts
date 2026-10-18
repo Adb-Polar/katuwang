@@ -271,7 +271,7 @@ export async function GET(req: NextRequest) {
         wantTutorCode
           ? prisma.user.findMany({
               where: {
-                role: { not: "ADMIN" },
+                role: { notIn: ["ADMIN", "SUPER_ADMIN"] },
                 OR:
                   scope === "tutorCode"
                     ? [{ anonymousId: { contains: q } }]

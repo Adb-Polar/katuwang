@@ -9,6 +9,7 @@ import { ShieldCheck } from "lucide-react";
 const ROLE_STYLES = {
   LEARNER: "bg-(--kt-tint-learner) kt-id--learner",
   TUTOR: "bg-(--kt-tint-tutor) kt-id--tutor",
+  ADMIN: "!bg-blue-100/95 !text-blue-950 dark:bg-purple-950/40 dark:text-purple-100 border-1 !border-blue-200/40 dark:border-purple-800/50 font-semibold",
 } as const;
 
 const SIZES = {
@@ -21,15 +22,17 @@ export default function AnonymousIdBadge({
   role,
   size = "sm",
   showIcon = false,
+  className,
 }: {
   id: string;
   role: keyof typeof ROLE_STYLES;
   size?: keyof typeof SIZES;
   showIcon?: boolean;
+  className?: string;
 }) {
   return (
     <span
-      className={`inline-flex items-center text-nowrap rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]}`}
+      className={`inline-flex items-center text-nowrap rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]} ${className ?? ""}`}
     >
       {showIcon && <ShieldCheck className="w-3 h-3 shrink-0" />}
       {id}
