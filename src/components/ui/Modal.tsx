@@ -72,19 +72,29 @@ export default function Modal({
   if (!open) return null;
 
   return (
-    <div className="modal modal-open" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      className="modal modal-open"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         ref={boxRef}
         tabIndex={-1}
         className={`modal-box ${MAX_WIDTH[size]} p-6 kt-card outline-none`}
         style={{ boxShadow: "var(--kt-shadow-pop)" }}
+        onClick={(e) => e.stopPropagation()}
       >
         {!bare && (
           <div className="flex items-start justify-between gap-3 mb-3">
             <h3 className="font-bold text-sm text-base-content">{title}</h3>
             <button
               type="button"
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               aria-label="Close"
               className="btn btn-sm btn-circle btn-ghost -mr-2 -mt-2 shrink-0"
             >
@@ -96,7 +106,14 @@ export default function Modal({
       </div>
       <label
         className="modal-backdrop"
-        onClick={closeOnBackdrop ? onClose : undefined}
+        onClick={
+          closeOnBackdrop
+            ? (e) => {
+                e.stopPropagation();
+                onClose();
+              }
+            : undefined
+        }
         aria-label="Close"
       />
     </div>

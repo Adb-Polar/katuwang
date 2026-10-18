@@ -153,7 +153,7 @@ export default function AbuseReportTable() {
                       onSort={toggle}
                     />
                     {tab !== "pending" && <th>Admin note</th>}
-                    {tab === "pending" && <th></th>}
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -179,7 +179,6 @@ export default function AbuseReportTable() {
                         {r.targetType === "CLASS" && r.class && (
                           <div className="text-2xs text-base-content/50 mt-0.5">{r.class.subject}</div>
                         )}
-                        <AuditLogLink targetId={r.id} />
                       </td>
                       <td>
                         <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" />
@@ -208,22 +207,27 @@ export default function AbuseReportTable() {
                           {r.resolutionNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}
-                      {tab === "pending" && (
-                        <td className="flex gap-2 justify-end">
-                          <button
-                            onClick={() => setResolveTarget(r)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
-                          >
-                            Resolve
-                          </button>
-                          <button
-                            onClick={() => setDismissTarget(r)}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
-                          >
-                            Dismiss
-                          </button>
-                        </td>
-                      )}
+                      <td>
+                        <div className="flex flex-col items-end gap-1.5">
+                          {tab === "pending" && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setResolveTarget(r)}
+                                className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                              >
+                                Resolve
+                              </button>
+                              <button
+                                onClick={() => setDismissTarget(r)}
+                                className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          )}
+                          <AuditLogLink targetId={r.id} className="whitespace-nowrap" />
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
