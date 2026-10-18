@@ -24,46 +24,44 @@ import { MINUTE_MS, HOUR_MS } from "@/lib/datetime";
  * and returns gracefully — so local development works with zero setup.
  */
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const RESEND_FROM = process.env.RESEND_FROM;
-
-const SMTP_HOST = process.env.SMTP_HOST;
-const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
-const SMTP_USER = process.env.SMTP_USER;
-const SMTP_PASS = process.env.SMTP_PASS;
-const SMTP_SECURE = process.env.SMTP_SECURE
-  ? process.env.SMTP_SECURE === "true"
-  : SMTP_PORT === 465;
-const MAIL_FROM = process.env.MAIL_FROM;
-
 /** True when there is enough configuration to actually send an email. */
 export function isMailConfigured(): boolean {
-  if (Boolean(RESEND_API_KEY)) {
+  if (Boolean(process.env.RESEND_API_KEY)) {
     return true;
   }
-  return Boolean(SMTP_HOST && MAIL_FROM);
+  return Boolean(process.env.SMTP_HOST && process.env.MAIL_FROM);
 }
 
 // Cache clients across dev HMR reloads, same pattern as `src/lib/prisma.ts`.
 const globalForMail = globalThis as unknown as {
   mailTransporter: Transporter | undefined;
   resendClient: Resend | undefined;
+  cachedResendApiKey: string | undefined;
 };
 
 function getResendClient(): Resend {
-  if (!globalForMail.resendClient) {
-    globalForMail.resendClient = new Resend(RESEND_API_KEY);
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!globalForMail.resendClient || globalForMail.cachedResendApiKey !== apiKey) {
+    globalForMail.resendClient = new Resend(apiKey);
+    globalForMail.cachedResendApiKey = apiKey;
   }
   return globalForMail.resendClient;
 }
 
 function getTransporter(): Transporter {
   if (!globalForMail.mailTransporter) {
+    const port = Number(process.env.SMTP_PORT ?? 587);
+    const secure = process.env.SMTP_SECURE
+      ? process.env.SMTP_SECURE === "true"
+      : port === 465;
+
     globalForMail.mailTransporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: SMTP_PORT,
-      secure: SMTP_SECURE,
-      auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
+      host: process.env.SMTP_HOST,
+      port,
+      secure,
+      auth: process.env.SMTP_USER
+        ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+        : undefined,
     });
   }
   return globalForMail.mailTransporter;
@@ -87,8 +85,9 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
   }
 
   // Priority 1: Resend (HTTPS over Port 443 — guaranteed compatibility with Render)
-  if (RESEND_API_KEY) {
-    const from = RESEND_FROM || MAIL_FROM || "Katuwang <onboarding@resend.dev>";
+  if (process.env.RESEND_API_KEY) {
+    const from =
+      process.env.RESEND_FROM || process.env.MAIL_FROM || "Katuwang <onboarding@resend.dev>";
     const resend = getResendClient();
     const { error } = await resend.emails.send({
       from,
@@ -108,7 +107,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
 
   // Priority 2: SMTP via Nodemailer
   await getTransporter().sendMail({
-    from: MAIL_FROM,
+    from: process.env.MAIL_FROM,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
