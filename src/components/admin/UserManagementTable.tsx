@@ -215,14 +215,16 @@ export default function UserManagementTable() {
                       </td>
                       <td className="text-base-content/70">
                         <div className="flex items-center gap-2.5">
-                          <UserAvatar
-                            src={u.image}
-                            name={`${u.firstName} ${u.lastName}`.trim()}
-                            anonymousId={u.anonymousId}
-                            size="sm"
-                            role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
-                            modalTitle={`${u.firstName} ${u.lastName} - Profile Picture`}
-                          />
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <UserAvatar
+                              src={u.image}
+                              name={`${u.firstName} ${u.lastName}`.trim()}
+                              anonymousId={u.anonymousId}
+                              size="sm"
+                              role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
+                              modalTitle={`${u.firstName} ${u.lastName} - Profile Picture`}
+                            />
+                          </div>
                           <span>
                             {u.firstName} {u.lastName}
                           </span>
