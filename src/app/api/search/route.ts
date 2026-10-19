@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { browseClassesWhere } from "@/lib/classQueries";
+import { getEligibleTutorGradesForStudent } from "@/lib/gradeLevels";
 import { getSubjects, resolveSubjectSlugs } from "@/lib/subjects";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
@@ -113,6 +114,17 @@ export async function GET(req: NextRequest) {
     }
 
     if (role === "STUDENT_LEARNER") {
+      const learnerGrade =
+        session.user.gradeLevel ??
+        (await prisma.user?.findUnique?.({
+          where: { id: session.user.id },
+          select: { gradeLevel: true },
+        }))?.gradeLevel ??
+        null;
+      const allowedTutorGrades = learnerGrade
+        ? getEligibleTutorGradesForStudent(learnerGrade)
+        : undefined;
+
       // When the platform reveals tutor names, learners can also search by name
       // and see the real name in results instead of just the anonymous ID.
       const showRealNames = await getSetting("showTutorRealNames");
@@ -130,7 +142,12 @@ export async function GET(req: NextRequest) {
       const [classes, tutors] = await Promise.all([
         classOr
           ? prisma.tutorClass.findMany({
-              where: { ...browseClassesWhere(session.user.id), OR: classOr },
+              where: {
+                AND: [
+                  browseClassesWhere(session.user.id, learnerGrade),
+                  { OR: classOr },
+                ],
+              },
               select: {
                 id: true,
                 code: true,
@@ -146,6 +163,7 @@ export async function GET(req: NextRequest) {
               where: {
                 role: "STUDENT_TUTOR",
                 status: "ACTIVE",
+                ...(allowedTutorGrades ? { gradeLevel: { in: allowedTutorGrades } } : {}),
                 tutorProfile: { topicCertifications: { some: { status: "CERTIFIED" } } },
                 OR: tutorOr,
               },

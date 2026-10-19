@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, getEligibleClassTargetGradesForStudent, GradeLevel } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SearchInput from "@/components/ui/SearchInput";
@@ -66,6 +67,15 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
   const isBrowse = scope === "browse";
   const isMine = scope === "mine";
+
+  const { data: sessionData } = useSession();
+  const learnerGrade = sessionData?.user?.gradeLevel;
+  const eligibleGradeLevels = learnerGrade
+    ? getEligibleClassTargetGradesForStudent(learnerGrade)
+    : null;
+  const displayedGradeLevels = eligibleGradeLevels
+    ? GRADE_LEVELS.filter((g) => eligibleGradeLevels.includes(g.value as GradeLevel))
+    : GRADE_LEVELS;
 
   const {
     data: classes,
@@ -136,7 +146,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               onChange={(e) => setGradeLevel(e.target.value)}
             >
               <option value="">All grades</option>
-              {GRADE_LEVELS.map((g) => (
+              {displayedGradeLevels.map((g) => (
                 <option key={g.value} value={g.value}>
                   {g.label}
                 </option>

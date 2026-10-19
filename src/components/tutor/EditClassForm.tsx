@@ -17,7 +17,7 @@ import {
 import { GradeLevel } from "@prisma/client";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -32,6 +32,7 @@ export default function EditClassForm({
   classId,
   subject,
   gradeLevel,
+  tutorGradeLevel,
   status,
   activeLabel,
   published,
@@ -55,6 +56,7 @@ export default function EditClassForm({
   classId: string;
   subject: string;
   gradeLevel: GradeLevel | null;
+  tutorGradeLevel?: GradeLevel | string | null;
   status: ClassLifecycleStatus;
   activeLabel: string;
   published: boolean;
@@ -117,6 +119,10 @@ export default function EditClassForm({
     if (locked) return;
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       setError("Please provide a location (building/room) or a meeting link.");
+      return;
+    }
+    if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
+      setError("Target grade cannot be higher than your current grade level.");
       return;
     }
     setLoading(true);
@@ -289,7 +295,7 @@ export default function EditClassForm({
                       className="select select-bordered select-sm w-full focus:select-primary text-xs"
                     >
                       <option value="">Any grade</option>
-                      {GRADE_LEVELS.map((g) => (
+                      {(tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS).map((g) => (
                         <option key={g.value} value={g.value}>
                           {g.label}
                         </option>

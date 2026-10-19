@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [86](#part-86) | **Grade-Based Tutor Teaching and Student Enrollment Restrictions** | Enforces grade eligibility rules: tutors can only teach students at their own grade or below (`targetGrade <= tutorGrade`); students only see and enroll in classes taught by tutors at their grade level or higher (`studentGrade <= tutorGrade`) and targeted to their grade or higher (`studentGrade <= targetGrade`). Applied end-to-end across class creation, editing, enrollment, search, match, topic requests, timetables, and direct URL lookups. | See Part 86 below. New utilities in `src/lib/gradeLevels.ts`, updated Prisma queries, server-side route validation, and client dropdown/filter constraints. 874/874 tests passing. |
 | [85](#part-85) | **`docs/README.md` / `docs/plans/README.md` de-duplication** | `docs/README.md`'s plans index was missing `landing-page-redesign.md` and had drifted from `docs/plans/README.md`'s own (more current) status table — two files independently tracking the same plan-status info. Merged the status detail into `docs/README.md`'s one table and deleted `docs/plans/README.md`. | See Part 85 below. Docs only. |
 | [84](#part-84) | **Full documentation audit — repo-wide** | Reviewed every doc file against the current implementation. Rewrote `PROGRESS_REPORT.md` (had drifted to describing shipped modules as "Pending"); fixed `README.md`'s stale "5/6 modules" status; archived the root `plan.md` session artifact; expanded `CLAUDE.md`'s project-structure tree and role summary; corrected `docs/roles/{LEARNER,TUTOR,ADMIN}.md` against the actual API/route surface (each had real drift — see Part 84 below). `docs/reference/*` and `docs/plans/*` were already current, spot-checked, mostly unchanged. | See Part 84 below. Docs only. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
@@ -4030,6 +4031,57 @@ Not committed.
    - `prisma/seed.ts`: Added live color-coded ANSI logging across all 12 provisioning phases displaying `[+]` added, `[~]` updated, `[=]` verified existing, and `[i]` system settings in real time.
 
 **Verification.** `prisma/seed.ts` executed twice against cloud dev/test database with exit code 0; second run verified 100% idempotency (`[=] ... verified`). All 746 tests pass (`pnpm test`), `npx tsc --noEmit` passes with 0 errors, and ESLint is clean.
+
+<a id="part-86"></a>
+## Part 86 — Grade-Based Tutor Teaching and Student Enrollment Restrictions (2026-10-19)
+
+Implemented a comprehensive, end-to-end grade restriction system enforcing academic peer tutoring rules across the platform:
+- **Tutor Class Creation / Update**: `targetGrade <= tutorGrade`. Tutors can only select and target grade levels less than or equal to their authenticated grade level.
+- **Student Class Visibility & Search**: `studentGrade <= tutorGrade` AND `studentGrade <= targetGrade` (if target grade is specified; null target allows all students where `studentGrade <= tutorGrade`).
+- **Student Class Enrollment**: Securely validated on the server with 403 Forbidden errors if tutor or class target is below student grade.
+
+1. **Shared Grade Logic & Comparison (`src/lib/gradeLevels.ts`)**:
+   - Added canonical `GRADE_ORDER: GradeLevel[]` from Grade 7 through Grade 12 (`GRADE_7` to `GRADE_12`).
+   - Added `gradeNumber(grade)` and `compareGradeLevels(a, b)`.
+   - Added rule validators: `isTargetGradeEligibleForTutor(target, tutor)`, `isStudentEligibleForTutor(student, tutor)`, `isStudentEligibleForClassTarget(student, classTarget)`, and combined `isStudentEligibleForClass(student, tutor, classTarget)`.
+   - Added list helpers: `getEligibleTargetGrades(tutorGrade)`, `getEligibleTutorGradesForStudent(studentGrade)`, `getEligibleClassTargetGradesForStudent(studentGrade)`, and `getEligibleStudentGradesForTutor(tutorGrade)`.
+
+2. **NextAuth Session & User Model (`src/types/next-auth.d.ts`, `src/lib/auth.ts`)**:
+   - Added `gradeLevel?: GradeLevel | null` to NextAuth `Session.user`, `User`, and `JWT`.
+   - Populated `gradeLevel` in the `session` and `jwt` callbacks from user records.
+
+3. **Prisma Query Infrastructure (`src/lib/classQueries.ts`)**:
+   - Added `gradeEligibilityWhere(learnerGrade)` which filters tutor classes to `tutorProfile.user.gradeLevel >= learnerGrade` and `gradeLevel: null | in: >= learnerGrade`.
+   - Integrated `gradeEligibilityWhere` into `browseClassesWhere` and `browsableOrEnrolledWhere`.
+
+4. **Tutor Class Creation & Editing**:
+   - `src/app/api/tutor/classes/route.ts`: Validates that selected `gradeLevel <= tutorGrade` on POST, returning 400 with a clear error message.
+   - `src/app/api/tutor/classes/[classId]/route.ts`: Validates `gradeLevel <= tutorGrade` on PATCH updates (400).
+   - `src/components/tutor/ClassScheduleFields.tsx`: Constrains target grade dropdown options to `getEligibleTargetGrades(tutorGradeLevel)` and checks client-side submission.
+   - Forms updated: `NewClassForm.tsx`, `EditClassForm.tsx`, `AcceptRequestForm.tsx`, `tutor/classes/new/page.tsx`, `tutor/classes/[classId]/edit/page.tsx`.
+
+5. **Learner Discovery, Search, Match & Recommendations**:
+   - `src/app/api/classes/route.ts`: Fetches `learnerGrade` and applies `browseClassesWhere(session.user.id, learnerGrade)` and rank context.
+   - `src/app/api/search/route.ts`: Filters class results by `browseClassesWhere` and tutor results to `gradeLevel in: getEligibleTutorGradesForStudent(learnerGrade)`.
+   - `src/app/api/learner/tutors/route.ts`: Filters browsable tutors to `gradeLevel in: getEligibleTutorGradesForStudent(learnerGrade)`.
+   - `src/app/api/learner/match/route.ts` & `src/lib/chatbot/recommend.ts`: Passed `learnerGrade` to `browsableOrEnrolledWhere`.
+   - `src/components/learner/ClassBrowser.tsx`: Dynamically filters target grade dropdown to student's grade and higher.
+
+6. **Learner Class Detail & Direct Navigation**:
+   - `src/app/learner/classes/[classId]/page.tsx`: Non-enrolled students attempting to view an ineligible class receive `notFound()`.
+   - `src/app/learner/tutors/[tutorId]/page.tsx`: Filters visible classes and weekly timetable slots to eligible classes; hides "Request a class" button when student is higher grade than the tutor.
+
+7. **Class Enrollment & Topic Requests**:
+   - `src/app/api/classes/[classId]/enroll/route.ts`: Rejects enrollment with 403 if `studentGrade > tutorGrade` or `studentGrade > targetGrade`.
+   - `src/app/api/learner/topic-requests/route.ts`: Derives student grade from authenticated record; rejects directed requests to lower-grade tutors with 403.
+   - `src/app/api/tutor/topic-requests/route.ts`: Filters open topic requests pool to `gradeLevel <= tutorGrade`.
+   - `src/app/api/tutor/topic-requests/[id]/accept/route.ts`: Validates `request.gradeLevel <= tutorGrade` (403) and `class.targetGrade <= tutorGrade` (400).
+
+**Verification.**
+- All 113 test files and 874 tests passing (`pnpm exec vitest run`).
+- `pnpm exec tsc --noEmit` clean (0 errors).
+- `pnpm lint` clean (0 errors).
+
 
 
 

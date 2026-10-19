@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { Prisma } from "@prisma/client";
 import { toLearnerClassDTO } from "@/lib/classQueries";
 
 // Minimal row shaped like `learnerClassInclude`'s payload.
@@ -57,3 +58,51 @@ describe("toLearnerClassDTO", () => {
     expect(dto.suspendedUntil).toBe(until);
   });
 });
+
+describe("grade eligibility query builders", () => {
+  it("gradeEligibilityWhere restricts tutor grade >= student grade and target grade >= student grade or null", async () => {
+    const { gradeEligibilityWhere } = await import("@/lib/classQueries");
+    const where = gradeEligibilityWhere("GRADE_9");
+    expect(where.tutorProfile).toEqual({
+      user: {
+        gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] },
+      },
+    });
+    expect(where.OR).toEqual([
+      { gradeLevel: null },
+      { gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] } },
+    ]);
+  });
+
+  it("browseClassesWhere applies gradeEligibilityWhere when learnerGrade is provided", async () => {
+    const { browseClassesWhere } = await import("@/lib/classQueries");
+    const where = browseClassesWhere("u1", "GRADE_10");
+    expect(where.enrollments).toEqual({ none: { learnerId: "u1" } });
+    expect(where.tutorProfile).toEqual({
+      user: {
+        gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] },
+      },
+    });
+    expect(where.OR).toEqual([
+      { gradeLevel: null },
+      { gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] } },
+    ]);
+  });
+
+  it("browsableOrEnrolledWhere applies grade eligibility to browsable branch but allows enrolled classes", async () => {
+    const { browsableOrEnrolledWhere } = await import("@/lib/classQueries");
+    const where = browsableOrEnrolledWhere("u1", "GRADE_8");
+    expect(where.OR).toBeDefined();
+    expect(where.OR?.length).toBe(2);
+    const schedBranch = where.OR?.[0] as Prisma.TutorClassWhereInput;
+    expect(schedBranch.status).toBe("SCHEDULED");
+    expect(schedBranch.tutorProfile).toEqual({
+      user: {
+        gradeLevel: { in: ["GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] },
+      },
+    });
+    const enrollBranch = where.OR?.[1] as Prisma.TutorClassWhereInput;
+    expect(enrollBranch.enrollments).toEqual({ some: { learnerId: "u1" } });
+  });
+});
+

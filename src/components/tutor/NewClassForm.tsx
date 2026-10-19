@@ -9,7 +9,13 @@ import ClassScheduleFields, { ClassScheduleSubmitPayload } from "@/components/tu
  * `/tutor/classes` — the form is long (subject, topics, description, a variable
  * number of session rows, location, capacity) and never fit a dialog well.
  */
-export default function NewClassForm({ allowedTopics }: { allowedTopics?: string[] }) {
+export default function NewClassForm({
+  allowedTopics,
+  tutorGradeLevel,
+}: {
+  allowedTopics?: string[];
+  tutorGradeLevel?: string | null;
+}) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -44,6 +50,7 @@ export default function NewClassForm({ allowedTopics }: { allowedTopics?: string
           submitting={submitting}
           error={error}
           allowedTopics={allowedTopics}
+          tutorGradeLevel={tutorGradeLevel}
           onCancel={() => router.push("/tutor/classes")}
           onSubmit={handleCreateClass}
         />

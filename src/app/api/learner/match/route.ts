@@ -48,9 +48,17 @@ export async function POST(req: NextRequest) {
 
     await reinstateExpiredClasses();
 
+    const learnerGrade =
+      session.user.gradeLevel ??
+      (await prisma.user?.findUnique?.({
+        where: { id: session.user.id },
+        select: { gradeLevel: true },
+      }))?.gradeLevel ??
+      null;
+
     const [rows, showRealNames] = await Promise.all([
       prisma.tutorClass.findMany({
-        where: { ...browsableOrEnrolledWhere(session.user.id), subject: subject },
+        where: { ...browsableOrEnrolledWhere(session.user.id, learnerGrade), subject: subject },
         include: learnerClassInclude(session.user.id),
         orderBy: { createdAt: "desc" },
       }),

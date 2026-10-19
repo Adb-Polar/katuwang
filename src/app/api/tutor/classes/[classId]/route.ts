@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
+import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { notify, notifyMany } from "@/lib/notifications";
 
 
@@ -37,7 +38,7 @@ export async function PATCH(
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { gradeLevel: true } } },
     });
 
     if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
@@ -66,6 +67,15 @@ export async function PATCH(
     }
 
     const { topics: rawTopics, subject: rawSubject, ...updates } = result.data;
+
+    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+    if (updates.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(updates.gradeLevel, tutorGradeLevel)) {
+      return NextResponse.json(
+        { error: "Target grade cannot be higher than your current grade level." },
+        { status: 400 }
+      );
+    }
+
     const subjectUpdate = rawSubject !== undefined ? { subject: rawSubject } : {};
 
     // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
