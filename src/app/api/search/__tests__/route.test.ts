@@ -112,7 +112,9 @@ describe("GET /api/search", () => {
     const kinds = json.groups.map((g: { kind: string }) => g.kind);
     expect(kinds).not.toContain("tutor");
     expect(kinds).not.toContain("topic");
-    expect(classFindMany.mock.calls[0][0].where.OR).toEqual([{ code: { contains: "C-0231" } }]);
+    const where = classFindMany.mock.calls[0][0].where;
+    const orClause = where.AND ? where.AND[1].OR : where.OR;
+    expect(orClause).toEqual([{ code: { contains: "C-0231" } }]);
     expect(userFindMany).not.toHaveBeenCalled();
   });
 
@@ -129,7 +131,9 @@ describe("GET /api/search", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
     resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);
     await GET(req("Mathematics", "subject"));
-    expect(classFindMany.mock.calls[0][0].where.OR).toEqual(
+    const where = classFindMany.mock.calls[0][0].where;
+    const orClause = where.AND ? where.AND[1].OR : where.OR;
+    expect(orClause).toEqual(
       expect.arrayContaining([{ subject: { in: ["MATH"] } }]),
     );
     expect(userFindMany).not.toHaveBeenCalled();

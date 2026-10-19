@@ -80,7 +80,7 @@ export async function recommendClasses(
 
   const [rows, showRealNames] = await Promise.all([
     prisma.tutorClass.findMany({
-      where: { ...browsableOrEnrolledWhere(ctx.userId), subject },
+      where: { ...browsableOrEnrolledWhere(ctx.userId, ctx.gradeLevel), subject },
       include: learnerClassInclude(ctx.userId),
       orderBy: { createdAt: "desc" },
     }),

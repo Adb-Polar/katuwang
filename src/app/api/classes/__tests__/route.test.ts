@@ -125,6 +125,17 @@ describe("GET /api/classes", () => {
       published: true,
       sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } } },
       enrollments: { none: { learnerId: "u1" } },
+      tutorProfile: {
+        user: {
+          gradeLevel: {
+            in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"],
+          },
+        },
+      },
+      OR: [
+        { gradeLevel: null },
+        { gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] } },
+      ],
     });
     expect(call.skip).toBeUndefined();
     expect(call.take).toBeUndefined();

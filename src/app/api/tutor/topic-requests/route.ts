@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
@@ -112,7 +112,8 @@ export async function GET(req: NextRequest) {
       select: { subject: true, topic: true },
     });
 
-    let where = tutorPoolWhere(tutorProfile.id, certifiedTopics);
+    const tutorGrade = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+    let where = tutorPoolWhere(tutorProfile.id, certifiedTopics, tutorGrade);
     if (subject) {
       where = { ...where, subject };
     }

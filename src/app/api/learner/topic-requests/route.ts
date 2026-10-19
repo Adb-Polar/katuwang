@@ -6,6 +6,8 @@ import { getSetting } from "@/lib/settings";
 import { createTopicRequestSchema } from "@/lib/validations/match";
 
 import { subjectExists, topicExists } from "@/lib/subjects";
+import { GradeLevel } from "@prisma/client";
+import { isStudentEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
 const MAX_OPEN_REQUESTS = 10;
@@ -115,7 +117,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { subject, topics, gradeLevel, preferredSlots, note, directedTutorId } = result.data;
+    const studentGrade =
+      (session.user as { gradeLevel?: GradeLevel | null }).gradeLevel ??
+      (await prisma.user?.findUnique?.({
+        where: { id: session.user.id },
+        select: { gradeLevel: true },
+      }))?.gradeLevel ??
+      result.data.gradeLevel ??
+      null;
+
+    if (!studentGrade) {
+      return NextResponse.json({ error: "Grade level is required." }, { status: 400 });
+    }
+
+    const { subject, topics, preferredSlots, note, directedTutorId } = result.data;
 
     if (!(await subjectExists(subject))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
@@ -131,10 +146,16 @@ export async function POST(req: NextRequest) {
     if (directedTutorId) {
       const directedTutor = await prisma.user.findFirst({
         where: { id: directedTutorId, role: "STUDENT_TUTOR" },
-        select: { tutorProfile: { select: { id: true } } },
+        select: { gradeLevel: true, tutorProfile: { select: { id: true } } },
       });
       if (!directedTutor || !directedTutor.tutorProfile) {
         return NextResponse.json({ error: "The selected tutor could not be found." }, { status: 400 });
+      }
+      if (!isStudentEligibleForTutor(studentGrade, directedTutor.gradeLevel)) {
+        return NextResponse.json(
+          { error: "You cannot request tutoring from a tutor in a lower grade level." },
+          { status: 403 }
+        );
       }
       directedTutorProfileId = directedTutor.tutorProfile.id;
     }
@@ -154,7 +175,7 @@ export async function POST(req: NextRequest) {
         data: {
           learnerId: session.user.id,
           subject: subject,
-          gradeLevel,
+          gradeLevel: studentGrade,
           note: note || null,
           directedTutorProfileId,
           topics: { create: [...new Set(topics)].map((topic) => ({ topic })) },

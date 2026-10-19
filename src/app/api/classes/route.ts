@@ -16,9 +16,11 @@ const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
  * The signals used to personalize the default browse order: the learner's grade
  * plus the subjects/topics they've engaged with (past enrolments + open requests).
  */
-async function loadRankContext(learnerId: string): Promise<BrowseRankContext> {
+async function loadRankContext(learnerId: string, learnerGrade?: GradeLevel | null): Promise<BrowseRankContext> {
   const [user, enrollments, requests] = await Promise.all([
-    prisma.user.findUnique({ where: { id: learnerId }, select: { gradeLevel: true } }),
+    learnerGrade !== undefined
+      ? Promise.resolve({ gradeLevel: learnerGrade })
+      : prisma.user.findUnique({ where: { id: learnerId }, select: { gradeLevel: true } }),
     prisma.classEnrollment.findMany({
       where: { learnerId },
       select: { class: { select: { subject: true, topics: { select: { topic: true } } } } },
@@ -53,6 +55,12 @@ export async function GET(req: NextRequest) {
     }
 
     await reinstateExpiredClasses();
+
+    const learner = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { gradeLevel: true },
+    });
+    const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
 
     const { searchParams } = new URL(req.url);
     const scope = searchParams.get("scope") === "mine" ? "mine" : "browse";
@@ -100,7 +108,7 @@ export async function GET(req: NextRequest) {
     const mineTab: MineTab =
       tabParam === "completed" || tabParam === "cancelled" ? tabParam : "upcoming";
 
-    const browseWhere = browseClassesWhere(session.user.id);
+    const browseWhere = browseClassesWhere(session.user.id, learnerGrade);
     const mineWhere = myClassesWhere(session.user.id);
     const filteredBrowse = scope === "browse" && hasFilters;
     // The unfiltered browse list is ranked by light personalization (see
@@ -150,7 +158,7 @@ export async function GET(req: NextRequest) {
         ...(personalize ? {} : { skip: (page - 1) * pageSize, take: pageSize }),
       }),
       getSetting("showTutorRealNames"),
-      personalize ? loadRankContext(session.user.id) : Promise.resolve(null),
+      personalize ? loadRankContext(session.user.id, learnerGrade) : Promise.resolve(null),
     ]);
 
     const mineTotal = mineUpcoming + mineCompleted + mineCancelled;

@@ -29,7 +29,7 @@ vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 
 import { GET } from "@/app/api/tutor/topic-requests/route";
 
-const tutor = { user: { id: "T1", role: "STUDENT_TUTOR" } };
+const tutor = { user: { id: "T1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_10" } };
 
 function req(url = "http://localhost/api/tutor/topic-requests") {
   return new NextRequest(url);
@@ -39,7 +39,7 @@ describe("GET /api/tutor/topic-requests", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(true);
-    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
     topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
     topicRequestCount.mockResolvedValue(1);
     topicRequestFindMany.mockResolvedValue([

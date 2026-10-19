@@ -1,4 +1,27 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, GradeLevel } from "@prisma/client";
+import {
+  getEligibleTutorGradesForStudent,
+  getEligibleClassTargetGradesForStudent,
+} from "@/lib/gradeLevels";
+
+/**
+ * Prisma where condition enforcing:
+ * 1. Tutor grade >= student grade (studentGrade <= tutorGrade)
+ * 2. Class target grade is null (open) OR target grade >= student grade (studentGrade <= targetGrade)
+ */
+export function gradeEligibilityWhere(
+  studentGrade: GradeLevel | string
+): Prisma.TutorClassWhereInput {
+  const eligibleTutorGrades = getEligibleTutorGradesForStudent(studentGrade);
+  const eligibleTargetGrades = getEligibleClassTargetGradesForStudent(studentGrade);
+  return {
+    tutorProfile: { user: { gradeLevel: { in: eligibleTutorGrades } } },
+    OR: [
+      { gradeLevel: null },
+      { gradeLevel: { in: eligibleTargetGrades } },
+    ],
+  };
+}
 
 /**
  * Classes a learner may see: every SCHEDULED + published class with at least one
@@ -6,26 +29,44 @@ import { Prisma } from "@prisma/client";
  * Shared by the class browser (`GET /api/classes`) and the matcher so the two
  * never drift apart.
  */
-export function browsableOrEnrolledWhere(learnerId: string): Prisma.TutorClassWhereInput {
+export function browsableOrEnrolledWhere(
+  learnerId: string,
+  learnerGrade?: GradeLevel | string | null
+): Prisma.TutorClassWhereInput {
+  const schedWhere: Prisma.TutorClassWhereInput = {
+    status: "SCHEDULED",
+    published: true,
+    sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
+    ...(learnerGrade ? gradeEligibilityWhere(learnerGrade) : {}),
+  };
+
   return {
     OR: [
-      {
-        status: "SCHEDULED",
-        published: true,
-        sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
-      },
+      schedWhere,
       { enrollments: { some: { learnerId } } },
     ],
   };
 }
 
 /** The "Browse" tab: enrollable classes the learner is NOT already in. */
-export function browseClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
-  return {
+export function browseClassesWhere(
+  learnerId: string,
+  learnerGrade?: GradeLevel | string | null
+): Prisma.TutorClassWhereInput {
+  const base: Prisma.TutorClassWhereInput = {
     status: "SCHEDULED",
     published: true,
     sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
     enrollments: { none: { learnerId } },
+  };
+
+  if (!learnerGrade) return base;
+
+  const gradeFilter = gradeEligibilityWhere(learnerGrade);
+  return {
+    ...base,
+    tutorProfile: gradeFilter.tutorProfile,
+    OR: gradeFilter.OR,
   };
 }
 

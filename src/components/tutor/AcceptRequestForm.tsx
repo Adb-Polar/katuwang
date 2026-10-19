@@ -60,10 +60,12 @@ let rowIdCounter = 0;
 export default function AcceptRequestForm({
   request,
   certifiedTopics,
+  tutorGradeLevel,
 }: {
   request: RequestSummary;
   /** The tutor's CERTIFIED topics within the request's subject. */
   certifiedTopics: string[];
+  tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
   const { topicsFor } = useSubjectCatalog();
@@ -131,6 +133,7 @@ export default function AcceptRequestForm({
           subjectLocked
           disabledTopics={disabledTopics}
           allowCustomTopics={false}
+          tutorGradeLevel={tutorGradeLevel}
           submitLabel="Accept & create class"
           submitting={submitting}
           error={error}

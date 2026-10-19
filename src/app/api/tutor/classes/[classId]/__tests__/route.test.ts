@@ -312,6 +312,45 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
       })
     );
   });
+
+  it("rejects updating target grade higher than tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "SCHEDULED",
+      topics: [],
+      sessions: [],
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+
+    const res = await patch({ gradeLevel: "GRADE_10" });
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toContain("Target grade cannot be higher than your current grade level");
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("permits updating target grade equal to or lower than tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      tutorProfileId: "tp1",
+      status: "SCHEDULED",
+      topics: [],
+      sessions: [],
+      _count: { enrollments: 0 },
+    });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+    classUpdate.mockResolvedValue({ id: "c1", gradeLevel: "GRADE_8", topics: [], sessions: [] });
+
+    const res = await patch({ gradeLevel: "GRADE_8" });
+    expect(res.status).toBe(200);
+    expect(classUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ gradeLevel: "GRADE_8" }) })
+    );
+  });
 });
 
 describe("DELETE /api/tutor/classes/[classId]", () => {

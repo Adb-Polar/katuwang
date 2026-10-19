@@ -25,6 +25,7 @@ export default async function AcceptTopicRequestPage({
     where: { userId: session!.user.id },
     select: {
       id: true,
+      user: { select: { gradeLevel: true } },
       topicCertifications: {
         where: { status: "CERTIFIED" },
         select: { subject: true, topic: true },
@@ -38,7 +39,7 @@ export default async function AcceptTopicRequestPage({
   // Only requests this tutor is actually eligible to accept (directed to them, or
   // public in one of their certified subjects/topics) — same gate as the list.
   const request = await prisma.topicRequest.findFirst({
-    where: { AND: [{ id }, tutorPoolWhere(tutorProfile.id, certifiedTopics)] },
+    where: { AND: [{ id }, tutorPoolWhere(tutorProfile.id, certifiedTopics, tutorProfile.user.gradeLevel)] },
     include: {
       topics: { select: { topic: true } },
       slots: { select: { day: true, startTime: true, endTime: true } },
@@ -65,6 +66,7 @@ export default async function AcceptTopicRequestPage({
         certifiedTopics={certifiedTopics
           .filter((c) => c.subject === request.subject)
           .map((c) => c.topic)}
+        tutorGradeLevel={tutorProfile.user.gradeLevel}
       />
     </div>
   );

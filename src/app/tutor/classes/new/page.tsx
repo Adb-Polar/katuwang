@@ -22,6 +22,12 @@ export default async function NewClassPage() {
     allowedTopics = certs.map((c) => c.topic);
   }
 
+  const tutorUser = await prisma.user.findUnique({
+    where: { id: session!.user.id },
+    select: { gradeLevel: true },
+  });
+  const tutorGradeLevel = tutorUser?.gradeLevel ?? session?.user?.gradeLevel ?? null;
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -29,7 +35,7 @@ export default async function NewClassPage() {
         title="Schedule a tutoring class"
         subtitle="Pick a subject and topics, add your sessions, and publish it for tutees to discover and enroll."
       />
-      <NewClassForm allowedTopics={allowedTopics} />
+      <NewClassForm allowedTopics={allowedTopics} tutorGradeLevel={tutorGradeLevel} />
     </div>
   );
 }

@@ -46,7 +46,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const learner = { user: { id: "L1", role: "STUDENT_LEARNER", anonymousId: "STU-0001" } };
+const learner = { user: { id: "L1", role: "STUDENT_LEARNER", anonymousId: "STU-0001", gradeLevel: "GRADE_9" } };
 const validBody = { subject: "MATH", topics: ["Algebraic Expressions"], gradeLevel: "GRADE_9" };
 
 const dbRow = {
@@ -130,9 +130,19 @@ describe("POST /api/learner/topic-requests", () => {
     expect(createMock).not.toHaveBeenCalled();
   });
 
+  it("403 when directed tutor is in a lower grade level than the learner", async () => {
+    getServerSessionMock.mockResolvedValue(learner); // learner is GRADE_9
+    userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" }, gradeLevel: "GRADE_8" });
+    const res = await POST(makeRequest({ ...validBody, directedTutorId: "T1" }));
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error).toMatch(/cannot request tutoring from a tutor in a lower grade level/i);
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
   it("directedTutorId path creates the request and notifies the tutor", async () => {
     getServerSessionMock.mockResolvedValue(learner);
-    userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" } });
+    userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" }, gradeLevel: "GRADE_10" });
     createMock.mockResolvedValue({ ...dbRow, directedTutor: { user: { anonymousId: "TUT-0001" } } });
 
     const res = await POST(makeRequest({ ...validBody, directedTutorId: "T1" }));

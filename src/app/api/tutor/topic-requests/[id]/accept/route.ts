@@ -9,6 +9,7 @@ import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
+import { isStudentEligibleForTutor, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
 // ─── POST: Accept an open topic request by auto-creating a class ────────────
@@ -33,7 +34,7 @@ export async function POST(
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
@@ -49,7 +50,7 @@ export async function POST(
 
     const request = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { id: true, status: true, subject: true, learnerId: true },
+      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true },
     });
     if (!request) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
@@ -58,13 +59,22 @@ export async function POST(
       return NextResponse.json({ error: "This request is no longer open." }, { status: 400 });
     }
 
+    const tutorGrade = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+
+    if (!isStudentEligibleForTutor(request.gradeLevel, tutorGrade)) {
+      return NextResponse.json(
+        { error: "You cannot teach students in a higher grade level than your own." },
+        { status: 403 }
+      );
+    }
+
     const certifiedTopics = await prisma.topicCertification.findMany({
       where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" },
       select: { subject: true, topic: true },
     });
 
     const eligible = await prisma.topicRequest.findFirst({
-      where: { id, ...tutorPoolWhere(tutorProfile.id, certifiedTopics) },
+      where: { id, ...tutorPoolWhere(tutorProfile.id, certifiedTopics, tutorGrade) },
       select: { id: true },
     });
     if (!eligible) {
@@ -76,6 +86,13 @@ export async function POST(
 
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
+
+    if (gradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorProfile.user.gradeLevel)) {
+      return NextResponse.json(
+        { error: "Target grade cannot be higher than your current grade level." },
+        { status: 400 }
+      );
+    }
 
     if (subject !== request.subject) {
       return NextResponse.json(

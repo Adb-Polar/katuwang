@@ -18,7 +18,11 @@ export default async function EditClassPage({
 
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId: session!.user.id },
-    select: { id: true, topicCertifications: { where: { status: "CERTIFIED" }, select: { subject: true, topic: true } } },
+    select: {
+      id: true,
+      user: { select: { gradeLevel: true } },
+      topicCertifications: { where: { status: "CERTIFIED" }, select: { subject: true, topic: true } },
+    },
   });
 
   if (!tutorProfile) notFound();
@@ -48,6 +52,7 @@ export default async function EditClassPage({
       classId={tutorClass.id}
       subject={tutorClass.subject}
       gradeLevel={tutorClass.gradeLevel}
+      tutorGradeLevel={tutorProfile.user.gradeLevel}
       status={tutorClass.status}
       activeLabel="Active"
       published={tutorClass.published}

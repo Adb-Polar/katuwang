@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
@@ -51,6 +51,7 @@ export default function ClassScheduleFields({
   disabledTopics = [],
   allowedTopics,
   allowCustomTopics = true,
+  tutorGradeLevel,
   submitLabel = "Schedule",
   submitting = false,
   error,
@@ -71,6 +72,8 @@ export default function ClassScheduleFields({
   disabledTopics?: string[];
   /** When false, hides the "add another topic" custom-topic input (accept flow: only certified topics allowed). */
   allowCustomTopics?: boolean;
+  /** The tutor's authenticated grade level — restricts target grade options to tutorGrade and below. */
+  tutorGradeLevel?: string | null;
   submitLabel?: string;
   submitting?: boolean;
   error?: string;
@@ -181,6 +184,9 @@ export default function ClassScheduleFields({
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       return setFormError("Please provide a location (building/room) or a meeting link.");
     }
+    if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
+      return setFormError("Target grade cannot be higher than your current grade level.");
+    }
 
     onSubmit({
       ...form,
@@ -192,6 +198,8 @@ export default function ClassScheduleFields({
       })),
     });
   };
+
+  const availableGrades = tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS;
 
   return (
     <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
@@ -223,7 +231,7 @@ export default function ClassScheduleFields({
           className={`select select-bordered ${selectCls} w-full focus:select-primary`}
         >
           <option value="">Any grade</option>
-          {GRADE_LEVELS.map((g) => (
+          {availableGrades.map((g) => (
             <option key={g.value} value={g.value}>
               {g.label}
             </option>

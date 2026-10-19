@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { addDays } from "@/lib/datetime";
 import { getSetting } from "@/lib/settings";
+import { isStudentEligibleForTutor, isStudentEligibleForClass } from "@/lib/gradeLevels";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
@@ -45,6 +46,7 @@ export default async function LearnerTutorProfilePage({
       firstName: true,
       lastName: true,
       section: true,
+      gradeLevel: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -101,21 +103,25 @@ export default async function LearnerTutorProfilePage({
     maxStudents: c.maxStudents,
   });
 
-  // A stranger only sees SCHEDULED classes; suspended/banned/completed classes
-  // surface only to a learner enrolled in them.
+  const isEnrolledIn = (c: (typeof allClasses)[number]) => c.enrollments.length > 0;
+  const isClassEligible = (c: (typeof allClasses)[number]) =>
+    isStudentEligibleForClass(me?.gradeLevel, tutor.gradeLevel, c.gradeLevel);
+
+  // A stranger only sees SCHEDULED classes that they are eligible to enroll in;
+  // suspended/banned/completed classes surface only to a learner enrolled in them.
   const visibleClasses = allClasses.filter(
-    (c) => c.status === "SCHEDULED" || c.enrollments.length > 0,
+    (c) => isEnrolledIn(c) || (c.status === "SCHEDULED" && isClassEligible(c)),
   );
   const activeClasses = visibleClasses.filter((c) => c.status !== "COMPLETED").map(toDto);
   const completedClasses = visibleClasses
-    .filter((c) => c.status === "COMPLETED" && c.enrollments.length > 0)
+    .filter((c) => c.status === "COMPLETED" && isEnrolledIn(c))
     .map(toDto);
 
   // Mon–Sun timetable: upcoming SCHEDULED sessions in the next 7 days.
   const now = new Date();
   const weekAhead = addDays(now, 7);
   const timetableSessions = allClasses
-    .filter((c) => c.status === "SCHEDULED")
+    .filter((c) => isEnrolledIn(c) || (c.status === "SCHEDULED" && isClassEligible(c)))
     .flatMap((c) =>
       c.sessions
         .filter((s) => s.status === "SCHEDULED" && s.scheduledAt > now && s.scheduledAt <= weekAhead)
@@ -144,12 +150,14 @@ export default async function LearnerTutorProfilePage({
         actions={
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />
-            <RequestTopicButton
-              tutorId={tutorId}
-              tutorAnonymousId={tutor.anonymousId}
-              defaultGrade={me?.gradeLevel ?? undefined}
-              verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
-            />
+            {isStudentEligibleForTutor(me?.gradeLevel, tutor.gradeLevel) && (
+              <RequestTopicButton
+                tutorId={tutorId}
+                tutorAnonymousId={tutor.anonymousId}
+                defaultGrade={me?.gradeLevel ?? undefined}
+                verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
+              />
+            )}
             {canReport && (
               <ReportButton targetType="TUTOR" targetId={tutorId} targetLabel={tutor.anonymousId} />
             )}

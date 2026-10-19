@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
+import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
 import LearnerClassActions from "@/components/learner/LearnerClassActions";
@@ -32,7 +33,7 @@ export default async function LearnerClassDetailPage({
 
   await reinstateExpiredClasses();
 
-  const [tutorClass, showRealNames] = await Promise.all([
+  const [tutorClass, showRealNames, learner] = await Promise.all([
     prisma.tutorClass.findUnique({
       where: { id: classId },
       include: {
@@ -56,7 +57,7 @@ export default async function LearnerClassDetailPage({
         tutorProfile: {
           select: {
             user: {
-              select: { id: true, anonymousId: true, image: true, firstName: true, lastName: true, section: true },
+              select: { id: true, anonymousId: true, image: true, firstName: true, lastName: true, section: true, gradeLevel: true },
             },
             topicCertifications: {
               where: { status: "CERTIFIED" },
@@ -69,14 +70,24 @@ export default async function LearnerClassDetailPage({
       },
     }),
     getSetting("showTutorRealNames"),
+    prisma.user.findUnique({
+      where: { id: session!.user.id },
+      select: { gradeLevel: true },
+    }),
   ]);
 
   if (!tutorClass) notFound();
 
   const isEnrolled = tutorClass.enrollments.length > 0;
+  const isEligible = isStudentEligibleForClass(
+    learner?.gradeLevel,
+    tutorClass.tutorProfile.user.gradeLevel,
+    tutorClass.gradeLevel
+  );
   const isBrowsable =
     tutorClass.status === "SCHEDULED" &&
     tutorClass.published &&
+    isEligible &&
     tutorClass.sessions.some((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date());
 
   if (!isEnrolled && !isBrowsable) notFound();

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { subjectExists } from "@/lib/subjects";
+import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { getSetting, getProfilePictureRequirement } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true, user: { select: { image: true } } },
+      select: { id: true, user: { select: { image: true, gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
@@ -109,6 +110,14 @@ export async function POST(req: NextRequest) {
 
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
+
+    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+    if (gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorGradeLevel)) {
+      return NextResponse.json(
+        { error: "Target grade cannot be higher than your current grade level." },
+        { status: 400 }
+      );
+    }
 
     if (!(await subjectExists(subject))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
