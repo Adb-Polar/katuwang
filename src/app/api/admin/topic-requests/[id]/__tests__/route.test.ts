@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, findUniqueMock, updateMock, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
+const { getServerSessionMock, findUniqueMock, findUniqueOrThrowMock, updateMock, historyCreate, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   findUniqueMock: vi.fn(),
+  findUniqueOrThrowMock: vi.fn(),
   updateMock: vi.fn(),
+  historyCreate: vi.fn(),
   auditLogCreate: vi.fn(),
   notificationCreate: vi.fn(),
 }));
@@ -16,7 +18,8 @@ vi.mock("@/lib/prisma", () => ({
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        topicRequest: { update: updateMock },
+        topicRequest: { findUniqueOrThrow: findUniqueOrThrowMock, update: updateMock },
+        topicRequestHistory: { create: historyCreate },
         auditLog: { create: auditLogCreate },
         notification: { create: notificationCreate },
       }),
@@ -41,6 +44,12 @@ describe("PATCH /api/admin/topic-requests/[id]", () => {
     vi.clearAllMocks();
     findUniqueMock.mockResolvedValue({ id: "r1", status: "OPEN", learnerId: "L1", subject: "MATH" });
     updateMock.mockResolvedValue({ id: "r1", status: "CANCELLED" });
+    findUniqueOrThrowMock.mockImplementation(async () => ({
+      ...(updateMock.mock.calls.length
+        ? await updateMock.mock.results.at(-1)?.value
+        : await findUniqueMock.mock.results.at(-1)?.value),
+      learnerId: "L1", subject: "MATH", topics: [], slots: [],
+    }));
   });
 
   it("401 for a non-admin", async () => {
@@ -99,6 +108,13 @@ describe("PATCH /api/admin/topic-requests/[id]", () => {
         }),
       })
     );
+    expect(historyCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        requestId: "r1", actorId: "A1", eventType: "STATUS_CHANGED",
+        before: expect.objectContaining({ status: "OPEN" }),
+        after: expect.objectContaining({ status: "CANCELLED" }),
+      }),
+    });
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1" }) })
     );
@@ -111,7 +127,13 @@ describe("PATCH /api/admin/topic-requests/[id]", () => {
     const res = await PATCH(makeRequest({ status: "OPEN" }), { params });
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "r1" }, data: { status: "OPEN", fulfilledClassId: null } })
+      expect.objectContaining({
+        where: { id: "r1" },
+        data: expect.objectContaining({
+          status: "OPEN", fulfilledClassId: null,
+          lastSubmittedAt: expect.any(Date), expiresAt: expect.any(Date),
+        }),
+      })
     );
   });
 
