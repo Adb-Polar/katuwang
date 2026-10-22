@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS, getEligibleClassTargetGradesForStudent, GradeLevel } from "@/lib/gradeLevels";
+import type { GradeLevel } from "@prisma/client";
+import { GRADE_LEVELS, getEligibleClassTargetGradesForStudent } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SearchInput from "@/components/ui/SearchInput";

@@ -38,12 +38,14 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         tutorClass: { create: tutorClassCreate },
-        topicRequest: { update: topicRequestUpdate },
+        topicRequest: { update: topicRequestUpdate, findUniqueOrThrow: topicRequestFindUnique },
         notification: { create: notificationCreate },
       }),
   },
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+
+vi.mock("@/lib/topicRequestHistory", () => ({ requestSnapshot: vi.fn().mockResolvedValue({}), recordRequestHistory: vi.fn() }));
 
 import { POST } from "@/app/api/tutor/topic-requests/[id]/accept/route";
 
@@ -77,7 +79,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(true);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9" });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000) });
     topicRequestFindFirst.mockResolvedValue({ id: "r1" }); // eligible by default
     topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
     classSessionFindMany.mockResolvedValue([]);
@@ -90,6 +92,14 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(401);
+  });
+
+  it("rejects a request at its deadline", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(0) });
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(400);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
   it("400 when the request is not OPEN", async () => {

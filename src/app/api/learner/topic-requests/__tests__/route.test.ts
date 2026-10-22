@@ -29,12 +29,15 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         topicRequest: { create: createMock },
+        topicRequestHistory: { create: vi.fn() },
         tutorProfile: { findUnique: vi.fn().mockResolvedValue({ userId: "T1" }) },
         notification: { create: notificationCreateMock },
       }),
   },
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+
+vi.mock("@/lib/topicRequestHistory", () => ({ requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), recordRequestHistory: vi.fn() }));
 
 import { GET, POST } from "@/app/api/learner/topic-requests/route";
 

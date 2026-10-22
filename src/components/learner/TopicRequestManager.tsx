@@ -13,6 +13,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import MatchCriteriaFields, {
   MatchCriteriaValue,
+  PreferredSlot,
   EMPTY_CRITERIA,
   criteriaToBody,
 } from "@/components/learner/MatchCriteriaFields";
@@ -24,6 +25,8 @@ interface TopicRequest {
   note: string | null;
   status: "OPEN" | "ACCEPTED" | "ENROLLED" | "FULFILLED" | "CANCELLED";
   createdAt: string;
+  expiresAt: string;
+  lastSubmittedAt: string;
   topics: string[];
   slots: { day: string; startTime: string; endTime: string }[];
   directedTo: { anonymousId: string } | null;
@@ -45,6 +48,9 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   );
 
   const [showForm, setShowForm] = useState(false);
+  const [tab, setTab] = useState<"Active" | "Expired" | "Past">("Active");
+  const [renewId, setRenewId] = useState<string | null>(null);
+  const [renewSlots, setRenewSlots] = useState<PreferredSlot[]>([]);
   const [criteria, setCriteria] = useState<MatchCriteriaValue>({ ...EMPTY_CRITERIA, gradeLevel: defaultGrade });
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -103,6 +109,22 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       setSavingEdit(false);
     }
   };
+
+  const renew = async (id: string, slots?: PreferredSlot[]) => {
+    setError("");
+    try {
+      const res = await fetch(`/api/learner/topic-requests/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "RENEW", ...(slots ? { preferredSlots: slots } : {}) }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not renew request.");
+      setRenewId(null);
+      setTab("Active");
+      refetch();
+      setSuccess("Request renewed for 3 days.");
+    } catch (err) { setError(err instanceof Error ? err.message : "Could not renew request."); }
+  };
+  const visibleRequests = requests.filter((r) => tab === "Past" ? r.status !== "OPEN" :
+    r.status === "OPEN" && (tab === "Expired" ? new Date(r.expiresAt) <= new Date() : new Date(r.expiresAt) > new Date()))
+    .sort((a, b) => new Date(b.lastSubmittedAt).getTime() - new Date(a.lastSubmittedAt).getTime());
 
   const editingRequest = editId ? requests.find((r) => r.id === editId) ?? null : null;
   // Adding or editing takes over the panel — the list and the "New request"
@@ -261,17 +283,33 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             </form>
           )}
 
+          {renewId && <div className="border border-base-200 rounded-xl p-4 space-y-3 text-xs">
+            <h3 className="font-semibold">Renew request · preferred times</h3>
+            <p>Adjust your weekly availability, then renew this request for 3 days.</p>
+            {renewSlots.map((slot, i) => <div key={i} className="flex flex-wrap gap-2">
+              <select className="select select-bordered select-sm" value={slot.day} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, day: e.target.value } : s))}>
+                {["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <input type="time" className="input input-bordered input-sm" value={slot.startTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, startTime: e.target.value } : s))} />
+              <input type="time" className="input input-bordered input-sm" value={slot.endTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, endTime: e.target.value } : s))} />
+              <button className="btn btn-ghost btn-sm" onClick={() => setRenewSlots(renewSlots.filter((_, j) => j !== i))}>Remove</button>
+            </div>)}
+            <div className="flex gap-2"><button className="btn btn-outline btn-sm" onClick={() => setRenewSlots([...renewSlots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }])}>Add time</button>
+              <button className="btn btn-primary btn-sm" onClick={() => renew(renewId, renewSlots)}>Renew for 3 days</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setRenewId(null)}>Back</button></div>
+          </div>}
+          {!formMode && <div role="tablist" className="tabs tabs-boxed">{(["Active", "Expired", "Past"] as const).map((name) => <button key={name} role="tab" aria-selected={tab === name} className={`tab ${tab === name ? "tab-active" : ""}`} onClick={() => setTab(name)}>{name}</button>)}</div>}
           {formMode ? null : loading ? (
             <div className="flex justify-center py-10">
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
-          ) : requests.length === 0 ? (
+          ) : visibleRequests.length === 0 ? (
             <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
-              You haven&apos;t posted any requests yet.
+              No {tab.toLowerCase()} requests.
             </div>
           ) : (
             <div className="space-y-3">
-              {requests.map((r) => {
+              {visibleRequests.map((r) => {
                 const meta = STATUS_TONE[r.status];
                 return (
                   <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
@@ -281,14 +319,14 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                           {r.subject}
                         </span>
                         <span className="text-base-content/50">{gradeLabel(r.gradeLevel)}</span>
-                        <StatusBadge tone={meta.tone} label={meta.label} size="xs" />
+                        <StatusBadge tone={tab === "Expired" ? "neutral" : meta.tone} label={tab === "Expired" ? "Expired" : meta.label} size="xs" />
                         <span className="badge badge-outline badge-sm text-2xs">
                           {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}
                         </span>
                       </div>
                       {(r.status === "OPEN" || r.status === "ACCEPTED") && (
                         <div className="flex items-center gap-1 shrink-0">
-                          {r.status === "OPEN" && (
+                          {r.status === "OPEN" && tab === "Active" && (
                             <button
                               onClick={() => startEdit(r)}
                               className="btn btn-ghost btn-xs text-2xs gap-1"
@@ -307,6 +345,8 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                       )}
                     </div>
 
+                    {tab === "Expired" && <><button className="btn btn-primary btn-xs" onClick={() => renew(r.id)}>Renew as is</button><button className="btn btn-outline btn-xs ml-2" onClick={() => { setRenewId(r.id); setRenewSlots(r.slots); }}>Change times and renew</button></>}
+                    <Link className="link link-primary text-2xs" href={`/learner/requests/${r.id}`}>View history</Link>
                     <div className="flex flex-wrap gap-1">
                       {r.topics.map((t) => (
                         <span key={t} className="badge badge-outline badge-sm text-2xs py-2.5">
@@ -365,7 +405,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     <p className="text-2xs text-base-content/40">
-                      Posted {formatDate(r.createdAt)}
+                      Posted {formatDate(r.createdAt)}{r.status === "OPEN" && ` · Deadline ${formatDateTime(r.expiresAt)}`}
                     </p>
                   </div>
                 );

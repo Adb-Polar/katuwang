@@ -22,7 +22,7 @@ export default async function LearnerDashboard() {
 
   const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
     prisma.classEnrollment.count({ where: { learnerId } }),
-    prisma.topicRequest.count({ where: { learnerId, status: "OPEN" } }),
+    prisma.topicRequest.count({ where: { learnerId, status: "OPEN", expiresAt: { gt: new Date() } } }),
     prisma.classSession.findMany({
       where: {
         status: "SCHEDULED",

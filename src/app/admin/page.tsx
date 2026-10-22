@@ -36,7 +36,7 @@ export default async function AdminDashboard() {
       prisma.topicCertification.count({ where: { status: "PENDING" } }),
       prisma.user.count({ where: { status: "PENDING" } }),
       prisma.questionRequest.count({ where: { status: "OPEN" } }),
-      prisma.topicRequest.count({ where: { status: "OPEN" } }),
+      prisma.topicRequest.count({ where: { status: "OPEN", expiresAt: { gt: new Date() } } }),
       prisma.classAppeal.count({ where: { status: "PENDING" } }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: "desc" },

@@ -42,6 +42,8 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (tx: { topicRequest: { update: (args: unknown) => unknown } }, id: string, data: Record<string, unknown>) => tx.topicRequest.update({ where: { id }, data }) }));
+
 import { PATCH } from "@/app/api/admin/classes/[classId]/route";
 
 function makeRequest(body: unknown) {
@@ -157,7 +159,7 @@ describe("PATCH /api/admin/classes/[classId]", () => {
     expect(res.status).toBe(200);
     expect(topicRequestUpdate).toHaveBeenCalledWith({
       where: { id: "r1" },
-      data: { status: "OPEN", fulfilledClassId: null },
+      data: { status: "OPEN", fulfilledClass: { disconnect: true } },
     });
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })

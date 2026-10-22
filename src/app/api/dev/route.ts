@@ -1,3 +1,4 @@
+import { recordRequestHistory } from "@/lib/topicRequestHistory";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { Role, GradeLevel, ClassStatus } from "@prisma/client";
@@ -333,9 +334,12 @@ async function createTopicRequests(body: Record<string, unknown>) {
     const learner = pick(learners);
     const subject = pick(SUBJECTS);
     const topics = sample(SUBJECT_TOPICS[subject], Math.floor(Math.random() * 2) + 1);
-    await prisma.topicRequest.create({
+    await prisma.$transaction(async (tx) => {
+      const request = await tx.topicRequest.create({
       data: {
         learnerId: learner.id,
+        lastSubmittedAt: new Date(),
+        expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
         subject,
         gradeLevel: learner.gradeLevel,
         note: "Dev factory class request.",
@@ -343,6 +347,9 @@ async function createTopicRequests(body: Record<string, unknown>) {
         topics: { create: topics.map((topic) => ({ topic })) },
         slots: { create: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }] },
       },
+      });
+      await recordRequestHistory(tx, request.id, null, "CREATED", null);
+      return request;
     });
     made++;
   }

@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { moderateTopicRequestSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { notify } from "@/lib/notifications";
+import { requestDeadline, requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
 
 // ─── PATCH: Close (→ CANCELLED) or re-open (→ OPEN) a topic request ─────────
 export async function PATCH(
@@ -51,12 +52,15 @@ export async function PATCH(
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      const before = await requestSnapshot(tx, id);
+      const now = new Date();
       const updatedRequest = await tx.topicRequest.update({
         where: { id },
-        data: { status, fulfilledClassId: null },
+        data: { status, fulfilledClassId: null, ...(status === "OPEN" ? { lastSubmittedAt: now, expiresAt: requestDeadline(now) } : {}) },
         select: { id: true, status: true },
       });
 
+      await recordRequestHistory(tx, id, session.user.id, "STATUS_CHANGED", before);
       await tx.auditLog.create({
         data: {
           adminId: session.user.id,

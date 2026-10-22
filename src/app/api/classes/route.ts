@@ -26,7 +26,7 @@ async function loadRankContext(learnerId: string, learnerGrade?: GradeLevel | nu
       select: { class: { select: { subject: true, topics: { select: { topic: true } } } } },
     }),
     prisma.topicRequest.findMany({
-      where: { learnerId, status: "OPEN" },
+      where: { learnerId, status: "OPEN", expiresAt: { gt: new Date() } },
       select: { subject: true, topics: { select: { topic: true } } },
     }),
   ]);
