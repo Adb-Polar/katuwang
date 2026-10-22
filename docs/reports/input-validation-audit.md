@@ -742,9 +742,9 @@ The following 14 schema modules in `src/lib/validations/` have no dedicated unit
 
 ## 11. Final Read-Only Verification
 
-- **Report Creation Status:** `AUDIT_INPUT_VALIDATION_REPORT.md` created successfully at repository root.
+- **Report Creation Status:** `docs/reports/input-validation-audit.md` created successfully at repository root.
 - **Repository Integrity:** No existing project files, configurations, database schemas, migrations, or tests were edited, overwritten, renamed, or deleted.
 - **Workspace State Verification:**
   - *Pre-Audit Working Tree State:* Confirmed existence of pre-existing modified/untracked files from earlier work (recorded via `git status --short`).
-  - *Post-Audit Working Tree State:* Only `AUDIT_INPUT_VALIDATION_REPORT.md` was added as an untracked file; all pre-existing files remain in their exact pre-audit state.
+  - *Post-Audit Working Tree State:* Only `docs/reports/input-validation-audit.md` was added as an untracked file; all pre-existing files remain in their exact pre-audit state.
 - **Skipped Execution Checks:** Live database mutation tests and test runs that generate cache directories (e.g. `node_modules/.vitest`) were intentionally skipped to ensure complete environment immutability.

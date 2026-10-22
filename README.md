@@ -13,6 +13,8 @@ Technology).
 For domain/business context — what the platform is, the three user roles,
 the privacy mandate, and the six core modules — start at
 [`docs/reference/project-overview.md`](docs/reference/project-overview.md).
+Browse plans, reports, and testing checklists in the
+[documentation index](docs/README.md).
 Engineering conventions, stack details, and project structure live in
 [`CLAUDE.md`](CLAUDE.md).
 
