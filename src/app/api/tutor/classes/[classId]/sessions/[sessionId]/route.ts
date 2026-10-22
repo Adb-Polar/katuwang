@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateSessionSchema } from "@/lib/validations/class";
 import { hasSessionOverlap } from "@/lib/classSessions";
@@ -13,7 +12,7 @@ export async function PATCH(
   { params }: { params: Promise<{ classId: string; sessionId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -149,7 +148,7 @@ export async function DELETE(
   { params }: { params: Promise<{ classId: string; sessionId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {

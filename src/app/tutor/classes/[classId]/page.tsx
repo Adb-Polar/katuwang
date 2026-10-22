@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
@@ -22,7 +21,8 @@ export default async function TutorClassDetailPage({
   params: Promise<{ classId: string }>;
 }) {
   const { classId } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId: session!.user.id },

@@ -1,9 +1,8 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma, TopicRequestStatus } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseSort } from "@/lib/sortParams";
 
@@ -18,7 +17,7 @@ const TR_SORT_COLUMN: Record<string, "createdAt" | "subject" | "status"> = {
 // ─── GET: List/search all topic requests platform-wide ──────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { reinstateExpiredClasses } from "@/lib/moderation";
@@ -16,7 +15,7 @@ const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
 // names are withheld unless the `showTutorRealNames` platform setting is on.
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }

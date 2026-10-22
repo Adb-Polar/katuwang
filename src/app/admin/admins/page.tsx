@@ -1,7 +1,6 @@
 import { Metadata } from "next";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import { isSuperAdminRole } from "@/lib/permissions";
 import PageHeader from "@/components/ui/PageHeader";
 import AdminManagementTable from "@/components/admin/AdminManagementTable";
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminAdminsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
 
   if (!session || !isSuperAdminRole(session.user.role)) {
     notFound();

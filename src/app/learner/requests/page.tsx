@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import TopicRequestManager from "@/components/learner/TopicRequestManager";
@@ -9,7 +9,8 @@ export const metadata = {
 };
 
 export default async function LearnerRequestsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const me = await prisma.user.findUnique({
     where: { id: session!.user.id },
     select: { gradeLevel: true },

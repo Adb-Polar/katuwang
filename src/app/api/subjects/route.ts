@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { getSubjects } from "@/lib/subjects";
 
 // ─── GET: active subjects + topics, for populating dropdowns ───────────────
 // Any authenticated role. Cached via src/lib/subjects.ts.
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }

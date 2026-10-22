@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { Prisma, Role, AccountStatus, GradeLevel } from "@prisma/client";
 import { parseSort } from "@/lib/sortParams";
@@ -24,7 +23,7 @@ const USER_SORT_COLUMN: Record<
 // ─── GET: List Learner + Tutor Accounts for Moderation ────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

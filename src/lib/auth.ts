@@ -14,8 +14,8 @@ const DUMMY_PASSWORD_HASH = "$2b$12$IoGXJ6Gc974qVtoXzHgX0ON1saFbEG.vkr3Fz2b44U45
 const INVALID_CREDENTIALS = "Invalid email or password.";
 
 // How long a decoded JWT's cached role/status is trusted before the `jwt`
-// callback re-reads them from the DB (so an admin suspend/ban takes effect
-// mid-session instead of only at the 8h expiry).
+// callback re-reads them from the DB for client/proxy display. Protected server
+// operations independently check the live account on every request.
 const TOKEN_STALE_MS = 5 * 60 * 1000;
 
 export const authOptions: NextAuthOptions = {
@@ -134,9 +134,10 @@ export const authOptions: NextAuthOptions = {
           select: { role: true, status: true, image: true, gradeLevel: true },
         });
         token.checkedAt = Date.now();
-        token.status = fresh ? fresh.status : "BANNED";
+        // Never adopt a changed role into an existing login. The live server
+        // boundary rejects mismatches immediately; the proxy catches up here.
+        token.status = fresh && fresh.role === token.role ? fresh.status : "BANNED";
         if (fresh) {
-          token.role = fresh.role;
           token.image = fresh.image ?? null;
           token.gradeLevel = fresh.gradeLevel ?? null;
         }

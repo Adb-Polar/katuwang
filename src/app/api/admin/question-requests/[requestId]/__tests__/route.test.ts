@@ -9,7 +9,7 @@ const { getServerSessionMock, findUniqueMock, updateMock, auditLogCreate, notifi
   notificationCreate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     questionRequest: { findUnique: findUniqueMock, update: updateMock },

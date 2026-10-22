@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { browseClassesWhere } from "@/lib/classQueries";
 import { getEligibleTutorGradesForStudent } from "@/lib/gradeLevels";
@@ -68,7 +67,7 @@ export interface SearchGroup {
 // get their own classes + topics; admins get all classes + accounts + topics.
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }

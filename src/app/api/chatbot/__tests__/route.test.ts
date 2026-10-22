@@ -10,7 +10,7 @@ const { getServerSessionMock, getSettingMock, userFindUniqueMock, chatbotMissCre
     classFindManyMock: vi.fn(),
   }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {

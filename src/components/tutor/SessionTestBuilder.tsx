@@ -558,6 +558,10 @@ function AddFromBankModal({
     <div className="modal modal-open">
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
+        <p className="text-xs text-base-content/60">
+          Bank questions are available for topics you are already certified in.
+          You can also write your own questions for this session.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <select value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs text-xs sm:col-span-1 truncate">
             <option value="">All topics</option>

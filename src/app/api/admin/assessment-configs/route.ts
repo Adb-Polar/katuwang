@@ -1,7 +1,6 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateGlobalAssessmentConfigSchema } from "@/lib/validations/assessment";
 import { getAssessmentConfig, ASSESSMENT_SETTING_KEYS } from "@/lib/settings";
@@ -10,7 +9,7 @@ import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 // ─── GET: The global assessment config ─────────────────────────────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
@@ -25,7 +24,7 @@ export async function GET() {
 // One platform-wide value per field, stored as PlatformSetting rows.
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }

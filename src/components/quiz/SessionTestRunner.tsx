@@ -219,8 +219,9 @@ export default function SessionTestRunner({
                   <div className="space-y-1.5 pl-6">
                     {item.options.map((o) => {
                       const isChosen = chosen === o.id;
+                      const optionIsCorrect = o.isCorrect ?? (isChosen ? item.isCorrect : undefined);
                       const cls = submitted
-                        ? o.isCorrect
+                        ? optionIsCorrect
                           ? "border-success/40 bg-success/5"
                           : isChosen
                           ? "border-error/40 bg-error/5"
@@ -244,8 +245,8 @@ export default function SessionTestRunner({
                             onChange={() => setAnswers((prev) => ({ ...prev, [item.questionId]: o.id }))}
                           />
                           <span className="text-base-content/80">{o.text}</span>
-                          {submitted && o.isCorrect && <span className="text-2xs text-success ml-auto">correct</span>}
-                          {submitted && isChosen && !o.isCorrect && (
+                          {submitted && optionIsCorrect === true && <span className="text-2xs text-success ml-auto">correct</span>}
+                          {submitted && isChosen && optionIsCorrect === false && (
                             <span className="text-2xs text-error ml-auto">your answer</span>
                           )}
                         </label>

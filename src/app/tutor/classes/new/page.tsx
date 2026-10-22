@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import PageHeader from "@/components/ui/PageHeader";
@@ -10,7 +10,8 @@ export const metadata = {
 };
 
 export default async function NewClassPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const requireCertification = await getSetting("requireCertificationForClassCreation");
 
   let allowedTopics: string[] | undefined;

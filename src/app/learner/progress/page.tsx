@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import MyProgressView from "@/components/learner/MyProgressView";
 
@@ -8,7 +8,8 @@ export const metadata = {
 };
 
 export default async function LearnerProgressPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const enrollments = await prisma.classEnrollment.findMany({
     where: { learnerId: session!.user.id },

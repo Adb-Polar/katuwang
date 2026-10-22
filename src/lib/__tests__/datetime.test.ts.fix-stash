@@ -1,0 +1,98 @@
+import { describe, it, expect } from "vitest";
+import {
+  daysBetween,
+  addDays,
+  formatDate,
+  formatDayMonth,
+  formatDateTime,
+  formatTime,
+  formatWeekday,
+  parseLocalDateAndTime,
+  combineDateAndTime,
+  MINUTE_MS,
+  HOUR_MS,
+  DAY_MS,
+} from "../datetime";
+
+describe("datetime utilities", () => {
+  it("defines duration constants accurately", () => {
+    expect(MINUTE_MS).toBe(60_000);
+    expect(HOUR_MS).toBe(3_600_000);
+    expect(DAY_MS).toBe(86_400_000);
+  });
+
+  it("calculates daysBetween and addDays correctly", () => {
+    const d1 = new Date("2026-10-01T00:00:00Z");
+    const d2 = new Date("2026-10-06T00:00:00Z");
+    expect(daysBetween(d1, d2)).toBe(5);
+    expect(daysBetween(d2, d1)).toBe(-5);
+
+    const added = addDays(d1, 3);
+    expect(added.toISOString()).toBe("2026-10-04T00:00:00.000Z");
+  });
+
+  describe("formatting helpers", () => {
+    const testDate = new Date(2026, 9, 25, 14, 30); // Oct 25, 2026 2:30 PM local
+
+    it("formats dates and weekdays predictably", () => {
+      expect(formatDate(testDate)).toContain("2026");
+      expect(formatDayMonth(testDate)).toMatch(/Oct|10/);
+      expect(formatDateTime(testDate)).toContain("2026");
+      expect(formatTime(testDate)).toMatch(/30/);
+      expect(typeof formatWeekday(testDate)).toBe("string");
+    });
+  });
+
+  describe("parseLocalDateAndTime", () => {
+    it("returns empty strings for null, undefined, or empty string", () => {
+      expect(parseLocalDateAndTime(null)).toEqual({ date: "", time: "" });
+      expect(parseLocalDateAndTime(undefined)).toEqual({ date: "", time: "" });
+      expect(parseLocalDateAndTime("")).toEqual({ date: "", time: "" });
+    });
+
+    it("parses local YYYY-MM-DDTHH:mm strings without timezone conversion", () => {
+      expect(parseLocalDateAndTime("2026-10-25T14:30")).toEqual({
+        date: "2026-10-25",
+        time: "14:30",
+      });
+      expect(parseLocalDateAndTime("2026-01-05T08:05")).toEqual({
+        date: "2026-01-05",
+        time: "08:05",
+      });
+    });
+
+    it("parses Date objects into local date and time parts", () => {
+      const d = new Date(2026, 9, 25, 14, 30); // local Date
+      const res = parseLocalDateAndTime(d);
+      expect(res.date).toBe("2026-10-25");
+      expect(res.time).toBe("14:30");
+    });
+
+    it("returns empty strings for invalid date strings", () => {
+      expect(parseLocalDateAndTime("not-a-date")).toEqual({ date: "", time: "" });
+    });
+  });
+
+  describe("combineDateAndTime", () => {
+    it("returns null if date or time is missing", () => {
+      expect(combineDateAndTime("", "14:30")).toBeNull();
+      expect(combineDateAndTime("2026-10-25", "")).toBeNull();
+      expect(combineDateAndTime(null, "14:30")).toBeNull();
+      expect(combineDateAndTime("2026-10-25", null)).toBeNull();
+    });
+
+    it("returns null for invalid date/time strings", () => {
+      expect(combineDateAndTime("invalid-date", "99:99")).toBeNull();
+    });
+
+    it("combines valid date and time into an ISO UTC string", () => {
+      const iso = combineDateAndTime("2026-10-25", "14:30");
+      expect(iso).not.toBeNull();
+      expect(iso).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+
+      // And parsing back yields the original local date and time
+      const parsed = parseLocalDateAndTime(iso);
+      expect(parsed).toEqual({ date: "2026-10-25", time: "14:30" });
+    });
+  });
+});

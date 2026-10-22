@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Users, EyeOff } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
@@ -29,7 +28,8 @@ export default async function LearnerClassDetailPage({
   const { from } = await searchParams;
   // Return the in-page "Back" link to whichever list the learner came from.
   const backHref = from === "my-classes" ? "/learner/my-classes" : "/learner/classes";
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   await reinstateExpiredClasses();
 

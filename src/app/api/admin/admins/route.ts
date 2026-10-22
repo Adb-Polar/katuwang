@@ -25,13 +25,12 @@ const ADMIN_SORT_COLUMN: Record<
 };
 
 // ─── GET: List all Administrative Accounts (Super Admin only) ────────────────
-export async function GET(req?: NextRequest) {
+export async function GET(req: NextRequest) {
   const auth = await requireSuperAdminSession();
   if (!auth.authorized) return auth.response;
 
   try {
-    const url = req?.url ? new URL(req.url) : null;
-    const searchParams = url ? url.searchParams : new URLSearchParams();
+    const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
     const roleParam = searchParams.get("role");
     const statusParam = searchParams.get("status");

@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { notFound, redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Calendar } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
 import UserAvatar from "@/components/profile/UserAvatar";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -21,7 +20,8 @@ export default async function TutorStudentProfilePage({
   params: Promise<{ studentId: string }>;
 }) {
   const { studentId } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId: session!.user.id },

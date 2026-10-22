@@ -1,4 +1,5 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -10,7 +11,6 @@ import {
   Users,
   Inbox,
 } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { addDays, formatDateTime, formatTime, formatWeekday } from "@/lib/datetime";
@@ -25,7 +25,8 @@ export const metadata = {
 };
 
 export default async function TutorDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },

@@ -1,8 +1,7 @@
-import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { notFound, redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import BackLink from "@/components/ui/BackLink";
 import TopicChip from "@/components/ui/TopicChip";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { addDays } from "@/lib/datetime";
@@ -32,7 +31,8 @@ export default async function LearnerTutorProfilePage({
   await reinstateExpiredClasses();
 
   const showRealNames = await getSetting("showTutorRealNames");
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const meId = session?.user.id ?? null;
   const me = meId
     ? await prisma.user.findUnique({ where: { id: meId }, select: { gradeLevel: true } })

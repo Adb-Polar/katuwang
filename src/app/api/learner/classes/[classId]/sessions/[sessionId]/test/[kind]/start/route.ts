@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { isAccessError, loadEnrolledSession } from "@/lib/sessionTestAccess";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
@@ -30,7 +29,7 @@ function newStartBlockReason(kind: SessionTestKind, sessionStatus: SessionStatus
 // ─── POST: Start (or Resume) a PRE/POST Session Test ───────────────────────
 export async function POST(_req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId, kind } = await params;
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {

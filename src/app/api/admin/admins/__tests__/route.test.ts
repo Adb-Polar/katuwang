@@ -23,8 +23,7 @@ const {
   generateAnonymousIdMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -75,7 +74,7 @@ describe("GET /api/admin/admins", () => {
 
   it("returns 401 when unauthenticated", async () => {
     getServerSessionMock.mockResolvedValue(null);
-    const res = await GET();
+    const res = await GET(new NextRequest("http://localhost/api/admin/admins"));
     expect(res.status).toBe(401);
   });
 
@@ -83,7 +82,7 @@ describe("GET /api/admin/admins", () => {
     getServerSessionMock.mockResolvedValue({
       user: { id: "admin-1", role: "ADMIN" },
     });
-    const res = await GET();
+    const res = await GET(new NextRequest("http://localhost/api/admin/admins"));
     expect(res.status).toBe(403);
   });
 
@@ -91,7 +90,7 @@ describe("GET /api/admin/admins", () => {
     getServerSessionMock.mockResolvedValue({
       user: { id: "tutor-1", role: "STUDENT_TUTOR" },
     });
-    const res = await GET();
+    const res = await GET(new NextRequest("http://localhost/api/admin/admins"));
     expect(res.status).toBe(403);
   });
 
@@ -121,7 +120,7 @@ describe("GET /api/admin/admins", () => {
     ];
     userFindManyMock.mockResolvedValue(mockAdmins);
 
-    const res = await GET();
+    const res = await GET(new NextRequest("http://localhost/api/admin/admins"));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.admins).toHaveLength(2);
@@ -250,4 +249,16 @@ describe("POST /api/admin/admins", () => {
       })
     );
   });
+});
+
+it("preserves admin-list filtering, sorting and pagination with the required request parameter", async () => {
+  getServerSessionMock.mockResolvedValue({ user: { id: "super-1", role: "SUPER_ADMIN" } });
+  userFindManyMock.mockResolvedValue([]);
+  userCountMock.mockResolvedValue(0);
+  const response = await GET(new NextRequest("http://localhost/api/admin/admins?q=Jane&role=ADMIN&status=ACTIVE&page=2&pageSize=5&sort=name&dir=asc"));
+  expect(response.status).toBe(200);
+  expect(userFindManyMock).toHaveBeenCalledWith(expect.objectContaining({
+    where: expect.objectContaining({ role: "ADMIN", status: "ACTIVE", OR: expect.arrayContaining([{ firstName: { contains: "Jane" } }]) }),
+    orderBy: { lastName: "asc" }, skip: 5, take: 5,
+  }));
 });

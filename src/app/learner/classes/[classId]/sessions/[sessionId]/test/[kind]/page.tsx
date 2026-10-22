@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { isAccessError, loadEnrolledSession } from "@/lib/sessionTestAccess";
 import SessionTestRunner from "@/components/quiz/SessionTestRunner";
@@ -14,7 +13,8 @@ export default async function LearnerSessionTestPage({
 }: {
   params: Promise<{ classId: string; sessionId: string; kind: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const { classId, sessionId, kind: kindParam } = await params;
   const kind = kindParam.toUpperCase();
 

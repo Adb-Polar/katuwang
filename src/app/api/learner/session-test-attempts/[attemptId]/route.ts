@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 
@@ -10,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ attemptId: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { attemptId } = await params;
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
@@ -31,7 +30,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED" }),
+      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED", revealBankAnswers: false }),
     );
   } catch (error) {
     console.error("Error fetching session-test attempt:", error);

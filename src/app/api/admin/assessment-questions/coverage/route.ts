@@ -1,8 +1,7 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 import { getAssessmentConfig } from "@/lib/settings";
@@ -14,7 +13,7 @@ const keyOf = (subject: string, topic: string) => `${subject}::${topic}`;
 // readiness flag, and how many question requests are open for it.
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

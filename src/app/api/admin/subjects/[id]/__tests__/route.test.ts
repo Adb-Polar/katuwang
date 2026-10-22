@@ -11,7 +11,7 @@ const h = vi.hoisted(() => ({
   countMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: h.getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: h.getServerSessionMock }));
 vi.mock("@/lib/subjects", () => ({ invalidateSubjectCache: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {

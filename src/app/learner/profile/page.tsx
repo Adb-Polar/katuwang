@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import ProfileView from "@/components/profile/ProfileView";
 
@@ -8,7 +8,8 @@ export const metadata = {
 };
 
 export default async function LearnerProfilePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },

@@ -1,3 +1,4 @@
+import { certifiedBankTopics } from "@/lib/teachingBankAccess";
 import { prisma } from "@/lib/prisma";
 
 export type AccessError = { error: string; status: number };
@@ -63,6 +64,18 @@ export async function loadOwnedSession(userId: string, classId: string, sessionI
     where: { sessionId },
     include: TEST_INCLUDE,
   });
+
+  // Also protect legacy linked questions, result drill-downs and server pages:
+  // restricting only the browse/PUT APIs would leave an alternate answer leak.
+  const bankQuestions = test?.questions.filter(({ question }) => question.origin === "BANK") ?? [];
+  if (bankQuestions.length > 0) {
+    const certified = await certifiedBankTopics(userId);
+    if (bankQuestions.some(({ question }) => !certified.some(
+      (topic) => topic.subject === question.subject && topic.topic === question.topic,
+    ))) {
+      return { error: "Certification is required to access bank questions for these topics.", status: 403 } as AccessError;
+    }
+  }
 
   return { ...owned, session, test };
 }

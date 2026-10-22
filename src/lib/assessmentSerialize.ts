@@ -37,11 +37,12 @@ export interface SerializedAttempt {
 /**
  * Shapes an attempt for a detail view. When `reveal` is false (a tutor viewing
  * an in-progress attempt), correct-answer flags, explanations, per-item grades
- * and the running score are stripped.
+ * and the running score are stripped. `revealAnswers: false` keeps submitted
+ * score/selected-answer feedback but withholds the full key and explanation.
  */
 export function serializeAttempt(
   attempt: AttemptWithItems,
-  { reveal }: { reveal: boolean }
+  { reveal, revealAnswers = reveal }: { reveal: boolean; revealAnswers?: boolean }
 ): SerializedAttempt {
   const items = [...attempt.items]
     .sort((a, b) => a.position - b.position)
@@ -51,7 +52,7 @@ export function serializeAttempt(
         .map((o) => ({
           id: o.id,
           text: o.text,
-          ...(reveal ? { isCorrect: o.isCorrect } : {}),
+          ...(revealAnswers ? { isCorrect: o.isCorrect } : {}),
         }));
 
       return {
@@ -61,7 +62,7 @@ export function serializeAttempt(
         options,
         selectedOptionId: item.selectedOptionId,
         ...(reveal
-          ? { isCorrect: item.isCorrect, explanation: item.question.explanation }
+          ? { isCorrect: item.isCorrect, ...(revealAnswers ? { explanation: item.question.explanation } : {}) }
           : {}),
       };
     });

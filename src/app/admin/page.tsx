@@ -1,7 +1,7 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import { ArrowRight, ScrollText, Users, GraduationCap, ShieldAlert, CalendarClock } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -14,7 +14,8 @@ export const metadata : Metadata = {
 };
 
 export default async function AdminDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const [
     learnerCount,

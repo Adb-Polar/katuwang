@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateTutorQuestionSchema } from "@/lib/validations/sessionTest";
 
@@ -34,7 +33,7 @@ function isLocked(q: NonNullable<Awaited<ReturnType<typeof loadOwnQuestion>>>) {
 // ─── PATCH: Edit an Own Custom Question ──────────────────────────────────
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { questionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -89,7 +88,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 // ─── DELETE: Remove an Own Custom Question ───────────────────────────────
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { questionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {

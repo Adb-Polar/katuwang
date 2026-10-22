@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
@@ -17,7 +16,8 @@ export default async function AcceptTopicRequestPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   if (!(await getSetting("matchingEnabled"))) notFound();
 

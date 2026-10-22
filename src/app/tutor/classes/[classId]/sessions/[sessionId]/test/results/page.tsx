@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import { isAccessError, loadOwnedSession } from "@/lib/sessionTestAccess";
 import SessionTestResults from "@/components/tutor/SessionTestResults";
 
@@ -13,7 +12,8 @@ export default async function TutorSessionTestResultsPage({
 }: {
   params: Promise<{ classId: string; sessionId: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const { classId, sessionId } = await params;
 
   const owned = await loadOwnedSession(session!.user.id, classId, sessionId);

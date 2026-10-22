@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { ClassStatus } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -15,7 +14,7 @@ import { generateClassCode } from "@/lib/idGenerator";
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -72,7 +71,7 @@ export async function GET(req: NextRequest) {
 // ─── POST: Create a New Class (with its initial sessions) ─────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

@@ -365,7 +365,7 @@ Start (or resume) an assessment attempt for a subject + topic pair. Does **not**
 **500** → `{ error }`.
 
 ### `GET /api/tutor/assessments/[attemptId]`
-Fetch one of the tutor's own attempts. Answers/correctness are hidden while `IN_PROGRESS`; a submitted attempt reveals everything (correct answers, explanations).
+Fetch one of the tutor's own attempts. Answers/correctness are hidden while `IN_PROGRESS`; a submitted attempt reveals the score and correctness of the tutor's submitted choices, while full answer keys and explanations remain withheld. Full keys are available to authorized administrators.
 
 **200** → the attempt with its questions/options.
 **401** → not a tutor. **404** → attempt not found or not owned by the caller.
@@ -523,3 +523,20 @@ via `loadOwnedSession`/`loadOwnedClass` in `src/lib/sessionTestAccess.ts`).
 
 - In-portal Help Center: **Jump to** quick links, **step-by-step guides** (get certified for a topic, create a class, fulfil a topic request, manage the roster, appeal a moderated class), and a **searchable FAQ** accordion covering certification, classes/sessions, requests, privacy, moderation, and account topics.
 - Content is static (`src/lib/help/helpContent.ts`, `TUTOR` entry) rendered by the shared `HelpCenter` component; no API. Also reachable from the topbar `?` button.
+
+
+### Qualification-bank access policy (2026-10-22)
+
+The shared bank used by certification quizzes is available for session-test
+authoring only after the tutor is CERTIFIED in the exact subject/topic. Both
+question browsing and attaching question IDs enforce this restriction. Legacy
+linked bank questions, test previews and result drill-downs also require current
+certification. Tutors can create and use their own custom questions without this
+bank permission. If certification is revoked, bank access is revoked on the next
+request; existing test/attempt records remain stored.
+
+Learner reviews withhold correct-option keys and explanations for shared BANK
+questions, while retaining their own score and selected-answer feedback.
+Certification attempt reviews likewise withhold full keys. Administrator review
+retains full access. This prevents the alternative browse/review endpoints from
+acting as unrestricted qualification answer-key downloads.

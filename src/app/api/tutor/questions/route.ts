@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { authorTutorQuestionSchema } from "@/lib/validations/sessionTest";
 import { isAccessError, loadOwnedClass } from "@/lib/sessionTestAccess";
@@ -8,7 +7,7 @@ import { isAccessError, loadOwnedClass } from "@/lib/sessionTestAccess";
 // ─── GET: The Tutor's Own Custom Questions ────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -45,7 +44,7 @@ export async function GET(req: NextRequest) {
 // ─── POST: Author a Custom Question for a Session Test ────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

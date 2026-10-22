@@ -1,0 +1,22 @@
+
+> katuwang@0.1.0 lint /home/hikaru/Capstone/katuwang
+> eslint
+
+
+/home/hikaru/Capstone/katuwang/design/round-2/theme-toggle.js
+  16:53  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+  40:57  warning  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/home/hikaru/Capstone/katuwang/prisma/questionBankData.ts
+   16:11  warning  'TopicProfile' is defined but never used        @typescript-eslint/no-unused-vars
+   93:3   warning  'competencyHint' is defined but never used      @typescript-eslint/no-unused-vars
+  111:9   warning  'isScience' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  112:9   warning  'isTech' is assigned a value but never used     @typescript-eslint/no-unused-vars
+
+/home/hikaru/Capstone/katuwang/prisma/seedQuestionBank.ts
+  106:7  warning  'topicCounter' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/home/hikaru/Capstone/katuwang/src/lib/validations/__tests__/auth.test.ts
+  83:13  warning  'consentGiven' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 8 problems (0 errors, 8 warnings)

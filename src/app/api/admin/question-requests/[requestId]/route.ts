@@ -1,7 +1,6 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { resolveQuestionRequestSchema } from "@/lib/validations/assessment";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -13,7 +12,7 @@ export async function PATCH(
   { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { requestId } = await params;
 
     if (!session || !isAdminRole(session.user.role)) {

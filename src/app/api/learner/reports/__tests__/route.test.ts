@@ -25,7 +25,7 @@ const {
   notifyManyMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/notifications", () => ({ notifyMany: notifyManyMock }));
 vi.mock("@/lib/prisma", () => {
   const tx = {

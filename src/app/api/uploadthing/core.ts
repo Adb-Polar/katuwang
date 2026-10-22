@@ -1,7 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { optimizeImageBuffer } from "@/lib/images/serverImageOptimizer";
 import { generateSafeAvatarFilename } from "@/lib/images/imageSafety";
@@ -15,7 +14,7 @@ export const ourFileRouter = {
     image: { maxFileSize: "2MB", maxFileCount: 1 },
   })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
+      const session = await getActiveServerSession();
       if (!session) throw new UploadThingError("Unauthorized.");
 
       const user = await prisma.user.findUnique({
@@ -27,9 +26,18 @@ export const ourFileRouter = {
         throw new UploadThingError("Profile picture editing has been locked by an administrator.");
       }
 
-      return { userId: session.user.id, oldKey: user?.imageKey };
+      return { userId: session.user.id, role: session.user.role, oldKey: user?.imageKey };
     })
     .onUploadComplete(async ({ metadata, file }) => {
+      // The provider callback can arrive after moderation or a role change.
+      const account = await prisma.user.findUnique({
+        where: { id: metadata.userId },
+        select: { status: true, role: true, profilePictureLocked: true },
+      });
+      if (!account || account.status !== "ACTIVE" || account.role !== metadata.role || account.profilePictureLocked) {
+        await utapi.deleteFiles(file.key);
+        throw new UploadThingError("Profile picture update is no longer authorized.");
+      }
       // Clean up previous image in cloud storage if replacing
       if (metadata.oldKey) {
         try {

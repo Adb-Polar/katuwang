@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
 import { LayoutDashboard, CalendarClock, Users, Inbox, BadgeCheck, Bell, UserCircle, HelpCircle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -11,7 +10,7 @@ export default async function TutorLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
 
   if (!session) {
     redirect("/login");

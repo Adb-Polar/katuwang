@@ -1,0 +1,197 @@
+
+> katuwang@0.1.0 build /home/hikaru/Capstone/katuwang
+> next build
+
+▲ Next.js 16.2.12 (Turbopack)
+- Environments: .env
+
+  Creating an optimized production build ...
+/*! 🌼 daisyUI 5.6.13 */
+✓ Compiled successfully in 38.3s
+  Running TypeScript ...
+  Finished TypeScript in 32.8s ...
+  Collecting page data using 3 workers ...
+  Generating static pages using 3 workers (0/117) ...
+  Generating static pages using 3 workers (29/117)
+  Generating static pages using 3 workers (58/117)
+  Generating static pages using 3 workers (87/117)
+✓ Generating static pages using 3 workers (117/117) in 1084ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /account-declined
+├ ƒ /account-unverified
+├ ƒ /admin
+├ ƒ /admin/abuse-reports
+├ ƒ /admin/admins
+├ ƒ /admin/assessment/certifications
+├ ƒ /admin/assessment/question-bank
+├ ƒ /admin/assessment/requests
+├ ƒ /admin/assessment/results
+├ ƒ /admin/audit-log
+├ ƒ /admin/certifications
+├ ƒ /admin/chatbot
+├ ƒ /admin/class-appeals
+├ ƒ /admin/classes
+├ ƒ /admin/classes/[id]
+├ ƒ /admin/help
+├ ƒ /admin/notifications
+├ ƒ /admin/question-bank
+├ ƒ /admin/registrations
+├ ƒ /admin/reports
+├ ƒ /admin/session-tests
+├ ƒ /admin/settings
+├ ƒ /admin/subjects
+├ ƒ /admin/topic-requests
+├ ƒ /admin/topic-requests/[id]
+├ ƒ /admin/users
+├ ƒ /admin/users/[id]
+├ ƒ /api/admin/abuse-reports
+├ ƒ /api/admin/abuse-reports/[reportId]
+├ ƒ /api/admin/admins
+├ ƒ /api/admin/admins/[adminId]
+├ ƒ /api/admin/assessment-attempts
+├ ƒ /api/admin/assessment-attempts/[attemptId]
+├ ƒ /api/admin/assessment-configs
+├ ƒ /api/admin/assessment-questions
+├ ƒ /api/admin/assessment-questions/[questionId]
+├ ƒ /api/admin/assessment-questions/coverage
+├ ƒ /api/admin/audit-log
+├ ƒ /api/admin/certifications
+├ ƒ /api/admin/certifications/[certificationId]
+├ ƒ /api/admin/chatbot-misses
+├ ƒ /api/admin/class-appeals
+├ ƒ /api/admin/class-appeals/[appealId]
+├ ƒ /api/admin/classes
+├ ƒ /api/admin/classes/[classId]
+├ ƒ /api/admin/classes/[classId]/recommendations
+├ ƒ /api/admin/profile/password
+├ ƒ /api/admin/question-requests
+├ ƒ /api/admin/question-requests/[requestId]
+├ ƒ /api/admin/registrations
+├ ƒ /api/admin/registrations/[userId]
+├ ƒ /api/admin/reports
+├ ƒ /api/admin/session-tests
+├ ƒ /api/admin/session-tests/[testId]/attempts/[attemptId]
+├ ƒ /api/admin/session-tests/[testId]/results
+├ ƒ /api/admin/settings
+├ ƒ /api/admin/subjects
+├ ƒ /api/admin/subjects/[id]
+├ ƒ /api/admin/subjects/[id]/topics
+├ ƒ /api/admin/topic-requests
+├ ƒ /api/admin/topic-requests/[id]
+├ ƒ /api/admin/topics/[id]
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[userId]
+├ ƒ /api/admin/users/[userId]/avatar-action
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/resend-verification
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/verify-email
+├ ƒ /api/chatbot
+├ ƒ /api/classes
+├ ƒ /api/classes/[classId]/enroll
+├ ƒ /api/dev
+├ ƒ /api/health
+├ ƒ /api/learner/classes/[classId]/session-tests
+├ ƒ /api/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/start
+├ ƒ /api/learner/match
+├ ƒ /api/learner/profile
+├ ƒ /api/learner/profile/password
+├ ƒ /api/learner/progress
+├ ƒ /api/learner/reports
+├ ƒ /api/learner/session-test-attempts/[attemptId]
+├ ƒ /api/learner/session-test-attempts/[attemptId]/submit
+├ ƒ /api/learner/topic-requests
+├ ƒ /api/learner/topic-requests/[id]
+├ ƒ /api/learner/tutors
+├ ƒ /api/notifications
+├ ƒ /api/notifications/read
+├ ƒ /api/register
+├ ƒ /api/search
+├ ƒ /api/subjects
+├ ƒ /api/tutor/assessments
+├ ƒ /api/tutor/assessments/[attemptId]
+├ ƒ /api/tutor/assessments/[attemptId]/submit
+├ ƒ /api/tutor/classes
+├ ƒ /api/tutor/classes/[classId]
+├ ƒ /api/tutor/classes/[classId]/appeal
+├ ƒ /api/tutor/classes/[classId]/sessions
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]/test
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]/test/attempts/[attemptId]
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]/test/questions
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]/test/results
+├ ƒ /api/tutor/classes/[classId]/sessions/[sessionId]/test/status
+├ ƒ /api/tutor/classes/[classId]/test-results
+├ ƒ /api/tutor/profile
+├ ƒ /api/tutor/profile/password
+├ ƒ /api/tutor/question-bank
+├ ƒ /api/tutor/question-requests
+├ ƒ /api/tutor/questions
+├ ƒ /api/tutor/questions/[questionId]
+├ ƒ /api/tutor/students
+├ ƒ /api/tutor/topic-certifications
+├ ƒ /api/tutor/topic-requests
+├ ƒ /api/tutor/topic-requests/[id]/accept
+├ ƒ /api/uploadthing
+├ ƒ /api/user/profile-picture
+├ ƒ /dashboard
+├ ○ /dev
+├ ○ /dev/charts
+├ ○ /dev/login
+├ ○ /forgot-password
+├ ƒ /learner
+├ ƒ /learner/classes
+├ ƒ /learner/classes/[classId]
+├ ƒ /learner/classes/[classId]/sessions/[sessionId]/test/[kind]
+├ ƒ /learner/help
+├ ƒ /learner/match
+├ ƒ /learner/my-classes
+├ ƒ /learner/notifications
+├ ƒ /learner/profile
+├ ƒ /learner/profile/edit
+├ ƒ /learner/progress
+├ ƒ /learner/reports
+├ ƒ /learner/requests
+├ ƒ /learner/requests/[id]
+├ ƒ /learner/tutors
+├ ƒ /learner/tutors/[tutorId]
+├ ○ /login
+├ ○ /logout
+├ ○ /pending-approval
+├ ○ /privacy-policy
+├ ○ /register
+├ ○ /register/learner
+├ ○ /register/tutor
+├ ○ /reset-password
+├ ƒ /tutor
+├ ƒ /tutor/assessments
+├ ƒ /tutor/assessments/[attemptId]
+├ ƒ /tutor/classes
+├ ƒ /tutor/classes/[classId]
+├ ƒ /tutor/classes/[classId]/edit
+├ ƒ /tutor/classes/[classId]/sessions/[sessionId]/test
+├ ƒ /tutor/classes/[classId]/sessions/[sessionId]/test/results
+├ ƒ /tutor/classes/new
+├ ƒ /tutor/help
+├ ƒ /tutor/notifications
+├ ƒ /tutor/profile
+├ ƒ /tutor/profile/edit
+├ ƒ /tutor/requests
+├ ƒ /tutor/requests/[id]
+├ ƒ /tutor/requests/[id]/accept
+├ ƒ /tutor/students
+├ ƒ /tutor/students/[studentId]
+├ ○ /unauthorized
+├ ○ /verify-email
+└ ƒ /verify-email/check-email
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

@@ -1,0 +1,79 @@
+Route,Source,Imports,Redirects,Direct DB models,Status
+/account-declined,src/app/account-declined/page.tsx,@/components/auth/AuthLayout; @/components/ui/BrandMark,,,NOT RUN
+/account-unverified,src/app/account-unverified/page.tsx,@/components/auth/AuthLayout; @/components/ui/BrandMark; @/components/auth/ResendVerificationButton,,,NOT RUN
+/admin/abuse-reports,src/app/admin/abuse-reports/page.tsx,@/components/ui/PageHeader; @/components/admin/AbuseReportTable,,,NOT RUN
+/admin/admins,src/app/admin/admins/page.tsx,@/lib/auth; @/lib/permissions; @/components/ui/PageHeader; @/components/admin/AdminManagementTable,,,NOT RUN
+/admin/assessment/certifications,src/app/admin/assessment/certifications/page.tsx,@/components/ui/PageHeader; @/components/admin/CertificationReviewTable,,,NOT RUN
+/admin/assessment/question-bank,src/app/admin/assessment/question-bank/page.tsx,@/components/ui/PageHeader; @/components/admin/QuestionBankManager,,,NOT RUN
+/admin/assessment/requests,src/app/admin/assessment/requests/page.tsx,@/components/ui/PageHeader; @/components/admin/QuestionBankManager,,,NOT RUN
+/admin/assessment/results,src/app/admin/assessment/results/page.tsx,@/components/ui/PageHeader; @/components/admin/QuestionBankManager,,,NOT RUN
+/admin/audit-log,src/app/admin/audit-log/page.tsx,@/components/ui/PageHeader; @/components/admin/AuditLogTable,,,NOT RUN
+/admin/certifications,src/app/admin/certifications/page.tsx,,"""/admin/assessment/certifications""",,NOT RUN
+/admin/chatbot,src/app/admin/chatbot/page.tsx,@/components/ui/PageHeader; @/components/admin/ChatbotMissesTable,,,NOT RUN
+/admin/class-appeals,src/app/admin/class-appeals/page.tsx,@/components/ui/PageHeader; @/components/admin/ClassAppealTable,,,NOT RUN
+/admin/classes/[id],src/app/admin/classes/[id]/page.tsx,@/lib/auth; @/lib/prisma; @/components/classes/ClassDetailsView; @/components/classes/SessionsList; @/components/classes/RecommendClassForm; @/components/ui/AnonymousIdBadge; @/lib/datetime; @/lib/gradeLevels; @/lib/permissions,,tutorClass,NOT RUN
+/admin/classes,src/app/admin/classes/page.tsx,@/components/ui/PageHeader; @/components/admin/ClassModerationTable,,,NOT RUN
+/admin/help,src/app/admin/help/page.tsx,@/components/ui/PageHeader; @/components/help/HelpCenter; @/lib/help/helpContent,,,NOT RUN
+/admin/notifications,src/app/admin/notifications/page.tsx,@/components/ui/PageHeader; @/components/notifications/NotificationList,,,NOT RUN
+/admin,src/app/admin/page.tsx,@/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/ui/StatusBadge; @/components/ui/StatCard; @/lib/datetime,,"auditLog, classAppeal, questionRequest, topicCertification, topicRequest, tutorClass, user",NOT RUN
+/admin/question-bank,src/app/admin/question-bank/page.tsx,,"""/admin/assessment/question-bank""",,NOT RUN
+/admin/registrations,src/app/admin/registrations/page.tsx,@/components/ui/PageHeader; @/components/admin/RegistrationApprovalTable,,,NOT RUN
+/admin/reports,src/app/admin/reports/page.tsx,@/components/ui/PageHeader; @/components/admin/ReportsView,,,NOT RUN
+/admin/session-tests,src/app/admin/session-tests/page.tsx,@/components/ui/PageHeader; @/components/admin/SessionTestsTable,,,NOT RUN
+/admin/settings,src/app/admin/settings/page.tsx,@/components/ui/PageHeader; @/components/admin/PlatformSettingsForm; @/components/profile/ChangePasswordForm,,,NOT RUN
+/admin/subjects,src/app/admin/subjects/page.tsx,@/components/ui/PageHeader; @/components/admin/SubjectTopicManager,,,NOT RUN
+/admin/topic-requests/[id],src/app/admin/topic-requests/[id]/page.tsx,@/lib/auth; @/lib/permissions; @/lib/prisma; @/components/TopicRequestDetail,,topicRequest,NOT RUN
+/admin/topic-requests,src/app/admin/topic-requests/page.tsx,@/components/ui/PageHeader; @/components/admin/TopicRequestModerationTable,,,NOT RUN
+/admin/users/[id],src/app/admin/users/[id]/page.tsx,@/components/ui/BackLink; @/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/ui/AnonymousIdBadge; @/components/ui/StatusBadge; @/lib/datetime; @/lib/gradeLevels; @/components/admin/UserAvatarModerationCard; @/lib/permissions,,"auditLog, user",NOT RUN
+/admin/users,src/app/admin/users/page.tsx,@/components/ui/PageHeader; @/components/admin/UserManagementTable,,,NOT RUN
+/dashboard,src/app/dashboard/page.tsx,@/lib/auth,"""/login""; destination ?? ""/login""",,NOT RUN
+/dev/charts,src/app/dev/charts/page.tsx,@/components/dev/DevChartLab,,,NOT RUN
+/dev/login,src/app/dev/login/page.tsx,@/lib/prisma; @/components/dev/DevLoginBoard,,user,NOT RUN
+/dev,src/app/dev/page.tsx,@/components/dev/DevDataFactory,,,NOT RUN
+/forgot-password,src/app/forgot-password/page.tsx,@/components/auth/ForgotPasswordForm; @/components/auth/AuthLayout,,,NOT RUN
+/learner/classes/[classId],src/app/learner/classes/[classId]/page.tsx,@/lib/auth; @/lib/prisma; @/lib/moderation; @/lib/settings; @/lib/gradeLevels; @/components/classes/ClassDetailsView; @/components/classes/SessionsList; @/components/learner/LearnerClassActions; @/components/learner/TutorInfoTrigger; @/components/classes/SessionTestsCard; @/components/learner/MyProgressView,,"tutorClass, user",NOT RUN
+/learner/classes/[classId]/sessions/[sessionId]/test/[kind],src/app/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/page.tsx,@/lib/auth; @/lib/prisma; @/lib/sessionTestAccess; @/components/quiz/SessionTestRunner,,"sessionTest, sessionTestAttempt",NOT RUN
+/learner/classes,src/app/learner/classes/page.tsx,@/components/learner/ClassBrowser; @/components/ui/PageHeader,,,NOT RUN
+/learner/help,src/app/learner/help/page.tsx,@/components/ui/PageHeader; @/components/help/HelpCenter; @/lib/help/helpContent,,,NOT RUN
+/learner/match,src/app/learner/match/page.tsx,@/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/learner/MatchFinder,,user,NOT RUN
+/learner/my-classes,src/app/learner/my-classes/page.tsx,@/components/learner/ClassBrowser; @/components/ui/PageHeader,,,NOT RUN
+/learner/notifications,src/app/learner/notifications/page.tsx,@/components/ui/PageHeader; @/components/notifications/NotificationList,,,NOT RUN
+/learner,src/app/learner/page.tsx,@/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/ui/AnonymousIdBadge; @/components/ui/StatCard; @/components/schedule/WeeklyTimetable; @/lib/datetime,,"classEnrollment, classSession, topicRequest",NOT RUN
+/learner/profile/edit,src/app/learner/profile/edit/page.tsx,@/lib/auth; @/lib/prisma; @/components/profile/ProfileEditView,,user,NOT RUN
+/learner/profile,src/app/learner/profile/page.tsx,@/lib/auth; @/lib/prisma; @/components/profile/ProfileView,,user,NOT RUN
+/learner/progress,src/app/learner/progress/page.tsx,@/lib/auth; @/lib/prisma; @/components/learner/MyProgressView,,classEnrollment,NOT RUN
+/learner/reports,src/app/learner/reports/page.tsx,@/components/ui/PageHeader; @/components/learner/MyReportsList,,,NOT RUN
+/learner/requests/[id],src/app/learner/requests/[id]/page.tsx,@/lib/auth; @/lib/prisma; @/components/TopicRequestDetail,,topicRequest,NOT RUN
+/learner/requests,src/app/learner/requests/page.tsx,@/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/learner/TopicRequestManager,,user,NOT RUN
+/learner/tutors/[tutorId],src/app/learner/tutors/[tutorId]/page.tsx,@/components/ui/BackLink; @/components/ui/TopicChip; @/lib/auth; @/lib/prisma; @/lib/moderation; @/lib/datetime; @/lib/settings; @/lib/gradeLevels; @/components/ui/PageHeader; @/components/ui/AnonymousIdBadge; @/components/schedule/WeeklyTimetable; @/components/learner/RequestTopicButton; @/components/learner/ReportButton; @/components/profile/UserAvatar; @/components/learner/TutorProfileClassTabs,,user,NOT RUN
+/learner/tutors,src/app/learner/tutors/page.tsx,@/components/ui/PageHeader; @/components/learner/TutorBrowser,,,NOT RUN
+/login,src/app/login/page.tsx,@/components/auth/LoginForm; @/components/auth/AuthLayout,,,NOT RUN
+/logout,src/app/logout/page.tsx,@/components/auth/AuthLayout; @/components/auth/LogoutConfirm,,,NOT RUN
+/,src/app/page.tsx,@/lib/auth; @/components/landing/LandingNav; @/components/landing/LandingHero; @/components/landing/StoryTimeline; @/components/landing/PrivacyPayoff; @/components/landing/StoryEnd; @/components/landing/LandingFooter,,,NOT RUN
+/pending-approval,src/app/pending-approval/page.tsx,@/components/auth/AuthLayout; @/components/ui/BrandMark,,,NOT RUN
+/privacy-policy,src/app/privacy-policy/page.tsx,@/components/ui/BrandMark,,,NOT RUN
+/register/learner,src/app/register/learner/page.tsx,@/components/auth/RegisterForm; @/components/auth/AuthLayout,,,NOT RUN
+/register,src/app/register/page.tsx,@/components/auth/AuthLayout; @/components/ui/BrandMark,,,NOT RUN
+/register/tutor,src/app/register/tutor/page.tsx,@/components/auth/RegisterForm; @/components/auth/AuthLayout,,,NOT RUN
+/reset-password,src/app/reset-password/page.tsx,@/components/auth/ResetPasswordForm; @/components/auth/AuthLayout,,,NOT RUN
+/tutor/assessments/[attemptId],src/app/tutor/assessments/[attemptId]/page.tsx,@/lib/auth; @/lib/prisma; @/lib/assessmentSerialize; @/components/tutor/AssessmentQuizRunner,,assessmentAttempt,NOT RUN
+/tutor/assessments,src/app/tutor/assessments/page.tsx,@/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/tutor/TopicCertificationList; @/components/tutor/AssessmentHistory; @/components/tutor/AssessmentsTabs; @/lib/assessmentStatus,,"assessmentAttempt, user",NOT RUN
+/tutor/classes/[classId]/edit,src/app/tutor/classes/[classId]/edit/page.tsx,@/lib/auth; @/lib/prisma; @/components/tutor/EditClassForm,`/tutor/classes/${classId}`,"tutorClass, tutorProfile",NOT RUN
+/tutor/classes/[classId],src/app/tutor/classes/[classId]/page.tsx,@/lib/auth; @/lib/prisma; @/components/classes/ClassDetailsView; @/components/classes/SessionsList; @/components/classes/EnrolledLearnersTable; @/components/tutor/ClassManageMenu; @/components/tutor/ClassAppealCard; @/components/classes/SessionTestsCard; @/components/tutor/ClassProgressPanel,,"tutorClass, tutorProfile",NOT RUN
+/tutor/classes/[classId]/sessions/[sessionId]/test,src/app/tutor/classes/[classId]/sessions/[sessionId]/test/page.tsx,@/lib/auth; @/lib/sessionTestAccess; @/lib/sessionTestSerialize; @/components/tutor/SessionTestBuilder,,,NOT RUN
+/tutor/classes/[classId]/sessions/[sessionId]/test/results,src/app/tutor/classes/[classId]/sessions/[sessionId]/test/results/page.tsx,@/lib/auth; @/lib/sessionTestAccess; @/components/tutor/SessionTestResults,,,NOT RUN
+/tutor/classes/new,src/app/tutor/classes/new/page.tsx,@/lib/auth; @/lib/prisma; @/lib/settings; @/components/ui/PageHeader; @/components/tutor/NewClassForm,,"topicCertification, user",NOT RUN
+/tutor/classes,src/app/tutor/classes/page.tsx,@/components/tutor/ClassManagement; @/components/ui/PageHeader,,,NOT RUN
+/tutor/help,src/app/tutor/help/page.tsx,@/components/ui/PageHeader; @/components/help/HelpCenter; @/lib/help/helpContent,,,NOT RUN
+/tutor/notifications,src/app/tutor/notifications/page.tsx,@/components/ui/PageHeader; @/components/notifications/NotificationList,,,NOT RUN
+/tutor,src/app/tutor/page.tsx,@/lib/auth; @/lib/prisma; @/lib/topicRequestVisibility; @/lib/datetime; @/components/ui/PageHeader; @/components/ui/AnonymousIdBadge; @/components/ui/StatCard; @/components/tutor/AssessmentsSummaryCard; @/components/schedule/WeeklyTimetable,,"classSession, topicRequest, user",NOT RUN
+/tutor/profile/edit,src/app/tutor/profile/edit/page.tsx,@/lib/auth; @/lib/prisma; @/components/profile/ProfileEditView,,user,NOT RUN
+/tutor/profile,src/app/tutor/profile/page.tsx,@/lib/auth; @/lib/prisma; @/components/profile/ProfileView,,user,NOT RUN
+/tutor/requests/[id]/accept,src/app/tutor/requests/[id]/accept/page.tsx,@/lib/auth; @/lib/prisma; @/lib/settings; @/lib/topicRequestVisibility; @/components/ui/PageHeader; @/components/tutor/AcceptRequestForm,,"topicRequest, tutorProfile",NOT RUN
+/tutor/requests/[id],src/app/tutor/requests/[id]/page.tsx,@/lib/auth; @/lib/prisma; @/lib/topicRequestVisibility; @/components/TopicRequestDetail,,"topicCertification, topicRequest, tutorProfile",NOT RUN
+/tutor/requests,src/app/tutor/requests/page.tsx,@/components/ui/PageHeader; @/components/tutor/TopicRequestBrowser,,,NOT RUN
+/tutor/students/[studentId],src/app/tutor/students/[studentId]/page.tsx,@/components/ui/BackLink; @/components/profile/UserAvatar; @/lib/auth; @/lib/prisma; @/components/ui/PageHeader; @/components/ui/AnonymousIdBadge; @/lib/datetime; @/lib/gradeLevels,,"classEnrollment, tutorProfile",NOT RUN
+/tutor/students,src/app/tutor/students/page.tsx,@/components/tutor/StudentRoster; @/components/ui/PageHeader,,,NOT RUN
+/unauthorized,src/app/unauthorized/page.tsx,@/components/auth/AuthLayout,,,NOT RUN
+/verify-email/check-email,src/app/verify-email/check-email/page.tsx,@/components/auth/AuthLayout; @/components/ui/BrandMark; @/components/auth/ResendVerificationButton,,,NOT RUN
+/verify-email,src/app/verify-email/page.tsx,@/components/auth/VerifyEmailForm; @/components/auth/AuthLayout,,,NOT RUN

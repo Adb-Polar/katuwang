@@ -1,7 +1,6 @@
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
@@ -15,7 +14,7 @@ export async function PATCH(
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -231,7 +230,7 @@ export async function DELETE(
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {

@@ -1,0 +1,4 @@
+.next/types/app/api/admin/admins/route.ts(42,7): error TS2344: Type '{ __tag__: "GET"; __param_position__: "first"; __param_type__: NextRequest | undefined; }' does not satisfy the constraint 'ParamCheck<NextRequest | Request>'.
+  Types of property '__param_type__' are incompatible.
+    Type 'NextRequest | undefined' is not assignable to type 'NextRequest | Request'.
+      Type 'undefined' is not assignable to type 'NextRequest | Request'.

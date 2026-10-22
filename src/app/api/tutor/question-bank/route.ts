@@ -1,8 +1,8 @@
+import { certifiedBankTopics, certifiedBankWhere } from "@/lib/teachingBankAccess";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -10,7 +10,7 @@ const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 // ─── GET: Browse the Admin Question Bank (for building a session test) ─────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -26,7 +26,12 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE),
     );
 
+    const certifiedTopics = await certifiedBankTopics(session.user.id);
+    if (certifiedTopics.length === 0) {
+      return NextResponse.json({ questions: [], total: 0, page, pageSize });
+    }
     const where: Prisma.AssessmentQuestionWhereInput = {
+      AND: [certifiedBankWhere(certifiedTopics)],
       origin: "BANK",
       active: true,
       ...(subject ? { subject } : {}),

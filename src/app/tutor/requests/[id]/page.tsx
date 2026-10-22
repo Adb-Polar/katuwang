@@ -1,11 +1,10 @@
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import TopicRequestDetail from "@/components/TopicRequestDetail";
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
   if (!session || session.user.role !== "STUDENT_TUTOR") notFound();
   const { id } = await params;
   const profile = await prisma.tutorProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } });

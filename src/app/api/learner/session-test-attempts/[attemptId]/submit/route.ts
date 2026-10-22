@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
@@ -18,7 +17,7 @@ export async function POST(
   { params }: { params: Promise<{ attemptId: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { attemptId } = await params;
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
@@ -97,7 +96,7 @@ export async function POST(
       return submitted;
     });
 
-    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true }));
+    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true, revealBankAnswers: false }));
   } catch (error) {
     console.error("Error submitting session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

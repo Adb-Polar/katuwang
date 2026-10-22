@@ -1,7 +1,7 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -14,7 +14,8 @@ export const metadata = {
 };
 
 export default async function LearnerDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const learnerId = session!.user.id;
 
   const now = new Date();

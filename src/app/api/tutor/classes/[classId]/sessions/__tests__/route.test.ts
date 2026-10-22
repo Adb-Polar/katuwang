@@ -11,8 +11,7 @@ const { getServerSessionMock, tutorProfileFindUnique, classFindUnique, sessionFi
   })
 );
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({

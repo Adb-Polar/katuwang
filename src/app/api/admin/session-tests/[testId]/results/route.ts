@@ -1,7 +1,6 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { buildSessionTestResults } from "@/lib/sessionTestResults";
 
 // ─── GET: Session Test Results (admin, read-only) ──────────────────────────
@@ -10,7 +9,7 @@ export async function GET(
   { params }: { params: Promise<{ testId: string }> },
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { testId } = await params;
 
     if (!session || !isAdminRole(session.user.role)) {

@@ -1,7 +1,6 @@
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { isStudentEligibleForTutor, isStudentEligibleForClassTarget } from "@/lib/gradeLevels";
@@ -13,7 +12,7 @@ export async function POST(
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId } = await params;
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
@@ -129,7 +128,7 @@ export async function DELETE(
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId } = await params;
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {

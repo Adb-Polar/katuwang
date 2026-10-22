@@ -1,3 +1,7 @@
+vi.mock("@/lib/teachingBankAccess", () => ({
+  certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
+  certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
+}));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const {
@@ -113,5 +117,27 @@ describe("loadEnrolledSession", () => {
   it("succeeds for an enrolled learner in an active class", async () => {
     const r = await loadEnrolledSession("L1", "c1", "s1");
     expect(isAccessError(r)).toBe(false);
+  });
+});
+
+import { certifiedBankTopics } from "@/lib/teachingBankAccess";
+describe("linked qualification-bank confidentiality", () => {
+  const linked = { id: "st1", questions: [{ question: { origin: "BANK", subject: "SCIENCE", topic: "Cells" } }] };
+  it("blocks legacy linked questions outside exact certified subject/topic", async () => {
+    sessionTestFindUnique.mockResolvedValue(linked);
+    const result = await loadOwnedSession("U1", "c1", "s1");
+    expect(isAccessError(result) && result.status).toBe(403);
+  });
+  it("allows linked bank questions for a certified topic", async () => {
+    sessionTestFindUnique.mockResolvedValue(linked);
+    vi.mocked(certifiedBankTopics).mockResolvedValueOnce([{ subject: "SCIENCE", topic: "Cells" }]);
+    expect(isAccessError(await loadOwnedSession("U1", "c1", "s1"))).toBe(false);
+  });
+  it("keeps custom-question authoring accessible without a certification", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", questions: [{ question: { origin: "TUTOR" } }] });
+    vi.mocked(certifiedBankTopics).mockResolvedValueOnce([]);
+    expect(isAccessError(await loadOwnedSession("U1", "c1", "s1"))).toBe(false);
+    expect(certifiedBankTopics).not.toHaveBeenCalled();
+    vi.mocked(certifiedBankTopics).mockReset().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]);
   });
 });

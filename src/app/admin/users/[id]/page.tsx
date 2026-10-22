@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import BackLink from "@/components/ui/BackLink";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -27,7 +26,7 @@ export default async function AdminUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
   if (!session || !isAdminRole(session.user.role)) notFound();
 
   const user = await prisma.user.findFirst({

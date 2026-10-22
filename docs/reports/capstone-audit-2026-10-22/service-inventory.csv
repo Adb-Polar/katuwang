@@ -1,0 +1,87 @@
+Source,Exports,Dependencies,Database operations,Status
+src/lib/assessmentConfig.ts,"ASSESSMENT_DEFAULTS, OPTION_COUNT_MIN, OPTION_COUNT_MAX, ResolvedTopicConfig",,,Source indexed; see automated tests/runtime gaps
+src/lib/assessmentPicker.ts,pickQuestionIds,@prisma/client,assessmentAttempt.findFirst; assessmentQuestion.findMany,Source indexed; see automated tests/runtime gaps
+src/lib/assessmentSerialize.ts,"AttemptWithItems, SerializedAttemptItem, SerializedAttempt, serializeAttempt",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/assessmentStatus.ts,"TopicAssessmentStatus, getTopicAssessmentStatus",@prisma/client; @/lib/prisma; @/lib/settings,assessmentAttempt.findMany; assessmentQuestion.groupBy; questionRequest.findMany; topicCertification.findMany,Source indexed; see automated tests/runtime gaps
+src/lib/auditLog.ts,"AUDIT_ACTIONS, AUDIT_TARGET_TYPES",,,Source indexed; see automated tests/runtime gaps
+src/lib/auth.ts,authOptions,next-auth; next-auth/providers/credentials; bcryptjs; ./prisma; ./rateLimit; ./settings,user.findUnique; user.update,Source indexed; see automated tests/runtime gaps
+src/lib/avatarPrivacy.ts,"CanViewProfilePictureOptions, canViewProfilePicture, sanitizeAvatarForViewer",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/browseRanking.ts,"BrowseRankContext, RankableClass, scoreBrowseClass, rankBrowseClasses",@prisma/client; @/lib/matching; @/lib/datetime,interestSubjects.has; interestTopics.has,Source indexed; see automated tests/runtime gaps
+src/lib/changePassword.ts,"ChangeOwnPasswordResult, changeOwnPassword",bcryptjs; @/lib/prisma,user.findUnique; user.update,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/classifier.ts,"Classification, classify",@/lib/chatbot/types; @/lib/chatbot/intents; @/lib/chatbot/faq; @/lib/chatbot/normalize,,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/faq.ts,FAQ_ENTRIES,@/lib/chatbot/types,,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/intents.ts,INTENTS,@/lib/chatbot/types; @/lib/portalPaths,,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/misses.ts,"MissRow, MissGroup, MissSort, AggregateMissesOptions, AggregateMissesResult, aggregateMisses",@prisma/client; @/lib/chatbot/normalize,,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/normalize.ts,"STOPWORDS, tokenize, editDistance, fuzzyHit",,,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/recommend.ts,"ExtractedCriteria, extractCriteria, RecommendationResult, recommendClasses",@/lib/prisma; @/lib/settings; @/lib/classQueries; @/lib/matching; @/lib/subjectTopics; @/lib/chatbot/types,tutorClass.findMany,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/respond.ts,"BotReplyResult, getBotReply, getBotReplyWithScore",@/lib/prisma; @/lib/chatbot/classifier; @/lib/chatbot/recommend; @/lib/chatbot/types,chatbotMiss.create,Source indexed; see automated tests/runtime gaps
+src/lib/chatbot/types.ts,"IntentCategory, ChatContext, BotLink, RecommendationCard, BotReply, BotReplyDraft, Intent, FaqEntry",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/classBrowserCache.ts,"getCachedClasses, setCachedClasses, clearClassBrowserCache",,,Source indexed; see automated tests/runtime gaps
+src/lib/classQueries.ts,"gradeEligibilityWhere, browsableOrEnrolledWhere, browseClassesWhere, myClassesWhere, learnerClassInclude, toLearnerClassDTO",@prisma/client; @/lib/gradeLevels,,Source indexed; see automated tests/runtime gaps
+src/lib/classSessions.ts,"hasSessionOverlap, hasInternalOverlap",@/lib/prisma; @/lib/datetime,classSession.findMany,Source indexed; see automated tests/runtime gaps
+src/lib/clientStorage.ts,"CHAT_HISTORY_KEY, clearClientSessionData",,,Source indexed; see automated tests/runtime gaps
+src/lib/contactInfo.ts,normalizeContactInfo,,,Source indexed; see automated tests/runtime gaps
+src/lib/csv.ts,"toCsv, downloadCsv",,,Source indexed; see automated tests/runtime gaps
+src/lib/datetime.ts,"MINUTE_MS, HOUR_MS, DAY_MS, daysBetween, addDays, formatDate, formatDayMonth, formatDateTime, formatTime, formatWeekday, parseLocalDateAndTime, combineDateAndTime",,,Source indexed; see automated tests/runtime gaps
+src/lib/derivedAvailability.ts,"DerivedSlot, SessionForDerivation, deriveWeeklyAvailability",,,Source indexed; see automated tests/runtime gaps
+src/lib/emailVerification.ts,"VERIFICATION_TOKEN_TTL_MS, generateVerificationToken, hashVerificationToken, verificationTokenExpiry",crypto; @/lib/datetime,,Source indexed; see automated tests/runtime gaps
+src/lib/gradeAttempt.ts,"GradableItem, GradedItem, GradeResult, gradeAttempt",,,Source indexed; see automated tests/runtime gaps
+src/lib/gradeLevels.ts,"GRADE_LEVELS, ALL_GRADE_LEVELS, GRADE_ORDER, gradeNumber, compareGradeLevels, isTargetGradeEligibleForTutor, isStudentEligibleForTutor, isStudentEligibleForClassTarget, isStudentEligibleForClass, getEligibleTargetGrades, getEligibleTutorGradesForStudent, getEligibleClassTargetGradesForStudent, getEligibleStudentGradesForTutor, gradeLabel, gradeSection",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/help/helpContent.ts,"HelpRole, HelpLink, HelpGuide, HelpFaq, HelpEntry, HELP_CONTENT",,,Source indexed; see automated tests/runtime gaps
+src/lib/idGenerator.ts,"generateAnonymousId, generateClassCode",./prisma,idCounter.update; idCounter.upsert; user.findUnique,Source indexed; see automated tests/runtime gaps
+src/lib/images/clientImageOptimizer.ts,"ClientOptimizationResult, validateAndOptimizeImage",./imageConfig; ./imageSafety,,Source indexed; see automated tests/runtime gaps
+src/lib/images/imageConfig.ts,"IMAGE_CONFIG, SupportedImageFormat, MAGIC_BYTES",,,Source indexed; see automated tests/runtime gaps
+src/lib/images/imageSafety.ts,"ImageValidationError, detectImageFormat, validateImageDimensions, calculateTargetDimensions, generateSafeAvatarFilename",./imageConfig,,Source indexed; see automated tests/runtime gaps
+src/lib/images/serverImageOptimizer.ts,"ServerOptimizationResult, ServerOptimizationOptions, optimizeImageBuffer",sharp; ./imageConfig; ./imageSafety,,Source indexed; see automated tests/runtime gaps
+src/lib/mail.ts,"isMailConfigured, MailContent, sendMail, renderPasswordResetEmail, renderVerificationEmail",nodemailer; @/lib/passwordReset; @/lib/emailVerification; @/lib/datetime,,Source indexed; see automated tests/runtime gaps
+src/lib/matching.ts,"GRADE_WEIGHTS, gradeScore, PreferredSlot, SessionForMatching, ClassForMatching, MatchCriteria, GradeMatch, MatchReasons, MatchResult, upcomingScheduledSessions, gradeMatchFor, scoreClass, rankMatches",@prisma/client; @/lib/datetime,,Source indexed; see automated tests/runtime gaps
+src/lib/moderation.ts,"computeExpiresAt, reinstateExpiredClasses",@/lib/prisma; @/lib/datetime,tutorClass.updateMany,Source indexed; see automated tests/runtime gaps
+src/lib/notifications.ts,"NotificationType, notify, notifyMany",@prisma/client,notification.create; notification.createMany,Source indexed; see automated tests/runtime gaps
+src/lib/pagination.ts,"ADMIN_PAGE_SIZE, BROWSE_PAGE_SIZE, AUDIT_PAGE_SIZE, DEV_PAGE_SIZE, MAX_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE",,,Source indexed; see automated tests/runtime gaps
+src/lib/passwordReset.ts,"RESET_TOKEN_TTL_MS, generateResetToken, hashResetToken, resetTokenExpiry",crypto; @/lib/datetime,,Source indexed; see automated tests/runtime gaps
+src/lib/permissions.ts,"isAdminRole, isSuperAdminRole, AdminAuthResult, requireAdminSession, requireSuperAdminSession",@prisma/client; next-auth; @/lib/auth; next/server,,Source indexed; see automated tests/runtime gaps
+src/lib/portalPaths.ts,portalPath,@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/prisma.ts,"getCaCertificate, getDatabaseUrl, parseDatabaseUrl, getDatabaseConfig, prisma",node:fs; @prisma/adapter-mariadb; @prisma/client; mariadb,,Source indexed; see automated tests/runtime gaps
+src/lib/rateLimit.ts,"RateLimitResult, rateLimit, rateLimitEnabled, clientIp, tooManyRequests",next/server; @/lib/datetime,,Source indexed; see automated tests/runtime gaps
+src/lib/registration.ts,"RegisterAccountInput, RegisterAccountResult, registerAccount",bcryptjs; @prisma/client; @/lib/prisma; @/lib/idGenerator; @/lib/emailVerification,user.create; user.findUnique; verificationToken.create,Source indexed; see automated tests/runtime gaps
+src/lib/reportViolations.ts,"ViolationOption, REPORT_VIOLATIONS, ALL_VIOLATION_VALUES, VIOLATION_LABEL, violationLabel",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/sessionTestAccess.ts,"AccessError, isAccessError, loadOwnedClass, loadOwnedSession, loadEnrolledSession",@/lib/prisma,classEnrollment.findUnique; classSession.findUnique; sessionTest.findUnique; tutorClass.findUnique; tutorProfile.findUnique,Source indexed; see automated tests/runtime gaps
+src/lib/sessionTestResults.ts,"SessionTestResults, buildSessionTestResults, ClassSessionTestRollupRow, ClassSessionTestRollup, buildClassSessionTestRollup",@/lib/prisma; test with a 0% average.,sessionTest.findUnique; tutorClass.findUnique,Source indexed; see automated tests/runtime gaps
+src/lib/sessionTestSerialize.ts,"SessionTestAttemptWithItems, SerializedSessionTestItem, SerializedSessionTestAttempt, serializeSessionTestAttempt, SessionTestWithQuestions, SerializedSessionTestQuestion, SerializedSessionTest, serializeSessionTest",@prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/settings.ts,"PLATFORM_SETTING_KEYS, PlatformSettingKey, getSetting, ASSESSMENT_SETTING_KEYS, getAssessmentConfig, ProfilePictureRequirement, PROFILE_PICTURE_REQUIREMENT_KEY, getProfilePictureRequirement",@/lib/prisma; @/lib/assessmentConfig,platformSetting.findMany; platformSetting.findUnique,Source indexed; see automated tests/runtime gaps
+src/lib/sortParams.ts,"SortDir, parseSort",,,Source indexed; see automated tests/runtime gaps
+src/lib/subjectTopics.ts,"SUBJECT_TOPICS, SUBJECT_SLUGS, normalizeTopic, isKnownTopic",,,Source indexed; see automated tests/runtime gaps
+src/lib/subjects.ts,"SubjectWithTopics, invalidateSubjectCache, getSubjects, getTopics, getSubjectSlugs, resolveSubjectSlugs, subjectExists, topicExists",@prisma/client; @/lib/prisma; @/lib/subjectTopics,subject.findMany,Source indexed; see automated tests/runtime gaps
+src/lib/topicRequestHistory.ts,"requestDeadline, activeOpenWhere, expiredOpenWhere, requestSnapshot, recordRequestHistory",@prisma/client,topicRequest.findUniqueOrThrow; topicRequestHistory.create,Source indexed; see automated tests/runtime gaps
+src/lib/topicRequestVisibility.ts,tutorPoolWhere,@prisma/client; @/lib/gradeLevels,,Source indexed; see automated tests/runtime gaps
+src/lib/updateTopicRequest.ts,updateTopicRequest,@prisma/client; @/lib/topicRequestHistory,topicRequest.update,Source indexed; see automated tests/runtime gaps
+src/lib/uploadthing.ts,,@uploadthing/react; @/app/api/uploadthing/core,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/admin.ts,"updateUserStatusSchema, UpdateUserStatusInput, updateClassStatusSchema, UpdateClassStatusInput, reviewCertificationSchema, ReviewCertificationInput, updatePlatformSettingSchema, UpdatePlatformSettingInput, moderateTopicRequestSchema, ModerateTopicRequestInput, reviewRegistrationSchema, ReviewRegistrationInput, moderateAvatarSchema, ModerateAvatarInput, updateProfilePictureRequirementSchema, UpdateProfilePictureRequirementInput, createAdminAccountSchema, CreateAdminAccountInput, updateAdminStatusSchema, UpdateAdminStatusInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/assessment.ts,"optionInputSchema, createAssessmentQuestionSchema, CreateAssessmentQuestionInput, updateAssessmentQuestionSchema, UpdateAssessmentQuestionInput, updateGlobalAssessmentConfigSchema, UpdateGlobalAssessmentConfigInput, startAssessmentSchema, StartAssessmentInput, submitAssessmentSchema, SubmitAssessmentInput, requestQuestionsSchema, RequestQuestionsInput, resolveQuestionRequestSchema, ResolveQuestionRequestInput",zod; @/lib/assessmentConfig,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/auth.ts,"commonRegisterSchema, learnerRegisterSchema, tutorRegisterSchema, registerSchema, RegisterInput, LearnerRegisterInput, TutorRegisterInput",zod; @prisma/client; @/lib/validations/password,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/availability.ts,"dayEnum, availabilitySlotSchema, DayOfWeek, AvailabilitySlotInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/changePassword.ts,"changePasswordSchema, ChangePasswordInput",zod; @/lib/validations/password,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/chatbot.ts,"chatbotMessageSchema, ChatbotMessageInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/class.ts,"sessionSchema, SessionInput, classDetailsSchema, ClassDetailsInput, hasLocationOrMeetingLink, createClassSchema, CreateClassInput, addSessionSchema, AddSessionInput, updateSessionSchema, UpdateSessionInput",zod; @prisma/client,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/classAppeal.ts,"createClassAppealSchema, CreateClassAppealInput, reviewClassAppealSchema, ReviewClassAppealInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/classRecommendation.ts,"createClassRecommendationSchema, CreateClassRecommendationInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/emailVerification.ts,"verifyEmailSchema, resendVerificationSchema, VerifyEmailInput, ResendVerificationInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/match.ts,"preferredSlotSchema, matchCriteriaSchema, MatchCriteriaInput, createTopicRequestSchema, CreateTopicRequestInput, cancelTopicRequestSchema, acceptTopicRequestSchema, AcceptTopicRequestInput",zod; @prisma/client; @/lib/validations/availability; @/lib/validations/class,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/password.ts,passwordField,zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/passwordReset.ts,"forgotPasswordSchema, resetPasswordSchema, ForgotPasswordInput, ResetPasswordInput",zod; @/lib/validations/password,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/profile.ts,"updateProfileSchema, UpdateProfileInput, updateTutorProfileSchema, UpdateTutorProfileInput",zod; @prisma/client; @/lib/contactInfo,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/report.ts,"createReportSchema, CreateReportInput, reviewReportSchema, ReviewReportInput",zod; @/lib/reportViolations,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/sessionTest.ts,"createSessionTestSchema, CreateSessionTestInput, updateSessionTestSchema, UpdateSessionTestInput, setSessionTestQuestionsSchema, SetSessionTestQuestionsInput, sessionTestStatusSchema, SessionTestStatusInput, authorTutorQuestionSchema, AuthorTutorQuestionInput, updateTutorQuestionSchema, UpdateTutorQuestionInput",zod; @/lib/validations/assessment; @/lib/assessmentConfig,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/subject.ts,"createSubjectSchema, CreateSubjectInput, updateSubjectSchema, UpdateSubjectInput, createTopicSchema, CreateTopicInput, updateTopicSchema, UpdateTopicInput",zod,,Source indexed; see automated tests/runtime gaps
+src/lib/validations/topicCertification.ts,"requestTopicCertificationSchema, RequestTopicCertificationInput",zod,,Source indexed; see automated tests/runtime gaps
+src/hooks/useFetchList.ts,useFetchList,react,,Source indexed; see automated tests/runtime gaps
+src/hooks/usePaginatedList.ts,usePaginatedList,react; next/navigation,,Source indexed; see automated tests/runtime gaps
+src/hooks/useSubjectCatalog.ts,"CatalogSubject, useSubjectCatalog",react; @/lib/subjectTopics,,Source indexed; see automated tests/runtime gaps
+src/hooks/useTableSort.ts,"SortDir, useTableSort",react,,Source indexed; see automated tests/runtime gaps
+src/hooks/useTopicCertifications.ts,"TopicCertification, useTopicCertifications",react; ./useFetchList,,Source indexed; see automated tests/runtime gaps
+src/types/next-auth.d.ts,,@prisma/client,,Source indexed; see automated tests/runtime gaps
+scripts/audit-and-optimize-images.ts,,fs; path; ../src/lib/prisma; ../src/lib/images/serverImageOptimizer; ../src/lib/images/imageSafety; ../src/lib/images/imageConfig; uploadthing/server,user.findMany; user.update,Source indexed; see automated tests/runtime gaps
+scripts/benchmark-image-compression.ts,,sharp; ../src/lib/images/serverImageOptimizer,,Source indexed; see automated tests/runtime gaps
+scripts/promote-super-admin.ts,,../src/lib/prisma; @prisma/client,user.findFirst; user.update,Source indexed; see automated tests/runtime gaps
+scripts/seed-super-admin.ts,,../src/lib/prisma; bcryptjs; @prisma/client; ../src/lib/idGenerator,idCounter.upsert; user.create; user.findFirst; user.findUnique; user.update,Source indexed; see automated tests/runtime gaps
+scripts/switch-db.mjs,,node:fs; node:path; node:url,,Source indexed; see automated tests/runtime gaps

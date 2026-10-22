@@ -1,6 +1,6 @@
 import { Role } from "@prisma/client";
-import { getServerSession, type Session } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import type { Session } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { NextResponse } from "next/server";
 
 /**
@@ -25,7 +25,7 @@ export type AdminAuthResult =
  * Enforces that the incoming request is authenticated with an administrative role (ADMIN or SUPER_ADMIN).
  */
 export async function requireAdminSession(): Promise<AdminAuthResult> {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
 
   if (!session || !session.user) {
     return {
@@ -51,7 +51,7 @@ export async function requireAdminSession(): Promise<AdminAuthResult> {
  * Enforces that the incoming request is authenticated with exclusive Super Admin privileges.
  */
 export async function requireSuperAdminSession(): Promise<AdminAuthResult> {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
 
   if (!session || !session.user) {
     return {

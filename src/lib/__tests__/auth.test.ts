@@ -343,3 +343,12 @@ describe("auth session config", () => {
     expect(authOptions.session?.maxAge).toBe(8 * 60 * 60);
   });
 });
+
+describe("JWT role changes", () => {
+  it("does not adopt elevated privileges into an existing login", async () => {
+    userFindUnique.mockResolvedValue({ role: "SUPER_ADMIN", status: "ACTIVE", image: null, gradeLevel: null });
+    const token = { id: "qa", role: "ADMIN", checkedAt: 0 };
+    const result = await authOptions.callbacks!.jwt!({ token } as never);
+    expect(result).toMatchObject({ role: "ADMIN", status: "BANNED" });
+  });
+});

@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 import AssessmentQuizRunner, { QuizAttempt } from "@/components/tutor/AssessmentQuizRunner";
@@ -14,7 +13,8 @@ export default async function TutorAssessmentAttemptPage({
 }: {
   params: Promise<{ attemptId: string }>;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const { attemptId } = await params;
 
   const attempt = await prisma.assessmentAttempt.findUnique({
@@ -29,7 +29,7 @@ export default async function TutorAssessmentAttemptPage({
     notFound();
   }
 
-  const serialized = serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS" });
+  const serialized = serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS", revealAnswers: false });
 
   return <AssessmentQuizRunner attempt={serialized as QuizAttempt} />;
 }

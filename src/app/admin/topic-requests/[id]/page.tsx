@@ -1,11 +1,10 @@
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import { isAdminRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import TopicRequestDetail from "@/components/TopicRequestDetail";
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
   if (!session || !isAdminRole(session.user.role)) notFound();
   const { id } = await params;
   if (!await prisma.topicRequest.findUnique({ where: { id }, select: { id: true } })) notFound();
