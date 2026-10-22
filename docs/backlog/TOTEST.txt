@@ -1,3 +1,20 @@
+Separate Date & Time Form Inputs (fix/separate-time-date-inputs, Changes.md Part 88)
+ [] /tutor/classes/new (Class creation):
+    - Session rows display distinct Date (<input type="date">) and Time (<input type="time">) fields side by side.
+    - Adding a session row creates empty date and time fields.
+    - Form validation blocks submission if either date or time is blank ("Every session needs a topic, date, and time.").
+    - Submitting a class sends valid UTC ISO strings to POST /api/tutor/classes and correctly schedules the class.
+ [] /tutor/requests/[id]/accept (Accepting topic request):
+    - Initial prefilled session row correctly populates separate Date and Time inputs from request's preferred slot.
+    - Submitting accepts the request and creates class sessions with valid ISO dates.
+ [] /tutor/classes/[classId] or /tutor/classes/[classId]/edit -> "Add Session" modal:
+    - Modal displays separate "Date" and "Time" inputs in a 2-column grid.
+    - Validation prevents adding a session if either field is missing.
+    - Submitting sends valid ISO string to POST /api/tutor/classes/[classId]/sessions.
+ [] /tutor/classes/[classId] or /tutor/classes/[classId]/edit -> "Reschedule Session" modal (Pencil icon):
+    - Modal displays separate "Date" and "Time" inputs pre-filled with the session's current local date and time.
+    - Updating date or time and saving sends valid ISO string to PATCH /api/tutor/classes/[classId]/sessions/[sessionId].
+
 Learner
  - check if class schedule confict detection exist
 
@@ -885,6 +902,35 @@ Security-review fixes (Changes.md Part 57)
  [] / database seeding idempotency: Run `npx prisma db seed` multiple times.
     Verify that consecutive runs succeed with exit code 0 without `Unique constraint failed on the constraint: tutor_classes_code_key` (P2002),
     and that existing test attempt history and class relationships are preserved.
+
+--- Part 86 (Philippine K–12 Subject and Topic Database) ---
+ [] Curriculum Seeding Idempotency: Run `pnpm exec tsx prisma/seedCurriculum.ts`.
+    Verify all 47 subjects and 155 topics are upserted without errors or primary/unique key collisions.
+    Verify existing User (299), TutorClass (170), TopicCertification (307), and AssessmentQuestion (646) records are untouched.
+ [] Subject Dropdowns in Forms: Open `/tutor/classes/new`, `/learner/requests`, and `/learner/match`.
+    Verify the subject `<select>` lists all newly seeded JHS & SHS subjects (e.g. "Grade 7 Mathematics (MATATAG)",
+    "Pre-Calculus", "Empowerment Technologies", "Computer Systems Servicing (CSS)").
+    Verify that selecting a subject dynamically filters the topic checklist/dropdown to its associated curriculum topics.
+ [] Admin Subject/Topic Management: Open `/admin/subjects`.
+    Verify all 47 subjects are listed in the catalogue with their respective topics.
+    Verify that admin can edit order, toggle active/inactive, or add subtopics without error.
+ [] Matching Engine Compatibility: In `/learner/match`, select Grade 11, General Mathematics, and "Functions and Their Graphs".
+    Verify that `rankMatches` computes matching classes with correct `GRADE_WEIGHTS` scoring (6 points for exact grade match)
+    and verified certification bonus.
+
+--- Part 87 (Comprehensive Question Bank Expansion - 15 questions/topic) ---
+ [] Question Bank Seeding: Run `pnpm exec tsx prisma/seedQuestionBank.ts`.
+    Verify question bank clearing and re-seeding completes with exit code 0.
+    Verify database contains exactly 2,325 questions (15 questions * 155 topics) and 9,300 options.
+ [] Admin Question Bank Drill-Down: Open `/admin/assessment/question-bank`.
+    Select any subject (e.g. "General Mathematics", "Pre-Calculus", "Computer Systems Servicing").
+    Verify all topics show green "Ready" badges (15/5 questions).
+    Click into any topic -> verify all 15 questions are displayed with 4 options and highlighted correct answers.
+ [] Tutor Certification Quiz: Log in as a tutor, open `/tutor/assessments`.
+    Select any newly added topic (e.g. "SHS_TVL_CSS" -> "LAN Setup, Cabling & IP Addressing" or "SHS_GENMATH" -> "Functions & Rational Functions").
+    Verify quiz can be started immediately (no BANK_NOT_READY error since all topics have >=15 questions).
+    Complete the 5 served questions and submit -> verify score is calculated correctly against the new questions.
+
 
 
 

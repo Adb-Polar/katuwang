@@ -30,7 +30,7 @@ const WEEKDAY_INDEX: Record<string, number> = {
   SATURDAY: 6,
 };
 
-/** Next future occurrence of `day` at `HH:MM`, formatted for a `datetime-local` input. */
+/** Next future occurrence of `day` at `HH:MM`, formatted as `YYYY-MM-DDTHH:mm`. */
 function nextOccurrence(day: string, time: string): string {
   const [hh, mm] = time.split(":").map(Number);
   const targetDow = WEEKDAY_INDEX[day] ?? 1;
@@ -77,12 +77,15 @@ export default function AcceptRequestForm({
   const disabledTopics = topicsFor(request.subject).filter((t) => !certifiedSet.has(t));
 
   const firstSlot = request.slots[0];
-  const initialSessionRows: SessionRowValue[] = firstSlot
+  const nextOccur = firstSlot ? nextOccurrence(firstSlot.day, firstSlot.startTime) : null;
+  const initialSessionRows: SessionRowValue[] = firstSlot && nextOccur
     ? [
         {
           key: `accept-row-${++rowIdCounter}`,
           topic: preselectedTopics[0] ?? "",
-          scheduledAt: nextOccurrence(firstSlot.day, firstSlot.startTime),
+          scheduledAt: nextOccur,
+          date: nextOccur.split("T")[0],
+          time: nextOccur.split("T")[1],
           duration: 60,
         },
       ]
