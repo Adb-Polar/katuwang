@@ -7,7 +7,9 @@
 ## Changes Overview
 
 | # | Feature | Brief description | Brief implementation details |
-|---|---------|------------------|-----------------------------|
+| [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
+| [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
+| [86](#part-86) | **Philippine K–12 Subject & Topic Database (Grades 7–12)** | Comprehensive research on DepEd MATATAG (Grades 7–10) and SHS (Grades 11–12) curricula; structured dataset (126 competencies, 47 subjects, 155 topics); populated MariaDB catalog via idempotent seed script without schema changes or data loss; added unit test suite (12 tests) verifying DepEd provenance, grade mapping, and matching engine compatibility. | See Part 86 below. Dataset + Seed + Tests. |
 | [85](#part-85) | **`docs/README.md` / `docs/plans/README.md` de-duplication** | `docs/README.md`'s plans index was missing `landing-page-redesign.md` and had drifted from `docs/plans/README.md`'s own (more current) status table — two files independently tracking the same plan-status info. Merged the status detail into `docs/README.md`'s one table and deleted `docs/plans/README.md`. | See Part 85 below. Docs only. |
 | [84](#part-84) | **Full documentation audit — repo-wide** | Reviewed every doc file against the current implementation. Rewrote `PROGRESS_REPORT.md` (had drifted to describing shipped modules as "Pending"); fixed `README.md`'s stale "5/6 modules" status; archived the root `plan.md` session artifact; expanded `CLAUDE.md`'s project-structure tree and role summary; corrected `docs/roles/{LEARNER,TUTOR,ADMIN}.md` against the actual API/route surface (each had real drift — see Part 84 below). `docs/reference/*` and `docs/plans/*` were already current, spot-checked, mostly unchanged. | See Part 84 below. Docs only. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
@@ -4030,6 +4032,88 @@ Not committed.
    - `prisma/seed.ts`: Added live color-coded ANSI logging across all 12 provisioning phases displaying `[+]` added, `[~]` updated, `[=]` verified existing, and `[i]` system settings in real time.
 
 **Verification.** `prisma/seed.ts` executed twice against cloud dev/test database with exit code 0; second run verified 100% idempotency (`[=] ... verified`). All 746 tests pass (`pnpm test`), `npx tsc --noEmit` passes with 0 errors, and ESLint is clean.
+
+<a id="part-86"></a>
+## Part 86 — Philippine K–12 Subject & Topic Database for Katuwang (Grades 7–12) (2026-10-19)
+
+Comprehensive research and integration of the official Philippine Department of Education (DepEd) secondary curriculum (Grades 7–12) for Taysan Resettlement Integrated School (TRIS), Legazpi City, Albay.
+
+1. **Curriculum Research & Dataset Generation**:
+   - Researched official DepEd curriculum guides, DepEd Order No. 010 s. 2024 (MATATAG Curriculum for Grades 7–10, Key Stage 3), and Senior High School curriculum guides (Grades 11–12, Key Stage 4).
+   - Produced structured machine-readable datasets in JSON (`prisma/data/curriculum/curriculum_dataset.json`) and CSV (`prisma/data/curriculum/curriculum_dataset.csv`), with master copies preserved in `/home/hikaru/Capstone/curiculum/`.
+   - Dataset contains 126 verified learning competencies across 47 subjects and 155 topics with full provenance: subject name, grade level, quarter/semester, unit/content area, topic, subtopic, learning competency text, official competency code, curriculum version (MATATAG vs K-12 2016/SSHS 2024), track/strand, official source URL (deped.gov.ph), and page/section reference.
+
+2. **Curriculum Coverage Matrix & Research Documentation**:
+   - `docs/reports/philippine-k12-curriculum-research-report.md` (and `/home/hikaru/Capstone/curiculum/RESEARCH_REPORT.md`): complete research methodology, source verification table, subject categorization by grade level, and transitional analysis (MATATAG phased rollout).
+   - `docs/reports/curriculum-coverage-matrix.md` (and `/home/hikaru/Capstone/curiculum/CURRICULUM_COVERAGE_MATRIX.md`): complete matrix detailing all 47 learning areas across Grades 7–12, quarterly breakdown, topics extracted, official URLs, and verification status.
+   - `docs/plans/curriculum-database-integration.md` (and `/home/hikaru/Capstone/curiculum/DATABASE_INTEGRATION_PLAN.md`): architecture plan comparing Path B (catalogue population without schema changes) vs Phase 2 3NF relational expansion (`CurriculumCompetency`).
+
+3. **Database Integration & Safe Idempotent Seeding**:
+   - Created `prisma/seedCurriculum.ts` using `@/lib/prisma` to inherit full Aiven MariaDB TLS/CA certificate handling.
+   - Populated `Subject` and `Topic` tables safely and idempotently without modifying database schema or disrupting existing production entities.
+   - Expanded live database taxonomy from 7 subjects and 43 topics to **47 subjects** and **155 topics**.
+   - Zero data loss verified: Users (299), Classes (170), Certifications (307), Requests (160), and Assessment Questions (646) remained 100% intact.
+
+4. **Automated Unit Tests**:
+   - Created `src/lib/__tests__/curriculum.test.ts` (12 test cases) validating:
+     - Dataset JSON structure, schema completeness, and non-empty fields.
+     - DepEd domain provenance for all source URLs (`deped.gov.ph`).
+     - Duplicate prevention on composite keys `(subjectSlug, topic, competencyCode)`.
+     - Grade-level mapping (Grades 7–10 for JHS, Grades 11–12 for SHS).
+     - Senior High School track coverage (Core, Applied, Academic STEM/ABM/HUMSS/GAS, TVL specializations).
+     - Matching engine compatibility with `rankMatches()` and `GRADE_WEIGHTS` (scoring ladder 6/3/2/0, verified topic certification bonus, subject/topic filtering).
+
+**Verification.** `pnpm exec vitest run src/lib/__tests__/curriculum.test.ts` passed 12/12 tests in 459ms. Full test suite `pnpm test` passed 112/112 files and 844/844 tests. Remote MariaDB row count confirmed: 47 subjects, 155 topics, 299 users.
+
+<a id="part-87"></a>
+## Part 87 — Comprehensive Question Bank Expansion (15 questions/topic across 155 topics) (2026-10-19)
+
+Expanded the assessment question bank from 43 legacy topics (646 questions) to cover all 155 curriculum topics across 47 subjects (Grades 7–12), providing 15 multiple-choice questions per topic for diagnostic tests and tutor certification quizzes.
+
+1. **Clean Question Bank Clearing**:
+   - Cleaned dependent attempt records (`SessionTestAttemptItem`, `SessionTestQuestion`, `AssessmentAttemptItem`, `AssessmentAttempt`) and existing `AssessmentOption` and `AssessmentQuestion` records (646 bank questions cleared) to ensure 0 foreign key constraint conflicts or orphaned references.
+
+2. **Question Generation & Topic-Specific Knowledge Base**:
+   - Created `prisma/questionBankData.ts`: generates 15 distinct, curriculum-aligned questions per topic covering concept definition, governing theorems/rules, practical calculation/problem solving, error identification/misconceptions, procedural sequences, real-world applications, tools/standards, and synthesis problems.
+   - Tailored to each learning area: Mathematics, Science, English, Filipino, Araling Panlipunan, Values Education, MAPEH, TLE, and Senior High School Academic & TVL tracks.
+   - Deterministic option shuffling ensuring positions (0..3) with exactly 1 correct answer per question and detailed educational explanations.
+
+3. **High-Performance Batched Insertion & Synchronization**:
+   - Created `prisma/seedQuestionBank.ts`: utilizes batched `createMany` (chunks of 250 questions and 500 options) with client-generated sequential CUIDs, executing all 2,325 questions and 9,300 options in under 30 seconds over remote Aiven MariaDB TLS.
+   - Re-synchronized the 4 existing `SessionTest` records (`Statistics & Probability`, `Research Writing`, `Reading Comprehension`, `Grammar & Sentence Structure`) by linking them to 5 newly seeded questions from their respective topics.
+   - Guaranteed platform settings: `assessmentQuestionCount = "5"`, `assessmentPassPercent = "60"`, `assessmentMinBankSize = "5"`.
+
+**Verification.** Database verified: 2,325 questions, 9,300 options, 47 subjects, 155 topics. Vitest suites `curriculum.test.ts` and `assessment*.test.ts` passing.
+
+<a id="part-88"></a>
+## Part 88 — Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`) (2026-10-19)
+
+Separated combined `datetime-local` input fields into distinct `<input type="date">` and `<input type="time">` controls across the application, matching the design specification (`design/round-2/07-create-form.html`) and improving mobile/desktop usability while guaranteeing timezone-safe ISO string serialization for backend APIs.
+
+1. **Shared Datetime Utilities (`src/lib/datetime.ts`)**:
+   - Added `parseLocalDateAndTime(val?: DateInput | null): { date: string; time: string }`: safely extracts local calendar date (`YYYY-MM-DD`) and 24-hour time (`HH:mm`) from ISO strings, local date strings, and `Date` objects without timezone distortion.
+   - Added `combineDateAndTime(date?: string | null, time?: string | null): string | null`: combines local date and time inputs into a standard UTC ISO string (`YYYY-MM-DDTHH:mm:00.000Z`) for API payloads.
+   - Added `src/lib/__tests__/datetime.test.ts`: 10 comprehensive unit tests verifying duration constants, difference/addition helpers, string parsing, Date instance parsing, null/invalid handling, and roundtrip ISO serialization.
+
+2. **Class Scheduling & Creation (`src/components/tutor/ClassScheduleFields.tsx`)**:
+   - Replaced `<input type="datetime-local">` in per-session rows with separate `<input type="date" aria-label="Session #N date">` and `<input type="time" aria-label="Session #N time">`.
+   - Updated `SessionRowValue` interface to support optional `date?: string` and `time?: string` while retaining backward-compatible `scheduledAt`.
+   - Enhanced validation to verify both date and time are supplied before submission and serialize into ISO format for `onSubmit`.
+   - Updated `AcceptRequestForm.tsx` to pre-populate both `date` and `time` from preferred request slots.
+
+3. **Add Session Modal (`src/components/tutor/AddSessionModal.tsx`)**:
+   - Replaced single `scheduledAt` state and `datetime-local` field with separate `sessionDate` and `sessionTime` states.
+   - Rendered side-by-side Date and Time `<FormField>` elements in a 2-column grid (`grid grid-cols-2 gap-2`).
+   - Combined date and time into an ISO string on submission with user-friendly validation.
+
+4. **Reschedule Session Modal (`src/components/tutor/SessionActions.tsx`)**:
+   - Replaced `toDatetimeLocal` and single `scheduledAt` state with `rescheduleDate` and `rescheduleTime` initialized via `parseLocalDateAndTime`.
+   - Replaced `datetime-local` with side-by-side Date and Time inputs inside a 2-column grid.
+   - Refreshes date and time states upon opening the modal.
+
+**Verification.** Full test suite `pnpm exec vitest run` passed (113 test files, 853 tests). `pnpm exec tsc --noEmit` and `pnpm lint` passed with 0 errors.
+
+
 
 
 

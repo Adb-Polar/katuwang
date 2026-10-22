@@ -8,14 +8,9 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { SessionSummary } from "@/components/classes/SessionsList";
+import { parseLocalDateAndTime, combineDateAndTime } from "@/lib/datetime";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
-
-function toDatetimeLocal(iso: string) {
-  const d = new Date(iso);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 export default function SessionActions({
   classId,
@@ -33,10 +28,22 @@ export default function SessionActions({
 
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [topic, setTopic] = useState(session.topic);
-  const [scheduledAt, setScheduledAt] = useState(toDatetimeLocal(session.scheduledAt));
+  const initialParsed = parseLocalDateAndTime(session.scheduledAt);
+  const [rescheduleDate, setRescheduleDate] = useState(initialParsed.date);
+  const [rescheduleTime, setRescheduleTime] = useState(initialParsed.time);
   const [duration, setDuration] = useState(session.duration);
   const [rescheduleError, setRescheduleError] = useState("");
   const [rescheduling, setRescheduling] = useState(false);
+
+  const openRescheduleModal = () => {
+    const parsed = parseLocalDateAndTime(session.scheduledAt);
+    setTopic(session.topic);
+    setRescheduleDate(parsed.date);
+    setRescheduleTime(parsed.time);
+    setDuration(session.duration);
+    setRescheduleError("");
+    setIsRescheduling(true);
+  };
 
   const sessionUrl = `/api/tutor/classes/${classId}/sessions/${session.id}`;
 
@@ -72,10 +79,17 @@ export default function SessionActions({
     setRescheduling(true);
     setRescheduleError("");
     try {
+      if (!rescheduleDate || !rescheduleTime) {
+        throw new Error("Please provide both a date and a time.");
+      }
+      const iso = combineDateAndTime(rescheduleDate, rescheduleTime);
+      if (!iso) {
+        throw new Error("Invalid date or time.");
+      }
       const res = await fetch(sessionUrl, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, scheduledAt: new Date(scheduledAt).toISOString(), duration }),
+        body: JSON.stringify({ topic, scheduledAt: iso, duration }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to reschedule session.");
@@ -96,7 +110,7 @@ export default function SessionActions({
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setIsRescheduling(true)}
+            onClick={openRescheduleModal}
             className="btn btn-ghost btn-xs cursor-pointer tooltip"
             data-tip="Reschedule"
             aria-label="Reschedule session"
@@ -179,15 +193,29 @@ export default function SessionActions({
                 </select>
               </FormField>
 
-              <FormField label="Date & Time" required>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  required
-                  className="input input-bordered input-sm w-full text-xs"
-                />
-              </FormField>
+              <div className="grid grid-cols-2 gap-2">
+                <FormField label="Date" required>
+                  <input
+                    type="date"
+                    value={rescheduleDate}
+                    onChange={(e) => setRescheduleDate(e.target.value)}
+                    required
+                    aria-label="Session date"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+
+                <FormField label="Time" required>
+                  <input
+                    type="time"
+                    value={rescheduleTime}
+                    onChange={(e) => setRescheduleTime(e.target.value)}
+                    required
+                    aria-label="Session time"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+              </div>
 
               <FormField label="Duration" required>
                 <select

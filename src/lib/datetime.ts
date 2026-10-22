@@ -48,3 +48,48 @@ export function formatTime(input: DateInput): string {
 export function formatWeekday(input: DateInput): string {
   return asDate(input).toLocaleDateString(undefined, { weekday: "short" });
 }
+
+// ─── Input Parsing & Serialization ──────────────────────────────────────────
+
+/**
+ * Splits a date-time input (ISO string, Date object, or "YYYY-MM-DDTHH:mm")
+ * into local date ("YYYY-MM-DD") and local time ("HH:mm") strings suitable
+ * for HTML `<input type="date">` and `<input type="time">`.
+ */
+export function parseLocalDateAndTime(val?: DateInput | null): { date: string; time: string } {
+  if (!val) return { date: "", time: "" };
+
+  if (
+    typeof val === "string" &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(val) &&
+    !val.endsWith("Z") &&
+    !/[+-]\d{2}:\d{2}$/.test(val)
+  ) {
+    const [d, t] = val.split("T");
+    return { date: d, time: t.slice(0, 5) };
+  }
+
+  const d = asDate(val);
+  if (isNaN(d.getTime())) return { date: "", time: "" };
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+
+  return { date: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
+}
+
+/**
+ * Combines a local date string ("YYYY-MM-DD") and a local time string ("HH:mm")
+ * into a UTC ISO string ("YYYY-MM-DDTHH:mm:00.000Z") for API transmission.
+ * Returns null if either component is missing or invalid.
+ */
+export function combineDateAndTime(date?: string | null, time?: string | null): string | null {
+  if (!date || !time) return null;
+  const d = new Date(`${date}T${time}`);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString();
+}
