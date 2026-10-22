@@ -1,3 +1,4 @@
+import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -90,10 +91,7 @@ export async function PATCH(
         });
 
         for (const r of linkedRequests) {
-          await tx.topicRequest.update({
-            where: { id: r.id },
-            data: { status: "OPEN", fulfilledClassId: null },
-          });
+          await updateTopicRequest(tx, r.id, { status: "OPEN", fulfilledClass: { disconnect: true } }, session.user.id);
           await notify(
             tx,
             r.learnerId,

@@ -33,9 +33,12 @@ export async function GET(req: NextRequest) {
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE));
     const { sort, dir } = parseSort(searchParams, Object.keys(TR_SORT_COLUMN), "createdAt");
 
+    const now = new Date();
     const where: Prisma.TopicRequestWhereInput = {
+      ...(status === "EXPIRED" ? { status: "OPEN", expiresAt: { lte: now } } :
+        status === "OPEN" || !status ? { status: "OPEN", expiresAt: { gt: now } } : {}),
       ...(subject ? { subject } : {}),
-      ...(status && status in TopicRequestStatus ? { status: status as TopicRequestStatus } : {}),
+      ...(status && status !== "OPEN" && status in TopicRequestStatus ? { status: status as TopicRequestStatus } : {}),
       ...(scope === "public" ? { directedTutorProfileId: null } : {}),
       ...(scope === "directed" ? { directedTutorProfileId: { not: null } } : {}),
       ...(q
@@ -86,6 +89,8 @@ export async function GET(req: NextRequest) {
         note: r.note,
         status: r.status,
         createdAt: r.createdAt,
+        expiresAt: r.expiresAt,
+        lastSubmittedAt: r.lastSubmittedAt,
         topics: r.topics.map((t) => t.topic),
         learner: r.learner,
         directedTo: r.directedTutor

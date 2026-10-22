@@ -1,3 +1,4 @@
+import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -167,7 +168,7 @@ export async function PATCH(
 
         for (const r of linkedRequests) {
           if (newStatus === "COMPLETED") {
-            await tx.topicRequest.update({ where: { id: r.id }, data: { status: "FULFILLED" } });
+            await updateTopicRequest(tx, r.id, { status: "FULFILLED" }, session.user.id);
             await notify(
               tx,
               r.learnerId,
@@ -176,10 +177,7 @@ export async function PATCH(
               `/learner/classes/${classId}`
             );
           } else {
-            await tx.topicRequest.update({
-              where: { id: r.id },
-              data: { status: "OPEN", fulfilledClassId: null },
-            });
+            await updateTopicRequest(tx, r.id, { status: "OPEN", fulfilledClass: { disconnect: true } }, session.user.id);
             await notify(
               tx,
               r.learnerId,
@@ -277,10 +275,7 @@ export async function DELETE(
       });
 
       for (const r of linkedRequests) {
-        await tx.topicRequest.update({
-          where: { id: r.id },
-          data: { status: "OPEN", fulfilledClassId: null },
-        });
+        await updateTopicRequest(tx, r.id, { status: "OPEN", fulfilledClass: { disconnect: true } }, session.user.id);
         await notify(
           tx,
           r.learnerId,

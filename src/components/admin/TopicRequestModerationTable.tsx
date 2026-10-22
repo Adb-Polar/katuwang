@@ -46,7 +46,7 @@ export default function TopicRequestModerationTable() {
   const [search, setSearch] = useState("");
   const { subjects: subjectCatalog } = useSubjectCatalog();
   const [subjectFilter, setSubjectFilter] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<RequestStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<RequestStatus | "EXPIRED" | "">("");
   const [scopeFilter, setScopeFilter] = useState<"" | "public" | "directed">("");
   const [closeTarget, setCloseTarget] = useState<AdminTopicRequest | null>(null);
   const [reopenTarget, setReopenTarget] = useState<AdminTopicRequest | null>(null);
@@ -135,10 +135,11 @@ export default function TopicRequestModerationTable() {
             </select>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as RequestStatus | "")}
+              onChange={(e) => setStatusFilter(e.target.value as RequestStatus | "EXPIRED" | "")}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All Statuses</option>
+              <option value="EXPIRED">Expired</option>
               <option value="OPEN">Open</option>
               <option value="ACCEPTED">Accepted</option>
               <option value="ENROLLED">Enrolled</option>
@@ -186,7 +187,7 @@ export default function TopicRequestModerationTable() {
                         </Link>
                       </td>
                       <td>
-                        <div className="font-semibold text-base-content/80">{r.subject}</div>
+                        <Link href={`/admin/topic-requests/${r.id}`} className="font-semibold link link-primary">{r.subject} · History</Link>
                         <div className="text-2xs text-base-content/50">{r.topics.join(", ")}</div>
                       </td>
                       <td className="text-base-content/60">

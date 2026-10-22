@@ -1,3 +1,4 @@
+import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -98,10 +99,8 @@ export async function POST(
         data: { classId, learnerId: session.user.id },
       });
 
-      await tx.topicRequest.updateMany({
-        where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" },
-        data: { status: "ENROLLED" },
-      });
+      const linkedRequests = await tx.topicRequest.findMany({ where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" }, select: { id: true } });
+      for (const request of linkedRequests) await updateTopicRequest(tx, request.id, { status: "ENROLLED" }, session.user.id);
 
       await notify(
         tx,
@@ -174,10 +173,8 @@ export async function DELETE(
         where: { id: existingEnrollment.id },
       });
 
-      await tx.topicRequest.updateMany({
-        where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" },
-        data: { status: "ACCEPTED" },
-      });
+      const linkedRequests = await tx.topicRequest.findMany({ where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" }, select: { id: true } });
+      for (const request of linkedRequests) await updateTopicRequest(tx, request.id, { status: "ACCEPTED" }, session.user.id);
 
       await notify(
         tx,

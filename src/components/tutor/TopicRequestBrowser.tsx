@@ -126,6 +126,7 @@ export default function TopicRequestBrowser() {
                   r.directed ? "border-primary/40 bg-primary/5" : "border-base-300 bg-base-200/50"
                 }`}
               >
+                <Link href={`/tutor/requests/${r.id}`} className="link link-primary text-2xs">View history</Link>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
@@ -188,6 +189,7 @@ export default function TopicRequestBrowser() {
         <div className="space-y-3">
           {acceptedList.data.map((r) => (
             <div key={r.id} className="border border-base-300 bg-base-200/50 rounded-xl p-4 space-y-2 text-xs">
+              <Link href={`/tutor/requests/${r.id}`} className="link link-primary text-2xs">View history</Link>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">

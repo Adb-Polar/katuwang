@@ -9,6 +9,7 @@ import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
+import { requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
 import { isStudentEligibleForTutor, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
@@ -50,12 +51,12 @@ export async function POST(
 
     const request = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true },
+      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, expiresAt: true },
     });
     if (!request) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
     }
-    if (request.status !== "OPEN") {
+    if (request.status !== "OPEN" || request.expiresAt <= new Date()) {
       return NextResponse.json({ error: "This request is no longer open." }, { status: 400 });
     }
 
@@ -169,6 +170,8 @@ export async function POST(
     const code = await generateClassCode();
 
     const { newClass, updatedRequest } = await prisma.$transaction(async (tx) => {
+      const current = await tx.topicRequest.findUniqueOrThrow({ where: { id }, select: { status: true, expiresAt: true } });
+      if (current.status !== "OPEN" || current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
       const newClass = await tx.tutorClass.create({
         data: {
           tutorProfileId: tutorProfile.id,
@@ -193,12 +196,15 @@ export async function POST(
         },
       });
 
+      if (current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
+      const before = await requestSnapshot(tx, id);
       const updatedRequest = await tx.topicRequest.update({
         where: { id },
         data: { status: "ACCEPTED", fulfilledClassId: newClass.id },
         select: { id: true, status: true, fulfilledClassId: true },
       });
 
+      await recordRequestHistory(tx, id, session.user.id, "STATUS_CHANGED", before);
       await notify(
         tx,
         request.learnerId,
@@ -212,6 +218,7 @@ export async function POST(
 
     return NextResponse.json({ request: updatedRequest, classId: newClass.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "Request expired before acceptance.") return NextResponse.json({ error: "This request has expired." }, { status: 409 });
     console.error("Error accepting topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

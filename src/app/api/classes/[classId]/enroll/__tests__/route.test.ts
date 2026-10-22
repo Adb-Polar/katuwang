@@ -9,6 +9,7 @@ const {
   enrollmentCreate,
   enrollmentDelete,
   topicRequestUpdateMany,
+  topicRequestFindMany,
   notificationCreate,
   userFindUnique,
 } = vi.hoisted(() => ({
@@ -19,6 +20,7 @@ const {
   enrollmentCreate: vi.fn(),
   enrollmentDelete: vi.fn(),
   topicRequestUpdateMany: vi.fn(),
+  topicRequestFindMany: vi.fn(),
   notificationCreate: vi.fn(),
   userFindUnique: vi.fn(),
 }));
@@ -43,6 +45,7 @@ vi.mock("@/lib/prisma", () => ({
     },
     topicRequest: {
       updateMany: topicRequestUpdateMany,
+      findMany: topicRequestFindMany,
     },
     notification: {
       create: notificationCreate,
@@ -50,11 +53,13 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         classEnrollment: { create: enrollmentCreate, delete: enrollmentDelete },
-        topicRequest: { updateMany: topicRequestUpdateMany },
+        topicRequest: { updateMany: topicRequestUpdateMany, findMany: topicRequestFindMany },
         notification: { create: notificationCreate },
       }),
   },
 }));
+
+vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (_tx: unknown, id: string, data: Record<string, unknown>) => topicRequestUpdateMany({ where: { id }, data }) }));
 
 import { POST, DELETE } from "@/app/api/classes/[classId]/enroll/route";
 
@@ -86,6 +91,7 @@ const learner = { user: { id: "l1", role: "STUDENT_LEARNER", anonymousId: "STU-0
 describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    topicRequestFindMany.mockResolvedValue([{ id: "r1" }]);
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestUpdateMany.mockResolvedValue({ count: 0 });
     userFindUnique.mockResolvedValue({ gradeLevel: "GRADE_9" });
@@ -194,7 +200,7 @@ describe("POST /api/classes/[classId]/enroll", () => {
       data: { classId: "c1", learnerId: "l1" },
     });
     expect(topicRequestUpdateMany).toHaveBeenCalledWith({
-      where: { fulfilledClassId: "c1", learnerId: "l1", status: "ACCEPTED" },
+      where: { id: "r1" },
       data: { status: "ENROLLED" },
     });
     expect(notificationCreate).toHaveBeenCalledWith(
@@ -301,7 +307,7 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
     expect(res.status).toBe(200);
     expect(enrollmentDelete).toHaveBeenCalledWith({ where: { id: "e1" } });
     expect(topicRequestUpdateMany).toHaveBeenCalledWith({
-      where: { fulfilledClassId: "c1", learnerId: "l1", status: "ENROLLED" },
+      where: { id: "r1" },
       data: { status: "ACCEPTED" },
     });
     expect(notificationCreate).toHaveBeenCalledWith(

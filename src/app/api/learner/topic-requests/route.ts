@@ -9,6 +9,7 @@ import { subjectExists, topicExists } from "@/lib/subjects";
 import { GradeLevel } from "@prisma/client";
 import { isStudentEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
+import { requestDeadline, recordRequestHistory } from "@/lib/topicRequestHistory";
 
 const MAX_OPEN_REQUESTS = 10;
 
@@ -38,6 +39,8 @@ function serialize(r: {
   note: string | null;
   status: string;
   createdAt: Date;
+  expiresAt: Date;
+  lastSubmittedAt: Date;
   topics: { topic: string }[];
   slots: { day: string; startTime: string; endTime: string }[];
   directedTutor: { user: { anonymousId: string } } | null;
@@ -57,6 +60,8 @@ function serialize(r: {
     note: r.note,
     status: r.status,
     createdAt: r.createdAt,
+    expiresAt: r.expiresAt,
+    lastSubmittedAt: r.lastSubmittedAt,
     topics: r.topics.map((t) => t.topic),
     slots: r.slots,
     directedTo: r.directedTutor ? { anonymousId: r.directedTutor.user.anonymousId } : null,
@@ -161,7 +166,7 @@ export async function POST(req: NextRequest) {
     }
 
     const openCount = await prisma.topicRequest.count({
-      where: { learnerId: session.user.id, status: "OPEN" },
+      where: { learnerId: session.user.id, status: "OPEN", expiresAt: { gt: new Date() } },
     });
     if (openCount >= MAX_OPEN_REQUESTS) {
       return NextResponse.json(
@@ -171,9 +176,12 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await prisma.$transaction(async (tx) => {
+      const submittedAt = new Date();
       const request = await tx.topicRequest.create({
         data: {
           learnerId: session.user.id,
+          lastSubmittedAt: submittedAt,
+          expiresAt: requestDeadline(submittedAt),
           subject: subject,
           gradeLevel: studentGrade,
           note: note || null,
@@ -189,6 +197,8 @@ export async function POST(req: NextRequest) {
         },
         include: requestInclude,
       });
+
+      await recordRequestHistory(tx, request.id, session.user.id, "CREATED", null);
 
       if (directedTutorProfileId) {
         const directedTutorProfile = await tx.tutorProfile.findUnique({

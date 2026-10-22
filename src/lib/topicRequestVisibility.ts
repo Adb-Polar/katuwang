@@ -34,6 +34,7 @@ export function tutorPoolWhere(
 
   return {
     status: "OPEN",
+    expiresAt: { gt: new Date() },
     ...(eligibleGrades ? { gradeLevel: { in: eligibleGrades } } : {}),
     OR: [
       { directedTutorProfileId: tutorProfileId },

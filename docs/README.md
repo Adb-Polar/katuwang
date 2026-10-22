@@ -1,9 +1,9 @@
 # Katuwang Docs — Index & Previews
 
-Every document under `docs/` lives in a subfolder; this file is the only page at
-the root and previews all of them. Reorganised 2026-09-10 (see `Changes.md`
-Part 69) — merged the six review docs and three assessment plans, archived
-completed/superseded plans, and moved every loose file into a folder.
+Project documentation is grouped by purpose below. Updated 2026-10-22.
+The repository root keeps `README.md`, `Changes.md`, `AGENTS.md`, and
+`CLAUDE.md` as project entry points and instructions. Design notes, Prisma seed
+accounts, migration notes, and tool skills stay beside the files they describe.
 
 ```
 docs/
@@ -13,7 +13,9 @@ docs/
 ├── plans/               active implementation plans
 ├── reviews/             consolidated code & design reviews
 ├── backlog/             flat TODO / manual-test scratchpads
-├── reports/             current sprint / feature-status spreadsheet
+├── reports/             audits, research, progress, and feature reports
+├── testing/             manual verification checklists
+├── katuwang/            Obsidian notes (vault structure preserved)
 ├── to-submit/           course module deliverables
 └── archive/             completed plans, superseded fragments, old reports
 ```
@@ -61,6 +63,14 @@ Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture di
 | [`subject-topic-management.md`](plans/subject-topic-management.md) | Admin-editable subjects & topics. | **Done 2026-09-04** — `SubjectArea` enum removed, `subject` columns are string slugs, `/admin/subjects` CRUD live. |
 | [`dev-data-factory.md`](plans/dev-data-factory.md) | Dev-only page + API to spawn test data (users, classes, enrollments, topic requests) on demand without re-seeding. | See the plan for current status. |
 
+Additional plans:
+
+| File | Preview |
+|---|---|
+| [`super-admin-implementation.md`](plans/super-admin-implementation.md) | Super Admin role and admin account management proposal. |
+| [`curriculum-database-integration.md`](plans/curriculum-database-integration.md) | Curriculum database integration plan. |
+| [`idempotent-seed-fix.md`](plans/idempotent-seed-fix.md) | Idempotent database seeding plan. |
+
 ## `reviews/`
 
 | File | Preview |
@@ -76,7 +86,30 @@ Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture di
 
 ## `reports/`
 
+| File | Preview |
+|---|---|
+| [`project-progress.md`](reports/project-progress.md) | High-level project implementation and progress report. |
+| [`input-validation-audit.md`](reports/input-validation-audit.md) | Input validation audit and findings. |
+| [`image-optimization.md`](reports/image-optimization.md) | Image compression, storage, and upload optimization report. |
+| [`curriculum-coverage-matrix.md`](reports/curriculum-coverage-matrix.md) | Curriculum coverage matrix. |
+| [`philippine-k12-curriculum-research-report.md`](reports/philippine-k12-curriculum-research-report.md) | Philippine K–12 curriculum research. |
+
 `feature-status-and-sprint-report.xlsx` — current sprint / feature status spreadsheet. Older dated copies are in `archive/reports/`.
+
+## `testing/` — verification checklists
+
+| File | Coverage |
+|---|---|
+| [`avatar.md`](testing/avatar.md) | Avatar uploads, privacy, compression, and moderation. |
+| [`input-validation.md`](testing/input-validation.md) | Field-by-field input validation. |
+| [`super-admin.md`](testing/super-admin.md) | Super Admin and admin account management. |
+| [`grade-restrictions-and-datetime.md`](testing/grade-restrictions-and-datetime.md) | Grade eligibility restrictions and separated date/time inputs. |
+
+## `katuwang/` — Obsidian notes
+
+The Obsidian vault retains its original filenames and configuration:
+[Welcome](katuwang/Welcome.md), [Untitled](katuwang/Untitled.md), and
+[create a link](<katuwang/create a link.md>).
 
 ## `to-submit/` — course deliverables
 

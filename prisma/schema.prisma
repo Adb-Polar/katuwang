@@ -228,6 +228,9 @@ model TopicRequest {
   directedTutorProfileId String?
   createdAt              DateTime            @default(now())
   updatedAt              DateTime            @updatedAt
+  expiresAt              DateTime
+  lastSubmittedAt        DateTime
+  history                TopicRequestHistory[]
   slots                  TopicRequestSlot[]
   topics                 TopicRequestTopic[]
   directedTutor          TutorProfile?       @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id])
@@ -239,6 +242,20 @@ model TopicRequest {
   @@index([fulfilledClassId], map: "topic_requests_fulfilledClassId_fkey")
   @@index([learnerId], map: "topic_requests_learnerId_fkey")
   @@map("topic_requests")
+}
+
+model TopicRequestHistory {
+  id        String       @id @default(cuid())
+  requestId String
+  actorId   String?
+  eventType String
+  createdAt DateTime     @default(now())
+  before    Json?
+  after     Json
+  request   TopicRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId, createdAt])
+  @@map("topic_request_history")
 }
 
 model TopicRequestTopic {

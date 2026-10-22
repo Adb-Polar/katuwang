@@ -1,3 +1,4 @@
+import { recordRequestHistory, requestDeadline, requestSnapshot } from "../src/lib/topicRequestHistory";
 import {
   Role,
   GradeLevel,
@@ -862,48 +863,67 @@ async function ensureTopicRequest(input: {
   });
 
   if (existing) {
-    await prisma.topicRequest.update({
-      where: { id: existing.id },
-      data: {
-        gradeLevel: input.gradeLevel,
-        status: input.status,
-        fulfilledClassId: input.fulfilledClassId ?? null,
-        directedTutorProfileId: input.directedTutorProfileId ?? null,
-      },
-    });
+    await prisma.$transaction(async (tx) => {
+      const before = await requestSnapshot(tx, existing.id);
+      const now = new Date();
+      await tx.topicRequest.update({
+        where: { id: existing.id },
+        data: {
+          gradeLevel: input.gradeLevel,
+          status: input.status,
+          fulfilledClassId: input.fulfilledClassId ?? null,
+          directedTutorProfileId: input.directedTutorProfileId ?? null,
+          ...(input.status === "OPEN" && before.status !== "OPEN"
+            ? { lastSubmittedAt: now, expiresAt: requestDeadline(now) }
+            : {}),
+        },
+      });
 
-    for (const topic of input.topics) {
-      if (!existing.topics.some((t) => t.topic === topic)) {
-        await prisma.topicRequestTopic.create({
-          data: { requestId: existing.id, topic },
-        });
-      }
-    }
-
-    if (input.slots) {
-      for (const slot of input.slots) {
-        if (!existing.slots.some((s) => s.day === slot.day && s.startTime === slot.startTime && s.endTime === slot.endTime)) {
-          await prisma.topicRequestSlot.create({
-            data: { requestId: existing.id, day: slot.day, startTime: slot.startTime, endTime: slot.endTime },
+      for (const topic of input.topics) {
+        if (!existing.topics.some((t) => t.topic === topic)) {
+          await tx.topicRequestTopic.create({
+            data: { requestId: existing.id, topic },
           });
         }
       }
-    }
+
+      if (input.slots) {
+        for (const slot of input.slots) {
+          if (!existing.slots.some((s) => s.day === slot.day && s.startTime === slot.startTime && s.endTime === slot.endTime)) {
+            await tx.topicRequestSlot.create({
+              data: { requestId: existing.id, day: slot.day, startTime: slot.startTime, endTime: slot.endTime },
+            });
+          }
+        }
+      }
+
+      const after = await requestSnapshot(tx, existing.id);
+      if (JSON.stringify(before) !== JSON.stringify(after)) {
+        await recordRequestHistory(tx, existing.id, null, "SEED_UPDATED", before);
+      }
+    });
     return { request: existing, isNew: false };
   }
 
-  const created = await prisma.topicRequest.create({
-    data: {
-      learnerId: input.learnerId,
-      subject: input.subject,
-      gradeLevel: input.gradeLevel,
-      note: input.note,
-      status: input.status,
-      fulfilledClassId: input.fulfilledClassId ?? null,
-      directedTutorProfileId: input.directedTutorProfileId ?? null,
-      topics: { create: input.topics.map((topic) => ({ topic })) },
-      slots: input.slots ? { create: input.slots } : undefined,
-    },
+  const created = await prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const request = await tx.topicRequest.create({
+      data: {
+        learnerId: input.learnerId,
+        lastSubmittedAt: now,
+        expiresAt: requestDeadline(now),
+        subject: input.subject,
+        gradeLevel: input.gradeLevel,
+        note: input.note,
+        status: input.status,
+        fulfilledClassId: input.fulfilledClassId ?? null,
+        directedTutorProfileId: input.directedTutorProfileId ?? null,
+        topics: { create: input.topics.map((topic) => ({ topic })) },
+        slots: input.slots ? { create: input.slots } : undefined,
+      },
+    });
+    await recordRequestHistory(tx, request.id, null, "CREATED", null);
+    return request;
   });
   return { request: created, isNew: true };
 }
