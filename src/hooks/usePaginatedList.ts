@@ -71,6 +71,7 @@ export function usePaginatedList<T>(
 
     async function load() {
       setLoading(true);
+      setError("");
       try {
         const query = new URLSearchParams({
           ...(JSON.parse(paramsKey) as Record<string, string>),
@@ -86,7 +87,10 @@ export function usePaginatedList<T>(
           setMeta(json);
         }
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : errorMessage);
+        if (!cancelled) {
+          setData([]);
+          setError(err instanceof Error ? err.message : errorMessage);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

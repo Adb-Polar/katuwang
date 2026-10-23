@@ -8,7 +8,7 @@ import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } 
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
-import { parseLocalDateAndTime, combineDateAndTime } from "@/lib/datetime";
+import { parseLocalDateAndTime, combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export interface SessionRowValue {
   key: string;
@@ -86,12 +86,12 @@ export default function ClassScheduleFields({
   onSubmit: (payload: ClassScheduleSubmitPayload) => void;
 }) {
   const page = variant === "page";
-  const inputCls = page ? "input-md text-sm" : "input-sm text-xs";
-  const selectCls = page ? "select-md text-sm" : "select-sm text-xs";
-  const rowInputCls = page ? "input-sm text-sm" : "input-xs text-2xs";
-  const rowSelectCls = page ? "select-sm text-sm" : "select-xs text-2xs";
-  const rowBtnCls = page ? "btn-sm" : "btn-xs";
-  const textareaCls = page ? "textarea-md text-sm h-24" : "textarea-sm text-xs h-20";
+  const inputCls = "min-h-11 text-base sm:text-sm";
+  const selectCls = "min-h-11 text-base sm:text-sm";
+  const rowInputCls = "min-h-11 text-base sm:text-sm";
+  const rowSelectCls = "min-h-11 text-base sm:text-sm";
+  const rowBtnCls = "min-h-11";
+  const textareaCls = "text-base sm:text-sm h-24";
   const actionBtnCls = page ? "btn-md text-sm" : "btn-sm text-xs";
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
   const topicLabelCls = page ? "text-xs" : "text-2xs";
@@ -250,6 +250,7 @@ export default function ClassScheduleFields({
   return (
     <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
+      <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
       <FormField size={fieldSize} label="Subject Area" required>
         <select
@@ -423,6 +424,7 @@ export default function ClassScheduleFields({
                     #{i + 1}
                   </span>
                   <select
+                    aria-label={`Session #${i + 1} topic`}
                     value={row.topic}
                     onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
                     className={`select select-bordered ${rowSelectCls} flex-1 min-w-0 truncate`}
@@ -487,6 +489,7 @@ export default function ClassScheduleFields({
         <div className="flex flex-wrap items-center gap-1.5">
           <input
             type="text"
+            aria-label="Building"
             name="building"
             value={form.building}
             onChange={handleInputChange}
@@ -495,6 +498,7 @@ export default function ClassScheduleFields({
           />
           <input
             type="text"
+            aria-label="Room"
             name="room"
             value={form.room}
             onChange={handleInputChange}

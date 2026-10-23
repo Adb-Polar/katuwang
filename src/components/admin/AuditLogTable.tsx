@@ -5,7 +5,7 @@ import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
-import { formatDateTime } from "@/lib/datetime";
+import { formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
@@ -75,16 +75,19 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Moderation Action History</h2>
+          <p className="text-xs text-base-content/60">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search audit log"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search admin ID, reason, target ID..."
               className="input input-bordered input-sm text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter audit actions"
               value={action}
               onChange={(e) => setAction(e.target.value)}
               className="select select-bordered select-sm text-xs focus:select-primary"
@@ -97,6 +100,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               ))}
             </select>
             <select
+              aria-label="Filter audit target types"
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
               className="select select-bordered select-sm text-xs focus:select-primary"

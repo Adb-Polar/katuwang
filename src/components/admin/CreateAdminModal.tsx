@@ -4,6 +4,7 @@ import { useState } from "react";
 import { UserPlus, CheckCircle2, Copy, Check } from "lucide-react";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import Modal from "@/components/ui/Modal";
 
 interface CreateAdminModalProps {
   isOpen: boolean;
@@ -108,19 +109,7 @@ export default function CreateAdminModal({
   };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-md p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-        <button
-          type="button"
-          onClick={handleClose}
-          className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-        >
-          ✕
-        </button>
-
-        <h3 className="font-sans text-base font-semibold mb-1">
-          {createdAdmin ? "Admin Provisioned" : "Provision Admin Account"}
-        </h3>
+    <Modal open={isOpen} onClose={handleClose} title={createdAdmin ? "Admin Provisioned" : "Provision Admin Account"} size="md">
         <p className="text-2xs text-base-content/50 mb-4">
           {createdAdmin
             ? "The new administrator account has been created."
@@ -150,11 +139,12 @@ export default function CreateAdminModal({
 
             {activationUrl && (
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-base-content/70">
+                <label htmlFor="admin-activation-url" className="text-xs font-medium text-base-content/70">
                   Direct Activation Link (valid for 48 hours)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
+                    id="admin-activation-url"
                     type="text"
                     readOnly
                     value={activationUrl}
@@ -270,7 +260,6 @@ export default function CreateAdminModal({
             </div>
           </form>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import type { TopicAssessmentStatus } from "@/lib/assessmentStatus";
 
 export interface TaughtTopic {
@@ -114,11 +115,11 @@ export default function TopicCertificationList({
             key={key}
             className="flex flex-col gap-2 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
           >
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-semibold text-base-content/80 truncate">{topic}</div>
+                <div className="font-semibold text-base-content/80 break-words">{topic}</div>
                 <div className="text-2xs text-base-content/50">
-                  {subject}
+                  {subjectDisplayLabel(subject)}
                   {st && !st.bankReady && (
                     <span className="ml-2 text-base-content/40">
                       · {st.activeQuestionCount}/{st.minBankSize} questions
@@ -127,7 +128,7 @@ export default function TopicCertificationList({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                 {certStatus === "CERTIFIED" ? (
                   <StatusBadge tone="success" label="Verified" size="xs" />
                 ) : awaitingConfirmation ? (
@@ -135,7 +136,7 @@ export default function TopicCertificationList({
                 ) : st?.inProgressAttemptId ? (
                   <button
                     onClick={() => router.push(`/tutor/assessments/${st.inProgressAttemptId}`)}
-                    className="btn btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                    className="btn btn-primary min-h-11 text-sm font-bold cursor-pointer"
                   >
                     Resume assessment
                   </button>
@@ -147,7 +148,7 @@ export default function TopicCertificationList({
                     <button
                       onClick={() => startAssessment(subject, topic)}
                       disabled={busy === key}
-                      className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                      className="btn btn-outline btn-primary min-h-11 text-sm font-bold cursor-pointer"
                     >
                       {busy === key ? (
                         <span className="loading loading-spinner loading-xs"></span>
@@ -164,7 +165,7 @@ export default function TopicCertificationList({
                   <button
                     onClick={() => requestQuestions(subject, topic)}
                     disabled={busy === key}
-                    className="btn btn-outline btn-xs text-2xs font-bold cursor-pointer"
+                    className="btn btn-outline min-h-11 text-sm font-bold cursor-pointer"
                   >
                     {busy === key ? (
                       <span className="loading loading-spinner loading-xs"></span>

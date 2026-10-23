@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatTime } from "@/lib/datetime";
+import { formatTime, formatWeekday, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export interface TimetableSession {
   id: string;
@@ -38,7 +38,7 @@ export default function WeeklyTimetable({
 
   const byDay: Record<number, TimetableSession[]> = {};
   for (const s of sessions) {
-    const idx = (new Date(s.scheduledAt).getDay() + 6) % 7; // Mon = 0 … Sun = 6
+    const idx = DAYS.indexOf(formatWeekday(s.scheduledAt)); // Mon = 0 … Sun = 6
     (byDay[idx] ??= []).push(s);
   }
   for (const list of Object.values(byDay)) {
@@ -47,6 +47,7 @@ export default function WeeklyTimetable({
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <p className="col-span-full text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
       {DAYS.map((day, i) => (
         <div key={day} className="rounded-lg border border-base-200 bg-base-200/20 p-2 min-h-[5rem]">
           <div className="text-2xs font-bold uppercase tracking-wide text-base-content/50 mb-1.5">

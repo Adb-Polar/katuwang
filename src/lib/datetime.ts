@@ -18,11 +18,14 @@ export const addDays = (date: DateInput, n: number): Date =>
   new Date(asDate(date).getTime() + n * DAY_MS);
 
 // ─── Formatting ──────────────────────────────────────────────────────────────
-// One presentation policy for the whole app. Locale follows the runtime.
+// School-wide presentation and form-input policy, independent of server/browser timezone.
+export const SCHOOL_TIME_ZONE = "Asia/Manila";
+export const SCHOOL_TIME_ZONE_LABEL = "Philippine time (PHT)";
+const LOCALE = "en-PH";
 
 /** e.g. "Aug 30, 2026". */
 export function formatDate(input: DateInput): string {
-  return asDate(input).toLocaleDateString(undefined, {
+  return asDate(input).toLocaleDateString(LOCALE, { timeZone: SCHOOL_TIME_ZONE,
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -31,22 +34,22 @@ export function formatDate(input: DateInput): string {
 
 /** e.g. "Aug 30" — day/month only, for dense lists where the year is implied. */
 export function formatDayMonth(input: DateInput): string {
-  return asDate(input).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return asDate(input).toLocaleDateString(LOCALE, { timeZone: SCHOOL_TIME_ZONE, month: "short", day: "numeric" });
 }
 
 /** e.g. "Aug 30, 2026, 3:00 PM". */
 export function formatDateTime(input: DateInput): string {
-  return asDate(input).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  return asDate(input).toLocaleString(LOCALE, { timeZone: SCHOOL_TIME_ZONE, dateStyle: "medium", timeStyle: "short" });
 }
 
 /** e.g. "3:00 PM". */
 export function formatTime(input: DateInput): string {
-  return asDate(input).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
+  return asDate(input).toLocaleTimeString(LOCALE, { timeZone: SCHOOL_TIME_ZONE, hour: "2-digit", minute: "2-digit" });
 }
 
 /** e.g. "Mon". */
 export function formatWeekday(input: DateInput): string {
-  return asDate(input).toLocaleDateString(undefined, { weekday: "short" });
+  return asDate(input).toLocaleDateString(LOCALE, { timeZone: SCHOOL_TIME_ZONE, weekday: "short" });
 }
 
 // ─── Input Parsing & Serialization ──────────────────────────────────────────
@@ -72,14 +75,13 @@ export function parseLocalDateAndTime(val?: DateInput | null): { date: string; t
   const d = asDate(val);
   if (isNaN(d.getTime())) return { date: "", time: "" };
 
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const year = d.getFullYear();
-  const month = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hours = pad(d.getHours());
-  const minutes = pad(d.getMinutes());
-
-  return { date: `${year}-${month}-${day}`, time: `${hours}:${minutes}` };
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: SCHOOL_TIME_ZONE,
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+  }).formatToParts(d);
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return { date: `${part("year")}-${part("month")}-${part("day")}`, time: `${part("hour")}:${part("minute")}` };
 }
 
 /**
@@ -89,7 +91,9 @@ export function parseLocalDateAndTime(val?: DateInput | null): { date: string; t
  */
 export function combineDateAndTime(date?: string | null, time?: string | null): string | null {
   if (!date || !time) return null;
-  const d = new Date(`${date}T${time}`);
-  if (isNaN(d.getTime())) return null;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return null;
+  // Asia/Manila has a fixed UTC+08:00 offset for current school schedules.
+  const d = new Date(`${date}T${time}:00+08:00`);
+  if (isNaN(d.getTime()) || parseLocalDateAndTime(d).date !== date || parseLocalDateAndTime(d).time !== time) return null;
   return d.toISOString();
 }

@@ -88,7 +88,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card kt-card">
+        <section className="order-2 lg:order-1 lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <ScrollText className="h-4 w-4 text-primary" />
@@ -107,7 +107,7 @@ export default async function AdminDashboard() {
                         {log.action.replace(/_/g, " ")}
                         <span className="font-normal text-base-content/50"> · {log.targetType.toLowerCase()}</span>
                       </span>
-                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)}</span>
+                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
                     </div>
                     <div className="text-2xs text-base-content/50 mt-0.5">
                       by {log.admin.anonymousId}
@@ -123,7 +123,7 @@ export default async function AdminDashboard() {
           </div>
         </section>
 
-        <section className="card kt-card">
+        <section className="order-1 lg:order-2 card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Needs attention</h2>
             {actions.map((a) => (

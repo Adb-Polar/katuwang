@@ -12,6 +12,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
+import { statusDisplayLabel } from "@/lib/displayLabels";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
@@ -248,7 +249,7 @@ export default function AdminManagementTable() {
                         )}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[u.status]} label={u.status} size="xs" />
+                        <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                         {u.status === "SUSPENDED" && u.statusReason && (
                           <div className="text-2xs text-base-content/50 mt-1 max-w-xs truncate">
                             {u.statusReason}
@@ -256,7 +257,7 @@ export default function AdminManagementTable() {
                         )}
                       </td>
                       <td className="text-base-content/60 text-xs">
-                        {formatDateTime(u.createdAt)}
+                        {formatDateTime(u.createdAt)} PHT
                       </td>
                       <td className="text-right">
                         {u.role === "SUPER_ADMIN" ? (

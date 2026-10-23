@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
@@ -49,7 +48,6 @@ interface TutorClass {
 }
 
 export default function ClassManagement() {
-  const router = useRouter();
   const { data: classes, loading, error } = useFetchList<TutorClass>(
     "/api/tutor/classes",
     "Could not retrieve classes."
@@ -137,7 +135,7 @@ export default function ClassManagement() {
                   enrolledCount={c.enrollments.length}
                   maxStudents={c.maxStudents}
                   activeLabel="Active"
-                  onClick={() => router.push(`/tutor/classes/${c.id}`)}
+                  href={`/tutor/classes/${c.id}`}
                 />
               ))}
             </div>

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Modal from "@/components/ui/Modal";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
@@ -14,6 +15,7 @@ import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { GRADE_LEVELS, gradeSection } from "@/lib/gradeLevels";
+import { statusDisplayLabel } from "@/lib/displayLabels";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
@@ -53,7 +55,6 @@ const TAB_ROLE: Record<"all" | "learners" | "tutors", string> = {
 };
 
 export default function UserManagementTable() {
-  const router = useRouter();
   const [success, setSuccess] = useState("");
   const [activeTab, setActiveTab] = useState<"all" | "learners" | "tutors">("all");
   const [search, setSearch] = useState("");
@@ -140,7 +141,7 @@ export default function UserManagementTable() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Learner & Tutor Accounts</h2>
+
 
           <Tabs
             tabs={[
@@ -155,15 +156,17 @@ export default function UserManagementTable() {
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
+              aria-label="Search accounts by name, email, or ID"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or ID..."
-              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+              className="input input-bordered min-h-11 w-full sm:max-w-xs text-base sm:text-sm focus:input-primary"
             />
             <select
+              aria-label="Filter accounts by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as AccountStatus | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto text-base sm:text-sm focus:select-primary"
             >
               <option value="">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -172,9 +175,10 @@ export default function UserManagementTable() {
               <option value="DECLINED">Declined</option>
             </select>
             <select
+              aria-label="Filter accounts by grade"
               value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value as GradeLevel | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto text-base sm:text-sm focus:select-primary"
             >
               <option value="">All Grade Levels</option>
               {GRADE_LEVELS.map((g) => (
@@ -188,7 +192,27 @@ export default function UserManagementTable() {
           {loading ? (
             <LoadingRow />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
+            <>
+            <div className="grid gap-3 md:hidden">
+              {displayed.map((u) => (
+                <article key={u.id} className="rounded-xl border border-base-300 p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <Link href={`/admin/users/${u.id}`} className="font-semibold text-primary hover:underline">{u.firstName} {u.lastName}</Link>
+                      <p className="text-xs text-base-content/60">{u.anonymousId} · {gradeSection(u.gradeLevel, u.section)}</p>
+                    </div>
+                    <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
+                  </div>
+                  <p className="text-xs break-all text-base-content/60">{u.email}</p>
+                  <div className="flex gap-2">
+                    <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 text-sm flex-1">View details</Link>
+                    <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 text-sm flex-1">Manage account</button>
+                  </div>
+                </article>
+              ))}
+              {!loading && displayed.length === 0 && <EmptyState>No accounts found.</EmptyState>}
+            </div>
+            <div className="hidden md:block overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
@@ -204,8 +228,7 @@ export default function UserManagementTable() {
                   {displayed.map((u) => (
                     <tr
                       key={u.id}
-                      onClick={() => router.push(`/admin/users/${u.id}`)}
-                      className="text-sm cursor-pointer hover:bg-base-200/40"
+                      className="text-sm hover:bg-base-200/40"
                     >
                       <td>
                         <AnonymousIdBadge
@@ -225,9 +248,9 @@ export default function UserManagementTable() {
                               modalTitle={`${u.firstName} ${u.lastName} - Profile Picture`}
                             />
                           </div>
-                          <span>
-                            {u.firstName} {u.lastName}
-                          </span>
+                          <Link href={`/admin/users/${u.id}`} className="font-semibold text-primary hover:underline">
+                            {u.firstName} {u.lastName}<span className="sr-only"> — View account details</span>
+                          </Link>
                         </div>
                       </td>
                       <td className="text-base-content/60">{u.email}</td>
@@ -235,7 +258,7 @@ export default function UserManagementTable() {
                         {gradeSection(u.gradeLevel, u.section)}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[u.status]} label={u.status} size="xs" />
+                        <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                         {u.status === "SUSPENDED" && u.statusExpiresAt && (
                           <div className="text-2xs text-base-content/50 mt-1">
                             Until {formatDateTime(u.statusExpiresAt)}
@@ -244,11 +267,9 @@ export default function UserManagementTable() {
                       </td>
                       <td>
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openModal(u);
-                          }}
-                          className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                          onClick={() => openModal(u)}
+                          aria-label={`Manage ${u.anonymousId} account`}
+                          className="btn btn-outline btn-primary min-h-11 text-xs font-bold"
                         >
                           Manage
                         </button>
@@ -261,6 +282,7 @@ export default function UserManagementTable() {
                 <EmptyState>No accounts found.</EmptyState>
               )}
             </div>
+            </>
           )}
 
           <Pagination
@@ -273,16 +295,8 @@ export default function UserManagementTable() {
         </div>
       </section>
 
-      {target && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              onClick={() => setTarget(null)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-1">Manage Account</h3>
+      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Account">
+        {target && <>
             <p className="text-2xs text-base-content/50 mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>
@@ -342,9 +356,8 @@ export default function UserManagementTable() {
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </>}
+      </Modal>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
-import { addDays, formatDateTime, formatTime, formatWeekday } from "@/lib/datetime";
+import { addDays, formatDateTime, formatTime, formatWeekday, parseLocalDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard from "@/components/ui/StatCard";
@@ -175,6 +175,7 @@ export default async function TutorDashboard() {
             <CalendarClock className="h-4 w-4 text-primary" />
             Upcoming sessions
           </h2>
+          <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
           {upcomingSessions.length === 0 ? (
             <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
               No scheduled sessions across your classes.
@@ -193,7 +194,7 @@ export default async function TutorDashboard() {
                         <span className="text-2xs font-bold uppercase leading-none">
                           {formatWeekday(d)}
                         </span>
-                        <span className="text-base font-bold leading-tight">{d.getDate()}</span>
+                        <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

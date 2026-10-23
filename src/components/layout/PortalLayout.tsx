@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -65,6 +65,10 @@ export default function PortalLayout({
   const pathname = usePathname();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const desktopRef = useRef<HTMLElement>(null);
   const avatarUrl = userImage ?? session?.user?.image ?? null;
 
   // Per-group collapse state, persisted per portal. `true` = collapsed. A group
@@ -102,17 +106,33 @@ export default function PortalLayout({
     setMenuOpen(false);
   }
 
-  // Lock body scroll and wire Escape-to-close while the drawer is open.
+  // The drawer is modal at mobile widths: enter it, contain Tab, and restore focus.
   useEffect(() => {
     if (!menuOpen) return;
+    const drawer = drawerRef.current;
+    const trigger = triggerRef.current;
+    const content = contentRef.current;
+    const desktop = desktopRef.current;
+    content?.setAttribute("inert", "");
+    desktop?.setAttribute("inert", "");
+    drawer?.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") { e.preventDefault(); setMenuOpen(false); return; }
+      if (e.key !== "Tab" || !drawer) return;
+      const focusable = Array.from(drawer.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
+      content?.removeAttribute("inert");
+      desktop?.removeAttribute("inert");
       document.body.style.overflow = "";
+      trigger?.focus();
     };
   }, [menuOpen]);
 
@@ -199,7 +219,7 @@ export default function PortalLayout({
   return (
     <div className="min-h-screen grid lg:grid-cols-[15.5rem_minmax(0,1fr)] bg-base-200">
       {/* desktop sidebar */}
-      <aside className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
+      <aside ref={desktopRef} className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
         <div className="flex items-center gap-3 px-2 pt-1">
           <BrandMark />
           <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
@@ -218,10 +238,11 @@ export default function PortalLayout({
       </aside>
 
       {/* content column */}
-      <div className="flex flex-col min-w-0">
+      <div ref={contentRef} className="flex flex-col min-w-0">
         <header className="kt-topbar">
           {/* mobile drawer toggle */}
           <button
+            ref={triggerRef}
             type="button"
             className="lg:hidden btn btn-ghost btn-sm btn-square"
             aria-label="Open menu"
@@ -302,10 +323,12 @@ export default function PortalLayout({
         aria-hidden="true"
       />
       <aside
+        ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
         aria-hidden={!menuOpen}
+        inert={!menuOpen}
         className={`kt-sidebar fixed inset-y-0 left-0 z-50 flex w-72 max-w-[82vw] flex-col gap-6 overflow-y-auto p-3 shadow-xl transition-transform duration-300 ease-out lg:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}

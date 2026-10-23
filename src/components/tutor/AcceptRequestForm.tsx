@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseLocalDateAndTime } from "@/lib/datetime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
@@ -32,21 +33,15 @@ const WEEKDAY_INDEX: Record<string, number> = {
 
 /** Next future occurrence of `day` at `HH:MM`, formatted as `YYYY-MM-DDTHH:mm`. */
 function nextOccurrence(day: string, time: string): string {
-  const [hh, mm] = time.split(":").map(Number);
   const targetDow = WEEKDAY_INDEX[day] ?? 1;
   const now = new Date();
-  const result = new Date(now);
-  result.setSeconds(0, 0);
-  result.setHours(hh, mm, 0, 0);
-
-  let diff = (targetDow - now.getDay() + 7) % 7;
-  if (diff === 0 && result.getTime() <= now.getTime()) diff = 7;
-  result.setDate(now.getDate() + diff);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${result.getFullYear()}-${pad(result.getMonth() + 1)}-${pad(result.getDate())}T${pad(
-    result.getHours()
-  )}:${pad(result.getMinutes())}`;
+  const schoolDate = parseLocalDateAndTime(now).date;
+  const schoolDay = new Date(`${schoolDate}T00:00:00Z`);
+  let diff = (targetDow - schoolDay.getUTCDay() + 7) % 7;
+  const candidate = `${schoolDate}T${time}`;
+  if (diff === 0 && new Date(`${schoolDate}T${time}:00+08:00`) <= now) diff = 7;
+  schoolDay.setUTCDate(schoolDay.getUTCDate() + diff);
+  return diff === 0 ? candidate : `${schoolDay.toISOString().slice(0, 10)}T${time}`;
 }
 
 let rowIdCounter = 0;

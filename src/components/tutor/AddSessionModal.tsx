@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
-import { combineDateAndTime } from "@/lib/datetime";
+import { combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export default function AddSessionModal({ classId, classTopics }: { classId: string; classTopics: string[] }) {
   const router = useRouter();
@@ -75,6 +75,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
             <FeedbackBanner variant="error" message={error || null} />
 
             <form onSubmit={handleSubmit} className="space-y-3.5 mt-3.5">
+              <p className="text-xs text-base-content/60">Enter the date and time in {SCHOOL_TIME_ZONE_LABEL}.</p>
               <FormField label="Topic" required>
                 <select
                   value={topic}

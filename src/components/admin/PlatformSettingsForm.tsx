@@ -225,10 +225,12 @@ export default function PlatformSettingsForm() {
       <div key={setting.key} className="flex items-center justify-between gap-4 py-4">
         <div>
           <p className="text-sm font-semibold text-base-content">{meta?.label || setting.key}</p>
-          {meta?.description && <p className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
+          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
         </div>
         <input
           type="checkbox"
+          aria-label={meta?.label || setting.key}
+          aria-describedby={meta?.description ? `setting-${setting.key}-description` : undefined}
           className="toggle toggle-primary shrink-0"
           checked={Boolean(setting.value)}
           disabled={savingKey === setting.key}
@@ -266,6 +268,7 @@ export default function PlatformSettingsForm() {
                   </p>
                 </div>
                 <select
+                  aria-label="Profile picture requirement"
                   className="select select-bordered select-sm w-full sm:w-56 text-xs focus:select-primary"
                   value={profilePicValue}
                   disabled={savingKey === "profilePictureRequirement"}

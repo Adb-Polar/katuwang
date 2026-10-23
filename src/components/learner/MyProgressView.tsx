@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { ProgressAreaChart } from "@/components/charts";
@@ -42,6 +43,8 @@ export default function MyProgressView({
   const [classId, setClassId] = useState(fixedClassId ?? "");
   const [data, setData] = useState<ProgressPayload | null>(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,12 +57,14 @@ export default function MyProgressView({
         if (!cancelled) setData(json);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load progress.");
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [classId]);
+  }, [classId, retryCount]);
 
   const chartData =
     data?.series.map((r) => ({
@@ -75,8 +80,9 @@ export default function MyProgressView({
           <h1 className="text-lg font-sans">My Progress</h1>
           {classOptions && classOptions.length > 0 && (
             <select
+              aria-label="Filter progress by class"
               value={classId}
-              onChange={(e) => setClassId(e.target.value)}
+              onChange={(e) => { setLoading(true); setError(""); setData(null); setClassId(e.target.value); }}
               className="select select-bordered select-sm text-xs"
             >
               <option value="">All classes</option>
@@ -91,8 +97,16 @@ export default function MyProgressView({
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
+      {error && <button type="button" onClick={() => { setLoading(true); setError(""); setData(null); setRetryCount((count) => count + 1); }} className="btn btn-outline btn-error min-h-11">Retry loading progress</button>}
 
-      {data && (
+      {loading && <p role="status" className="text-sm text-base-content/60">Loading progress…</p>}
+      {!loading && !error && data?.summary.sessionsWithTest === 0 && (
+        <div className="rounded-xl border border-base-300 p-4 text-sm space-y-2">
+          <p>No session tests have been recorded for this selection yet. Open a class to check upcoming sessions and tests.</p>
+          <Link className="link link-primary" href={fixedClassId ? `/learner/classes/${fixedClassId}` : "/learner/my-classes"}>View my classes</Link>
+        </div>
+      )}
+      {data && !error && (
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           <div className="card kt-card kt-stat p-4">
             <span className="kt-stat-title">Sessions with a test</span>
@@ -125,7 +139,7 @@ export default function MyProgressView({
         </div>
       )}
 
-      <ProgressAreaChart
+      {!loading && !error && data && data.summary.sessionsWithTest > 0 && <ProgressAreaChart
         title="Pre vs post score, by session"
         data={chartData}
         xKey="label"
@@ -133,7 +147,7 @@ export default function MyProgressView({
           { key: "pre", name: "Pre-test", color: "var(--color-accent)" },
           { key: "post", name: "Post-test", color: "var(--color-success)" },
         ]}
-      />
+      />}
     </div>
   );
 }

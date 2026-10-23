@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
-import { useRouter } from "next/navigation";
+
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -59,7 +59,6 @@ interface TutorClass {
  * via `usePaginatedList` so Back from a class detail restores the exact page.
  */
 export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
-  const router = useRouter();
   const [q, setQ] = useState("");
   const { subjects: catalog } = useSubjectCatalog();
   const [subject, setSubject] = useState<string>("");
@@ -88,6 +87,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
     setPageSize,
     loading,
     error,
+    refetch,
   } = usePaginatedList<TutorClass>(
     "/api/classes",
     "classes",
@@ -125,12 +125,14 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <SearchInput
+              label="Search classes"
               value={q}
               onChange={setQ}
               placeholder="Search code, subject, or topic..."
             />
             <select
-              className="select select-bordered select-sm text-xs"
+              aria-label="Filter classes by subject"
+              className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
             >
@@ -142,7 +144,8 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               ))}
             </select>
             <select
-              className="select select-bordered select-sm text-xs"
+              aria-label="Filter classes by grade"
+              className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
               value={gradeLevel}
               onChange={(e) => setGradeLevel(e.target.value)}
             >
@@ -157,6 +160,11 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
           {loading ? (
             <LoadingRow />
+          ) : error ? (
+            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+              <span>Classes could not be loaded.</span>
+              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry loading classes</button>
+            </div>
           ) : classes.length === 0 ? (
             <ClassEmptyState
               message={
@@ -211,9 +219,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                     tutorName={c.tutor.name}
                     tutorSection={c.tutor.section}
                     tutorImage={c.tutor.image}
-                    onClick={() =>
-                      router.push(`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`)
-                    }
+                    href={`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`}
                   />
                 ))}
               </div>

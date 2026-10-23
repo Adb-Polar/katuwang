@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -62,7 +61,6 @@ function reasonChips(r: MatchReasons) {
 }
 
 export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) {
-  const router = useRouter();
   const [criteria, setCriteria] = useState<MatchCriteriaValue>({
     ...EMPTY_CRITERIA,
     gradeLevel: defaultGrade,
@@ -152,7 +150,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       tutorName={m.class.tutor.name}
                       tutorSection={m.class.tutor.section}
                       tutorImage={m.class.tutor.image}
-                      onClick={() => router.push(`/learner/classes/${m.class.id}?from=browse`)}
+                      href={`/learner/classes/${m.class.id}?from=browse`}
                     />
                     <div className="flex items-center gap-1.5 px-1">
                       <span className="badge badge-primary badge-sm text-2xs font-bold">

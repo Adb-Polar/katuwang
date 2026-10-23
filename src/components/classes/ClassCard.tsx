@@ -31,7 +31,6 @@ export default function ClassCard({
   tutorName,
   tutorSection,
   tutorImage,
-  onClick,
   href,
 }: {
   /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow when set. */
@@ -60,8 +59,6 @@ export default function ClassCard({
   tutorSection?: string | null;
   /** Learner-facing: the tutor's profile picture URL */
   tutorImage?: string | null;
-  /** Click handler (client callers). Ignored when `href` is set. */
-  onClick?: () => void;
   /** When set, the card renders as a link to this path (usable from Server Components). */
   href?: string;
 }) {
@@ -194,13 +191,6 @@ export default function ClassCard({
     </>
   );
 
-  return href ? (
-    <Link href={href} className={cardClassName}>
-      {inner}
-    </Link>
-  ) : (
-    <div onClick={onClick} className={cardClassName}>
-      {inner}
-    </div>
-  );
+  return href ? <Link href={href} className={cardClassName}>{inner}</Link>
+    : <div className={cardClassName.replace("cursor-pointer", "")}>{inner}</div>;
 }
