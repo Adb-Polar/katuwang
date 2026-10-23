@@ -18,6 +18,7 @@ export default function FormField({
   ) as ReactElement<Record<string, unknown>> | undefined;
   const id = nativeChild ? (nativeChild.props.id as string | undefined) ?? generatedId : undefined;
   const feedbackId = `${generatedId}-feedback`;
+  const labelId = `${generatedId}-label`;
   const control = nativeChild ? nodes.map((node) => node === nativeChild
     ? cloneElement(nativeChild, {
         id,
@@ -33,12 +34,12 @@ export default function FormField({
   );
   const feedback = error ? <p id={feedbackId} className="text-xs text-error mt-1">{error}</p>
     : hint ? <p id={feedbackId} className="text-xs text-base-content/60 mt-1">{hint}</p> : null;
-  const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div>{labelNode}</div>;
+  const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div id={labelId}>{labelNode}</div>;
   if (orientation === "horizontal") return (
-    <div className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+    <div role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
       <div className="sm:w-40 sm:shrink-0 sm:pt-2">{labelElement}</div>
       <div className="w-full">{control}{feedback}</div>
     </div>
   );
-  return <div className="w-full flex flex-col gap-1.5">{labelElement}{control}{feedback}</div>;
+  return <div role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-1.5">{labelElement}{control}{feedback}</div>;
 }

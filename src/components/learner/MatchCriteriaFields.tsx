@@ -137,6 +137,7 @@ export default function MatchCriteriaFields({
             <div key={i} className="rounded-lg border border-base-300 bg-base-100 p-3 space-y-2.5">
               <div className="flex items-center gap-2">
                 <select
+                  aria-label={`Preferred time slot ${i + 1} day`}
                   value={slot.day}
                   onChange={(e) => updateSlot(i, { day: e.target.value })}
                   className="select select-bordered select-sm text-xs w-full"
@@ -151,7 +152,7 @@ export default function MatchCriteriaFields({
                   type="button"
                   onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
                   className="btn btn-ghost btn-sm text-error shrink-0"
-                  aria-label="Remove time slot"
+                  aria-label={`Remove preferred time slot ${i + 1}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -159,6 +160,7 @@ export default function MatchCriteriaFields({
               <div className="flex items-center gap-2">
                 <input
                   type="time"
+                  aria-label={`Preferred time slot ${i + 1} start time`}
                   value={slot.startTime}
                   onChange={(e) => updateSlot(i, { startTime: e.target.value })}
                   className="input input-bordered input-sm text-xs w-full"
@@ -166,6 +168,7 @@ export default function MatchCriteriaFields({
                 <span className="text-xs text-base-content/50 shrink-0">to</span>
                 <input
                   type="time"
+                  aria-label={`Preferred time slot ${i + 1} end time`}
                   value={slot.endTime}
                   onChange={(e) => updateSlot(i, { endTime: e.target.value })}
                   className="input input-bordered input-sm text-xs w-full"

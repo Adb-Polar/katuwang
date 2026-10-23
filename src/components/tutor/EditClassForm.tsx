@@ -264,6 +264,7 @@ export default function EditClassForm({
                       <div className="flex gap-2 mt-2">
                         <input
                           type="text"
+                          aria-label="Add a custom topic"
                           value={customTopic}
                           onChange={(e) => setCustomTopic(e.target.value)}
                           onKeyDown={(e) => {
@@ -308,6 +309,7 @@ export default function EditClassForm({
                       <MapPin className="h-4 w-4 text-primary shrink-0" />
                       <input
                         type="text"
+                        aria-label="Building"
                         value={form.building}
                         onChange={(e) => setForm((prev) => ({ ...prev, building: e.target.value }))}
                         placeholder="Building"
@@ -315,6 +317,7 @@ export default function EditClassForm({
                       />
                       <input
                         type="text"
+                        aria-label="Room"
                         value={form.room}
                         onChange={(e) => setForm((prev) => ({ ...prev, room: e.target.value }))}
                         placeholder="Room"
@@ -328,6 +331,7 @@ export default function EditClassForm({
                       <LinkIcon className="h-4 w-4 text-primary shrink-0" />
                       <input
                         type="url"
+                        aria-label="Meeting link"
                         value={form.meetingLink}
                         onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
                         placeholder="https://meet.google.com/..."

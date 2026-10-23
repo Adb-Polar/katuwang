@@ -296,6 +296,7 @@ export default function ClassScheduleFields({
             {subjectTopics.length > 8 && (
               <input
                 type="text"
+                aria-label="Search available topics"
                 value={topicFilter}
                 onChange={(e) => setTopicFilter(e.target.value)}
                 placeholder="Search topics…"
@@ -364,6 +365,7 @@ export default function ClassScheduleFields({
               <div className="flex gap-2">
                 <input
                   type="text"
+                  aria-label="Add a custom topic"
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
                   onKeyDown={(e) => {

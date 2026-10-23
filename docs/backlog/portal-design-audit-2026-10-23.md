@@ -50,8 +50,8 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 
 - [x] DA-01: Use `Asia/Manila` in shared date/time formatting, parsing, UTC serialization, weekly timetable grouping, request-slot prefill, and admin report day grouping; show PHT near schedules and time-sensitive admin records.
 - [ ] DA-01: Verify the same stored session/account/event on dashboard, list, detail, editor, and audit pages in a browser running in a different timezone. Check remaining direct date arithmetic outside the shared helper.
-- [x] DA-02: Associate direct native controls in `FormField` with labels and hints/errors; name learner browse filters, admin user filters, and settings toggles.
-- [ ] DA-02: Audit composite `FormField` children and remaining controls across all portal forms; verify names, hints, and errors with a screen reader.
+- [x] DA-02: Associate native controls in `FormField` with labels and hints/errors, give composite fields named groups, and name learner browse/matching filters, tutor scheduling/editing controls, admin user filters, and settings toggles.
+- [ ] DA-02: Audit remaining controls across all portal forms and verify names, hints, and errors with a screen reader.
 - [x] DA-03: Enter the mobile drawer on open, trap Tab, make background inert, keep Escape, and restore trigger focus.
 - [ ] DA-03: Verify focus behavior and viewport transitions in a real mobile browser.
 - [x] DA-04: Use semantic links for learner/tutor class cards and admin account details.
