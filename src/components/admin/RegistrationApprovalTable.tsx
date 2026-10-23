@@ -122,15 +122,17 @@ export default function RegistrationApprovalTable() {
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
+              aria-label="Search pending registrations"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or ID..."
-              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+              className="input input-bordered min-h-11 w-full sm:max-w-xs text-base sm:text-sm focus:input-primary"
             />
             <select
+              aria-label="Filter registrations by grade"
               value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value as GradeLevel | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto text-base sm:text-sm focus:select-primary"
             >
               <option value="">All Grade Levels</option>
               {GRADE_LEVELS.map((g) => (
@@ -143,6 +145,11 @@ export default function RegistrationApprovalTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : error && users.length === 0 ? (
+            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+              <span>Pending registrations could not be loaded.</span>
+              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry</button>
+            </div>
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -182,7 +189,7 @@ export default function RegistrationApprovalTable() {
                           <button
                             onClick={() => review(u, "APPROVE")}
                             disabled={busyId === u.id}
-                            className="btn btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-primary min-h-11 text-sm font-bold cursor-pointer"
                           >
                             {busyId === u.id ? (
                               <span className="loading loading-spinner loading-xs"></span>
@@ -197,7 +204,7 @@ export default function RegistrationApprovalTable() {
                               setError("");
                             }}
                             disabled={busyId === u.id}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error min-h-11 text-sm font-bold cursor-pointer"
                           >
                             Decline
                           </button>

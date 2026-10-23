@@ -135,15 +135,17 @@ export default function CertificationReviewTable() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search certification requests"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search topic or tutor ID..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              className="input input-bordered min-h-11 text-base sm:text-sm focus:input-primary"
             />
             <select
+              aria-label="Filter certifications by subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
             >
               <option value="">All subjects</option>
               {catalog.map((s) => (
@@ -153,9 +155,10 @@ export default function CertificationReviewTable() {
               ))}
             </select>
             <select
+              aria-label="Sort certification requests"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
             >
               <option value="requested">Sort: Requested date</option>
               <option value="certified">Sort: Certified date</option>
@@ -166,6 +169,11 @@ export default function CertificationReviewTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : error && certifications.length === 0 ? (
+            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+              <span>Certification requests could not be loaded.</span>
+              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry</button>
+            </div>
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">

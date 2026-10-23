@@ -61,9 +61,11 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-06: Add mobile admin account cards with identity/status/actions visible, and move Needs attention ahead of activity on mobile.
 - [ ] DA-06: Inspect at 390px and confirm no duplicate visible row set, clipping, or inaccessible action.
 - [x] DA-07: Put upcoming learner sessions before compact metrics on mobile, allow assessment names to wrap, and enlarge class browsing/scheduling, admin filtering, and pagination controls.
+- [x] DA-07: Enlarge registration approval actions and registration/certification review filters to mobile-friendly control sizes.
 - [ ] DA-07: Review tap targets and layout at multiple mobile widths, including remaining compact admin controls.
 - [x] DA-08: Keep class retrieval errors separate from empty results and give no-test progress a path to enrolled classes.
 - [x] DA-08: Add retry actions for learner class and progress retrieval, clear stale list errors on successful refetch, and map common assessment/account subject/status codes to readable labels.
+- [x] DA-08: Separate load failure from empty queues and add retry actions in registration and certification review.
 - [ ] DA-08: Review remaining internal codes and other portal empty/error states, including lower-priority admin modules.
 - [x] Validation after implementation: `npx tsc --noEmit` passed; `npm test -- --run` passed (120 files, 931 tests); `npm run lint` passed with eight pre-existing warnings outside changed files. Focused school-time test passed (three cases).
 - [x] Production build passed with `npm run build` after granting Turbopack local process/port access. The default sandbox run failed solely at worker port binding (`Operation not permitted`); the rerun compiled, type-checked, and generated all pages.
