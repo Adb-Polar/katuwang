@@ -113,6 +113,12 @@ export default function PortalLayout({
     const trigger = triggerRef.current;
     const content = contentRef.current;
     const desktop = desktopRef.current;
+    const desktopWidth = window.matchMedia("(min-width: 1024px)");
+    const onDesktopWidth = () => {
+      if (desktopWidth.matches) setMenuOpen(false);
+    };
+    desktopWidth.addEventListener("change", onDesktopWidth);
+    onDesktopWidth();
     content?.setAttribute("inert", "");
     desktop?.setAttribute("inert", "");
     drawer?.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
@@ -128,11 +134,13 @@ export default function PortalLayout({
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
+      desktopWidth.removeEventListener("change", onDesktopWidth);
       document.removeEventListener("keydown", onKey);
       content?.removeAttribute("inert");
       desktop?.removeAttribute("inert");
       document.body.style.overflow = "";
-      trigger?.focus();
+      if (trigger?.getClientRects().length) trigger.focus();
+      else desktop?.querySelector<HTMLElement>('a[aria-current="page"], a[href]')?.focus();
     };
   }, [menuOpen]);
 

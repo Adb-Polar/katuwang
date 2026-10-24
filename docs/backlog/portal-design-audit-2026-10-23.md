@@ -54,6 +54,7 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-02: Name administrator management search/status filters and move its account popup to the shared focus-managed `Modal`.
 - [ ] DA-02: Audit remaining controls across all portal forms and verify names, hints, and errors with a screen reader.
 - [x] DA-03: Enter the mobile drawer on open, trap Tab, make background inert, keep Escape, and restore trigger focus.
+- [x] DA-03: Close an open drawer when the viewport crosses into the desktop layout; restore focus to a visible desktop navigation link instead of the hidden mobile trigger.
 - [ ] DA-03: Verify focus behavior and viewport transitions in a real mobile browser.
 - [x] DA-04: Use semantic links for learner/tutor class cards and admin account details.
 - [ ] DA-04: Verify all card variants and user table interactions by keyboard in browser.
@@ -108,6 +109,8 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [x] Report recovery deploy: `bf5b028` reached `live` as `dep-dbe1r2flot8c73ba9260`; the authenticated admin Reports page loaded chart data and Export CSV. This live check found remaining raw chart labels, which the next source follow-up addresses. The learner report failure state and retry actions still need simulated network-failure verification.
 - [x] Admin report chart deploy: `0fbf90d` was published to both branches and reached `live` as `dep-dbe1tb6k1f9s73end7k0`. Shared chart/table label formatting and compact chart-axis labels passed `npx tsc --noEmit`, focused ESLint, and `npm run build`. On the live admin Reports page, chart labels were readable and the expanded subject data table showed full names, including 21st Century Literature from the Philippines and the World. `/api/health` returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the checked post-deploy window.
 - [x] Latest source pass: `npx tsc --noEmit`, `npm run lint` (eight existing warnings outside changed files), `npm test -- --run` (120 files, 931 tests), and `npm run build` passed after the remaining control-name, semantic-link, retry-state, label, and mobile-target changes. A source AST sweep found no remaining unnamed native inputs, selects, or textareas in the three portal areas.
+- [x] DA-03 resize follow-up: at 355px, the live admin drawer contained a full 24-Tab cycle and Escape restored focus to Open menu. Resizing with the drawer open through 768px to 1200px and back to 390px exposed a stale open state; the source fix now closes it at the desktop breakpoint. `npx tsc --noEmit` and focused ESLint passed; live recheck is pending.
+- [x] DA-01 source check: school-date tests passed under `TZ=America/New_York` and `TZ=Pacific/Honolulu` (three cases each). Remaining admin report and request-form date arithmetic starts from a PHT-derived day. A non-PHT browser check is still pending.
 - [ ] Latest source pass: verify the above changes in a browser, including multiple mobile widths, focus and keyboard operation, and simulated retrieval failures.
 
 ### Recommended implementation order
