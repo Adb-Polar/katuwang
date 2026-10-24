@@ -9,6 +9,7 @@ import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
 import { formatDate, formatDateTime } from "@/lib/datetime";
 import { gradeLabel } from "@/lib/gradeLevels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import MatchCriteriaFields, {
@@ -251,7 +252,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             >
               <div className="flex items-center gap-2 text-2xs text-base-content/50">
                 <span className="badge badge-neutral text-2xs font-bold uppercase">
-                  {editingRequest.subject}
+                  {subjectDisplayLabel(editingRequest.subject)}
                 </span>
                 Editing your open request
               </div>
@@ -316,7 +317,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
-                          {r.subject}
+                          {subjectDisplayLabel(r.subject)}
                         </span>
                         <span className="text-base-content/50">{gradeLabel(r.gradeLevel)}</span>
                         <StatusBadge tone={tab === "Expired" ? "neutral" : meta.tone} label={tab === "Expired" ? "Expired" : meta.label} size="xs" />

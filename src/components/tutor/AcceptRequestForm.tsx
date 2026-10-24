@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseLocalDateAndTime } from "@/lib/datetime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
 interface RequestSlot {
@@ -109,13 +110,13 @@ export default function AcceptRequestForm({
     <section className="card kt-card">
       <div className="card-body gap-4 p-6 sm:p-8">
         <p className="text-xs text-base-content/60">
-          This creates a full class from {request.subject} request. Only topics you&apos;re certified for can be
+          This creates a full class from the {subjectDisplayLabel(request.subject)} request. Only topics you&apos;re certified for can be
           selected.
         </p>
 
         {certifiedTopics.length === 0 && (
           <div className="text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-3">
-            You have no CERTIFIED topics in {request.subject} yet — request an assessment first.
+            You have no certified topics in {subjectDisplayLabel(request.subject)} yet — request an assessment first.
           </div>
         )}
 

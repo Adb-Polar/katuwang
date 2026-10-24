@@ -69,6 +69,8 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-08: Separate load failure from empty queues and add retry actions in registration and certification review.
 - [x] DA-08: Give admin user, administrator, and audit lists retry actions without simultaneously showing empty-result copy; show readable class subject names and audit actions/target types.
 - [x] DA-08: Use the shared readable action and target labels in the admin dashboard's Recent activity list.
+- [x] DA-08: Give learner and admin report retrieval a retry path, keep the learner's load failure separate from the no-reports state, and render readable subject/status labels on request detail, request editing/listing, learner progress filters, and report targets.
+- [x] DA-01: Use the school date, rather than UTC date, in admin report CSV filenames.
 - [ ] DA-08: Review remaining internal codes and other portal empty/error states, including lower-priority admin modules.
 - [x] Validation through the October 24 follow-up: `npx tsc --noEmit` passed; `npm test -- --run` passed (120 files, 931 tests); `npm run lint` passed with eight pre-existing warnings outside changed files. Focused school-time test passed (three cases).
 - [x] Production build passed with `npm run build`, including the October 24 follow-up. The initial default-sandbox run on October 23 failed solely at worker port binding (`Operation not permitted`); the successful runs compiled, type-checked, and generated all pages.
@@ -95,6 +97,7 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [ ] DA-08: Simulate request failures in all three portals to verify retry behavior and continue checking remaining raw codes and lower-priority empty states.
 - [x] Follow-up deploy: `39e2430` was published to `fix/portal-design-audit-2026-10-23` and the dev-test-tracked `codex/fix-capstone-backlog` branch; Render deployed that exact commit as `dep-dbe1cg7lot8c73b9ufr0`. Health, error logs, and focused live admin controls were checked.
 - [x] Admin activity deploy: `671b8c8` was published to both branches and deployed as `dep-dbe1mg0u01pc73e2hh4g`. The deploy reached `live`; health, error logs, and Recent activity labels were checked on the live dashboard.
+- [x] October 24 source follow-up: `npx tsc --noEmit`, focused ESLint, `npm test -- --run` (120 files, 931 tests), and `npm run build` passed after the report recovery and label changes. Browser verification of these new changes is pending deployment. The initial build attempt hit the same sandbox-only Turbopack port-binding failure; the build with local process access completed.
 
 ### Recommended implementation order
 

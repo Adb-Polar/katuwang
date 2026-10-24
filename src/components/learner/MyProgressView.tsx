@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { ProgressAreaChart } from "@/components/charts";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface ProgressRow {
   classCode: string;
@@ -88,7 +89,7 @@ export default function MyProgressView({
               <option value="">All classes</option>
               {classOptions.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.code} · {c.subject}
+                  {c.code} · {subjectDisplayLabel(c.subject)}
                 </option>
               ))}
             </select>

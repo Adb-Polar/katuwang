@@ -15,6 +15,7 @@ import { BarChartCard, DataTable, useThemeColors } from "@/components/charts";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import LoadingRow from "@/components/ui/LoadingRow";
+import { parseLocalDateAndTime } from "@/lib/datetime";
 
 interface Breakdown {
   count: number;
@@ -36,11 +37,13 @@ export default function ReportsView() {
   const [reports, setReports] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      setError("");
       try {
         const res = await fetch("/api/admin/reports");
         if (!res.ok) throw new Error("Could not retrieve reports.");
@@ -56,7 +59,7 @@ export default function ReportsView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   if (loading) {
     return (
@@ -89,13 +92,19 @@ export default function ReportsView() {
     for (const d of reports.enrollments.byDay) {
       rows.push({ section: "enrollments_by_day", label: d.date, count: d.count });
     }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = parseLocalDateAndTime(new Date()).date;
     downloadCsv(`katuwang-report-${today}.csv`, toCsv(rows, ["section", "label", "count"]));
   };
 
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
+
+      {error && (
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => setRetryKey((key) => key + 1)}>
+          Retry reports
+        </button>
+      )}
 
       {reports && (
         <>
