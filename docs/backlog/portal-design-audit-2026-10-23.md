@@ -75,24 +75,24 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 
 ### Targeted browser verification — October 23–24, 2026
 
-Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`). The `/api/health` endpoint returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the post-deploy window checked. Authenticated demo learner, tutor, and super-admin reads loaded on that commit. The later source changes in this checklist require a follow-up deployment before their live status can be checked.
+Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), then the follow-up commit `39e2430` on October 24 (`dep-dbe1cg7lot8c73b9ufr0`). Both reached `live`. After the final deploy, `/api/health` returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the post-deploy window checked. Authenticated demo learner, tutor, and super-admin reads loaded on the first commit. The final commit's administrator filters, dialog, and audit action labels were checked on the live site.
 
 - [x] DA-01, high confidence for inspected records: tutor C-0103 on October 29 showed 3:00 PM PHT on the live dashboard, class card, detail, and editor; the enrolled learner's class detail and weekly timetable agreed. Admin ADM-0003 creation showed October 18, 3:27 PM PHT on the live dashboard, administrator table, and audit log.
 - [ ] DA-01: Repeat with a browser explicitly set to a non-PHT timezone and inspect remaining direct date arithmetic; no scheduling write/round-trip was performed.
-- [x] DA-02, high confidence for inspected controls: live learner browse search/filters and admin user search/filters exposed names; local admin settings switches and administrator filters exposed names. Tutor class editor controls inspected had named grade, location, and meeting-link fields.
+- [x] DA-02, high confidence for inspected controls: live learner browse search/filters, admin user search/filters, and final administrator search/status filters exposed names; local admin settings switches exposed names. Tutor class editor controls inspected had named grade, location, and meeting-link fields.
 - [ ] DA-02: Complete a screen-reader pass across all forms, including spoken hints and validation errors.
 - [x] DA-03, high confidence for inspected menu: at a 390px mobile viewport, opening the tutor drawer focused Close, Tab moved inside it, Escape closed it, and focus returned to the menu trigger.
 - [ ] DA-03: Test focus containment through a full Tab cycle, all three portals, and resize transitions.
 - [x] DA-04, high confidence for inspected links: live learner browse cards, tutor class cards, and admin account details appeared as links in the accessibility tree.
 - [ ] DA-04: Exercise every card variant and user table detail link with keyboard activation.
-- [x] DA-05, high confidence for inspected dialogs: live admin Manage Account and local Provision Admin opened with focus on Close; Tab entered the form; Escape closed and restored focus. The local administrator management dialog behaved the same after the follow-up source fix.
+- [x] DA-05, high confidence for inspected dialogs: live admin Manage Account and local Provision Admin opened with focus on Close; Tab entered the form; Escape closed and restored focus. The final live administrator management dialog behaved the same after the follow-up fix.
 - [ ] DA-05: Test full Tab containment, backdrop close, and assistive-technology announcements for every dialog.
 - [x] DA-06, high confidence for inspected mobile layout: at 390px the live admin dashboard placed Needs attention before activity; at 390px and 355px the user cards showed identity, status, detail, and manage actions without a duplicate visible table. The 355px action buttons were stacked in the follow-up local source check to avoid wrapped labels.
 - [x] DA-07, medium confidence for inspected layout: at 390px the learner dashboard put upcoming sessions before secondary metrics, and class browse filters were readable; admin user controls were readable at 355px. Other compact controls remain for inspection.
 - [ ] DA-07: Inspect tutor assessment rows and remaining admin controls at 355px, 390px, and wider mobile sizes, measuring target size and clipping.
-- [x] DA-08, high confidence for inspected empty state: live learner progress showed a distinct no-tests message and a View my classes link. Local admin audit labels rendered readable action/target names after the source change.
+- [x] DA-08, high confidence for inspected states: live learner progress showed a distinct no-tests message and a View my classes link. The final live admin audit log rendered readable action and target names.
 - [ ] DA-08: Simulate request failures in all three portals to verify retry behavior and continue checking remaining raw codes and lower-priority empty states.
-- [ ] Follow-up deploy: publish the source changes made after `4cdcf86`, then repeat health/error-log and focused live checks on that exact commit.
+- [x] Follow-up deploy: `39e2430` was published to `fix/portal-design-audit-2026-10-23` and the dev-test-tracked `codex/fix-capstone-backlog` branch; Render deployed that exact commit as `dep-dbe1cg7lot8c73b9ufr0`. Health, error logs, and focused live admin controls were checked.
 
 ### Recommended implementation order
 
