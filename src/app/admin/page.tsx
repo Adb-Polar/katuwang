@@ -8,6 +8,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import { formatDateTime } from "@/lib/datetime";
 import { Metadata } from "next";
+import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
@@ -104,8 +105,8 @@ export default async function AdminDashboard() {
                   <li key={log.id} className="py-2.5 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-semibold text-base-content/80">
-                        {log.action.replace(/_/g, " ")}
-                        <span className="font-normal text-base-content/50"> · {log.targetType.toLowerCase()}</span>
+                        {auditActionDisplayLabel(log.action)}
+                        <span className="font-normal text-base-content/50"> · {statusDisplayLabel(log.targetType)}</span>
                       </span>
                       <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
                     </div>

@@ -11,7 +11,7 @@ import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
-import { statusDisplayLabel } from "@/lib/displayLabels";
+import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
 interface AuditLogEntry {
   id: string;
@@ -22,15 +22,6 @@ interface AuditLogEntry {
   createdAt: string;
   admin: { anonymousId: string; firstName: string; lastName: string };
 }
-
-const ACTION_LABELS: Record<string, string> = {
-  USER_STATUS_CHANGE: "User Status Changed",
-  CLASS_STATUS_CHANGE: "Class Status Changed",
-  CERTIFICATION_APPROVED: "Certification Approved",
-  CERTIFICATION_REJECTED: "Certification Rejected",
-  USER_APPROVED: "Registration Approved",
-  USER_DECLINED: "Registration Declined",
-};
 
 const PAGE_SIZE = AUDIT_PAGE_SIZE;
 const ACTIONS = Object.values(AUDIT_ACTIONS);
@@ -98,7 +89,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               <option value="">All actions</option>
               {ACTIONS.map((a) => (
                 <option key={a} value={a}>
-                  {ACTION_LABELS[a] || statusDisplayLabel(a)}
+                  {auditActionDisplayLabel(a)}
                 </option>
               ))}
             </select>
@@ -135,7 +126,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                   {logs.map((log) => (
                     <tr key={log.id} className="text-sm">
                       <td className="font-semibold text-base-content/80">
-                        {ACTION_LABELS[log.action] || statusDisplayLabel(log.action)}
+                        {auditActionDisplayLabel(log.action)}
                       </td>
                       <td className="text-base-content/60">
                         {statusDisplayLabel(log.targetType)} · {log.targetId}
