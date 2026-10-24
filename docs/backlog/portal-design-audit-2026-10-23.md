@@ -68,6 +68,7 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-08: Add retry actions for learner class and progress retrieval, clear stale list errors on successful refetch, and map common assessment/account subject/status codes to readable labels.
 - [x] DA-08: Separate load failure from empty queues and add retry actions in registration and certification review.
 - [x] DA-08: Give admin user, administrator, and audit lists retry actions without simultaneously showing empty-result copy; show readable class subject names and audit actions/target types.
+- [x] DA-08: Use the shared readable action and target labels in the admin dashboard's Recent activity list.
 - [ ] DA-08: Review remaining internal codes and other portal empty/error states, including lower-priority admin modules.
 - [x] Validation through the October 24 follow-up: `npx tsc --noEmit` passed; `npm test -- --run` passed (120 files, 931 tests); `npm run lint` passed with eight pre-existing warnings outside changed files. Focused school-time test passed (three cases).
 - [x] Production build passed with `npm run build`, including the October 24 follow-up. The initial default-sandbox run on October 23 failed solely at worker port binding (`Operation not permitted`); the successful runs compiled, type-checked, and generated all pages.
@@ -75,7 +76,7 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 
 ### Targeted browser verification — October 23–24, 2026
 
-Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), then the follow-up commit `39e2430` on October 24 (`dep-dbe1cg7lot8c73b9ufr0`). Both reached `live`. After the final deploy, `/api/health` returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the post-deploy window checked. Authenticated demo learner, tutor, and super-admin reads loaded on the first commit. The final commit's administrator filters, dialog, and audit action labels were checked on the live site.
+Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), then follow-up commits `39e2430` (`dep-dbe1cg7lot8c73b9ufr0`) and `671b8c8` (`dep-dbe1mg0u01pc73e2hh4g`) on October 24. All three reached `live`. After the latest code deploy, `/api/health` returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the post-deploy window checked. Authenticated demo learner, tutor, and super-admin reads loaded on the first commit. The administrator filters, dialog, audit log labels, and latest admin dashboard Recent activity labels were checked on the live site.
 
 - [x] DA-01, high confidence for inspected records: tutor C-0103 on October 29 showed 3:00 PM PHT on the live dashboard, class card, detail, and editor; the enrolled learner's class detail and weekly timetable agreed. Admin ADM-0003 creation showed October 18, 3:27 PM PHT on the live dashboard, administrator table, and audit log.
 - [ ] DA-01: Repeat with a browser explicitly set to a non-PHT timezone and inspect remaining direct date arithmetic; no scheduling write/round-trip was performed.
@@ -90,9 +91,10 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [x] DA-06, high confidence for inspected mobile layout: at 390px the live admin dashboard placed Needs attention before activity; at 390px and 355px the user cards showed identity, status, detail, and manage actions without a duplicate visible table. The 355px action buttons were stacked in the follow-up local source check to avoid wrapped labels.
 - [x] DA-07, medium confidence for inspected layout: at 390px the learner dashboard put upcoming sessions before secondary metrics, and class browse filters were readable; admin user controls were readable at 355px. Other compact controls remain for inspection.
 - [ ] DA-07: Inspect tutor assessment rows and remaining admin controls at 355px, 390px, and wider mobile sizes, measuring target size and clipping.
-- [x] DA-08, high confidence for inspected states: live learner progress showed a distinct no-tests message and a View my classes link. The final live admin audit log rendered readable action and target names.
+- [x] DA-08, high confidence for inspected states: live learner progress showed a distinct no-tests message and a View my classes link. The live admin audit log rendered readable action and target names. After `671b8c8`, Recent activity on the live admin dashboard displayed readable labels, including User Status Changed, Report Dismissed, Admin Created, and Topic Request Status Change.
 - [ ] DA-08: Simulate request failures in all three portals to verify retry behavior and continue checking remaining raw codes and lower-priority empty states.
 - [x] Follow-up deploy: `39e2430` was published to `fix/portal-design-audit-2026-10-23` and the dev-test-tracked `codex/fix-capstone-backlog` branch; Render deployed that exact commit as `dep-dbe1cg7lot8c73b9ufr0`. Health, error logs, and focused live admin controls were checked.
+- [x] Admin activity deploy: `671b8c8` was published to both branches and deployed as `dep-dbe1mg0u01pc73e2hh4g`. The deploy reached `live`; health, error logs, and Recent activity labels were checked on the live dashboard.
 
 ### Recommended implementation order
 
