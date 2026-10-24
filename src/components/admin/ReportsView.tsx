@@ -16,6 +16,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import LoadingRow from "@/components/ui/LoadingRow";
 import { parseLocalDateAndTime } from "@/lib/datetime";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface Breakdown {
   count: number;
@@ -172,36 +173,41 @@ export default function ReportsView() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <BarChartCard title="Users by Role" rows={reports.usersByRole} labelKey="role" color={c.primary} />
+            <BarChartCard title="Users by Role" rows={reports.usersByRole} labelKey="role" color={c.primary} labelFormatter={statusDisplayLabel} />
             <BarChartCard
               title="Users by Grade Level"
               rows={reports.usersByGradeLevel}
               labelKey="gradeLevel"
               color={c.primary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Users by Status"
               rows={reports.usersByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Classes by Subject"
               rows={reports.classesBySubject}
               labelKey="subject"
               color={c.primary}
+              labelFormatter={subjectDisplayLabel}
             />
             <BarChartCard
               title="Classes by Status"
               rows={reports.classesByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Certifications by Status"
               rows={reports.certificationsByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
           </div>
         </>
