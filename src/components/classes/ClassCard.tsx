@@ -6,6 +6,7 @@ import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import UserAvatar from "@/components/profile/UserAvatar";
 import { formatDateTime, formatWeekday } from "@/lib/datetime";
 import { gradeLabel } from "@/lib/gradeLevels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface SessionLike {
   scheduledAt: string;
@@ -97,7 +98,7 @@ export default function ClassCard({
               {code}
             </p>
           )}
-          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subject}</h3>
+          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subjectDisplayLabel(subject)}</h3>
           {gradeLevel && (
             <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">
               {gradeLabel(gradeLevel)}

@@ -27,6 +27,7 @@ import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export default function EditClassForm({
   classId,
@@ -204,7 +205,7 @@ export default function EditClassForm({
       <form id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
-            {subject}
+            {subjectDisplayLabel(subject)}
           </span>
           {locked ? (
             <StatusBadge tone="error" label={status === "BANNED" ? "Banned" : "Suspended"} size="sm" />

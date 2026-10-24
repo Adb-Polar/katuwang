@@ -5,6 +5,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import ClassModerationPanel from "./ClassModerationPanel";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export default function ClassDetailsView({
   backHref,
@@ -89,7 +90,7 @@ export default function ClassDetailsView({
         )}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
-            {subject}
+            {subjectDisplayLabel(subject)}
           </span>
           {published ? (
             <StatusBadge tone={tone} label={label} size="sm" />

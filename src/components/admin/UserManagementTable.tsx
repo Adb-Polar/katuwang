@@ -138,6 +138,7 @@ export default function UserManagementTable() {
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={target ? null : error || null} />
+      {!target && error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry accounts</button>}
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -204,13 +205,13 @@ export default function UserManagementTable() {
                     <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                   </div>
                   <p className="text-xs break-all text-base-content/60">{u.email}</p>
-                  <div className="flex gap-2">
-                    <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 text-sm flex-1">View details</Link>
-                    <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 text-sm flex-1">Manage account</button>
+                  <div className="flex flex-col gap-2">
+                    <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 text-sm w-full">View details</Link>
+                    <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 text-sm w-full">Manage account</button>
                   </div>
                 </article>
               ))}
-              {!loading && displayed.length === 0 && <EmptyState>No accounts found.</EmptyState>}
+              {!error && displayed.length === 0 && <EmptyState>No accounts found.</EmptyState>}
             </div>
             <div className="hidden md:block overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -278,7 +279,7 @@ export default function UserManagementTable() {
                   ))}
                 </tbody>
               </table>
-              {displayed.length === 0 && (
+              {!error && displayed.length === 0 && (
                 <EmptyState>No accounts found.</EmptyState>
               )}
             </div>

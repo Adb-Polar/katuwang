@@ -19,6 +19,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard from "@/components/ui/StatCard";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
@@ -199,7 +200,7 @@ export default async function TutorDashboard() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                            {s.class.subject}
+                            {subjectDisplayLabel(s.class.subject)}
                           </span>
                           <span className="text-sm font-semibold text-base-content/85 truncate">
                             {s.topic}

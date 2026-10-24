@@ -18,6 +18,7 @@ import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import CreateAdminModal from "@/components/admin/CreateAdminModal";
+import Modal from "@/components/ui/Modal";
 import { Shield, Crown, ShieldCheck, UserPlus } from "lucide-react";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -153,6 +154,7 @@ export default function AdminManagementTable() {
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={target ? null : error || null} />
+      {!target && error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry administrators</button>}
 
       {/* Dashboard Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -189,15 +191,17 @@ export default function AdminManagementTable() {
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
+              aria-label="Search administrators by name, email, or ID"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or ID..."
-              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+              className="input input-bordered min-h-11 sm:input-sm w-full sm:max-w-xs text-base sm:text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter administrators by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as AccountStatus | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered min-h-11 sm:select-sm w-full sm:w-auto text-base sm:text-xs focus:select-primary"
             >
               <option value="">All Statuses</option>
               <option value="ACTIVE">Active</option>
@@ -278,7 +282,7 @@ export default function AdminManagementTable() {
                   ))}
                 </tbody>
               </table>
-              {admins.length === 0 && (
+              {!error && admins.length === 0 && (
                 <EmptyState>No administrator accounts found.</EmptyState>
               )}
             </div>
@@ -295,16 +299,8 @@ export default function AdminManagementTable() {
       </section>
 
       {/* Manage Account Modal (mirroring UserManagementTable) */}
-      {target && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              onClick={() => setTarget(null)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-1">Manage Account</h3>
+      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Administrator">
+        {target && <>
             <p className="text-2xs text-base-content/50 mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>
@@ -349,9 +345,8 @@ export default function AdminManagementTable() {
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </>}
+      </Modal>
 
       {/* Create Admin Modal */}
       <CreateAdminModal

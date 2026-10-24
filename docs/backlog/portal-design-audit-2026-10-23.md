@@ -8,7 +8,7 @@ This document consolidates the learner/tutor audit of October 22 and the admin a
 
 ## Overall results
 
-| Portal | Current score | Previous score | Verdict |
+| Portal | Original audit score | Previous score | Verdict at audit |
 |---|---:|---:|---|
 | Learner | 3.3/5 | 2.7/5 | Main entry and browsing restored; accessibility and mobile task priority need work |
 | Tutor | 3.3/5 | No baseline | Core read flows work; scheduling consistency and accessibility need work |
@@ -46,11 +46,12 @@ Shared issues are listed once here. Detailed reproduction evidence, component re
 
 ### Fix pass progress — October 23, 2026
 
-Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checklist. The audit scores above remain the original live scores until a new browser audit is completed. A checked item means implemented and source/type checked; it does **not** mean live deployment verification.
+Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checklist. The scores above are the October 22–23 baseline, before the fix pass. Implementation checks and browser checks are tracked separately below.
 
 - [x] DA-01: Use `Asia/Manila` in shared date/time formatting, parsing, UTC serialization, weekly timetable grouping, request-slot prefill, and admin report day grouping; show PHT near schedules and time-sensitive admin records.
 - [ ] DA-01: Verify the same stored session/account/event on dashboard, list, detail, editor, and audit pages in a browser running in a different timezone. Check remaining direct date arithmetic outside the shared helper.
 - [x] DA-02: Associate native controls in `FormField` with labels and hints/errors, give composite fields named groups, and name learner browse/matching filters, tutor scheduling/editing controls, admin user filters, and settings toggles.
+- [x] DA-02: Name administrator management search/status filters and move its account popup to the shared focus-managed `Modal`.
 - [ ] DA-02: Audit remaining controls across all portal forms and verify names, hints, and errors with a screen reader.
 - [x] DA-03: Enter the mobile drawer on open, trap Tab, make background inert, keep Escape, and restore trigger focus.
 - [ ] DA-03: Verify focus behavior and viewport transitions in a real mobile browser.
@@ -66,10 +67,32 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-08: Keep class retrieval errors separate from empty results and give no-test progress a path to enrolled classes.
 - [x] DA-08: Add retry actions for learner class and progress retrieval, clear stale list errors on successful refetch, and map common assessment/account subject/status codes to readable labels.
 - [x] DA-08: Separate load failure from empty queues and add retry actions in registration and certification review.
+- [x] DA-08: Give admin user, administrator, and audit lists retry actions without simultaneously showing empty-result copy; show readable class subject names and audit actions/target types.
 - [ ] DA-08: Review remaining internal codes and other portal empty/error states, including lower-priority admin modules.
-- [x] Validation after implementation: `npx tsc --noEmit` passed; `npm test -- --run` passed (120 files, 931 tests); `npm run lint` passed with eight pre-existing warnings outside changed files. Focused school-time test passed (three cases).
-- [x] Production build passed with `npm run build` after granting Turbopack local process/port access. The default sandbox run failed solely at worker port binding (`Operation not permitted`); the rerun compiled, type-checked, and generated all pages.
-- [ ] Repeat the inspected learner, tutor, and admin flows on desktop/mobile; record new scores only after live verification.
+- [x] Validation through the October 24 follow-up: `npx tsc --noEmit` passed; `npm test -- --run` passed (120 files, 931 tests); `npm run lint` passed with eight pre-existing warnings outside changed files. Focused school-time test passed (three cases).
+- [x] Production build passed with `npm run build`, including the October 24 follow-up. The initial default-sandbox run on October 23 failed solely at worker port binding (`Operation not permitted`); the successful runs compiled, type-checked, and generated all pages.
+- [ ] Complete a full comparative browser audit of each portal on desktop/mobile and record score deltas. The targeted checks below do not cover every original flow.
+
+### Targeted browser verification — October 23–24, 2026
+
+Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`). The `/api/health` endpoint returned HTTP 200 with `healthy` and `database: connected`; Render had no error logs in the post-deploy window checked. Authenticated demo learner, tutor, and super-admin reads loaded on that commit. The later source changes in this checklist require a follow-up deployment before their live status can be checked.
+
+- [x] DA-01, high confidence for inspected records: tutor C-0103 on October 29 showed 3:00 PM PHT on the live dashboard, class card, detail, and editor; the enrolled learner's class detail and weekly timetable agreed. Admin ADM-0003 creation showed October 18, 3:27 PM PHT on the live dashboard, administrator table, and audit log.
+- [ ] DA-01: Repeat with a browser explicitly set to a non-PHT timezone and inspect remaining direct date arithmetic; no scheduling write/round-trip was performed.
+- [x] DA-02, high confidence for inspected controls: live learner browse search/filters and admin user search/filters exposed names; local admin settings switches and administrator filters exposed names. Tutor class editor controls inspected had named grade, location, and meeting-link fields.
+- [ ] DA-02: Complete a screen-reader pass across all forms, including spoken hints and validation errors.
+- [x] DA-03, high confidence for inspected menu: at a 390px mobile viewport, opening the tutor drawer focused Close, Tab moved inside it, Escape closed it, and focus returned to the menu trigger.
+- [ ] DA-03: Test focus containment through a full Tab cycle, all three portals, and resize transitions.
+- [x] DA-04, high confidence for inspected links: live learner browse cards, tutor class cards, and admin account details appeared as links in the accessibility tree.
+- [ ] DA-04: Exercise every card variant and user table detail link with keyboard activation.
+- [x] DA-05, high confidence for inspected dialogs: live admin Manage Account and local Provision Admin opened with focus on Close; Tab entered the form; Escape closed and restored focus. The local administrator management dialog behaved the same after the follow-up source fix.
+- [ ] DA-05: Test full Tab containment, backdrop close, and assistive-technology announcements for every dialog.
+- [x] DA-06, high confidence for inspected mobile layout: at 390px the live admin dashboard placed Needs attention before activity; at 390px and 355px the user cards showed identity, status, detail, and manage actions without a duplicate visible table. The 355px action buttons were stacked in the follow-up local source check to avoid wrapped labels.
+- [x] DA-07, medium confidence for inspected layout: at 390px the learner dashboard put upcoming sessions before secondary metrics, and class browse filters were readable; admin user controls were readable at 355px. Other compact controls remain for inspection.
+- [ ] DA-07: Inspect tutor assessment rows and remaining admin controls at 355px, 390px, and wider mobile sizes, measuring target size and clipping.
+- [x] DA-08, high confidence for inspected empty state: live learner progress showed a distinct no-tests message and a View my classes link. Local admin audit labels rendered readable action/target names after the source change.
+- [ ] DA-08: Simulate request failures in all three portals to verify retry behavior and continue checking remaining raw codes and lower-priority empty states.
+- [ ] Follow-up deploy: publish the source changes made after `4cdcf86`, then repeat health/error-log and focused live checks on that exact commit.
 
 ### Recommended implementation order
 

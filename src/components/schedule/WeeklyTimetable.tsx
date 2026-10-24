@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { formatTime, formatWeekday, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export interface TimetableSession {
   id: string;
@@ -66,7 +67,7 @@ export default function WeeklyTimetable({
                   <div className="font-bold text-primary/90">
                     {formatTime(s.scheduledAt)}
                   </div>
-                  <div className="truncate text-base-content/70" title={`${s.subject} — ${s.topic}`}>
+                  <div className="truncate text-base-content/70" title={`${subjectDisplayLabel(s.subject)} — ${s.topic}`}>
                     {s.topic}
                   </div>
                 </Link>

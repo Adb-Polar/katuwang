@@ -11,6 +11,7 @@ import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import { statusDisplayLabel } from "@/lib/displayLabels";
 
 interface AuditLogEntry {
   id: string;
@@ -53,6 +54,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
     setPageSize,
     loading,
     error,
+    refetch,
   } = usePaginatedList<AuditLogEntry>(
     "/api/admin/audit-log",
     "logs",
@@ -71,6 +73,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
+      {error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry audit log</button>}
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -84,18 +87,18 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search admin ID, reason, target ID..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              className="input input-bordered min-h-11 sm:input-sm text-base sm:text-xs focus:input-primary"
             />
             <select
               aria-label="Filter audit actions"
               value={action}
               onChange={(e) => setAction(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
             >
               <option value="">All actions</option>
               {ACTIONS.map((a) => (
                 <option key={a} value={a}>
-                  {ACTION_LABELS[a] || a}
+                  {ACTION_LABELS[a] || statusDisplayLabel(a)}
                 </option>
               ))}
             </select>
@@ -103,12 +106,12 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               aria-label="Filter audit target types"
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
             >
               <option value="">All target types</option>
               {TARGET_TYPES.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {statusDisplayLabel(t)}
                 </option>
               ))}
             </select>
@@ -132,10 +135,10 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                   {logs.map((log) => (
                     <tr key={log.id} className="text-sm">
                       <td className="font-semibold text-base-content/80">
-                        {ACTION_LABELS[log.action] || log.action}
+                        {ACTION_LABELS[log.action] || statusDisplayLabel(log.action)}
                       </td>
                       <td className="text-base-content/60">
-                        {log.targetType} · {log.targetId}
+                        {statusDisplayLabel(log.targetType)} · {log.targetId}
                       </td>
                       <td className="text-base-content/60">
                         {log.admin.anonymousId} ({log.admin.firstName} {log.admin.lastName})
@@ -148,7 +151,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                   ))}
                 </tbody>
               </table>
-              {logs.length === 0 && (
+              {!error && logs.length === 0 && (
                 <EmptyState>No moderation actions match these filters.</EmptyState>
               )}
             </div>

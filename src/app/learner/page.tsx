@@ -8,6 +8,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import { addDays, formatTime, formatWeekday, parseLocalDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata = {
   title: "Learner Portal | Katuwang",
@@ -136,7 +137,7 @@ export default async function LearnerDashboard() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                              {s.class.subject}
+                              {subjectDisplayLabel(s.class.subject)}
                             </span>
                             <span className="text-sm font-semibold text-base-content/85 truncate">
                               {s.topic}
