@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -134,12 +135,12 @@ export default function TopicCertificationList({
                 ) : awaitingConfirmation ? (
                   <StatusBadge tone="warning" label="Passed — awaiting confirmation" size="xs" />
                 ) : st?.inProgressAttemptId ? (
-                  <button
-                    onClick={() => router.push(`/tutor/assessments/${st.inProgressAttemptId}`)}
+                  <Link
+                    href={`/tutor/assessments/${st.inProgressAttemptId}`}
                     className="btn btn-primary min-h-11 text-sm font-bold cursor-pointer"
                   >
                     Resume assessment
-                  </button>
+                  </Link>
                 ) : st?.bankReady ? (
                   <>
                     {lastAttempt?.status === "FAILED" && (

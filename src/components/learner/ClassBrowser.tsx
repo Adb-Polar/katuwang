@@ -186,7 +186,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                       setSubject("");
                       setGradeLevel("");
                     }}
-                    className="btn btn-link btn-xs text-primary mt-1 text-xs"
+                    className="btn btn-link btn-xs min-h-11 sm:min-h-0 text-primary mt-1 text-xs"
                   >
                     Clear filters
                   </button>

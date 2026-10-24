@@ -272,7 +272,7 @@ export default function AdminManagementTable() {
                           <button
                             type="button"
                             onClick={() => openModal(u)}
-                            className="btn btn-outline btn-primary btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Manage
                           </button>

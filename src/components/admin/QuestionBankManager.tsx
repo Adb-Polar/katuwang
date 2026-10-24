@@ -9,6 +9,7 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
 import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
 import { formatDateTime } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -18,6 +19,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 const SUBJECTS = SUBJECT_SLUGS;
@@ -156,7 +158,9 @@ export default function QuestionBankManager({ only }: { only?: QBankTab } = {}) 
           )}
 
           {active === "questions" && (
-            <QuestionsTab
+            coverage.loading ? <LoadingRow /> : coverage.loadError ? (
+              <LoadErrorState message={coverage.loadError} onRetry={coverage.refetch} />
+            ) : <QuestionsTab
               coverage={coverage.data}
               refetchCoverage={coverage.refetch}
               selSubject={selSubject}
@@ -188,7 +192,7 @@ function Breadcrumb({
       {back && (
         <button
           onClick={back}
-          className="btn btn-ghost btn-xs gap-1 text-2xs font-semibold text-base-content/70 hover:text-primary"
+          className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs font-semibold text-base-content/70 hover:text-primary"
         >
           <CornerUpLeft className="w-3.5 h-3.5" />
           Back
@@ -257,6 +261,7 @@ function QuestionsTab({
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<Question>(
@@ -401,7 +406,7 @@ function QuestionsTab({
   return (
     <div className="space-y-4">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={editTarget || showAdd || deleteTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={editTarget || showAdd || deleteTarget || loadError ? null : error || null} />
 
       {cov && (
         <CoveragePanel row={cov} />
@@ -413,7 +418,7 @@ function QuestionsTab({
             setError("");
             setShowAdd(true);
           }}
-          className="btn btn-primary btn-xs text-2xs font-bold cursor-pointer"
+          className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
         >
           Add question
         </button>
@@ -421,6 +426,8 @@ function QuestionsTab({
 
       {loading ? (
         <LoadingRow />
+      ) : loadError ? (
+        <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -467,14 +474,14 @@ function QuestionsTab({
                           }}
                           disabled={q.inUse || busyId === q.id}
                           title={q.inUse ? "In use — retire and recreate to change" : undefined}
-                          className="btn btn-outline btn-xs text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => toggleActive(q)}
                           disabled={busyId === q.id}
-                          className="btn btn-outline btn-xs text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           {q.active ? "Retire" : "Reactivate"}
                         </button>
@@ -485,7 +492,7 @@ function QuestionsTab({
                           }}
                           disabled={q.inUse || busyId === q.id}
                           title={q.inUse ? "In use — retire instead" : undefined}
-                          className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Delete
                         </button>
@@ -632,6 +639,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<QRequest>(
@@ -671,7 +679,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
   return (
     <div className="space-y-4">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={target ? null : error || null} />
+      <FeedbackBanner variant="error" message={target || loadError ? null : error || null} />
 
       <Tabs
         tabs={[
@@ -685,6 +693,8 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
 
       {loading ? (
         <LoadingRow />
+      ) : loadError ? (
+        <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -704,7 +714,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                   <td>
                     <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" />
                   </td>
-                  <td className="text-base-content/70">{r.subject}</td>
+                  <td className="text-base-content/70">{subjectDisplayLabel(r.subject)}</td>
                   <td className="text-base-content/70">{r.topic}</td>
                   <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
                     {r.note || <span className="text-base-content/30 italic">No note</span>}
@@ -724,7 +734,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                             setNote("");
                             setTarget({ req: r, decision: "RESOLVED" });
                           }}
-                          className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Resolve
                         </button>
@@ -734,7 +744,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                             setNote("");
                             setTarget({ req: r, decision: "DISMISSED" });
                           }}
-                          className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Dismiss
                         </button>
@@ -766,7 +776,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
               {target.decision === "RESOLVED" ? "Resolve" : "Dismiss"} this request?
             </h3>
             <p className="text-xs text-base-content/60">
-              {target.req.subject} · {target.req.topic} — from {target.req.tutor.anonymousId}
+              {subjectDisplayLabel(target.req.subject)} · {target.req.topic} — from {target.req.tutor.anonymousId}
             </p>
             <FeedbackBanner variant="error" message={error || null} />
             <FormField label="Note for the tutor" hint="Optional">
@@ -816,7 +826,8 @@ function ResultsTab() {
     pageSize,
     setPageSize,
     loading,
-    error,
+    loadError,
+    refetch,
   } = usePaginatedList<AttemptRow>(
     "/api/admin/assessment-attempts",
     "attempts",
@@ -843,17 +854,18 @@ function ResultsTab() {
 
   return (
     <div className="space-y-4">
-      <FeedbackBanner variant="error" message={error || null} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <input
           type="text"
+          aria-label="Search assessment results by tutor ID"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search tutor ID..."
           className="input input-bordered input-sm text-xs focus:input-primary"
         />
         <select
+          aria-label="Filter assessment results by subject"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
           className="select select-bordered select-sm text-xs focus:select-primary"
@@ -861,11 +873,12 @@ function ResultsTab() {
           <option value="">All subjects</option>
           {SUBJECTS.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {subjectDisplayLabel(s)}
             </option>
           ))}
         </select>
         <select
+          aria-label="Filter assessment results by outcome"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
           className="select select-bordered select-sm text-xs focus:select-primary"
@@ -879,6 +892,8 @@ function ResultsTab() {
 
       {loading ? (
         <LoadingRow />
+      ) : loadError ? (
+        <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
         <div className="overflow-x-auto border border-base-200 rounded-xl">
           <table className="table table-sm">
@@ -900,7 +915,7 @@ function ResultsTab() {
                   <td>
                     <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
                   </td>
-                  <td className="text-base-content/70">{a.subject}</td>
+                  <td className="text-base-content/70">{subjectDisplayLabel(a.subject)}</td>
                   <td className="text-base-content/70">{a.topic}</td>
                   <td className="text-base-content/60">#{a.attemptNo}</td>
                   <td className="text-base-content/60">
@@ -917,7 +932,7 @@ function ResultsTab() {
                   <td className="text-right">
                     <button
                       onClick={() => openDetail(a.id)}
-                      className="btn btn-outline btn-xs text-2xs font-bold cursor-pointer"
+                      className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                     >
                       View
                     </button>
@@ -952,7 +967,7 @@ function ResultsTab() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h3 className="font-bold text-sm text-base-content">
-                      {detail.subject} · {detail.topic}
+                      {subjectDisplayLabel(detail.subject)} · {detail.topic}
                     </h3>
                     <p className="text-2xs text-base-content/50 mt-0.5">
                       {detail.tutor.anonymousId} · attempt #{detail.attemptNo} ·{" "}

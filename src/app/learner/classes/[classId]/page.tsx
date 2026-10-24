@@ -12,6 +12,7 @@ import LearnerClassActions from "@/components/learner/LearnerClassActions";
 import TutorInfoTrigger from "@/components/learner/TutorInfoTrigger";
 import SessionTestsCard from "@/components/classes/SessionTestsCard";
 import MyProgressView from "@/components/learner/MyProgressView";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -196,7 +197,7 @@ export default async function LearnerClassDetailPage({
           status={tutorClass.status}
           isEnrolled={isEnrolled}
           isFull={tutorClass._count.enrollments >= tutorClass.maxStudents}
-          reportLabel={`${tutorClass.subject} · ${tutorClass.code}`}
+          reportLabel={`${subjectDisplayLabel(tutorClass.subject)} · ${tutorClass.code}`}
         />
       }
     />

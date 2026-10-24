@@ -15,6 +15,8 @@ import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import LoadingRow from "@/components/ui/LoadingRow";
+import LoadErrorState from "@/components/ui/LoadErrorState";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -63,6 +65,7 @@ export default function TopicRequestModerationTable() {
     pageSize,
     setPageSize,
     loading,
+    loadError,
     refetch,
   } = usePaginatedList<AdminTopicRequest>(
     "/api/admin/topic-requests",
@@ -116,12 +119,14 @@ export default function TopicRequestModerationTable() {
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
+              aria-label="Search class requests"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by learner or topic..."
               className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter class requests by subject"
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
@@ -134,6 +139,7 @@ export default function TopicRequestModerationTable() {
               ))}
             </select>
             <select
+              aria-label="Filter class requests by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as RequestStatus | "EXPIRED" | "")}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
@@ -147,6 +153,7 @@ export default function TopicRequestModerationTable() {
               <option value="CANCELLED">Cancelled</option>
             </select>
             <select
+              aria-label="Filter class requests by audience"
               value={scopeFilter}
               onChange={(e) => setScopeFilter(e.target.value as "" | "public" | "directed")}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
@@ -159,6 +166,8 @@ export default function TopicRequestModerationTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -187,7 +196,7 @@ export default function TopicRequestModerationTable() {
                         </Link>
                       </td>
                       <td>
-                        <Link href={`/admin/topic-requests/${r.id}`} className="font-semibold link link-primary">{r.subject} · History</Link>
+                        <Link href={`/admin/topic-requests/${r.id}`} className="font-semibold link link-primary">{subjectDisplayLabel(r.subject)} · History</Link>
                         <div className="text-2xs text-base-content/50">{r.topics.join(", ")}</div>
                       </td>
                       <td className="text-base-content/60">
@@ -215,7 +224,7 @@ export default function TopicRequestModerationTable() {
                         )}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[r.status]} label={r.status} size="xs" />
+                        <StatusBadge tone={STATUS_TONE[r.status]} label={statusDisplayLabel(r.status)} size="xs" />
                       </td>
                       <td>
                         <div className="flex flex-wrap gap-2 justify-end">
@@ -228,7 +237,7 @@ export default function TopicRequestModerationTable() {
                               setReason("");
                               setError("");
                             }}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Close
                           </button>
@@ -236,7 +245,7 @@ export default function TopicRequestModerationTable() {
                         {(r.status === "CANCELLED" || r.status === "ACCEPTED") && (
                           <button
                             onClick={() => setReopenTarget(r)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Re-open
                           </button>
@@ -274,7 +283,7 @@ export default function TopicRequestModerationTable() {
             </button>
             <h3 className="font-sans text-base font-semibold mb-1">Close request</h3>
             <p className="text-2xs text-base-content/50 mb-4">
-              {closeTarget.subject} · {closeTarget.topics.join(", ")}
+              {subjectDisplayLabel(closeTarget.subject)} · {closeTarget.topics.join(", ")}
             </p>
 
             <FeedbackBanner variant="error" message={error || null} />

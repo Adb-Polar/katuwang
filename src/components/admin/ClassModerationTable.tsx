@@ -13,10 +13,12 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import { formatDateTime } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import LoadingRow from "@/components/ui/LoadingRow";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -64,6 +66,7 @@ export default function ClassModerationTable() {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<AdminClass>(
@@ -118,7 +121,7 @@ export default function ClassModerationTable() {
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={moderateTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={moderateTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -127,12 +130,14 @@ export default function ClassModerationTable() {
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
+              aria-label="Search classes"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by code, topic, or tutor..."
               className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter classes by subject"
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
@@ -145,6 +150,7 @@ export default function ClassModerationTable() {
               ))}
             </select>
             <select
+              aria-label="Filter classes by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ClassLifecycleStatus | "")}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
@@ -160,6 +166,8 @@ export default function ClassModerationTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -183,7 +191,7 @@ export default function ClassModerationTable() {
                           {c.code}
                         </td>
                         <td>
-                          <div className="font-semibold text-base-content/80">{c.subject}</div>
+                          <div className="font-semibold text-base-content/80">{subjectDisplayLabel(c.subject)}</div>
                           <div className="text-2xs text-base-content/50">{c.topics.join(", ")}</div>
                         </td>
                         <td>
@@ -208,7 +216,7 @@ export default function ClassModerationTable() {
                           <div className="flex flex-wrap gap-2 justify-end">
                           <Link
                             href={`/admin/classes/${c.id}`}
-                            className="btn btn-ghost btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             View
                           </Link>
@@ -220,7 +228,7 @@ export default function ClassModerationTable() {
                                 setDurationDays("");
                                 setError("");
                               }}
-                              className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                              className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                             >
                               Suspend
                             </button>
@@ -233,7 +241,7 @@ export default function ClassModerationTable() {
                                 setDurationDays("");
                                 setError("");
                               }}
-                              className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                              className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                             >
                               Ban
                             </button>
@@ -241,7 +249,7 @@ export default function ClassModerationTable() {
                           {(c.status === "SUSPENDED" || c.status === "BANNED") && (
                             <button
                               onClick={() => setReinstateTarget(c)}
-                              className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                              className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                             >
                               Reinstate
                             </button>
@@ -282,7 +290,7 @@ export default function ClassModerationTable() {
               {moderateTarget.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
             </h3>
             <p className="text-2xs text-base-content/50 mb-4">
-              {moderateTarget.class.subject} · {moderateTarget.class.topics.join(", ")}
+              {subjectDisplayLabel(moderateTarget.class.subject)} · {moderateTarget.class.topics.join(", ")}
             </p>
 
             <FeedbackBanner variant="error" message={error || null} />

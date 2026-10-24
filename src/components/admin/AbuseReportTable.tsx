@@ -17,6 +17,8 @@ import { violationLabel } from "@/lib/reportViolations";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import LoadErrorState from "@/components/ui/LoadErrorState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -60,6 +62,7 @@ export default function AbuseReportTable() {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<Report>(
@@ -72,7 +75,7 @@ export default function AbuseReportTable() {
   );
 
   const targetName = (r: Report) =>
-    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
+    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
 
   const review = async (report: Report, decision: "RESOLVE" | "DISMISS", reviewNote?: string) => {
     setSaving(true);
@@ -107,7 +110,7 @@ export default function AbuseReportTable() {
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={resolveTarget || dismissTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={resolveTarget || dismissTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -137,6 +140,8 @@ export default function AbuseReportTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -177,7 +182,7 @@ export default function AbuseReportTable() {
                           )}
                         </div>
                         {r.targetType === "CLASS" && r.class && (
-                          <div className="text-2xs text-base-content/50 mt-0.5">{r.class.subject}</div>
+                          <div className="text-2xs text-base-content/50 mt-0.5">{subjectDisplayLabel(r.class.subject)}</div>
                         )}
                       </td>
                       <td>
@@ -213,13 +218,13 @@ export default function AbuseReportTable() {
                             <div className="flex items-center gap-2">
                               <button
                                 onClick={() => setResolveTarget(r)}
-                                className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                                className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                               >
                                 Resolve
                               </button>
                               <button
                                 onClick={() => setDismissTarget(r)}
-                                className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                                className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                               >
                                 Dismiss
                               </button>

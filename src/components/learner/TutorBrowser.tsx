@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { BadgeCheck, CalendarClock, GraduationCap } from "lucide-react";
 import SearchInput from "@/components/ui/SearchInput";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDayMonth, formatTime, formatWeekday } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 import UserAvatar from "@/components/profile/UserAvatar";
 
@@ -34,7 +35,6 @@ function fmtNext(iso: string) {
 }
 
 export default function TutorBrowser() {
-  const router = useRouter();
   const { subjects: catalog } = useSubjectCatalog();
   const [q, setQ] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
@@ -50,7 +50,8 @@ export default function TutorBrowser() {
     pageSize,
     setPageSize,
     loading,
-    error,
+    loadError,
+    refetch,
   } = usePaginatedList<TutorRow>(
     "/api/learner/tutors",
     "tutors",
@@ -65,18 +66,18 @@ export default function TutorBrowser() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="space-y-2.5">
             <SearchInput
+              label="Search tutors"
               value={q}
               onChange={setQ}
               placeholder="Search a tutor by ID (e.g. TUT-0148)…"
               transform="upper"
             />
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div role="group" aria-label="Filter tutors by subject taught" className="flex flex-wrap items-center gap-1.5">
               <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/40">
                 Teaches
               </span>
@@ -112,6 +113,8 @@ export default function TutorBrowser() {
             <div className="flex justify-center py-12">
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : tutors.length === 0 ? (
             <p className="rounded-xl border border-dashed border-base-300 py-10 text-center text-xs italic text-base-content/40">
               No verified tutors match this filter yet.
@@ -119,10 +122,9 @@ export default function TutorBrowser() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {tutors.map((t) => (
-                <button
+                <Link
                   key={t.id}
-                  type="button"
-                  onClick={() => router.push(`/learner/tutors/${t.id}`)}
+                  href={`/learner/tutors/${t.id}`}
                   className="flex flex-col gap-2.5 rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-2">
@@ -133,7 +135,7 @@ export default function TutorBrowser() {
                         anonymousId={t.anonymousId}
                         size="sm"
                         role="TUTOR"
-                        subtitle={t.subjects.length > 0 ? t.subjects.join(", ") : undefined}
+                        subtitle={t.subjects.length > 0 ? t.subjects.map(subjectDisplayLabel).join(", ") : undefined}
                       />
                       <div className="min-w-0">
                         <AnonymousIdBadge id={t.anonymousId} role="TUTOR" size="sm" showIcon />
@@ -148,7 +150,7 @@ export default function TutorBrowser() {
                     <div className="flex flex-wrap gap-1">
                       {t.subjects.map((s) => (
                         <span key={s} className="badge badge-neutral badge-sm text-2xs">
-                          {s}
+                          {subjectDisplayLabel(s)}
                         </span>
                       ))}
                     </div>
@@ -161,7 +163,7 @@ export default function TutorBrowser() {
                         <span
                           key={c.code}
                           className="badge badge-success badge-sm gap-1 text-2xs"
-                          title={`${c.subject} · ${c.code}`}
+                          title={`${subjectDisplayLabel(c.subject)} · ${c.code}`}
                         >
                           <BadgeCheck className="h-2.5 w-2.5" />
                           {c.code}
@@ -186,7 +188,7 @@ export default function TutorBrowser() {
                       </span>
                     )}
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           )}

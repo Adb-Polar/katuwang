@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export interface QuizOption {
   id: string;
@@ -83,7 +84,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
           Assessments
         </Link>
         <span className="text-2xs text-base-content/50">
-          {attempt.subject} · attempt #{attempt.attemptNo}
+          {subjectDisplayLabel(attempt.subject)} · attempt #{attempt.attemptNo}
         </span>
       </div>
 

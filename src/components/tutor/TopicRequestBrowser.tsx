@@ -5,7 +5,6 @@ import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -14,6 +13,8 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 import { formatDate, formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
+import LoadErrorState from "@/components/ui/LoadErrorState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -77,7 +78,6 @@ export default function TopicRequestBrowser() {
 
   return (
     <div className="space-y-4">
-      <FeedbackBanner variant="error" message={active.error || null} />
 
       <Tabs
         tabs={[
@@ -110,6 +110,8 @@ export default function TopicRequestBrowser() {
         <div className="flex justify-center py-10">
           <span className="loading loading-spinner loading-md" />
         </div>
+      ) : active.loadError ? (
+        <LoadErrorState message={active.loadError} onRetry={active.refetch} />
       ) : isOpenTab ? (
         openList.data.length === 0 ? (
           <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
@@ -130,7 +132,7 @@ export default function TopicRequestBrowser() {
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
-                      {r.subject}
+                      {subjectDisplayLabel(r.subject)}
                     </span>
                     {r.directed && <StatusBadge tone="info" label="Directed to you" size="xs" />}
                     <div className="flex items-center gap-1.5">
@@ -149,7 +151,7 @@ export default function TopicRequestBrowser() {
                   </div>
                   <Link
                     href={`/tutor/requests/${r.id}/accept`}
-                    className="btn btn-primary btn-xs text-2xs"
+                    className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs"
                   >
                     Accept &amp; create class
                   </Link>
@@ -193,7 +195,7 @@ export default function TopicRequestBrowser() {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
-                    {r.subject}
+                    {subjectDisplayLabel(r.subject)}
                   </span>
                   <div className="flex items-center gap-1.5">
                     <UserAvatar
@@ -212,7 +214,7 @@ export default function TopicRequestBrowser() {
                   />
                 </div>
                 {r.class && (
-                  <Link href={`/tutor/classes/${r.class.id}`} className="btn btn-ghost btn-xs text-2xs">
+                  <Link href={`/tutor/classes/${r.class.id}`} className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs">
                     View class
                   </Link>
                 )}

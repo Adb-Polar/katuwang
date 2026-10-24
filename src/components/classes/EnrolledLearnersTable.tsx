@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import UserAvatar from "@/components/profile/UserAvatar";
@@ -27,8 +27,6 @@ export default function EnrolledLearnersTable({
   enrollments: Enrollment[];
   maxStudents: number;
 }) {
-  const router = useRouter();
-
   return (
     <>
       <h2 className="card-title text-sm font-bold">
@@ -51,11 +49,7 @@ export default function EnrolledLearnersTable({
             </thead>
             <tbody>
               {enrollments.map((enr) => (
-                <tr
-                  key={enr.id}
-                  onClick={() => router.push(`/tutor/students/${enr.learner.id}`)}
-                  className="cursor-pointer hover:bg-base-200/40"
-                >
+                <tr key={enr.id} className="hover:bg-base-200/40">
                   <td>
                     <div className="flex items-center gap-2">
                       <UserAvatar
@@ -65,14 +59,16 @@ export default function EnrolledLearnersTable({
                         role="LEARNER"
                         subtitle={gradeSection(enr.learner.gradeLevel, enr.learner.section)}
                       />
-                      <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
+                      <Link href={`/tutor/students/${enr.learner.id}`} aria-label={`View ${enr.learner.anonymousId} details`} className="link link-primary rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                        <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
+                      </Link>
                     </div>
                   </td>
                   <td className="text-base-content/60">
                     {gradeSection(enr.learner.gradeLevel, enr.learner.section)}
                   </td>
                   <td className="text-right">
-                    <ChevronRight className="h-4 w-4 text-base-content/30 inline" />
+                    <ChevronRight aria-hidden="true" className="h-4 w-4 text-base-content/30 inline" />
                   </td>
                 </tr>
               ))}

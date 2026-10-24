@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDate } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { gradeSection } from "@/lib/gradeLevels";
 
 export const metadata = {
@@ -94,7 +95,7 @@ export default async function TutorStudentProfilePage({
                 className="block border border-base-200 bg-base-200/20 hover:bg-base-200/40 rounded-lg p-3 space-y-1.5 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{enr.class.subject}</span>
+                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{subjectDisplayLabel(enr.class.subject)}</span>
                   <span className="flex items-center gap-1 text-2xs text-base-content/50">
                     <Calendar className="h-3 w-3" />
                     {formatDate(enr.enrolledAt)}

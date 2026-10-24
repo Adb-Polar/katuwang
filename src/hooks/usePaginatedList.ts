@@ -29,6 +29,7 @@ export function usePaginatedList<T>(
   const [meta, setMeta] = useState<Record<string, unknown>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [version, setVersion] = useState(0);
 
   const refetch = useCallback(() => setVersion((v) => v + 1), []);
@@ -72,6 +73,7 @@ export function usePaginatedList<T>(
     async function load() {
       setLoading(true);
       setError("");
+      setLoadError("");
       try {
         const query = new URLSearchParams({
           ...(JSON.parse(paramsKey) as Record<string, string>),
@@ -89,7 +91,9 @@ export function usePaginatedList<T>(
       } catch (err) {
         if (!cancelled) {
           setData([]);
-          setError(err instanceof Error ? err.message : errorMessage);
+          const message = err instanceof Error ? err.message : errorMessage;
+          setError(message);
+          setLoadError(message);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -112,6 +116,7 @@ export function usePaginatedList<T>(
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   };

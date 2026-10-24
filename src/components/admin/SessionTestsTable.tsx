@@ -6,13 +6,14 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import Pagination from "@/components/ui/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import SortableTh from "@/components/ui/SortableTh";
 import SessionTestResults from "@/components/tutor/SessionTestResults";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -51,7 +52,8 @@ export default function SessionTestsTable() {
     pageSize,
     setPageSize,
     loading,
-    error,
+    loadError,
+    refetch,
   } = usePaginatedList<Row>(
     "/api/admin/session-tests",
     "tests",
@@ -91,19 +93,20 @@ export default function SessionTestsTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search session tests"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search title / class / tutor..."
               className="input input-bordered input-sm text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter session tests by subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               className="select select-bordered select-sm text-xs focus:select-primary"
@@ -116,6 +119,7 @@ export default function SessionTestsTable() {
               ))}
             </select>
             <select
+              aria-label="Filter session tests by status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="select select-bordered select-sm text-xs focus:select-primary"
@@ -129,6 +133,8 @@ export default function SessionTestsTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -149,7 +155,7 @@ export default function SessionTestsTable() {
                     <tr key={t.id} className="text-sm">
                       <td className="text-base-content/70">
                         <span className="font-mono text-2xs">{t.classCode}</span>
-                        <div className="text-2xs text-base-content/40">{t.subject}</div>
+                        <div className="text-2xs text-base-content/40">{subjectDisplayLabel(t.subject)}</div>
                       </td>
                       <td>
                         <AnonymousIdBadge id={t.tutor.anonymousId} role="TUTOR" />
@@ -162,7 +168,7 @@ export default function SessionTestsTable() {
                       <td className="text-base-content/60">{t.questionCount}</td>
                       <td className="text-base-content/60">{t.attemptCount}</td>
                       <td className="text-right">
-                        <button onClick={() => setOpenId(t.id)} className="btn btn-outline btn-xs text-2xs font-bold">
+                        <button onClick={() => setOpenId(t.id)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                           Results
                         </button>
                       </td>

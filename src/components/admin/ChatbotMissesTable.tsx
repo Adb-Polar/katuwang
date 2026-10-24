@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
 import { formatDateTime } from "@/lib/datetime";
@@ -41,7 +41,8 @@ export default function ChatbotMissesTable() {
     pageSize,
     setPageSize,
     loading,
-    error,
+    loadError,
+    refetch,
   } = usePaginatedList<MissGroup>(
     "/api/admin/chatbot-misses",
     "groups",
@@ -58,7 +59,6 @@ export default function ChatbotMissesTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -71,12 +71,14 @@ export default function ChatbotMissesTable() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search unanswered messages"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search message text..."
               className="input input-bordered input-sm text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter unanswered messages by role"
               value={role}
               onChange={(e) => setRole(e.target.value as "" | MissGroup["role"])}
               className="select select-bordered select-sm text-xs focus:select-primary"
@@ -90,6 +92,8 @@ export default function ChatbotMissesTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">

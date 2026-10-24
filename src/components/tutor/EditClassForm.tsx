@@ -276,13 +276,13 @@ export default function EditClassForm({
                           }}
                           placeholder="Add another topic not listed above…"
                           maxLength={60}
-                          className="input input-bordered input-xs flex-1 text-2xs focus:input-primary"
+                          className="input input-bordered input-xs min-h-11 sm:min-h-0 flex-1 text-2xs focus:input-primary"
                         />
                         <button
                           type="button"
                           onClick={addCustomTopic}
                           disabled={normalizeTopic(customTopic).length < 2 || topics.length >= 10}
-                          className="btn btn-outline btn-xs text-2xs"
+                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs"
                         >
                           Add
                         </button>
@@ -347,6 +347,7 @@ export default function EditClassForm({
                 <div className="card-body gap-2">
                   <h2 className="card-title text-sm font-bold">Description</h2>
                   <textarea
+                    aria-label="Class description"
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Briefly explain what will be covered in this class... (optional)"
@@ -386,8 +387,9 @@ export default function EditClassForm({
                     <Users className="h-4 w-4 text-primary shrink-0" />
                     <span>{enrolledCount} currently enrolled</span>
                   </div>
-                  <label className="font-semibold text-2xs text-base-content/50">MAX CAPACITY</label>
+                  <label htmlFor="class-max-capacity" className="font-semibold text-2xs text-base-content/50">MAX CAPACITY</label>
                   <input
+                    id="class-max-capacity"
                     type="number"
                     value={form.maxStudents}
                     onChange={(e) => setForm((prev) => ({ ...prev, maxStudents: Number(e.target.value) }))}

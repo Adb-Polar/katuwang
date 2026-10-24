@@ -12,6 +12,7 @@ import { gradeLabel } from "@/lib/gradeLevels";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import MatchCriteriaFields, {
   MatchCriteriaValue,
   PreferredSlot,
@@ -43,7 +44,7 @@ const STATUS_TONE = {
 } as const;
 
 export default function TopicRequestManager({ defaultGrade }: { defaultGrade: string }) {
-  const { data: requests, loading, error, setError, refetch } = useFetchList<TopicRequest>(
+  const { data: requests, loading, error, loadError, setError, refetch } = useFetchList<TopicRequest>(
     "/api/learner/topic-requests",
     "Could not load your requests."
   );
@@ -184,7 +185,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={error || null} />
+      <FeedbackBanner variant="error" message={loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -288,11 +289,11 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             <h3 className="font-semibold">Renew request · preferred times</h3>
             <p>Adjust your weekly availability, then renew this request for 3 days.</p>
             {renewSlots.map((slot, i) => <div key={i} className="flex flex-wrap gap-2">
-              <select className="select select-bordered select-sm" value={slot.day} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, day: e.target.value } : s))}>
-                {["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => <option key={d} value={d}>{d}</option>)}
+              <select aria-label={`Preferred day ${i + 1}`} className="select select-bordered select-sm" value={slot.day} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, day: e.target.value } : s))}>
+                {["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => <option key={d} value={d}>{d.charAt(0) + d.slice(1).toLowerCase()}</option>)}
               </select>
-              <input type="time" className="input input-bordered input-sm" value={slot.startTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, startTime: e.target.value } : s))} />
-              <input type="time" className="input input-bordered input-sm" value={slot.endTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, endTime: e.target.value } : s))} />
+              <input type="time" aria-label={`Preferred start time ${i + 1}`} className="input input-bordered input-sm" value={slot.startTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, startTime: e.target.value } : s))} />
+              <input type="time" aria-label={`Preferred end time ${i + 1}`} className="input input-bordered input-sm" value={slot.endTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, endTime: e.target.value } : s))} />
               <button className="btn btn-ghost btn-sm" onClick={() => setRenewSlots(renewSlots.filter((_, j) => j !== i))}>Remove</button>
             </div>)}
             <div className="flex gap-2"><button className="btn btn-outline btn-sm" onClick={() => setRenewSlots([...renewSlots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }])}>Add time</button>
@@ -304,6 +305,8 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
             <div className="flex justify-center py-10">
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : visibleRequests.length === 0 ? (
             <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
               No {tab.toLowerCase()} requests.
@@ -330,7 +333,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                           {r.status === "OPEN" && tab === "Active" && (
                             <button
                               onClick={() => startEdit(r)}
-                              className="btn btn-ghost btn-xs text-2xs gap-1"
+                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs gap-1"
                             >
                               <Pencil className="h-3 w-3" />
                               Edit
@@ -338,7 +341,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                           )}
                           <button
                             onClick={() => setCancelId(r.id)}
-                            className="btn btn-ghost btn-xs text-error text-2xs"
+                            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error text-2xs"
                           >
                             Cancel
                           </button>
@@ -346,7 +349,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                       )}
                     </div>
 
-                    {tab === "Expired" && <><button className="btn btn-primary btn-xs" onClick={() => renew(r.id)}>Renew as is</button><button className="btn btn-outline btn-xs ml-2" onClick={() => { setRenewId(r.id); setRenewSlots(r.slots); }}>Change times and renew</button></>}
+                    {tab === "Expired" && <><button className="btn btn-primary btn-xs min-h-11 sm:min-h-0" onClick={() => renew(r.id)}>Renew as is</button><button className="btn btn-outline btn-xs min-h-11 sm:min-h-0 ml-2" onClick={() => { setRenewId(r.id); setRenewSlots(r.slots); }}>Change times and renew</button></>}
                     <Link className="link link-primary text-2xs" href={`/learner/requests/${r.id}`}>View history</Link>
                     <div className="flex flex-wrap gap-1">
                       {r.topics.map((t) => (
@@ -380,7 +383,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         </span>
                         <Link
                           href={`/learner/classes/${r.fulfilledClass.id}`}
-                          className="btn btn-success btn-xs text-2xs"
+                          className="btn btn-success btn-xs min-h-11 sm:min-h-0 text-2xs"
                         >
                           Review &amp; enroll
                         </Link>
@@ -394,7 +397,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         </span>
                         <Link
                           href={`/learner/classes/${r.fulfilledClass.id}`}
-                          className="btn btn-ghost btn-xs text-2xs"
+                          className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs"
                         >
                           View class
                         </Link>

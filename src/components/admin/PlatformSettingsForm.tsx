@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useFetchList } from "@/hooks/useFetchList";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import LoadingRow from "@/components/ui/LoadingRow";
 
@@ -104,7 +105,7 @@ const ASSESSMENT_FIELDS: {
 ];
 
 export default function PlatformSettingsForm() {
-  const { data: settings, loading, error, setError, refetch } = useFetchList<Setting>(
+  const { data: settings, loading, error, loadError, setError, refetch } = useFetchList<Setting>(
     "/api/admin/settings",
     "Could not retrieve platform settings."
   );
@@ -113,6 +114,8 @@ export default function PlatformSettingsForm() {
 
   // ─── Global assessment config ───────────────────────────────────────────
   const [config, setConfig] = useState<AssessmentConfig | null>(null);
+  const [configError, setConfigError] = useState("");
+  const [configRetry, setConfigRetry] = useState(0);
   const [draft, setDraft] = useState<Record<keyof AssessmentConfig, string>>({
     questionCount: "",
     passPercent: "",
@@ -133,11 +136,13 @@ export default function PlatformSettingsForm() {
           minBankSize: String(c.minBankSize),
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setConfigError("Could not retrieve assessment settings.");
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [configRetry]);
 
   const toggle = async (key: string, nextValue: boolean) => {
     setSavingKey(key);
@@ -247,6 +252,9 @@ export default function PlatformSettingsForm() {
   const profilePicSetting = settings.find((s) => s.key === "profilePictureRequirement");
   const profilePicValue = String(profilePicSetting?.value ?? "OPTIONAL");
 
+  if (loading) return <LoadingRow />;
+  if (loadError) return <LoadErrorState message={loadError} onRetry={refetch} />;
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
@@ -293,7 +301,8 @@ export default function PlatformSettingsForm() {
 
           {!loading && <div className="divide-y divide-base-200">{assessmentToggles.map(renderToggle)}</div>}
 
-          <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {configError && <LoadErrorState message={configError} onRetry={() => { setConfigError(""); setConfigRetry((retry) => retry + 1); }} />}
+          {!configError && <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ASSESSMENT_FIELDS.map((f) => (
               <label key={f.key} className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-base-content">{f.label}</span>
@@ -310,8 +319,8 @@ export default function PlatformSettingsForm() {
                 <span className="text-2xs text-base-content/50">{f.description}</span>
               </label>
             ))}
-          </div>
-          {config === null && (
+          </div>}
+          {config === null && !configError && (
             <p className="text-2xs text-base-content/40">Loading assessment settings…</p>
           )}
         </div>

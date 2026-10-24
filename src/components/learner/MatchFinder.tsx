@@ -112,7 +112,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 <button
                   type="button"
                   onClick={() => setFlipped(false)}
-                  className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                  className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   Adjust filters
@@ -124,7 +124,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 <p className="text-xs text-base-content/50 italic">
                   Nothing open fits this right now.
                 </p>
-                <Link href="/learner/requests" className="btn btn-outline btn-xs text-xs">
+                <Link href="/learner/requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
                   Post a class request instead
                 </Link>
               </div>
@@ -187,7 +187,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   <button
                     type="button"
                     onClick={() => setFlipped(true)}
-                    className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                    className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
                   >
                     <ListChecks className="h-3.5 w-3.5" />
                     View results

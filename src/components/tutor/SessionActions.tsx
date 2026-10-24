@@ -111,7 +111,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={openRescheduleModal}
-            className="btn btn-ghost btn-xs cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 cursor-pointer tooltip"
             data-tip="Reschedule"
             aria-label="Reschedule session"
           >
@@ -120,7 +120,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("complete")}
-            className="btn btn-ghost btn-xs text-success cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-success cursor-pointer tooltip"
             data-tip="Mark complete"
             aria-label="Mark session complete"
           >
@@ -129,7 +129,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("cancel")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
             data-tip="Cancel"
             aria-label="Cancel session"
           >
@@ -138,7 +138,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("delete")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
             data-tip="Delete"
             aria-label="Delete session"
           >

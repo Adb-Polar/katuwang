@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { formatDateTime } from "@/lib/datetime";
+import { statusDisplayLabel } from "@/lib/displayLabels";
 import { gradeSection } from "@/lib/gradeLevels";
 import UserAvatarModerationCard from "@/components/admin/UserAvatarModerationCard";
 import { isAdminRole } from "@/lib/permissions";
@@ -111,7 +112,7 @@ export default async function AdminUserDetailPage({
         <div className="card-body gap-3 p-6">
           <div className="flex items-center gap-2">
             <h2 className="card-title text-sm font-bold">Status</h2>
-            <StatusBadge tone={STATUS_TONE[user.status]} label={user.status} size="xs" />
+            <StatusBadge tone={STATUS_TONE[user.status]} label={statusDisplayLabel(user.status)} size="xs" />
           </div>
           {user.status !== "ACTIVE" && (
             <div className="text-xs text-base-content/70 space-y-0.5">

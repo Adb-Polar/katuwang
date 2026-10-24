@@ -128,7 +128,7 @@ export default function UserAvatarModerationCard({
                 type="button"
                 onClick={() => openActionModal("WARN")}
                 disabled={Boolean(loadingAction)}
-                className="btn btn-outline btn-warning btn-xs text-2xs gap-1 cursor-pointer"
+                className="btn btn-outline btn-warning btn-xs min-h-11 sm:min-h-0 text-2xs gap-1 cursor-pointer"
               >
                 <AlertTriangle className="w-3 h-3" />
                 Send Warning
@@ -139,7 +139,7 @@ export default function UserAvatarModerationCard({
                   type="button"
                   onClick={() => openActionModal("REMOVE")}
                   disabled={Boolean(loadingAction)}
-                  className="btn btn-outline btn-error btn-xs text-2xs gap-1 cursor-pointer"
+                  className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs gap-1 cursor-pointer"
                 >
                   <CameraOff className="w-3 h-3" />
                   Remove Picture
@@ -151,7 +151,7 @@ export default function UserAvatarModerationCard({
                   type="button"
                   onClick={() => openActionModal("UNLOCK")}
                   disabled={Boolean(loadingAction)}
-                  className="btn btn-outline btn-success btn-xs text-2xs gap-1 cursor-pointer"
+                  className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs gap-1 cursor-pointer"
                 >
                   <Unlock className="w-3 h-3" />
                   Unlock Uploads
@@ -161,7 +161,7 @@ export default function UserAvatarModerationCard({
                   type="button"
                   onClick={() => openActionModal("LOCK")}
                   disabled={Boolean(loadingAction)}
-                  className="btn btn-outline btn-error btn-xs text-2xs gap-1 cursor-pointer"
+                  className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs gap-1 cursor-pointer"
                 >
                   <Lock className="w-3 h-3" />
                   Lock Uploads
@@ -201,6 +201,7 @@ export default function UserAvatarModerationCard({
                 </span>
               </label>
               <textarea
+                aria-label={pendingAction === "WARN" ? "Reason for profile picture warning" : "Administrative reason or note"}
                 className="textarea textarea-bordered textarea-sm w-full text-xs"
                 placeholder={
                   pendingAction === "WARN"

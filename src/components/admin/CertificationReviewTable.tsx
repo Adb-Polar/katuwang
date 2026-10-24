@@ -14,6 +14,7 @@ import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -196,7 +197,7 @@ export default function CertificationReviewTable() {
                           {c.tutor.firstName} {c.tutor.lastName}
                         </div>
                       </td>
-                      <td className="text-base-content/70">{c.subject}</td>
+                      <td className="text-base-content/70">{subjectDisplayLabel(c.subject)}</td>
                       <td className="text-base-content/70">{c.topic}</td>
                       <td className="text-base-content/60">
                         {tab === "certified"
@@ -218,13 +219,13 @@ export default function CertificationReviewTable() {
                         <td className="flex gap-2 justify-end">
                           <button
                             onClick={() => setApproveTarget(c)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => setRejectTarget(c)}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Reject
                           </button>
@@ -261,7 +262,7 @@ export default function CertificationReviewTable() {
         title="Approve this certification?"
         description={
           approveTarget
-            ? `${approveTarget.tutor.anonymousId} will be certified for "${approveTarget.topic}" (${approveTarget.subject}).`
+            ? `${approveTarget.tutor.anonymousId} will be certified for "${approveTarget.topic}" (${subjectDisplayLabel(approveTarget.subject)}).`
             : undefined
         }
         confirmLabel="Approve"
