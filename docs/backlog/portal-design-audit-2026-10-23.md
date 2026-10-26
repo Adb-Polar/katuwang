@@ -44,6 +44,8 @@ Shared issues are listed once here. Detailed reproduction evidence, component re
 | DA-07 | Medium | Learner and tutor; compact controls also affect admin | Mobile metrics, small controls, and truncated topic names weaken task clarity | Open |
 | DA-08 | High for error recovery; Medium for copy | Learner; status/subject clarity also affects tutor/admin | Error and empty states need distinct handling; progress needs a next action; internal codes need readable labels | Open |
 
+For the focused remaining verification plan after remediation, see [Remaining portal tests](portal-design-audit-remaining-tests-2026-10-26.md).
+
 ### Fix pass progress — October 23, 2026
 
 Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checklist. The scores above are the October 22–23 baseline, before the fix pass. Implementation checks and browser checks are tracked separately below.
