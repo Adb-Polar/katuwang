@@ -281,6 +281,16 @@ Validation: this pass changes documentation only. `git diff --check` passed; sou
 
 Source validation: TypeScript, lint (eight existing warnings), all **120 files / 931 tests**, production build, and `git diff --check` passed. Deployed verification is recorded separately after rollout; these implementation notes do not complete physical-device or spoken screen-reader checks. Existing seeded descriptions and inconsistent capacity/topic fixtures are not automatically rewritten.
 
+#### First remediation deployment verification
+
+`f62bdc15b69e6d59b34b7518117e5c98252442f0` reached live as `dep-dbfcmiqjnfac73ekm5jg` at **03:41:16 UTC / 11:41:16 PHT**.
+
+- **14 targeted checks passed, zero failed:** password names and local mismatch validation in all three portals; native FAQ Enter/Space behavior in all three; reschedule named-dialog focus/24 forward and reverse Tabs/Escape/backdrop/restoration at 355/390/640/1440px; and four cancelled cards with successful Enter navigation. PHT date/time prefill remained 2026-10-29 / 15:00 in the Honolulu browser.
+- A further admin check followed `aria-describedby` to the actual hint/error elements and verified the expected text. No password change was sent to the server.
+- Repeated **40 page captures at four widths**: no document-wide overflow and no unnamed controls in the measured role categories. This remains accessibility-tree evidence, not spoken screen-reader verification.
+- The broader sizing rule fixed the initially reproduced learner targets, but **640px** still exposed compact buttons/links in appeals, abuse-report audit links, question requests, certifications, and session-test results. `sm:min-h-0` utility precedence over the component CSS was the cause. The mobile target rule is moved outside the component layer so the explicit below-768px size requirement takes precedence over compact utility classes. Final deployed checks follow below.
+- Health returned healthy / database connected, and the error-log window checked after rollout was empty.
+
 ### Recommended implementation order
 
 1. **DA-01:** standardize display timezone, calendar grouping, and input round trips; verify identical records across server/client views.

@@ -325,6 +325,9 @@ b, strong { font-weight: var(--font-weight-bold); }
      Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
   .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
 
+}
+
+/* Keep mobile target sizes above compact breakpoint utilities. */
   @media (width < 48rem) {
     .kt-portal :is(button, summary, select, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), .kt-tab, .kt-icon-btn) {
       min-height: 2.75rem;
@@ -344,4 +347,3 @@ b, strong { font-weight: var(--font-weight-bold); }
       min-width: 2.75rem;
     }
   }
-}
