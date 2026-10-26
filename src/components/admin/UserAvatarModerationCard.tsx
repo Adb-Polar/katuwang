@@ -6,6 +6,14 @@ import { Camera, CameraOff, AlertTriangle, Lock, Unlock, Loader2 } from "lucide-
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import UserAvatar from "@/components/profile/UserAvatar";
 import { formatDateTime } from "@/lib/datetime";
+import Modal from "@/components/ui/Modal";
+
+const ACTION_TITLES = {
+  WARN: "Send Profile Picture Warning",
+  REMOVE: "Forcibly Remove Picture",
+  LOCK: "Lock Profile Picture Uploads",
+  UNLOCK: "Unlock Profile Picture Uploads",
+} as const;
 
 interface UserAvatarModerationCardProps {
   userId: string;
@@ -173,16 +181,11 @@ export default function UserAvatarModerationCard({
       </div>
 
       {/* Moderation Action Modal */}
-      {modalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm">
-            <h3 className="font-bold text-sm">
-              {pendingAction === "WARN" && "Send Profile Picture Warning"}
-              {pendingAction === "REMOVE" && "Forcibly Remove Picture"}
-              {pendingAction === "LOCK" && "Lock Profile Picture Uploads"}
-              {pendingAction === "UNLOCK" && "Unlock Profile Picture Uploads"}
-            </h3>
-
+      <Modal
+        open={modalOpen}
+        onClose={() => { if (!loadingAction) setModalOpen(false); }}
+        title={pendingAction ? ACTION_TITLES[pendingAction] : "Profile picture moderation"}
+      >
             <p className="text-xs text-base-content/70 mt-2">
               {pendingAction === "WARN" &&
                 "The user will receive an in-app warning notification prompting them to update their photo."}
@@ -246,9 +249,7 @@ export default function UserAvatarModerationCard({
                 )}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </section>
   );
 }

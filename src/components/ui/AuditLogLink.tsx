@@ -4,7 +4,7 @@ import Link from "next/link";
 export default function AuditLogLink({
   targetId,
   children = "View audit log",
-  className = "mt-1 inline-block",
+  className = "mt-1",
 }: {
   targetId: string;
   children?: React.ReactNode;
@@ -13,7 +13,7 @@ export default function AuditLogLink({
   return (
     <Link
       href={`/admin/audit-log?q=${targetId}`}
-      className={`text-2xs text-primary hover:underline ${className}`}
+      className={`inline-flex min-h-11 items-center text-2xs text-primary hover:underline sm:min-h-0 ${className}`}
     >
       {children}
     </Link>

@@ -77,6 +77,14 @@ export default function AbuseReportTable() {
   const targetName = (r: Report) =>
     r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
 
+  const targetDetails = (r: Report) => r.targetType === "TUTOR" ? (
+    r.tutor ? <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" /> : "—"
+  ) : r.class ? (
+    <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
+      {r.class.code} · {subjectDisplayLabel(r.class.subject)}
+    </Link>
+  ) : "—";
+
   const review = async (report: Report, decision: "RESOLVE" | "DISMISS", reviewNote?: string) => {
     setSaving(true);
     try {
@@ -143,7 +151,32 @@ export default function AbuseReportTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
+            <>
+            <div className="space-y-3 md:hidden">
+              {reports.map((r) => (
+                <article key={r.id} className="rounded-xl border border-base-200 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="badge badge-neutral badge-sm font-bold">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
+                    <span className="text-xs text-base-content/60">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
+                  </div>
+                  <div className="text-sm font-semibold">{targetDetails(r)}</div>
+                  <p className="text-xs text-base-content/65">Reported by <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" /></p>
+                  <div className="flex flex-wrap gap-1">
+                    {r.violations.map((v) => <span key={v} className="badge badge-outline h-auto max-w-full whitespace-normal py-1 text-left text-xs">{violationLabel(v)}</span>)}
+                  </div>
+                  {r.details && <p className="text-sm whitespace-normal break-words">{r.details}</p>}
+                  {tab !== "pending" && <p className="text-xs text-base-content/65">Admin note: {r.resolutionNote || "No note"}</p>}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {tab === "pending" && <>
+                      <button type="button" onClick={() => setResolveTarget(r)} className="btn btn-outline btn-success btn-sm min-h-11">Resolve</button>
+                      <button type="button" onClick={() => setDismissTarget(r)} className="btn btn-outline btn-error btn-sm min-h-11">Dismiss</button>
+                    </>}
+                    <AuditLogLink targetId={r.id} className="ml-auto" />
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto rounded-xl border border-base-200 md:block">
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
@@ -165,7 +198,7 @@ export default function AbuseReportTable() {
                   {reports.map((r) => (
                     <tr key={r.id} className="text-sm align-top">
                       <td>
-                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType}</span>
+                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
                         <div className="font-mono text-xs">
                           {r.targetType === "TUTOR" ? (
                             r.tutor ? (
@@ -237,10 +270,11 @@ export default function AbuseReportTable() {
                   ))}
                 </tbody>
               </table>
-              {reports.length === 0 && (
-                <EmptyState>{tab === "pending" ? "No reports awaiting review." : `No ${tab} reports.`}</EmptyState>
-              )}
             </div>
+            {reports.length === 0 && (
+              <EmptyState>{tab === "pending" ? "No reports awaiting review." : `No ${tab} reports.`}</EmptyState>
+            )}
+            </>
           )}
 
           <Pagination

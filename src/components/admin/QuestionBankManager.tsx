@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { ChevronRight, CornerUpLeft } from "lucide-react";
@@ -20,6 +20,7 @@ import Tabs from "@/components/ui/Tabs";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
 import LoadErrorState from "@/components/ui/LoadErrorState";
+import Modal from "@/components/ui/Modal";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 const SUBJECTS = SUBJECT_SLUGS;
@@ -557,10 +558,8 @@ function QuestionsTab({
         />
       )}
 
-      {deleteTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 kt-card space-y-3">
-            <h3 className="font-bold text-sm text-base-content">Delete this question?</h3>
+      <Modal open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} title="Delete this question?">
+        {deleteTarget && <div className="space-y-3">
             <p className="text-xs text-base-content/60">This cannot be undone.</p>
             <p className="text-2xs text-base-content/50 border border-base-200 rounded-lg p-2">
               {deleteTarget.prompt}
@@ -578,10 +577,8 @@ function QuestionsTab({
                 Delete
               </button>
             </div>
-          </div>
-          <label className="modal-backdrop" onClick={() => setDeleteTarget(null)} aria-label="Close" />
-        </div>
-      )}
+        </div>}
+      </Modal>
     </div>
   );
 }
@@ -769,12 +766,12 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
         onPageSizeChange={setPageSize}
       />
 
-      {target && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 kt-card space-y-3">
-            <h3 className="font-bold text-sm text-base-content">
-              {target.decision === "RESOLVED" ? "Resolve" : "Dismiss"} this request?
-            </h3>
+      <Modal
+        open={target !== null}
+        onClose={() => { if (!saving) setTarget(null); }}
+        title={target?.decision === "RESOLVED" ? "Resolve this request?" : "Dismiss this request?"}
+      >
+        {target && <div className="space-y-3">
             <p className="text-xs text-base-content/60">
               {subjectDisplayLabel(target.req.subject)} · {target.req.topic} — from {target.req.tutor.anonymousId}
             </p>
@@ -801,10 +798,8 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                 {target.decision === "RESOLVED" ? "Resolve" : "Dismiss"}
               </button>
             </div>
-          </div>
-          <label className="modal-backdrop" onClick={() => setTarget(null)} aria-label="Close" />
-        </div>
-      )}
+        </div>}
+      </Modal>
     </div>
   );
 }
@@ -816,7 +811,10 @@ function ResultsTab() {
   const [statusFilter, setStatusFilter] = useState("");
   const [q, setQ] = useState("");
   const [detail, setDetail] = useState<AttemptDetail | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailError, setDetailError] = useState("");
   const [detailLoading, setDetailLoading] = useState(false);
+  const detailRequest = useRef(0);
 
   const {
     data: attempts,
@@ -842,14 +840,29 @@ function ResultsTab() {
   );
 
   const openDetail = async (id: string) => {
+    const request = ++detailRequest.current;
+    setDetailId(id);
+    setDetail(null);
+    setDetailError("");
     setDetailLoading(true);
     try {
       const res = await fetch(`/api/admin/assessment-attempts/${id}`);
+      if (!res.ok) throw new Error("Could not retrieve assessment details.");
       const data = await res.json();
-      if (res.ok) setDetail(data);
+      if (request === detailRequest.current) setDetail(data);
+    } catch (err) {
+      if (request === detailRequest.current) setDetailError(err instanceof Error ? err.message : "Could not retrieve assessment details.");
     } finally {
-      setDetailLoading(false);
+      if (request === detailRequest.current) setDetailLoading(false);
     }
+  };
+
+  const closeDetail = () => {
+    detailRequest.current += 1;
+    setDetailId(null);
+    setDetail(null);
+    setDetailError("");
+    setDetailLoading(false);
   };
 
   return (
@@ -955,31 +968,26 @@ function ResultsTab() {
         onPageSizeChange={setPageSize}
       />
 
-      {(detail || detailLoading) && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl p-6 kt-card space-y-4">
-            {detailLoading || !detail ? (
+      <Modal
+        open={detailId !== null}
+        onClose={closeDetail}
+        title={detail ? `${subjectDisplayLabel(detail.subject)} · ${detail.topic}` : "Assessment attempt details"}
+        size="lg"
+      >
+          {detailLoading ? (
               <div className="flex justify-center py-10">
                 <span className="loading loading-spinner loading-md text-primary" />
               </div>
-            ) : (
+            ) : detailError ? (
+              <LoadErrorState message={detailError} onRetry={() => detailId && openDetail(detailId)} />
+            ) : detail ? (
               <>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-bold text-sm text-base-content">
-                      {subjectDisplayLabel(detail.subject)} · {detail.topic}
-                    </h3>
-                    <p className="text-2xs text-base-content/50 mt-0.5">
+                    <p className="text-2xs text-base-content/50 mb-4">
                       {detail.tutor.anonymousId} · attempt #{detail.attemptNo} ·{" "}
                       {detail.status === "IN_PROGRESS"
                         ? "in progress"
                         : `${detail.scorePercent}% (pass ≥ ${detail.passPercent}%)`}
                     </p>
-                  </div>
-                  <button className="btn btn-sm btn-circle btn-ghost" onClick={() => setDetail(null)}>
-                    ✕
-                  </button>
-                </div>
 
                 <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
                   {detail.items.map((item) => (
@@ -1022,16 +1030,13 @@ function ResultsTab() {
                 </div>
 
                 <div className="modal-action pt-1">
-                  <button className="btn btn-ghost btn-sm" onClick={() => setDetail(null)}>
+                  <button className="btn btn-ghost btn-sm" onClick={closeDetail}>
                     Close
                   </button>
                 </div>
               </>
-            )}
-          </div>
-          <label className="modal-backdrop" onClick={() => setDetail(null)} aria-label="Close" />
-        </div>
-      )}
+            ) : null}
+      </Modal>
     </div>
   );
 }

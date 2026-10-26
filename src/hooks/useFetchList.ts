@@ -23,6 +23,7 @@ export function useFetchList<T>(url: string, errorMessage = "Failed to load data
         if (!cancelled) setData(json);
       } catch (err) {
         if (!cancelled) {
+          setData([]);
           const message = err instanceof Error ? err.message : errorMessage;
           setError(message);
           setLoadError(message);

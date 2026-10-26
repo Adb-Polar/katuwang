@@ -16,6 +16,7 @@ import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import LoadingRow from "@/components/ui/LoadingRow";
 import LoadErrorState from "@/components/ui/LoadErrorState";
+import Modal from "@/components/ui/Modal";
 import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -272,16 +273,8 @@ export default function TopicRequestModerationTable() {
         </div>
       </section>
 
-      {closeTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              onClick={() => setCloseTarget(null)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-1">Close request</h3>
+      <Modal open={closeTarget !== null} onClose={() => setCloseTarget(null)} title="Close request">
+        {closeTarget && <>
             <p className="text-2xs text-base-content/50 mb-4">
               {subjectDisplayLabel(closeTarget.subject)} · {closeTarget.topics.join(", ")}
             </p>
@@ -313,9 +306,8 @@ export default function TopicRequestModerationTable() {
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : "Close request"}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </>}
+      </Modal>
 
       <ConfirmDialog
         open={reopenTarget !== null}

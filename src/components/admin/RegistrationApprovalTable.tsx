@@ -15,6 +15,8 @@ import Pagination from "@/components/ui/Pagination";
 import Tabs from "@/components/ui/Tabs";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import Modal from "@/components/ui/Modal";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -55,6 +57,7 @@ export default function RegistrationApprovalTable() {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<PendingUser>(
@@ -100,10 +103,16 @@ export default function RegistrationApprovalTable() {
     }
   };
 
+  const openDecline = (user: PendingUser) => {
+    setDeclineTarget(user);
+    setReason("");
+    setError("");
+  };
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={declineTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={declineTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -145,13 +154,33 @@ export default function RegistrationApprovalTable() {
 
           {loading ? (
             <LoadingRow />
-          ) : error && users.length === 0 ? (
-            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
-              <span>Pending registrations could not be loaded.</span>
-              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry</button>
-            </div>
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
+            <>
+            <div className="grid gap-3 md:hidden">
+              {users.map((u) => (
+                <article key={u.id} className="min-w-0 space-y-3 rounded-xl border border-base-200 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <AnonymousIdBadge id={u.anonymousId} role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"} />
+                    <span className="text-xs font-semibold">{u.role === "STUDENT_TUTOR" ? "Tutor" : "Learner"}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{u.firstName} {u.lastName}</p>
+                    <p className="break-all text-xs text-base-content/60">{u.email}</p>
+                  </div>
+                  <div className="space-y-1 text-xs text-base-content/65">
+                    <p>{gradeSection(u.gradeLevel, u.section)}</p>
+                    <p>Requested {formatDateTime(u.createdAt)}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 border-t border-base-200 pt-3">
+                    <button type="button" onClick={() => review(u, "APPROVE")} disabled={busyId === u.id} className="btn btn-primary min-h-11 flex-1 text-sm">{busyId === u.id ? <span className="loading loading-spinner loading-xs" /> : "Approve"}</button>
+                    <button type="button" onClick={() => openDecline(u)} disabled={busyId === u.id} className="btn btn-outline btn-error min-h-11 flex-1 text-sm">Decline</button>
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto rounded-xl border border-base-200 md:block">
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
@@ -198,11 +227,7 @@ export default function RegistrationApprovalTable() {
                             )}
                           </button>
                           <button
-                            onClick={() => {
-                              setDeclineTarget(u);
-                              setReason("");
-                              setError("");
-                            }}
+                            onClick={() => openDecline(u)}
                             disabled={busyId === u.id}
                             className="btn btn-outline btn-error min-h-11 text-sm font-bold cursor-pointer"
                           >
@@ -214,10 +239,9 @@ export default function RegistrationApprovalTable() {
                   ))}
                 </tbody>
               </table>
-              {users.length === 0 && (
-                <EmptyState>No accounts awaiting approval.</EmptyState>
-              )}
             </div>
+            {users.length === 0 && <EmptyState>No accounts awaiting approval.</EmptyState>}
+            </>
           )}
 
           <Pagination
@@ -230,16 +254,8 @@ export default function RegistrationApprovalTable() {
         </div>
       </section>
 
-      {declineTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              onClick={() => setDeclineTarget(null)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-1">Decline Registration</h3>
+      <Modal open={declineTarget !== null} onClose={() => setDeclineTarget(null)} title="Decline Registration">
+        {declineTarget && <>
             <p className="text-2xs text-base-content/50 mb-4">
               {declineTarget.anonymousId} · {declineTarget.firstName} {declineTarget.lastName}
             </p>
@@ -275,9 +291,8 @@ export default function RegistrationApprovalTable() {
                 )}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </>}
+      </Modal>
     </div>
   );
 }

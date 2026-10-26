@@ -15,6 +15,7 @@ import FormField from "@/components/ui/FormField";
 import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Modal from "@/components/ui/Modal";
 import Pagination from "@/components/ui/Pagination";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import LoadingRow from "@/components/ui/LoadingRow";
@@ -118,6 +119,13 @@ export default function ClassModerationTable() {
     }
   };
 
+  const startModeration = (tutorClass: AdminClass, action: "SUSPENDED" | "BANNED") => {
+    setModerateTarget({ class: tutorClass, action });
+    setReason("");
+    setDurationDays("");
+    setError("");
+  };
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
@@ -169,7 +177,37 @@ export default function ClassModerationTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
+            <>
+            <div className="grid gap-3 md:hidden">
+              {classes.map((c) => {
+                const { tone, label } = getClassStatusBadge(c.status, false, "Scheduled");
+                return (
+                  <article key={c.id} className="min-w-0 space-y-3 rounded-xl border border-base-200 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <Link href={`/admin/classes/${c.id}`} className="font-mono text-sm font-semibold text-primary hover:underline">{c.code}</Link>
+                      <StatusBadge tone={tone} label={label} size="xs" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{subjectDisplayLabel(c.subject)}</p>
+                      <p className="break-words text-xs text-base-content/60">{c.topics.join(", ")}</p>
+                    </div>
+                    <div className="grid gap-2 text-xs text-base-content/65">
+                      <p>Tutor: <AnonymousIdBadge id={c.tutor.anonymousId} role="TUTOR" /> {c.tutor.firstName} {c.tutor.lastName}</p>
+                      <p>Next session: {c.nextSessionAt ? formatDateTime(c.nextSessionAt) : "None scheduled"}</p>
+                      <p>Enrolled: {c._count.enrollments}</p>
+                      {c.status === "SUSPENDED" && c.suspendedUntil && <p>Suspended until: {formatDateTime(c.suspendedUntil)}</p>}
+                    </div>
+                    <div className="flex flex-wrap gap-2 border-t border-base-200 pt-3">
+                      <Link href={`/admin/classes/${c.id}`} className="btn btn-outline btn-sm min-h-11">View class</Link>
+                      {c.status === "SCHEDULED" && <button type="button" onClick={() => startModeration(c, "SUSPENDED")} className="btn btn-outline btn-error btn-sm min-h-11">Suspend</button>}
+                      {(c.status === "SCHEDULED" || c.status === "SUSPENDED") && <button type="button" onClick={() => startModeration(c, "BANNED")} className="btn btn-outline btn-error btn-sm min-h-11">Ban</button>}
+                      {(c.status === "SUSPENDED" || c.status === "BANNED") && <button type="button" onClick={() => setReinstateTarget(c)} className="btn btn-outline btn-success btn-sm min-h-11">Reinstate</button>}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <div className="hidden overflow-x-auto rounded-xl border border-base-200 md:block">
               <table className="table table-sm">
                 <thead>
                   <tr className="text-2xs">
@@ -222,12 +260,7 @@ export default function ClassModerationTable() {
                           </Link>
                           {c.status === "SCHEDULED" && (
                             <button
-                              onClick={() => {
-                                setModerateTarget({ class: c, action: "SUSPENDED" });
-                                setReason("");
-                                setDurationDays("");
-                                setError("");
-                              }}
+                              onClick={() => startModeration(c, "SUSPENDED")}
                               className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                             >
                               Suspend
@@ -235,12 +268,7 @@ export default function ClassModerationTable() {
                           )}
                           {(c.status === "SCHEDULED" || c.status === "SUSPENDED") && (
                             <button
-                              onClick={() => {
-                                setModerateTarget({ class: c, action: "BANNED" });
-                                setReason("");
-                                setDurationDays("");
-                                setError("");
-                              }}
+                              onClick={() => startModeration(c, "BANNED")}
                               className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                             >
                               Ban
@@ -261,10 +289,11 @@ export default function ClassModerationTable() {
                   })}
                 </tbody>
               </table>
-              {classes.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-xs">No classes found.</div>
-              )}
             </div>
+            {classes.length === 0 && (
+              <div className="text-center py-8 text-base-content/40 italic text-xs">No classes found.</div>
+            )}
+            </>
           )}
 
           <Pagination
@@ -277,18 +306,12 @@ export default function ClassModerationTable() {
         </div>
       </section>
 
-      {moderateTarget && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              onClick={() => setModerateTarget(null)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-1">
-              {moderateTarget.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
-            </h3>
+      <Modal
+        open={moderateTarget !== null}
+        onClose={() => setModerateTarget(null)}
+        title={moderateTarget?.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
+      >
+        {moderateTarget && <>
             <p className="text-2xs text-base-content/50 mb-4">
               {subjectDisplayLabel(moderateTarget.class.subject)} · {moderateTarget.class.topics.join(", ")}
             </p>
@@ -351,9 +374,8 @@ export default function ClassModerationTable() {
                 )}
               </button>
             </div>
-          </div>
-        </div>
-      )}
+        </>}
+      </Modal>
 
       <ConfirmDialog
         open={reinstateTarget !== null}

@@ -91,6 +91,8 @@ export function usePaginatedList<T>(
       } catch (err) {
         if (!cancelled) {
           setData([]);
+          setTotal(0);
+          setMeta({});
           const message = err instanceof Error ? err.message : errorMessage;
           setError(message);
           setLoadError(message);
