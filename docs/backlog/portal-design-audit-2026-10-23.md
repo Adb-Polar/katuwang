@@ -96,7 +96,7 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [x] DA-02, high confidence for inspected controls: live learner browse search/filters, admin user search/filters, and final administrator search/status filters exposed names; local admin settings switches exposed names. Tutor class editor controls inspected had named grade, location, and meeting-link fields.
 - [ ] DA-02: Complete a screen-reader pass across all forms, including spoken hints and validation errors.
 - [x] DA-03, high confidence for inspected menu: at a 390px mobile viewport, opening the tutor drawer focused Close, Tab moved inside it, Escape closed it, and focus returned to the menu trigger.
-- [ ] DA-03: Test focus containment through a full Tab cycle, all three portals, and resize transitions.
+- [x] DA-03: Test focus containment through a full Tab cycle, all three portals, and resize transitions. Repeated October 26 on dev-test `e4f24a8` in Chromium mobile emulation; see continuation below. Physical-device verification remains open.
 - [x] DA-04, high confidence for inspected links: live learner browse cards, tutor class cards, and admin account details appeared as links in the accessibility tree.
 - [ ] DA-04: Exercise every card variant and user table detail link with keyboard activation.
 - [x] DA-05, high confidence for inspected dialogs: live admin Manage Account and local Provision Admin opened with focus on Close; Tab entered the form; Escape closed and restored focus. The final live administrator management dialog behaved the same after the follow-up fix.
@@ -117,6 +117,76 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [ ] DA-05/07/08 October 25 follow-up: verify mobile class and abuse-report cards, migrated admin dialogs, and assessment-detail error recovery in a browser after deployment.
 - [x] DA-01 source check: school-date tests passed under `TZ=America/New_York` and `TZ=Pacific/Honolulu` (three cases each). Remaining admin report and request-form date arithmetic starts from a PHT-derived day. A non-PHT browser check is still pending.
 - [ ] Latest source pass: verify the above changes in a browser, including multiple mobile widths, focus and keyboard operation, and simulated retrieval failures.
+
+### Audit continuation — October 26, 2026
+
+#### Deployment provenance and access
+
+- Fetched and checked out `origin/fix/portal-design-audit-2026-10-23`, starting at **`462027c`**, with its remote upstream configured. Read `AGENTS.md`, this working checklist, and the installed Next.js server/client component and Playwright guides before changes.
+- Used the authorized Render connection and the user-confirmed **My Workspace** (`tea-daief5lg1s2s73f0o9u0`). No interactive login was needed. No deployment, configuration change, moderation decision, database write, push, or seed was performed.
+- **Production:** Render service `katuwang` (`srv-daiika67bikc738qdeu0`) tracks `develop`. Latest deployment **`dep-dba2126q1p3s73a0t60g`** is `live` at **`fef58af855bf6d2782d7ae1c6e60d3ec5f39c966`**. The actual Render URL is **https://katuwang.onrender.com**. Authenticated learner, tutor, and admin dashboards loaded. These older dashboards still expose historical labels/time presentation; they do **not** represent this audit branch.
+- The supplied **https://katuwang.onerender.com** is a different domain: an HTTPS header request returned **302 to `http://survey-smiles.com`**. No credentials were sent there. The browser audit used only the Render-confirmed `onrender.com` domains.
+- **Dev-test:** `katuwang-dev-test` (`srv-db9hg37avr4c73e3eaeg`) tracks `codex/fix-capstone-backlog`. Latest deployment **`dep-dbe2pdmk1f9s73eo02ng`** is `live` at **`e4f24a85caad79506cb01c8dbef716edf5ec7b0d`**. The audit branch is one commit ahead: `462027c` changes ten files, including mobile class/report cards, migrated moderation dialogs, detail recovery, and list-data clearing. None of those latest changes can be claimed verified on dev-test.
+- Both Render-confirmed sites returned healthy, database-connected responses from `/api/health` during this session. This is a point-in-time observation.
+
+#### Browser method and evidence boundary
+
+Two distinct browser targets were used:
+
+1. **Authenticated dev-test at `e4f24a8`:** headless system Chromium, `America/New_York`, desktop **1440×900** and mobile viewports **355×900, 390×900, 640×900** (drawer checks at 390×844). Waited for client retrieval to settle before recording loaded page/accessibility-tree evidence. Coverage: learner dashboard, browse, my classes, progress, requests, reports; tutor dashboard, classes, students, assessments, requests, C-0103 detail and editor; admin dashboard, users, classes, abuse reports, assessment results, settings, administrators, audit log.
+2. **Local component browser harness at branch `462027c` plus this continuation's edits:** actual repository React components, hooks, and compiled application CSS, with synthetic API responses and small Next router/link/session adapters. No application authorization/server-rendering pipeline or real database was exercised. The configured cloud DB timed out (`ER_CONNECTION_TIMEOUT`); the local DB refused connection (`ECONNREFUSED`). This harness establishes browser component behavior, **not an authenticated end-to-end branch pass**. Synthetic data includes a long literature subject, long topic/reason, one scheduled class/report, and one assessment attempt.
+
+Raw browser snapshots can include private account data and remain in session scratch storage. Do not publish them. The reproducible procedures and sanitized findings below are the durable evidence; credentials and personal record contents are omitted.
+
+#### Latest branch checks and reproduced fixes
+
+- [x] **DA-06/07, component browser:** admin class and abuse-report queues rendered one mobile card set and zero visible tables at **355, 390, 640px**; at **1440px**, zero visible cards and one table. No document overflow was measured. Class identity, readable subject/status, tutor, next session, enrollment, and moderation actions remained together. Report target, reason, reporter, date, and actions remained together. A 355px screenshot was visually inspected for the class card and suspension dialog.
+- [x] **DA-05, component browser:** class suspension, abuse-report resolution, assessment-detail failure, registration decline, class-request closure, and profile-picture warning dialogs exposed named dialog roles. Initial focus was inside. Tested **18 forward and 18 reverse Tabs** per class/report/detail dialog at all four widths; **16 forward and 16 reverse Tabs** for the other three dialogs at 390px. Escape and backdrop click closed them; Escape restored the initiating control. No moderation action was submitted. Other variants, nested/stacked modal behavior, and spoken screen-reader announcements remain unverified.
+- [x] **DA-08, component browser:** assessment detail HTTP 500 kept its modal open with a named error and Retry loading action. Retrying to a successful synthetic response rendered attempt details. Closing while a delayed response was outstanding did not reopen the dialog.
+- [x] **New reproducible focus defect fixed:** after focusing Retry loading and retrying detail retrieval, that control unmounted. The next Tab escaped to the background while the dialog remained open. The shared `Modal` now restarts Tab/Shift+Tab inside when focus is outside or on the shell, skips hidden/inert candidates, and focuses the shell if none remain. The delayed-retry regression changed from **focus contained: false** before the fix to **true** after it. Normal wrap/Escape/backdrop/restoration checks still passed.
+- [x] **New reproducible target-size defect fixed:** class/report/result selects and report tabs measured approximately **32px** at 355/390/640px. Added explicit minimum heights to the tested admin filters/tabs, and a portal-scoped rule for compact buttons, inputs, selects, tabs, and round icon controls below 768px. The measured filters/tabs now meet **44px**, including at 640px. The 355px suspension-dialog screenshot confirms readable duration/reason fields and enlarged actions. Desktop compact styles remain available.
+- [x] **DA-08, component browser:** simulated HTTP 500 then success for admin classes, abuse reports, assessment results, learner browse/my-classes, learner progress, and tutor students. Each exposed a retry action and recovered; failures did not also show the corresponding empty-result copy. Failed admin lists displayed zero totals rather than stale totals. Assessment, class, and report failures used the actual shared hooks.
+- [x] **DA-02, component browser semantics:** registration/class-request reason controls and profile-picture warning reasons exposed meaningful names. Shared `FormField` exposed the label **Reason**, associated hint **Explain the reason**, and, when invalid, `aria-invalid=true` with associated error **A reason is required**. This checks DOM/accessibility-tree semantics, not speech output.
+- [x] **DA-04, component browser keyboard:** focused learner browse and my-class card links and tutor student detail links, pressed Enter, and waited for the expected destination URL. Covers those variants only; every class status, assessment-resume link, and every detail-link variant remains pending.
+
+#### Authenticated dev-test checks at the older commit
+
+- [x] **DA-03:** all three portal drawers contained **35 forward Tabs**, Escape restored Open menu, resizing open drawers to 1440px closed them, and returning to 390px left them closed. Browser viewport emulation is not an iOS/Android device test.
+- [x] **DA-01, non-PHT browser, inspected records:** with browser timezone explicitly `America/New_York`, C-0103's October 29 session showed **3:00 PM PHT** on the tutor dashboard/timetable and **3:00 PM** in detail and editor session summaries. The loaded class list also exposed the corresponding PHT-formatted schedule. No reschedule dialog was saved, and no serialization/write round trip was performed. ADM-0003 creation agreed at **October 18, 3:27 PM** in administrator management and its matching audit event; the dashboard used the same PHT time. Learner dashboard/timetable exposed PHT-labelled times, but a same-record learner detail/editor comparison remains pending.
+- [x] **DA-04:** Enter activated the tutor dashboard session link to C-0103 and an admin View account details link to its expected user detail route.
+- [x] **DA-06/07:** inspected loaded learner, tutor, and admin pages at all four widths without document-wide overflow. Admin users exposed mobile cards at narrow widths and a desktop table; dev-test classes/abuse reports still used the older scrolling tables, as expected from deployment provenance. Learner progress had a distinct no-tests message plus View my classes. All tested pages finished loading without captured uncaught browser errors.
+- **Remaining copy/data observations:** dev-test still displays `CLASS`/`TUTOR` report target badges and some legacy subject codes in assessment choices. Those views predate the branch's readable-label changes, so these are not new branch regressions. Seeded free-text descriptions include enum-like words and inconsistent academic topics; automatic replacement of authored text was not attempted. Some active classes have only past scheduled sessions; this needs lifecycle/data review rather than assuming a browser failure. The empty assessment-results queue prevented a real-record detail check, so the latest detail/error scenarios used synthetic data.
+
+#### Comparative scores for inspected flows only
+
+Original overall scores **learner 3.3, tutor 3.3, admin 3.2 remain historical baselines**. Do not substitute this table for a full overall re-score. These conservative category comparisons apply to the authenticated `e4f24a8` read flows named above, with component harness evidence listed separately. They do not score uninspected writes, all forms, speech output, physical mobile behavior, or the undeployed branch as a whole.
+
+| Portal / category | Historical category | Inspected-flow assessment | Delta | Basis and limit |
+|---|---:|---:|---:|---|
+| Learner / accessibility | 2 | 3 | +1 | Named browse filters, semantic links, full drawer cycle/resize; full screen-reader/form pass pending |
+| Learner / workflow clarity | 3 | 4 | +1 | Loaded browse/my-classes, PHT schedule labels, no-tests next action; source retry behavior separately exercised with synthetic failures |
+| Tutor / accessibility | 2 | 3 | +1 | Named roster/editor controls, semantic session navigation, full drawer behavior; not every card/form tested |
+| Tutor / workflow clarity | 3 | 4 | +1 | C-0103 consistent in non-PHT browser dashboard/detail/editor, readable status and named editor fields; no scheduling write round trip |
+| Admin / accessibility | 2 | 3 | +1 | Named settings/filters, keyboard detail link, full drawer behavior; latest moderation dialog evidence is component-only |
+| Admin / responsive usability | 2 | 3 | +1 | User cards preserve account context and dashboard queue priority; older deployed class/report tables still require contained scrolling |
+
+Other categories are **not re-scored**. A complete, same-commit, end-to-end comparative audit remains unchecked.
+
+#### Validation after this continuation's fixes
+
+- [x] `npx tsc --noEmit` passed.
+- [x] `npm run lint` passed with the same **eight existing warnings** in seed/test files and no errors.
+- [x] `npm test` passed: **120 files, 931 tests**.
+- [x] `npm run build` passed with compilation, type checking, and page generation, using local process/network access needed by the managed sandbox.
+- [x] `git diff --check` passed. The final component browser pass retained successful containment/close/restoration checks at all four widths, the delayed-retry focus regression passed, and measured target filters/tabs had no sub-44px targets at 355/390/640px.
+
+#### Remaining verification limits
+
+- [ ] Deploy/serve the current branch in an authenticated environment with working database access, then repeat the latest class/report cards, all migrated dialog variants, and detail retry cases end to end. No Render deployment was requested or triggered in this session.
+- [ ] Use an actual screen reader to confirm spoken names, hints, dynamic errors, dialog titles, and modal background exclusion across all forms. Accessibility-tree evidence does not complete this item.
+- [ ] Repeat on physical mobile browsers, including reverse drawer focus cycles and real virtual-keyboard behavior.
+- [ ] Complete same-record learner timezone coverage, reschedule/new-request round trips, every card/detail/resume variant, all lower-priority modules and their empty/error states, and the complete original comparative scope before changing overall scores.
+- [ ] Verify remaining moderation-dialog variants (including question-bank forms) and pending/disabled-control transitions; no source-only inference should close these browser checks.
 
 ### Recommended implementation order
 

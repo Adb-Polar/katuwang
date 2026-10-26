@@ -324,4 +324,13 @@ b, strong { font-weight: var(--font-weight-bold); }
   /* Buttons are notation, not speech — Fragment Mono per the ROUND-2 brief.
      Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
   .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
+
+  @media (width < 48rem) {
+    .kt-portal :is(.btn-xs, .btn-sm, .input-sm, .select-sm, .kt-tab, .kt-icon-btn) {
+      min-height: 2.75rem;
+    }
+    .kt-portal :is(.btn-circle, .kt-icon-btn) {
+      min-width: 2.75rem;
+    }
+  }
 }

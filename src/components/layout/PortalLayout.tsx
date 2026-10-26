@@ -225,7 +225,7 @@ export default function PortalLayout({
   );
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-[15.5rem_minmax(0,1fr)] bg-base-200">
+    <div className="kt-portal min-h-screen grid lg:grid-cols-[15.5rem_minmax(0,1fr)] bg-base-200">
       {/* desktop sidebar */}
       <aside ref={desktopRef} className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
         <div className="flex items-center gap-3 px-2 pt-1">

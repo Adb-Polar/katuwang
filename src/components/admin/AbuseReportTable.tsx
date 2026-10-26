@@ -138,7 +138,7 @@ export default function AbuseReportTable() {
               aria-label="Filter by report target"
               value={targetFilter}
               onChange={(e) => setTargetFilter(e.target.value as "" | "TUTOR" | "CLASS")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered select-sm min-h-11 md:min-h-0 w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All targets</option>
               <option value="TUTOR">Tutor reports</option>

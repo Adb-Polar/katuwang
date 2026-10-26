@@ -51,11 +51,21 @@ export default function Modal({
         return;
       }
       if (e.key !== "Tab" || !box) return;
-      const items = Array.from(box.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (items.length === 0) return;
+      const items = Array.from(box.querySelectorAll<HTMLElement>(FOCUSABLE))
+        .filter((item) => item.getClientRects().length > 0 && !item.closest('[inert], [hidden]'));
+      if (items.length === 0) {
+        e.preventDefault();
+        box.focus();
+        return;
+      }
       const first = items[0];
       const last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
+      // Async content can remove the focused retry/form control. Restart inside
+      // the dialog instead of allowing the next Tab to enter the page behind it.
+      if (!box.contains(document.activeElement) || document.activeElement === box) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      } else if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {

@@ -23,7 +23,7 @@ export default function Tabs({
           aria-selected={active === tab.key}
           data-active={active === tab.key ? "true" : "false"}
           onClick={() => onChange(tab.key)}
-          className="kt-tab"
+          className="kt-tab min-h-11 md:min-h-0"
         >
           {tab.label}
           {tab.count !== undefined && (

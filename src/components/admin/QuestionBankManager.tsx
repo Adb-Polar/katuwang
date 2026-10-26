@@ -881,7 +881,7 @@ function ResultsTab() {
           aria-label="Filter assessment results by subject"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="select select-bordered select-sm text-xs focus:select-primary"
+          className="select select-bordered select-sm min-h-11 md:min-h-0 text-xs focus:select-primary"
         >
           <option value="">All subjects</option>
           {SUBJECTS.map((s) => (
@@ -894,7 +894,7 @@ function ResultsTab() {
           aria-label="Filter assessment results by outcome"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="select select-bordered select-sm text-xs focus:select-primary"
+          className="select select-bordered select-sm min-h-11 md:min-h-0 text-xs focus:select-primary"
         >
           <option value="">All outcomes</option>
           <option value="PASSED">Passed</option>

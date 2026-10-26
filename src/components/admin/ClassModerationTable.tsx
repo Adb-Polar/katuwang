@@ -148,7 +148,7 @@ export default function ClassModerationTable() {
               aria-label="Filter classes by subject"
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered select-sm min-h-11 md:min-h-0 w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All Subjects</option>
               {subjectCatalog.map((s) => (
@@ -161,7 +161,7 @@ export default function ClassModerationTable() {
               aria-label="Filter classes by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as ClassLifecycleStatus | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered select-sm min-h-11 md:min-h-0 w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All Statuses</option>
               <option value="SCHEDULED">Scheduled</option>
