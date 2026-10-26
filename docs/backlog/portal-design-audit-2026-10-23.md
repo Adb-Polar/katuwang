@@ -208,6 +208,12 @@ This supersedes the earlier continuation's statement that no deployment had yet 
 - After this additional fix, **TypeScript, lint (eight existing warnings), all 120 test files / 931 tests, production build, and `git diff --check` passed**. Live re-verification of the authoring fix is tracked in the next deployment note.
 - The post-`3848324` deployment window queried contained **no Render error-level logs**. `/api/health` checks and final deployment evidence are repeated after the follow-up rollout.
 
+#### Authoring-dialog deployment and label follow-up
+
+The shared authoring-shell fix was pushed only to the directly tracked audit branch as **`ef212d6046bcac21360f7749be424f94d2c03841`**. Automatic deployment **`dep-dbfc48s9v7es73dajgd0`** reached **`live` at 03:02:10 UTC / 11:02:10 PHT**. Its real admin Add question dialog then passed named role, initial focus, 24 forward/reverse Tabs, Escape/restoration, and backdrop close/restoration. There were no captured uncaught browser errors in this check.
+
+The same deployed browser check found that the eight answer radio/text controls lacked explicit individual labels (the text boxes relied on placeholders). The follow-up adds **Mark option N as correct**, **Option N text**, and contextual **Remove option N** names. This fixes an authoring component outside the portal-directory source sweep; that earlier sweep must not be read as a guarantee covering all shared components. Spoken screen-reader output remains unverified.
+
 ### Recommended implementation order
 
 1. **DA-01:** standardize display timezone, calendar grouping, and input round trips; verify identical records across server/client views.
