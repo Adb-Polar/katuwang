@@ -4,6 +4,7 @@ import { useState } from "react";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import Modal from "@/components/ui/Modal";
 
 export interface QuestionDraft {
   prompt: string;
@@ -85,8 +86,8 @@ export default function QuestionFormModal({
   };
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 kt-card space-y-4">
+    <Modal open onClose={onClose} title={title} size="md" bare>
+      <div className="space-y-4">
         <div>
           <h3 className="font-bold text-sm text-base-content">{title}</h3>
           {contextLabel && <p className="text-2xs text-base-content/50 mt-0.5">{contextLabel}</p>}
@@ -178,7 +179,6 @@ export default function QuestionFormModal({
           </button>
         </div>
       </div>
-      <label className="modal-backdrop" onClick={onClose} aria-label="Close" />
-    </div>
+    </Modal>
   );
 }
