@@ -265,8 +265,9 @@ Target: **https://katuwang-dev-test.onrender.com**, Render live application **`f
 **Environment limits:** no actual screen reader (`orca` not installed) or physical device interface was available. These blocks cannot be marked complete using source inspection, accessibility-tree snapshots, or mobile viewport emulation. No scheduling write was used merely to manufacture missing fixture coverage. A controlled writable fixture and actual assistive-technology/device access are needed to finish those cases.
 
 - [x] Every remaining working-checklist group has an explicit tested/failed/unavailable disposition above.
-- [ ] Repair and recheck the tutor reschedule dialog, unnamed password/FAQ controls, and remaining small targets.
-- [ ] Resolve the cancelled learner queue/link observation and provide fixtures for completed/resume/locked/nested/tutor-draft cases.
+- [x] Repair and recheck the reproduced tutor reschedule, password/FAQ naming, and mobile-target failures. Completed in the remediation deployments through `3dd0ad8`; see measured, scoped results below. Actual screen-reader/device verification remains separate.
+- [x] Resolve the cancelled learner queue/link observation: waiting for the actual response produced four rows and four links; Enter opened a detail page. No API patch was needed.
+- [ ] Provide fixtures for completed/resume/locked/nested/tutor-draft cases.
 - [ ] Complete actual screen-reader, physical-mobile, and persisted scheduling/request round-trip checks.
 
 Validation: this pass changes documentation only. `git diff --check` passed; source build/type/lint/931-test validation remains the preceding `fc906ae` evidence, not a newly rerun suite. Raw snapshots containing personal records remain in session scratch storage and are excluded from Git.
@@ -304,6 +305,18 @@ Automatic deployment **`dep-dbfcr3rbc2fs7392hjfg`** reached **live at 03:51:04 U
 On `f119457`, the **40-page / four-width sweep completed** with no document-wide overflow or unnamed controls in the audited role categories. The previously failing 640px appeals, audit links, question requests, certifications, and test-results actions now meet the measured target height. The final **14 behavioral checks also passed** on this deployment, including actual password hint/error descriptions in all three portals.
 
 The remaining small input measurements were the **nine named settings switches**, whose native input drawing is 24px high. Each switch now sits inside an associated, padded, minimum-44px clickable label. This enlarges the effective hit area while preserving the switch appearance and disabled behavior. Final browser checks measure the associated label, rather than incorrectly equating the native switch drawing with its entire clickable area. No settings changes are submitted by these checks.
+
+#### Remediation complete for the reproduced browser failures
+
+Final application commit **`3dd0ad810dc0c3d8c402772c43a2c937e95e9fb5`**, automatic deploy **`dep-dbfd0ds9v7es73db9m80`**, reached **live at 04:02:16 UTC / 12:02:16 PHT** on https://katuwang-dev-test.onrender.com. Dev-test continues tracking `fix/portal-design-audit-2026-10-23` directly. Production was not deployed.
+
+- Final switch verification: **six checks passed, zero failed** (admin dashboard smoke check, four viewport switch-area checks, and no uncaught browser errors). All **nine switches** have explicit names and native associated labels measuring at least **56×44 CSS pixels** at **355, 390, 640, and 1440px**. No setting was toggled or saved.
+- The preceding **40-page / four-width** pass on `f119457` found no document-wide overflow and no unnamed controls in the audited role categories. Its only remaining small native-input drawings were those nine settings switches; the final label-area checks resolve their effective touch targets. Other measured mobile buttons, links, text inputs, selects and filter badges met the 44px height goal, including the previously failing 640px admin actions. This does not claim a universal contrast/spacing or every-popup audit.
+- **14 behavioral checks passed** on `f119457`: all-portal password names/hints/mismatch errors, native FAQ keyboard behavior, reschedule semantics/full focus cycles/Escape/backdrop/restoration with PHT prefill at all four widths, and cancelled-class count/keyboard navigation. The only runtime change from that commit to `3dd0ad8` is the settings-label wrapper, tested separately above.
+- Validation after the settings-wrapper change: **TypeScript passed; lint passed with eight existing warnings; all 120 files / 931 tests passed; production build passed; `git diff --check` passed**.
+- Post-rollout health reported healthy / database connected; the checked Render error-level log window was empty. These are point-in-time observations.
+
+The reproduced UI defects are fixed and their browser remediation checkbox is complete. Physical iOS/Android testing, spoken screen-reader verification, unavailable fixture variants and persisted scheduling round trips remain unchecked. Seeded free-text descriptions/capacity/topic inconsistencies were not rewritten as part of these UI fixes. Documentation-only verification updates use a Render skip phrase; the live application commit remains `3dd0ad8`.
 
 ### Recommended implementation order
 
