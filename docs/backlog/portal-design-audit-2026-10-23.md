@@ -59,9 +59,9 @@ Branch: `fix/portal-design-audit-2026-10-23`. This section is the working checkl
 - [x] DA-04: Use semantic links for learner/tutor class cards and admin account details.
 - [ ] DA-04: Verify all card variants and user table interactions by keyboard in browser.
 - [x] DA-05: Use shared focus-managed `Modal` for Manage Account and Provision Admin.
-- [ ] DA-05: Verify initial focus, Escape, containment, backdrop, and restoration in browser.
+- [x] DA-05: Verify initial focus, Escape, containment, backdrop, and restoration in browser for Manage Account and Provision Admin. Authenticated dev-test `3848324` passed full forward/reverse Tab cycles and both close/restoration paths on October 26; other variants and spoken announcements remain separately tracked.
 - [x] DA-06: Add mobile admin account cards with identity/status/actions visible, and move Needs attention ahead of activity on mobile.
-- [ ] DA-06: Inspect at 390px and confirm no duplicate visible row set, clipping, or inaccessible action.
+- [x] DA-06: Inspect at 390px and confirm no duplicate visible row set, clipping, or inaccessible action for the user cards. Authenticated October 26 checks included 355/390/640/1440px, Manage, and keyboard activation of mobile View details. See deployment evidence below.
 - [x] DA-07: Put upcoming learner sessions before compact metrics on mobile, allow assessment names to wrap, and enlarge class browsing/scheduling, admin filtering, and pagination controls.
 - [x] DA-07: Enlarge registration approval actions and registration/certification review filters to mobile-friendly control sizes.
 - [ ] DA-07: Review tap targets and layout at multiple mobile widths, including remaining compact admin controls.
@@ -114,9 +114,9 @@ Dev test deployed commit `4cdcf86` on October 23 (`dep-dbde4cuk1f9s73f56un0`), t
 - [x] Latest source pass: `npx tsc --noEmit`, `npm run lint` (eight existing warnings outside changed files), `npm test -- --run` (120 files, 931 tests), and `npm run build` passed after the remaining control-name, semantic-link, retry-state, label, and mobile-target changes. A source AST sweep found no remaining unnamed native inputs, selects, or textareas in the three portal areas.
 - [x] DA-03 resize follow-up: at 355px, the live admin drawer contained a full 24-Tab cycle and Escape restored focus to Open menu. Resizing with the drawer open through 768px to 1200px and back to 390px exposed a stale open state; the source fix now closes it at the desktop breakpoint. `npx tsc --noEmit` and focused ESLint passed; live recheck is pending.
 - [x] DA-03 resize deploy: `e4f24a8` reached `live` as `dep-dbe2pdmk1f9s73eo02ng`. On the authenticated admin page, opening the drawer at 355px, resizing to 1200px, and returning to 390px left it closed; focus moved to a visible desktop navigation link at the desktop width.
-- [ ] DA-05/07/08 October 25 follow-up: verify mobile class and abuse-report cards, migrated admin dialogs, and assessment-detail error recovery in a browser after deployment.
+- [x] DA-05/07/08 October 25 follow-up: verify mobile class and abuse-report cards, migrated admin dialogs, and assessment-detail error recovery in a browser after deployment. Completed October 26 for the named flows below on `3848324`, with authoring fixes verified through `fc906ae`; assessment-detail and class-request record overrides are explicitly identified below.
 - [x] DA-01 source check: school-date tests passed under `TZ=America/New_York` and `TZ=Pacific/Honolulu` (three cases each). Remaining admin report and request-form date arithmetic starts from a PHT-derived day. A non-PHT browser check is still pending.
-- [ ] Latest source pass: verify the above changes in a browser, including multiple mobile widths, focus and keyboard operation, and simulated retrieval failures.
+- [x] Latest source pass: verify the above changes in a browser, including multiple mobile widths, focus and keyboard operation, and simulated retrieval failures. See the October 26 deployment follow-up for exact flow coverage; this does not complete every variant, physical-device, or screen-reader check.
 
 ### Audit continuation — October 26, 2026
 
@@ -182,11 +182,11 @@ Other categories are **not re-scored**. A complete, same-commit, end-to-end comp
 
 #### Remaining verification limits
 
-- [ ] Deploy/serve the current branch in an authenticated environment with working database access, then repeat the latest class/report cards, all migrated dialog variants, and detail retry cases end to end. No Render deployment was requested or triggered in this session.
+- [x] Deploy and authenticate the current branch, then repeat the named latest class/report cards, moderation dialogs, and detail retry cases. Subsequently completed after user authorization on October 26; see the deployment follow-up. Synthetic-record limits and remaining variants are tracked separately.
 - [ ] Use an actual screen reader to confirm spoken names, hints, dynamic errors, dialog titles, and modal background exclusion across all forms. Accessibility-tree evidence does not complete this item.
 - [ ] Repeat on physical mobile browsers, including reverse drawer focus cycles and real virtual-keyboard behavior.
 - [ ] Complete same-record learner timezone coverage, reschedule/new-request round trips, every card/detail/resume variant, all lower-priority modules and their empty/error states, and the complete original comparative scope before changing overall scores.
-- [ ] Verify remaining moderation-dialog variants (including question-bank forms) and pending/disabled-control transitions; no source-only inference should close these browser checks.
+- [ ] Verify remaining Edit/Delete, locked/busy, nested-dialog, and pending/disabled-control transitions. Admin Add question and the other named dialog flows were subsequently browser-verified; shared tutor authoring and every variant are not inferred from those checks.
 
 ### Dev-test deployment follow-up — October 26, 2026
 
@@ -213,6 +213,17 @@ This supersedes the earlier continuation's statement that no deployment had yet 
 The shared authoring-shell fix was pushed only to the directly tracked audit branch as **`ef212d6046bcac21360f7749be424f94d2c03841`**. Automatic deployment **`dep-dbfc48s9v7es73dajgd0`** reached **`live` at 03:02:10 UTC / 11:02:10 PHT**. Its real admin Add question dialog then passed named role, initial focus, 24 forward/reverse Tabs, Escape/restoration, and backdrop close/restoration. There were no captured uncaught browser errors in this check.
 
 The same deployed browser check found that the eight answer radio/text controls lacked explicit individual labels (the text boxes relied on placeholders). The follow-up adds **Mark option N as correct**, **Option N text**, and contextual **Remove option N** names. This fixes an authoring component outside the portal-directory source sweep; that earlier sweep must not be read as a guarantee covering all shared components. Spoken screen-reader output remains unverified.
+
+#### Final live verification — `fc906ae`
+
+- [x] Pushed **`fc906aeb9adbb9e475437001f4be64ff2fe60a60`** to `fix/portal-design-audit-2026-10-23`. Automatic deploy **`dep-dbfc6rc9v7es73dall10`** reached **`live` at 03:07:35 UTC / 11:07:35 PHT**. Render confirmed that dev-test directly tracks this audit branch with auto-deploy on commit. Production was not deployed.
+- [x] Final authenticated browser run: **13 checks passed, zero failed**, using real deployed application code in Chromium / `America/New_York`. Repeated all three dashboard reads at 355/390/640/1440px; the Add question dialog at each width; real class/report cards and dialog behavior at 355px; and assessment detail failure/retry/late-dismissal behavior. Earlier broader read and retry checks at `3848324` remain tied to that commit; the subsequent runtime diff is confined to the shared question-authoring component.
+- [x] **Add question, all four widths:** named dialog and all ten input/textarea controls; four distinct correct-answer radio names and four option-text names; contextual removal names; adding/removing an option preserved correct names; 24 forward and 24 reverse Tabs; initial focus; Escape/restoration; backdrop close/restoration; no outer or internal dialog horizontal overflow. No question was submitted or saved. The shared tutor authoring path was not exercised with a real editable draft and remains a distinct coverage limit.
+- [x] **Regression:** real mobile class/report cards still passed, and the synthetic assessment detail retained its error dialog, recovered on retry, contained Tab during the delayed retry, restored View on Escape, and ignored a response after dismissal. The synthetic-attempt serializer/server-access limits still apply.
+- [x] `/api/health` returned **HTTP 200**, **healthy**, **database: connected** at **03:08:55 UTC**. The Render error-level log query from **03:07:35 through 03:10:19 UTC** returned **zero entries**. No uncaught browser errors were captured in the final three portal contexts. These are bounded observations, not a long-term reliability claim.
+- [x] Latest source validation: **TypeScript passed; lint passed with eight existing warnings; 120 test files / 931 tests passed; production build passed; `git diff --check` passed**.
+
+The verification documentation is committed with a Render skip phrase so recording the results does not trigger another application rollout. The live application commit is `fc906ae`; a later documentation-only branch tip does not indicate a different tested runtime. Historical overall scores remain unchanged. Physical mobile browsers, spoken screen-reader announcements, every mutation outcome, all modal/link variants, and remaining lower-priority modules are still outside the completed coverage.
 
 ### Recommended implementation order
 
