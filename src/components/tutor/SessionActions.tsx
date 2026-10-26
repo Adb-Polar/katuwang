@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
+import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -162,19 +162,7 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      {isRescheduling && typeof document !== "undefined" &&
-        createPortal(
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              type="button"
-              onClick={() => setIsRescheduling(false)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-4">Reschedule Session</h3>
-
+      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <form onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
@@ -245,10 +233,7 @@ export default function SessionActions({
                 </button>
               </div>
             </form>
-          </div>
-        </div>,
-        document.body
-      )}
+      </Modal>
     </>
   );
 }

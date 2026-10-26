@@ -271,6 +271,16 @@ Target: **https://katuwang-dev-test.onrender.com**, Render live application **`f
 
 Validation: this pass changes documentation only. `git diff --check` passed; source build/type/lint/931-test validation remains the preceding `fc906ae` evidence, not a newly rerun suite. Raw snapshots containing personal records remain in session scratch storage and are excluded from Git.
 
+### Remediation of the expanded-audit findings — October 26, 2026
+
+- Tutor rescheduling now uses the shared named `Modal`, including initial focus, full Tab wrapping, Escape, backdrop close, and restoration. The old body portal and bespoke shell were removed; PHT parsing/serialization and save behavior remain intact.
+- Shared password controls now have individual Current password / New password names, contextual show/hide names, and an associated new-password hint. The client-side mismatch error is associated with the confirmation field and marks it invalid.
+- Help uses native `details`/`summary` disclosures instead of unnamed checkbox controls; disclosure state and keyboard interaction can now be exposed natively.
+- Mobile minimum target height now covers portal buttons, disclosure summaries, selects, text/date/password inputs, and main-content links, including custom filter badges and controls that lacked DaisyUI compact classes. Subject-filter badges can wrap rather than clip long labels. Checkbox/radio inputs retain their own control sizing; native disclosure semantics replace the FAQ checkbox targets.
+- The cancelled-list observation was rechecked against the actual network response: HTTP 200, total **4**, returned rows **4**, rendered class-detail links **4**. The earlier zero-link capture occurred before retrieval settled. No API/data change is warranted; browser checks must wait for the cancelled response and rendered links before asserting counts or activating a card.
+
+Source validation: TypeScript, lint (eight existing warnings), all **120 files / 931 tests**, production build, and `git diff --check` passed. Deployed verification is recorded separately after rollout; these implementation notes do not complete physical-device or spoken screen-reader checks. Existing seeded descriptions and inconsistent capacity/topic fixtures are not automatically rewritten.
+
 ### Recommended implementation order
 
 1. **DA-01:** standardize display timezone, calendar grouping, and input round trips; verify identical records across server/client views.

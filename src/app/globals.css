@@ -326,8 +326,19 @@ b, strong { font-weight: var(--font-weight-bold); }
   .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
 
   @media (width < 48rem) {
-    .kt-portal :is(.btn-xs, .btn-sm, .input-sm, .select-sm, .kt-tab, .kt-icon-btn) {
+    .kt-portal :is(button, summary, select, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), .kt-tab, .kt-icon-btn) {
       min-height: 2.75rem;
+    }
+    .kt-portal main a:not(.card) {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.75rem;
+      max-width: 100%;
+    }
+    .kt-portal button.badge {
+      height: auto;
+      white-space: normal;
+      text-align: left;
     }
     .kt-portal :is(.btn-circle, .kt-icon-btn) {
       min-width: 2.75rem;
