@@ -291,6 +291,20 @@ Source validation: TypeScript, lint (eight existing warnings), all **120 files /
 - The broader sizing rule fixed the initially reproduced learner targets, but **640px** still exposed compact buttons/links in appeals, abuse-report audit links, question requests, certifications, and session-test results. `sm:min-h-0` utility precedence over the component CSS was the cause. The mobile target rule is moved outside the component layer so the explicit below-768px size requirement takes precedence over compact utility classes. Final deployed checks follow below.
 - Health returned healthy / database connected, and the error-log window checked after rollout was empty.
 
+#### Final remediation rollout — `f119457`
+
+Automatic deployment **`dep-dbfcr3rbc2fs7392hjfg`** reached **live at 03:51:04 UTC / 11:51:04 PHT**, serving **`f119457af7bca34d3d01fa04ceb307c1a92442db`** from `fix/portal-design-audit-2026-10-23`.
+
+- **14 final targeted checks passed, zero failed** on this deployment: named password fields, actual hint/error descriptions and invalid confirmation state, native FAQ Enter/Space disclosure behavior in all three portals; reschedule modal semantics, 24 forward/reverse Tabs, Escape/backdrop/restoration and PHT prefill at all four widths; cancelled-tab network count and Enter navigation. Browser timezone was Pacific/Honolulu. No password or schedule update was submitted.
+- The cancelled-tab observation is resolved as an automation timing issue: waiting for the cancelled response and rendered cards gives four rows, four links, and a successful detail navigation. No backend query/data patch was made.
+- The reschedule dialog, password/FAQ names, and individual mobile size findings in the preceding failure report describe the pre-fix deployment; the new implementation and its subsequent deployed checks supersede those findings. Physical-device, spoken screen-reader, nested/locked/fixture-only, and real scheduling-write checks remain separate limits.
+
+#### Final sizing sweep and settings switch hit areas
+
+On `f119457`, the **40-page / four-width sweep completed** with no document-wide overflow or unnamed controls in the audited role categories. The previously failing 640px appeals, audit links, question requests, certifications, and test-results actions now meet the measured target height. The final **14 behavioral checks also passed** on this deployment, including actual password hint/error descriptions in all three portals.
+
+The remaining small input measurements were the **nine named settings switches**, whose native input drawing is 24px high. Each switch now sits inside an associated, padded, minimum-44px clickable label. This enlarges the effective hit area while preserving the switch appearance and disabled behavior. Final browser checks measure the associated label, rather than incorrectly equating the native switch drawing with its entire clickable area. No settings changes are submitted by these checks.
+
 ### Recommended implementation order
 
 1. **DA-01:** standardize display timezone, calendar grouping, and input round trips; verify identical records across server/client views.

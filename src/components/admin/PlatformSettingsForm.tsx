@@ -232,15 +232,17 @@ export default function PlatformSettingsForm() {
           <p className="text-sm font-semibold text-base-content">{meta?.label || setting.key}</p>
           {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
         </div>
-        <input
-          type="checkbox"
-          aria-label={meta?.label || setting.key}
-          aria-describedby={meta?.description ? `setting-${setting.key}-description` : undefined}
-          className="toggle toggle-primary shrink-0"
-          checked={Boolean(setting.value)}
-          disabled={savingKey === setting.key}
-          onChange={(e) => toggle(setting.key, e.target.checked)}
-        />
+        <label className="inline-flex min-h-11 shrink-0 items-center px-2 -mx-2">
+          <input
+            type="checkbox"
+            aria-label={meta?.label || setting.key}
+            aria-describedby={meta?.description ? `setting-${setting.key}-description` : undefined}
+            className="toggle toggle-primary shrink-0"
+            checked={Boolean(setting.value)}
+            disabled={savingKey === setting.key}
+            onChange={(e) => toggle(setting.key, e.target.checked)}
+          />
+        </label>
       </div>
     );
   };
