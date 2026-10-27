@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           topics: { select: { topic: true } },
-          slots: { select: { day: true, startTime: true, endTime: true } },
+          slots: { select: { date: true, day: true, startTime: true, endTime: true } },
           learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
         },
         orderBy: [{ directedTutorProfileId: "desc" }, { createdAt: "asc" }],

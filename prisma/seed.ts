@@ -2,6 +2,7 @@ import { PrismaClient, Role, GradeLevel, ClassStatus, SessionStatus, User, Tutor
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
 import { config as loadEnv } from "dotenv";
+import { defaultSubjectGrades } from "../src/lib/subjectGradeDefaults";
 import { SUBJECT_TOPICS } from "../src/lib/subjectTopics";
 
 // .env holds DATABASE_URL; .env.seed (optional, gitignored) holds the SEED_* volume knobs.
@@ -945,7 +946,7 @@ async function main() {
       const subject = await prisma.subject.upsert({
         where: { slug },
         update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
-        create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
+        create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug) },
       });
       sOrder++;
       let tOrder = 0;

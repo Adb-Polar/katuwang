@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
     const q = searchParams.get("q")?.trim() || "";
     const subjectParam = searchParams.get("subject");
     const gradeParam = searchParams.get("gradeLevel");
+    const topic = searchParams.get("topic")?.trim();
 
     // `TutorClass.subject` stores the slug, so free-text "Mathematics" only
     // reaches those rows once resolved to slugs against the subject catalog.
@@ -74,6 +75,7 @@ export async function GET(req: NextRequest) {
 
     const listFilters: Prisma.TutorClassWhereInput = {
       ...(subjectParam ? { subject: subjectParam } : {}),
+      ...(topic ? { topics: { some: { topic } } } : {}),
       ...(gradeParam && gradeParam in GradeLevel ? { gradeLevel: gradeParam as GradeLevel } : {}),
       ...(q
         ? {

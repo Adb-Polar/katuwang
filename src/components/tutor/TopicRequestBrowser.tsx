@@ -23,7 +23,7 @@ interface OpenRequest {
   note: string | null;
   createdAt: string;
   topics: string[];
-  slots: { day: string; startTime: string; endTime: string }[];
+  slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
   learner: { anonymousId: string; gradeLevel: string; section: string };
   directed: boolean;
 }
@@ -156,7 +156,7 @@ export default function TopicRequestBrowser() {
                   <p className="text-2xs text-base-content/60">
                     Prefers:{" "}
                     {r.slots
-                      .map((s) => `${s.day[0] + s.day.slice(1).toLowerCase()} ${s.startTime}–${s.endTime}`)
+                      .map((s) => `${s.day[0] + s.day.slice(1).toLowerCase()} ${s.date ? `(${s.date}) ` : ""}${s.startTime}–${s.endTime}`)
                       .join(", ")}
                   </p>
                 )}

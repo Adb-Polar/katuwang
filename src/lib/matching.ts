@@ -1,4 +1,5 @@
 import { GradeLevel } from "@prisma/client";
+import { scheduleClock, scheduleDate } from "@/lib/scheduleDates";
 import { daysBetween } from "@/lib/datetime";
 
 // ─── Scoring weights (tunable, kept explicit for transparency in the UI) ──────
@@ -22,17 +23,8 @@ export function gradeScore(match: GradeMatch): number {
 
 const SOONNESS_HORIZON_DAYS = 14;
 
-const DAY_INDEX: Record<string, number> = {
-  SUNDAY: 0,
-  MONDAY: 1,
-  TUESDAY: 2,
-  WEDNESDAY: 3,
-  THURSDAY: 4,
-  FRIDAY: 5,
-  SATURDAY: 6,
-};
-
 export interface PreferredSlot {
+  date?: string | null;
   day: string; // "MONDAY".."SUNDAY"
   startTime: string; // "HH:MM" 24h
   endTime: string; // "HH:MM" 24h
@@ -100,13 +92,11 @@ export function upcomingScheduledSessions(klass: ClassForMatching, now: Date): D
 
 /** Does a session start on a preferred day and within a preferred time window? */
 function sessionFitsAnySlot(start: Date, slots: PreferredSlot[]): boolean {
-  const startMin = start.getHours() * 60 + start.getMinutes();
-  return slots.some(
-    (slot) =>
-      DAY_INDEX[slot.day] === start.getDay() &&
-      startMin >= toMinutes(slot.startTime) &&
-      startMin < toMinutes(slot.endTime)
-  );
+  const { day, minutes } = scheduleClock(start);
+  return slots.some((slot) => {
+    const onDay = slot.date ? slot.date === scheduleDate(start) : slot.day === day;
+    return onDay && minutes >= toMinutes(slot.startTime) && minutes < toMinutes(slot.endTime);
+  });
 }
 
 export function gradeMatchFor(

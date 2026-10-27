@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { getSubjects } from "@/lib/subjects";
+import { availableInGrade } from "@/lib/catalogGrades";
 import { Prisma } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -31,6 +34,16 @@ export async function GET(req: NextRequest) {
     const subjectSlugs = (subjectsParam ? subjectsParam.split(",") : legacySubject ? [legacySubject] : [])
       .map((s) => s.trim())
       .filter(Boolean);
+    const gradeLevel = searchParams.get("gradeLevel") || "";
+    if (gradeLevel && !GRADE_LEVELS.some((g) => g.value === gradeLevel)) {
+      return NextResponse.json({ error: "Invalid grade level." }, { status: 400 });
+    }
+    const eligible = gradeLevel ? (await getSubjects()).filter((s) => availableInGrade(s.gradeLevels, gradeLevel)) : [];
+    const eligibleCerts: Prisma.TopicCertificationWhereInput[] = eligible.map((s) => ({
+      subject: s.slug,
+      topic: { in: s.topics.filter((t) => availableInGrade(t.gradeLevels, gradeLevel)).map((t) => t.name) },
+    }));
+    const gradeCertification = gradeLevel ? { OR: eligibleCerts } : {};
     const page = Math.max(1, Number(searchParams.get("page")) || 1);
     const pageSize = Math.min(
       MAX_PAGE_SIZE,
@@ -47,10 +60,10 @@ export async function GET(req: NextRequest) {
         subjectSlugs.length > 0
           ? {
               AND: subjectSlugs.map((s) => ({
-                topicCertifications: { some: { status: "CERTIFIED", subject: s } },
+                topicCertifications: { some: { status: "CERTIFIED", subject: s, ...gradeCertification } },
               })),
             }
-          : { topicCertifications: { some: { status: "CERTIFIED" } } },
+          : { topicCertifications: { some: { status: "CERTIFIED", ...gradeCertification } } },
       ...(q ? { anonymousId: { contains: q } } : {}),
     };
 

@@ -12,7 +12,7 @@ const MAX_OPEN_REQUESTS = 10;
 
 const requestInclude = {
   topics: { select: { topic: true } },
-  slots: { select: { day: true, startTime: true, endTime: true } },
+  slots: { select: { date: true, day: true, startTime: true, endTime: true } },
   directedTutor: { select: { user: { select: { anonymousId: true } } } },
   fulfilledClass: {
     select: {
@@ -37,7 +37,7 @@ function serialize(r: {
   status: string;
   createdAt: Date;
   topics: { topic: string }[];
-  slots: { day: string; startTime: string; endTime: string }[];
+  slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
   directedTutor: { user: { anonymousId: string } } | null;
   fulfilledClass:
     | {
@@ -117,10 +117,10 @@ export async function POST(req: NextRequest) {
 
     const { subject, topics, gradeLevel, preferredSlots, note, directedTutorId } = result.data;
 
-    if (!(await subjectExists(subject))) {
+    if (!(await subjectExists(subject, { gradeLevel }))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    if ((await Promise.all(topics.map((t) => topicExists(subject, t)))).some((ok) => !ok)) {
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel })))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -161,6 +161,7 @@ export async function POST(req: NextRequest) {
           slots: {
             create: (preferredSlots ?? []).map((s) => ({
               day: s.day,
+              ...(s.date ? { date: s.date } : {}),
               startTime: s.startTime,
               endTime: s.endTime,
             })),

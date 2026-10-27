@@ -41,7 +41,7 @@ export default async function AcceptTopicRequestPage({
     where: { AND: [{ id }, tutorPoolWhere(tutorProfile.id, certifiedTopics)] },
     include: {
       topics: { select: { topic: true } },
-      slots: { select: { day: true, startTime: true, endTime: true } },
+      slots: { select: { date: true, day: true, startTime: true, endTime: true } },
     },
   });
   if (!request) notFound();

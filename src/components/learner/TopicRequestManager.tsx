@@ -25,7 +25,7 @@ interface TopicRequest {
   status: "OPEN" | "ACCEPTED" | "ENROLLED" | "FULFILLED" | "CANCELLED";
   createdAt: string;
   topics: string[];
-  slots: { day: string; startTime: string; endTime: string }[];
+  slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
   directedTo: { anonymousId: string } | null;
   fulfilledClass: { id: string; subject: string; nextSessionAt: string | null; tutorAnonymousId: string } | null;
 }
@@ -320,7 +320,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         <Clock className="h-3 w-3 shrink-0" />
                         {r.slots.map((s, i) => (
                           <span key={i}>
-                            {s.day[0] + s.day.slice(1).toLowerCase()} {s.startTime}–{s.endTime}
+                            {s.day[0] + s.day.slice(1).toLowerCase()} {s.date ? `(${s.date}) ` : ""}{s.startTime}–{s.endTime}
                             {i < r.slots.length - 1 ? "," : ""}
                           </span>
                         ))}

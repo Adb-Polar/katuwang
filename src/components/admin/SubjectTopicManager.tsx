@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, Trash2 } from "lucide-react";
+import CatalogGradePicker from "./CatalogGradePicker";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -11,6 +12,7 @@ interface TopicRow {
   name: string;
   order: number;
   active: boolean;
+  gradeLevels?: unknown;
 }
 interface SubjectRow {
   id: string;
@@ -18,6 +20,7 @@ interface SubjectRow {
   name: string;
   order: number;
   active: boolean;
+  gradeLevels?: unknown;
   topics: TopicRow[];
 }
 
@@ -143,6 +146,8 @@ export default function SubjectTopicManager() {
 
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newSubjectSlug, setNewSubjectSlug] = useState("");
+  const [newSubjectGrades, setNewSubjectGrades] = useState<string[]>([]);
+  const [newTopicGrades, setNewTopicGrades] = useState<string[]>([]);
   const [newTopic, setNewTopic] = useState("");
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingTopicName, setEditingTopicName] = useState("");
@@ -204,10 +209,12 @@ export default function SubjectTopicManager() {
     const r = await call("/api/admin/subjects", "POST", {
       name: newSubjectName.trim(),
       slug: newSubjectSlug.trim().toUpperCase(),
+      gradeLevels: newSubjectGrades,
     });
     if (r) {
       setNewSubjectName("");
       setNewSubjectSlug("");
+      setNewSubjectGrades([]);
       flash("Subject added.");
     }
   };
@@ -223,9 +230,10 @@ export default function SubjectTopicManager() {
 
   const addTopic = async () => {
     if (!selected || !newTopic.trim()) return;
-    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim() });
+    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim(), gradeLevels: newTopicGrades });
     if (r) {
       setNewTopic("");
+      setNewTopicGrades([]);
       flash("Topic added.");
     }
   };
@@ -346,6 +354,7 @@ export default function SubjectTopicManager() {
                 placeholder="SLUG (e.g. MATH)"
                 className="input input-bordered input-xs w-full font-mono text-xs"
               />
+              <CatalogGradePicker value={newSubjectGrades} onChange={setNewSubjectGrades} />
               <button
                 type="button"
                 onClick={addSubject}
@@ -367,6 +376,8 @@ export default function SubjectTopicManager() {
 
             {selected ? (
               <>
+                <CatalogGradePicker label="Subject grades" value={selected.gradeLevels} disabled={busy}
+                  onChange={(gradeLevels) => { void call(`/api/admin/subjects/${selected.id}`, "PATCH", { gradeLevels }); }} />
                 <ul className="min-h-0 flex-1 divide-y divide-base-200 overflow-y-auto">
                   {[...selected.topics]
                     .sort((a, b) => a.order - b.order)
@@ -404,6 +415,7 @@ export default function SubjectTopicManager() {
                           </>
                         ) : (
                           <>
+                            <div className="min-w-0 flex-1">
                             <span
                               className={`min-w-0 flex-1 truncate ${
                                 t.active ? "" : "text-base-content/40 line-through"
@@ -411,6 +423,9 @@ export default function SubjectTopicManager() {
                             >
                               {t.name}
                             </span>
+                            <CatalogGradePicker label="Topic grades" value={t.gradeLevels} disabled={busy}
+                              onChange={(gradeLevels) => { void call(`/api/admin/topics/${t.id}`, "PATCH", { gradeLevels }); }} />
+                            </div>
                             <RowMenu
                               anchorId={`${idBase}-t-${t.id}`}
                               busy={busy}
@@ -458,6 +473,7 @@ export default function SubjectTopicManager() {
                   )}
                 </ul>
 
+                <CatalogGradePicker label="New topic grades" value={newTopicGrades} onChange={setNewTopicGrades} />
                 <div className="flex shrink-0 flex-wrap gap-2 border-t border-base-200 pt-3">
                   <input
                     value={newTopic}

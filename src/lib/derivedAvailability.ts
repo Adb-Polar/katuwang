@@ -5,15 +5,7 @@
 // is actually active instead of a stale, self-reported schedule that was never
 // enforced against class scheduling.
 
-const DAY_NAMES = [
-  "SUNDAY",
-  "MONDAY",
-  "TUESDAY",
-  "WEDNESDAY",
-  "THURSDAY",
-  "FRIDAY",
-  "SATURDAY",
-] as const;
+import { scheduleClock } from "@/lib/scheduleDates";
 
 // Monday-first ordering for display.
 const DISPLAY_ORDER = [
@@ -51,7 +43,7 @@ function hhmm(totalMinutes: number): string {
  * weekly windows. Overlapping or back-to-back sessions on the same weekday merge
  * into one window. Cancelled, completed, and past sessions are ignored.
  *
- * Day-of-week and time-of-day are read in the server's local timezone, matching
+ * Day-of-week and time-of-day use Philippine time, matching
  * how `src/lib/matching.ts` interprets `scheduledAt`.
  */
 export function deriveWeeklyAvailability(
@@ -65,8 +57,7 @@ export function deriveWeeklyAvailability(
     const start = new Date(s.scheduledAt);
     if (Number.isNaN(start.getTime()) || start.getTime() <= now.getTime()) continue;
 
-    const day = DAY_NAMES[start.getDay()];
-    const startMin = start.getHours() * 60 + start.getMinutes();
+    const { day, minutes: startMin } = scheduleClock(start);
     const endMin = startMin + Math.max(0, s.duration);
 
     const list = byDay.get(day) ?? [];

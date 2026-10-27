@@ -4,10 +4,8 @@ import { scoreClass, rankMatches, ClassForMatching } from "@/lib/matching";
 const NOW = new Date("2026-03-02T08:00:00Z"); // a Monday
 
 function daysFromNow(days: number, hour = 15, minute = 0): Date {
-  const d = new Date(NOW);
-  d.setDate(d.getDate() + days);
-  d.setHours(hour, minute, 0, 0);
-  return d;
+  // Explicit Philippine wall clock; independent of the test host timezone.
+  return new Date(Date.UTC(2026, 2, 2 + days, hour - 8, minute));
 }
 
 function mkClass(overrides: Partial<ClassForMatching> = {}): ClassForMatching {
@@ -147,5 +145,30 @@ describe("rankMatches", () => {
     ];
     const ranked = rankMatches(baseCriteria, classes, NOW);
     expect(ranked[0].class.id).toBe("sooner");
+  });
+});
+
+
+describe("dated preferred slots", () => {
+  it("scores only the chosen calendar date in Philippine time", () => {
+    const criteria = { ...baseCriteria, preferredSlots: [{ date: "2026-03-03", day: "TUESDAY", startTime: "15:00", endTime: "17:00" }] };
+    const make = (scheduledAt: string) => mkClass({ sessions: [{ scheduledAt, duration: 60, status: "SCHEDULED" }] });
+    expect(scoreClass(criteria, make("2026-03-03T07:00:00Z"), NOW)?.reasons.scheduleFitCount).toBe(1);
+    expect(scoreClass(criteria, make("2026-03-10T07:00:00Z"), NOW)?.reasons.scheduleFitCount).toBe(0);
+    expect(scoreClass(criteria, make("2026-03-03T10:00:00Z"), NOW)?.reasons.scheduleFitCount).toBe(0);
+  });
+});
+
+
+describe("weekly preferred slots use Philippine time", () => {
+  it("matches the same wall time as a dated preference on a UTC server", () => {
+    const klass = mkClass({ sessions: [{ scheduledAt: "2026-03-03T07:00:00Z", duration: 60, status: "SCHEDULED" }] });
+    const criteria = { ...baseCriteria, preferredSlots: [{ day: "TUESDAY", startTime: "15:00", endTime: "16:00" }] };
+    expect(scoreClass(criteria, klass, NOW)?.reasons.scheduleFitCount).toBe(1);
+  });
+  it("uses the Philippine weekday across a UTC midnight boundary", () => {
+    const klass = mkClass({ sessions: [{ scheduledAt: "2026-03-02T18:00:00Z", duration: 60, status: "SCHEDULED" }] });
+    const criteria = { ...baseCriteria, preferredSlots: [{ day: "TUESDAY", startTime: "02:00", endTime: "03:00" }] };
+    expect(scoreClass(criteria, klass, NOW)?.reasons.scheduleFitCount).toBe(1);
   });
 });

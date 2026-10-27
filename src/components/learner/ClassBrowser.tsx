@@ -59,9 +59,10 @@ interface TutorClass {
 export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const router = useRouter();
   const [q, setQ] = useState("");
-  const { subjects: catalog } = useSubjectCatalog();
   const [subject, setSubject] = useState<string>("");
   const [gradeLevel, setGradeLevel] = useState("");
+  const [topic, setTopic] = useState("");
+  const { subjects: catalog, topicsFor } = useSubjectCatalog(gradeLevel);
   const [mineTab, setMineTab] = useState<MineTab>("upcoming");
 
   const isBrowse = scope === "browse";
@@ -85,6 +86,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
       ...(isMine ? { status: mineTab } : {}),
       ...(q.trim() ? { q: q.trim() } : {}),
       ...(subject ? { subject } : {}),
+      ...(topic ? { topic } : {}),
       ...(gradeLevel ? { gradeLevel } : {}),
     },
     PAGE_SIZE,
@@ -93,7 +95,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   );
 
   const mineTabCounts = (meta.counts as { mineTabs?: Record<MineTab, number> } | undefined)?.mineTabs;
-  const hasFilters = q.trim() !== "" || subject !== "" || gradeLevel !== "";
+  const hasFilters = q.trim() !== "" || subject !== "" || gradeLevel !== "" || topic !== "";
 
   return (
     <div className="space-y-6">
@@ -120,8 +122,22 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
             />
             <select
               className="select select-bordered select-sm text-xs"
+              aria-label="Grade level"
+              value={gradeLevel}
+              onChange={(e) => { setGradeLevel(e.target.value); setSubject(""); setTopic(""); }}
+            >
+              <option value="">All grades</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+            <select
+              className="select select-bordered select-sm text-xs"
+              aria-label="Subject"
               value={subject}
-              onChange={(e) => setSubject(e.target.value)}
+              onChange={(e) => { setSubject(e.target.value); setTopic(""); }}
             >
               <option value="">All subjects</option>
               {catalog.map((s) => (
@@ -130,17 +146,10 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                 </option>
               ))}
             </select>
-            <select
-              className="select select-bordered select-sm text-xs"
-              value={gradeLevel}
-              onChange={(e) => setGradeLevel(e.target.value)}
-            >
-              <option value="">All grades</option>
-              {GRADE_LEVELS.map((g) => (
-                <option key={g.value} value={g.value}>
-                  {g.label}
-                </option>
-              ))}
+            <select aria-label="Topic" className="select select-bordered select-sm text-xs" value={topic}
+              disabled={!subject} onChange={(e) => setTopic(e.target.value)}>
+              <option value="">All topics</option>
+              {topicsFor(subject).map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
 
@@ -164,6 +173,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
                   <button
                     onClick={() => {
                       setQ("");
+                      setTopic("");
                       setSubject("");
                       setGradeLevel("");
                     }}

@@ -1,5 +1,6 @@
 "use client";
 
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
@@ -32,7 +33,8 @@ function fmtNext(iso: string) {
 
 export default function TutorBrowser() {
   const router = useRouter();
-  const { subjects: catalog } = useSubjectCatalog();
+  const [gradeLevel, setGradeLevel] = useState("");
+  const { subjects: catalog } = useSubjectCatalog(gradeLevel);
   const [q, setQ] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
 
@@ -52,6 +54,7 @@ export default function TutorBrowser() {
     "/api/learner/tutors",
     "tutors",
     {
+      ...(gradeLevel ? { gradeLevel } : {}),
       ...(q.trim() ? { q: q.trim() } : {}),
       ...(subjects.length ? { subjects: [...subjects].sort().join(",") } : {}),
     },
@@ -73,35 +76,22 @@ export default function TutorBrowser() {
               placeholder="Search a tutor by ID (e.g. TUT-0148)…"
               transform="upper"
             />
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/40">
-                Teaches
-              </span>
-              {catalog.map((s) => {
-                const on = subjects.includes(s.slug);
-                return (
-                  <button
-                    key={s.slug}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => toggleSubject(s.slug)}
-                    className={`badge badge-sm cursor-pointer text-2xs transition-colors ${
-                      on ? "badge-primary" : "badge-ghost hover:badge-neutral"
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                );
-              })}
-              {subjects.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setSubjects([])}
-                  className="text-2xs text-base-content/50 underline hover:text-base-content"
-                >
-                  Clear
-                </button>
-              )}
+            <div className="flex flex-wrap items-start gap-3">
+              <select aria-label="Grade level" className="select select-bordered select-sm" value={gradeLevel}
+                onChange={(e) => { setGradeLevel(e.target.value); setSubjects([]); }}>
+                <option value="">All grades</option>
+                {GRADE_LEVELS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
+              </select>
+              <details className="dropdown">
+                <summary className="btn btn-outline btn-sm">Teaches{subjects.length ? ` (${subjects.length})` : ""}</summary>
+                <div className="dropdown-content z-20 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg w-64 max-h-64 overflow-y-auto">
+                  {catalog.map((s) => <label key={s.slug} className="flex items-center gap-2 py-1.5 text-xs">
+                    <input type="checkbox" className="checkbox checkbox-xs checkbox-primary" checked={subjects.includes(s.slug)}
+                      onChange={() => toggleSubject(s.slug)} />{s.name}
+                  </label>)}
+                  <button type="button" className="btn btn-ghost btn-xs" onClick={() => setSubjects([])}>Clear</button>
+                </div>
+              </details>
             </div>
           </div>
 

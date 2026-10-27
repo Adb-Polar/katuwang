@@ -1,3 +1,5 @@
+import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
+import { availableInGrade } from "@/lib/catalogGrades";
 import type { Subject, Topic } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeTopic, SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
@@ -39,6 +41,7 @@ function staticFallback(): SubjectWithTopics[] {
     name: slug,
     order: i,
     active: true,
+    gradeLevels: defaultSubjectGrades(slug) ?? null,
     createdAt: now,
     updatedAt: now,
     topics: SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS].map((name, j) => ({
@@ -47,6 +50,7 @@ function staticFallback(): SubjectWithTopics[] {
       name,
       order: j,
       active: true,
+      gradeLevels: null,
       createdAt: now,
     })),
   }));
@@ -125,10 +129,10 @@ export async function resolveSubjectSlugs(q: string): Promise<string[]> {
     .map((s) => s.slug);
 }
 
-export async function subjectExists(slug: string, opts: { includeInactive?: boolean } = {}): Promise<boolean> {
+export async function subjectExists(slug: string, opts: { includeInactive?: boolean; gradeLevel?: string } = {}): Promise<boolean> {
   const all = await loadAll();
   const s = all.find((x) => x.slug === slug);
-  return !!s && (opts.includeInactive || s.active);
+  return !!s && (opts.includeInactive || s.active) && availableInGrade(s.gradeLevels, opts.gradeLevel);
 }
 
 /**
@@ -138,9 +142,9 @@ export async function subjectExists(slug: string, opts: { includeInactive?: bool
 export async function topicExists(
   subjectSlug: string,
   topicName: string,
-  opts: { includeInactive?: boolean } = {}
+  opts: { includeInactive?: boolean; gradeLevel?: string } = {}
 ): Promise<boolean> {
   const wanted = normalizeTopic(topicName).toLowerCase();
   const topics = await getTopics(subjectSlug, opts);
-  return topics.some((t) => t.name.toLowerCase() === wanted);
+  return await subjectExists(subjectSlug, opts) && topics.some((t) => t.name.toLowerCase() === wanted && availableInGrade(t.gradeLevels, opts.gradeLevel));
 }

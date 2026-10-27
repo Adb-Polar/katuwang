@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { config as loadEnv } from "dotenv";
+import { defaultSubjectGrades } from "../src/lib/subjectGradeDefaults";
 import { SUBJECT_TOPICS } from "../src/lib/subjectTopics";
 
 // Seeds only the essentials a fresh deploy needs to function — no dummy
@@ -40,7 +41,7 @@ async function seedSubjectsAndTopics() {
     const subject = await prisma.subject.upsert({
       where: { slug },
       update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
+      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug) },
     });
     sOrder++;
 

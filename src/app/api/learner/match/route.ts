@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
 
     const { subject, topics, gradeLevel, preferredSlots, classFormat } = result.data;
 
-    if (!(await subjectExists(subject))) {
+    if (!(await subjectExists(subject, { gradeLevel }))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    const topicChecks = await Promise.all(topics.map((t) => topicExists(subject, t)));
+    const topicChecks = await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel })));
     if (topicChecks.some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },

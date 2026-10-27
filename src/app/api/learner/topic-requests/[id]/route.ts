@@ -73,10 +73,10 @@ export async function PATCH(
     const { subject, topics, gradeLevel, preferredSlots, note } =
       parsed.data as CreateTopicRequestInput;
 
-    if (!(await subjectExists(subject))) {
+    if (!(await subjectExists(subject, { gradeLevel }))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    if ((await Promise.all(topics.map((t) => topicExists(subject, t)))).some((ok) => !ok)) {
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel })))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -97,6 +97,7 @@ export async function PATCH(
           deleteMany: {},
           create: (preferredSlots ?? []).map((s) => ({
             day: s.day,
+              ...(s.date ? { date: s.date } : {}),
             startTime: s.startTime,
             endTime: s.endTime,
           })),

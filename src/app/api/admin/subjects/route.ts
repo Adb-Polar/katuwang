@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { name, slug } = result.data;
+    const { name, slug, gradeLevels } = result.data;
 
     const clash = await prisma.subject.findFirst({
       where: { OR: [{ slug }, { name }] },
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
     const subject = await prisma.$transaction(async (tx) => {
       const created = await tx.subject.create({
-        data: { name, slug, order: (max._max.order ?? -1) + 1 },
+        data: { name, slug, gradeLevels, order: (max._max.order ?? -1) + 1 },
       });
       await tx.auditLog.create({
         data: {

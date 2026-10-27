@@ -1,13 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { deriveWeeklyAvailability, SessionForDerivation } from "@/lib/derivedAvailability";
 
-const NOW = new Date("2026-03-02T08:00:00"); // a Monday, local time
+const NOW = new Date("2026-03-02T08:00:00+08:00"); // a Monday, Philippine time
 
 function at(dayOffset: number, hour: number, minute = 0): Date {
-  const d = new Date(NOW);
-  d.setDate(d.getDate() + dayOffset);
-  d.setHours(hour, minute, 0, 0);
-  return d;
+  return new Date(Date.UTC(2026, 2, 2 + dayOffset, hour - 8, minute));
 }
 
 function session(overrides: Partial<SessionForDerivation> = {}): SessionForDerivation {
@@ -81,4 +78,9 @@ describe("deriveWeeklyAvailability", () => {
     );
     expect(slots).toEqual([{ day: "TUESDAY", startTime: "23:30", endTime: "24:00" }]);
   });
+});
+
+it("derives Philippine weekday and time across a UTC date boundary", () => {
+  expect(deriveWeeklyAvailability([session({ scheduledAt: "2026-03-02T18:00:00Z" })], NOW))
+    .toEqual([{ day: "TUESDAY", startTime: "02:00", endTime: "03:00" }]);
 });

@@ -3,8 +3,6 @@ import Link from "next/link";
 import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import PageHeader from "@/components/ui/PageHeader";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import { addDays, formatTime, formatWeekday } from "@/lib/datetime";
@@ -91,13 +89,6 @@ export default async function LearnerDashboard() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Learner Portal"
-        title="Welcome back"
-        subtitle="Surfacing only anonymized data to protect your identity."
-        actions={<AnonymousIdBadge id={session!.user.anonymousId} role="LEARNER" size="md" showIcon />}
-      />
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {stats.map((s) => (
           <StatCard key={s.label} {...s} />

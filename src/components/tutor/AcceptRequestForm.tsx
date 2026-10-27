@@ -6,6 +6,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
 interface RequestSlot {
+  date?: string | null;
   day: string;
   startTime: string;
   endTime: string;
@@ -80,7 +81,7 @@ export default function AcceptRequestForm({
         {
           key: `accept-row-${++rowIdCounter}`,
           topic: preselectedTopics[0] ?? "",
-          scheduledAt: nextOccurrence(firstSlot.day, firstSlot.startTime),
+          scheduledAt: firstSlot.date ? `${firstSlot.date}T${firstSlot.startTime}` : nextOccurrence(firstSlot.day, firstSlot.startTime),
           duration: 60,
         },
       ]

@@ -23,9 +23,13 @@ const timeString = z
 
 export const availabilitySlotSchema = z
   .object({
+    date: z.iso.date().nullable().optional(),
     day: dayEnum,
     startTime: timeString,
     endTime: timeString,
+  })
+  .refine((slot) => !slot.date || DAYS[(new Date(`${slot.date}T12:00:00Z`).getUTCDay() + 6) % 7] === slot.day, {
+    message: "Date must match the selected day.", path: ["date"],
   })
   .refine((slot) => slot.startTime < slot.endTime, {
     message: "Start time must be before end time.",
