@@ -14,8 +14,10 @@ import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -61,6 +63,7 @@ export default function ClassAppealTable() {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<Appeal>(
@@ -85,8 +88,8 @@ export default function ClassAppealTable() {
 
       setSuccess(
         decision === "APPROVE"
-          ? `Appeal approved — ${appeal.class.subject} · ${appeal.class.code} is scheduled again.`
-          : `Appeal for ${appeal.class.subject} · ${appeal.class.code} was rejected.`
+          ? `Appeal approved — ${subjectDisplayLabel(appeal.class.subject)} · ${appeal.class.code} is scheduled again.`
+          : `Appeal for ${subjectDisplayLabel(appeal.class.subject)} · ${appeal.class.code} was rejected.`
       );
       setApproveTarget(null);
       setRejectTarget(null);
@@ -102,7 +105,7 @@ export default function ClassAppealTable() {
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={approveTarget || rejectTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={approveTarget || rejectTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -120,6 +123,8 @@ export default function ClassAppealTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -145,7 +150,7 @@ export default function ClassAppealTable() {
                       <td>
                         <span className="font-mono text-xs">{a.class.code}</span>
                         <div className="text-2xs text-base-content/50 mt-0.5">
-                          {a.class.subject} · was {a.class.status}
+                          {subjectDisplayLabel(a.class.subject)} · was {statusDisplayLabel(a.class.status)}
                         </div>
                         {a.class.suspendedReason && (
                           <div className="text-2xs text-base-content/40 mt-0.5 max-w-[14rem] whitespace-normal">
@@ -170,13 +175,13 @@ export default function ClassAppealTable() {
                         <td className="flex gap-2 justify-end">
                           <button
                             onClick={() => setApproveTarget(a)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => setRejectTarget(a)}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Reject
                           </button>
@@ -207,7 +212,7 @@ export default function ClassAppealTable() {
         title="Approve this appeal?"
         description={
           approveTarget
-            ? `${approveTarget.class.subject} · ${approveTarget.class.code} will be reinstated to SCHEDULED and the tutor notified.`
+            ? `${subjectDisplayLabel(approveTarget.class.subject)} · ${approveTarget.class.code} will be reinstated to scheduled status and the tutor notified.`
             : undefined
         }
         confirmLabel="Approve & reinstate"
@@ -222,7 +227,7 @@ export default function ClassAppealTable() {
         title="Reject this appeal?"
         description={
           rejectTarget
-            ? `${rejectTarget.class.subject} · ${rejectTarget.class.code} stays moderated. The tutor is notified and can appeal again.`
+            ? `${subjectDisplayLabel(rejectTarget.class.subject)} · ${rejectTarget.class.code} stays moderated. The tutor is notified and can appeal again.`
             : undefined
         }
         noteLabel="Note for the tutor (optional)"

@@ -1,0 +1,38 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.11 /home/hikaru/Capstone/katuwang
+
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > accepts current active SUPER_ADMIN and refreshes grade/image 7ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies SUSPENDED SUPER_ADMIN despite a cached ACTIVE JWT 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies BANNED SUPER_ADMIN despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies PENDING SUPER_ADMIN despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies DECLINED SUPER_ADMIN despite a cached ACTIVE JWT 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > accepts current active ADMIN and refreshes grade/image 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies SUSPENDED ADMIN despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies BANNED ADMIN despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies PENDING ADMIN despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies DECLINED ADMIN despite a cached ACTIVE JWT 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > accepts current active STUDENT_TUTOR and refreshes grade/image 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies SUSPENDED STUDENT_TUTOR despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies BANNED STUDENT_TUTOR despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies PENDING STUDENT_TUTOR despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies DECLINED STUDENT_TUTOR despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > accepts current active STUDENT_LEARNER and refreshes grade/image 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies SUSPENDED STUDENT_LEARNER despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies BANNED STUDENT_LEARNER despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies PENDING STUDENT_LEARNER despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies DECLINED STUDENT_LEARNER despite a cached ACTIVE JWT 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > rechecks each request without a five-minute authorization cache 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > denies deleted accounts and changed roles 0ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > does not query accounts for an anonymous session 1ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > fails closed when the account store is unavailable 2ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > rejects banned administrators through both shared guards 5ms
+ ✓ src/lib/__tests__/serverSession.test.ts > live account server boundary > blocks a direct tutor API request before querying the bank 4ms
+
+ Test Files  1 passed (1)
+      Tests  26 passed (26)
+   Start at  13:03:00
+   Duration  1.03s (transform 160ms, setup 0ms, import 440ms, tests 33ms, environment 0ms)

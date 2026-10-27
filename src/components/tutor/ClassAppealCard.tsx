@@ -104,7 +104,7 @@ export default function ClassAppealCard({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="btn btn-neutral btn-outline btn-xs text-2xs"
+              className="btn btn-neutral btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs"
             >
               Cancel
             </button>
@@ -112,7 +112,7 @@ export default function ClassAppealCard({
               type="button"
               onClick={submit}
               disabled={saving || reason.trim().length < 10}
-              className="btn btn-primary btn-xs text-2xs"
+              className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs"
             >
               {saving ? <span className="loading loading-spinner loading-xs" /> : "Submit appeal"}
             </button>
@@ -126,7 +126,7 @@ export default function ClassAppealCard({
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="btn btn-outline btn-primary btn-xs text-2xs shrink-0"
+            className="btn btn-outline btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs shrink-0"
           >
             <Gavel className="h-3.5 w-3.5" />
             {wasRejected ? "Appeal again" : "Appeal this decision"}

@@ -23,7 +23,7 @@ const {
   pickQuestionIdsMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/assessmentPicker", () => ({ pickQuestionIds: pickQuestionIdsMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {

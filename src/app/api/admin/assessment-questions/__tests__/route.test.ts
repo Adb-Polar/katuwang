@@ -9,7 +9,7 @@ const { getServerSessionMock, findManyMock, countMock, createMock, auditLogCreat
   auditLogCreate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     assessmentQuestion: { findMany: findManyMock, count: countMock, create: createMock },

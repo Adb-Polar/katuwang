@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { GradeLevel } from "@prisma/client";
 import { gradeLabel, gradeSection } from "@/lib/gradeLevels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
+
+import UserAvatar from "@/components/profile/UserAvatar";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -25,6 +28,7 @@ interface StudentEnrollment {
 interface Student {
   id: string;
   anonymousId: string;
+  image?: string | null;
   gradeLevel: GradeLevel;
   section: string;
   enrollments: StudentEnrollment[];
@@ -40,7 +44,6 @@ const GRADE_LEVELS: GradeLevel[] = [
 ];
 
 export default function StudentRoster() {
-  const router = useRouter();
   const [q, setQ] = useState("");
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | "">("");
   const [section, setSection] = useState("");
@@ -53,7 +56,8 @@ export default function StudentRoster() {
     page,
     setPage,
     loading,
-    error,
+    loadError,
+    refetch,
   } = usePaginatedList<Student>(
     "/api/tutor/students",
     "students",
@@ -69,7 +73,6 @@ export default function StudentRoster() {
 
   return (
     <div className="space-y-4">
-      <FeedbackBanner variant="error" message={error || null} />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <FormField label="Search">
@@ -124,6 +127,8 @@ export default function StudentRoster() {
         <div className="flex justify-center py-10">
           <span className="loading loading-spinner loading-md"></span>
         </div>
+      ) : loadError ? (
+        <LoadErrorState message={loadError} onRetry={refetch} />
       ) : students.length === 0 ? (
         <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
           No students match these filters yet.
@@ -140,13 +145,20 @@ export default function StudentRoster() {
             </thead>
             <tbody>
               {students.map((student) => (
-                <tr
-                  key={student.id}
-                  onClick={() => router.push(`/tutor/students/${student.id}`)}
-                  className="cursor-pointer hover:bg-base-200/40"
-                >
+                <tr key={student.id} className="hover:bg-base-200/40">
                   <td>
-                    <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
+                    <div className="flex items-center gap-2">
+                      <UserAvatar
+                        src={student.image}
+                        anonymousId={student.anonymousId}
+                        size="sm"
+                        role="LEARNER"
+                        subtitle={gradeSection(student.gradeLevel, student.section)}
+                      />
+                      <Link href={`/tutor/students/${student.id}`} aria-label={`View ${student.anonymousId} details`} className="link link-primary rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                        <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
+                      </Link>
+                    </div>
                   </td>
                   <td className="text-xs text-base-content/70">
                     {gradeSection(student.gradeLevel, student.section)}
@@ -157,7 +169,7 @@ export default function StudentRoster() {
                         <span
                           key={enr.classId}
                           className="badge badge-outline badge-sm text-2xs font-mono"
-                          title={`${enr.subject} — ${enr.topics.join(", ")}`}
+                          title={`${subjectDisplayLabel(enr.subject)} — ${enr.topics.join(", ")}`}
                         >
                           {enr.code}
                         </span>

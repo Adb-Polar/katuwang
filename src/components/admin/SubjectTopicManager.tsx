@@ -6,6 +6,7 @@ import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, T
 import CatalogGradePicker from "./CatalogGradePicker";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 interface TopicRow {
   id: string;
@@ -95,7 +96,7 @@ function RowMenu({ anchorId, busy, items }: { anchorId: string; busy: boolean; i
         aria-label="Row actions"
         aria-haspopup="menu"
         aria-expanded={open}
-        className="btn btn-ghost btn-xs btn-square"
+        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0"
         onClick={() => {
           if (!open) place();
           setOpen((v) => !v);
@@ -140,6 +141,7 @@ export default function SubjectTopicManager() {
   const [subjects, setSubjects] = useState<SubjectRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [success, setSuccess] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -154,7 +156,7 @@ export default function SubjectTopicManager() {
   const [deleteTopic, setDeleteTopic] = useState<TopicRow | null>(null);
   const [deleteSubject, setDeleteSubject] = useState<SubjectRow | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
-  const load = () => setReloadKey((k) => k + 1);
+  const load = () => { setLoading(true); setLoadError(""); setReloadKey((k) => k + 1); };
 
   useEffect(() => {
     let cancelled = false;
@@ -165,9 +167,10 @@ export default function SubjectTopicManager() {
         const json = await res.json();
         if (cancelled) return;
         setSubjects(json.subjects);
+        setLoadError("");
         setSelectedId((cur) => cur ?? json.subjects[0]?.id ?? null);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Could not load subjects.");
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Could not load subjects.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -267,6 +270,7 @@ export default function SubjectTopicManager() {
       </div>
     );
   }
+  if (loadError) return <LoadErrorState message={loadError} onRetry={load} />;
 
   const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);
 
@@ -343,23 +347,25 @@ export default function SubjectTopicManager() {
             <div className="shrink-0 space-y-2 border-t border-base-200 pt-3">
               <p className="text-2xs text-base-content/60">Add a subject</p>
               <input
+                aria-label="New subject name"
                 value={newSubjectName}
                 onChange={(e) => setNewSubjectName(e.target.value)}
                 placeholder="Name (e.g. Mathematics)"
-                className="input input-bordered input-xs w-full text-xs"
+                className="input input-bordered input-xs min-h-11 sm:min-h-0 w-full text-xs"
               />
               <input
+                aria-label="New subject code"
                 value={newSubjectSlug}
                 onChange={(e) => setNewSubjectSlug(e.target.value.toUpperCase())}
                 placeholder="SLUG (e.g. MATH)"
-                className="input input-bordered input-xs w-full font-mono text-xs"
+                className="input input-bordered input-xs min-h-11 sm:min-h-0 w-full font-mono text-xs"
               />
               <CatalogGradePicker value={newSubjectGrades} onChange={setNewSubjectGrades} />
               <button
                 type="button"
                 onClick={addSubject}
                 disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim()}
-                className="btn btn-primary btn-xs w-full text-2xs"
+                className="btn btn-primary btn-xs min-h-11 sm:min-h-0 w-full text-2xs"
               >
                 <Plus className="h-3 w-3" /> Add subject
               </button>
@@ -386,20 +392,21 @@ export default function SubjectTopicManager() {
                         {editingTopicId === t.id ? (
                           <>
                             <input
+                              aria-label={`Rename topic ${t.name}`}
                               value={editingTopicName}
                               onChange={(e) => setEditingTopicName(e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") saveTopicName(t);
                                 if (e.key === "Escape") setEditingTopicId(null);
                               }}
-                              className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                              className="input input-bordered input-xs min-h-11 sm:min-h-0 min-w-0 flex-1 text-xs"
                               autoFocus
                             />
                             <button
                               type="button"
                               disabled={busy}
                               onClick={() => saveTopicName(t)}
-                              className="btn btn-ghost btn-xs btn-square shrink-0 text-success"
+                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0 shrink-0 text-success"
                               aria-label="Save"
                             >
                               <Check className="h-3.5 w-3.5" />
@@ -407,7 +414,7 @@ export default function SubjectTopicManager() {
                             <button
                               type="button"
                               onClick={() => setEditingTopicId(null)}
-                              className="btn btn-ghost btn-xs btn-square shrink-0"
+                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0 shrink-0"
                               aria-label="Cancel"
                             >
                               <X className="h-3.5 w-3.5" />
@@ -476,17 +483,18 @@ export default function SubjectTopicManager() {
                 <CatalogGradePicker label="New topic grades" value={newTopicGrades} onChange={setNewTopicGrades} />
                 <div className="flex shrink-0 flex-wrap gap-2 border-t border-base-200 pt-3">
                   <input
+                    aria-label="New topic name"
                     value={newTopic}
                     onChange={(e) => setNewTopic(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && addTopic()}
                     placeholder="New topic name"
-                    className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                    className="input input-bordered input-xs min-h-11 sm:min-h-0 min-w-0 flex-1 text-xs"
                   />
                   <button
                     type="button"
                     onClick={addTopic}
                     disabled={busy || !newTopic.trim()}
-                    className="btn btn-primary btn-xs text-2xs"
+                    className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs"
                   >
                     <Plus className="h-3 w-3" /> Add
                   </button>

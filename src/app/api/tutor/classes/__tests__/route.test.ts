@@ -9,6 +9,7 @@ const {
   sessionFindMany,
   topicCertificationFindMany,
   getSettingMock,
+  getProfilePictureRequirementMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
@@ -17,10 +18,10 @@ const {
   sessionFindMany: vi.fn(),
   topicCertificationFindMany: vi.fn(),
   getSettingMock: vi.fn(),
+  getProfilePictureRequirementMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -34,6 +35,7 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/lib/settings", () => ({
   getSetting: getSettingMock,
+  getProfilePictureRequirement: getProfilePictureRequirementMock,
 }));
 
 vi.mock("@/lib/idGenerator", () => ({
@@ -105,7 +107,29 @@ describe("POST /api/tutor/classes", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(false);
+    getProfilePictureRequirementMock.mockResolvedValue("OPTIONAL");
     sessionFindMany.mockResolvedValue([]);
+  });
+
+  it("rejects class creation when profile picture is mandatory for tutors and tutor has no picture", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null } });
+    getProfilePictureRequirementMock.mockResolvedValue("TUTORS_ONLY");
+
+    const res = await POST(makeRequest(validBody()));
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toContain("A profile picture is required");
+  });
+
+  it("permits class creation when profile picture is mandatory for tutors and tutor has a picture", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: "https://utfs.io/f/pic.jpg" } });
+    getProfilePictureRequirementMock.mockResolvedValue("TUTORS_ONLY");
+    classCreate.mockResolvedValue({ id: "c1", classCode: "C-0001", topics: [], sessions: [] });
+
+    const res = await POST(makeRequest(validBody()));
+    expect(res.status).toBe(201);
   });
 
   it("returns 401 for the wrong role", async () => {
@@ -124,8 +148,9 @@ describe("POST /api/tutor/classes", () => {
   it("returns 400 for a missing sessions array", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    const { sessions: _sessions, ...rest } = validBody();
-    const res = await POST(makeRequest(rest));
+    const body = validBody() as Record<string, unknown>;
+    delete body.sessions;
+    const res = await POST(makeRequest(body));
     expect(res.status).toBe(400);
   });
 
@@ -287,6 +312,31 @@ describe("POST /api/tutor/classes", () => {
     expect(classCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ gradeLevel: "GRADE_9" }) })
     );
+  });
+
+  it("rejects target grade higher than tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+
+    const res = await POST(makeRequest(validBody({ gradeLevel: "GRADE_10" })));
+    expect(res.status).toBe(400);
+    const body = await res.json();
+    expect(body.error).toContain("Target grade cannot be higher than your current grade level");
+    expect(classCreate).not.toHaveBeenCalled();
+  });
+
+  it("permits target grade equal to or lower than tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+    classCreate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+
+    // Target Grade 9 (equal)
+    const resEqual = await POST(makeRequest(validBody({ gradeLevel: "GRADE_9" })));
+    expect(resEqual.status).toBe(201);
+
+    // Target Grade 8 (lower)
+    const resLower = await POST(makeRequest(validBody({ gradeLevel: "GRADE_8" })));
+    expect(resLower.status).toBe(201);
   });
 
   it("defaults gradeLevel to null when omitted", async () => {

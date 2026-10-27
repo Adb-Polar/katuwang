@@ -1,18 +1,20 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
-import { addDays, formatTime, formatWeekday } from "@/lib/datetime";
+import { addDays, formatTime, formatWeekday, parseLocalDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata = {
   title: "Learner Portal | Katuwang",
 };
 
 export default async function LearnerDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const learnerId = session!.user.id;
 
   const now = new Date();
@@ -20,7 +22,7 @@ export default async function LearnerDashboard() {
 
   const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
     prisma.classEnrollment.count({ where: { learnerId } }),
-    prisma.topicRequest.count({ where: { learnerId, status: "OPEN" } }),
+    prisma.topicRequest.count({ where: { learnerId, status: "OPEN", expiresAt: { gt: new Date() } } }),
     prisma.classSession.findMany({
       where: {
         status: "SCHEDULED",
@@ -88,20 +90,21 @@ export default async function LearnerDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="flex flex-col gap-6">
+      <div className="order-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
         {stats.map((s) => (
-          <StatCard key={s.label} {...s} />
+          <div key={s.label} className="last:col-span-2 sm:last:col-span-1"><StatCard {...s} /></div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="order-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-primary" />
               Upcoming sessions
             </h2>
+            <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
             {upcomingSessions.length === 0 ? (
               <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
                 No scheduled sessions yet. Browse classes to enroll.
@@ -120,12 +123,12 @@ export default async function LearnerDashboard() {
                           <span className="text-2xs font-bold uppercase leading-none">
                             {formatWeekday(d)}
                           </span>
-                          <span className="text-base font-bold leading-tight">{d.getDate()}</span>
+                          <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                              {s.class.subject}
+                              {subjectDisplayLabel(s.class.subject)}
                             </span>
                             <span className="text-sm font-semibold text-base-content/85 truncate">
                               {s.topic}
@@ -169,7 +172,7 @@ export default async function LearnerDashboard() {
         </section>
       </div>
 
-      <section className="card kt-card">
+      <section className="order-3 card kt-card">
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />

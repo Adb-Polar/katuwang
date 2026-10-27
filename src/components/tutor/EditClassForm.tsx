@@ -17,7 +17,7 @@ import {
 import { GradeLevel } from "@prisma/client";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -27,11 +27,13 @@ import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export default function EditClassForm({
   classId,
   subject,
   gradeLevel,
+  tutorGradeLevel,
   status,
   activeLabel,
   published,
@@ -55,6 +57,7 @@ export default function EditClassForm({
   classId: string;
   subject: string;
   gradeLevel: GradeLevel | null;
+  tutorGradeLevel?: GradeLevel | string | null;
   status: ClassLifecycleStatus;
   activeLabel: string;
   published: boolean;
@@ -117,6 +120,10 @@ export default function EditClassForm({
     if (locked) return;
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       setError("Please provide a location (building/room) or a meeting link.");
+      return;
+    }
+    if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
+      setError("Target grade cannot be higher than your current grade level.");
       return;
     }
     setLoading(true);
@@ -198,7 +205,7 @@ export default function EditClassForm({
       <form id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
-            {subject}
+            {subjectDisplayLabel(subject)}
           </span>
           {locked ? (
             <StatusBadge tone="error" label={status === "BANNED" ? "Banned" : "Suspended"} size="sm" />
@@ -258,6 +265,7 @@ export default function EditClassForm({
                       <div className="flex gap-2 mt-2">
                         <input
                           type="text"
+                          aria-label="Add a custom topic"
                           value={customTopic}
                           onChange={(e) => setCustomTopic(e.target.value)}
                           onKeyDown={(e) => {
@@ -268,13 +276,13 @@ export default function EditClassForm({
                           }}
                           placeholder="Add another topic not listed above…"
                           maxLength={60}
-                          className="input input-bordered input-xs flex-1 text-2xs focus:input-primary"
+                          className="input input-bordered input-xs min-h-11 sm:min-h-0 flex-1 text-2xs focus:input-primary"
                         />
                         <button
                           type="button"
                           onClick={addCustomTopic}
                           disabled={normalizeTopic(customTopic).length < 2 || topics.length >= 10}
-                          className="btn btn-outline btn-xs text-2xs"
+                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs"
                         >
                           Add
                         </button>
@@ -289,7 +297,7 @@ export default function EditClassForm({
                       className="select select-bordered select-sm w-full focus:select-primary text-xs"
                     >
                       <option value="">Any grade</option>
-                      {GRADE_LEVELS.map((g) => (
+                      {(tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS).map((g) => (
                         <option key={g.value} value={g.value}>
                           {g.label}
                         </option>
@@ -302,6 +310,7 @@ export default function EditClassForm({
                       <MapPin className="h-4 w-4 text-primary shrink-0" />
                       <input
                         type="text"
+                        aria-label="Building"
                         value={form.building}
                         onChange={(e) => setForm((prev) => ({ ...prev, building: e.target.value }))}
                         placeholder="Building"
@@ -309,6 +318,7 @@ export default function EditClassForm({
                       />
                       <input
                         type="text"
+                        aria-label="Room"
                         value={form.room}
                         onChange={(e) => setForm((prev) => ({ ...prev, room: e.target.value }))}
                         placeholder="Room"
@@ -322,6 +332,7 @@ export default function EditClassForm({
                       <LinkIcon className="h-4 w-4 text-primary shrink-0" />
                       <input
                         type="url"
+                        aria-label="Meeting link"
                         value={form.meetingLink}
                         onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
                         placeholder="https://meet.google.com/..."
@@ -336,6 +347,7 @@ export default function EditClassForm({
                 <div className="card-body gap-2">
                   <h2 className="card-title text-sm font-bold">Description</h2>
                   <textarea
+                    aria-label="Class description"
                     value={form.description}
                     onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
                     placeholder="Briefly explain what will be covered in this class... (optional)"
@@ -375,8 +387,9 @@ export default function EditClassForm({
                     <Users className="h-4 w-4 text-primary shrink-0" />
                     <span>{enrolledCount} currently enrolled</span>
                   </div>
-                  <label className="font-semibold text-2xs text-base-content/50">MAX CAPACITY</label>
+                  <label htmlFor="class-max-capacity" className="font-semibold text-2xs text-base-content/50">MAX CAPACITY</label>
                   <input
+                    id="class-max-capacity"
                     type="number"
                     value={form.maxStudents}
                     onChange={(e) => setForm((prev) => ({ ...prev, maxStudents: Number(e.target.value) }))}

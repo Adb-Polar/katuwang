@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { acceptTopicRequestSchema } from "@/lib/validations/match";
@@ -9,6 +8,8 @@ import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
+import { requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
+import { isStudentEligibleForTutor, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
 // ─── POST: Accept an open topic request by auto-creating a class ────────────
@@ -20,7 +21,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { id } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -33,7 +34,7 @@ export async function POST(
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
@@ -49,13 +50,22 @@ export async function POST(
 
     const request = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { id: true, status: true, subject: true, learnerId: true },
+      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, expiresAt: true },
     });
     if (!request) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
     }
-    if (request.status !== "OPEN") {
+    if (request.status !== "OPEN" || request.expiresAt <= new Date()) {
       return NextResponse.json({ error: "This request is no longer open." }, { status: 400 });
+    }
+
+    const tutorGrade = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+
+    if (!isStudentEligibleForTutor(request.gradeLevel, tutorGrade)) {
+      return NextResponse.json(
+        { error: "You cannot teach students in a higher grade level than your own." },
+        { status: 403 }
+      );
     }
 
     const certifiedTopics = await prisma.topicCertification.findMany({
@@ -64,7 +74,7 @@ export async function POST(
     });
 
     const eligible = await prisma.topicRequest.findFirst({
-      where: { id, ...tutorPoolWhere(tutorProfile.id, certifiedTopics) },
+      where: { id, ...tutorPoolWhere(tutorProfile.id, certifiedTopics, tutorGrade) },
       select: { id: true },
     });
     if (!eligible) {
@@ -76,6 +86,13 @@ export async function POST(
 
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
+
+    if (gradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorProfile.user.gradeLevel)) {
+      return NextResponse.json(
+        { error: "Target grade cannot be higher than your current grade level." },
+        { status: 400 }
+      );
+    }
 
     if (subject !== request.subject) {
       return NextResponse.json(
@@ -152,6 +169,8 @@ export async function POST(
     const code = await generateClassCode();
 
     const { newClass, updatedRequest } = await prisma.$transaction(async (tx) => {
+      const current = await tx.topicRequest.findUniqueOrThrow({ where: { id }, select: { status: true, expiresAt: true } });
+      if (current.status !== "OPEN" || current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
       const newClass = await tx.tutorClass.create({
         data: {
           tutorProfileId: tutorProfile.id,
@@ -176,12 +195,15 @@ export async function POST(
         },
       });
 
+      if (current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
+      const before = await requestSnapshot(tx, id);
       const updatedRequest = await tx.topicRequest.update({
         where: { id },
         data: { status: "ACCEPTED", fulfilledClassId: newClass.id },
         select: { id: true, status: true, fulfilledClassId: true },
       });
 
+      await recordRequestHistory(tx, id, session.user.id, "STATUS_CHANGED", before);
       await notify(
         tx,
         request.learnerId,
@@ -195,6 +217,7 @@ export async function POST(
 
     return NextResponse.json({ request: updatedRequest, classId: newClass.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "Request expired before acceptance.") return NextResponse.json({ error: "This request has expired." }, { status: 409 });
     console.error("Error accepting topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { createTopicRequestSchema } from "@/lib/validations/match";
 
 import { subjectExists, topicExists } from "@/lib/subjects";
+import { GradeLevel } from "@prisma/client";
+import { isStudentEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
+import { requestDeadline, recordRequestHistory } from "@/lib/topicRequestHistory";
 
 const MAX_OPEN_REQUESTS = 10;
 
@@ -36,6 +38,8 @@ function serialize(r: {
   note: string | null;
   status: string;
   createdAt: Date;
+  expiresAt: Date;
+  lastSubmittedAt: Date;
   topics: { topic: string }[];
   slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
   directedTutor: { user: { anonymousId: string } } | null;
@@ -55,6 +59,8 @@ function serialize(r: {
     note: r.note,
     status: r.status,
     createdAt: r.createdAt,
+    expiresAt: r.expiresAt,
+    lastSubmittedAt: r.lastSubmittedAt,
     topics: r.topics.map((t) => t.topic),
     slots: r.slots,
     directedTo: r.directedTutor ? { anonymousId: r.directedTutor.user.anonymousId } : null,
@@ -72,7 +78,7 @@ function serialize(r: {
 // ─── GET: The caller's own topic requests ────────────────────────────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -97,7 +103,7 @@ export async function GET() {
 // ─── POST: Create a topic request ───────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -115,12 +121,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { subject, topics, gradeLevel, preferredSlots, note, directedTutorId } = result.data;
+    const studentGrade =
+      (session.user as { gradeLevel?: GradeLevel | null }).gradeLevel ??
+      (await prisma.user?.findUnique?.({
+        where: { id: session.user.id },
+        select: { gradeLevel: true },
+      }))?.gradeLevel ??
+      result.data.gradeLevel ??
+      null;
 
-    if (!(await subjectExists(subject, { gradeLevel }))) {
+    if (!studentGrade) {
+      return NextResponse.json({ error: "Grade level is required." }, { status: 400 });
+    }
+
+    const { subject, topics, preferredSlots, note, directedTutorId } = result.data;
+
+    if (!(await subjectExists(subject, { gradeLevel: studentGrade }))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel })))).some((ok) => !ok)) {
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel: studentGrade })))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -131,16 +150,22 @@ export async function POST(req: NextRequest) {
     if (directedTutorId) {
       const directedTutor = await prisma.user.findFirst({
         where: { id: directedTutorId, role: "STUDENT_TUTOR" },
-        select: { tutorProfile: { select: { id: true } } },
+        select: { gradeLevel: true, tutorProfile: { select: { id: true } } },
       });
       if (!directedTutor || !directedTutor.tutorProfile) {
         return NextResponse.json({ error: "The selected tutor could not be found." }, { status: 400 });
+      }
+      if (!isStudentEligibleForTutor(studentGrade, directedTutor.gradeLevel)) {
+        return NextResponse.json(
+          { error: "You cannot request tutoring from a tutor in a lower grade level." },
+          { status: 403 }
+        );
       }
       directedTutorProfileId = directedTutor.tutorProfile.id;
     }
 
     const openCount = await prisma.topicRequest.count({
-      where: { learnerId: session.user.id, status: "OPEN" },
+      where: { learnerId: session.user.id, status: "OPEN", expiresAt: { gt: new Date() } },
     });
     if (openCount >= MAX_OPEN_REQUESTS) {
       return NextResponse.json(
@@ -150,11 +175,14 @@ export async function POST(req: NextRequest) {
     }
 
     const created = await prisma.$transaction(async (tx) => {
+      const submittedAt = new Date();
       const request = await tx.topicRequest.create({
         data: {
           learnerId: session.user.id,
+          lastSubmittedAt: submittedAt,
+          expiresAt: requestDeadline(submittedAt),
           subject: subject,
-          gradeLevel,
+          gradeLevel: studentGrade,
           note: note || null,
           directedTutorProfileId,
           topics: { create: [...new Set(topics)].map((topic) => ({ topic })) },
@@ -169,6 +197,8 @@ export async function POST(req: NextRequest) {
         },
         include: requestInclude,
       });
+
+      await recordRequestHistory(tx, request.id, session.user.id, "CREATED", null);
 
       if (directedTutorProfileId) {
         const directedTutorProfile = await tx.tutorProfile.findUnique({

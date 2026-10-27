@@ -8,7 +8,7 @@ const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi
   reinstateMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({ prisma: { tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));

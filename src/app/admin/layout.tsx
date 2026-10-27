@@ -1,9 +1,9 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
+import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
 const ADMIN_NAV_ITEMS: NavItem[] = [
@@ -33,22 +33,36 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
 
   if (!session) {
     redirect("/login");
   }
 
-  if (session.user.role !== "ADMIN") {
+  if (!isAdminRole(session.user.role)) {
     redirect("/unauthorized");
   }
+
+  const isSuperAdmin = isSuperAdminRole(session.user.role);
 
   const [unreadCount, chatbotEnabled] = await Promise.all([
     prisma.notification.count({ where: { userId: session.user.id, readAt: null } }),
     getSetting("chatbotEnabled"),
   ]);
 
-  const navItems: NavItem[] = ADMIN_NAV_ITEMS.map((item) =>
+  const baseNavItems: NavItem[] = isSuperAdmin
+    ? [
+        ...ADMIN_NAV_ITEMS,
+        {
+          label: "Admins",
+          href: "/admin/admins",
+          icon: <ShieldAlert className="w-4 h-4" />,
+          group: "Administration",
+        },
+      ]
+    : ADMIN_NAV_ITEMS;
+
+  const navItems: NavItem[] = baseNavItems.map((item) =>
     item.href === "/admin/notifications" ? { ...item, badge: unreadCount } : item
   );
 

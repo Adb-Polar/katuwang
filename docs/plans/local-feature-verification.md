@@ -36,3 +36,9 @@ Recurring preferences previously read session times in the server's local timezo
 ## Existing rollout limitation
 
 The repository's older migration history omits pre-existing subject/topic tables. The local upgrade test used a reconstructed checked-in pre-change schema before applying the new migrations. The upgrade path passes; a fresh installation using only historical migrations still needs that older history reconciled. No migration history or schema was reset on a remote database.
+
+## Dev-test integration validation
+
+Before deployment, the fix branch was merged with the existing dev-test branch to preserve its portal/accessibility, profile-picture, request-history, and grade-eligibility behavior. The integrated release passed 945 tests and the production build. Its full 26-file migration history passed against a fresh empty local database, resolving the older history gap described above. Authenticated smoke checks passed on all five learner routes at 375px and 1440px, plus dated request creation. Requests retain dev-test's existing rule that request grade is the learner's registered grade; their grade field is locked consistently with the API.
+
+The integrated class cards render profile pictures, with enlargement explicitly disabled inside cards. The release migration wrapper passes against the local database and supports the configured database CA with strict TLS. Deployment to Render remains gated on approval for the confirmed shared database used by dev-test and the primary service.

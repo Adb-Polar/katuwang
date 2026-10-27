@@ -337,15 +337,15 @@ function BuilderBody({
             <h2 className="card-title text-sm font-bold">Questions ({items.length})</h2>
             {editable && (
               <div className="flex gap-2">
-                <button onClick={() => setShowBank(true)} className="btn btn-outline btn-xs text-2xs font-bold">
+                <button onClick={() => setShowBank(true)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                   Add from bank
                 </button>
-                <button onClick={() => setShowMine(true)} className="btn btn-outline btn-xs text-2xs font-bold">
+                <button onClick={() => setShowMine(true)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                   My questions
                 </button>
                 <button
                   onClick={() => setShowWrite(true)}
-                  className="btn btn-outline btn-primary btn-xs text-2xs font-bold"
+                  className="btn btn-outline btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold"
                 >
                   Write a question
                 </button>
@@ -376,7 +376,7 @@ function BuilderBody({
                       <button
                         onClick={() => move(idx, -1)}
                         disabled={idx === 0}
-                        className="btn btn-ghost btn-xs"
+                        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0"
                         aria-label="Move up"
                       >
                         <ChevronUp className="h-3 w-3" />
@@ -384,12 +384,12 @@ function BuilderBody({
                       <button
                         onClick={() => move(idx, 1)}
                         disabled={idx === items.length - 1}
-                        className="btn btn-ghost btn-xs"
+                        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0"
                         aria-label="Move down"
                       >
                         <ChevronDown className="h-3 w-3" />
                       </button>
-                      <button onClick={() => removeAt(idx)} className="btn btn-ghost btn-xs text-error" aria-label="Remove">
+                      <button onClick={() => removeAt(idx)} className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error" aria-label="Remove">
                         <Trash2 className="h-3 w-3" />
                       </button>
                     </div>
@@ -558,8 +558,12 @@ function AddFromBankModal({
     <div className="modal modal-open">
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
+        <p className="text-xs text-base-content/60">
+          Bank questions are available for topics you are already certified in.
+          You can also write your own questions for this session.
+        </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <select value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs text-xs sm:col-span-1 truncate">
+          <select aria-label="Filter question bank by topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1 truncate">
             <option value="">All topics</option>
             {topics.map((t) => (
               <option key={t} value={t}>
@@ -568,12 +572,13 @@ function AddFromBankModal({
             ))}
           </select>
           <input
+            aria-label="Search question prompts"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Search prompt..."
-            className="input input-bordered input-xs text-xs sm:col-span-1"
+            className="input input-bordered input-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1"
           />
-          <button onClick={search} disabled={loading} className="btn btn-neutral btn-xs text-2xs sm:col-span-1">
+          <button onClick={search} disabled={loading} className="btn btn-neutral btn-xs min-h-11 sm:min-h-0 text-2xs sm:col-span-1">
             {loading ? <span className="loading loading-spinner loading-xs" /> : "Search"}
           </button>
         </div>

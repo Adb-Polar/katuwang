@@ -1,3 +1,7 @@
+vi.mock("@/lib/teachingBankAccess", () => ({
+  certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
+  certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
+}));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -21,7 +25,7 @@ const {
   notificationCreateMany: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
@@ -68,7 +72,7 @@ describe("PATCH /test/status", () => {
   });
 
   it("publishing notifies every enrolled learner with SESSION_PRETEST_OPEN", async () => {
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ position: 0 }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED" });
     const res = await PATCH(patch({ status: "PUBLISHED" }), ctx());
     expect(res.status).toBe(200);
@@ -87,7 +91,7 @@ describe("PATCH /test/status", () => {
   });
 
   it("closes a published test", async () => {
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [{ position: 0 }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "CLOSED" });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());
     expect(res.status).toBe(200);

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { ClassStatus } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { subjectExists } from "@/lib/subjects";
-import { getSetting } from "@/lib/settings";
+import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
+import { getSetting, getProfilePictureRequirement } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -14,7 +14,7 @@ import { generateClassCode } from "@/lib/idGenerator";
 // ─── GET: Fetch Tutor's Classes ───────────────────────────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
 // ─── POST: Create a New Class (with its initial sessions) ─────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -79,11 +79,24 @@ export async function POST(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { image: true, gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
+    }
+
+    const picReq = await getProfilePictureRequirement();
+    if (picReq === "TUTORS_ONLY" || picReq === "ALL_USERS") {
+      if (!tutorProfile.user?.image) {
+        return NextResponse.json(
+          {
+            error:
+              "A profile picture is required to create classes. Please upload one in your profile settings.",
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const body = await req.json();
@@ -96,6 +109,14 @@ export async function POST(req: NextRequest) {
 
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
+
+    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+    if (gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorGradeLevel)) {
+      return NextResponse.json(
+        { error: "Target grade cannot be higher than your current grade level." },
+        { status: 400 }
+      );
+    }
 
     if (!(await subjectExists(subject))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });

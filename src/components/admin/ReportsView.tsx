@@ -15,6 +15,8 @@ import { BarChartCard, DataTable, useThemeColors } from "@/components/charts";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { toCsv, downloadCsv } from "@/lib/csv";
 import LoadingRow from "@/components/ui/LoadingRow";
+import { parseLocalDateAndTime } from "@/lib/datetime";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface Breakdown {
   count: number;
@@ -36,11 +38,13 @@ export default function ReportsView() {
   const [reports, setReports] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
+      setError("");
       try {
         const res = await fetch("/api/admin/reports");
         if (!res.ok) throw new Error("Could not retrieve reports.");
@@ -56,7 +60,7 @@ export default function ReportsView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   if (loading) {
     return (
@@ -89,13 +93,19 @@ export default function ReportsView() {
     for (const d of reports.enrollments.byDay) {
       rows.push({ section: "enrollments_by_day", label: d.date, count: d.count });
     }
-    const today = new Date().toISOString().slice(0, 10);
+    const today = parseLocalDateAndTime(new Date()).date;
     downloadCsv(`katuwang-report-${today}.csv`, toCsv(rows, ["section", "label", "count"]));
   };
 
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
+
+      {error && (
+        <button type="button" className="btn btn-outline btn-sm" onClick={() => setRetryKey((key) => key + 1)}>
+          Retry reports
+        </button>
+      )}
 
       {reports && (
         <>
@@ -163,36 +173,41 @@ export default function ReportsView() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <BarChartCard title="Users by Role" rows={reports.usersByRole} labelKey="role" color={c.primary} />
+            <BarChartCard title="Users by Role" rows={reports.usersByRole} labelKey="role" color={c.primary} labelFormatter={statusDisplayLabel} />
             <BarChartCard
               title="Users by Grade Level"
               rows={reports.usersByGradeLevel}
               labelKey="gradeLevel"
               color={c.primary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Users by Status"
               rows={reports.usersByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Classes by Subject"
               rows={reports.classesBySubject}
               labelKey="subject"
               color={c.primary}
+              labelFormatter={subjectDisplayLabel}
             />
             <BarChartCard
               title="Classes by Status"
               rows={reports.classesByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
               title="Certifications by Status"
               rows={reports.certificationsByStatus}
               labelKey="status"
               color={c.secondary}
+              labelFormatter={statusDisplayLabel}
             />
           </div>
         </>

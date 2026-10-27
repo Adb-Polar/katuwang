@@ -7,7 +7,7 @@ const { getServerSessionMock, sessionTestFindMany, sessionTestCount } = vi.hoist
   sessionTestCount: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: { sessionTest: { findMany: sessionTestFindMany, count: sessionTestCount } },
 }));

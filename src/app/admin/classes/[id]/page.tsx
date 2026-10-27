@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import SessionsList from "@/components/classes/SessionsList";
@@ -8,6 +7,7 @@ import RecommendClassForm from "@/components/classes/RecommendClassForm";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
+import { isAdminRole } from "@/lib/permissions";
 
 export const metadata = { title: "Class Detail | Katuwang" };
 
@@ -17,8 +17,8 @@ export default async function AdminClassDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") notFound();
+  const session = await getActiveServerSession();
+  if (!session || !isAdminRole(session.user.role)) notFound();
 
   const tutorClass = await prisma.tutorClass.findUnique({
     where: { id },

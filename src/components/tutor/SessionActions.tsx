@@ -1,21 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
+import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { SessionSummary } from "@/components/classes/SessionsList";
+import { parseLocalDateAndTime, combineDateAndTime } from "@/lib/datetime";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
-
-function toDatetimeLocal(iso: string) {
-  const d = new Date(iso);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
 
 export default function SessionActions({
   classId,
@@ -33,10 +28,22 @@ export default function SessionActions({
 
   const [isRescheduling, setIsRescheduling] = useState(false);
   const [topic, setTopic] = useState(session.topic);
-  const [scheduledAt, setScheduledAt] = useState(toDatetimeLocal(session.scheduledAt));
+  const initialParsed = parseLocalDateAndTime(session.scheduledAt);
+  const [rescheduleDate, setRescheduleDate] = useState(initialParsed.date);
+  const [rescheduleTime, setRescheduleTime] = useState(initialParsed.time);
   const [duration, setDuration] = useState(session.duration);
   const [rescheduleError, setRescheduleError] = useState("");
   const [rescheduling, setRescheduling] = useState(false);
+
+  const openRescheduleModal = () => {
+    const parsed = parseLocalDateAndTime(session.scheduledAt);
+    setTopic(session.topic);
+    setRescheduleDate(parsed.date);
+    setRescheduleTime(parsed.time);
+    setDuration(session.duration);
+    setRescheduleError("");
+    setIsRescheduling(true);
+  };
 
   const sessionUrl = `/api/tutor/classes/${classId}/sessions/${session.id}`;
 
@@ -72,10 +79,17 @@ export default function SessionActions({
     setRescheduling(true);
     setRescheduleError("");
     try {
+      if (!rescheduleDate || !rescheduleTime) {
+        throw new Error("Please provide both a date and a time.");
+      }
+      const iso = combineDateAndTime(rescheduleDate, rescheduleTime);
+      if (!iso) {
+        throw new Error("Invalid date or time.");
+      }
       const res = await fetch(sessionUrl, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, scheduledAt: new Date(scheduledAt).toISOString(), duration }),
+        body: JSON.stringify({ topic, scheduledAt: iso, duration }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to reschedule session.");
@@ -96,8 +110,8 @@ export default function SessionActions({
         <div className="flex items-center gap-1">
           <button
             type="button"
-            onClick={() => setIsRescheduling(true)}
-            className="btn btn-ghost btn-xs cursor-pointer tooltip"
+            onClick={openRescheduleModal}
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 cursor-pointer tooltip"
             data-tip="Reschedule"
             aria-label="Reschedule session"
           >
@@ -106,7 +120,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("complete")}
-            className="btn btn-ghost btn-xs text-success cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-success cursor-pointer tooltip"
             data-tip="Mark complete"
             aria-label="Mark session complete"
           >
@@ -115,7 +129,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("cancel")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
             data-tip="Cancel"
             aria-label="Cancel session"
           >
@@ -124,7 +138,7 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("delete")}
-            className="btn btn-ghost btn-xs text-error cursor-pointer tooltip"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
             data-tip="Delete"
             aria-label="Delete session"
           >
@@ -148,19 +162,7 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      {isRescheduling && typeof document !== "undefined" &&
-        createPortal(
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              type="button"
-              onClick={() => setIsRescheduling(false)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-4">Reschedule Session</h3>
-
+      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <form onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
@@ -179,15 +181,29 @@ export default function SessionActions({
                 </select>
               </FormField>
 
-              <FormField label="Date & Time" required>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  required
-                  className="input input-bordered input-sm w-full text-xs"
-                />
-              </FormField>
+              <div className="grid grid-cols-2 gap-2">
+                <FormField label="Date" required>
+                  <input
+                    type="date"
+                    value={rescheduleDate}
+                    onChange={(e) => setRescheduleDate(e.target.value)}
+                    required
+                    aria-label="Session date"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+
+                <FormField label="Time" required>
+                  <input
+                    type="time"
+                    value={rescheduleTime}
+                    onChange={(e) => setRescheduleTime(e.target.value)}
+                    required
+                    aria-label="Session time"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+              </div>
 
               <FormField label="Duration" required>
                 <select
@@ -217,10 +233,7 @@ export default function SessionActions({
                 </button>
               </div>
             </form>
-          </div>
-        </div>,
-        document.body
-      )}
+      </Modal>
     </>
   );
 }

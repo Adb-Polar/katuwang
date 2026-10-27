@@ -1,22 +1,35 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
-import { updatePlatformSettingSchema } from "@/lib/validations/admin";
-import { PLATFORM_SETTING_KEYS, getSetting } from "@/lib/settings";
+import {
+  updatePlatformSettingSchema,
+  updateProfilePictureRequirementSchema,
+} from "@/lib/validations/admin";
+import {
+  PLATFORM_SETTING_KEYS,
+  PROFILE_PICTURE_REQUIREMENT_KEY,
+  getSetting,
+  getProfilePictureRequirement,
+} from "@/lib/settings";
 
 // ─── GET: List Platform Settings ──────────────────────────────────────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const settings = await Promise.all(
+    const settings: { key: string; value: boolean | string }[] = await Promise.all(
       PLATFORM_SETTING_KEYS.map(async (key) => ({ key, value: await getSetting(key) }))
     );
+
+    settings.push({
+      key: PROFILE_PICTURE_REQUIREMENT_KEY,
+      value: await getProfilePictureRequirement(),
+    });
 
     return NextResponse.json(settings);
   } catch (error) {
@@ -31,13 +44,30 @@ export async function GET() {
 // ─── PATCH: Update a Platform Setting ─────────────────────────────────────────
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
     const body = await req.json();
+
+    if (body?.key === PROFILE_PICTURE_REQUIREMENT_KEY) {
+      const result = updateProfilePictureRequirementSchema.safeParse(body);
+      if (!result.success) {
+        const errorMsg = result.error.issues[0]?.message || "Invalid requirement option.";
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
+      }
+
+      const updated = await prisma.platformSetting.upsert({
+        where: { key: PROFILE_PICTURE_REQUIREMENT_KEY },
+        update: { value: result.data.value },
+        create: { key: PROFILE_PICTURE_REQUIREMENT_KEY, value: result.data.value },
+      });
+
+      return NextResponse.json({ key: updated.key, value: updated.value });
+    }
+
     const result = updatePlatformSettingSchema.safeParse(body);
 
     if (!result.success) {

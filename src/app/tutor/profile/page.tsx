@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import ProfileView from "@/components/profile/ProfileView";
 
@@ -8,7 +8,8 @@ export const metadata = {
 };
 
 export default async function TutorProfilePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },
@@ -16,6 +17,7 @@ export default async function TutorProfilePage() {
       contactInfo: true,
       section: true,
       gradeLevel: true,
+      image: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -42,6 +44,7 @@ export default async function TutorProfilePage() {
       section={user?.section ?? ""}
       contactInfo={user?.contactInfo ?? ""}
       certifiedTopics={user?.tutorProfile?.topicCertifications ?? []}
+      image={user?.image}
     />
   );
 }

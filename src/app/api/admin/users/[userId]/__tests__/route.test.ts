@@ -8,8 +8,7 @@ const { getServerSessionMock, userFindUnique, userUpdate, auditLogCreate } = vi.
   auditLogCreate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -59,6 +58,29 @@ describe("PATCH /api/admin/users/[userId]", () => {
     const res = await patch({ status: "SUSPENDED" });
     expect(res.status).toBe(400);
     expect(userUpdate).not.toHaveBeenCalled();
+  });
+
+  it("returns 400 when targeting a super admin account", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "super1", role: "SUPER_ADMIN" } });
+    userFindUnique.mockResolvedValue({ id: "u2", role: "SUPER_ADMIN" });
+    const res = await patch({ status: "SUSPENDED" }, "u2");
+    expect(res.status).toBe(400);
+    expect(userUpdate).not.toHaveBeenCalled();
+  });
+
+  it("allows SUPER_ADMIN to update learner/tutor account status", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "super1", role: "SUPER_ADMIN" } });
+    userFindUnique.mockResolvedValue({ id: "u1", role: "STUDENT_TUTOR" });
+    userUpdate.mockResolvedValue({
+      id: "u1",
+      anonymousId: "TUT-0001",
+      status: "ACTIVE",
+      statusReason: "Reinstated",
+      statusUpdatedAt: new Date().toISOString(),
+    });
+
+    const res = await patch({ status: "ACTIVE", reason: "Reinstated" });
+    expect(res.status).toBe(200);
   });
 
   it("returns 400 for an invalid status", async () => {

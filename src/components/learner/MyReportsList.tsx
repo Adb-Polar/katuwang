@@ -5,6 +5,7 @@ import { Flag } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { violationLabel } from "@/lib/reportViolations";
 import { formatDate } from "@/lib/datetime";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface MyReport {
   id: string;
@@ -26,13 +27,14 @@ const STATUS_BADGE: Record<MyReport["status"], string> = {
 
 function targetLabel(r: MyReport) {
   if (r.targetType === "TUTOR") return r.target.anonymousId ?? "Tutor";
-  return `${r.target.subject ?? ""} · ${r.target.code ?? ""}`.trim();
+  return `${r.target.subject ? subjectDisplayLabel(r.target.subject) : "Class"} · ${r.target.code ?? ""}`.trim();
 }
 
 export default function MyReportsList() {
   const [reports, setReports] = useState<MyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +53,7 @@ export default function MyReportsList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   if (loading) {
     return (
@@ -64,15 +66,16 @@ export default function MyReportsList() {
   return (
     <div className="space-y-4">
       <FeedbackBanner variant="error" message={error || null} />
+      {error && <button type="button" className="btn btn-outline btn-sm" onClick={() => { setError(""); setLoading(true); setRetryKey((key) => key + 1); }}>Retry reports</button>}
 
-      {reports.length === 0 ? (
+      {!error && reports.length === 0 ? (
         <div className="card kt-card">
           <div className="card-body items-center text-center gap-2 py-10">
             <Flag className="h-6 w-6 text-base-content/30" />
             <p className="text-sm text-base-content/50 italic">You haven&apos;t filed any reports.</p>
           </div>
         </div>
-      ) : (
+      ) : !error ? (
         reports.map((r) => (
           <section key={r.id} className="card kt-card">
             <div className="card-body gap-2">
@@ -84,7 +87,7 @@ export default function MyReportsList() {
                   <p className="font-mono text-sm font-semibold">{targetLabel(r)}</p>
                 </div>
                 <span className={`badge badge-sm ${STATUS_BADGE[r.status]} text-2xs font-bold`}>
-                  {r.status}
+                  {statusDisplayLabel(r.status)}
                 </span>
               </div>
 
@@ -118,7 +121,7 @@ export default function MyReportsList() {
             </div>
           </section>
         ))
-      )}
+      ) : null}
     </div>
   );
 }

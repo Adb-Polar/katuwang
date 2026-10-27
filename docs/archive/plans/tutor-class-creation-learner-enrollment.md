@@ -1,5 +1,12 @@
 # Tutor Class Creation + Learner Enrollment
 
+> **Done.** Shipped early in the project (this was originally `plan.md` at the
+> repo root, before the `docs/plans/` convention existed — moved here
+> 2026-09-23). The schema and API surface have since grown well beyond what's
+> described below (`ClassSession`, `ClassTopic`, publishing, moderation, etc.
+> — see `prisma/schema.prisma` and `docs/roles/LEARNER.md` /
+> `docs/roles/TUTOR.md` for the current shape). Kept for history only.
+
 ## Context
 
 `prisma/schema.prisma` already models everything needed for tutor-created classes: `TutorClass` (subject, topic, schedule, duration, `maxStudents` — 1 for 1‑on‑1, higher for group) and `ClassEnrollment` (unique per class+learner). The tutor-side implementation is **already fully built** — Zod schema, GET/POST/PATCH/DELETE API routes, and a complete `ClassManagement` client component with a schedule form, conflict detection, and a class-details/roster modal — but it was never mounted into `src/app/tutor/page.tsx`, so it's dead code today. There is **no learner-facing equivalent at all**: `src/app/learner/page.tsx` is a static placeholder with a non-functional "Request Session" button.

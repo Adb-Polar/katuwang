@@ -41,14 +41,15 @@ export interface SerializedSessionTestAttempt {
  */
 export function serializeSessionTestAttempt(
   attempt: SessionTestAttemptWithItems,
-  { reveal }: { reveal: boolean },
+  { reveal, revealBankAnswers = true }: { reveal: boolean; revealBankAnswers?: boolean },
 ): SerializedSessionTestAttempt {
   const items = [...attempt.items]
     .sort((a, b) => a.position - b.position)
     .map((item) => {
+      const revealAnswers = reveal && (revealBankAnswers || item.question.origin !== "BANK");
       const options = [...item.question.options]
         .sort((a, b) => a.position - b.position)
-        .map((o) => ({ id: o.id, text: o.text, ...(reveal ? { isCorrect: o.isCorrect } : {}) }));
+        .map((o) => ({ id: o.id, text: o.text, ...(revealAnswers ? { isCorrect: o.isCorrect } : {}) }));
 
       return {
         position: item.position,
@@ -57,7 +58,7 @@ export function serializeSessionTestAttempt(
         options,
         selectedOptionId: item.selectedOptionId,
         ...(reveal
-          ? { isCorrect: item.isCorrect, explanation: item.question.explanation }
+          ? { isCorrect: item.isCorrect, ...(revealAnswers ? { explanation: item.question.explanation } : {}) }
           : {}),
       };
     });

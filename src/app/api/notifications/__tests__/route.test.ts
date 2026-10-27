@@ -6,7 +6,7 @@ const { getServerSessionMock, findManyMock, countMock } = vi.hoisted(() => ({
   countMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: { notification: { findMany: findManyMock, count: countMock } },
 }));

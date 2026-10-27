@@ -1,9 +1,9 @@
 # Katuwang Docs — Index & Previews
 
-Every document under `docs/` lives in a subfolder; this file is the only page at
-the root and previews all of them. Reorganised 2026-09-10 (see `Changes.md`
-Part 69) — merged the six review docs and three assessment plans, archived
-completed/superseded plans, and moved every loose file into a folder.
+Project documentation is grouped by purpose below. Updated 2026-10-22.
+The repository root keeps `README.md`, `Changes.md`, `AGENTS.md`, and
+`CLAUDE.md` as project entry points and instructions. Design notes, Prisma seed
+accounts, migration notes, and tool skills stay beside the files they describe.
 
 ```
 docs/
@@ -13,7 +13,9 @@ docs/
 ├── plans/               active implementation plans
 ├── reviews/             consolidated code & design reviews
 ├── backlog/             flat TODO / manual-test scratchpads
-├── reports/             current sprint / feature-status spreadsheet
+├── reports/             audits, research, progress, and feature reports
+├── testing/             manual verification checklists
+├── katuwang/            Obsidian notes (vault structure preserved)
 ├── to-submit/           course module deliverables
 └── archive/             completed plans, superseded fragments, old reports
 ```
@@ -36,6 +38,8 @@ docs/
 | [`chatbot.md`](reference/chatbot.md) | Chatbot Assistant architecture & workflow — a deterministic intent/FAQ responder, no LLM. Now includes the original implementation plan as an appendix. |
 | [`theme.md`](reference/theme.md) | **Retired 2026-09-10** to a pointer at `src/app/globals.css` — it had drifted to an older palette. Kept so old links don't 404. |
 | [`thesis.md`](reference/thesis.md) | The full ~450KB capstone thesis ("A web-based Peer Tutoring Management Platform … for Taysan Resettlement Integrated School"). A historical proposal snapshot — **do not read wholesale**; use `grep`/offset reads, and prefer `project-overview.md`. |
+| [`thesis-implementation-audit.md`](reference/thesis-implementation-audit.md) | Point-in-time (2026-09-23) thesis-vs-code defense-prep audit: requirements traceability matrix, objectives/scope/role/DB/security comparisons, thesis self-contradictions, and ranked defense-readiness issues. Not a living doc — re-run rather than trust blindly if the thesis or code changes materially. |
+| [`qa-iso-25010-checklist.md`](reference/qa-iso-25010-checklist.md) | Formal ISO/IEC 25010 QA testing & evaluation checklist across all 8 quality characteristics with concrete test steps, expected behaviors, and sign-off criteria for the Katuwang peer tutoring platform. |
 
 Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture diagram).
 
@@ -49,16 +53,23 @@ Non-markdown here: `architecture-design.html` / `.pdf` (rendered architecture di
 
 ## `plans/` — active implementation plans
 
-See [`plans/README.md`](plans/README.md) for the status table.
+| File | Preview | Status |
+|---|---|---|
+| [`assessments.md`](plans/assessments.md) | Merged assessments plan: admin question bank + auto-graded topic quizzes, per-topic config → one global config, and learner per-session pre/post-tests (`SessionTest` per `ClassSession`). | **Mostly shipped** — Changes.md Parts 29–33. Question bank, global config, and per-session pre/post tests all implemented and `db push`ed; the pre-test-post-test section is retained as history (also in `archive/plans/`). Not committed. |
+| [`deployment.md`](plans/deployment.md) | Free-tier path from local dev to a public URL: Oracle Cloud **or** Render hosting, TiDB Cloud Serverless MySQL, free `.tech`/`.me` domain. | **Planning** — Changes.md Part 34. Hosting options + setup, DB bootstrap via `prisma migrate deploy`, env-var reference, pre-deploy code changes, `main → production` branching, verification checklist. Not executed. |
+| [`fixes.md`](plans/fixes.md) | Status audit of the ~55-item fixes/redesign backlog (raw source now `archive/plans/fixes.txt`) and a 6-phase implementation sequence. | **In progress** — Changes.md Part 36+. Sept 5/6 items reconciled as shipped (Parts 29–35); remaining work grouped Phase 1 (bugs/guardrails) → Phase 6 (appeal-notify schema change, needs DB confirmation). One commit per phase. |
+| [`landing-page-redesign.md`](plans/landing-page-redesign.md) | Modern redesign of the public `/` landing page: "The Key" direction — STU ⇄ TUT pairing hero, bento features, dark privacy section, real logo wired in. | **Prototype 10 (Story) implemented** — Changes.md Parts 78–82 (04 Timetable was built first, then superseded). Plan's original "The Key" scope is historical; all 10 prototypes kept in `design/landing/`. |
+| [`notification-system-expansion.md`](plans/notification-system-expansion.md) | Broaden the DB-backed notification system beyond topic requests; add the unread dot. | See the plan for current status. |
+| [`subject-topic-management.md`](plans/subject-topic-management.md) | Admin-editable subjects & topics. | **Done 2026-09-04** — `SubjectArea` enum removed, `subject` columns are string slugs, `/admin/subjects` CRUD live. |
+| [`dev-data-factory.md`](plans/dev-data-factory.md) | Dev-only page + API to spawn test data (users, classes, enrollments, topic requests) on demand without re-seeding. | See the plan for current status. |
+
+Additional plans:
 
 | File | Preview |
 |---|---|
-| [`assessments.md`](plans/assessments.md) | **Merged.** Admin question bank + auto-graded topic quizzes, per-topic config → one global config, and learner per-session pre/post-tests (`SessionTest` per `ClassSession`). Mostly shipped (Changes.md Parts 29–33). |
-| [`deployment.md`](plans/deployment.md) | Free-tier path from local dev to a public URL: Oracle Cloud **or** Render hosting, TiDB Cloud Serverless MySQL, free `.tech`/`.me` domain. Planning only. |
-| [`fixes.md`](plans/fixes.md) | Status audit of the ~55-item fixes/redesign backlog (raw source now `archive/plans/fixes.txt`) and a 6-phase implementation sequence. Phases 1–6 shipped. |
-| [`notification-system-expansion.md`](plans/notification-system-expansion.md) | Broaden the DB-backed notification system beyond topic requests; add the unread dot. |
-| [`subject-topic-management.md`](plans/subject-topic-management.md) | Admin-editable subjects & topics. **Done 2026-09-04** — `SubjectArea` enum removed, `subject` columns are string slugs, `/admin/subjects` CRUD live. |
-| [`dev-data-factory.md`](plans/dev-data-factory.md) | Dev-only page + API to spawn test data (users, classes, enrollments, topic requests) on demand without re-seeding. |
+| [`super-admin-implementation.md`](plans/super-admin-implementation.md) | Super Admin role and admin account management proposal. |
+| [`curriculum-database-integration.md`](plans/curriculum-database-integration.md) | Curriculum database integration plan. |
+| [`idempotent-seed-fix.md`](plans/idempotent-seed-fix.md) | Idempotent database seeding plan. |
 
 ## `reviews/`
 
@@ -75,7 +86,30 @@ See [`plans/README.md`](plans/README.md) for the status table.
 
 ## `reports/`
 
+| File | Preview |
+|---|---|
+| [`project-progress.md`](reports/project-progress.md) | High-level project implementation and progress report. |
+| [`input-validation-audit.md`](reports/input-validation-audit.md) | Input validation audit and findings. |
+| [`image-optimization.md`](reports/image-optimization.md) | Image compression, storage, and upload optimization report. |
+| [`curriculum-coverage-matrix.md`](reports/curriculum-coverage-matrix.md) | Curriculum coverage matrix. |
+| [`philippine-k12-curriculum-research-report.md`](reports/philippine-k12-curriculum-research-report.md) | Philippine K–12 curriculum research. |
+
 `feature-status-and-sprint-report.xlsx` — current sprint / feature status spreadsheet. Older dated copies are in `archive/reports/`.
+
+## `testing/` — verification checklists
+
+| File | Coverage |
+|---|---|
+| [`avatar.md`](testing/avatar.md) | Avatar uploads, privacy, compression, and moderation. |
+| [`input-validation.md`](testing/input-validation.md) | Field-by-field input validation. |
+| [`super-admin.md`](testing/super-admin.md) | Super Admin and admin account management. |
+| [`grade-restrictions-and-datetime.md`](testing/grade-restrictions-and-datetime.md) | Grade eligibility restrictions and separated date/time inputs. |
+
+## `katuwang/` — Obsidian notes
+
+The Obsidian vault retains its original filenames and configuration:
+[Welcome](katuwang/Welcome.md), [Untitled](katuwang/Untitled.md), and
+[create a link](<katuwang/create a link.md>).
 
 ## `to-submit/` — course deliverables
 
@@ -100,5 +134,6 @@ Kept for history; not part of the living dev docs.
 | [`pre-test-post-test-plan.md`](archive/plans/pre-test-post-test-plan.md) | **Done** (Changes.md Part 29) — learner per-session pre/post-tests. Also folded into `plans/assessments.md`. |
 | [`sept-5-fixes.md`](archive/plans/sept-5-fixes.md) | **Done** (Changes.md Part 31) — a 9-item bug/UX batch from the Sept 5 review. |
 | `fixes.txt`, `admin-portal-fixes.txt`, `leaner-portal-fixes.txt` | Raw, unordered backlog fragments now tracked through `plans/fixes.md`. |
+| [`tutor-class-creation-learner-enrollment.md`](archive/plans/tutor-class-creation-learner-enrollment.md) | **Done** — original tutor class scheduling + learner browse/enroll/unenroll build. Predates the `docs/plans/` convention (was `plan.md` at repo root); moved here 2026-09-23. |
 
 **`archive/reports/`** — `feature-status-and-sprint-report-2026-09-02.xlsx`, `-2026-09-06.xlsx` (superseded by the undated copy in `reports/`).

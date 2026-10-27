@@ -1,13 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { idCounterUpdate, idCounterUpsert } = vi.hoisted(() => ({
+const { idCounterUpdate, idCounterUpsert, userFindUnique } = vi.hoisted(() => ({
   idCounterUpdate: vi.fn(),
   idCounterUpsert: vi.fn(),
+  userFindUnique: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     idCounter: { update: idCounterUpdate, upsert: idCounterUpsert },
+    user: { findUnique: userFindUnique },
   },
 }));
 
@@ -28,6 +30,30 @@ describe("generateAnonymousId", () => {
   it("formats a zero-padded learner ID", async () => {
     idCounterUpdate.mockResolvedValue({ role: "LEARNER", count: 123 });
     await expect(generateAnonymousId("LEARNER")).resolves.toBe("STU-0123");
+  });
+
+  it("upserts and bumps count if ADM-0001 already exists", async () => {
+    idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 1 });
+    userFindUnique.mockResolvedValue({ id: "existing-seeded-admin" });
+    idCounterUpdate.mockResolvedValue({ role: "ADMIN", count: 2 });
+
+    await expect(generateAnonymousId("ADMIN")).resolves.toBe("ADM-0002");
+    expect(idCounterUpsert).toHaveBeenCalledWith({
+      where: { role: "ADMIN" },
+      create: { role: "ADMIN", count: 1 },
+      update: { count: { increment: 1 } },
+    });
+    expect(idCounterUpdate).toHaveBeenCalledWith({
+      where: { role: "ADMIN" },
+      data: { count: { increment: 1 } },
+    });
+  });
+
+  it("formats ADM-0001 if not already taken", async () => {
+    idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 1 });
+    userFindUnique.mockResolvedValue(null);
+
+    await expect(generateAnonymousId("ADMIN")).resolves.toBe("ADM-0001");
   });
 });
 

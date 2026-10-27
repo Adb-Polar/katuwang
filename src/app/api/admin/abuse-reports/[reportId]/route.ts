@@ -1,6 +1,6 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { reviewReportSchema } from "@/lib/validations/report";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -12,10 +12,10 @@ export async function PATCH(
   { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { reportId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 

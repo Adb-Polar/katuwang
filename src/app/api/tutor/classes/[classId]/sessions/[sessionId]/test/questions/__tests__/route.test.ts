@@ -1,3 +1,7 @@
+vi.mock("@/lib/teachingBankAccess", () => ({
+  certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
+  certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
+}));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -23,7 +27,7 @@ const {
   sessionTestFindUniqueOrThrow: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
@@ -115,7 +119,7 @@ describe("PUT /test/questions", () => {
       expect.objectContaining({
         where: expect.objectContaining({
           OR: [
-            { origin: "BANK", active: true, subject: "MATH" },
+            { origin: "BANK", active: true, subject: "MATH", AND: [{ OR: [{ subject: "MATH", topic: "Fractions" }] }] },
             { origin: "TUTOR", ownerTutorProfileId: "tp1" },
           ],
         }),

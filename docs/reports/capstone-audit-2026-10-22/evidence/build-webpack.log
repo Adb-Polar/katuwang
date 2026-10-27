@@ -1,0 +1,7 @@
+▲ Next.js 16.2.12 (webpack)
+- Environments: .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 35.0s
+  Running TypeScript ...
+Next.js build worker exited with code: 1 and signal: null

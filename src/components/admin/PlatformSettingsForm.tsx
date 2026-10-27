@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useFetchList } from "@/hooks/useFetchList";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import LoadingRow from "@/components/ui/LoadingRow";
 
 interface Setting {
   key: string;
-  value: boolean;
+  value: boolean | string;
 }
 
 type SettingGroup = "General" | "Assessment";
@@ -104,7 +105,7 @@ const ASSESSMENT_FIELDS: {
 ];
 
 export default function PlatformSettingsForm() {
-  const { data: settings, loading, error, setError, refetch } = useFetchList<Setting>(
+  const { data: settings, loading, error, loadError, setError, refetch } = useFetchList<Setting>(
     "/api/admin/settings",
     "Could not retrieve platform settings."
   );
@@ -113,6 +114,8 @@ export default function PlatformSettingsForm() {
 
   // ─── Global assessment config ───────────────────────────────────────────
   const [config, setConfig] = useState<AssessmentConfig | null>(null);
+  const [configError, setConfigError] = useState("");
+  const [configRetry, setConfigRetry] = useState(0);
   const [draft, setDraft] = useState<Record<keyof AssessmentConfig, string>>({
     questionCount: "",
     passPercent: "",
@@ -133,11 +136,13 @@ export default function PlatformSettingsForm() {
           minBankSize: String(c.minBankSize),
         });
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setConfigError("Could not retrieve assessment settings.");
+      });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [configRetry]);
 
   const toggle = async (key: string, nextValue: boolean) => {
     setSavingKey(key);
@@ -198,27 +203,59 @@ export default function PlatformSettingsForm() {
     }
   };
 
+  const updateProfilePicRequirement = async (nextValue: string) => {
+    setSavingKey("profilePictureRequirement");
+    setError("");
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "profilePictureRequirement", value: nextValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update profile picture requirement.");
+      setSuccess("Profile picture policy updated successfully.");
+      refetch();
+      setTimeout(() => setSuccess(""), 4000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update setting.");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
   const renderToggle = (setting: Setting) => {
     const meta = SETTING_META[setting.key];
     return (
       <div key={setting.key} className="flex items-center justify-between gap-4 py-4">
         <div>
           <p className="text-sm font-semibold text-base-content">{meta?.label || setting.key}</p>
-          {meta?.description && <p className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
+          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
         </div>
-        <input
-          type="checkbox"
-          className="toggle toggle-primary shrink-0"
-          checked={setting.value}
-          disabled={savingKey === setting.key}
-          onChange={(e) => toggle(setting.key, e.target.checked)}
-        />
+        <label className="inline-flex min-h-11 shrink-0 items-center px-2 -mx-2">
+          <input
+            type="checkbox"
+            aria-label={meta?.label || setting.key}
+            aria-describedby={meta?.description ? `setting-${setting.key}-description` : undefined}
+            className="toggle toggle-primary shrink-0"
+            checked={Boolean(setting.value)}
+            disabled={savingKey === setting.key}
+            onChange={(e) => toggle(setting.key, e.target.checked)}
+          />
+        </label>
       </div>
     );
   };
 
-  const generalToggles = settings.filter((s) => (SETTING_META[s.key]?.group ?? "General") === "General");
+  const generalToggles = settings.filter(
+    (s) => s.key !== "profilePictureRequirement" && (SETTING_META[s.key]?.group ?? "General") === "General"
+  );
   const assessmentToggles = settings.filter((s) => SETTING_META[s.key]?.group === "Assessment");
+  const profilePicSetting = settings.find((s) => s.key === "profilePictureRequirement");
+  const profilePicValue = String(profilePicSetting?.value ?? "OPTIONAL");
+
+  if (loading) return <LoadingRow />;
+  if (loadError) return <LoadErrorState message={loadError} onRetry={refetch} />;
 
   return (
     <div className="space-y-6">
@@ -231,7 +268,28 @@ export default function PlatformSettingsForm() {
           {loading ? (
             <LoadingRow />
           ) : (
-            <div className="divide-y divide-base-200">{generalToggles.map(renderToggle)}</div>
+            <div className="divide-y divide-base-200">
+              {generalToggles.map(renderToggle)}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
+                <div>
+                  <p className="text-sm font-semibold text-base-content">Profile picture requirement</p>
+                  <p className="text-xs text-base-content/60 mt-0.5">
+                    Control whether profile pictures are optional, mandatory for tutors before creating classes, or mandatory for all users.
+                  </p>
+                </div>
+                <select
+                  aria-label="Profile picture requirement"
+                  className="select select-bordered select-sm w-full sm:w-56 text-xs focus:select-primary"
+                  value={profilePicValue}
+                  disabled={savingKey === "profilePictureRequirement"}
+                  onChange={(e) => updateProfilePicRequirement(e.target.value)}
+                >
+                  <option value="OPTIONAL">Fully optional</option>
+                  <option value="TUTORS_ONLY">Mandatory for tutors</option>
+                  <option value="ALL_USERS">Mandatory for all users</option>
+                </select>
+              </div>
+            </div>
           )}
         </div>
       </section>
@@ -245,7 +303,8 @@ export default function PlatformSettingsForm() {
 
           {!loading && <div className="divide-y divide-base-200">{assessmentToggles.map(renderToggle)}</div>}
 
-          <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {configError && <LoadErrorState message={configError} onRetry={() => { setConfigError(""); setConfigRetry((retry) => retry + 1); }} />}
+          {!configError && <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ASSESSMENT_FIELDS.map((f) => (
               <label key={f.key} className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-base-content">{f.label}</span>
@@ -262,8 +321,8 @@ export default function PlatformSettingsForm() {
                 <span className="text-2xs text-base-content/50">{f.description}</span>
               </label>
             ))}
-          </div>
-          {config === null && (
+          </div>}
+          {config === null && !configError && (
             <p className="text-2xs text-base-content/40">Loading assessment settings…</p>
           )}
         </div>

@@ -1,0 +1,41 @@
+{
+  "commit": "f53bc71fe7629efa18270e6748e5f9d1a6368a56",
+  "existing_suite": {
+    "command": "pnpm test",
+    "exit": 0,
+    "files_passed": 114,
+    "tests_passed": 880
+  },
+  "initial_typecheck": {
+    "command": "pnpm exec tsc --noEmit --incremental false",
+    "exit": 0,
+    "caveat": "before production generated route type checks"
+  },
+  "lint": {
+    "command": "pnpm lint",
+    "exit": 0,
+    "errors": 0,
+    "warnings": 8
+  },
+  "audit_probes": {
+    "exit": 0,
+    "reproduced": 4,
+    "acceptance_pass": 0,
+    "acceptance_fail": 4
+  },
+  "turbopack_build": {
+    "exit": 1,
+    "cause": "sandbox internal port binding denied"
+  },
+  "webpack_build": {
+    "exit": 1,
+    "compiled": true,
+    "stage": "TypeScript worker"
+  },
+  "final_typecheck": {
+    "command": "node node_modules/typescript/bin/tsc --noEmit --incremental false",
+    "exit": 2,
+    "diagnostic": "TS2344 .next/types/app/api/admin/admins/route.ts optional GET request",
+    "defect": "BUG-009"
+  }
+}

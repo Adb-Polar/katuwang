@@ -6,7 +6,7 @@ const { getServerSessionMock, userUpdate } = vi.hoisted(() => ({
   userUpdate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({ prisma: { user: { update: userUpdate } } }));
 
 import { PATCH } from "@/app/api/learner/profile/route";

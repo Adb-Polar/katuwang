@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import BackLink from "@/components/ui/BackLink";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { RateBarChart, DeltaBar, type DeltaRow } from "@/components/charts";
 import type { SessionTestResults as SessionTestResultsPayload } from "@/lib/sessionTestResults";
 import EmptyState from "@/components/ui/EmptyState";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 
 interface AttemptDetail {
   learner: { anonymousId: string };
@@ -54,6 +54,7 @@ export default function SessionTestResults({
 }) {
   const [data, setData] = useState<SessionTestResultsPayload | null>(null);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
   const [detail, setDetail] = useState<AttemptDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -72,7 +73,7 @@ export default function SessionTestResults({
     return () => {
       cancelled = true;
     };
-  }, [resultsUrl]);
+  }, [resultsUrl, retryKey]);
 
   const openDetail = async (attemptId: string) => {
     setDetailLoading(true);
@@ -91,7 +92,7 @@ export default function SessionTestResults({
     return (
       <div className="space-y-4">
         {backControl}
-        <FeedbackBanner variant="error" message={error} />
+        <LoadErrorState message={error} onRetry={() => { setError(""); setRetryKey((key) => key + 1); }} />
       </div>
     );
   }
@@ -198,12 +199,12 @@ export default function SessionTestResults({
                     <td className={`font-semibold ${deltaClass(l.delta)}`}>{fmtDelta(l.delta)}</td>
                     <td className="text-right flex gap-1 justify-end">
                       {l.preAttemptId && (
-                        <button onClick={() => openDetail(l.preAttemptId!)} className="btn btn-outline btn-xs text-2xs font-bold">
+                        <button onClick={() => openDetail(l.preAttemptId!)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                           Pre
                         </button>
                       )}
                       {l.postAttemptId && (
-                        <button onClick={() => openDetail(l.postAttemptId!)} className="btn btn-outline btn-xs text-2xs font-bold">
+                        <button onClick={() => openDetail(l.postAttemptId!)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                           Post
                         </button>
                       )}

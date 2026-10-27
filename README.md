@@ -13,6 +13,8 @@ Technology).
 For domain/business context — what the platform is, the three user roles,
 the privacy mandate, and the six core modules — start at
 [`docs/reference/project-overview.md`](docs/reference/project-overview.md).
+Browse plans, reports, and testing checklists in the
+[documentation index](docs/README.md).
 Engineering conventions, stack details, and project structure live in
 [`CLAUDE.md`](CLAUDE.md).
 
@@ -90,9 +92,8 @@ pnpm exec tsx prisma/seed.ts  # seed the database
 
 ## Status
 
-Five of six core modules are built and working (User Management, Session
-Management, Tutor Matching, tutor-side Assessment/Certification, Analytics
-Dashboard). The Chatbot Assistant module and a learner-facing pre-/post-test
-assessment are not yet implemented — see
+All six core modules (User Management, Session Management, Tutor Matching,
+Assessment — tutor certification plus learner per-session pre-/post-tests,
+Chatbot Assistant, Analytics Dashboard) are built and working — see
 [`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md) for the full
 breakdown.

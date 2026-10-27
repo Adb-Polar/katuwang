@@ -4,15 +4,18 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
+import { parseLocalDateAndTime, combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export interface SessionRowValue {
   key: string;
   topic: string;
-  scheduledAt: string;
+  date?: string;
+  time?: string;
+  scheduledAt?: string;
   duration: number;
 }
 
@@ -51,6 +54,7 @@ export default function ClassScheduleFields({
   disabledTopics = [],
   allowedTopics,
   allowCustomTopics = true,
+  tutorGradeLevel,
   submitLabel = "Schedule",
   submitting = false,
   error,
@@ -71,6 +75,8 @@ export default function ClassScheduleFields({
   disabledTopics?: string[];
   /** When false, hides the "add another topic" custom-topic input (accept flow: only certified topics allowed). */
   allowCustomTopics?: boolean;
+  /** The tutor's authenticated grade level — restricts target grade options to tutorGrade and below. */
+  tutorGradeLevel?: string | null;
   submitLabel?: string;
   submitting?: boolean;
   error?: string;
@@ -80,12 +86,12 @@ export default function ClassScheduleFields({
   onSubmit: (payload: ClassScheduleSubmitPayload) => void;
 }) {
   const page = variant === "page";
-  const inputCls = page ? "input-md text-sm" : "input-sm text-xs";
-  const selectCls = page ? "select-md text-sm" : "select-sm text-xs";
-  const rowInputCls = page ? "input-sm text-sm" : "input-xs text-2xs";
-  const rowSelectCls = page ? "select-sm text-sm" : "select-xs text-2xs";
-  const rowBtnCls = page ? "btn-sm" : "btn-xs";
-  const textareaCls = page ? "textarea-md text-sm h-24" : "textarea-sm text-xs h-20";
+  const inputCls = "min-h-11 text-base sm:text-sm";
+  const selectCls = "min-h-11 text-base sm:text-sm";
+  const rowInputCls = "min-h-11 text-base sm:text-sm";
+  const rowSelectCls = "min-h-11 text-base sm:text-sm";
+  const rowBtnCls = "min-h-11";
+  const textareaCls = "text-base sm:text-sm h-24";
   const actionBtnCls = page ? "btn-md text-sm" : "btn-sm text-xs";
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
   const topicLabelCls = page ? "text-xs" : "text-2xs";
@@ -103,7 +109,16 @@ export default function ClassScheduleFields({
   const [selectedTopics, setSelectedTopics] = useState<string[]>(initial?.topics ?? []);
   const [customTopic, setCustomTopic] = useState("");
   const [topicFilter, setTopicFilter] = useState("");
-  const [sessionRows, setSessionRows] = useState<SessionRowValue[]>(initial?.sessionRows ?? []);
+  const [sessionRows, setSessionRows] = useState<SessionRowValue[]>(() => {
+    return (initial?.sessionRows ?? []).map((r) => {
+      const parsed = parseLocalDateAndTime(r.scheduledAt);
+      return {
+        ...r,
+        date: r.date ?? parsed.date,
+        time: r.time ?? parsed.time,
+      };
+    });
+  });
   const [formError, setFormError] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -157,7 +172,14 @@ export default function ClassScheduleFields({
   const addSessionRow = () => {
     setSessionRows((prev) => [
       ...prev,
-      { key: newRowKey(), topic: selectedTopics[0] ?? "", scheduledAt: "", duration: 60 },
+      {
+        key: newRowKey(),
+        topic: selectedTopics[0] ?? "",
+        date: "",
+        time: "",
+        scheduledAt: "",
+        duration: 60,
+      },
     ]);
   };
 
@@ -165,8 +187,25 @@ export default function ClassScheduleFields({
     setSessionRows((prev) => prev.filter((r) => r.key !== key));
   };
 
-  const updateSessionRow = (key: string, field: "topic" | "scheduledAt" | "duration", value: string | number) => {
-    setSessionRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
+  const updateSessionRow = (
+    key: string,
+    field: "topic" | "date" | "time" | "scheduledAt" | "duration",
+    value: string | number
+  ) => {
+    setSessionRows((prev) =>
+      prev.map((r) => {
+        if (r.key !== key) return r;
+        const updated = { ...r, [field]: value };
+        if (field === "date" || field === "time") {
+          const d = field === "date" ? String(value) : r.date || "";
+          const t = field === "time" ? String(value) : r.time || "";
+          if (d && t) {
+            updated.scheduledAt = `${d}T${t}`;
+          }
+        }
+        return updated;
+      })
+    );
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -175,27 +214,43 @@ export default function ClassScheduleFields({
     if (!form.subject) return setFormError("Please select a subject.");
     if (selectedTopics.length === 0) return setFormError("Please select at least one topic.");
     if (sessionRows.length === 0) return setFormError("Please add at least one session.");
-    if (sessionRows.some((r) => !r.topic || !r.scheduledAt)) {
-      return setFormError("Every session needs a topic and a date/time.");
+    const invalidSession = sessionRows.some((r) => {
+      const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
+      const t = r.time || parseLocalDateAndTime(r.scheduledAt).time;
+      return !r.topic || !d || !t;
+    });
+    if (invalidSession) {
+      return setFormError("Every session needs a topic, date, and time.");
     }
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       return setFormError("Please provide a location (building/room) or a meeting link.");
+    }
+    if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
+      return setFormError("Target grade cannot be higher than your current grade level.");
     }
 
     onSubmit({
       ...form,
       topics: selectedTopics,
-      sessions: sessionRows.map((r) => ({
-        topic: r.topic,
-        scheduledAt: new Date(r.scheduledAt).toISOString(),
-        duration: r.duration,
-      })),
+      sessions: sessionRows.map((r) => {
+        const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
+        const t = r.time || parseLocalDateAndTime(r.scheduledAt).time;
+        const iso = combineDateAndTime(d, t) ?? new Date().toISOString();
+        return {
+          topic: r.topic,
+          scheduledAt: iso,
+          duration: r.duration,
+        };
+      }),
     });
   };
+
+  const availableGrades = tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS;
 
   return (
     <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
+      <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
       <FormField size={fieldSize} label="Subject Area" required>
         <select
@@ -223,7 +278,7 @@ export default function ClassScheduleFields({
           className={`select select-bordered ${selectCls} w-full focus:select-primary`}
         >
           <option value="">Any grade</option>
-          {GRADE_LEVELS.map((g) => (
+          {availableGrades.map((g) => (
             <option key={g.value} value={g.value}>
               {g.label}
             </option>
@@ -241,6 +296,7 @@ export default function ClassScheduleFields({
             {subjectTopics.length > 8 && (
               <input
                 type="text"
+                aria-label="Search available topics"
                 value={topicFilter}
                 onChange={(e) => setTopicFilter(e.target.value)}
                 placeholder="Search topics…"
@@ -309,6 +365,7 @@ export default function ClassScheduleFields({
               <div className="flex gap-2">
                 <input
                   type="text"
+                  aria-label="Add a custom topic"
                   value={customTopic}
                   onChange={(e) => setCustomTopic(e.target.value)}
                   onKeyDown={(e) => {
@@ -369,6 +426,7 @@ export default function ClassScheduleFields({
                     #{i + 1}
                   </span>
                   <select
+                    aria-label={`Session #${i + 1} topic`}
                     value={row.topic}
                     onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
                     className={`select select-bordered ${rowSelectCls} flex-1 min-w-0 truncate`}
@@ -388,15 +446,24 @@ export default function ClassScheduleFields({
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <input
-                    type="datetime-local"
-                    value={row.scheduledAt}
-                    onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
-                    className={`input input-bordered ${rowInputCls} flex-1 min-w-[9.5rem]`}
+                    type="date"
+                    aria-label={`Session #${i + 1} date`}
+                    value={row.date ?? parseLocalDateAndTime(row.scheduledAt).date}
+                    onChange={(e) => updateSessionRow(row.key, "date", e.target.value)}
+                    className={`input input-bordered ${rowInputCls} flex-1 min-w-[8.5rem]`}
+                  />
+                  <input
+                    type="time"
+                    aria-label={`Session #${i + 1} time`}
+                    value={row.time ?? parseLocalDateAndTime(row.scheduledAt).time}
+                    onChange={(e) => updateSessionRow(row.key, "time", e.target.value)}
+                    className={`input input-bordered ${rowInputCls} w-28 shrink-0`}
                   />
                   <select
                     value={row.duration}
+                    aria-label={`Session #${i + 1} duration`}
                     onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
                     className={`select select-bordered ${rowSelectCls} shrink-0`}
                   >
@@ -424,6 +491,7 @@ export default function ClassScheduleFields({
         <div className="flex flex-wrap items-center gap-1.5">
           <input
             type="text"
+            aria-label="Building"
             name="building"
             value={form.building}
             onChange={handleInputChange}
@@ -432,6 +500,7 @@ export default function ClassScheduleFields({
           />
           <input
             type="text"
+            aria-label="Room"
             name="room"
             value={form.room}
             onChange={handleInputChange}

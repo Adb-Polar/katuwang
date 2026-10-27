@@ -34,6 +34,8 @@ export default function Modal({
 }) {
   const boxRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -45,15 +47,25 @@ export default function Modal({
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !box) return;
-      const items = Array.from(box.querySelectorAll<HTMLElement>(FOCUSABLE));
-      if (items.length === 0) return;
+      const items = Array.from(box.querySelectorAll<HTMLElement>(FOCUSABLE))
+        .filter((item) => item.getClientRects().length > 0 && !item.closest('[inert], [hidden]'));
+      if (items.length === 0) {
+        e.preventDefault();
+        box.focus();
+        return;
+      }
       const first = items[0];
       const last = items[items.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
+      // Async content can remove the focused retry/form control. Restart inside
+      // the dialog instead of allowing the next Tab to enter the page behind it.
+      if (!box.contains(document.activeElement) || document.activeElement === box) {
+        e.preventDefault();
+        (e.shiftKey ? last : first).focus();
+      } else if (e.shiftKey && document.activeElement === first) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
@@ -67,24 +79,34 @@ export default function Modal({
       document.removeEventListener("keydown", onKey);
       restoreRef.current?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
   return (
-    <div className="modal modal-open" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      className="modal modal-open"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={(e) => e.stopPropagation()}
+    >
       <div
         ref={boxRef}
         tabIndex={-1}
         className={`modal-box ${MAX_WIDTH[size]} p-6 kt-card outline-none`}
         style={{ boxShadow: "var(--kt-shadow-pop)" }}
+        onClick={(e) => e.stopPropagation()}
       >
         {!bare && (
           <div className="flex items-start justify-between gap-3 mb-3">
             <h3 className="font-bold text-sm text-base-content">{title}</h3>
             <button
               type="button"
-              onClick={onClose}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose();
+              }}
               aria-label="Close"
               className="btn btn-sm btn-circle btn-ghost -mr-2 -mt-2 shrink-0"
             >
@@ -96,7 +118,14 @@ export default function Modal({
       </div>
       <label
         className="modal-backdrop"
-        onClick={closeOnBackdrop ? onClose : undefined}
+        onClick={
+          closeOnBackdrop
+            ? (e) => {
+                e.stopPropagation();
+                onClose();
+              }
+            : undefined
+        }
         aria-label="Close"
       />
     </div>

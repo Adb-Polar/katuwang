@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateUserStatusSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { computeExpiresAt } from "@/lib/moderation";
+
+import { isAdminRole } from "@/lib/permissions";
 
 // ─── PATCH: Suspend, Ban, or Reactivate a Learner/Tutor Account ───────────────
 export async function PATCH(
@@ -12,10 +13,10 @@ export async function PATCH(
   { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { userId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -28,7 +29,7 @@ export async function PATCH(
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    if (targetUser.role === "ADMIN") {
+    if (isAdminRole(targetUser.role)) {
       return NextResponse.json({ error: "Cannot modify an admin account." }, { status: 400 });
     }
 

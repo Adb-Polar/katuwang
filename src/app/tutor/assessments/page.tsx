@@ -1,5 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import { TaughtTopic } from "@/components/tutor/TopicCertificationList";
@@ -26,7 +26,8 @@ export interface AttemptSummary {
 }
 
 export default async function TutorAssessmentsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },

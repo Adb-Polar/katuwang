@@ -1,0 +1,132 @@
+Component,Source,API references,Checks,Status
+TopicRequestDetail,src/components/TopicRequestDetail.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AbuseReportTable,src/components/admin/AbuseReportTable.tsx,/api/admin/abuse-reports; /api/admin/abuse-reports/${report.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AdminManagementTable,src/components/admin/AdminManagementTable.tsx,/api/admin/admins; /api/admin/admins/${target.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AuditLogTable,src/components/admin/AuditLogTable.tsx,/api/admin/audit-log,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+CertificationReviewTable,src/components/admin/CertificationReviewTable.tsx,/api/admin/certifications; /api/admin/certifications/${certification.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ChatbotMissesTable,src/components/admin/ChatbotMissesTable.tsx,/api/admin/chatbot-misses,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassAppealTable,src/components/admin/ClassAppealTable.tsx,/api/admin/class-appeals; /api/admin/class-appeals/${appeal.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassModerationTable,src/components/admin/ClassModerationTable.tsx,/api/admin/classes; /api/admin/classes/${classId},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+CreateAdminModal,src/components/admin/CreateAdminModal.tsx,/api/admin/admins,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+PlatformSettingsForm,src/components/admin/PlatformSettingsForm.tsx,/api/admin/assessment-configs; /api/admin/settings,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+QuestionBankManager,src/components/admin/QuestionBankManager.tsx,/api/admin/assessment-attempts; /api/admin/assessment-attempts/${id}; /api/admin/assessment-questions; /api/admin/assessment-questions/${editTarget!.id}; /api/admin/assessment-questions/${q.id}; /api/admin/assessment-questions/coverage; /api/admin/question-requests; /api/admin/question-requests/${target.req.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+RegistrationApprovalTable,src/components/admin/RegistrationApprovalTable.tsx,/api/admin/registrations; /api/admin/registrations/${user.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ReportsView,src/components/admin/ReportsView.tsx,/api/admin/reports,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionTestsTable,src/components/admin/SessionTestsTable.tsx,/api/admin/session-tests; /api/admin/session-tests/${openId}/attempts; /api/admin/session-tests/${openId}/results,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SubjectTopicManager,src/components/admin/SubjectTopicManager.tsx,/api/admin/subjects; /api/admin/subjects/${deleteSubject.id}; /api/admin/subjects/${s.id}; /api/admin/subjects/${selected.id}/topics; /api/admin/subjects/${sorted[j].id}; /api/admin/topics/${deleteTopic.id}; /api/admin/topics/${sorted[j].id}; /api/admin/topics/${t.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TopicRequestModerationTable,src/components/admin/TopicRequestModerationTable.tsx,/api/admin/topic-requests; /api/admin/topic-requests/${id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+UserAvatarModerationCard,src/components/admin/UserAvatarModerationCard.tsx,/api/admin/users/${userId}/avatar-action,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+UserManagementTable,src/components/admin/UserManagementTable.tsx,/api/admin/users; /api/admin/users/${target.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AuthLayout,src/components/auth/AuthLayout.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ForgotPasswordForm,src/components/auth/ForgotPasswordForm.tsx,/api/auth/forgot-password,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LoginForm,src/components/auth/LoginForm.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LogoutConfirm,src/components/auth/LogoutConfirm.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+RegisterForm,src/components/auth/RegisterForm.tsx,/api/register,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ResendVerificationButton,src/components/auth/ResendVerificationButton.tsx,/api/auth/resend-verification,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ResetPasswordForm,src/components/auth/ResetPasswordForm.tsx,/api/auth/reset-password,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+VerifyEmailForm,src/components/auth/VerifyEmailForm.tsx,/api/auth/verify-email,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+BarChartCard,src/components/charts/BarChartCard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+DataTable,src/components/charts/DataTable.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+DeltaBar,src/components/charts/DeltaBar.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+GroupedBarChart,src/components/charts/GroupedBarChart.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ProgressAreaChart,src/components/charts/ProgressAreaChart.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+RateBarChart,src/components/charts/RateBarChart.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+index,src/components/charts/index.ts,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+progressTooltip,src/components/charts/progressTooltip.ts,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+useThemeColors,src/components/charts/useThemeColors.ts,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ChatMessage,src/components/chatbot/ChatMessage.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ChatWidget,src/components/chatbot/ChatWidget.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+chatbotClient,src/components/chatbot/chatbotClient.ts,/api/chatbot,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassCard,src/components/classes/ClassCard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassDetailsView,src/components/classes/ClassDetailsView.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassEmptyState,src/components/classes/ClassEmptyState.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassModerationPanel,src/components/classes/ClassModerationPanel.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+EnrolledLearnersTable,src/components/classes/EnrolledLearnersTable.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+RecommendClassForm,src/components/classes/RecommendClassForm.tsx,/api/admin/classes/${classId}/recommendations; /api/admin/users?role=STUDENT_LEARNER&q=${encodeURIComponent(query)}&pageSize=10,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionTestsCard,src/components/classes/SessionTestsCard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionsList,src/components/classes/SessionsList.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+classStatus,src/components/classes/classStatus.ts,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+DevChartLab,src/components/dev/DevChartLab.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+DevDataFactory,src/components/dev/DevDataFactory.tsx,/api/dev,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+DevLoginBoard,src/components/dev/DevLoginBoard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+HelpCenter,src/components/help/HelpCenter.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LandingFooter,src/components/landing/LandingFooter.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LandingHero,src/components/landing/LandingHero.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LandingNav,src/components/landing/LandingNav.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+Logo,src/components/landing/Logo.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+MatchResultSample,src/components/landing/MatchResultSample.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+PrivacyPayoff,src/components/landing/PrivacyPayoff.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SampleMatchForm,src/components/landing/SampleMatchForm.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SampleProgress,src/components/landing/SampleProgress.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+StoryEnd,src/components/landing/StoryEnd.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+StoryTimeline,src/components/landing/StoryTimeline.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TutorProfileSample,src/components/landing/TutorProfileSample.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+sampleData,src/components/landing/sampleData.ts,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+GlobalSearch,src/components/layout/GlobalSearch.tsx,/api/search?q=${encodeURIComponent(term)}&scope=${scope},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+PortalLayout,src/components/layout/PortalLayout.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassBrowser,src/components/learner/ClassBrowser.tsx,/api/classes,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LearnerClassActions,src/components/learner/LearnerClassActions.tsx,/api/classes/${classId}/enroll,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+MatchCriteriaFields,src/components/learner/MatchCriteriaFields.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+MatchFinder,src/components/learner/MatchFinder.tsx,/api/learner/match,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+MyProgressView,src/components/learner/MyProgressView.tsx,/api/learner/progress${qs},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+MyReportsList,src/components/learner/MyReportsList.tsx,/api/learner/reports,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ReportButton,src/components/learner/ReportButton.tsx,/api/learner/reports,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+RequestTopicButton,src/components/learner/RequestTopicButton.tsx,/api/learner/topic-requests,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TopicRequestManager,src/components/learner/TopicRequestManager.tsx,/api/learner/topic-requests; /api/learner/topic-requests/${cancelId}; /api/learner/topic-requests/${editId}; /api/learner/topic-requests/${id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TutorBrowser,src/components/learner/TutorBrowser.tsx,/api/learner/tutors,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TutorInfoTrigger,src/components/learner/TutorInfoTrigger.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TutorProfileClassTabs,src/components/learner/TutorProfileClassTabs.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+NotificationBell,src/components/notifications/NotificationBell.tsx,/api/notifications/read; /api/notifications?take=8,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+NotificationList,src/components/notifications/NotificationList.tsx,/api/notifications; /api/notifications/read,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+notificationMeta,src/components/notifications/notificationMeta.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ChangePasswordForm,src/components/profile/ChangePasswordForm.tsx,/api/learner/profile/password,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ProfileEditForm,src/components/profile/ProfileEditForm.tsx,/api/learner/profile,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ProfileEditView,src/components/profile/ProfileEditView.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ProfilePictureUpload,src/components/profile/ProfilePictureUpload.tsx,/api/user/profile-picture,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ProfileView,src/components/profile/ProfileView.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+UserAvatar,src/components/profile/UserAvatar.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionProvider,src/components/providers/SessionProvider.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+QuestionFormModal,src/components/quiz/QuestionFormModal.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionTestRunner,src/components/quiz/SessionTestRunner.tsx,/api/learner/classes/${classId}/session-tests; /api/learner/classes/${classId}/sessions/${sessionId}/test/${kind}/start; /api/learner/session-test-attempts/${attempt.id}/submit; /api/learner/session-test-attempts/${attemptId},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+WeeklyTimetable,src/components/schedule/WeeklyTimetable.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AcceptRequestForm,src/components/tutor/AcceptRequestForm.tsx,/api/tutor/topic-requests/${request.id}/accept,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AddSessionModal,src/components/tutor/AddSessionModal.tsx,/api/tutor/classes/${classId}/sessions,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AssessmentHistory,src/components/tutor/AssessmentHistory.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AssessmentQuizRunner,src/components/tutor/AssessmentQuizRunner.tsx,/api/tutor/assessments/${attempt.id}/submit,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AssessmentsSummaryCard,src/components/tutor/AssessmentsSummaryCard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AssessmentsTabs,src/components/tutor/AssessmentsTabs.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassAppealCard,src/components/tutor/ClassAppealCard.tsx,/api/tutor/classes/${classId}/appeal,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassManageMenu,src/components/tutor/ClassManageMenu.tsx,/api/tutor/classes/${classId},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassManagement,src/components/tutor/ClassManagement.tsx,/api/tutor/classes,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassProgressPanel,src/components/tutor/ClassProgressPanel.tsx,/api/tutor/classes/${classId}/test-results,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ClassScheduleFields,src/components/tutor/ClassScheduleFields.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+EditClassForm,src/components/tutor/EditClassForm.tsx,/api/tutor/classes/${classId},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+NewClassForm,src/components/tutor/NewClassForm.tsx,/api/tutor/classes,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+OtherTopicAssessment,src/components/tutor/OtherTopicAssessment.tsx,/api/tutor/assessments,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionActions,src/components/tutor/SessionActions.tsx,/api/tutor/classes/${classId}/sessions/${session.id},Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionTestBuilder,src/components/tutor/SessionTestBuilder.tsx,/api/tutor/classes/${classId}/sessions/${sessionId}/test; /api/tutor/classes/${classId}/sessions/${sessionId}/test/questions; /api/tutor/classes/${classId}/sessions/${sessionId}/test/status; /api/tutor/question-bank?${params}; /api/tutor/questions,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SessionTestResults,src/components/tutor/SessionTestResults.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+StudentRoster,src/components/tutor/StudentRoster.tsx,/api/tutor/students,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TopicCertificationList,src/components/tutor/TopicCertificationList.tsx,/api/tutor/assessments; /api/tutor/question-requests,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TopicRequestBrowser,src/components/tutor/TopicRequestBrowser.tsx,/api/tutor/topic-requests,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+WeeklyScheduleView,src/components/tutor/WeeklyScheduleView.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AnonymousIdBadge,src/components/ui/AnonymousIdBadge.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+AuditLogLink,src/components/ui/AuditLogLink.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+BackLink,src/components/ui/BackLink.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+BrandMark,src/components/ui/BrandMark.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+CharCount,src/components/ui/CharCount.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+ConfirmDialog,src/components/ui/ConfirmDialog.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+EmptyState,src/components/ui/EmptyState.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+FeedbackBanner,src/components/ui/FeedbackBanner.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+FormField,src/components/ui/FormField.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+LoadingRow,src/components/ui/LoadingRow.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+Modal,src/components/ui/Modal.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+PageHeader,src/components/ui/PageHeader.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+Pagination,src/components/ui/Pagination.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+PromptDialog,src/components/ui/PromptDialog.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SearchInput,src/components/ui/SearchInput.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+SortableTh,src/components/ui/SortableTh.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+StatCard,src/components/ui/StatCard.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+StatusBadge,src/components/ui/StatusBadge.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+Tabs,src/components/ui/Tabs.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN
+TopicChip,src/components/ui/TopicChip.tsx,,Keyboard/focus; mobile layout; errors/loading/empty; role/PII; interactions; refresh,NOT RUN

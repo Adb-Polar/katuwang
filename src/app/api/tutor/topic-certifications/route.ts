@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 
 import { requestTopicCertificationSchema } from "@/lib/validations/topicCertification";
@@ -9,7 +8,7 @@ import { topicExists } from "@/lib/subjects";
 // ─── GET: List the Tutor's Topic Certifications ───────────────────────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -65,7 +64,7 @@ export async function GET() {
 // ─── POST: Request an Assessment for a Topic ───────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

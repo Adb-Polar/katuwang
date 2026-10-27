@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { getSubjects } from "@/lib/subjects";
 import { availableInGrade } from "@/lib/catalogGrades";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { reinstateExpiredClasses } from "@/lib/moderation";
+import { getEligibleTutorGradesForStudent } from "@/lib/gradeLevels";
 
 const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
 const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
@@ -18,12 +18,23 @@ const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
 // names are withheld unless the `showTutorRealNames` platform setting is on.
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
     await reinstateExpiredClasses();
+
+    const learnerGrade =
+      session.user.gradeLevel ??
+      (await prisma.user?.findUnique?.({
+        where: { id: session.user.id },
+        select: { gradeLevel: true },
+      }))?.gradeLevel ??
+      null;
+    const allowedTutorGrades = learnerGrade
+      ? getEligibleTutorGradesForStudent(learnerGrade)
+      : undefined;
 
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
@@ -55,6 +66,7 @@ export async function GET(req: NextRequest) {
     const where: Prisma.UserWhereInput = {
       role: "STUDENT_TUTOR",
       status: "ACTIVE",
+      ...(allowedTutorGrades ? { gradeLevel: { in: allowedTutorGrades } } : {}),
       // Multi-select is AND: the tutor must be CERTIFIED in every chosen subject.
       tutorProfile:
         subjectSlugs.length > 0
@@ -73,6 +85,7 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           anonymousId: true,
+          image: true,
           ...(showRealNames ? { firstName: true, lastName: true, section: true } : {}),
           tutorProfile: {
             select: {
@@ -123,6 +136,7 @@ export async function GET(req: NextRequest) {
       return {
         id: u.id,
         anonymousId: u.anonymousId,
+        image: u.image ?? null,
         ...(showRealNames && "firstName" in u
           ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(), section: u.section }
           : {}),

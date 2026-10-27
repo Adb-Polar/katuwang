@@ -5,14 +5,16 @@ import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import UserAvatar from "@/components/profile/UserAvatar";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
 import { formatDate, formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
+import LoadErrorState from "@/components/ui/LoadErrorState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -24,7 +26,7 @@ interface OpenRequest {
   createdAt: string;
   topics: string[];
   slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
-  learner: { anonymousId: string; gradeLevel: string; section: string };
+  learner: { anonymousId: string; image?: string | null; gradeLevel: string; section: string };
   directed: boolean;
 }
 
@@ -34,7 +36,7 @@ interface AcceptedRequest {
   gradeLevel: string;
   status: "ACCEPTED" | "ENROLLED";
   topics: string[];
-  learner: { anonymousId: string; gradeLevel: string; section: string };
+  learner: { anonymousId: string; image?: string | null; gradeLevel: string; section: string };
   class: { id: string; nextSessionAt: string | null; enrolledCount: number; maxStudents: number } | null;
 }
 
@@ -76,7 +78,6 @@ export default function TopicRequestBrowser() {
 
   return (
     <div className="space-y-4">
-      <FeedbackBanner variant="error" message={active.error || null} />
 
       <Tabs
         tabs={[
@@ -109,6 +110,8 @@ export default function TopicRequestBrowser() {
         <div className="flex justify-center py-10">
           <span className="loading loading-spinner loading-md" />
         </div>
+      ) : active.loadError ? (
+        <LoadErrorState message={active.loadError} onRetry={active.refetch} />
       ) : isOpenTab ? (
         openList.data.length === 0 ? (
           <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
@@ -125,20 +128,30 @@ export default function TopicRequestBrowser() {
                   r.directed ? "border-primary/40 bg-primary/5" : "border-base-300 bg-base-200/50"
                 }`}
               >
+                <Link href={`/tutor/requests/${r.id}`} className="link link-primary text-2xs">View history</Link>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
-                      {r.subject}
+                      {subjectDisplayLabel(r.subject)}
                     </span>
                     {r.directed && <StatusBadge tone="info" label="Directed to you" size="xs" />}
-                    <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                    <div className="flex items-center gap-1.5">
+                      <UserAvatar
+                        src={r.learner.image}
+                        anonymousId={r.learner.anonymousId}
+                        size="xs"
+                        role="LEARNER"
+                        subtitle={gradeSection(r.learner.gradeLevel, r.learner.section)}
+                      />
+                      <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                    </div>
                     <span className="text-base-content/50">
                       {gradeSection(r.learner.gradeLevel, r.learner.section)}
                     </span>
                   </div>
                   <Link
                     href={`/tutor/requests/${r.id}/accept`}
-                    className="btn btn-primary btn-xs text-2xs"
+                    className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs"
                   >
                     Accept &amp; create class
                   </Link>
@@ -178,12 +191,22 @@ export default function TopicRequestBrowser() {
         <div className="space-y-3">
           {acceptedList.data.map((r) => (
             <div key={r.id} className="border border-base-300 bg-base-200/50 rounded-xl p-4 space-y-2 text-xs">
+              <Link href={`/tutor/requests/${r.id}`} className="link link-primary text-2xs">View history</Link>
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
-                    {r.subject}
+                    {subjectDisplayLabel(r.subject)}
                   </span>
-                  <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                  <div className="flex items-center gap-1.5">
+                    <UserAvatar
+                      src={r.learner.image}
+                      anonymousId={r.learner.anonymousId}
+                      size="xs"
+                      role="LEARNER"
+                      subtitle={gradeSection(r.learner.gradeLevel, r.learner.section)}
+                    />
+                    <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                  </div>
                   <StatusBadge
                     tone={r.status === "ENROLLED" ? "success" : "info"}
                     label={r.status === "ENROLLED" ? "Enrolled" : "Awaiting enrollment"}
@@ -191,7 +214,7 @@ export default function TopicRequestBrowser() {
                   />
                 </div>
                 {r.class && (
-                  <Link href={`/tutor/classes/${r.class.id}`} className="btn btn-ghost btn-xs text-2xs">
+                  <Link href={`/tutor/classes/${r.class.id}`} className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs">
                     View class
                   </Link>
                 )}

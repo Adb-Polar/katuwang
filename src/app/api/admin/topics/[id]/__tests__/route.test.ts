@@ -12,7 +12,7 @@ const h = vi.hoisted(() => ({
   updateMany: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: h.getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: h.getServerSessionMock }));
 vi.mock("@/lib/subjects", () => ({ invalidateSubjectCache: vi.fn() }));
 vi.mock("@/lib/prisma", () => {
   const model = { count: h.count, updateMany: h.updateMany };

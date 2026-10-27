@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 
@@ -11,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ attemptId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { attemptId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -30,7 +29,7 @@ export async function GET(
       return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
     }
 
-    return NextResponse.json(serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS" }));
+    return NextResponse.json(serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS", revealAnswers: false }));
   } catch (error) {
     console.error("Error fetching tutor assessment attempt:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

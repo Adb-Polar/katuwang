@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { ChevronDown, HelpCircle, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -28,6 +29,8 @@ interface PortalLayoutProps {
   portalLabel: string;
   accent: PortalAccent;
   idRole?: "LEARNER" | "TUTOR";
+  /** optional user profile picture URL override */
+  userImage?: string | null;
   /** unread notification count — drives the topbar bell dot; refreshed on navigation */
   unreadCount?: number;
   /** portal-specific notifications page, e.g. "/tutor/notifications" */
@@ -50,6 +53,7 @@ export default function PortalLayout({
   anonymousId,
   portalLabel,
   idRole,
+  userImage,
   unreadCount = 0,
   notificationsHref = "/dashboard",
   helpHref,
@@ -59,31 +63,35 @@ export default function PortalLayout({
   children,
 }: PortalLayoutProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const drawerRef = useRef<HTMLElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const desktopRef = useRef<HTMLElement>(null);
+  const avatarUrl = userImage ?? session?.user?.image ?? null;
 
   // Per-group collapse state, persisted per portal. `true` = collapsed. A group
   // absent from the map falls back to `defaultExpandedGroups`. Starts empty so
   // the first client render matches SSR; the stored prefs load post-mount.
   const navPrefKey = `kt-nav:${portalLabel}`;
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const [prefsLoaded, setPrefsLoaded] = useState(false);
-  useEffect(() => {
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
     try {
       const raw = window.localStorage.getItem(navPrefKey);
-      if (raw) setCollapsed(JSON.parse(raw) as Record<string, boolean>);
+      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
     } catch {
-      /* private mode / storage disabled — non-fatal */
+      return {};
     }
-    setPrefsLoaded(true);
-  }, [navPrefKey]);
+  });
+
   useEffect(() => {
-    if (!prefsLoaded) return;
     try {
       window.localStorage.setItem(navPrefKey, JSON.stringify(collapsed));
     } catch {
       /* private mode / storage disabled — non-fatal */
     }
-  }, [navPrefKey, collapsed, prefsLoaded]);
+  }, [navPrefKey, collapsed]);
   const toggleGroup = (name: string) =>
     setCollapsed((cur) => {
       const openByDefault = defaultExpandedGroups?.includes(name) ?? false;
@@ -98,17 +106,41 @@ export default function PortalLayout({
     setMenuOpen(false);
   }
 
-  // Lock body scroll and wire Escape-to-close while the drawer is open.
+  // The drawer is modal at mobile widths: enter it, contain Tab, and restore focus.
   useEffect(() => {
     if (!menuOpen) return;
+    const drawer = drawerRef.current;
+    const trigger = triggerRef.current;
+    const content = contentRef.current;
+    const desktop = desktopRef.current;
+    const desktopWidth = window.matchMedia("(min-width: 1024px)");
+    const onDesktopWidth = () => {
+      if (desktopWidth.matches) setMenuOpen(false);
+    };
+    desktopWidth.addEventListener("change", onDesktopWidth);
+    onDesktopWidth();
+    content?.setAttribute("inert", "");
+    desktop?.setAttribute("inert", "");
+    drawer?.querySelector<HTMLButtonElement>('button[aria-label="Close menu"]')?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMenuOpen(false);
+      if (e.key === "Escape") { e.preventDefault(); setMenuOpen(false); return; }
+      if (e.key !== "Tab" || !drawer) return;
+      const focusable = Array.from(drawer.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) { e.preventDefault(); first.focus(); }
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
+      desktopWidth.removeEventListener("change", onDesktopWidth);
       document.removeEventListener("keydown", onKey);
+      content?.removeAttribute("inert");
+      desktop?.removeAttribute("inert");
       document.body.style.overflow = "";
+      if (trigger?.getClientRects().length) trigger.focus();
+      else desktop?.querySelector<HTMLElement>('a[aria-current="page"], a[href]')?.focus();
     };
   }, [menuOpen]);
 
@@ -193,9 +225,9 @@ export default function PortalLayout({
   );
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-[15.5rem_minmax(0,1fr)] bg-base-200">
+    <div className="kt-portal min-h-screen grid lg:grid-cols-[15.5rem_minmax(0,1fr)] bg-base-200">
       {/* desktop sidebar */}
-      <aside className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
+      <aside ref={desktopRef} className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
         <div className="flex items-center gap-3 px-2 pt-1">
           <BrandMark />
           <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
@@ -214,10 +246,11 @@ export default function PortalLayout({
       </aside>
 
       {/* content column */}
-      <div className="flex flex-col min-w-0">
+      <div ref={contentRef} className="flex flex-col min-w-0">
         <header className="kt-topbar">
           {/* mobile drawer toggle */}
           <button
+            ref={triggerRef}
             type="button"
             className="lg:hidden btn btn-ghost btn-sm btn-square"
             aria-label="Open menu"
@@ -244,12 +277,42 @@ export default function PortalLayout({
           )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           {profileHref ? (
-            <Link href={profileHref} className="kt-avatar" aria-label="Your profile">
-              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            <Link
+              href={profileHref}
+              className="kt-avatar overflow-hidden"
+              aria-label="Your profile"
+            >
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Your profile"
+                  width={34}
+                  height={34}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()
+              )}
             </Link>
           ) : (
-            <span className="kt-avatar" aria-hidden="true">
-              {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
+            <span className="kt-avatar overflow-hidden" aria-hidden="true">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  width={34}
+                  height={34}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()
+              )}
             </span>
           )}
         </header>
@@ -268,10 +331,12 @@ export default function PortalLayout({
         aria-hidden="true"
       />
       <aside
+        ref={drawerRef}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation menu"
         aria-hidden={!menuOpen}
+        inert={!menuOpen}
         className={`kt-sidebar fixed inset-y-0 left-0 z-50 flex w-72 max-w-[82vw] flex-col gap-6 overflow-y-auto p-3 shadow-xl transition-transform duration-300 ease-out lg:hidden ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         }`}

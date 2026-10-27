@@ -8,7 +8,7 @@ const { getServerSessionMock, findManyMock, upsertMock, auditLogCreate } = vi.ho
   auditLogCreate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     platformSetting: { findMany: findManyMock, upsert: upsertMock },

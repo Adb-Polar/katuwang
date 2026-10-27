@@ -1,4 +1,5 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import {
   CheckCircle2,
@@ -10,22 +11,23 @@ import {
   Users,
   Inbox,
 } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
-import { addDays, formatDateTime, formatTime, formatWeekday } from "@/lib/datetime";
+import { addDays, formatDateTime, formatTime, formatWeekday, parseLocalDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard from "@/components/ui/StatCard";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
 };
 
 export default async function TutorDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },
@@ -174,6 +176,7 @@ export default async function TutorDashboard() {
             <CalendarClock className="h-4 w-4 text-primary" />
             Upcoming sessions
           </h2>
+          <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
           {upcomingSessions.length === 0 ? (
             <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
               No scheduled sessions across your classes.
@@ -192,12 +195,12 @@ export default async function TutorDashboard() {
                         <span className="text-2xs font-bold uppercase leading-none">
                           {formatWeekday(d)}
                         </span>
-                        <span className="text-base font-bold leading-tight">{d.getDate()}</span>
+                        <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                            {s.class.subject}
+                            {subjectDisplayLabel(s.class.subject)}
                           </span>
                           <span className="text-sm font-semibold text-base-content/85 truncate">
                             {s.topic}

@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle, GraduationCap } from "lucide-react";
+import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { formatDateTime, formatWeekday } from "@/lib/datetime";
 import { gradeLabel } from "@/lib/gradeLevels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface SessionLike {
   scheduledAt: string;
@@ -29,7 +31,7 @@ export default function ClassCard({
   tutorAnonymousId,
   tutorName,
   tutorSection,
-  onClick,
+  tutorImage,
   href,
 }: {
   /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow when set. */
@@ -56,8 +58,8 @@ export default function ClassCard({
   tutorName?: string | null;
   /** Learner-facing: the tutor's section, shown as a muted suffix when `tutorName` is set. */
   tutorSection?: string | null;
-  /** Click handler (client callers). Ignored when `href` is set. */
-  onClick?: () => void;
+  /** Learner-facing: the tutor's profile picture URL */
+  tutorImage?: string | null;
   /** When set, the card renders as a link to this path (usable from Server Components). */
   href?: string;
 }) {
@@ -96,7 +98,7 @@ export default function ClassCard({
               {code}
             </p>
           )}
-          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subject}</h3>
+          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subjectDisplayLabel(subject)}</h3>
           {gradeLevel && (
             <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">
               {gradeLabel(gradeLevel)}
@@ -162,9 +164,16 @@ export default function ClassCard({
           </span>
         </div>
         {tutorAnonymousId && (
-          <div className="flex items-center gap-1">
-            <GraduationCap className="h-3.5 w-3.5 text-primary" />
-            <span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <UserAvatar clickable={false}
+              src={tutorImage}
+              name={tutorName}
+              anonymousId={tutorAnonymousId}
+              size="xs"
+              role="TUTOR"
+              subtitle={tutorName && tutorSection ? `Section ${tutorSection}` : undefined}
+            />
+            <span className="truncate">
               {tutorName || tutorAnonymousId}
               {tutorName && tutorSection && (
                 <span className="text-base-content/40"> · {tutorSection}</span>
@@ -183,13 +192,6 @@ export default function ClassCard({
     </>
   );
 
-  return href ? (
-    <Link href={href} className={cardClassName}>
-      {inner}
-    </Link>
-  ) : (
-    <div onClick={onClick} className={cardClassName}>
-      {inner}
-    </div>
-  );
+  return href ? <Link href={href} className={cardClassName}>{inner}</Link>
+    : <div className={cardClassName.replace("cursor-pointer", "")}>{inner}</div>;
 }

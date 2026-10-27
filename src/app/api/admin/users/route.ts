@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { Prisma, Role, AccountStatus, GradeLevel } from "@prisma/client";
 import { parseSort } from "@/lib/sortParams";
+import { isAdminRole } from "@/lib/permissions";
 
 const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -23,9 +23,9 @@ const USER_SORT_COLUMN: Record<
 // ─── GET: List Learner + Tutor Accounts for Moderation ────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     const { sort, dir } = parseSort(searchParams, Object.keys(USER_SORT_COLUMN), "createdAt");
 
     const where: Prisma.UserWhereInput = {
-      role: role && role in Role ? (role as Role) : { not: "ADMIN" },
+      role: role && role in Role ? (role as Role) : { notIn: [Role.ADMIN, Role.SUPER_ADMIN] },
       // Declined applicants are terminal — hide them unless explicitly filtered for.
       ...(status && status in AccountStatus
         ? { status: status as AccountStatus }
@@ -73,6 +73,8 @@ export async function GET(req: NextRequest) {
           statusReason: true,
           statusUpdatedAt: true,
           statusExpiresAt: true,
+          image: true,
+          profilePictureLocked: true,
           createdAt: true,
         },
         orderBy: { [USER_SORT_COLUMN[sort]]: dir },

@@ -1,0 +1,62 @@
+[
+  {
+    "path": "/login",
+    "expected": 200,
+    "actual": 200,
+    "pass": true
+  },
+  {
+    "path": "/api/admin/admins",
+    "expected": 401,
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "path": "/api/tutor/question-bank",
+    "expected": 401,
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "path": "/api/notifications",
+    "expected": 401,
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "path": "/api/user/profile-picture",
+    "expected": 401,
+    "actual": 401,
+    "pass": true
+  },
+  {
+    "path": "/api/dev",
+    "expected": 404,
+    "actual": 404,
+    "pass": true
+  },
+  {
+    "path": "/admin",
+    "expected": 307,
+    "actual": 307,
+    "pass": true,
+    "signin_redirect_status": 302,
+    "redirect_to_login": true
+  },
+  {
+    "path": "/learner",
+    "expected": 307,
+    "actual": 307,
+    "pass": true,
+    "signin_redirect_status": 302,
+    "redirect_to_login": true
+  },
+  {
+    "path": "/tutor",
+    "expected": 307,
+    "actual": 307,
+    "pass": true,
+    "signin_redirect_status": 302,
+    "redirect_to_login": true
+  }
+]

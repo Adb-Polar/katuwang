@@ -108,3 +108,15 @@ describe("serializeSessionTest", () => {
     expect(s.questions[0].origin).toBe("BANK");
   });
 });
+
+it("withholds shared-bank keys from learner review while preserving their own score and feedback", () => {
+  const submitted = {
+    ...baseAttempt, status: "SUBMITTED", scorePercent: 100,
+    items: [{ ...baseAttempt.items[0], isCorrect: true, selectedOptionId: "o2", question: { ...baseAttempt.items[0].question, origin: "BANK" } }],
+  } as unknown as SessionTestAttemptWithItems;
+  const result = serializeSessionTestAttempt(submitted, { reveal: true, revealBankAnswers: false });
+  expect(result.scorePercent).toBe(100);
+  expect(result.items[0].isCorrect).toBe(true);
+  expect(result.items[0]).not.toHaveProperty("explanation");
+  expect(result.items[0].options.every((o) => !("isCorrect" in o))).toBe(true);
+});

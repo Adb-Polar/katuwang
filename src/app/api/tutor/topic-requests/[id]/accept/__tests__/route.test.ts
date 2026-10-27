@@ -27,7 +27,7 @@ const {
   getSettingMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
@@ -38,17 +38,19 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         tutorClass: { create: tutorClassCreate },
-        topicRequest: { update: topicRequestUpdate },
+        topicRequest: { update: topicRequestUpdate, findUniqueOrThrow: topicRequestFindUnique },
         notification: { create: notificationCreate },
       }),
   },
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 
+vi.mock("@/lib/topicRequestHistory", () => ({ requestSnapshot: vi.fn().mockResolvedValue({}), recordRequestHistory: vi.fn() }));
+
 import { POST } from "@/app/api/tutor/topic-requests/[id]/accept/route";
 
 const params = Promise.resolve({ id: "r1" });
-const tutor = { user: { id: "T1", role: "STUDENT_TUTOR" } };
+const tutor = { user: { id: "T1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_10" } };
 
 const futureDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -76,8 +78,8 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(true);
-    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1" });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000) });
     topicRequestFindFirst.mockResolvedValue({ id: "r1" }); // eligible by default
     topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
     classSessionFindMany.mockResolvedValue([]);
@@ -90,6 +92,14 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(401);
+  });
+
+  it("rejects a request at its deadline", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(0) });
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(400);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
   it("400 when the request is not OPEN", async () => {
@@ -105,6 +115,31 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     topicRequestFindFirst.mockResolvedValue(null);
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(403);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+  });
+
+  it("403 when the request grade level is higher than the tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue(tutor); // tutor is GRADE_10
+    topicRequestFindUnique.mockResolvedValue({
+      id: "r1",
+      status: "OPEN",
+      subject: "MATH",
+      learnerId: "L1",
+      gradeLevel: "GRADE_11", // higher than tutor's GRADE_10
+    });
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(403);
+    const json = await res.json();
+    expect(json.error).toMatch(/cannot teach students in a higher grade level/i);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+  });
+
+  it("400 when the class target grade level is higher than the tutor grade level", async () => {
+    getServerSessionMock.mockResolvedValue(tutor); // tutor is GRADE_10
+    const res = await POST(makeRequest(validBody({ gradeLevel: "GRADE_11" })), { params });
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toMatch(/target grade cannot be higher than your current grade level/i);
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 

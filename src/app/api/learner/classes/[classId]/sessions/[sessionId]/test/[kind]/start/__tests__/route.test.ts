@@ -1,3 +1,7 @@
+vi.mock("@/lib/teachingBankAccess", () => ({
+  certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
+  certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
+}));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
@@ -22,7 +26,7 @@ const {
   sessionTestAttemptCreate: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     platformSetting: { findUnique: platformSettingFindUnique },

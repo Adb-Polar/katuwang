@@ -5,12 +5,13 @@ import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
-import { formatDateTime } from "@/lib/datetime";
+import { formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
 interface AuditLogEntry {
   id: string;
@@ -21,15 +22,6 @@ interface AuditLogEntry {
   createdAt: string;
   admin: { anonymousId: string; firstName: string; lastName: string };
 }
-
-const ACTION_LABELS: Record<string, string> = {
-  USER_STATUS_CHANGE: "User Status Changed",
-  CLASS_STATUS_CHANGE: "Class Status Changed",
-  CERTIFICATION_APPROVED: "Certification Approved",
-  CERTIFICATION_REJECTED: "Certification Rejected",
-  USER_APPROVED: "Registration Approved",
-  USER_DECLINED: "Registration Declined",
-};
 
 const PAGE_SIZE = AUDIT_PAGE_SIZE;
 const ACTIONS = Object.values(AUDIT_ACTIONS);
@@ -53,6 +45,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
     setPageSize,
     loading,
     error,
+    refetch,
   } = usePaginatedList<AuditLogEntry>(
     "/api/admin/audit-log",
     "logs",
@@ -71,40 +64,45 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
+      {error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry audit log</button>}
 
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Moderation Action History</h2>
+          <p className="text-xs text-base-content/60">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search audit log"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search admin ID, reason, target ID..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              className="input input-bordered min-h-11 sm:input-sm text-base sm:text-xs focus:input-primary"
             />
             <select
+              aria-label="Filter audit actions"
               value={action}
               onChange={(e) => setAction(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
             >
               <option value="">All actions</option>
               {ACTIONS.map((a) => (
                 <option key={a} value={a}>
-                  {ACTION_LABELS[a] || a}
+                  {auditActionDisplayLabel(a)}
                 </option>
               ))}
             </select>
             <select
+              aria-label="Filter audit target types"
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
             >
               <option value="">All target types</option>
               {TARGET_TYPES.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {statusDisplayLabel(t)}
                 </option>
               ))}
             </select>
@@ -128,10 +126,10 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                   {logs.map((log) => (
                     <tr key={log.id} className="text-sm">
                       <td className="font-semibold text-base-content/80">
-                        {ACTION_LABELS[log.action] || log.action}
+                        {auditActionDisplayLabel(log.action)}
                       </td>
                       <td className="text-base-content/60">
-                        {log.targetType} · {log.targetId}
+                        {statusDisplayLabel(log.targetType)} · {log.targetId}
                       </td>
                       <td className="text-base-content/60">
                         {log.admin.anonymousId} ({log.admin.firstName} {log.admin.lastName})
@@ -144,7 +142,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                   ))}
                 </tbody>
               </table>
-              {logs.length === 0 && (
+              {!error && logs.length === 0 && (
                 <EmptyState>No moderation actions match these filters.</EmptyState>
               )}
             </div>

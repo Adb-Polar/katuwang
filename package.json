@@ -9,11 +9,20 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:local": "node scripts/switch-db.mjs local",
+    "db:cloud": "node scripts/switch-db.mjs cloud",
+    "db:target": "node scripts/switch-db.mjs target",
+    "db:status": "prisma migrate status",
+    "db:deploy": "prisma migrate deploy",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "seed:super-admin": "tsx scripts/seed-super-admin.ts"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@uploadthing/react": "^7.3.3",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.2",
@@ -27,6 +36,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.10.1",
+    "sharp": "^0.35.4",
+    "uploadthing": "^7.7.4",
     "zod": "^4.4.3"
   },
   "devDependencies": {

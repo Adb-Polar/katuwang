@@ -1,8 +1,8 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma, ReportStatus, ReportTargetType } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseSort } from "@/lib/sortParams";
 
@@ -18,9 +18,9 @@ const REPORT_SORT_COLUMN: Record<string, "createdAt" | "reviewedAt" | "targetTyp
 // ─── GET: List abuse reports (tabbed / paginated) ──────────────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 

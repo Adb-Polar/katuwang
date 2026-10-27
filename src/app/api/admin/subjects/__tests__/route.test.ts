@@ -11,7 +11,7 @@ const { getServerSessionMock, subjectFindMany, subjectFindFirst, subjectAggregat
     auditCreate: vi.fn(),
   }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/subjects", () => ({ invalidateSubjectCache: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {

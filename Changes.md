@@ -8,6 +8,12 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
+| [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
+| [89](#part-89) | **Philippine K–12 Subject & Topic Database (Grades 7–12)** | Comprehensive research on DepEd MATATAG (Grades 7–10) and SHS (Grades 11–12) curricula; structured dataset (126 competencies, 47 subjects, 155 topics); populated MariaDB catalog via idempotent seed script without schema changes or data loss; added unit test suite (12 tests) verifying DepEd provenance, grade mapping, and matching engine compatibility. | See Part 89 below. Dataset + Seed + Tests. |
+| [86](#part-86) | **Grade-Based Tutor Teaching and Student Enrollment Restrictions** | Enforces grade eligibility rules: tutors can only teach students at their own grade or below (`targetGrade <= tutorGrade`); students only see and enroll in classes taught by tutors at their grade level or higher (`studentGrade <= tutorGrade`) and targeted to their grade or higher (`studentGrade <= targetGrade`). Applied end-to-end across class creation, editing, enrollment, search, match, topic requests, timetables, and direct URL lookups. | See Part 86 below. New utilities in `src/lib/gradeLevels.ts`, updated Prisma queries, server-side route validation, and client dropdown/filter constraints. 874/874 tests passing. |
+| [85](#part-85) | **`docs/README.md` / `docs/plans/README.md` de-duplication** | `docs/README.md`'s plans index was missing `landing-page-redesign.md` and had drifted from `docs/plans/README.md`'s own (more current) status table — two files independently tracking the same plan-status info. Merged the status detail into `docs/README.md`'s one table and deleted `docs/plans/README.md`. | See Part 85 below. Docs only. |
+| [84](#part-84) | **Full documentation audit — repo-wide** | Reviewed every doc file against the current implementation. Rewrote `docs/reports/project-progress.md` (had drifted to describing shipped modules as "Pending"); fixed `README.md`'s stale "5/6 modules" status; archived the root `plan.md` session artifact; expanded `CLAUDE.md`'s project-structure tree and role summary; corrected `docs/roles/{LEARNER,TUTOR,ADMIN}.md` against the actual API/route surface (each had real drift — see Part 84 below). `docs/reference/*` and `docs/plans/*` were already current, spot-checked, mostly unchanged. | See Part 84 below. Docs only. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
 | [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
 | [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
@@ -22,7 +28,7 @@
 | [72](#part-72) | **Email verification (optional gate)** | Optional admin-toggleable email-verification gate on login (`requireEmailVerification`), checked before `PENDING`/`DECLINED` approval status. | See Part 72 below. |
 | [71](#part-71) | **9/11 tutor/learner bug-fix batch** | Six fixes from manual-testing notes: numbers-only contact info, truncated long topic names in `<select>`s, class scheduling requires a location or meeting link, tutors are notified when a learner takes a pre-test, a fully-past class with no enrollees drops out of "Active", and a pre-test start race condition (`P2002`) that surfaced as "posted but errors, refresh fixes it". Two reported items (a stale test-page 404 and a class-report error) turned out to be dev-DB-reseed artifacts, not code bugs — verified by re-testing live, no fix applied. | See Part 71 below. |
 | [70](#part-70) | **`docs/reference/` refresh** | Brought the reference docs to the current build. `project-overview.md`: chatbot and learner pre/post-tests are ✅ built (were "not built"); subjects are admin-editable tables, not the `SubjectArea` enum. `decisions.md`: "Known unbuilt modules" section resolved (all six modules built); chatbot decision gets a 2026-09-10 update (35 intents / 26 FAQ / `/admin/chatbot` review UI). `feature-checklist.md`: review date → 2026-09-10, matching row wording. `auth-implementation.md`: added a "build guide, not a code mirror" status banner. `erd.mmd` regenerated from the schema (was missing the `Report*` enums). `chatbot.md`, `theme.md`, `architecture-design.*`, `thesis.md` already current / historical — unchanged. | Docs only — no code/schema/test change. `npx prisma generate` re-run (erd.md unchanged). |
-| [69](#part-69) | **`docs/` reorganisation** | Every file moved into a subfolder; `docs/README.md` is now a preview index of all docs. Merged the 6 `reviews/` docs → `reviews/reviews.md` and 3 assessment plans → `plans/assessments.md`; folded `plans/chatbot-assistant.md` into `reference/chatbot.md`. Archived completed/superseded plans + old spreadsheets under `docs/archive/`. `TODO.txt`/`TOTEST.txt` → `docs/backlog/`; `feature-checklist.md`/`erd.md`/`architecture-design.*` + renamed `thesis.md` → `docs/reference/`; xlsx → `docs/reports/`. | Path refs updated in `CLAUDE.md`, `README.md`, `PROGRESS_REPORT.md`, `docs/plans/README.md`, `docs/plans/fixes.md`, and 4 `src/` comments. `prisma/schema.prisma` erd `output` → `../docs/reference/erd.md`. Docs only — no test impact. |
+| [69](#part-69) | **`docs/` reorganisation** | Every file moved into a subfolder; `docs/README.md` is now a preview index of all docs. Merged the 6 `reviews/` docs → `reviews/reviews.md` and 3 assessment plans → `plans/assessments.md`; folded `plans/chatbot-assistant.md` into `reference/chatbot.md`. Archived completed/superseded plans + old spreadsheets under `docs/archive/`. `TODO.txt`/`TOTEST.txt` → `docs/backlog/`; `feature-checklist.md`/`erd.md`/`architecture-design.*` + renamed `thesis.md` → `docs/reference/`; xlsx → `docs/reports/`. | Path refs updated in `CLAUDE.md`, `README.md`, `docs/reports/project-progress.md`, `docs/plans/README.md`, `docs/plans/fixes.md`, and 4 `src/` comments. `prisma/schema.prisma` erd `output` → `../docs/reference/erd.md`. Docs only — no test impact. |
 | [68](#part-68) | **`<Modal>` shell with focus trap (component-reuse R3)** | New `components/ui/Modal.tsx` — backdrop + box, Escape / backdrop close, Tab focus-trap, focus-restore on close. `ConfirmDialog` + `PromptDialog` re-based on `<Modal bare>` (pixel-identical) so every confirm/prompt dialog gains the a11y behaviour. Bespoke modals can adopt it later. | New `Modal.tsx`; `ConfirmDialog`/`PromptDialog` rewritten as thin bodies. No API change. 680/680. |
 | [67](#part-67) | **`<PromptDialog>` (component-reuse R2)** | `ConfirmDialog` + a note textarea (with `CharCount`) extracted to `components/ui/PromptDialog.tsx`; migrated the 3 clean "confirm + note" modals (`ClassAppealTable`, `AbuseReportTable` ×2, `CertificationReviewTable`) and deleted their parent note state. `AbuseReportTable`'s resolve modal gains an optional note (was confirm-only). 5 harder sites deferred to after R3. | New `PromptDialog.tsx` (own note state via render-time prop-change reset, no effect). 680/680. |
 | [66](#part-66) | **`AuditLogTable` + `ChatbotMissesTable` use `SortableTh` (component-reuse R6)** | Deleted both tables' local `sortHeader()` + `toggleSort` and switched to `useTableSort` + `<SortableTh>`, matching every other admin table (incl. the neutral unsorted chevron). | ~20 lines removed per file; `AuditLogTable` keeps its per-column start direction via `defaultDirs`. 680/680. |
@@ -3036,6 +3042,101 @@ clean, 643/643.
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
 
+<a id="part-85"></a>
+## Part 85 — `docs/README.md` / `docs/plans/README.md` de-duplication (2026-09-23)
+
+User reported the docs felt "messy, no category groupings." The category folders
+(`reference/`, `roles/`, `plans/`, `reviews/`, `backlog/`, `reports/`, `to-submit/`,
+`archive/`) already existed from Part 69's reorg, so the real issues were drift and
+one duplicate-maintenance surface, both in `docs/`:
+
+- `docs/README.md`'s `plans/` preview table had no row for
+  `docs/plans/landing-page-redesign.md` (shipped, tied to Parts 78–83), even
+  though `docs/plans/README.md`'s own status table already listed it correctly.
+- `docs/plans/README.md` existed only to hold a second "Active plans" status
+  table, an "Archived" table, and a "Related reference docs" list — all three
+  already covered by `docs/README.md` in slightly different form. Two files
+  tracking the same plan-status information independently is exactly how the
+  missing row above happened.
+
+Merged the status column from `docs/plans/README.md`'s Active table into
+`docs/README.md`'s existing plans table (now Preview + Status per plan,
+including the missing `landing-page-redesign.md` row), confirmed the Archived
+table and reference links there are unaffected, then deleted
+`docs/plans/README.md` and its one inbound link. Root `.md` files and
+`design/` were explicitly out of scope for this pass (user chose "docs/ only,
+conservative" — no deleting archived/superseded content).
+
+Docs only — no application code, schema, or test changes. Not committed.
+
+<a id="part-84"></a>
+## Part 84 — Full documentation audit, repo-wide (2026-09-23)
+
+Requested pass: compare every doc against the current implementation (source code, schema, config)
+and fix drift, without inventing unbuilt features or deleting history. `docs/reference/*` and
+`docs/plans/*` turned out to already be well-maintained (self-aware status banners, `decisions.md`
+kept current) — spot-checked and left unchanged except two small additions. The real drift was in
+root-level docs and the three per-role references.
+
+**Root docs.**
+- `README.md` — "Status" section said 5/6 modules built, Chatbot + pre/post-tests "not yet
+  implemented." Both shipped 2026-09-04/05 per `feature-checklist.md`/`decisions.md`. Fixed to "all
+  six."
+- `docs/reports/project-progress.md` — rewritten. The old version's embedded ER diagram, API table, and
+  "Implementation Status Matrix" had drifted badly (still listed the admin portal, tutor class
+  management UI, and learner portal as "Pending" long after all shipped; schema/API sections covered
+  ~4 of 32 models and 4 of 190+ routes). Replaced those duplicated, driftable sections with pointers
+  to the docs that are actually kept current (`feature-checklist.md`, `erd.md`, `docs/roles/`),
+  keeping only the still-accurate executive summary/architecture/security overview, refreshed to
+  current stack versions and feature set.
+- `plan.md` (repo root) — a completed, pre-`docs/plans/` convention session plan for tutor class
+  creation + learner enrollment; the feature is long since shipped and outgrew the plan (`ClassSession`,
+  `ClassTopic`, moderation, etc. added since). Moved to
+  `docs/archive/plans/tutor-class-creation-learner-enrollment.md` with a "Done" banner, matching how
+  other completed plans are archived; added to `docs/README.md`'s archive table.
+- `CLAUDE.md` — Project Structure tree was missing `components/{admin,chatbot,notifications,dev,
+  symbols}`, several `app/` routes (`dev/`, `forgot-password/`, `reset-password/`, `verify-email/`,
+  `privacy-policy/`, `account-declined/`, `account-unverified/`, `pending-approval/`), and most of
+  `lib/` (`matching.ts`, `notifications.ts`, `settings.ts`, `subjects.ts`, `auditLog.ts`, `mail.ts`,
+  `chatbot/`). Added. "User Roles & Route Permissions" undersold each role (e.g. admin bullet said
+  "manages users, platform settings, and reports" with no mention of classes, subjects, certifications,
+  chatbot, or the audit log) — expanded, with a pointer to `docs/roles/`. Fixed a stray typo
+  ("Generate Prisma clie").
+- `docs/backlog/TODO.txt` — the bulk-import backlog item's mechanism description referenced
+  `TopicAssessmentConfig`, a model dropped 2026-09-03 (replaced by a platform-wide `PlatformSetting`
+  read via `getAssessmentConfig()`) and `SUBJECT_TOPICS[subject].includes(topic)`, superseded by
+  `topicExists()`. Fixed both references; the backlog item itself is still open/unbuilt, unchanged.
+- `docs/plans/dev-data-factory.md`, `notification-system-expansion.md` — both fully implemented
+  (`/api/dev`, `/dev`, `DevDataFactory.tsx`; `NotificationBell.tsx`, `/admin/notifications`) but had no
+  status banner, unlike every other file in `docs/plans/`. Added "Status: DONE" to both for consistency.
+- `docs/reference/erd.md` — regenerated via `npx prisma generate` to confirm freshness; came back
+  byte-identical (already current).
+
+**Per-role docs** (`docs/roles/{LEARNER,TUTOR,ADMIN}.md`) — each audited by a separate pass against
+its full API/route/component surface; all three had real, previously-undetected drift:
+- `LEARNER.md` — missing query params/response fields on `GET /api/classes` (status filter, browse
+  ranking, `counts.mineTabs`) and `GET /api/learner/tutors` (multi-subject filter, `verifiedClasses`);
+  the tutor-profile page's real-name/timetable/tab behavior was wrong; `classFormat` matching filter,
+  rate limits (register/chatbot/search), `SESSION_PRETEST_OPEN`/`POST_OPEN` notification types, and
+  `recoveryEmail`/`gradeLevel` on the profile PATCH were all undocumented; a session-test 403 was
+  documented as 404; "topic request" renamed to "class request" in prose per `decisions.md`.
+- `TUTOR.md` — `building`/`room` class-location fields were entirely missing; per-session
+  reschedule/complete/cancel controls were attributed to the wrong page (they're on the Edit Class
+  page, not the read-only class detail page); the Assessments section described a superseded
+  manual-request flow instead of the actual auto-graded quiz (`POST /api/tutor/assessments` +
+  `/submit`, `autoCertifyOnAssessmentPass`); Topic Requests tabs were wrong (3 tabs — Directed/Public/
+  Accepted — not 2); a claimed "Typical Weekly Schedule" derived-availability display doesn't
+  actually render anywhere in the code; roster search param and profile PATCH body were incomplete.
+- `ADMIN.md` — three entire admin pages were undocumented (Question Bank, Question Requests,
+  Assessment Results, all under the Assessment nav group); the Platform Settings list covered 5 of 9
+  real setting keys and omitted the global assessment-config endpoint entirely; several
+  `/api/admin/**` endpoints (registrations, assessment-questions, question-requests,
+  assessment-attempts, assessment-configs) had no reference entries; `GET /api/admin/reports`'s
+  30-day enrollment series was undocumented; the audit-log section described 3 of 20+ logged action
+  categories.
+
+Docs only — no application code, schema, or test changes. Not committed.
+
 <a id="part-83"></a>
 ## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
 
@@ -3448,7 +3549,7 @@ Cleanup pass over `docs/`. No behaviour change; docs + a few path references onl
 
 **Reference updates.** `CLAUDE.md` (convention paths `docs/backlog/TODO.txt`,
 `docs/backlog/TOTEST.txt`, `docs/reference/feature-checklist.md`,
-`docs/reference/thesis.md`), root `README.md`, `PROGRESS_REPORT.md` tree,
+`docs/reference/thesis.md`), root `README.md`, `docs/reports/project-progress.md` tree,
 `docs/plans/README.md` (rewritten: Active vs. Archived), `docs/plans/fixes.md`
 (`fixes.txt` → `../archive/plans/`), `docs/reference/{decisions,project-overview,
 feature-checklist,chatbot}.md`, and comment paths in
@@ -3863,3 +3964,208 @@ pill is ~4px). Thumb colour is `color-mix` of `--color-base-content` at 18%
 (→ 34% on hover), added as `--kt-scrollbar-thumb` / `--kt-scrollbar-thumb-hover`
 tokens on `:root`. CSS only — no TS/component/schema/test change. `build` clean.
 Not committed.
+
+<a id="part-55"></a>
+## Part 55 — Health-check API endpoint (`/api/health`) (2026-10-15)
+
+`src/app/api/health/route.ts` — lightweight unauthenticated health-check route handler for uptime monitoring and cron triggers (e.g. cron-job.org). Configured with dynamic rendering (`export const dynamic = "force-dynamic"`) and `nodejs` runtime (`export const runtime = "nodejs"`), returning `Cache-Control: no-store, no-cache, must-revalidate`. Verifies application responsiveness and executes `prisma.$queryRaw\`SELECT 1\`` using the existing `@/lib/prisma` client to verify database connectivity. Returns HTTP 200 `{ status: "healthy", database: "connected", timestamp }` on success, or HTTP 503 `{ status: "unhealthy", database: "disconnected", timestamp }` on database check failure. Safely logs diagnostic details on the server via `console.error` without leaking connection strings, credentials, or stack traces in client responses.
+
+**Tests.** `src/app/api/health/__tests__/route.test.ts` (2 tests — 200 healthy response with cache-control header, 503 error response ensuring no sensitive data leakage and server logging). `pnpm test` 731/731 passing, `tsc` clean, Next.js build clean. Committed.
+
+<a id="part-56"></a>
+## Part 56 — MariaDB adapter TLS and RSA authentication handshake fix (2026-10-15)
+
+`src/lib/prisma.ts` — fixed production database connection failures on Render connecting to Aiven MySQL/MariaDB (`DriverAdapterError: pool failed to retrieve a connection from pool` with root cause `RSA public key is not available client side. Either set option cachingRsaPublicKey or allow public key retrieval with option allowPublicKeyRetrieval`). Normalized the connection URL for `@prisma/adapter-mariadb`:
+1. Maps `ssl-mode=REQUIRED` / remote hosts to `ssl=true` (the exact parameter expected by the underlying `mariadb` driver) ensuring TLS encryption with certificate verification (`rejectUnauthorized: true`) is retained.
+2. Configures `allowPublicKeyRetrieval=true` to satisfy MySQL 8+ `caching_sha2_password` authentication requirements.
+3. Caches and reuses a single `PrismaClient` instance globally across both development and production module evaluations to eliminate redundant connection pools.
+
+**Tests.** `src/lib/__tests__/prisma.test.ts` (5 tests verifying URL normalization, Aiven SSL mapping, localhost handling, and parameter preservation). `pnpm test` 736/736 passing, `tsc` clean, Next.js production build clean.
+
+<a id="part-57"></a>
+## Part 57 — Aiven Project CA certificate verification fix (2026-10-15)
+
+`src/lib/prisma.ts` — resolved production TLS certificate verification failure on Render connecting to Aiven MySQL (`DriverAdapterError: pool failed to retrieve a connection from pool` with root cause `self-signed certificate in certificate chain`).
+1. Added `getCaCertificate` to detect and load Aiven's official Project CA certificate from environment variables (`AIVEN_CA_CERT`, `DATABASE_CA_CERT`, `CA_CERT`, unescaping literal `\n` characters) or file paths (`AIVEN_CA_CERT_PATH`, `DATABASE_CA_CERT_PATH`, or standard Render Secret File mounts at `/etc/secrets/aiven-ca.pem` / `/etc/secrets/ca.pem`). Added `/*turbopackIgnore: true*/` to suppress dynamic NFT tracing warnings.
+2. Added `getDatabaseConfig` to construct a typed `mariadb.PoolConfig` object for `@prisma/adapter-mariadb`, configuring `ssl: { ca: caCert, rejectUnauthorized: true }` when a CA certificate is provided.
+3. Preserved strict TLS certificate verification (`rejectUnauthorized: true`). Did not disable TLS or allow unverified certificates.
+4. Added explicit production diagnostic logging if the CA certificate is missing for an Aiven host without leaking credentials, connection strings, or certificate data.
+
+**Tests.** `src/lib/__tests__/prisma.test.ts` expanded to 10 tests covering certificate parsing, file path loading, CA injection into adapter config, localhost handling, and explicit warning generation. `pnpm test` 741/741 passing, `tsc` clean, Next.js build clean with 0 warnings.
+
+<a id="part-58"></a>
+## Part 58 — Idempotent database seeding and unique class code collision fix (2026-10-15)
+
+`prisma/seed.ts` — resolved Prisma seed failure `Unique constraint failed on the constraint: tutor_classes_code_key` (P2002) at `prisma.tutorClass.create()` and eliminated destructive `deleteMany` workarounds to ensure safe and fully idempotent re-runs:
+1. **Dynamic Class Code Tracking & Allocation**: Replaced the in-memory reset counter `let classCodeSeq = 0` with `initMaxClassCode` (which scans both `IdCounter` for `"CLASS"` and existing class codes in `tutor_classes`), `recordCodeNumber`, and `allocateClassCode(preferredCode)`. Guaranteed that sequential codes never collide with existing classes or user-created records. Synchronized `IdCounter` for `"CLASS"` to `Math.max(currentCount, highestObservedCode)` so application-created classes continue the sequence without collisions.
+2. **Idempotent `ensureTutorClass`**: Added an upsert/find-and-update handler that first looks for an existing class by preferred code (ensuring it matches the tutor profile) or by `(tutorProfileId, subject, description)`. If found, updates the class record and synchronizes topics, sessions, and enrollments while preserving existing IDs and existing `ClassSession` rows (preventing cascade deletion of session test attempts). If not found, allocates a guaranteed unique code and creates the class.
+3. **Idempotent Curated & Procedural Classes**: Assigned deterministic class codes `C-0001` through `C-0013` to the 13 curated classes in `buildClasses()`, `C-0014` and `C-0015` to request-fulfilled classes, and deterministic codes `C-${pad(16 + index, 4)}` to procedurally generated classes.
+4. **Eliminated All `deleteMany` Workarounds**: Removed `tutorClass.deleteMany`, `topicRequest.deleteMany`, `notification.deleteMany`, and `assessmentQuestion.deleteMany` / `assessmentAttemptItem.deleteMany`.
+5. **Idempotent Helpers for Requests, Notifications, and Tests**: Added `ensureTopicRequest` (reusing existing requests by `learnerId, subject, note`), `ensureNotification` (reusing notifications by `userId, type, link`), idempotent question bank creation (checking `findFirst` by `subject, topic, prompt, origin: "BANK"`), and guarded `seedSessionTests` from duplicate `sessionId` creation.
+
+**Verification.** Plan created at `docs/plans/idempotent-seed-fix.md`. `npx prisma db seed` executed successfully twice consecutively on the local database (exit code 0, 0 errors, 0 duplicates). Verified `seed-session-tests.ts` executes cleanly and test attempts (84/84) remain preserved after subsequent seed re-runs. `tsc --noEmit` clean, `pnpm test` 101/101 test files and 741/741 tests passing.
+
+<a id="part-59"></a>
+## Part 59 — Dev Data Factory fix, full database seed expansion, and realtime logging (2026-10-16)
+
+1. **Dev Data Factory Fix & Tests**:
+   - `src/app/api/dev/route.ts`: Removed restrictive role checks on dev data generator endpoint so developers can reliably generate fixture data on dev environments. Ensured all newly created users have `emailVerifiedAt: new Date()` set so generated accounts can log in immediately without email verification barriers.
+   - `src/components/dev/DevDataFactory.tsx`: Enhanced error handling and message extraction from JSON response bodies.
+   - `src/app/api/dev/__tests__/route.test.ts`: Added Vitest unit test suite covering 200 success, 403 in production, and 500 error scenarios using `vi.stubEnv`.
+
+2. **Full Database Seed Expansion**:
+   - `prisma/seed.ts`: Extended seed coverage to all models feeding the frontend application:
+     - Users across all status states (`APPROVED`, `REJECTED`, `PENDING_VERIFICATION`, `PENDING_APPROVAL`).
+     - Tutors and learners with populated profiles.
+     - TutorClasses with complete schedules, topics, and enrollments.
+     - Class appeals across statuses (`PENDING`, `APPROVED`, `REJECTED`).
+     - Reports and report violations.
+     - Recommendations and chatbot misses (`ChatbotMiss`).
+     - System audit logs (`AuditLog`).
+     - Pre- and post-test assessments with attempts (`AssessmentAttempt`, `AssessmentAttemptItem`).
+     - Verification and password reset tokens (`Token`).
+   - `.env.seed`: Added support for `.env.seed` to customize data volume knobs (`SEED_SCALE`, `SEED_REPORTS_COUNT`, `SEED_AUDIT_LOGS_COUNT`, `SEED_CHATBOT_MISSES_COUNT`, etc.).
+
+3. **Driver Connection & Seeding Optimization**:
+   - `src/lib/prisma.ts`: Updated `connectTimeout` from 10,000ms to 30,000ms for stable remote database connections (e.g. Aiven MySQL over TLS).
+   - `prisma/seed.ts`: Prefetched existing question bank prompts into an in-memory `Set` before question seeding, eliminating thousands of sequential network round-trips over remote TLS links.
+
+4. **Realtime Console Logging**:
+   - `prisma/seed.ts`: Added live color-coded ANSI logging across all 12 provisioning phases displaying `[+]` added, `[~]` updated, `[=]` verified existing, and `[i]` system settings in real time.
+
+**Verification.** `prisma/seed.ts` executed twice against cloud dev/test database with exit code 0; second run verified 100% idempotency (`[=] ... verified`). All 746 tests pass (`pnpm test`), `npx tsc --noEmit` passes with 0 errors, and ESLint is clean.
+
+<a id="part-86"></a>
+## Part 86 — Grade-Based Tutor Teaching and Student Enrollment Restrictions (2026-10-19)
+
+Implemented a comprehensive, end-to-end grade restriction system enforcing academic peer tutoring rules across the platform:
+- **Tutor Class Creation / Update**: `targetGrade <= tutorGrade`. Tutors can only select and target grade levels less than or equal to their authenticated grade level.
+- **Student Class Visibility & Search**: `studentGrade <= tutorGrade` AND `studentGrade <= targetGrade` (if target grade is specified; null target allows all students where `studentGrade <= tutorGrade`).
+- **Student Class Enrollment**: Securely validated on the server with 403 Forbidden errors if tutor or class target is below student grade.
+
+1. **Shared Grade Logic & Comparison (`src/lib/gradeLevels.ts`)**:
+   - Added canonical `GRADE_ORDER: GradeLevel[]` from Grade 7 through Grade 12 (`GRADE_7` to `GRADE_12`).
+   - Added `gradeNumber(grade)` and `compareGradeLevels(a, b)`.
+   - Added rule validators: `isTargetGradeEligibleForTutor(target, tutor)`, `isStudentEligibleForTutor(student, tutor)`, `isStudentEligibleForClassTarget(student, classTarget)`, and combined `isStudentEligibleForClass(student, tutor, classTarget)`.
+   - Added list helpers: `getEligibleTargetGrades(tutorGrade)`, `getEligibleTutorGradesForStudent(studentGrade)`, `getEligibleClassTargetGradesForStudent(studentGrade)`, and `getEligibleStudentGradesForTutor(tutorGrade)`.
+
+2. **NextAuth Session & User Model (`src/types/next-auth.d.ts`, `src/lib/auth.ts`)**:
+   - Added `gradeLevel?: GradeLevel | null` to NextAuth `Session.user`, `User`, and `JWT`.
+   - Populated `gradeLevel` in the `session` and `jwt` callbacks from user records.
+
+3. **Prisma Query Infrastructure (`src/lib/classQueries.ts`)**:
+   - Added `gradeEligibilityWhere(learnerGrade)` which filters tutor classes to `tutorProfile.user.gradeLevel >= learnerGrade` and `gradeLevel: null | in: >= learnerGrade`.
+   - Integrated `gradeEligibilityWhere` into `browseClassesWhere` and `browsableOrEnrolledWhere`.
+
+4. **Tutor Class Creation & Editing**:
+   - `src/app/api/tutor/classes/route.ts`: Validates that selected `gradeLevel <= tutorGrade` on POST, returning 400 with a clear error message.
+   - `src/app/api/tutor/classes/[classId]/route.ts`: Validates `gradeLevel <= tutorGrade` on PATCH updates (400).
+   - `src/components/tutor/ClassScheduleFields.tsx`: Constrains target grade dropdown options to `getEligibleTargetGrades(tutorGradeLevel)` and checks client-side submission.
+   - Forms updated: `NewClassForm.tsx`, `EditClassForm.tsx`, `AcceptRequestForm.tsx`, `tutor/classes/new/page.tsx`, `tutor/classes/[classId]/edit/page.tsx`.
+
+5. **Learner Discovery, Search, Match & Recommendations**:
+   - `src/app/api/classes/route.ts`: Fetches `learnerGrade` and applies `browseClassesWhere(session.user.id, learnerGrade)` and rank context.
+   - `src/app/api/search/route.ts`: Filters class results by `browseClassesWhere` and tutor results to `gradeLevel in: getEligibleTutorGradesForStudent(learnerGrade)`.
+   - `src/app/api/learner/tutors/route.ts`: Filters browsable tutors to `gradeLevel in: getEligibleTutorGradesForStudent(learnerGrade)`.
+   - `src/app/api/learner/match/route.ts` & `src/lib/chatbot/recommend.ts`: Passed `learnerGrade` to `browsableOrEnrolledWhere`.
+   - `src/components/learner/ClassBrowser.tsx`: Dynamically filters target grade dropdown to student's grade and higher.
+
+6. **Learner Class Detail & Direct Navigation**:
+   - `src/app/learner/classes/[classId]/page.tsx`: Non-enrolled students attempting to view an ineligible class receive `notFound()`.
+   - `src/app/learner/tutors/[tutorId]/page.tsx`: Filters visible classes and weekly timetable slots to eligible classes; hides "Request a class" button when student is higher grade than the tutor.
+
+7. **Class Enrollment & Topic Requests**:
+   - `src/app/api/classes/[classId]/enroll/route.ts`: Rejects enrollment with 403 if `studentGrade > tutorGrade` or `studentGrade > targetGrade`.
+   - `src/app/api/learner/topic-requests/route.ts`: Derives student grade from authenticated record; rejects directed requests to lower-grade tutors with 403.
+   - `src/app/api/tutor/topic-requests/route.ts`: Filters open topic requests pool to `gradeLevel <= tutorGrade`.
+   - `src/app/api/tutor/topic-requests/[id]/accept/route.ts`: Validates `request.gradeLevel <= tutorGrade` (403) and `class.targetGrade <= tutorGrade` (400).
+
+**Verification.**
+- All 113 test files and 874 tests passing (`pnpm exec vitest run`).
+- `pnpm exec tsc --noEmit` clean (0 errors).
+- `pnpm lint` clean (0 errors).
+
+<a id="part-89"></a>
+## Part 89 — Philippine K–12 Subject & Topic Database for Katuwang (Grades 7–12) (2026-10-19)
+
+Comprehensive research and integration of the official Philippine Department of Education (DepEd) secondary curriculum (Grades 7–12) for Taysan Resettlement Integrated School (TRIS), Legazpi City, Albay.
+
+1. **Curriculum Research & Dataset Generation**:
+   - Researched official DepEd curriculum guides, DepEd Order No. 010 s. 2024 (MATATAG Curriculum for Grades 7–10, Key Stage 3), and Senior High School curriculum guides (Grades 11–12, Key Stage 4).
+   - Produced structured machine-readable datasets in JSON (`prisma/data/curriculum/curriculum_dataset.json`) and CSV (`prisma/data/curriculum/curriculum_dataset.csv`), with master copies preserved in `/home/hikaru/Capstone/curiculum/`.
+   - Dataset contains 126 verified learning competencies across 47 subjects and 155 topics with full provenance: subject name, grade level, quarter/semester, unit/content area, topic, subtopic, learning competency text, official competency code, curriculum version (MATATAG vs K-12 2016/SSHS 2024), track/strand, official source URL (deped.gov.ph), and page/section reference.
+
+2. **Curriculum Coverage Matrix & Research Documentation**:
+   - `docs/reports/philippine-k12-curriculum-research-report.md` (and `/home/hikaru/Capstone/curiculum/RESEARCH_REPORT.md`): complete research methodology, source verification table, subject categorization by grade level, and transitional analysis (MATATAG phased rollout).
+   - `docs/reports/curriculum-coverage-matrix.md` (and `/home/hikaru/Capstone/curiculum/CURRICULUM_COVERAGE_MATRIX.md`): complete matrix detailing all 47 learning areas across Grades 7–12, quarterly breakdown, topics extracted, official URLs, and verification status.
+   - `docs/plans/curriculum-database-integration.md` (and `/home/hikaru/Capstone/curiculum/DATABASE_INTEGRATION_PLAN.md`): architecture plan comparing Path B (catalogue population without schema changes) vs Phase 2 3NF relational expansion (`CurriculumCompetency`).
+
+3. **Database Integration & Safe Idempotent Seeding**:
+   - Created `prisma/seedCurriculum.ts` using `@/lib/prisma` to inherit full Aiven MariaDB TLS/CA certificate handling.
+   - Populated `Subject` and `Topic` tables safely and idempotently without modifying database schema or disrupting existing production entities.
+   - Expanded live database taxonomy from 7 subjects and 43 topics to **47 subjects** and **155 topics**.
+   - Zero data loss verified: Users (299), Classes (170), Certifications (307), Requests (160), and Assessment Questions (646) remained 100% intact.
+
+4. **Automated Unit Tests**:
+   - Created `src/lib/__tests__/curriculum.test.ts` (12 test cases) validating:
+     - Dataset JSON structure, schema completeness, and non-empty fields.
+     - DepEd domain provenance for all source URLs (`deped.gov.ph`).
+     - Duplicate prevention on composite keys `(subjectSlug, topic, competencyCode)`.
+     - Grade-level mapping (Grades 7–10 for JHS, Grades 11–12 for SHS).
+     - Senior High School track coverage (Core, Applied, Academic STEM/ABM/HUMSS/GAS, TVL specializations).
+     - Matching engine compatibility with `rankMatches()` and `GRADE_WEIGHTS` (scoring ladder 6/3/2/0, verified topic certification bonus, subject/topic filtering).
+
+**Verification.** `pnpm exec vitest run src/lib/__tests__/curriculum.test.ts` passed 12/12 tests in 459ms. Full test suite `pnpm test` passed 112/112 files and 844/844 tests. Remote MariaDB row count confirmed: 47 subjects, 155 topics, 299 users.
+
+<a id="part-87"></a>
+## Part 87 — Comprehensive Question Bank Expansion (15 questions/topic across 155 topics) (2026-10-19)
+
+Expanded the assessment question bank from 43 legacy topics (646 questions) to cover all 155 curriculum topics across 47 subjects (Grades 7–12), providing 15 multiple-choice questions per topic for diagnostic tests and tutor certification quizzes.
+
+1. **Clean Question Bank Clearing**:
+   - Cleaned dependent attempt records (`SessionTestAttemptItem`, `SessionTestQuestion`, `AssessmentAttemptItem`, `AssessmentAttempt`) and existing `AssessmentOption` and `AssessmentQuestion` records (646 bank questions cleared) to ensure 0 foreign key constraint conflicts or orphaned references.
+
+2. **Question Generation & Topic-Specific Knowledge Base**:
+   - Created `prisma/questionBankData.ts`: generates 15 distinct, curriculum-aligned questions per topic covering concept definition, governing theorems/rules, practical calculation/problem solving, error identification/misconceptions, procedural sequences, real-world applications, tools/standards, and synthesis problems.
+   - Tailored to each learning area: Mathematics, Science, English, Filipino, Araling Panlipunan, Values Education, MAPEH, TLE, and Senior High School Academic & TVL tracks.
+   - Deterministic option shuffling ensuring positions (0..3) with exactly 1 correct answer per question and detailed educational explanations.
+
+3. **High-Performance Batched Insertion & Synchronization**:
+   - Created `prisma/seedQuestionBank.ts`: utilizes batched `createMany` (chunks of 250 questions and 500 options) with client-generated sequential CUIDs, executing all 2,325 questions and 9,300 options in under 30 seconds over remote Aiven MariaDB TLS.
+   - Re-synchronized the 4 existing `SessionTest` records (`Statistics & Probability`, `Research Writing`, `Reading Comprehension`, `Grammar & Sentence Structure`) by linking them to 5 newly seeded questions from their respective topics.
+   - Guaranteed platform settings: `assessmentQuestionCount = "5"`, `assessmentPassPercent = "60"`, `assessmentMinBankSize = "5"`.
+
+**Verification.** Database verified: 2,325 questions, 9,300 options, 47 subjects, 155 topics. Vitest suites `curriculum.test.ts` and `assessment*.test.ts` passing.
+
+<a id="part-88"></a>
+## Part 88 — Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`) (2026-10-19)
+
+Separated combined `datetime-local` input fields into distinct `<input type="date">` and `<input type="time">` controls across the application, matching the design specification (`design/round-2/07-create-form.html`) and improving mobile/desktop usability while guaranteeing timezone-safe ISO string serialization for backend APIs.
+
+1. **Shared Datetime Utilities (`src/lib/datetime.ts`)**:
+   - Added `parseLocalDateAndTime(val?: DateInput | null): { date: string; time: string }`: safely extracts local calendar date (`YYYY-MM-DD`) and 24-hour time (`HH:mm`) from ISO strings, local date strings, and `Date` objects without timezone distortion.
+   - Added `combineDateAndTime(date?: string | null, time?: string | null): string | null`: combines local date and time inputs into a standard UTC ISO string (`YYYY-MM-DDTHH:mm:00.000Z`) for API payloads.
+   - Added `src/lib/__tests__/datetime.test.ts`: 10 comprehensive unit tests verifying duration constants, difference/addition helpers, string parsing, Date instance parsing, null/invalid handling, and roundtrip ISO serialization.
+
+2. **Class Scheduling & Creation (`src/components/tutor/ClassScheduleFields.tsx`)**:
+   - Replaced `<input type="datetime-local">` in per-session rows with separate `<input type="date" aria-label="Session #N date">` and `<input type="time" aria-label="Session #N time">`.
+   - Updated `SessionRowValue` interface to support optional `date?: string` and `time?: string` while retaining backward-compatible `scheduledAt`.
+   - Enhanced validation to verify both date and time are supplied before submission and serialize into ISO format for `onSubmit`.
+   - Updated `AcceptRequestForm.tsx` to pre-populate both `date` and `time` from preferred request slots.
+
+3. **Add Session Modal (`src/components/tutor/AddSessionModal.tsx`)**:
+   - Replaced single `scheduledAt` state and `datetime-local` field with separate `sessionDate` and `sessionTime` states.
+   - Rendered side-by-side Date and Time `<FormField>` elements in a 2-column grid (`grid grid-cols-2 gap-2`).
+   - Combined date and time into an ISO string on submission with user-friendly validation.
+
+4. **Reschedule Session Modal (`src/components/tutor/SessionActions.tsx`)**:
+   - Replaced `toDatetimeLocal` and single `scheduledAt` state with `rescheduleDate` and `rescheduleTime` initialized via `parseLocalDateAndTime`.
+   - Replaced `datetime-local` with side-by-side Date and Time inputs inside a 2-column grid.
+   - Refreshes date and time states upon opening the modal.
+
+**Verification.** Full test suite `pnpm exec vitest run` passed (113 test files, 853 tests). `pnpm exec tsc --noEmit` and `pnpm lint` passed with 0 errors.
+
+
+
+
+

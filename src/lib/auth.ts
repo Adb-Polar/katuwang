@@ -14,8 +14,8 @@ const DUMMY_PASSWORD_HASH = "$2b$12$IoGXJ6Gc974qVtoXzHgX0ON1saFbEG.vkr3Fz2b44U45
 const INVALID_CREDENTIALS = "Invalid email or password.";
 
 // How long a decoded JWT's cached role/status is trusted before the `jwt`
-// callback re-reads them from the DB (so an admin suspend/ban takes effect
-// mid-session instead of only at the 8h expiry).
+// callback re-reads them from the DB for client/proxy display. Protected server
+// operations independently check the live account on every request.
 const TOKEN_STALE_MS = 5 * 60 * 1000;
 
 export const authOptions: NextAuthOptions = {
@@ -104,6 +104,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           fullName: `${user.firstName} ${user.lastName}`.trim(),
+          ...(user.image ? { image: user.image } : {}),
+          gradeLevel: user.gradeLevel,
         };
       },
     }),
@@ -117,6 +119,8 @@ export const authOptions: NextAuthOptions = {
         token.anonymousId = user.anonymousId;
         token.role = user.role;
         token.fullName = user.fullName;
+        if (user.image) token.image = user.image;
+        if (user.gradeLevel) token.gradeLevel = user.gradeLevel;
         token.status = "ACTIVE";
         token.checkedAt = Date.now();
         return token;
@@ -127,12 +131,18 @@ export const authOptions: NextAuthOptions = {
       if (token.id && (!token.checkedAt || Date.now() - token.checkedAt > TOKEN_STALE_MS)) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, status: true },
+          select: { role: true, status: true, image: true, gradeLevel: true },
         });
         token.checkedAt = Date.now();
-        token.status = fresh ? fresh.status : "BANNED";
-        if (fresh) token.role = fresh.role;
+        // Never adopt a changed role into an existing login. The live server
+        // boundary rejects mismatches immediately; the proxy catches up here.
+        token.status = fresh && fresh.role === token.role ? fresh.status : "BANNED";
+        if (fresh) {
+          token.image = fresh.image ?? null;
+          token.gradeLevel = fresh.gradeLevel ?? null;
+        }
       }
+
       return token;
     },
 
@@ -144,6 +154,8 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.fullName = token.fullName;
         session.user.status = token.status ?? "ACTIVE";
+        session.user.image = token.image ?? null;
+        session.user.gradeLevel = token.gradeLevel ?? null;
       }
       return session;
     },

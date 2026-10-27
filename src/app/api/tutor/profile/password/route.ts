@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { changePasswordSchema } from "@/lib/validations/changePassword";
 import { changeOwnPassword } from "@/lib/changePassword";
 
 // ─── POST: Change Own Password ─────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

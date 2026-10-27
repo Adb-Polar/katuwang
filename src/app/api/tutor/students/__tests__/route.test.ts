@@ -7,8 +7,7 @@ const { getServerSessionMock, tutorProfileFindUnique, classEnrollmentFindMany } 
   classEnrollmentFindMany: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -95,7 +94,7 @@ describe("GET /api/tutor/students", () => {
     expect(classEnrollmentFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         select: expect.objectContaining({
-          learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+          learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
         }),
       })
     );

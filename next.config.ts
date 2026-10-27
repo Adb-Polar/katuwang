@@ -11,11 +11,11 @@ const CSP = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com",
   "font-src 'self' data:",
   "style-src 'self' 'unsafe-inline'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
-  "connect-src 'self'",
+  "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://utfs.io https://*.ufs.sh",
   "form-action 'self'",
 ].join("; ");
 
@@ -33,6 +33,23 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["192.168.219.123"],
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+      },
+      {
+        protocol: "https",
+        hostname: "*.ufs.sh",
+      },
+      {
+        protocol: "https",
+        hostname: "uploadthing.com",
+      },
+    ],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

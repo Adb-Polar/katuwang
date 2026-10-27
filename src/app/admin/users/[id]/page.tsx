@@ -1,13 +1,15 @@
 import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import BackLink from "@/components/ui/BackLink";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { formatDateTime } from "@/lib/datetime";
+import { statusDisplayLabel } from "@/lib/displayLabels";
 import { gradeSection } from "@/lib/gradeLevels";
+import UserAvatarModerationCard from "@/components/admin/UserAvatarModerationCard";
+import { isAdminRole } from "@/lib/permissions";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -25,11 +27,11 @@ export default async function AdminUserDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") notFound();
+  const session = await getActiveServerSession();
+  if (!session || !isAdminRole(session.user.role)) notFound();
 
   const user = await prisma.user.findFirst({
-    where: { id, role: { not: "ADMIN" } },
+    where: { id, role: { notIn: ["ADMIN", "SUPER_ADMIN"] } },
     select: {
       id: true,
       anonymousId: true,
@@ -44,6 +46,9 @@ export default async function AdminUserDetailPage({
       statusReason: true,
       statusUpdatedAt: true,
       statusExpiresAt: true,
+      image: true,
+      profilePictureLocked: true,
+      profilePictureUpdatedAt: true,
       createdAt: true,
       _count: { select: { enrollments: true, topicRequests: true } },
       tutorProfile: {
@@ -107,7 +112,7 @@ export default async function AdminUserDetailPage({
         <div className="card-body gap-3 p-6">
           <div className="flex items-center gap-2">
             <h2 className="card-title text-sm font-bold">Status</h2>
-            <StatusBadge tone={STATUS_TONE[user.status]} label={user.status} size="xs" />
+            <StatusBadge tone={STATUS_TONE[user.status]} label={statusDisplayLabel(user.status)} size="xs" />
           </div>
           {user.status !== "ACTIVE" && (
             <div className="text-xs text-base-content/70 space-y-0.5">
@@ -131,6 +136,14 @@ export default async function AdminUserDetailPage({
           )}
         </div>
       </section>
+
+      <UserAvatarModerationCard
+        userId={user.id}
+        userName={`${user.firstName} ${user.lastName}`}
+        initialImage={user.image}
+        locked={user.profilePictureLocked}
+        updatedAt={user.profilePictureUpdatedAt ? user.profilePictureUpdatedAt.toISOString() : null}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section className="lg:col-span-2 card kt-card">

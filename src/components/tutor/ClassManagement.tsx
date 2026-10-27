@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 
 import { useFetchList } from "@/hooks/useFetchList";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Tabs from "@/components/ui/Tabs";
 import ClassCard from "@/components/classes/ClassCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
@@ -49,8 +48,7 @@ interface TutorClass {
 }
 
 export default function ClassManagement() {
-  const router = useRouter();
-  const { data: classes, loading, error } = useFetchList<TutorClass>(
+  const { data: classes, loading, loadError, refetch } = useFetchList<TutorClass>(
     "/api/tutor/classes",
     "Could not retrieve classes."
   );
@@ -80,7 +78,6 @@ export default function ClassManagement() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="error" message={error || null} />
 
       {/* Main Section */}
       <section className="card kt-card">
@@ -108,12 +105,14 @@ export default function ClassManagement() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : displayedClasses.length === 0 ? (
             <ClassEmptyState
               message={activeTab === "active" ? "No active classes scheduled." : "No past classes found."}
               action={
                 activeTab === "active" && (
-                  <Link href="/tutor/classes/new" className="btn btn-link btn-xs text-primary mt-1 text-xs">
+                  <Link href="/tutor/classes/new" className="btn btn-link btn-xs min-h-11 sm:min-h-0 text-primary mt-1 text-xs">
                     Schedule your first class now
                   </Link>
                 )
@@ -137,7 +136,7 @@ export default function ClassManagement() {
                   enrolledCount={c.enrollments.length}
                   maxStudents={c.maxStudents}
                   activeLabel="Active"
-                  onClick={() => router.push(`/tutor/classes/${c.id}`)}
+                  href={`/tutor/classes/${c.id}`}
                 />
               ))}
             </div>

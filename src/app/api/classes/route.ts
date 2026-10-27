@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma, GradeLevel } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
@@ -16,15 +15,17 @@ const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
  * The signals used to personalize the default browse order: the learner's grade
  * plus the subjects/topics they've engaged with (past enrolments + open requests).
  */
-async function loadRankContext(learnerId: string): Promise<BrowseRankContext> {
+async function loadRankContext(learnerId: string, learnerGrade?: GradeLevel | null): Promise<BrowseRankContext> {
   const [user, enrollments, requests] = await Promise.all([
-    prisma.user.findUnique({ where: { id: learnerId }, select: { gradeLevel: true } }),
+    learnerGrade !== undefined
+      ? Promise.resolve({ gradeLevel: learnerGrade })
+      : prisma.user.findUnique({ where: { id: learnerId }, select: { gradeLevel: true } }),
     prisma.classEnrollment.findMany({
       where: { learnerId },
       select: { class: { select: { subject: true, topics: { select: { topic: true } } } } },
     }),
     prisma.topicRequest.findMany({
-      where: { learnerId, status: "OPEN" },
+      where: { learnerId, status: "OPEN", expiresAt: { gt: new Date() } },
       select: { subject: true, topics: { select: { topic: true } } },
     }),
   ]);
@@ -46,13 +47,19 @@ async function loadRankContext(learnerId: string): Promise<BrowseRankContext> {
 // ─── GET: Paginated Browsable / Enrolled Classes for a Learner ───────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
     await reinstateExpiredClasses();
+
+    const learner = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { gradeLevel: true },
+    });
+    const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
 
     const { searchParams } = new URL(req.url);
     const scope = searchParams.get("scope") === "mine" ? "mine" : "browse";
@@ -102,7 +109,7 @@ export async function GET(req: NextRequest) {
     const mineTab: MineTab =
       tabParam === "completed" || tabParam === "cancelled" ? tabParam : "upcoming";
 
-    const browseWhere = browseClassesWhere(session.user.id);
+    const browseWhere = browseClassesWhere(session.user.id, learnerGrade);
     const mineWhere = myClassesWhere(session.user.id);
     const filteredBrowse = scope === "browse" && hasFilters;
     // The unfiltered browse list is ranked by light personalization (see
@@ -152,7 +159,7 @@ export async function GET(req: NextRequest) {
         ...(personalize ? {} : { skip: (page - 1) * pageSize, take: pageSize }),
       }),
       getSetting("showTutorRealNames"),
-      personalize ? loadRankContext(session.user.id) : Promise.resolve(null),
+      personalize ? loadRankContext(session.user.id, learnerGrade) : Promise.resolve(null),
     ]);
 
     const mineTotal = mineUpcoming + mineCompleted + mineCancelled;

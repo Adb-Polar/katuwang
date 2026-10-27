@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 
 function avg(nums: number[]): number | null {
@@ -12,7 +11,7 @@ function avg(nums: number[]): number | null {
 // small class would make "class average" a de-anonymisation oracle).
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_LEARNER") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

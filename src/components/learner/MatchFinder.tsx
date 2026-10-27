@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -31,7 +30,7 @@ interface MatchedClass {
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
   published: boolean;
   suspendedReason: string | null;
-  tutor: { id: string; anonymousId: string; name?: string; section?: string };
+  tutor: { id: string; anonymousId: string; name?: string; section?: string; image?: string | null };
   maxStudents: number;
   _count: { enrollments: number };
 }
@@ -62,7 +61,6 @@ function reasonChips(r: MatchReasons) {
 }
 
 export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) {
-  const router = useRouter();
   const [criteria, setCriteria] = useState<MatchCriteriaValue>({
     ...EMPTY_CRITERIA,
     gradeLevel: defaultGrade,
@@ -114,7 +112,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 <button
                   type="button"
                   onClick={() => setFlipped(false)}
-                  className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                  className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   Adjust filters
@@ -126,7 +124,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 <p className="text-xs text-base-content/50 italic">
                   Nothing open fits this right now.
                 </p>
-                <Link href="/learner/requests" className="btn btn-outline btn-xs text-xs">
+                <Link href="/learner/requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
                   Post a class request instead
                 </Link>
               </div>
@@ -151,7 +149,8 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       tutorAnonymousId={m.class.tutor.anonymousId}
                       tutorName={m.class.tutor.name}
                       tutorSection={m.class.tutor.section}
-                      onClick={() => router.push(`/learner/classes/${m.class.id}?from=browse`)}
+                      tutorImage={m.class.tutor.image}
+                      href={`/learner/classes/${m.class.id}?from=browse`}
                     />
                     <div className="flex items-center gap-1.5 px-1">
                       <span className="badge badge-primary badge-sm text-2xs font-bold">
@@ -188,7 +187,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   <button
                     type="button"
                     onClick={() => setFlipped(true)}
-                    className="btn btn-ghost btn-xs gap-1 text-2xs shrink-0"
+                    className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
                   >
                     <ListChecks className="h-3.5 w-3.5" />
                     View results

@@ -7,10 +7,12 @@ const { getServerSessionMock, findUniqueMock, updateMock } = vi.hoisted(() => ({
   updateMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { topicRequest: { findUnique: findUniqueMock, update: updateMock } },
+  prisma: { topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
 }));
+
+vi.mock("@/lib/topicRequestHistory", () => ({ requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), requestSnapshot: vi.fn().mockResolvedValue({ slots: [], note: null }), recordRequestHistory: vi.fn() }));
 
 import { PATCH } from "@/app/api/learner/topic-requests/[id]/route";
 
@@ -105,6 +107,24 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
         }),
       })
     );
+  });
+
+  it("renews an expired request with the same ID and a new deadline", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "OPEN", expiresAt: new Date(Date.now() - 1) });
+    updateMock.mockImplementation(async ({ data }: { data: { expiresAt: Date } }) => ({ id: "r1", status: "OPEN", expiresAt: data.expiresAt }));
+    const res = await PATCH(makeRequest({ action: "RENEW" }), { params });
+    expect(res.status).toBe(200);
+    expect((await res.json()).id).toBe("r1");
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ lastSubmittedAt: expect.any(Date), expiresAt: expect.any(Date) }) }));
+  });
+
+  it("does not renew an active request", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "OPEN", expiresAt: new Date(Date.now() + 1000) });
+    const res = await PATCH(makeRequest({ action: "RENEW" }), { params });
+    expect(res.status).toBe(400);
+    expect(updateMock).not.toHaveBeenCalled();
   });
 
   it("400 when editing a request that is no longer open", async () => {

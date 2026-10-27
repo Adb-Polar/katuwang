@@ -7,8 +7,7 @@ const { getServerSessionMock, findManyMock, countMock } = vi.hoisted(() => ({
   countMock: vi.fn(),
 }));
 
-vi.mock("next-auth", () => ({
-  getServerSession: getServerSessionMock,
+vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -55,8 +54,21 @@ describe("GET /api/admin/users", () => {
     expect(json.users).toHaveLength(1);
     expect(json.total).toBe(1);
     expect(findManyMock).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ role: { not: "ADMIN" } }) })
+      expect.objectContaining({
+        where: expect.objectContaining({
+          role: { notIn: ["ADMIN", "SUPER_ADMIN"] },
+        }),
+      })
     );
+  });
+
+  it("returns 200 when requester is SUPER_ADMIN", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "super1", role: "SUPER_ADMIN" } });
+    findManyMock.mockResolvedValue([]);
+    countMock.mockResolvedValue(0);
+
+    const res = await GET(makeRequest());
+    expect(res.status).toBe(200);
   });
 
   it("filters by role and search term when provided", async () => {

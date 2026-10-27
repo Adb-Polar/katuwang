@@ -15,6 +15,7 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 - **Ban a user** — set a user's account status to `BANNED` (indefinite, with a reason).
 - **Reactivate a user** — restore a suspended/banned account back to `ACTIVE`.
 - **Registration approval** (`/admin/registrations`, active while `requireRegistrationApproval` is on) — approve → `ACTIVE`; decline → `DECLINED` (distinct from `BANNED`, which is a policy action on an already-active account). A declined applicant can't sign in; when they try, they're sent to `/account-declined`, which shows the decline reason. The Users table hides `DECLINED` accounts unless you filter for that status.
+  (`GET /api/admin/registrations`, `PATCH /api/admin/registrations/[userId]`)
 - **Email verification** (toggle `requireEmailVerification` in Platform Settings, added 2026-09-14) — when on, new accounts must click an emailed link before they can log in (`User.emailVerifiedAt`, `VerificationToken` model), checked *before* `requireRegistrationApproval`. Defaults off: turning it on retroactively blocks every existing account with no verified email, so only enable it once that's accounted for.
 - Every status change is written to the audit log automatically.
 - Admin accounts cannot be modified through this endpoint (`400 Cannot modify an admin account`).
@@ -68,17 +69,60 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
   (`PATCH /api/admin/certifications/[certificationId]`)
 - Certification decisions are recorded in the audit log (the rejection note is copied to the log `reason`).
 
+## Question Bank (`/admin/assessment/question-bank`)
+
+- Lives in the **Assessment** nav group. `/admin/question-bank` (old path) permanently redirects here.
+- **Author bank questions** — drill in by subject → topic, then add single-answer multiple-choice questions (prompt, optional explanation, 2–6 options with exactly one marked correct). Every admin-authored question is created with `origin: "BANK"`; a tutor's self-authored session-test questions (`origin: "TUTOR"`) never appear here.
+  (`GET`/`POST /api/admin/assessment-questions?subject=&topic=&active=&q=&page=&pageSize=`)
+- **Edit or retire a question** — full content edits (prompt/explanation/options) are only allowed before the question has been used in any certification attempt or session test; once `inUse`, only the `active` flag can be toggled (retiring it hides it from future picks without touching history). **Delete** is hard and only works on an unused question — an in-use one must be retired instead.
+  (`PATCH`/`DELETE /api/admin/assessment-questions/[questionId]`)
+- **Coverage view** — one row per curated (subject, topic) showing the active question count, the effective global config, a `ready` flag (`activeCount >= minBankSize`), and how many open question requests exist for that topic.
+  (`GET /api/admin/assessment-questions/coverage`)
+- All question CRUD is recorded in the audit log (`QUESTION_CREATED`/`QUESTION_UPDATED`/`QUESTION_RETIRED`/`QUESTION_DELETED`).
+
+## Question Requests (`/admin/assessment/requests`)
+
+- Lives in the **Assessment** nav group — the review queue for a tutor's "please add more questions for this topic" request (`POST /api/tutor/question-requests`).
+- **List** — Open (default) / Resolved / Dismissed, filterable by subject and a topic/tutor-anonymous-ID search.
+  (`GET /api/admin/question-requests?status=&subject=&q=&page=&pageSize=`)
+- **Resolve** (after adding bank questions) or **Dismiss** (with an optional note) — either way the request leaves the Open tab; the tutor gets a `QUESTION_REQUEST_RESOLVED` or `QUESTION_REQUEST_DISMISSED` notification linking to `/tutor/assessments`.
+  (`PATCH /api/admin/question-requests/[requestId]`) — only an `OPEN` request can be resolved (`400` otherwise).
+- Recorded in the audit log as `QUESTION_REQUEST_RESOLVED` regardless of which decision was made.
+
+## Assessment Results (`/admin/assessment/results`)
+
+- Lives in the **Assessment** nav group — read-only visibility into every tutor **certification** `AssessmentAttempt` (not to be confused with the per-session `SessionTest` results below).
+- **List** — filterable by subject, topic, status (`IN_PROGRESS`/`PASSED`/`FAILED`), and a tutor-anonymous-ID search.
+  (`GET /api/admin/assessment-attempts?subject=&topic=&status=&q=&page=&pageSize=`)
+- **View one attempt** — full per-question breakdown with the correct answer revealed (admin-only; the tutor's own results view doesn't reveal unanswered correct options the same way).
+  (`GET /api/admin/assessment-attempts/[attemptId]`)
+- No write routes — admins observe attempts, they don't create or grade them.
+
 ## Platform Settings (`/admin/settings`)
 
-Admin-configurable boolean flags stored in `PlatformSetting`:
+Admin-configurable boolean flags stored in `PlatformSetting`, grouped on the page as **General** and **Assessment**:
 
+General:
 - **`registrationOpen`** — toggles whether new learner/tutor registrations are accepted (`POST /api/register` checks this and returns `403` when closed). Defaults to `true`.
 - **`requireCertificationForClassCreation`** — when enabled, tutors may only create a class covering topics they hold a `CERTIFIED` `TopicCertification` for. Defaults to `false`.
 - **`matchingEnabled`** — when disabled, the learner "Find a Class" matcher (`POST /api/learner/match`), topic requests (`/api/learner/topic-requests`), and the tutor request queue (`/api/tutor/topic-requests`) all return `403`. Defaults to `true`.
-- **`sessionTestsEnabled`** — when disabled, a tutor cannot create or publish a session test and a learner cannot start a pre/post attempt; already-collected results stay fully readable regardless. Defaults to `true`.
+- **`showTutorRealNames`** — override for the double-blind default; when enabled, learners see a tutor's real name instead of just their `TUT-XXXX` anonymous ID. Defaults to `false`.
+- **`requireRegistrationApproval`** — gates whether new accounts land `PENDING` (needing the `/admin/registrations` approve/decline step above) or go straight to `ACTIVE`. Defaults to `false`.
 - **`requireEmailVerification`** (added 2026-09-14) — see User Management above. Defaults to `false`.
 
+Assessment:
+- **`autoCertifyOnAssessmentPass`** — when off (default), a tutor who passes an assessment gets a `PENDING` `TopicCertification` for an admin to approve on the Certifications screen; when on, passing goes straight to `CERTIFIED`. Defaults to `false`.
+- **`chatbotEnabled`** — see Chatbot assistant below. Defaults to `true`.
+- **`sessionTestsEnabled`** — when disabled, a tutor cannot create or publish a session test and a learner cannot start a pre/post attempt; already-collected results stay fully readable regardless. Defaults to `true`.
+
 (`GET`/`PATCH /api/admin/settings`)
+
+**Global assessment config** — three numeric platform-wide values applied to every subject/topic (not per-`(subject, topic)`), edited on the same page under the Assessment group:
+- **Questions per attempt** (`questionCount`, 1–50, default `5`) — how many questions each assessment attempt serves.
+- **Pass mark %** (`passPercent`, 1–100, default `80`) — % correct required to pass.
+- **Minimum bank size** (`minBankSize`, 1–200, default `5`) — active questions a topic needs before it's assessable.
+
+(`GET`/`PATCH /api/admin/assessment-configs`, upserts `PlatformSetting` rows, logs `ASSESSMENT_CONFIG_UPDATED`)
 
 This page also has a **My Account** section (added 2026-09-14) to change your own password — the
 first self-service account surface admins have had, since this page previously covered only
@@ -91,13 +135,13 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 - Users by role, by grade level, and by account status.
 - Classes by subject and by status.
 - Certifications by status.
-- Total enrollments and enrollments in the last 30 days.
+- Total enrollments, enrollments in the last 30 days, and a zero-filled daily enrollment series over that same window (charted in `ReportsView.tsx`).
 
 (`GET /api/admin/reports`)
 
 ## Audit Log (`/admin/audit-log`)
 
-- **View moderation action history** — the most recent 200 `AuditLog` entries (user status changes, class status changes, certification approvals/rejections), each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp.
+- **View moderation action history** — the most recent 200 `AuditLog` entries, each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp. Covers every write action across the portal: user registration approve/decline and status changes, class status changes, class appeal decisions, abuse report resolve/dismiss, topic request status changes, certification approve/reject, question bank create/update/retire/delete, question request resolutions, global assessment config updates, and subject/topic create/update/delete.
   (`GET /api/admin/audit-log`)
 
 ## Notifications (`/admin/notifications`)
@@ -159,7 +203,7 @@ Quick search behind the top-bar box. **Not** admin-gated (any authenticated role
 ### `GET /api/admin/users`
 List/search learner + tutor accounts (admins excluded).
 
-**Query params** (all optional): `q` (free-text: first/last name, email, anonymous ID), `role` (`STUDENT_LEARNER` \| `STUDENT_TUTOR`), `status` (`ACTIVE` \| `SUSPENDED` \| `BANNED` \| `PENDING` \| `DECLINED` — omitted excludes `DECLINED`), `page` (default `1`), `pageSize` (default `10`, max `100`).
+**Query params** (all optional): `q` (free-text: first/last name, email, anonymous ID), `role` (`STUDENT_LEARNER` \| `STUDENT_TUTOR`), `status` (`ACTIVE` \| `SUSPENDED` \| `BANNED` \| `PENDING` \| `DECLINED` — omitted excludes `DECLINED`), `gradeLevel`, `sort` (`createdAt` default \| `name` \| `status` \| `role` \| `code`) + `dir`, `page` (default `1`), `pageSize` (default `10`, max `100`).
 
 **200** → `{ users: User[], total, page, pageSize }` — each `User` includes `id, anonymousId, firstName, lastName, email, role, gradeLevel, section, status, statusReason, statusUpdatedAt, statusExpiresAt, createdAt`.
 
@@ -292,10 +336,55 @@ Approve or reject a pending certification request.
 **404** → certification not found.
 **500** → `{ error }`.
 
+### `GET /api/admin/registrations`, `PATCH /api/admin/registrations/[userId]`
+List the `PENDING` registration queue (`q`, `role`, `gradeLevel`, `page`, `pageSize`, `sort`/`dir` — same paging convention as users) and approve/decline one.
+
+**Body** (`PATCH /[userId]`): `{ "decision": "APPROVE" | "DECLINE", "reason": "string (≤500 chars, optional)" }`.
+- `APPROVE` → `status: "ACTIVE"`, notifies the user (`REGISTRATION_APPROVED` → `/dashboard`).
+- `DECLINE` → `status: "DECLINED"`, stores `reason` as `statusReason`; no notification is sent (a declined applicant can't sign in to see one — see `/account-declined`).
+- Writes an `AuditLog` entry (`USER_APPROVED` / `USER_DECLINED`).
+
+**400** → target is not `PENDING`, or failed validation. **404** → user not found. **500** → `{ error }`.
+
+### `GET /api/admin/assessment-questions`, `POST /api/admin/assessment-questions`
+List (filtered by `subject`, `topic`, `active`, `q`, `page`, `pageSize`) or create a bank question. Always scoped to `origin: "BANK"`.
+
+**POST body**: `{ subject, topic, prompt (5–1000 chars), explanation?: string (≤1000 chars), options: [{ text, isCorrect }] (2–6, exactly one correct) }`.
+**201** → the created question (`inUse: false`). **400** → validation error or invalid topic for that subject. Logs `QUESTION_CREATED`.
+
+### `GET`/`PATCH`/`DELETE /api/admin/assessment-questions/[questionId]`
+Fetch, edit, retire, or delete one bank question.
+
+- `PATCH` with `prompt`/`explanation`/`options` → **409** if the question is already `inUse` (used in an `AssessmentAttempt` or `SessionTest`) — content can't change after use, only `active` can.
+- `PATCH` with `active: false` on a previously-active question → logs `QUESTION_RETIRED`; any other edit logs `QUESTION_UPDATED`.
+- `DELETE` → **409** if `inUse`; otherwise hard-deletes and logs `QUESTION_DELETED`.
+- **404** → question not found (or not `origin: "BANK"`).
+
+### `GET /api/admin/assessment-questions/coverage`
+Per-`(subject, topic)` bank readiness: `[{ subject, topic, activeCount, config: { questionCount, passPercent, minBankSize }, ready, openRequests }]`, one row per curated topic. `ready` is `activeCount >= config.minBankSize`.
+
+### `GET /api/admin/question-requests`, `PATCH /api/admin/question-requests/[requestId]`
+List (`status` — `OPEN` default/`RESOLVED`/`DISMISSED`, `subject`, `q`, `page`, `pageSize`) tutor requests for more bank questions on a topic, or resolve one.
+
+**PATCH body**: `{ "status": "RESOLVED" | "DISMISSED", "resolutionNote": "string (≤500 chars, optional)" }`.
+- **400** if the request isn't `OPEN`. Notifies the requesting tutor (`QUESTION_REQUEST_RESOLVED` / `QUESTION_REQUEST_DISMISSED` → `/tutor/assessments`). Logs `QUESTION_REQUEST_RESOLVED` either way.
+
+### `GET /api/admin/assessment-attempts`, `GET /api/admin/assessment-attempts/[attemptId]`
+Read-only list (`subject`, `topic`, `status`, `q` on tutor anonymous ID, `page`, `pageSize`) and full detail (options + correct answers revealed) of every tutor certification `AssessmentAttempt`. No write routes.
+
+### `GET /api/admin/assessment-configs`
+Read the global assessment config: `{ questionCount, passPercent, minBankSize }`.
+
+### `PATCH /api/admin/assessment-configs`
+Update one or more of the three global assessment values (applies to every subject/topic).
+
+**Body**: `{ "questionCount": "int 1–50 (optional)", "passPercent": "int 1–100 (optional)", "minBankSize": "int 1–200 (optional)" }` — at least one field required.
+**200** → the updated config. **400** → out of range, or no field given. Logs `ASSESSMENT_CONFIG_UPDATED`.
+
 ### `GET /api/admin/settings`
 List all platform settings.
 
-**200** → `[{ key: "registrationOpen" | "requireCertificationForClassCreation", value: boolean }, ...]`.
+**200** → `[{ key, value: boolean }, ...]` — one row per key in `PLATFORM_SETTING_KEYS`: `registrationOpen`, `requireCertificationForClassCreation`, `matchingEnabled`, `showTutorRealNames`, `requireRegistrationApproval`, `requireEmailVerification`, `autoCertifyOnAssessmentPass`, `chatbotEnabled`, `sessionTestsEnabled`.
 **500** → `{ error }`.
 
 ### `PATCH /api/admin/settings`
@@ -303,7 +392,7 @@ Update one platform setting (upserts into `PlatformSetting`).
 
 **Body**
 ```json
-{ "key": "registrationOpen" | "requireCertificationForClassCreation" | "matchingEnabled", "value": true }
+{ "key": "registrationOpen" | "requireCertificationForClassCreation" | "matchingEnabled" | "showTutorRealNames" | "requireRegistrationApproval" | "requireEmailVerification" | "autoCertifyOnAssessmentPass" | "chatbotEnabled" | "sessionTestsEnabled", "value": true }
 ```
 **200** → `{ key, value }`.
 **400** → invalid key or non-boolean value.
@@ -321,7 +410,7 @@ Read-only platform breakdown dashboard (Prisma `groupBy` aggregates).
   "classesBySubject": [{ "subject": "...", "count": 0 }],
   "classesByStatus": [{ "status": "...", "count": 0 }],
   "certificationsByStatus": [{ "status": "...", "count": 0 }],
-  "enrollments": { "total": 0, "last30Days": 0 }
+  "enrollments": { "total": 0, "last30Days": 0, "byDay": [{ "date": "YYYY-MM-DD", "count": 0 }] }
 }
 ```
 **500** → `{ error }`.

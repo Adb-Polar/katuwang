@@ -1,18 +1,18 @@
-import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { User } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import BackLink from "@/components/ui/BackLink";
 import TopicChip from "@/components/ui/TopicChip";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { addDays } from "@/lib/datetime";
 import { getSetting } from "@/lib/settings";
+import { isStudentEligibleForTutor, isStudentEligibleForClass } from "@/lib/gradeLevels";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
 import ReportButton from "@/components/learner/ReportButton";
+import UserAvatar from "@/components/profile/UserAvatar";
 import TutorProfileClassTabs, {
   type TutorProfileClass,
 } from "@/components/learner/TutorProfileClassTabs";
@@ -31,7 +31,8 @@ export default async function LearnerTutorProfilePage({
   await reinstateExpiredClasses();
 
   const showRealNames = await getSetting("showTutorRealNames");
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
   const meId = session?.user.id ?? null;
   const me = meId
     ? await prisma.user.findUnique({ where: { id: meId }, select: { gradeLevel: true } })
@@ -41,9 +42,11 @@ export default async function LearnerTutorProfilePage({
     where: { id: tutorId, role: "STUDENT_TUTOR" },
     select: {
       anonymousId: true,
+      image: true,
       firstName: true,
       lastName: true,
       section: true,
+      gradeLevel: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -100,21 +103,25 @@ export default async function LearnerTutorProfilePage({
     maxStudents: c.maxStudents,
   });
 
-  // A stranger only sees SCHEDULED classes; suspended/banned/completed classes
-  // surface only to a learner enrolled in them.
+  const isEnrolledIn = (c: (typeof allClasses)[number]) => c.enrollments.length > 0;
+  const isClassEligible = (c: (typeof allClasses)[number]) =>
+    isStudentEligibleForClass(me?.gradeLevel, tutor.gradeLevel, c.gradeLevel);
+
+  // A stranger only sees SCHEDULED classes that they are eligible to enroll in;
+  // suspended/banned/completed classes surface only to a learner enrolled in them.
   const visibleClasses = allClasses.filter(
-    (c) => c.status === "SCHEDULED" || c.enrollments.length > 0,
+    (c) => isEnrolledIn(c) || (c.status === "SCHEDULED" && isClassEligible(c)),
   );
   const activeClasses = visibleClasses.filter((c) => c.status !== "COMPLETED").map(toDto);
   const completedClasses = visibleClasses
-    .filter((c) => c.status === "COMPLETED" && c.enrollments.length > 0)
+    .filter((c) => c.status === "COMPLETED" && isEnrolledIn(c))
     .map(toDto);
 
   // Mon–Sun timetable: upcoming SCHEDULED sessions in the next 7 days.
   const now = new Date();
   const weekAhead = addDays(now, 7);
   const timetableSessions = allClasses
-    .filter((c) => c.status === "SCHEDULED")
+    .filter((c) => isEnrolledIn(c) || (c.status === "SCHEDULED" && isClassEligible(c)))
     .flatMap((c) =>
       c.sessions
         .filter((s) => s.status === "SCHEDULED" && s.scheduledAt > now && s.scheduledAt <= weekAhead)
@@ -143,12 +150,14 @@ export default async function LearnerTutorProfilePage({
         actions={
           <div className="flex items-center gap-2 flex-wrap justify-end">
             <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />
-            <RequestTopicButton
-              tutorId={tutorId}
-              tutorAnonymousId={tutor.anonymousId}
-              defaultGrade={me?.gradeLevel ?? undefined}
-              verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
-            />
+            {isStudentEligibleForTutor(me?.gradeLevel, tutor.gradeLevel) && (
+              <RequestTopicButton
+                tutorId={tutorId}
+                tutorAnonymousId={tutor.anonymousId}
+                defaultGrade={me?.gradeLevel ?? undefined}
+                verifiedTopicsHint={certifiedTopics.map((c) => `${c.topic}`)}
+              />
+            )}
             {canReport && (
               <ReportButton targetType="TUTOR" targetId={tutorId} targetLabel={tutor.anonymousId} />
             )}
@@ -156,20 +165,34 @@ export default async function LearnerTutorProfilePage({
         }
       />
 
-      {showRealNames && (
-        <section className="card kt-card">
-          <div className="card-body gap-2">
-            <h2 className="card-title text-sm font-bold">Tutor</h2>
-            <div className="flex items-center gap-2 text-xs text-base-content/80">
-              <User className="h-4 w-4 text-primary shrink-0" />
-              <span className="font-semibold">
-                {tutor.firstName} {tutor.lastName}
-              </span>
-              <span className="text-base-content/50">· Section {tutor.section}</span>
+      <section className="card kt-card">
+        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <UserAvatar
+            src={tutor.image}
+            name={showRealNames ? `${tutor.firstName} ${tutor.lastName}` : null}
+            anonymousId={tutor.anonymousId}
+            size="xl"
+            role="TUTOR"
+            subtitle={showRealNames && tutor.section ? `Section ${tutor.section}` : null}
+          />
+          <div className="text-center sm:text-left space-y-1">
+            <h2 className="text-base font-bold text-base-content">
+              {showRealNames ? `${tutor.firstName} ${tutor.lastName}` : "Certified Student Tutor"}
+            </h2>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="sm" showIcon />
+              {showRealNames && tutor.section && (
+                <span className="text-xs text-base-content/60">Section {tutor.section}</span>
+              )}
             </div>
+            <p className="text-2xs text-base-content/50 pt-1">
+              {tutor.image
+                ? "Click profile picture to view full size."
+                : "Student tutor is using their anonymous monogram."}
+            </p>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <section className="card kt-card">
         <div className="card-body gap-3">

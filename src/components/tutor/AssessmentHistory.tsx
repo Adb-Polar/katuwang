@@ -1,6 +1,7 @@
 import Link from "next/link";
 import StatusBadge from "@/components/ui/StatusBadge";
 import type { AttemptSummary } from "@/app/tutor/assessments/page";
+import { subjectDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 import { formatDate } from "@/lib/datetime";
 
 export interface CertificationDetail {
@@ -48,17 +49,17 @@ export default function AssessmentHistory({
         <div className="space-y-3">
           <h3 className="text-xs font-bold text-base-content/70">Attempts</h3>
           {attempts.map((a) => (
-            <div key={a.id} className="border border-base-200 rounded-xl p-3 flex items-center justify-between gap-3">
+            <div key={a.id} className="border border-base-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-semibold text-xs text-base-content/80 truncate">{a.topic}</div>
+                <div className="font-semibold text-sm text-base-content/80 break-words">{a.topic}</div>
                 <div className="text-2xs text-base-content/50">
-                  {a.subject} · attempt #{a.attemptNo} · {formatDate(a.startedAt)}
+                  {subjectDisplayLabel(a.subject)} · attempt #{a.attemptNo} · {formatDate(a.startedAt)}
                   {a.status !== "IN_PROGRESS" && (
                     <> · {a.scorePercent}% ({a.correctCount}/{a.questionCount})</>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                 <StatusBadge
                   tone={ATTEMPT_BADGE[a.status].tone}
                   label={ATTEMPT_BADGE[a.status].label}
@@ -66,7 +67,7 @@ export default function AssessmentHistory({
                 />
                 <Link
                   href={`/tutor/assessments/${a.id}`}
-                  className="btn btn-outline btn-xs text-2xs font-bold"
+                  className="btn btn-outline min-h-11 text-sm font-bold"
                 >
                   {a.status === "IN_PROGRESS" ? "Resume" : "Review"}
                 </Link>
@@ -83,8 +84,8 @@ export default function AssessmentHistory({
             <div key={c.id} className="border border-base-200 rounded-xl p-3 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-semibold text-xs text-base-content/80 truncate">{c.topic}</div>
-                  <div className="text-2xs text-base-content/50">{c.subject}</div>
+                  <div className="font-semibold text-sm text-base-content/80 break-words">{c.topic}</div>
+                  <div className="text-2xs text-base-content/50">{subjectDisplayLabel(c.subject)}</div>
                 </div>
                 <StatusBadge
                   tone={STATUS_BADGE[c.status].tone}
@@ -108,7 +109,7 @@ export default function AssessmentHistory({
                 <div className="flex flex-wrap gap-1 pt-1">
                   {c.usedInClasses.map((cls) => (
                     <span key={cls.id} className="badge badge-outline badge-sm text-2xs">
-                      {cls.status}
+                      {statusDisplayLabel(cls.status)}
                     </span>
                   ))}
                 </div>

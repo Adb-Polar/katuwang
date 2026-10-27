@@ -36,12 +36,14 @@ export default function MatchCriteriaFields({
   onChange,
   gradeHint,
   showFormatFilter = false,
+  gradeLocked = false,
 }: {
   value: MatchCriteriaValue;
   onChange: (next: MatchCriteriaValue) => void;
   gradeHint?: string;
   /** Auto Match passes this to show a 1-on-1 / Group selector; topic requests don't. */
   showFormatFilter?: boolean;
+  gradeLocked?: boolean;
 }) {
   const { subjects, topicsFor } = useSubjectCatalog(value.gradeLevel);
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
@@ -63,6 +65,7 @@ export default function MatchCriteriaFields({
           <select
             className="select select-bordered select-md w-full text-sm"
             value={value.gradeLevel}
+            disabled={gradeLocked}
             onChange={(e) => set({ gradeLevel: e.target.value, subject: "", topics: [] })}
           >
             <option value="">Any grade</option>
@@ -174,7 +177,7 @@ export default function MatchCriteriaFields({
                   type="button"
                   onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
                   className="btn btn-ghost btn-sm text-error shrink-0"
-                  aria-label="Remove time slot"
+                  aria-label={`Remove preferred time slot ${i + 1}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>

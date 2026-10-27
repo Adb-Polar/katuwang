@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound, redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import EditClassForm from "@/components/tutor/EditClassForm";
 
@@ -14,11 +13,16 @@ export default async function EditClassPage({
   params: Promise<{ classId: string }>;
 }) {
   const { classId } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId: session!.user.id },
-    select: { id: true, topicCertifications: { where: { status: "CERTIFIED" }, select: { subject: true, topic: true } } },
+    select: {
+      id: true,
+      user: { select: { gradeLevel: true } },
+      topicCertifications: { where: { status: "CERTIFIED" }, select: { subject: true, topic: true } },
+    },
   });
 
   if (!tutorProfile) notFound();
@@ -48,6 +52,7 @@ export default async function EditClassPage({
       classId={tutorClass.id}
       subject={tutorClass.subject}
       gradeLevel={tutorClass.gradeLevel}
+      tutorGradeLevel={tutorProfile.user.gradeLevel}
       status={tutorClass.status}
       activeLabel="Active"
       published={tutorClass.published}

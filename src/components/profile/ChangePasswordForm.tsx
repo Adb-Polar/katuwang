@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -11,6 +11,7 @@ export default function ChangePasswordForm({
   /** POST endpoint that accepts `{ currentPassword, newPassword }` — e.g. "/api/learner/profile/password". */
   endpoint: string;
 }) {
+  const hintId = useId();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -59,6 +60,7 @@ export default function ChangePasswordForm({
         <div className="relative">
           <input
             type={showCurrent ? "text" : "password"}
+            aria-label="Current password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             className="input input-bordered input-md text-sm w-full pr-10"
@@ -68,7 +70,7 @@ export default function ChangePasswordForm({
             type="button"
             onClick={() => setShowCurrent((v) => !v)}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
-            aria-label={showCurrent ? "Hide password" : "Show password"}
+            aria-label={showCurrent ? "Hide current password" : "Show current password"}
           >
             {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -79,6 +81,8 @@ export default function ChangePasswordForm({
         <div className="relative">
           <input
             type={showNew ? "text" : "password"}
+            aria-label="New password"
+            aria-describedby={hintId}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             className="input input-bordered input-md text-sm w-full pr-10"
@@ -89,14 +93,15 @@ export default function ChangePasswordForm({
             type="button"
             onClick={() => setShowNew((v) => !v)}
             className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
-            aria-label={showNew ? "Hide password" : "Show password"}
+            aria-label={showNew ? "Hide new password" : "Show new password"}
           >
             {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
       </FormField>
 
-      <FormField label="Confirm new password" required orientation="horizontal">
+      <span id={hintId} className="sr-only">At least 8 characters.</span>
+      <FormField label="Confirm new password" required error={error === "New passwords do not match." ? error : undefined} orientation="horizontal">
         <input
           type={showNew ? "text" : "password"}
           value={confirmPassword}

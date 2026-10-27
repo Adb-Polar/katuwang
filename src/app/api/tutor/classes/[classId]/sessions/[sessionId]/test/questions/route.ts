@@ -1,6 +1,6 @@
+import { certifiedBankTopics, certifiedBankWhere } from "@/lib/teachingBankAccess";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { setSessionTestQuestionsSchema } from "@/lib/validations/sessionTest";
 import { isAccessError, loadOwnedSession } from "@/lib/sessionTestAccess";
@@ -13,7 +13,7 @@ type Ctx = { params: Promise<{ classId: string; sessionId: string }> };
 // immutable once served, which is what makes the pre/post delta valid.
 export async function PUT(req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -48,11 +48,12 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 
     // Every id must be an active bank question of this class's subject, OR a
     // custom question this tutor owns.
+    const certifiedTopics = await certifiedBankTopics(session.user.id);
     const allowed = await prisma.assessmentQuestion.findMany({
       where: {
         id: { in: questionIds },
         OR: [
-          { origin: "BANK", active: true, subject: owned.tutorClass.subject },
+          { origin: "BANK", active: true, subject: owned.tutorClass.subject, AND: [certifiedBankWhere(certifiedTopics)] },
           { origin: "TUTOR", ownerTutorProfileId: owned.tutorProfile.id },
         ],
       },

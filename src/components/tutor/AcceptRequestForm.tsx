@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseLocalDateAndTime } from "@/lib/datetime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
 interface RequestSlot {
@@ -31,23 +33,17 @@ const WEEKDAY_INDEX: Record<string, number> = {
   SATURDAY: 6,
 };
 
-/** Next future occurrence of `day` at `HH:MM`, formatted for a `datetime-local` input. */
+/** Next future occurrence of `day` at `HH:MM`, formatted as `YYYY-MM-DDTHH:mm`. */
 function nextOccurrence(day: string, time: string): string {
-  const [hh, mm] = time.split(":").map(Number);
   const targetDow = WEEKDAY_INDEX[day] ?? 1;
   const now = new Date();
-  const result = new Date(now);
-  result.setSeconds(0, 0);
-  result.setHours(hh, mm, 0, 0);
-
-  let diff = (targetDow - now.getDay() + 7) % 7;
-  if (diff === 0 && result.getTime() <= now.getTime()) diff = 7;
-  result.setDate(now.getDate() + diff);
-
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${result.getFullYear()}-${pad(result.getMonth() + 1)}-${pad(result.getDate())}T${pad(
-    result.getHours()
-  )}:${pad(result.getMinutes())}`;
+  const schoolDate = parseLocalDateAndTime(now).date;
+  const schoolDay = new Date(`${schoolDate}T00:00:00Z`);
+  let diff = (targetDow - schoolDay.getUTCDay() + 7) % 7;
+  const candidate = `${schoolDate}T${time}`;
+  if (diff === 0 && new Date(`${schoolDate}T${time}:00+08:00`) <= now) diff = 7;
+  schoolDay.setUTCDate(schoolDay.getUTCDate() + diff);
+  return diff === 0 ? candidate : `${schoolDay.toISOString().slice(0, 10)}T${time}`;
 }
 
 let rowIdCounter = 0;
@@ -61,10 +57,12 @@ let rowIdCounter = 0;
 export default function AcceptRequestForm({
   request,
   certifiedTopics,
+  tutorGradeLevel,
 }: {
   request: RequestSummary;
   /** The tutor's CERTIFIED topics within the request's subject. */
   certifiedTopics: string[];
+  tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
   const { topicsFor } = useSubjectCatalog();
@@ -76,12 +74,15 @@ export default function AcceptRequestForm({
   const disabledTopics = topicsFor(request.subject).filter((t) => !certifiedSet.has(t));
 
   const firstSlot = request.slots[0];
-  const initialSessionRows: SessionRowValue[] = firstSlot
+  const nextOccur = firstSlot ? (firstSlot.date ? `${firstSlot.date}T${firstSlot.startTime}` : nextOccurrence(firstSlot.day, firstSlot.startTime)) : null;
+  const initialSessionRows: SessionRowValue[] = firstSlot && nextOccur
     ? [
         {
           key: `accept-row-${++rowIdCounter}`,
           topic: preselectedTopics[0] ?? "",
-          scheduledAt: firstSlot.date ? `${firstSlot.date}T${firstSlot.startTime}` : nextOccurrence(firstSlot.day, firstSlot.startTime),
+          scheduledAt: nextOccur,
+          date: nextOccur.split("T")[0],
+          time: nextOccur.split("T")[1],
           duration: 60,
         },
       ]
@@ -110,13 +111,13 @@ export default function AcceptRequestForm({
     <section className="card kt-card">
       <div className="card-body gap-4 p-6 sm:p-8">
         <p className="text-xs text-base-content/60">
-          This creates a full class from {request.subject} request. Only topics you&apos;re certified for can be
+          This creates a full class from the {subjectDisplayLabel(request.subject)} request. Only topics you&apos;re certified for can be
           selected.
         </p>
 
         {certifiedTopics.length === 0 && (
           <div className="text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-3">
-            You have no CERTIFIED topics in {request.subject} yet — request an assessment first.
+            You have no certified topics in {subjectDisplayLabel(request.subject)} yet — request an assessment first.
           </div>
         )}
 
@@ -132,6 +133,7 @@ export default function AcceptRequestForm({
           subjectLocked
           disabledTopics={disabledTopics}
           allowCustomTopics={false}
+          tutorGradeLevel={tutorGradeLevel}
           submitLabel="Accept & create class"
           submitting={submitting}
           error={error}

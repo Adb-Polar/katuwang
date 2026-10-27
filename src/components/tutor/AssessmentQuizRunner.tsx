@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export interface QuizOption {
   id: string;
@@ -83,7 +84,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
           Assessments
         </Link>
         <span className="text-2xs text-base-content/50">
-          {attempt.subject} · attempt #{attempt.attemptNo}
+          {subjectDisplayLabel(attempt.subject)} · attempt #{attempt.attemptNo}
         </span>
       </div>
 
@@ -138,8 +139,9 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                     {item.options.map((o) => {
                       const isChosen = chosen === o.id;
                       const showState = submitted;
+                      const optionIsCorrect = o.isCorrect ?? (isChosen ? item.isCorrect : undefined);
                       const cls = showState
-                        ? o.isCorrect
+                        ? optionIsCorrect
                           ? "border-success/40 bg-success/5"
                           : isChosen
                           ? "border-error/40 bg-error/5"
@@ -165,10 +167,10 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                             }
                           />
                           <span className="text-base-content/80">{o.text}</span>
-                          {submitted && o.isCorrect && (
+                          {submitted && optionIsCorrect === true && (
                             <span className="text-2xs text-success ml-auto">correct</span>
                           )}
-                          {submitted && isChosen && !o.isCorrect && (
+                          {submitted && isChosen && optionIsCorrect === false && (
                             <span className="text-2xs text-error ml-auto">your answer</span>
                           )}
                         </label>

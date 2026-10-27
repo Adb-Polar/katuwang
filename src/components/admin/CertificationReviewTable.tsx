@@ -14,6 +14,7 @@ import Pagination from "@/components/ui/Pagination";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -135,15 +136,17 @@ export default function CertificationReviewTable() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="text"
+              aria-label="Search certification requests"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search topic or tutor ID..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              className="input input-bordered min-h-11 text-base sm:text-sm focus:input-primary"
             />
             <select
+              aria-label="Filter certifications by subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
             >
               <option value="">All subjects</option>
               {catalog.map((s) => (
@@ -153,9 +156,10 @@ export default function CertificationReviewTable() {
               ))}
             </select>
             <select
+              aria-label="Sort certification requests"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
             >
               <option value="requested">Sort: Requested date</option>
               <option value="certified">Sort: Certified date</option>
@@ -166,6 +170,11 @@ export default function CertificationReviewTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : error && certifications.length === 0 ? (
+            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+              <span>Certification requests could not be loaded.</span>
+              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry</button>
+            </div>
           ) : (
             <div className="overflow-x-auto border border-base-200 rounded-xl">
               <table className="table table-sm">
@@ -188,7 +197,7 @@ export default function CertificationReviewTable() {
                           {c.tutor.firstName} {c.tutor.lastName}
                         </div>
                       </td>
-                      <td className="text-base-content/70">{c.subject}</td>
+                      <td className="text-base-content/70">{subjectDisplayLabel(c.subject)}</td>
                       <td className="text-base-content/70">{c.topic}</td>
                       <td className="text-base-content/60">
                         {tab === "certified"
@@ -210,13 +219,13 @@ export default function CertificationReviewTable() {
                         <td className="flex gap-2 justify-end">
                           <button
                             onClick={() => setApproveTarget(c)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => setRejectTarget(c)}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
                             Reject
                           </button>
@@ -253,7 +262,7 @@ export default function CertificationReviewTable() {
         title="Approve this certification?"
         description={
           approveTarget
-            ? `${approveTarget.tutor.anonymousId} will be certified for "${approveTarget.topic}" (${approveTarget.subject}).`
+            ? `${approveTarget.tutor.anonymousId} will be certified for "${approveTarget.topic}" (${subjectDisplayLabel(approveTarget.subject)}).`
             : undefined
         }
         confirmLabel="Approve"

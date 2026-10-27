@@ -1,3 +1,14 @@
+> **Current authorization boundary — 2026-10-22:** All application server pages,
+> protected APIs and upload middleware use `getActiveServerSession()` from
+> `src/lib/serverSession.ts`. It verifies the current database account on every
+> call and returns no session for deleted/inactive users or a changed role.
+> Database failures fail closed. An expired suspension is reinstated by signing
+> in again through the existing login flow; role changes require a fresh login.
+> JWT refresh remains a client/proxy display aid, not the authorization boundary.
+> Provider upload callbacks recheck current status, role and avatar lock.
+> Older tutorial snippets below are historical examples; do not copy their raw
+> `getServerSession` calls into protected application code.
+
 **Stack:** Next.js 16.2.4 · React 19 · TypeScript · Tailwind CSS 4 · NextAuth.js 4.24.14 · Prisma 7.7.0 · MySQL 9.7.0 · bcrypt
 
 > **Status (reviewed 2026-09-10): build guide, not a mirror of the code.** The

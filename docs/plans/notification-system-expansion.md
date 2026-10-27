@@ -1,5 +1,9 @@
 # Notification System — Expansion & Unread Dot
 
+> **Status: DONE.** Bell dropdown + unread dot, admin parity, and the
+> expanded event coverage described below are all shipped
+> (`NotificationBell.tsx`, `/admin/notifications`).
+
 ## Context
 
 Katuwang already has a working DB-backed notification system (added in commit `26cc175` "Topic Requests v2"):

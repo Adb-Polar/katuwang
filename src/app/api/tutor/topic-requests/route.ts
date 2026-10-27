@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
@@ -15,7 +14,7 @@ const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 //   tab=accepted — requests this tutor has already accepted, with the linked class
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -27,7 +26,7 @@ export async function GET(req: NextRequest) {
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, user: { select: { gradeLevel: true } } },
     });
 
     if (!tutorProfile) {
@@ -62,7 +61,7 @@ export async function GET(req: NextRequest) {
           where,
           include: {
             topics: { select: { topic: true } },
-            learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+            learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
             fulfilledClass: {
               select: {
                 id: true,
@@ -112,7 +111,8 @@ export async function GET(req: NextRequest) {
       select: { subject: true, topic: true },
     });
 
-    let where = tutorPoolWhere(tutorProfile.id, certifiedTopics);
+    const tutorGrade = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
+    let where = tutorPoolWhere(tutorProfile.id, certifiedTopics, tutorGrade);
     if (subject) {
       where = { ...where, subject };
     }
@@ -129,7 +129,7 @@ export async function GET(req: NextRequest) {
         include: {
           topics: { select: { topic: true } },
           slots: { select: { date: true, day: true, startTime: true, endTime: true } },
-          learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+          learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
         },
         orderBy: [{ directedTutorProfileId: "desc" }, { createdAt: "asc" }],
         skip: (page - 1) * pageSize,

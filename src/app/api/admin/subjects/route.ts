@@ -1,6 +1,6 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { invalidateSubjectCache } from "@/lib/subjects";
 import { createSubjectSchema } from "@/lib/validations/subject";
@@ -9,8 +9,8 @@ import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 // ─── GET: full taxonomy (subjects + topics, including inactive) ────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "ADMIN") {
+    const session = await getActiveServerSession();
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -32,8 +32,8 @@ export async function GET() {
 // ─── POST: create a subject ──────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "ADMIN") {
+    const session = await getActiveServerSession();
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 

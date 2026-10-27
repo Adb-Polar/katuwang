@@ -17,6 +17,8 @@ import { violationLabel } from "@/lib/reportViolations";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import LoadErrorState from "@/components/ui/LoadErrorState";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -60,6 +62,7 @@ export default function AbuseReportTable() {
     setPageSize,
     loading,
     error,
+    loadError,
     setError,
     refetch,
   } = usePaginatedList<Report>(
@@ -72,7 +75,15 @@ export default function AbuseReportTable() {
   );
 
   const targetName = (r: Report) =>
-    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
+    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
+
+  const targetDetails = (r: Report) => r.targetType === "TUTOR" ? (
+    r.tutor ? <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" /> : "—"
+  ) : r.class ? (
+    <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
+      {r.class.code} · {subjectDisplayLabel(r.class.subject)}
+    </Link>
+  ) : "—";
 
   const review = async (report: Report, decision: "RESOLVE" | "DISMISS", reviewNote?: string) => {
     setSaving(true);
@@ -107,7 +118,7 @@ export default function AbuseReportTable() {
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
-      <FeedbackBanner variant="error" message={resolveTarget || dismissTarget ? null : error || null} />
+      <FeedbackBanner variant="error" message={resolveTarget || dismissTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
@@ -127,7 +138,7 @@ export default function AbuseReportTable() {
               aria-label="Filter by report target"
               value={targetFilter}
               onChange={(e) => setTargetFilter(e.target.value as "" | "TUTOR" | "CLASS")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered select-sm min-h-11 md:min-h-0 w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All targets</option>
               <option value="TUTOR">Tutor reports</option>
@@ -137,8 +148,35 @@ export default function AbuseReportTable() {
 
           {loading ? (
             <LoadingRow />
+          ) : loadError ? (
+            <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
+            <>
+            <div className="space-y-3 md:hidden">
+              {reports.map((r) => (
+                <article key={r.id} className="rounded-xl border border-base-200 p-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="badge badge-neutral badge-sm font-bold">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
+                    <span className="text-xs text-base-content/60">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
+                  </div>
+                  <div className="text-sm font-semibold">{targetDetails(r)}</div>
+                  <p className="text-xs text-base-content/65">Reported by <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" /></p>
+                  <div className="flex flex-wrap gap-1">
+                    {r.violations.map((v) => <span key={v} className="badge badge-outline h-auto max-w-full whitespace-normal py-1 text-left text-xs">{violationLabel(v)}</span>)}
+                  </div>
+                  {r.details && <p className="text-sm whitespace-normal break-words">{r.details}</p>}
+                  {tab !== "pending" && <p className="text-xs text-base-content/65">Admin note: {r.resolutionNote || "No note"}</p>}
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    {tab === "pending" && <>
+                      <button type="button" onClick={() => setResolveTarget(r)} className="btn btn-outline btn-success btn-sm min-h-11">Resolve</button>
+                      <button type="button" onClick={() => setDismissTarget(r)} className="btn btn-outline btn-error btn-sm min-h-11">Dismiss</button>
+                    </>}
+                    <AuditLogLink targetId={r.id} className="ml-auto" />
+                  </div>
+                </article>
+              ))}
+            </div>
+            <div className="hidden overflow-x-auto rounded-xl border border-base-200 md:block">
               <table className="table table-sm">
                 <thead>
                   <tr className="text-xs">
@@ -153,14 +191,14 @@ export default function AbuseReportTable() {
                       onSort={toggle}
                     />
                     {tab !== "pending" && <th>Admin note</th>}
-                    {tab === "pending" && <th></th>}
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
                   {reports.map((r) => (
                     <tr key={r.id} className="text-sm align-top">
                       <td>
-                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType}</span>
+                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
                         <div className="font-mono text-xs">
                           {r.targetType === "TUTOR" ? (
                             r.tutor ? (
@@ -177,9 +215,8 @@ export default function AbuseReportTable() {
                           )}
                         </div>
                         {r.targetType === "CLASS" && r.class && (
-                          <div className="text-2xs text-base-content/50 mt-0.5">{r.class.subject}</div>
+                          <div className="text-2xs text-base-content/50 mt-0.5">{subjectDisplayLabel(r.class.subject)}</div>
                         )}
-                        <AuditLogLink targetId={r.id} />
                       </td>
                       <td>
                         <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" />
@@ -208,30 +245,36 @@ export default function AbuseReportTable() {
                           {r.resolutionNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}
-                      {tab === "pending" && (
-                        <td className="flex gap-2 justify-end">
-                          <button
-                            onClick={() => setResolveTarget(r)}
-                            className="btn btn-outline btn-success btn-xs text-2xs font-bold cursor-pointer"
-                          >
-                            Resolve
-                          </button>
-                          <button
-                            onClick={() => setDismissTarget(r)}
-                            className="btn btn-outline btn-error btn-xs text-2xs font-bold cursor-pointer"
-                          >
-                            Dismiss
-                          </button>
-                        </td>
-                      )}
+                      <td>
+                        <div className="flex flex-col items-end gap-1.5">
+                          {tab === "pending" && (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setResolveTarget(r)}
+                                className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                              >
+                                Resolve
+                              </button>
+                              <button
+                                onClick={() => setDismissTarget(r)}
+                                className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
+                          )}
+                          <AuditLogLink targetId={r.id} className="whitespace-nowrap" />
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {reports.length === 0 && (
-                <EmptyState>{tab === "pending" ? "No reports awaiting review." : `No ${tab} reports.`}</EmptyState>
-              )}
             </div>
+            {reports.length === 0 && (
+              <EmptyState>{tab === "pending" ? "No reports awaiting review." : `No ${tab} reports.`}</EmptyState>
+            )}
+            </>
           )}
 
           <Pagination

@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { Prisma, GradeLevel } from "@prisma/client";
 
@@ -10,6 +9,7 @@ const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
 interface StudentEntry {
   id: string;
   anonymousId: string;
+  image?: string | null;
   gradeLevel: GradeLevel;
   section: string;
   enrollments: {
@@ -24,7 +24,7 @@ interface StudentEntry {
 // ─── GET: Aggregate Roster Across All of the Tutor's Classes ──────────────────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       select: {
         enrolledAt: true,
         class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
-        learner: { select: { id: true, anonymousId: true, gradeLevel: true, section: true } },
+        learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
       },
       orderBy: { enrolledAt: "desc" },
     });
@@ -91,6 +91,7 @@ export async function GET(req: NextRequest) {
         byLearner.set(enr.learner.id, {
           id: enr.learner.id,
           anonymousId: enr.learner.anonymousId,
+          image: enr.learner.image ?? null,
           gradeLevel: enr.learner.gradeLevel,
           section: enr.learner.section,
           enrollments: [entry],

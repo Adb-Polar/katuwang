@@ -1,21 +1,22 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { parseLocalDateAndTime } from "@/lib/datetime";
 
 // ─── GET: Platform Breakdown Counts for Admin Reports ─────────────────────────
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
     const DAYS = 30;
-    const since = new Date();
-    since.setHours(0, 0, 0, 0);
-    since.setDate(since.getDate() - (DAYS - 1));
+    const today = parseLocalDateAndTime(new Date()).date;
+    const since = new Date(`${today}T00:00:00+08:00`);
+    since.setUTCDate(since.getUTCDate() - (DAYS - 1));
 
     const [
       usersByRole,
@@ -41,13 +42,12 @@ export async function GET() {
     ]);
 
     // Bucket the last 30 days of enrollments into a zero-filled daily series.
-    const dayKey = (d: Date) =>
-      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    const dayKey = (d: Date) => parseLocalDateAndTime(d).date;
 
     const byDay = new Map<string, number>();
     for (let i = 0; i < DAYS; i++) {
       const d = new Date(since);
-      d.setDate(since.getDate() + i);
+      d.setUTCDate(since.getUTCDate() + i);
       byDay.set(dayKey(d), 0);
     }
     for (const row of recentEnrollmentRows) {

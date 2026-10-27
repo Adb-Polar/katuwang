@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { createSessionTestSchema, updateSessionTestSchema } from "@/lib/validations/sessionTest";
 import { isAccessError, loadOwnedSession } from "@/lib/sessionTestAccess";
@@ -12,7 +11,7 @@ type Ctx = { params: Promise<{ classId: string; sessionId: string }> };
 // ─── GET: This Session's Test (may not exist yet) ──────────────────────────
 export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -38,7 +37,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
 // ─── POST: Create the Session's Test ────────────────────────────────────
 export async function POST(req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -79,7 +78,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 // ─── PATCH: Edit Title / Instructions (DRAFT only) ────────────────────────
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -123,7 +122,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 // ─── DELETE: Remove a Draft, Unattempted Test ────────────────────────────
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId, sessionId } = await params;
 
     if (!session || session.user.role !== "STUDENT_TUTOR") {

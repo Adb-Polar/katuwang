@@ -62,3 +62,20 @@ export async function getAssessmentConfig(): Promise<ResolvedTopicConfig> {
     minBankSize: read(ASSESSMENT_SETTING_KEYS.minBankSize, ASSESSMENT_DEFAULTS.minBankSize),
   };
 }
+
+// ─── Profile Picture Policy Setting ─────────────────────────────────────────
+
+export type ProfilePictureRequirement = "OPTIONAL" | "TUTORS_ONLY" | "ALL_USERS";
+export const PROFILE_PICTURE_REQUIREMENT_KEY = "profilePictureRequirement";
+
+export async function getProfilePictureRequirement(): Promise<ProfilePictureRequirement> {
+  const row = await prisma.platformSetting.findUnique({
+    where: { key: PROFILE_PICTURE_REQUIREMENT_KEY },
+  });
+  if (!row) return "OPTIONAL";
+  if (row.value === "TUTORS_ONLY" || row.value === "ALL_USERS") {
+    return row.value;
+  }
+  return "OPTIONAL";
+}
+

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import LandingNav from "@/components/landing/LandingNav";
 import LandingHero from "@/components/landing/LandingHero";
 import StoryTimeline from "@/components/landing/StoryTimeline";
@@ -15,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
   const signedIn = Boolean(session);
 
   return (

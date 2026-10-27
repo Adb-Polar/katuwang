@@ -46,7 +46,7 @@ pnpm build
 pnpm start
 
 # Prisma / Database
-npx prisma generate                       # Generate Prisma clie
+npx prisma generate                       # Generate Prisma client
 npx prisma db push                        # Sync schema with database
 npx prisma migrate dev --name <name>      # Create and apply migrations
 npx prisma studio                         # Open database GUI
@@ -80,26 +80,41 @@ katuwang/
 │   └── seed.ts               # Database seeding script
 ├── src/
 │   ├── app/                  # Next.js App Router (pages & route handlers)
-│   │   ├── api/              # REST Route Handlers (auth, register, tutor, classes)
-│   │   ├── admin/            # Administrator portal (/admin)
-│   │   ├── tutor/            # Student Tutor portal (/tutor)
-│   │   ├── learner/          # Student Learner portal (/learner)
+│   │   ├── api/              # Route Handlers (admin/, tutor/, learner/, auth/,
+│   │   │                     #   classes/, chatbot/, notifications/, search/, register/)
+│   │   ├── admin/            # Administrator portal (/admin/**)
+│   │   ├── tutor/            # Student Tutor portal (/tutor/**)
+│   │   ├── learner/          # Student Learner portal (/learner/**)
 │   │   ├── dashboard/        # Smart role dispatcher (redirects to dedicated portal)
-│   │   ├── login/            # Authentication login page
-│   │   ├── register/         # Learner registration & tutor application flow
-│   │   ├── unauthorized/     # Access denied screen
-│   │   ├── globals.css       # Tailwind 4 & DaisyUI 5 theme definition
+│   │   ├── login/, register/, forgot-password/, reset-password/,
+│   │   │   verify-email/     # Public auth flow pages
+│   │   ├── dev/               # Dev-only test-data factory + quick-login (404s in prod)
+│   │   ├── privacy-policy/, unauthorized/, account-declined/,
+│   │   │   account-unverified/, pending-approval/  # Static/status pages
+│   │   ├── globals.css       # Tailwind 4 & DaisyUI 5 theme definition (source of truth for colors)
 │   │   └── layout.tsx        # Root application layout
 │   ├── components/           # Reusable UI components
 │   │   ├── auth/             # LoginForm, LearnerRegisterForm, TutorRegisterForm
-│   │   ├── tutor/            # ClassManagement, schedule forms, roster modals
-│   │   ├── learner/          # ClassBrowser, enroll/unenroll views
+│   │   ├── admin/            # User/class moderation tables, reports, settings, chatbot review
+│   │   ├── tutor/            # ClassManagement, session/test builders, assessments, roster modals
+│   │   ├── learner/          # ClassBrowser, TutorBrowser, reports, progress views
+│   │   ├── chatbot/          # ChatWidget, ChatMessage (per-portal assistant)
+│   │   ├── notifications/    # NotificationBell, NotificationList
+│   │   ├── dev/              # DevDataFactory (dev-only)
+│   │   ├── symbols/          # Brand mark / icon
 │   │   └── providers/        # SessionProvider and client context wrappers
 │   ├── lib/                  # Shared backend utilities and configurations
 │   │   ├── auth.ts           # NextAuth configuration and callbacks
 │   │   ├── prisma.ts         # Singleton Prisma MariaDB client
 │   │   ├── idGenerator.ts    # Concurrency-safe sequential anonymous ID generator
-│   │   └── validations/      # Zod validation schemas (auth, classes)
+│   │   ├── matching.ts       # rankMatches() — tutor/class matching algorithm
+│   │   ├── notifications.ts  # notify()/notifyMany() — DB-backed notification helpers
+│   │   ├── settings.ts       # PlatformSetting reads (getSetting/getAssessmentConfig)
+│   │   ├── subjects.ts       # Subject/Topic catalogue reads (subjectExists/topicExists)
+│   │   ├── auditLog.ts       # Admin moderation audit-log helpers
+│   │   ├── mail.ts           # Nodemailer/SMTP sender (console fallback if unset)
+│   │   ├── chatbot/          # Deterministic intent classifier + FAQ + recommend engine
+│   │   └── validations/      # Zod validation schemas (auth, classes, assessment, chatbot, …)
 │   ├── proxy.ts              # NextAuth middleware route guards (RBAC)
 │   └── types/                # Ambient and custom TypeScript type declarations
 └── vitest.config.ts          # Vitest configuration with tsconfig paths
@@ -111,9 +126,11 @@ katuwang/
 
 The system supports three distinct roles (`Role` enum in Prisma):
 
-1. **`STUDENT_LEARNER`** ➔ Access to `/learner`, can browse scheduled classes, enroll, and unenroll.
-2. **`STUDENT_TUTOR`** ➔ Access to `/tutor`, can apply for subjects, create/manage classes, view rosters.
-3. **`ADMIN`** ➔ Access to `/admin`, manages users, platform settings, and reports.
+1. **`STUDENT_LEARNER`** ➔ Access to `/learner`: browse/enroll/unenroll in classes, get matched to tutors or post a topic (class) request, take per-session pre/post-tests, report a tutor/class, use the chatbot.
+2. **`STUDENT_TUTOR`** ➔ Access to `/tutor`: apply for subjects, take topic-certification quizzes, create/manage classes and sessions, build session pre/post-tests, accept topic requests, appeal class moderation.
+3. **`ADMIN`** ➔ Access to `/admin`: manage users/registrations, moderate classes and abuse reports, maintain the subject/topic catalogue and question bank, review certifications, configure platform settings, view analytics and the audit log.
+
+See `docs/roles/{LEARNER,TUTOR,ADMIN}.md` for the full feature + API reference per role.
 
 - Route protection is enforced at the network edge via `src/proxy.ts` (NextAuth middleware).
 - `/dashboard` acts as an automated dispatcher that resolves the user's session role and redirects them to their respective portal.

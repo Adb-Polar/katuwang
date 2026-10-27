@@ -1,6 +1,7 @@
+import { updateTopicRequest } from "@/lib/updateTopicRequest";
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateClassStatusSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -13,10 +14,10 @@ export async function PATCH(
   { params }: { params: Promise<{ classId: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { classId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -89,10 +90,7 @@ export async function PATCH(
         });
 
         for (const r of linkedRequests) {
-          await tx.topicRequest.update({
-            where: { id: r.id },
-            data: { status: "OPEN", fulfilledClassId: null },
-          });
+          await updateTopicRequest(tx, r.id, { status: "OPEN", fulfilledClass: { disconnect: true } }, session.user.id);
           await notify(
             tx,
             r.learnerId,

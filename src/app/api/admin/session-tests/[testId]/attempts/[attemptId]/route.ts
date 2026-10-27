@@ -1,6 +1,6 @@
+import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 
@@ -10,10 +10,10 @@ type Ctx = { params: Promise<{ testId: string; attemptId: string }> };
 // Double-blind: only the learner's anonymousId is exposed, never their `id`.
 export async function GET(_req: NextRequest, { params }: Ctx) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getActiveServerSession();
     const { testId, attemptId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 

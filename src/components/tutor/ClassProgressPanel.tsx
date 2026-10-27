@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import LoadErrorState from "@/components/ui/LoadErrorState";
 import { GroupedBarChart } from "@/components/charts";
 import type { ClassSessionTestRollup } from "@/lib/sessionTestResults";
 
@@ -9,6 +9,7 @@ import type { ClassSessionTestRollup } from "@/lib/sessionTestResults";
 export default function ClassProgressPanel({ classId }: { classId: string }) {
   const [data, setData] = useState<ClassSessionTestRollup | null>(null);
   const [error, setError] = useState("");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,9 +26,9 @@ export default function ClassProgressPanel({ classId }: { classId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [classId]);
+  }, [classId, retryKey]);
 
-  if (error) return <FeedbackBanner variant="error" message={error} />;
+  if (error) return <LoadErrorState message={error} onRetry={() => { setError(""); setRetryKey((key) => key + 1); }} />;
   if (!data) {
     return (
       <div className="flex justify-center py-8">

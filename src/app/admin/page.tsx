@@ -1,20 +1,22 @@
-import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import { ArrowRight, ScrollText, Users, GraduationCap, ShieldAlert, CalendarClock } from "lucide-react";
-import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import { formatDateTime } from "@/lib/datetime";
 import { Metadata } from "next";
+import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
 export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
 };
 
 export default async function AdminDashboard() {
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const [
     learnerCount,
@@ -36,7 +38,7 @@ export default async function AdminDashboard() {
       prisma.topicCertification.count({ where: { status: "PENDING" } }),
       prisma.user.count({ where: { status: "PENDING" } }),
       prisma.questionRequest.count({ where: { status: "OPEN" } }),
-      prisma.topicRequest.count({ where: { status: "OPEN" } }),
+      prisma.topicRequest.count({ where: { status: "OPEN", expiresAt: { gt: new Date() } } }),
       prisma.classAppeal.count({ where: { status: "PENDING" } }),
       prisma.auditLog.findMany({
         orderBy: { createdAt: "desc" },
@@ -87,7 +89,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card kt-card">
+        <section className="order-2 lg:order-1 lg:col-span-2 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <ScrollText className="h-4 w-4 text-primary" />
@@ -103,10 +105,10 @@ export default async function AdminDashboard() {
                   <li key={log.id} className="py-2.5 text-xs">
                     <div className="flex items-center justify-between gap-3">
                       <span className="font-semibold text-base-content/80">
-                        {log.action.replace(/_/g, " ")}
-                        <span className="font-normal text-base-content/50"> · {log.targetType.toLowerCase()}</span>
+                        {auditActionDisplayLabel(log.action)}
+                        <span className="font-normal text-base-content/50"> · {statusDisplayLabel(log.targetType)}</span>
                       </span>
-                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)}</span>
+                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
                     </div>
                     <div className="text-2xs text-base-content/50 mt-0.5">
                       by {log.admin.anonymousId}
@@ -122,7 +124,7 @@ export default async function AdminDashboard() {
           </div>
         </section>
 
-        <section className="card kt-card">
+        <section className="order-1 lg:order-2 card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Needs attention</h2>
             {actions.map((a) => (

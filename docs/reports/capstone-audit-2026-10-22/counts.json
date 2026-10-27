@@ -1,0 +1,20 @@
+{
+  "features": 52,
+  "api_methods": 120,
+  "api_route_files": 91,
+  "pages": 78,
+  "components": 131,
+  "models": 33,
+  "cases": 1401,
+  "case_statuses": {
+    "NOT RUN": 1241,
+    "BLOCKED": 155,
+    "FAIL": 5
+  },
+  "feature_statuses": {
+    "IMPLEMENTED": 45,
+    "PARTIALLY IMPLEMENTED": 6,
+    "UNVERIFIED": 1
+  },
+  "manifest_files": 699
+}

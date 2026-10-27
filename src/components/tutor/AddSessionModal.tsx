@@ -6,12 +6,14 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import { combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export default function AddSessionModal({ classId, classTopics }: { classId: string; classTopics: string[] }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [topic, setTopic] = useState(classTopics[0] ?? "");
-  const [scheduledAt, setScheduledAt] = useState("");
+  const [sessionDate, setSessionDate] = useState("");
+  const [sessionTime, setSessionTime] = useState("");
   const [duration, setDuration] = useState(60);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,15 +23,23 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
     setLoading(true);
     setError("");
     try {
+      if (!sessionDate || !sessionTime) {
+        throw new Error("Please provide both a date and a time.");
+      }
+      const iso = combineDateAndTime(sessionDate, sessionTime);
+      if (!iso) {
+        throw new Error("Invalid date or time.");
+      }
       const res = await fetch(`/api/tutor/classes/${classId}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, scheduledAt: new Date(scheduledAt).toISOString(), duration }),
+        body: JSON.stringify({ topic, scheduledAt: iso, duration }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to add session.");
       setIsOpen(false);
-      setScheduledAt("");
+      setSessionDate("");
+      setSessionTime("");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add session.");
@@ -65,6 +75,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
             <FeedbackBanner variant="error" message={error || null} />
 
             <form onSubmit={handleSubmit} className="space-y-3.5 mt-3.5">
+              <p className="text-xs text-base-content/60">Enter the date and time in {SCHOOL_TIME_ZONE_LABEL}.</p>
               <FormField label="Topic" required>
                 <select
                   value={topic}
@@ -80,15 +91,29 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
                 </select>
               </FormField>
 
-              <FormField label="Date & Time" required>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  required
-                  className="input input-bordered input-sm w-full text-xs"
-                />
-              </FormField>
+              <div className="grid grid-cols-2 gap-2">
+                <FormField label="Date" required>
+                  <input
+                    type="date"
+                    value={sessionDate}
+                    onChange={(e) => setSessionDate(e.target.value)}
+                    required
+                    aria-label="Session date"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+
+                <FormField label="Time" required>
+                  <input
+                    type="time"
+                    value={sessionTime}
+                    onChange={(e) => setSessionTime(e.target.value)}
+                    required
+                    aria-label="Session time"
+                    className="input input-bordered input-sm w-full text-xs"
+                  />
+                </FormField>
+              </div>
 
               <FormField label="Duration" required>
                 <select

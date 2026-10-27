@@ -99,18 +99,18 @@ export default function HelpCenter({ role }: { role: HelpRole }) {
                   {group.category}
                 </p>
                 {group.items.map((faq) => (
-                  <div
+                  <details
+                    open={!!q || undefined}
                     key={faq.question}
                     className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box"
                   >
-                    <input type="checkbox" defaultChecked={!!q} />
-                    <div className="collapse-title text-sm font-medium min-h-0 py-3">
+                    <summary className="collapse-title text-sm font-medium min-h-0 py-3">
                       {faq.question}
-                    </div>
+                    </summary>
                     <div className="collapse-content text-sm text-base-content/70">
                       <p className="pb-1">{faq.answer}</p>
                     </div>
-                  </div>
+                  </details>
                 ))}
               </div>
             ))}

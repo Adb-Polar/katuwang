@@ -1,13 +1,14 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { GraduationCap, Calendar } from "lucide-react";
+import { notFound, redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { Calendar } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
-import { authOptions } from "@/lib/auth";
+import UserAvatar from "@/components/profile/UserAvatar";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDate } from "@/lib/datetime";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { gradeSection } from "@/lib/gradeLevels";
 
 export const metadata = {
@@ -20,7 +21,8 @@ export default async function TutorStudentProfilePage({
   params: Promise<{ studentId: string }>;
 }) {
   const { studentId } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
 
   const tutorProfile = await prisma.tutorProfile.findUnique({
     where: { userId: session!.user.id },
@@ -34,7 +36,7 @@ export default async function TutorStudentProfilePage({
     select: {
       enrolledAt: true,
       class: { select: { id: true, subject: true, topics: { select: { topic: true } } } },
-      learner: { select: { anonymousId: true, gradeLevel: true, section: true } },
+      learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
     },
     orderBy: { enrolledAt: "desc" },
   });
@@ -55,14 +57,29 @@ export default async function TutorStudentProfilePage({
       />
 
       <section className="card kt-card">
-        <div className="card-body gap-3 text-xs">
-          <h2 className="card-title text-sm font-bold">Details</h2>
-          <div className="divider my-0" />
-          <div className="flex items-center gap-1.5 text-base-content/70">
-            <GraduationCap className="h-4 w-4 text-primary shrink-0" />
-            <span>
-              {gradeSection(learner.gradeLevel, learner.section)}
-            </span>
+        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+          <UserAvatar
+            src={learner.image}
+            anonymousId={learner.anonymousId}
+            size="xl"
+            role="LEARNER"
+            subtitle={gradeSection(learner.gradeLevel, learner.section)}
+          />
+          <div className="text-center sm:text-left space-y-1">
+            <h2 className="text-base font-bold text-base-content">
+              Enrolled Student
+            </h2>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+              <AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="sm" showIcon />
+              <span className="text-xs text-base-content/60">
+                {gradeSection(learner.gradeLevel, learner.section)}
+              </span>
+            </div>
+            <p className="text-2xs text-base-content/50 pt-1">
+              {learner.image
+                ? "Click profile picture to view full size."
+                : "Student is using their anonymous monogram."}
+            </p>
           </div>
         </div>
       </section>
@@ -78,7 +95,7 @@ export default async function TutorStudentProfilePage({
                 className="block border border-base-200 bg-base-200/20 hover:bg-base-200/40 rounded-lg p-3 space-y-1.5 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{enr.class.subject}</span>
+                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{subjectDisplayLabel(enr.class.subject)}</span>
                   <span className="flex items-center gap-1 text-2xs text-base-content/50">
                     <Calendar className="h-3 w-3" />
                     {formatDate(enr.enrolledAt)}

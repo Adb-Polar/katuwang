@@ -1,0 +1,5 @@
+
+/home/hikaru/Capstone/katuwang/src/lib/validations/__tests__/auth.test.ts
+  83:13  warning  'consentGiven' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)

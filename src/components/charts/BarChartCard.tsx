@@ -19,14 +19,16 @@ export default function BarChartCard({
   rows,
   labelKey,
   color,
+  labelFormatter = labelize,
 }: {
   title: string;
   rows: Breakdown[];
   labelKey: string;
   color: string;
+  labelFormatter?: (value: string) => string;
 }) {
   const c = useThemeColors();
-  const data = rows.map((r) => ({ name: labelize(r[labelKey]), count: r.count }));
+  const data = rows.map((r) => ({ name: labelFormatter(String(r[labelKey])), count: r.count }));
 
   return (
     <div className="card kt-card">
@@ -42,7 +44,8 @@ export default function BarChartCard({
                 interval={0}
                 angle={-20}
                 textAnchor="end"
-                height={48}
+                height={56}
+                tickFormatter={(value: string) => value.length > 12 ? `${value.slice(0, 11)}…` : value}
               />
               <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: c.text }} />
               <Tooltip
@@ -53,7 +56,10 @@ export default function BarChartCard({
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <DataTable rows={rows} labelKey={labelKey} />
+        <DataTable rows={rows} columns={[
+          { header: "", cell: (row) => labelFormatter(String(row[labelKey])) },
+          { header: "", cell: (row) => row.count, align: "right" },
+        ]} />
       </div>
     </div>
   );
