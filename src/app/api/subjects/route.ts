@@ -17,6 +17,9 @@ export async function GET() {
       subjects: subjects.map((s) => ({
         slug: s.slug,
         name: s.name,
+        gradeLevels: s.gradeLevels,
+        curriculum: s.curriculum,
+        topicDetails: s.topics.map((t) => ({ name: t.name, gradeLevels: t.gradeLevels, curriculum: t.curriculum })),
         topics: s.topics.map((t) => t.name),
       })),
     });

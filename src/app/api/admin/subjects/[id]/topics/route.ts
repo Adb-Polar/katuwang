@@ -1,3 +1,4 @@
+import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const topic = await prisma.$transaction(async (tx) => {
       const created = await tx.topic.create({
-        data: { subjectId, name, order: (max._max.order ?? -1) + 1 },
+        data: { subjectId, name, gradeLevels: result.data.gradeLevels, curriculum: adminCurriculumNote(result.data.curriculumNote), order: (max._max.order ?? -1) + 1 },
       });
       await tx.auditLog.create({
         data: {

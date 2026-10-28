@@ -1,3 +1,4 @@
+import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -53,8 +54,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       }
     }
 
+    const { curriculumNote, ...data } = result.data;
     const updated = await prisma.$transaction(async (tx) => {
-      const row = await tx.subject.update({ where: { id }, data: result.data });
+      const row = await tx.subject.update({ where: { id }, data: { ...data, ...(data.gradeLevels || curriculumNote !== undefined ? { curriculum: adminCurriculumNote(curriculumNote) } : {}) } });
       await tx.auditLog.create({
         data: {
           adminId: session.user.id,

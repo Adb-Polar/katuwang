@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, Trash2 } from "lucide-react";
+import CurriculumCoverage, { GradeChoices } from "@/components/admin/CurriculumCoverage";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
@@ -11,6 +12,8 @@ interface TopicRow {
   name: string;
   order: number;
   active: boolean;
+  gradeLevels: string[];
+  curriculum?: unknown;
 }
 interface SubjectRow {
   id: string;
@@ -18,6 +21,8 @@ interface SubjectRow {
   name: string;
   order: number;
   active: boolean;
+  gradeLevels: string[];
+  curriculum?: unknown;
   topics: TopicRow[];
 }
 
@@ -144,6 +149,8 @@ export default function SubjectTopicManager() {
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newSubjectSlug, setNewSubjectSlug] = useState("");
   const [newTopic, setNewTopic] = useState("");
+  const [newSubjectGrades, setNewSubjectGrades] = useState<string[]>([]);
+  const [newTopicGrades, setNewTopicGrades] = useState<string[]>([]);
   const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
   const [editingTopicName, setEditingTopicName] = useState("");
   const [deleteTopic, setDeleteTopic] = useState<TopicRow | null>(null);
@@ -200,14 +207,16 @@ export default function SubjectTopicManager() {
   const selected = subjects.find((s) => s.id === selectedId) ?? null;
 
   const addSubject = async () => {
-    if (!newSubjectName.trim() || !newSubjectSlug.trim()) return;
+    if (!newSubjectName.trim() || !newSubjectSlug.trim() || !newSubjectGrades.length) return;
     const r = await call("/api/admin/subjects", "POST", {
       name: newSubjectName.trim(),
       slug: newSubjectSlug.trim().toUpperCase(),
+      gradeLevels: newSubjectGrades,
     });
     if (r) {
       setNewSubjectName("");
       setNewSubjectSlug("");
+      setNewSubjectGrades([]);
       flash("Subject added.");
     }
   };
@@ -222,10 +231,11 @@ export default function SubjectTopicManager() {
   };
 
   const addTopic = async () => {
-    if (!selected || !newTopic.trim()) return;
-    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim() });
+    if (!selected || !newTopic.trim() || !newTopicGrades.length) return;
+    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim(), gradeLevels: newTopicGrades });
     if (r) {
       setNewTopic("");
+      setNewTopicGrades([]);
       flash("Topic added.");
     }
   };
@@ -328,6 +338,8 @@ export default function SubjectTopicManager() {
                       ]}
                     />
                   </div>
+                  <CurriculumCoverage gradeLevels={s.gradeLevels} curriculum={s.curriculum} disabled={busy}
+                    onSave={(gradeLevels, curriculumNote) => call(`/api/admin/subjects/${s.id}`, "PATCH", { gradeLevels, curriculumNote })} />
                 </li>
               ))}
             </ul>
@@ -346,10 +358,11 @@ export default function SubjectTopicManager() {
                 placeholder="SLUG (e.g. MATH)"
                 className="input input-bordered input-xs w-full font-mono text-xs"
               />
+              <GradeChoices value={newSubjectGrades} onChange={setNewSubjectGrades} disabled={busy} />
               <button
                 type="button"
                 onClick={addSubject}
-                disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim()}
+                disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim() || !newSubjectGrades.length}
                 className="btn btn-primary btn-xs w-full text-2xs"
               >
                 <Plus className="h-3 w-3" /> Add subject
@@ -404,13 +417,15 @@ export default function SubjectTopicManager() {
                           </>
                         ) : (
                           <>
-                            <span
-                              className={`min-w-0 flex-1 truncate ${
+                            <div
+                              className={`min-w-0 flex-1 ${
                                 t.active ? "" : "text-base-content/40 line-through"
                               }`}
                             >
                               {t.name}
-                            </span>
+                              <CurriculumCoverage gradeLevels={t.gradeLevels} curriculum={t.curriculum} disabled={busy}
+                                onSave={(gradeLevels, curriculumNote) => call(`/api/admin/topics/${t.id}`, "PATCH", { gradeLevels, curriculumNote })} />
+                            </div>
                             <RowMenu
                               anchorId={`${idBase}-t-${t.id}`}
                               busy={busy}
@@ -466,10 +481,11 @@ export default function SubjectTopicManager() {
                     placeholder="New topic name"
                     className="input input-bordered input-xs min-w-0 flex-1 text-xs"
                   />
+                  <GradeChoices value={newTopicGrades} onChange={setNewTopicGrades} disabled={busy} />
                   <button
                     type="button"
                     onClick={addTopic}
-                    disabled={busy || !newTopic.trim()}
+                    disabled={busy || !newTopic.trim() || !newTopicGrades.length}
                     className="btn btn-primary btn-xs text-2xs"
                   >
                     <Plus className="h-3 w-3" /> Add

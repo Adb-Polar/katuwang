@@ -312,13 +312,15 @@ model IdCounter {
 // See src/lib/subjects.ts and docs/plans/subject-topic-management.md.
 
 model Subject {
-  id        String   @id @default(cuid())
-  slug      String   @unique // "MATH" — the value stored in `subject` columns
-  name      String   @unique // "Mathematics" — display label
-  order     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  slug        String   @unique // "MATH" — the value stored in `subject` columns
+  name        String   @unique // "Mathematics" — display label
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  gradeLevels Json     @default("[]") // GradeLevel[]; a topic may span several grades
+  curriculum  Json? // source evidence, qualification, review date and school year
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   topics Topic[]
 
@@ -326,13 +328,15 @@ model Subject {
 }
 
 model Topic {
-  id        String   @id @default(cuid())
-  subjectId String
-  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  name      String
-  order     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  subjectId   String
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  name        String
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  gradeLevels Json     @default("[]") // GradeLevel[]; a topic may span several grades
+  curriculum  Json? // source evidence, qualification, review date and school year
+  createdAt   DateTime @default(now())
 
   @@unique([subjectId, name])
   @@index([subjectId, active])

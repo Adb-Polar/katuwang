@@ -1,3 +1,4 @@
+import { curriculumFor } from "@/lib/curriculum";
 import type { Subject, Topic } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { normalizeTopic, SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
@@ -34,6 +35,8 @@ let warnedFallback = false;
 function staticFallback(): SubjectWithTopics[] {
   const now = new Date();
   return SUBJECT_SLUGS.map((slug, i) => ({
+    ...curriculumFor(slug),
+    curriculum: curriculumFor(slug).curriculum ?? null,
     id: `static-${slug}`,
     slug,
     name: slug,
@@ -42,6 +45,8 @@ function staticFallback(): SubjectWithTopics[] {
     createdAt: now,
     updatedAt: now,
     topics: SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS].map((name, j) => ({
+      ...curriculumFor(slug, name),
+      curriculum: curriculumFor(slug, name).curriculum ?? null,
       id: `static-${slug}-${j}`,
       subjectId: `static-${slug}`,
       name,

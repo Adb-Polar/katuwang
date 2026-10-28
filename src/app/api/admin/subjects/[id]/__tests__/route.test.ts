@@ -65,6 +65,14 @@ describe("/api/admin/subjects/[id]", () => {
     );
   });
 
+  it("PATCH persists multiple grades and marks the assignment as admin-reviewed", async () => {
+    const res = await PATCH(patch({ gradeLevels: ["GRADE_8", "GRADE_9"] }), params);
+    expect(res.status).toBe(200);
+    expect(h.subjectUpdate).toHaveBeenCalledWith({ where: { id: "s1" }, data: {
+      gradeLevels: ["GRADE_8", "GRADE_9"], curriculum: expect.objectContaining({ status: "admin", sources: [] }),
+    } });
+  });
+
   it("PATCH 404 for a missing subject", async () => {
     h.subjectFindUnique.mockResolvedValue(null);
     expect((await PATCH(patch({ active: false }), params)).status).toBe(404);
