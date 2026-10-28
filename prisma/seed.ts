@@ -1407,6 +1407,8 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
     existingQuestions.map((q) => `${q.subject}::${q.topic}::${q.prompt}`)
   );
 
+  const pendingQuestions: { id: string; subject: string; topic: string; prompt: string; explanation: string | null; createdById: string }[] = [];
+  const pendingOptions: { id: string; questionId: string; text: string; isCorrect: boolean; position: number }[] = [];
   let topicCounter = 0;
   const totalTopics = Object.keys(SUBJECT_TOPICS).reduce((acc, s) => acc + SUBJECT_TOPICS[s].length, 0);
 
@@ -1433,18 +1435,22 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
       }
       const addedForTopic = newQuestions.length;
       if (addedForTopic) {
-        await prisma.assessmentQuestion.createMany({ data: newQuestions });
-        await prisma.assessmentOption.createMany({ data: newOptions });
+        pendingQuestions.push(...newQuestions);
+        pendingOptions.push(...newOptions);
         created += addedForTopic;
       }
 
       if (addedForTopic > 0) {
-        log.add("QuestionBank", `[${String(topicCounter).padStart(2, "0")}/${totalTopics}] ${subject} / ${topic}: +${addedForTopic} new questions created (${questions.length} total)`);
+        log.add("QuestionBank", `[${String(topicCounter).padStart(2, "0")}/${totalTopics}] ${subject} / ${topic}: +${addedForTopic} new questions queued (${questions.length} total)`);
       } else {
         log.exist("QuestionBank", `[${String(topicCounter).padStart(2, "0")}/${totalTopics}] ${subject} / ${topic}: ${questions.length} questions verified in bank`);
       }
     }
   }
+
+  for (let i = 0; i < pendingQuestions.length; i += 250) await prisma.assessmentQuestion.createMany({ data: pendingQuestions.slice(i, i + 250) });
+  for (let i = 0; i < pendingOptions.length; i += 1000) await prisma.assessmentOption.createMany({ data: pendingOptions.slice(i, i + 1000) });
+  log.info("QuestionBank", `${pendingQuestions.length} question rows and ${pendingOptions.length} options inserted in batches.`);
 
   for (const [key, value] of [
     ["assessmentQuestionCount", "5"],
