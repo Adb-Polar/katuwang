@@ -1,13 +1,13 @@
 # Seeded Dummy Accounts
 
 Created by `pnpm exec tsx prisma/seed.ts` (see that file for the full class/enrollment data).
-All accounts share one password:
+New dummy accounts use the password below. Existing administrator passwords are preserved during a reset:
 
 ```
 password123
 ```
 
-Re-running the seed script is safe — it reuses these accounts by email and only resets the dummy classes/enrollments.
+Use `pnpm seed` to populate the grouped demo fixtures. Use `pnpm seed:reset` for a clean test-data rebuild: learning records, tutor/learner accounts and the old catalog are removed, while admin accounts, their passwords, platform settings and ID counters are retained. The catalog is rebuilt with exactly 10 groups and 135 topics. Every group has a published demo class; Miscellaneous includes cooking and baking. Topic selections and class/request grade levels are validated against the approved catalog.
 
 ## Super Admin
 
@@ -19,10 +19,10 @@ Re-running the seed script is safe — it reuses these accounts by email and onl
 
 | Anonymous ID | Email                         | Name            | Grade / Section | Topic certifications (✓ verified)                                                        |
 | ------------ | ------------------------------ | ---------------- | ---------------- | ------------------------------------------------------------------------------------------ |
-| TUT-0002     | maria.santos@katuwang.test     | Maria Santos     | Grade 10 / Rizal | MATH: Algebraic Expressions ✓, Fractions & Decimals (pending)                             |
-| TUT-0003     | jose.reyes@katuwang.test       | Jose Reyes       | Grade 11 / Bonifacio | ENGLISH: Essay & Paragraph Writing ✓, Grammar & Sentence Structure (pending)           |
-| TUT-0004     | ana.cruz@katuwang.test         | Ana Cruz         | Grade 12 / Mabini | FILIPINO: Panitikang Pilipino ✓, Pagsulat ng Sanaysay (pending); ARALING_PANLIPUNAN: Kasaysayan ng Pilipinas ✓ |
-| TUT-0005     | paolo.garcia@katuwang.test     | Paolo Garcia     | Grade 9 / Aguinaldo | SCIENCE: Chemical Reactions & Matter ✓                                                 |
+| TUT-0002     | maria.santos@katuwang.test     | Maria Santos     | Grade 10 / Rizal | MATH: Algebraic Expressions & Factoring ✓, Fractions, Decimals & Rational Numbers (pending)                             |
+| TUT-0003     | jose.reyes@katuwang.test       | Jose Reyes       | Grade 11 / Bonifacio | ENGLISH: Paragraph & Essay Writing ✓, Grammar & Sentence Structure (pending)           |
+| TUT-0004     | ana.cruz@katuwang.test         | Ana Cruz         | Grade 12 / Mabini | FILIPINO: Panitikang Pilipino ✓, Pagsulat ng Sanaysay (pending); ARALING_PANLIPUNAN: Philippine History ✓ |
+| TUT-0005     | paolo.garcia@katuwang.test     | Paolo Garcia     | Grade 9 / Aguinaldo | SCIENCE: Chemical Reactions & Stoichiometry ✓                                                 |
 | TUT-0006     | liza.fernandez@katuwang.test   | Liza Fernandez   | Grade 11 / Luna   | MAPEH: Physical Education & Sports (pending)                                             |
 
 ## Learners

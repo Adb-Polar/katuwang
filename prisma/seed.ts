@@ -1,3 +1,8 @@
+import { verifySeedData } from "./verifySeedData";
+import { randomUUID } from "node:crypto";
+import { resetTestData } from "./resetTestData";
+import { seedGrade, seedGrades, seedTopicsForGrade } from "./seedCatalogHelpers";
+import { SUBJECT_CATALOG } from "../src/lib/subjectCatalog";
 import { seedSubjectCatalog } from "./seedSubjectCatalog";
 import { recordRequestHistory, requestDeadline, requestSnapshot } from "../src/lib/topicRequestHistory";
 import {
@@ -217,10 +222,10 @@ const TUTORS: TutorSeed[] = [
     gradeLevel: "GRADE_10",
     section: "Rizal",
     topicCertifications: [
-      { subject: "MATH", topic: "Algebraic Expressions", certified: true },
+      { subject: "MATH", topic: "Algebraic Expressions & Factoring", certified: true },
       { subject: "MATH", topic: "Linear Equations & Inequalities", certified: true },
       { subject: "MATH", topic: "Geometry & Measurement", certified: true },
-      { subject: "MATH", topic: "Fractions & Decimals", certified: true },
+      { subject: "MATH", topic: "Fractions, Decimals & Rational Numbers", certified: true },
     ],
   },
   {
@@ -232,8 +237,8 @@ const TUTORS: TutorSeed[] = [
     topicCertifications: [
       { subject: "ENGLISH", topic: "Grammar & Sentence Structure", certified: true },
       { subject: "ENGLISH", topic: "Reading Comprehension", certified: true },
-      { subject: "ENGLISH", topic: "Essay & Paragraph Writing", certified: true },
-      { subject: "ENGLISH", topic: "Public Speaking & Oral Communication", certified: true },
+      { subject: "ENGLISH", topic: "Paragraph & Essay Writing", certified: true },
+      { subject: "ENGLISH", topic: "Speech Writing & Public Speaking", certified: true },
     ],
   },
   {
@@ -244,7 +249,7 @@ const TUTORS: TutorSeed[] = [
     section: "Mabini",
     topicCertifications: [
       { subject: "FILIPINO", topic: "Panitikang Pilipino", certified: true },
-      { subject: "ARALING_PANLIPUNAN", topic: "Kasaysayan ng Pilipinas", certified: true },
+      { subject: "ARALING_PANLIPUNAN", topic: "Philippine History", certified: true },
       { subject: "FILIPINO", topic: "Pagsulat ng Sanaysay", certified: false },
     ],
   },
@@ -254,7 +259,7 @@ const TUTORS: TutorSeed[] = [
     lastName: "Garcia",
     gradeLevel: "GRADE_9",
     section: "Aguinaldo",
-    topicCertifications: [{ subject: "SCIENCE", topic: "Chemical Reactions & Matter", certified: true }],
+    topicCertifications: [{ subject: "SCIENCE", topic: "Chemical Reactions & Stoichiometry", certified: true }],
   },
   {
     email: "liza.fernandez@katuwang.test",
@@ -285,7 +290,7 @@ const TUTORS: TutorSeed[] = [
     gradeLevel: "GRADE_10",
     section: "Demo",
     topicCertifications: [
-      { subject: "MATH", topic: "Algebraic Expressions", certified: true },
+      { subject: "MATH", topic: "Algebraic Expressions & Factoring", certified: true },
       { subject: "ENGLISH", topic: "Grammar & Sentence Structure", certified: true },
     ],
   },
@@ -322,7 +327,7 @@ const MODERATED_ACCOUNTS: { tutor?: TutorSeed; learner?: LearnerSeed }[] = [
       section: "Mabini",
       status: "PENDING",
       topicCertifications: [
-        { subject: "SCIENCE", topic: "Cell Biology & Genetics", certified: false },
+        { subject: "SCIENCE", topic: "Genetics & Heredity", certified: false },
       ],
     },
   },
@@ -498,13 +503,13 @@ function buildClasses(): ClassSeed[] {
       tutorEmail: "maria.santos@katuwang.test",
       subject: "MATH",
       gradeLevel: "GRADE_10",
-      topics: ["Algebraic Expressions", "Linear Equations & Inequalities"],
+      topics: ["Algebraic Expressions & Factoring", "Linear Equations & Inequalities"],
       description: "Review of algebraic expressions and solving linear equations, with practice problems.",
       maxStudents: 2,
       meetingLink: "https://meet.google.com/math-review-1",
       status: "SCHEDULED",
       sessions: [
-        { topic: "Algebraic Expressions", scheduledAt: inDays(2, 15), duration: 60, status: "SCHEDULED" },
+        { topic: "Algebraic Expressions & Factoring", scheduledAt: inDays(2, 15), duration: 60, status: "SCHEDULED" },
         { topic: "Linear Equations & Inequalities", scheduledAt: inDays(4, 15), duration: 60, status: "SCHEDULED" },
       ],
       enrolledLearnerEmails: ["juan.delacruz@katuwang.test"],
@@ -525,13 +530,13 @@ function buildClasses(): ClassSeed[] {
       code: "C-0003",
       tutorEmail: "jose.reyes@katuwang.test",
       subject: "ENGLISH",
-      topics: ["Essay & Paragraph Writing", "Reading Comprehension"],
+      topics: ["Paragraph & Essay Writing", "Reading Comprehension"],
       description: "Small group workshop on structuring a five-paragraph essay.",
       maxStudents: 3,
       meetingLink: "https://meet.google.com/essay-workshop",
       status: "SCHEDULED",
       sessions: [
-        { topic: "Essay & Paragraph Writing", scheduledAt: inDays(3, 15), duration: 60, status: "SCHEDULED" },
+        { topic: "Paragraph & Essay Writing", scheduledAt: inDays(3, 15), duration: 60, status: "SCHEDULED" },
         { topic: "Reading Comprehension", scheduledAt: inDays(5, 15), duration: 60, status: "SCHEDULED" },
       ],
       enrolledLearnerEmails: ["carla.mendoza@katuwang.test", "miguel.torres@katuwang.test"],
@@ -540,13 +545,13 @@ function buildClasses(): ClassSeed[] {
       code: "C-0004",
       tutorEmail: "jose.reyes@katuwang.test",
       subject: "ENGLISH",
-      topics: ["Public Speaking & Oral Communication"],
+      topics: ["Speech Writing & Public Speaking"],
       description: "1-on-1 coaching for an upcoming class declamation piece.",
       maxStudents: 1,
       meetingLink: "https://meet.google.com/declam-coaching",
       status: "SCHEDULED",
       sessions: [
-        { topic: "Public Speaking & Oral Communication", scheduledAt: inDays(1, 10), duration: 45, status: "SCHEDULED" },
+        { topic: "Speech Writing & Public Speaking", scheduledAt: inDays(1, 10), duration: 45, status: "SCHEDULED" },
       ],
       enrolledLearnerEmails: ["angela.ramos@katuwang.test"],
     },
@@ -569,12 +574,12 @@ function buildClasses(): ClassSeed[] {
       code: "C-0006",
       tutorEmail: "ana.cruz@katuwang.test",
       subject: "ARALING_PANLIPUNAN",
-      topics: ["Kasaysayan ng Pilipinas"],
+      topics: ["Philippine History"],
       description: "Group review ng mahahalagang pangyayari bago ang Rebolusyong Pilipino.",
       maxStudents: 4,
       meetingLink: "https://meet.google.com/kasaysayan-review",
       status: "SCHEDULED",
-      sessions: [{ topic: "Kasaysayan ng Pilipinas", scheduledAt: inDays(8, 15), duration: 60, status: "SCHEDULED" }],
+      sessions: [{ topic: "Philippine History", scheduledAt: inDays(8, 15), duration: 60, status: "SCHEDULED" }],
       enrolledLearnerEmails: ["juan.delacruz@katuwang.test", "sofia.villanueva@katuwang.test"],
     },
     {
@@ -582,13 +587,13 @@ function buildClasses(): ClassSeed[] {
       tutorEmail: "paolo.garcia@katuwang.test",
       subject: "SCIENCE",
       gradeLevel: "GRADE_9",
-      topics: ["Chemical Reactions & Matter", "Force, Motion & Energy"],
+      topics: ["Chemical Reactions & Stoichiometry", "Force, Motion & Energy"],
       description: "Lab-style walkthrough of common chemical reaction and motion problems.",
       maxStudents: 2,
       meetingLink: null,
       status: "SCHEDULED",
       sessions: [
-        { topic: "Chemical Reactions & Matter", scheduledAt: inDays(7, 15), duration: 90, status: "SCHEDULED" },
+        { topic: "Chemical Reactions & Stoichiometry", scheduledAt: inDays(7, 15), duration: 90, status: "SCHEDULED" },
         { topic: "Force, Motion & Energy", scheduledAt: inDays(9, 15), duration: 90, status: "SCHEDULED" },
       ],
       enrolledLearnerEmails: [],
@@ -609,12 +614,12 @@ function buildClasses(): ClassSeed[] {
       code: "C-0009",
       tutorEmail: "maria.santos@katuwang.test",
       subject: "MATH",
-      topics: ["Fractions & Decimals"],
+      topics: ["Fractions, Decimals & Rational Numbers"],
       description: "Completed review session on converting fractions to decimals.",
       maxStudents: 2,
       meetingLink: null,
       status: "COMPLETED",
-      sessions: [{ topic: "Fractions & Decimals", scheduledAt: inDays(-3), duration: 60, status: "COMPLETED" }],
+      sessions: [{ topic: "Fractions, Decimals & Rational Numbers", scheduledAt: inDays(-3), duration: 60, status: "COMPLETED" }],
       enrolledLearnerEmails: ["juan.delacruz@katuwang.test"],
     },
     {
@@ -633,12 +638,12 @@ function buildClasses(): ClassSeed[] {
       code: "C-0011",
       tutorEmail: "ana.cruz@katuwang.test",
       subject: "FILIPINO",
-      topics: ["Balarila (Gramatika)"],
+      topics: ["Balarila"],
       description: "Sesyong kinansela dahil sa hindi inaasahang salungatan sa iskedyul.",
       maxStudents: 2,
       meetingLink: null,
       status: "CANCELLED",
-      sessions: [{ topic: "Balarila (Gramatika)", scheduledAt: inDays(10, 15), duration: 60, status: "CANCELLED" }],
+      sessions: [{ topic: "Balarila", scheduledAt: inDays(10, 15), duration: 60, status: "CANCELLED" }],
       enrolledLearnerEmails: ["juan.delacruz@katuwang.test"],
     },
     {
@@ -646,13 +651,13 @@ function buildClasses(): ClassSeed[] {
       tutorEmail: "demo@tutor.test",
       subject: "MATH",
       gradeLevel: "GRADE_10",
-      topics: ["Algebraic Expressions", "Linear Equations & Inequalities"],
+      topics: ["Algebraic Expressions & Factoring", "Linear Equations & Inequalities"],
       description: "Demo class for walkthroughs — a multi-session course with an enrolled roster.",
       maxStudents: 3,
       meetingLink: "https://meet.google.com/demo-math",
       status: "SCHEDULED",
       sessions: [
-        { topic: "Algebraic Expressions", scheduledAt: inDays(2, 15), duration: 60, status: "SCHEDULED" },
+        { topic: "Algebraic Expressions & Factoring", scheduledAt: inDays(2, 15), duration: 60, status: "SCHEDULED" },
         { topic: "Linear Equations & Inequalities", scheduledAt: inDays(4, 15), duration: 60, status: "SCHEDULED" },
       ],
       enrolledLearnerEmails: ["demo@learner.test", "juan.delacruz@katuwang.test"],
@@ -720,6 +725,7 @@ async function ensureTutorClass(input: EnsureTutorClassInput): Promise<{
   tutorProfileId: string;
   isNew: boolean;
 }> {
+  input.gradeLevel = seedGrade(input.subject, [...new Set([...input.topics, ...input.sessions.map((s) => s.topic)])], input.gradeLevel);
   let existing = input.preferredCode
     ? await prisma.tutorClass.findUnique({
         where: { code: input.preferredCode },
@@ -853,6 +859,7 @@ async function ensureTopicRequest(input: {
   topics: string[];
   slots?: { day: string; startTime: string; endTime: string }[];
 }) {
+  input.gradeLevel = seedGrade(input.subject, input.topics, input.gradeLevel);
   const existing = await prisma.topicRequest.findFirst({
     where: {
       learnerId: input.learnerId,
@@ -1219,6 +1226,9 @@ async function createGeneratedClass(
     topics = rand.sample(SUBJECT_TOPICS[subject], rand.int(1, 3));
   }
 
+  const targetGrade = rand.pick(seedGrades(subject, [topics[0]]));
+  topics = topics.filter((t) => seedTopicsForGrade(subject, targetGrade).includes(t));
+
   const roll = rng();
   const status: ClassStatus = roll < 0.8 ? "SCHEDULED" : roll < 0.92 ? "COMPLETED" : "CANCELLED";
   const maxStudents = rand.int(1, 6);
@@ -1243,7 +1253,7 @@ async function createGeneratedClass(
     tutorProfileId: profileId,
     preferredCode,
     subject,
-    gradeLevel: rand.chance(0.5) ? rand.pick(ALL_GRADES) : null,
+    gradeLevel: targetGrade,
     description: `${subject} session on ${topics.join(", ")}.`,
     maxStudents,
     meetingLink: rand.chance(0.5) ? `https://meet.google.com/seed-${Math.floor(rng() * 1e6)}` : null,
@@ -1267,7 +1277,7 @@ interface QSeed {
 const QUESTION_BANK: { subject: string; topic: string; questions: QSeed[] }[] = [
   {
     subject: "MATH",
-    topic: "Algebraic Expressions",
+    topic: "Algebraic Expressions & Factoring",
     questions: [
       {
         prompt: "Simplify: 3x + 5x - 2x",
@@ -1411,26 +1421,21 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
         ...genQuestionsForTopic(subject, topic, Math.max(0, perTopic - hand.length)),
       ];
 
-      let addedForTopic = 0;
+      const newQuestions = [];
+      const newOptions = [];
       for (const q of questions) {
         const key = `${subject}::${topic}::${q.prompt}`;
-        if (!existingSet.has(key)) {
-          await prisma.assessmentQuestion.create({
-            data: {
-              subject,
-              topic,
-              prompt: q.prompt,
-              explanation: q.explanation ?? null,
-              createdById: adminId,
-              options: {
-                create: q.options.map(([text, isCorrect], position) => ({ text, isCorrect, position })),
-              },
-            },
-          });
-          existingSet.add(key);
-          created++;
-          addedForTopic++;
-        }
+        if (existingSet.has(key)) continue;
+        const id = randomUUID();
+        newQuestions.push({ id, subject, topic, prompt: q.prompt, explanation: q.explanation ?? null, createdById: adminId });
+        newOptions.push(...q.options.map(([text, isCorrect], position) => ({ id: randomUUID(), questionId: id, text, isCorrect, position })));
+        existingSet.add(key);
+      }
+      const addedForTopic = newQuestions.length;
+      if (addedForTopic) {
+        await prisma.assessmentQuestion.createMany({ data: newQuestions });
+        await prisma.assessmentOption.createMany({ data: newOptions });
+        created += addedForTopic;
       }
 
       if (addedForTopic > 0) {
@@ -1484,12 +1489,12 @@ async function seedSessionTests(): Promise<boolean> {
     where: {
       subject: "MATH",
       tutorProfile: { user: { email: "demo@tutor.test" } },
-      topics: { some: { topic: "Algebraic Expressions" } },
+      topics: { some: { topic: "Algebraic Expressions & Factoring" } },
     },
     include: {
       enrollments: { select: { learnerId: true, learner: { select: { email: true } } }, orderBy: { enrolledAt: "asc" } },
       tutorProfile: { select: { id: true, user: { select: { id: true } } } },
-      sessions: { where: { topic: "Algebraic Expressions" }, take: 1 },
+      sessions: { where: { topic: "Algebraic Expressions & Factoring" }, take: 1 },
     },
   });
   if (!tutorClass || tutorClass.enrollments.length === 0 || tutorClass.sessions.length === 0) return false;
@@ -1506,7 +1511,7 @@ async function seedSessionTests(): Promise<boolean> {
   }
 
   const bankQs = await prisma.assessmentQuestion.findMany({
-    where: { origin: "BANK", subject: "MATH", topic: "Algebraic Expressions", active: true },
+    where: { origin: "BANK", subject: "MATH", topic: "Algebraic Expressions & Factoring", active: true },
     orderBy: { createdAt: "asc" },
     take: 5,
     select: { id: true, options: { select: { id: true, isCorrect: true }, orderBy: { position: "asc" } } },
@@ -1516,7 +1521,7 @@ async function seedSessionTests(): Promise<boolean> {
   let custom = await prisma.assessmentQuestion.findFirst({
     where: {
       subject: "MATH",
-      topic: "Algebraic Expressions",
+      topic: "Algebraic Expressions & Factoring",
       prompt: "What is the degree of the polynomial 4x^3 + x + 7?",
       origin: "TUTOR",
     },
@@ -1527,7 +1532,7 @@ async function seedSessionTests(): Promise<boolean> {
     custom = await prisma.assessmentQuestion.create({
       data: {
         subject: "MATH",
-        topic: "Algebraic Expressions",
+        topic: "Algebraic Expressions & Factoring",
         prompt: "What is the degree of the polynomial 4x^3 + x + 7?",
         explanation: "The degree is the highest exponent, which is 3.",
         origin: "TUTOR",
@@ -1544,14 +1549,14 @@ async function seedSessionTests(): Promise<boolean> {
       },
       select: { id: true, options: { select: { id: true, isCorrect: true } } },
     });
-    log.add("CustomQuestion", "Tutor custom question added for Algebraic Expressions");
+    log.add("CustomQuestion", "Tutor custom question added for Algebraic Expressions & Factoring");
   }
 
   const specs = [...bankQs, custom];
   const test = await prisma.sessionTest.create({
     data: {
       sessionId: classSession.id,
-      title: "Algebraic Expressions check-in",
+      title: "Algebraic Expressions & Factoring check-in",
       instructions: "A short diagnostic before and after this session. Answer as best you can.",
       status: "PUBLISHED",
       publishedAt: new Date(),
@@ -1604,6 +1609,7 @@ async function seedSessionTests(): Promise<boolean> {
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 async function main() {
+  if (process.argv.includes("--reset")) await resetTestData(prisma);
   console.log("\x1b[1m\x1b[35m=======================================================\x1b[0m");
   console.log("\x1b[1m\x1b[35m  Katuwang Database Seeder — Real-time Population     \x1b[0m");
   console.log("\x1b[1m\x1b[35m=======================================================\x1b[0m");
@@ -1768,6 +1774,24 @@ async function main() {
     }
   }
 
+  const coverageTutor = tutorProfiles["demo@tutor.test"] ?? Object.values(tutorProfiles)[0];
+  for (const group of SUBJECT_CATALOG) {
+    const coverageTopics = group.slug === "MISCELLANEOUS" ? group.topics.slice(0, 2) : group.topics.slice(0, 1);
+    for (const topic of coverageTopics) {
+      await prisma.topicCertification.upsert({
+        where: { tutorProfileId_subject_topic: { tutorProfileId: coverageTutor.id, subject: group.slug, topic: topic.name } },
+        update: { status: "CERTIFIED", certifiedAt: new Date() },
+        create: { tutorProfileId: coverageTutor.id, subject: group.slug, topic: topic.name, status: "CERTIFIED", certifiedAt: new Date() },
+      });
+      const klass = await ensureTutorClass({ tutorProfileId: coverageTutor.id, subject: group.slug,
+        gradeLevel: seedGrade(group.slug, [topic.name]), description: `[grouped-seed] ${group.name}: ${topic.name}`,
+        maxStudents: 4, status: "SCHEDULED", published: true, topics: [topic.name],
+        sessions: [{ topic: topic.name, scheduledAt: inDays(3 + group.order, 14), duration: 60 }], enrolledLearnerIds: [],
+      });
+      classesList.push(klass);
+    }
+  }
+
   log.header("[6/12] Topic Requests & Directed Notifications");
   const juan = learnerUsers["juan.delacruz@katuwang.test"];
   const maria = tutorUsers["maria.santos@katuwang.test"];
@@ -1780,10 +1804,10 @@ async function main() {
       note: "Struggling with distributing and combining like terms.",
       status: "OPEN",
       directedTutorProfileId: mariaProfile.id,
-      topics: ["Algebraic Expressions"],
+      topics: ["Algebraic Expressions & Factoring"],
       slots: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }],
     });
-    if (tr1.isNew) log.add("TopicRequest", `MATH (Algebraic Expressions) from ${juan.anonymousId} [OPEN]`);
+    if (tr1.isNew) log.add("TopicRequest", `MATH (Algebraic Expressions & Factoring) from ${juan.anonymousId} [OPEN]`);
     else log.exist("TopicRequest", `MATH request from ${juan.anonymousId} verified`);
 
     const notif1 = await ensureNotification({
@@ -1808,8 +1832,8 @@ async function main() {
       maxStudents: 3,
       status: "SCHEDULED",
       published: true,
-      topics: ["Essay & Paragraph Writing"],
-      sessions: [{ topic: "Essay & Paragraph Writing", scheduledAt: inDays(4, 14), duration: 60 }],
+      topics: ["Paragraph & Essay Writing"],
+      sessions: [{ topic: "Paragraph & Essay Writing", scheduledAt: inDays(4, 14), duration: 60 }],
       enrolledLearnerIds: [],
     });
     classesList.push(acceptedClass);
@@ -1821,7 +1845,7 @@ async function main() {
       note: "Need help structuring a 5-paragraph essay.",
       status: "ACCEPTED",
       fulfilledClassId: acceptedClass.id,
-      topics: ["Essay & Paragraph Writing"],
+      topics: ["Paragraph & Essay Writing"],
     });
     if (tr2.isNew) log.add("TopicRequest", `ENGLISH (Essay Writing) from ${carla.anonymousId} [ACCEPTED]`);
     else log.exist("TopicRequest", `ENGLISH request from ${carla.anonymousId} verified`);
@@ -1848,8 +1872,8 @@ async function main() {
       maxStudents: 2,
       status: "SCHEDULED",
       published: true,
-      topics: ["Chemical Reactions & Matter"],
-      sessions: [{ topic: "Chemical Reactions & Matter", scheduledAt: inDays(2, 13), duration: 60 }],
+      topics: ["Chemical Reactions & Stoichiometry"],
+      sessions: [{ topic: "Chemical Reactions & Stoichiometry", scheduledAt: inDays(2, 13), duration: 60 }],
       enrolledLearnerIds: [miguel.id],
     });
     classesList.push(enrolledClass);
@@ -1861,7 +1885,7 @@ async function main() {
       note: "Want to review balancing chemical equations.",
       status: "ENROLLED",
       fulfilledClassId: enrolledClass.id,
-      topics: ["Chemical Reactions & Matter"],
+      topics: ["Chemical Reactions & Stoichiometry"],
     });
     if (tr3.isNew) log.add("TopicRequest", `SCIENCE (Chemical Reactions) from ${miguel.anonymousId} [ENROLLED]`);
     else log.exist("TopicRequest", `SCIENCE request from ${miguel.anonymousId} verified`);
@@ -1906,27 +1930,27 @@ async function main() {
   });
 
   // Procedurally generated topic requests
-  const scheduledClasses = classesList.filter((c) => c.status === "SCHEDULED");
   for (let i = 0; i < GEN.topicRequests; i++) {
     const learner = rand.pick(Object.values(learnerUsers));
     const subject = rand.pick(ALL_SUBJECTS);
-    const topics = rand.sample(SUBJECT_TOPICS[subject], rand.int(1, 3));
+    const targetGrade = seedGrade(subject, [rand.pick(SUBJECT_TOPICS[subject])], learner.gradeLevel);
+    const topics = rand.sample(seedTopicsForGrade(subject, targetGrade), rand.int(1, 3));
     const slotDays = rand.sample(WEEKDAYS, rand.int(0, 3));
 
     const directedCandidates = Object.entries(tutorProfiles).filter(([email]) =>
       (certifiedByProfile.get(tutorProfiles[email].id) ?? []).some((c) => c.subject === subject)
     );
     const directed = rand.chance(0.1) && directedCandidates.length > 0 ? rand.pick(directedCandidates) : undefined;
-    const match = rand.chance(0.12) ? scheduledClasses.find((c) => c.subject === subject) : undefined;
+    // Curated scenarios below cover fulfillment; generated requests stay open with their own exact criteria.
 
     const res = await ensureTopicRequest({
       learnerId: learner.id,
       subject,
-      gradeLevel: rand.chance(0.8) ? learner.gradeLevel : rand.pick(ALL_GRADES),
+      gradeLevel: targetGrade,
       note: rand.chance(0.4) ? rand.pick(REQUEST_NOTES) : null,
-      status: match ? "FULFILLED" : "OPEN",
-      fulfilledClassId: match?.id ?? null,
-      directedTutorProfileId: match ? null : directed?.[1].id ?? null,
+      status: "OPEN",
+      fulfilledClassId: null,
+      directedTutorProfileId: directed?.[1].id ?? null,
       topics,
       slots: slotDays.map((day) => {
         const start = rand.int(8, 17);
@@ -2378,7 +2402,7 @@ async function seedAuditLogs(
     { action: "USER_APPROVED", targetType: "USER", targetId: sampleUser?.id ?? "USR-01", reason: "Approved registration application after identity check.", createdAt: inDays(-12) },
     { action: "USER_STATUS_CHANGE", targetType: "USER", targetId: sampleUser?.id ?? "USR-01", reason: "Suspended user account pending attendance review.", createdAt: inDays(-10) },
     { action: "CLASS_STATUS_CHANGE", targetType: "CLASS", targetId: sampleClass?.id ?? "CLS-01", reason: "Suspended class C-0016 for curriculum moderation review.", createdAt: inDays(-8) },
-    { action: "CERTIFICATION_APPROVED", targetType: "CERTIFICATION", targetId: "CERT-01", reason: "Approved tutor certification for Algebraic Expressions (score: 100%).", createdAt: inDays(-7) },
+    { action: "CERTIFICATION_APPROVED", targetType: "CERTIFICATION", targetId: "CERT-01", reason: "Approved tutor certification for Algebraic Expressions & Factoring (score: 100%).", createdAt: inDays(-7) },
     { action: "CERTIFICATION_REJECTED", targetType: "CERTIFICATION", targetId: "CERT-02", reason: "Rejected certification for PE: practical component missing.", createdAt: inDays(-6) },
     { action: "REPORT_RESOLVED", targetType: "REPORT", targetId: "REP-01", reason: "Resolved learner report #2 regarding session syllabus.", createdAt: inDays(-4) },
     { action: "REPORT_DISMISSED", targetType: "REPORT", targetId: "REP-02", reason: "Dismissed report #3: minor typo corrected in session.", createdAt: inDays(-3) },
@@ -2430,6 +2454,7 @@ async function seedAuditLogs(
 }
 
 main()
+  .then(() => verifySeedData(prisma, Math.min(5, GEN.questionsPerTopic)))
   .catch((err) => {
     console.error(err);
     process.exitCode = 1;

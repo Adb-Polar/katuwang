@@ -4,7 +4,7 @@
  *   pnpm exec tsx prisma/seed-session-tests.ts
  *
  * Run this AFTER `pnpm exec tsx prisma/seed.ts` (it builds on the demo MATH
- * class owned by demo@tutor.test — "Algebraic Expressions" /
+ * class owned by demo@tutor.test — "Algebraic Expressions & Factoring" /
  * "Linear Equations & Inequalities"). Re-running is safe: the script wipes and
  * rebuilds this class's sessions, its session tests, and the `[seed-st]`
  * questions it owns; learner enrolments are only ever added.
@@ -27,20 +27,17 @@
  * The admin Reports charts (users/classes/certs/enrolments) are fed by the main
  * seed and are not touched here.
  */
-import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { prisma } from "../src/lib/prisma";
 import { config as loadEnv } from "dotenv";
 
 loadEnv();
 loadEnv({ path: ".env.seed" });
 
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
-const prisma = new PrismaClient({ adapter });
 
 const DEMO_TUTOR_EMAIL = "demo@tutor.test";
 const DEMO_LEARNER_EMAIL = "demo@learner.test";
 const SUBJECT = "MATH";
-const TOPIC_A = "Algebraic Expressions";
+const TOPIC_A = "Algebraic Expressions & Factoring";
 const TOPIC_L = "Linear Equations & Inequalities";
 const TAG = "[seed-st]"; // marks questions this script owns, for idempotent re-runs
 const MAX_ROSTER = 12;
@@ -107,7 +104,7 @@ type SessionSpec = {
 const SESSIONS: SessionSpec[] = [
   {
     key: "S1",
-    title: "Algebraic Expressions — diagnostic 1",
+    title: "Algebraic Expressions & Factoring — diagnostic 1",
     topic: TOPIC_A,
     scheduledAt: daysAgo(28),
     sessionStatus: "COMPLETED",
@@ -137,7 +134,7 @@ const SESSIONS: SessionSpec[] = [
   },
   {
     key: "S3",
-    title: "Algebraic Expressions — diagnostic 2",
+    title: "Algebraic Expressions & Factoring — diagnostic 2",
     topic: TOPIC_A,
     scheduledAt: daysAgo(14),
     sessionStatus: "COMPLETED",
@@ -161,7 +158,7 @@ const SESSIONS: SessionSpec[] = [
   },
   {
     key: "S5",
-    title: "Algebraic Expressions — mastery check",
+    title: "Algebraic Expressions & Factoring — mastery check",
     topic: TOPIC_A,
     scheduledAt: daysAgo(3),
     sessionStatus: "COMPLETED",

@@ -1,7 +1,7 @@
 /**
  * Comprehensive Knowledge Base and Generator for Philippine K-12 Question Bank
  * Generates 15 distinct, high-quality, curriculum-aligned multiple-choice questions
- * for each topic across all 47 Junior & Senior High School subjects.
+ * for topics in the ten approved general subject groups. These are demo items.
  */
 
 export interface GeneratedQuestion {

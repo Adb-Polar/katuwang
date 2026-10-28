@@ -1,6 +1,5 @@
 import { seedSubjectCatalog } from "./seedSubjectCatalog";
-import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { prisma } from "../src/lib/prisma";
 import { config as loadEnv } from "dotenv";
 
 // Seeds only the essentials a fresh deploy needs to function — no dummy
@@ -10,8 +9,6 @@ import { config as loadEnv } from "dotenv";
 // Safe to re-run; existing rows are left untouched / kept in sync by slug or name.
 loadEnv();
 
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
-const prisma = new PrismaClient({ adapter });
 
 async function seedIdCounters() {
   for (const role of ["TUTOR", "LEARNER", "CLASS"] as const) {

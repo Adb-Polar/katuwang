@@ -43,6 +43,11 @@ try {
     if (verified.error) throw verified.error;
     process.exitCode = verified.status ?? 1;
   }
+  if (process.exitCode === 0) {
+    const seeded = spawnSync(process.execPath, [join(process.cwd(), "scripts/render-seed-test-data.mjs")], { stdio: "inherit", env: process.env });
+    if (seeded.error) throw seeded.error;
+    process.exitCode = seeded.status ?? 1;
+  }
 } finally {
   if (directory) rmSync(directory, { recursive: true, force: true });
 }
