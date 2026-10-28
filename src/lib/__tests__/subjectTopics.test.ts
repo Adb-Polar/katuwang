@@ -12,7 +12,7 @@ describe("normalizeTopic", () => {
 
 describe("isKnownTopic", () => {
   it("matches a curated topic case-insensitively", () => {
-    expect(isKnownTopic("MATH", "algebraic expressions")).toBe(true);
+    expect(isKnownTopic("MATH", "algebraic expressions & factoring")).toBe(true);
     expect(isKnownTopic("MATH", SUBJECT_TOPICS.MATH[0])).toBe(true);
   });
   it("returns false for a custom topic", () => {

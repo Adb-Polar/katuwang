@@ -1,3 +1,4 @@
+import { catalogEntry } from "./subjectCatalog";
 import type { GradeLevel } from "@prisma/client";
 import data from "./curriculumData.json";
 
@@ -18,6 +19,8 @@ const catalog = data.subjects as unknown as Record<string, {
 
 /** Unknown/custom entries stay unassigned until an admin supplies evidence. */
 export function curriculumFor(slug: string, topic?: string) {
+  const grouped = catalogEntry(slug, topic);
+  if (grouped) return { gradeLevels: [...grouped.gradeLevels] as GradeLevel[], curriculum: { ...grouped.curriculum } };
   const mapping = topic === undefined ? catalog[slug]?.subject : catalog[slug]?.topics[topic];
   if (!mapping) return { gradeLevels: [] as GradeLevel[], curriculum: undefined };
   const { gradeLevels, ...evidence } = mapping;

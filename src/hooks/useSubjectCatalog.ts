@@ -1,5 +1,6 @@
 "use client";
 
+import { SUBJECT_NAMES } from "@/lib/subjectCatalog";
 import { curriculumFor } from "@/lib/curriculum";
 
 import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
@@ -21,7 +22,7 @@ export interface CatalogSubject {
 // (admin-managed) replaces it once fetched.
 const STATIC: CatalogSubject[] = SUBJECT_SLUGS.map((slug) => ({
   slug,
-  name: slug,
+  name: SUBJECT_NAMES[slug] ?? slug,
   gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug),
   curriculum: curriculumFor(slug).curriculum,
   topicGrades: Object.fromEntries(SUBJECT_TOPICS[slug].map((name) => [name, curriculumFor(slug, name).curriculum ? curriculumFor(slug, name).gradeLevels : null])),

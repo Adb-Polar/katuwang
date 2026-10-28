@@ -6,7 +6,7 @@ export const SAMPLE_TUTOR_ID = "TUT-0148";
 export const SAMPLE_CLASS_CODE = "C-0007";
 
 // Hard-coded copies of what the app's subject/grade pickers show — the landing page never fetches these.
-export const SAMPLE_SUBJECTS = ["MATH", "ENGLISH", "SCIENCE", "FILIPINO", "ARALING_PANLIPUNAN", "TLE", "MAPEH"];
+export const SAMPLE_SUBJECTS = ["MATH", "ENGLISH", "SCIENCE", "FILIPINO", "ARALING_PANLIPUNAN", "VALUES_EDUCATION", "MAPEH", "BUSINESS_ENTREPRENEURSHIP", "RESEARCH_DIGITAL_LITERACY", "MISCELLANEOUS"];
 
 export const SAMPLE_GRADES = [
   { value: "GRADE_7", label: "Grade 7" },

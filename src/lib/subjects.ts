@@ -1,3 +1,4 @@
+import { SUBJECT_NAMES } from "@/lib/subjectCatalog";
 import { curriculumFor } from "@/lib/curriculum";
 import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
 import { availableInGrade } from "@/lib/catalogGrades";
@@ -39,7 +40,7 @@ function staticFallback(): SubjectWithTopics[] {
   return SUBJECT_SLUGS.map((slug, i) => ({
     id: `static-${slug}`,
     slug,
-    name: slug,
+    name: SUBJECT_NAMES[slug] ?? slug,
     order: i,
     active: true,
     gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug) ?? null,

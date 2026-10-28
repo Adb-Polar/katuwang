@@ -51,7 +51,7 @@ describe("extractCriteria", () => {
   it("detects a named topic within the subject", () => {
     const c = extractCriteria("help me with algebraic expressions");
     expect(c.subject).toBe("MATH");
-    expect(c.topics).toContain("Algebraic Expressions");
+    expect(c.topics).toContain("Algebraic Expressions & Factoring");
   });
 });
 

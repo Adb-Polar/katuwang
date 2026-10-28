@@ -1,5 +1,4 @@
-import { curriculumFor } from "../src/lib/curriculum";
-import { defaultSubjectGrades } from "../src/lib/subjectGradeDefaults";
+import { seedSubjectCatalog } from "./seedSubjectCatalog";
 import { recordRequestHistory, requestDeadline, requestSnapshot } from "../src/lib/topicRequestHistory";
 import {
   Role,
@@ -1630,38 +1629,8 @@ async function main() {
   await initMaxClassCode();
   log.info("IdCounter", `Synchronized counters (CLASS base code: ${maxObservedCodeNum})`);
 
-  // Subject / Topic catalogue
-  const SUBJECT_NAMES: Record<string, string> = {
-    MATH: "Mathematics",
-    ENGLISH: "English",
-    SCIENCE: "Science",
-    FILIPINO: "Filipino",
-    ARALING_PANLIPUNAN: "Araling Panlipunan",
-    TLE: "Technology & Livelihood Education",
-    MAPEH: "MAPEH",
-  };
+  await seedSubjectCatalog(prisma);
 
-  let sOrder = 0;
-  for (const slug of Object.keys(SUBJECT_TOPICS) as string[]) {
-    const subject = await prisma.subject.upsert({
-      where: { slug },
-      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : { gradeLevels: defaultSubjectGrades(slug) }) },
-    });
-    sOrder++;
-    let tOrder = 0;
-    for (const name of SUBJECT_TOPICS[slug]) {
-      await prisma.topic.upsert({
-        where: { subjectId_name: { subjectId: subject.id, name } },
-        update: { order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
-        create: { subjectId: subject.id, name, order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
-      });
-      tOrder++;
-    }
-    log.exist("Subject", `${SUBJECT_NAMES[slug] ?? slug} (${slug}) with ${SUBJECT_TOPICS[slug].length} topics`);
-  }
-
-  log.header("[2/12] Administrator Provisioning");
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
 
   const existingSuperAdmin = await prisma.user.findUnique({ where: { email: "superadmin@katuwang.test" } });

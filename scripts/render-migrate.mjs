@@ -30,12 +30,15 @@ try {
   }
   const cli = createRequire(import.meta.url).resolve("prisma/build/index.js");
   const result = spawnSync(process.execPath, [cli, "migrate", "deploy"], {
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "inherit"],
+    encoding: "utf8",
     env: { ...process.env, DATABASE_URL: url.toString() },
   });
+  if (result.stdout) process.stdout.write(result.stdout);
   if (result.error) throw result.error;
   process.exitCode = result.status ?? 1;
-  if (process.exitCode === 0) {
+  // Verify this catalog replacement when applied, without blocking later legitimate admin edits on restart.
+  if (process.exitCode === 0 && result.stdout?.includes("20261028010000_general_subject_grouping")) {
     const verified = spawnSync(process.execPath, [join(process.cwd(), "scripts/verify-curriculum.mjs")], { stdio: "inherit", env: process.env });
     if (verified.error) throw verified.error;
     process.exitCode = verified.status ?? 1;

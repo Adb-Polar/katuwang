@@ -1,9 +1,7 @@
-import { curriculumFor } from "../src/lib/curriculum";
+import { seedSubjectCatalog } from "./seedSubjectCatalog";
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { config as loadEnv } from "dotenv";
-import { defaultSubjectGrades } from "../src/lib/subjectGradeDefaults";
-import { SUBJECT_TOPICS } from "../src/lib/subjectTopics";
 
 // Seeds only the essentials a fresh deploy needs to function — no dummy
 // users, classes, or demo data:
@@ -14,16 +12,6 @@ loadEnv();
 
 const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
-
-const SUBJECT_NAMES: Record<string, string> = {
-  MATH: "Mathematics",
-  ENGLISH: "English",
-  SCIENCE: "Science",
-  FILIPINO: "Filipino",
-  ARALING_PANLIPUNAN: "Araling Panlipunan",
-  TLE: "Technology & Livelihood Education",
-  MAPEH: "MAPEH",
-};
 
 async function seedIdCounters() {
   for (const role of ["TUTOR", "LEARNER", "CLASS"] as const) {
@@ -37,26 +25,7 @@ async function seedIdCounters() {
 }
 
 async function seedSubjectsAndTopics() {
-  let sOrder = 0;
-  for (const slug of Object.keys(SUBJECT_TOPICS)) {
-    const subject = await prisma.subject.upsert({
-      where: { slug },
-      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : { gradeLevels: defaultSubjectGrades(slug) }) },
-    });
-    sOrder++;
-
-    let tOrder = 0;
-    for (const name of SUBJECT_TOPICS[slug]) {
-      await prisma.topic.upsert({
-        where: { subjectId_name: { subjectId: subject.id, name } },
-        update: { order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
-        create: { subjectId: subject.id, name, order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
-      });
-      tOrder++;
-    }
-  }
-  console.log(`Subject/Topic catalogue ensured (${Object.keys(SUBJECT_TOPICS).length} subjects).`);
+  console.log(await seedSubjectCatalog(prisma));
 }
 
 async function main() {

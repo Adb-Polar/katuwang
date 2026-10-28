@@ -10,11 +10,14 @@ import type { ChatContext, RecommendationCard } from "@/lib/chatbot/types";
 
 const SUBJECT_KEYWORDS: Record<string, string[]> = {
   MATH: ["math", "mathematics", "arithmetic", "algebra", "geometry", "trigonometry", "trig", "calculus", "fractions", "statistics", "probability", "equations", "numbers"],
-  ENGLISH: ["english", "grammar", "essay", "writing", "reading", "comprehension", "vocabulary", "literature", "speaking", "research"],
+  ENGLISH: ["english", "grammar", "essay", "writing", "reading", "comprehension", "vocabulary", "literature", "speaking"],
   SCIENCE: ["science", "biology", "chemistry", "physics", "cell", "genetics", "chemical", "ecosystem", "environment", "energy", "motion", "space"],
   FILIPINO: ["filipino", "balarila", "gramatika", "panitikan", "sanaysay", "pagbasa", "pagsulat", "pagsasalin", "retorika", "wika"],
   ARALING_PANLIPUNAN: ["araling", "panlipunan", "history", "kasaysayan", "ekonomiks", "economics", "geography", "heograpiya", "civics", "pamahalaan"],
-  TLE: ["tle", "technology", "livelihood", "entrepreneurship", "cookery", "ict", "agriculture", "industrial", "home economics"],
+  MISCELLANEOUS: ["miscellaneous", "tle", "livelihood", "cooking", "cookery", "baking", "pastry", "ict", "agriculture", "industrial", "home economics", "welding", "servicing", "cabling"],
+  BUSINESS_ENTREPRENEURSHIP: ["business", "entrepreneurship", "accounting", "accountancy", "payroll", "marketing", "finance"],
+  RESEARCH_DIGITAL_LITERACY: ["research", "qualitative", "quantitative", "digital literacy", "fact-checking", "web design", "media literacy"],
+  VALUES_EDUCATION: ["values", "philosophy", "personal development", "moral", "pakikipagkapwa"],
   MAPEH: ["mapeh", "music", "arts", "physical education", "health", "sports", "dance", "pe"],
 };
 

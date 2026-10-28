@@ -53,7 +53,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     id: "faq_subjects",
     question: "What subjects are offered?",
     answer:
-      "Math, English, Science, Filipino, Araling Panlipunan, TLE, and MAPEH. Each subject has a fixed list of topics you choose from when browsing, matching or requesting.",
+      "Mathematics, Science, English, Filipino, Social Studies, Values & Personal Development, Arts/PE/Health, Business & Entrepreneurship, Research & Digital Literacy, and Miscellaneous. Cooking, baking, computer servicing and other practical skills are topics under Miscellaneous.",
     keywords: ["subject", "offer", "available", "math", "english", "science", "filipino", "which"],
   },
   {
