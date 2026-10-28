@@ -123,35 +123,33 @@ model IdCounter {
 
 model Subject {
   gradeLevels Json? // null/empty = all grades; otherwise GradeLevel values
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  name      String   @unique
-  order     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  topics    Topic[]
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String   @unique
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  topics      Topic[]
+  curriculum  Json?
 
   @@map("subjects")
-  curriculum Json?
-
 }
 
 model Topic {
   gradeLevels Json? // null/empty = all grades; otherwise GradeLevel values
-  id        String   @id @default(cuid())
-  subjectId String
-  name      String
-  order     Int      @default(0)
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  subjectId   String
+  name        String
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  curriculum  Json?
 
   @@unique([subjectId, name])
   @@index([subjectId, active])
   @@map("topics")
-  curriculum Json?
-
 }
 
 model TutorClass {
@@ -224,24 +222,24 @@ model ClassEnrollment {
 }
 
 model TopicRequest {
-  id                     String              @id @default(cuid())
+  id                     String                @id @default(cuid())
   learnerId              String
   subject                String
   gradeLevel             GradeLevel
-  note                   String?             @db.Text
-  status                 TopicRequestStatus  @default(OPEN)
+  note                   String?               @db.Text
+  status                 TopicRequestStatus    @default(OPEN)
   fulfilledClassId       String?
   directedTutorProfileId String?
-  createdAt              DateTime            @default(now())
-  updatedAt              DateTime            @updatedAt
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
   expiresAt              DateTime
   lastSubmittedAt        DateTime
   history                TopicRequestHistory[]
   slots                  TopicRequestSlot[]
   topics                 TopicRequestTopic[]
-  directedTutor          TutorProfile?       @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id])
-  fulfilledClass         TutorClass?         @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id])
-  learner                User                @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
+  directedTutor          TutorProfile?         @relation("DirectedTopicRequests", fields: [directedTutorProfileId], references: [id])
+  fulfilledClass         TutorClass?           @relation("FulfilledRequests", fields: [fulfilledClassId], references: [id])
+  learner                User                  @relation("LearnerTopicRequests", fields: [learnerId], references: [id], onDelete: Cascade)
 
   @@index([status, subject])
   @@index([directedTutorProfileId, status])
@@ -275,7 +273,7 @@ model TopicRequestTopic {
 }
 
 model TopicRequestSlot {
-  date String? // optional YYYY-MM-DD in Asia/Manila
+  date      String? // optional YYYY-MM-DD in Asia/Manila
   id        String       @id @default(cuid())
   requestId String
   day       String

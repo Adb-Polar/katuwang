@@ -35,6 +35,11 @@ try {
   });
   if (result.error) throw result.error;
   process.exitCode = result.status ?? 1;
+  if (process.exitCode === 0) {
+    const verified = spawnSync(process.execPath, [join(process.cwd(), "scripts/verify-curriculum.mjs")], { stdio: "inherit", env: process.env });
+    if (verified.error) throw verified.error;
+    process.exitCode = verified.status ?? 1;
+  }
 } finally {
   if (directory) rmSync(directory, { recursive: true, force: true });
 }

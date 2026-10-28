@@ -94,11 +94,11 @@ Newer [2026 DepEd training notices](https://caraga.deped.gov.ph/wp-content/uploa
 
 ## Implementation and applying the data
 
-The migration adds `gradeLevels` (JSON array of GradeLevel enum values) and `curriculum` (source evidence) to `subjects` and `topics`, and backfills exact canonical names. Unrecognized custom entries remain unassigned rather than receiving guessed grades. Admin create/edit forms require nonempty, valid grade selections; custom/admin edits replace the original research attribution with an admin qualification. Public catalog responses retain `topics: string[]` for compatibility and add `gradeLevels`, `curriculum`, and `topicDetails`.
+On the dev-test branch, the existing grade arrays and filtering are retained. The new migration adds `curriculum` source evidence to `subjects` and `topics`, and backfills the reviewed grade arrays on exact canonical names. Unrecognized custom entries remain unassigned rather than receiving guessed grades. Admin create/edit forms require nonempty, valid grade selections; custom/admin edits replace the original research attribution with an admin qualification. Public catalog responses retain `topics: string[]` for compatibility and add `gradeLevels`, `curriculum`, and `topicDetails`.
 
 From the repository, apply the reviewed migration using the usual database deployment process (`prisma migrate deploy`). It includes the canonical data backfill; do not run the full demo seed. `tsx prisma/backfillCurriculum.ts` provides a dry-run for an already migrated database, and `tsx prisma/backfillCurriculum.ts --apply` reapplies the reviewed metadata to matching canonical rows. Both seed entrypoints also include the grade metadata for fresh installations.
 
-The live database was unreachable from this session, so the live schema/data update is pending. No successful live write is claimed.
+Deployment applies the migration through the existing Render startup migration runner; its completion and read-only coverage verification are logged before the app starts.
 
 ## Validation
 

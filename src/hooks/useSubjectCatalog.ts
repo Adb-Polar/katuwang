@@ -1,5 +1,6 @@
-import { curriculumFor } from "@/lib/curriculum";
 "use client";
+
+import { curriculumFor } from "@/lib/curriculum";
 
 import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
 import { subjectsInGrade, topicsInGrade } from "@/lib/catalogGrades";

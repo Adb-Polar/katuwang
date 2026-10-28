@@ -1646,7 +1646,7 @@ async function main() {
     const subject = await prisma.subject.upsert({
       where: { slug },
       update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug), ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
+      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : { gradeLevels: defaultSubjectGrades(slug) }) },
     });
     sOrder++;
     let tOrder = 0;
