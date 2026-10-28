@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
@@ -35,11 +39,12 @@ export default function RequestTopicButton({
   const [error, setError] = useState("");
 
   const submit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
-    if (!criteria.subject) return setError("Please choose a subject.");
-    if (criteria.topics.length === 0) return setError("Please choose at least one topic.");
-    if (!criteria.gradeLevel) return setError("Please choose a grade level.");
+    if (!criteria.subject) return reportFieldError(e.currentTarget, "Subject", "Please choose a subject.");
+    if (criteria.topics.length === 0) return reportFieldError(e.currentTarget, "Topics", "Please choose at least one topic.");
+    if (!criteria.gradeLevel) return reportFieldError(e.currentTarget, "Grade level", "Please choose a grade level.");
 
     setSubmitting(true);
     try {
@@ -49,6 +54,7 @@ export default function RequestTopicButton({
         body: JSON.stringify({ ...criteriaToBody(criteria), note, directedTutorId: tutorId }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not send your request.");
       setOpen(false);
       router.push("/learner/requests");
@@ -88,8 +94,8 @@ export default function RequestTopicButton({
 
             <FeedbackBanner variant="error" message={error || null} />
 
-            <form onSubmit={submit} className="space-y-4 mt-3">
-              <MatchCriteriaFields value={criteria} onChange={setCriteria} />
+            <ValidatedForm onSubmit={submit} className="space-y-4 mt-3">
+              <MatchCriteriaFields gradeRequired value={criteria} onChange={setCriteria} />
               <FormField label="Note" hint="Optional — anything this tutor should know.">
                 <textarea
                   value={note}
@@ -108,7 +114,7 @@ export default function RequestTopicButton({
                   {submitting ? <span className="loading loading-spinner loading-xs" /> : "Send request"}
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           </div>
         </div>
       )}

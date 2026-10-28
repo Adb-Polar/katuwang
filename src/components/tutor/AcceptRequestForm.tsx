@@ -1,5 +1,7 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { parseLocalDateAndTime } from "@/lib/datetime";
@@ -88,7 +90,7 @@ export default function AcceptRequestForm({
       ]
     : [];
 
-  const submit = async (payload: ClassScheduleSubmitPayload) => {
+  const submit = async (payload: ClassScheduleSubmitPayload, validationForm: HTMLFormElement) => {
     setError("");
     setSubmitting(true);
     try {
@@ -98,6 +100,7 @@ export default function AcceptRequestForm({
         body: JSON.stringify({ ...payload, gradeLevel: payload.gradeLevel || null }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) { setSubmitting(false); return; }
       if (!res.ok) throw new Error(data.error || "Could not accept this request.");
       router.push(`/tutor/classes/${data.classId}`);
       router.refresh();

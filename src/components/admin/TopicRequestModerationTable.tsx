@@ -1,5 +1,8 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -83,7 +86,7 @@ export default function TopicRequestModerationTable() {
     "Could not retrieve class requests."
   );
 
-  const moderate = async (id: string, status: "OPEN" | "CANCELLED") => {
+  const moderate = async (id: string, status: "OPEN" | "CANCELLED", validationForm?: HTMLFormElement) => {
     setSaving(true);
     setError("");
     try {
@@ -93,6 +96,7 @@ export default function TopicRequestModerationTable() {
         body: JSON.stringify({ status, reason }),
       });
       const data = await res.json();
+      if (!res.ok && validationForm && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update request.");
 
       setSuccess(status === "CANCELLED" ? "Request closed." : "Request re-opened.");
@@ -274,7 +278,7 @@ export default function TopicRequestModerationTable() {
       </section>
 
       <Modal open={closeTarget !== null} onClose={() => setCloseTarget(null)} title="Close request">
-        {closeTarget && <>
+        {closeTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void moderate(closeTarget.id, "CANCELLED", e.currentTarget); }}>
             <p className="text-2xs text-base-content/50 mb-4">
               {subjectDisplayLabel(closeTarget.subject)} · {closeTarget.topics.join(", ")}
             </p>
@@ -283,6 +287,7 @@ export default function TopicRequestModerationTable() {
 
             <FormField label="Reason" hint="Optional — shown for your own records">
               <textarea
+                maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Why is this request being closed?"
@@ -298,15 +303,14 @@ export default function TopicRequestModerationTable() {
               >
                 Cancel
               </button>
-              <button
-                onClick={() => moderate(closeTarget.id, "CANCELLED")}
+              <button type="submit"
                 disabled={saving}
                 className="btn btn-error btn-sm text-xs cursor-pointer"
               >
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : "Close request"}
               </button>
             </div>
-        </>}
+        </ValidatedForm>}
       </Modal>
 
       <ConfirmDialog

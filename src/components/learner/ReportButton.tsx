@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
@@ -31,8 +35,6 @@ export default function ReportButton({
 
   const options = REPORT_VIOLATIONS[targetType];
   const isOther = checked.has("OTHER");
-  const canSubmit =
-    checked.size > 0 && (!isOther || details.trim().length >= 10) && !submitting;
 
   const noun = targetType === "TUTOR" ? "tutor" : "class";
 
@@ -52,8 +54,10 @@ export default function ReportButton({
   };
 
   const submit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
+    if (!checked.size) return reportFieldError(e.currentTarget, "Violations", "Select at least one issue to report.");
     setSubmitting(true);
     try {
       const res = await fetch("/api/learner/reports", {
@@ -67,6 +71,7 @@ export default function ReportButton({
         }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not submit your report.");
       setOpen(false);
       reset();
@@ -121,8 +126,8 @@ export default function ReportButton({
 
             <FeedbackBanner variant="error" message={error || null} />
 
-            <form onSubmit={submit} className="space-y-4 mt-3">
-              <fieldset className="space-y-1.5">
+            <ValidatedForm onSubmit={submit} className="space-y-4 mt-3">
+              <fieldset data-form-field="Violations" className="space-y-1.5">
                 <legend className="text-xs font-semibold text-base-content/80 pb-1">
                   What went wrong? <span className="text-error">*</span>
                 </legend>
@@ -145,6 +150,8 @@ export default function ReportButton({
               {isOther && (
                 <FormField label="Describe the issue" required>
                   <textarea
+                    required
+                    minLength={10}
                     value={details}
                     onChange={(e) => setDetails(e.target.value)}
                     maxLength={DETAILS_MAX}
@@ -169,13 +176,13 @@ export default function ReportButton({
                 </button>
                 <button
                   type="submit"
-                  disabled={!canSubmit}
+                  disabled={submitting}
                   className="btn btn-error btn-sm text-xs"
                 >
                   {submitting ? <span className="loading loading-spinner loading-xs" /> : "Submit report"}
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           </div>
           <label
             className="modal-backdrop"

@@ -36,10 +36,10 @@ export default function FormField({
     : hint ? <p id={feedbackId} className="text-xs text-base-content/60 mt-1">{hint}</p> : null;
   const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div id={labelId}>{labelNode}</div>;
   if (orientation === "horizontal") return (
-    <div role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+    <div data-form-field={label} role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
       <div className="sm:w-40 sm:shrink-0 sm:pt-2">{labelElement}</div>
-      <div className="w-full">{control}{feedback}</div>
+      <div className="w-full">{control}<div data-field-feedback>{feedback}</div></div>
     </div>
   );
-  return <div role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-1.5">{labelElement}{control}{feedback}</div>;
+  return <div data-form-field={label} role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-1.5">{labelElement}{control}<div data-field-feedback>{feedback}</div></div>;
 }

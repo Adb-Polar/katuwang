@@ -1,6 +1,8 @@
 "use client";
 
 import { useId, useState } from "react";
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+import ValidatedForm from "@/components/ui/ValidatedForm";
 import { Eye, EyeOff } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -22,12 +24,13 @@ export default function ChangePasswordForm({
   const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
     setSuccess("");
 
     if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
+      reportFieldError(e.currentTarget, "Confirm new password", "New passwords do not match.");
       return;
     }
 
@@ -39,6 +42,7 @@ export default function ChangePasswordForm({
         body: JSON.stringify({ currentPassword, newPassword }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update password.");
       setSuccess("Password updated.");
       setCurrentPassword("");
@@ -52,7 +56,7 @@ export default function ChangePasswordForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
       <FeedbackBanner variant="error" message={error || null} />
       <FeedbackBanner variant="success" message={success || null} />
 
@@ -116,6 +120,6 @@ export default function ChangePasswordForm({
           {saving ? <span className="loading loading-spinner loading-sm"></span> : "Update password"}
         </button>
       </div>
-    </form>
+    </ValidatedForm>
   );
 }

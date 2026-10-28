@@ -51,3 +51,6 @@ next-env.d.ts
 /docs/reviews/scratchpad/
 /docs/katuwang/
 .obsidian/
+
+# Local task work and verification assets
+/work/

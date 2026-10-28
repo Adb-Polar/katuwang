@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -83,7 +87,7 @@ export default function ClassScheduleFields({
   /** "modal" = compact controls for the dialog (accept-request flow); "page" = comfortable full-size controls. */
   variant?: "modal" | "page";
   onCancel: () => void;
-  onSubmit: (payload: ClassScheduleSubmitPayload) => void;
+  onSubmit: (payload: ClassScheduleSubmitPayload, form: HTMLFormElement) => void;
 }) {
   const page = variant === "page";
   const inputCls = "min-h-11 text-base sm:text-sm";
@@ -211,19 +215,19 @@ export default function ClassScheduleFields({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    if (!form.subject) return setFormError("Please select a subject.");
-    if (selectedTopics.length === 0) return setFormError("Please select at least one topic.");
-    if (sessionRows.length === 0) return setFormError("Please add at least one session.");
+    if (!form.subject) return reportFieldError(e.currentTarget, "Subject Area", "Please select a subject.");
+    if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topic(s)", "Please select at least one topic.");
+    if (sessionRows.length === 0) return reportFieldError(e.currentTarget, "Sessions", "Please add at least one session.");
     const invalidSession = sessionRows.some((r) => {
       const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
       const t = r.time || parseLocalDateAndTime(r.scheduledAt).time;
       return !r.topic || !d || !t;
     });
     if (invalidSession) {
-      return setFormError("Every session needs a topic, date, and time.");
+      return reportFieldError(e.currentTarget, "Sessions", "Every session needs a topic, date, and time.");
     }
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
-      return setFormError("Please provide a location (building/room) or a meeting link.");
+      return reportFieldError(e.currentTarget, "Location", "Please provide a location (building/room) or a meeting link.");
     }
     if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
       return setFormError("Target grade cannot be higher than your current grade level.");
@@ -242,13 +246,13 @@ export default function ClassScheduleFields({
           duration: r.duration,
         };
       }),
-    });
+    }, e.currentTarget as HTMLFormElement);
   };
 
   const availableGrades = tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS;
 
   return (
-    <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
+    <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
       <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
@@ -419,6 +423,7 @@ export default function ClassScheduleFields({
             {sessionRows.map((row, i) => (
               <div
                 key={row.key}
+                data-control-field
                 className="border border-base-300 bg-base-200/40 rounded-lg p-2.5 space-y-1.5"
               >
                 <div className="flex items-center gap-1.5">
@@ -449,6 +454,7 @@ export default function ClassScheduleFields({
                 <div className="flex flex-wrap items-center gap-1.5">
                   <input
                     type="date"
+                    required
                     aria-label={`Session #${i + 1} date`}
                     value={row.date ?? parseLocalDateAndTime(row.scheduledAt).date}
                     onChange={(e) => updateSessionRow(row.key, "date", e.target.value)}
@@ -456,6 +462,7 @@ export default function ClassScheduleFields({
                   />
                   <input
                     type="time"
+                    required
                     aria-label={`Session #${i + 1} time`}
                     value={row.time ?? parseLocalDateAndTime(row.scheduledAt).time}
                     onChange={(e) => updateSessionRow(row.key, "time", e.target.value)}
@@ -474,10 +481,12 @@ export default function ClassScheduleFields({
                     <option value={120}>120m</option>
                   </select>
                 </div>
+                <div data-control-feedback />
               </div>
             ))}
             <button
               type="button"
+              data-validation-change
               onClick={addSessionRow}
               className={`btn btn-ghost ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
             >
@@ -548,6 +557,6 @@ export default function ClassScheduleFields({
           {submitting ? <span className="loading loading-spinner loading-sm"></span> : submitLabel}
         </button>
       </div>
-    </form>
+    </ValidatedForm>
   );
 }

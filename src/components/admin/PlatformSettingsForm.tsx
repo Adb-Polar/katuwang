@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFetchList } from "@/hooks/useFetchList";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -109,6 +109,8 @@ export default function PlatformSettingsForm() {
     "/api/admin/settings",
     "Could not retrieve platform settings."
   );
+  const settingInputs = useRef<Partial<Record<keyof AssessmentConfig, HTMLInputElement>>>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof AssessmentConfig, string>>>({});
   const [success, setSuccess] = useState("");
   const [savingKey, setSavingKey] = useState<string | null>(null);
 
@@ -171,10 +173,11 @@ export default function PlatformSettingsForm() {
     const next = Number(draft[field]);
     const meta = ASSESSMENT_FIELDS.find((f) => f.key === field)!;
     if (!Number.isInteger(next) || next < meta.min || next > meta.max) {
-      setDraft((d) => ({ ...d, [field]: String(config[field]) }));
-      setError(`${meta.label} must be a whole number between ${meta.min} and ${meta.max}.`);
+      setFieldErrors((prev) => ({ ...prev, [field]: `${meta.label} must be a whole number between ${meta.min} and ${meta.max}.` }));
+      settingInputs.current[field]?.focus();
       return;
     }
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
     if (next === config[field]) return;
 
     setSavingField(field);
@@ -309,6 +312,10 @@ export default function PlatformSettingsForm() {
               <label key={f.key} className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-base-content">{f.label}</span>
                 <input
+                  ref={(element) => { if (element) settingInputs.current[f.key] = element; }}
+                  aria-invalid={Boolean(fieldErrors[f.key])}
+                  aria-describedby={fieldErrors[f.key] ? `setting-${f.key}-error` : undefined}
+                  required
                   type="number"
                   min={f.min}
                   max={f.max}
@@ -318,6 +325,7 @@ export default function PlatformSettingsForm() {
                   onBlur={() => saveField(f.key)}
                   className="input input-bordered input-sm text-xs focus:input-primary"
                 />
+                {fieldErrors[f.key] && <span id={`setting-${f.key}-error`} role="alert" className="text-xs text-error">{fieldErrors[f.key]}</span>}
                 <span className="text-2xs text-base-content/50">{f.description}</span>
               </label>
             ))}

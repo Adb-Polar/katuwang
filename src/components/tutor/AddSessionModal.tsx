@@ -1,5 +1,9 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -19,6 +23,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -36,6 +41,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
         body: JSON.stringify({ topic, scheduledAt: iso, duration }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to add session.");
       setIsOpen(false);
       setSessionDate("");
@@ -74,7 +80,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
 
             <FeedbackBanner variant="error" message={error || null} />
 
-            <form onSubmit={handleSubmit} className="space-y-3.5 mt-3.5">
+            <ValidatedForm onSubmit={handleSubmit} className="space-y-3.5 mt-3.5">
               <p className="text-xs text-base-content/60">Enter the date and time in {SCHOOL_TIME_ZONE_LABEL}.</p>
               <FormField label="Topic" required>
                 <select
@@ -142,7 +148,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
                   {loading ? <span className="loading loading-spinner loading-xs"></span> : "Add Session"}
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           </div>
         </div>,
         document.body

@@ -347,3 +347,8 @@ b, strong { font-weight: var(--font-weight-bold); }
       min-width: 2.75rem;
     }
   }
+/* Keep invalid controls visible while their field-level feedback is shown. */
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border-color: var(--color-error);
+  outline-color: var(--color-error);
+}

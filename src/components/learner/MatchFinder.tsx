@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
@@ -71,10 +75,11 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
   const [flipped, setFlipped] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
-    if (!criteria.subject) return setError("Please choose a subject.");
-    if (criteria.topics.length === 0) return setError("Please choose at least one topic.");
+    if (!criteria.subject) return reportFieldError(e.currentTarget, "Subject", "Please choose a subject.");
+    if (criteria.topics.length === 0) return reportFieldError(e.currentTarget, "Topics", "Please choose at least one topic.");
 
     setLoading(true);
     try {
@@ -84,6 +89,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
         body: JSON.stringify(criteriaToBody(criteria)),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not find matches.");
       setMatches(data.matches);
       setFlipped(true);
@@ -194,7 +200,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   </button>
                 )}
               </div>
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <ValidatedForm onSubmit={handleSubmit} className="space-y-5">
                 <MatchCriteriaFields
                   value={criteria}
                   onChange={setCriteria}
@@ -213,7 +219,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   )}
                   Auto Match
                 </button>
-              </form>
+              </ValidatedForm>
             </div>
           </section>
         )}

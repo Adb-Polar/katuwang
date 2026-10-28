@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const result = createSubjectSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error.issues[0]?.message || "Invalid inputs." },
+        { error: result.error.issues[0]?.message || "Invalid inputs.", fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) },
         { status: 400 }
       );
     }
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     });
     if (clash) {
       return NextResponse.json(
-        { error: "A subject with that name or slug already exists." },
+        { error: "A subject with that name or slug already exists.", fieldErrors: [{ path: [clash.slug === slug ? "slug" : "name"], message: "A subject with this value already exists." }] },
         { status: 409 }
       );
     }

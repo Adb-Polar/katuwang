@@ -1,5 +1,8 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -20,7 +23,7 @@ export default function OtherTopicAssessment() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const start = async () => {
+  const start = async (validationForm: HTMLFormElement) => {
     if (!subject || !topic) return;
     setBusy(true);
     setError("");
@@ -31,6 +34,7 @@ export default function OtherTopicAssessment() {
         body: JSON.stringify({ subject, topic }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) {
         if (data.code === "BANK_NOT_READY") {
           setError("This topic doesn't have enough questions yet — ask an admin to add some.");
@@ -47,7 +51,7 @@ export default function OtherTopicAssessment() {
   };
 
   return (
-    <div className="border border-base-200 bg-base-200/20 rounded-xl p-4 space-y-3">
+    <ValidatedForm onSubmit={(e) => { e.preventDefault(); void start(e.currentTarget); }} className="border border-base-200 bg-base-200/20 rounded-xl p-4 space-y-3">
       <div>
         <h3 className="text-xs font-bold text-base-content/80">Take an assessment for any topic</h3>
         <p className="text-2xs text-base-content/55 mt-0.5">
@@ -56,8 +60,9 @@ export default function OtherTopicAssessment() {
       </div>
       <FeedbackBanner variant="error" message={error || null} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <FormField label="Subject">
+        <FormField label="Subject" required>
           <select
+            required
             value={subject}
             onChange={(e) => {
               setSubject(e.target.value);
@@ -73,8 +78,9 @@ export default function OtherTopicAssessment() {
             ))}
           </select>
         </FormField>
-        <FormField label="Topic">
+        <FormField label="Topic" required>
           <select
+            required
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             disabled={!subject}
@@ -92,14 +98,13 @@ export default function OtherTopicAssessment() {
       </div>
       <div className="flex justify-end">
         <button
-          type="button"
-          onClick={start}
-          disabled={busy || !subject || !topic}
+          type="submit"
+          disabled={busy}
           className="btn btn-primary btn-sm text-xs"
         >
           {busy ? <span className="loading loading-spinner loading-xs" /> : "Start assessment"}
         </button>
       </div>
-    </div>
+    </ValidatedForm>
   );
 }

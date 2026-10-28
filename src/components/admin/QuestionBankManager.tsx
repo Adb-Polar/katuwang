@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidation";
+import ValidatedForm from "@/components/ui/ValidatedForm";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { ChevronRight, CornerUpLeft } from "lucide-react";
@@ -294,7 +296,7 @@ function QuestionsTab({
         body: JSON.stringify({ active: !q.active }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update question.");
+      if (!res.ok) throw new FormValidationError(data, "Failed to update question.");
       afterWrite(`Question ${q.active ? "retired" : "reactivated"}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update question.");
@@ -309,7 +311,7 @@ function QuestionsTab({
     try {
       const res = await fetch(`/api/admin/assessment-questions/${q.id}`, { method: "DELETE" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete question.");
+      if (!res.ok) throw new FormValidationError(data, "Failed to delete question.");
       afterWrite("Question deleted.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to delete question.");
@@ -552,7 +554,7 @@ function QuestionsTab({
               }
             );
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to save question.");
+            if (!res.ok) throw new FormValidationError(data, "Failed to save question.");
             afterWrite(isEdit ? "Question updated." : "Question added.");
           }}
         />
@@ -565,10 +567,10 @@ function QuestionsTab({
               {deleteTarget.prompt}
             </p>
             <div className="modal-action pt-1">
-              <button className="btn btn-ghost btn-sm" onClick={() => setDeleteTarget(null)}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDeleteTarget(null)}>
                 Cancel
               </button>
-              <button
+              <button type="button"
                 className="btn btn-error btn-sm"
                 disabled={busyId === deleteTarget.id}
                 onClick={() => remove(deleteTarget)}
@@ -648,7 +650,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
     "qreq"
   );
 
-  const resolve = async () => {
+  const resolve = async (validationForm: HTMLFormElement) => {
     if (!target) return;
     setSaving(true);
     setError("");
@@ -659,7 +661,8 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
         body: JSON.stringify({ status: target.decision, ...(note.trim() ? { resolutionNote: note.trim() } : {}) }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update request.");
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
+      if (!res.ok) throw new FormValidationError(data, "Failed to update request.");
       setSuccess(`Request ${target.decision === "RESOLVED" ? "resolved" : "dismissed"}.`);
       setTarget(null);
       setNote("");
@@ -771,7 +774,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
         onClose={() => { if (!saving) setTarget(null); }}
         title={target?.decision === "RESOLVED" ? "Resolve this request?" : "Dismiss this request?"}
       >
-        {target && <div className="space-y-3">
+        {target && <ValidatedForm className="space-y-3" onSubmit={(e) => { e.preventDefault(); void resolve(e.currentTarget); }}>
             <p className="text-xs text-base-content/60">
               {subjectDisplayLabel(target.req.subject)} · {target.req.topic} — from {target.req.tutor.anonymousId}
             </p>
@@ -786,19 +789,18 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
               />
             </FormField>
             <div className="modal-action pt-1">
-              <button className="btn btn-ghost btn-sm" onClick={() => setTarget(null)} disabled={saving}>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setTarget(null)} disabled={saving}>
                 Cancel
               </button>
-              <button
+              <button type="submit"
                 className={`btn btn-sm ${target.decision === "RESOLVED" ? "btn-success" : "btn-error"}`}
-                onClick={resolve}
                 disabled={saving}
               >
                 {saving && <span className="loading loading-spinner loading-xs" />}
                 {target.decision === "RESOLVED" ? "Resolve" : "Dismiss"}
               </button>
             </div>
-        </div>}
+        </ValidatedForm>}
       </Modal>
     </div>
   );

@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
-      return NextResponse.json({ error: errorMsg }, { status: 400 });
+      return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
     const { currentPassword, newPassword } = result.data;
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         outcome.code === "WRONG_CURRENT_PASSWORD"
           ? "Current password is incorrect."
           : "Unauthorized.";
-      return NextResponse.json({ error: message }, { status: 401 });
+      return NextResponse.json({ error: message, ...(outcome.code === "WRONG_CURRENT_PASSWORD" ? { fieldErrors: [{ path: ["currentPassword"], message }] } : {}) }, { status: 401 });
     }
 
     return NextResponse.json({ message: "Password updated." });

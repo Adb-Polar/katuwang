@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,13 +23,14 @@ export default function ResetPasswordForm() {
   const [done, setDone] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      reportFieldError(e.currentTarget, "New Password", "Password must be at least 8 characters.");
       return;
     }
     if (password !== confirm) {
-      setError("Passwords do not match.");
+      reportFieldError(e.currentTarget, "Confirm Password", "Passwords do not match.");
       return;
     }
     setError("");
@@ -37,6 +42,7 @@ export default function ResetPasswordForm() {
         body: JSON.stringify({ token, password }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) {
         setError(data.error || "Something went wrong. Please try again.");
         return;
@@ -75,8 +81,8 @@ export default function ResetPasswordForm() {
             message="This reset link is missing its token. Request a new link from the sign-in page."
           />
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-control w-full">
+          <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
+            <div data-form-field="New Password" className="form-control w-full">
               <label className="label py-1">
                 <span className="label-text font-semibold text-xs text-base-content/75">New Password</span>
               </label>
@@ -105,7 +111,7 @@ export default function ResetPasswordForm() {
               </div>
             </div>
 
-            <div className="form-control w-full">
+            <div data-form-field="Confirm Password" className="form-control w-full">
               <label className="label py-1">
                 <span className="label-text font-semibold text-xs text-base-content/75">Confirm Password</span>
               </label>
@@ -137,7 +143,7 @@ export default function ResetPasswordForm() {
                 <span>Reset password</span>
               )}
             </button>
-          </form>
+          </ValidatedForm>
         )}
 
         <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">

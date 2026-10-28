@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -116,10 +120,12 @@ export default function EditClassForm({
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     if (locked) return;
+    if (!topics.length) return reportFieldError(e.currentTarget, "Topics", "Please select at least one topic.");
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
-      setError("Please provide a location (building/room) or a meeting link.");
+      reportFieldError(e.currentTarget, "Location", "Please provide a location (building/room) or a meeting link.");
       return;
     }
     if (form.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(form.gradeLevel, tutorGradeLevel)) {
@@ -143,6 +149,7 @@ export default function EditClassForm({
         }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
       router.push(backHref);
       router.refresh();
@@ -202,7 +209,7 @@ export default function EditClassForm({
 
       <FeedbackBanner variant="error" message={error || null} />
 
-      <form id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
+      <ValidatedForm id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
             {subjectDisplayLabel(subject)}
@@ -240,6 +247,7 @@ export default function EditClassForm({
                           <button
                             type="button"
                             key={topic}
+                            aria-pressed={selected}
                             disabled={lockedTopic || locked}
                             onClick={() => toggleTopic(topic)}
                             className={`badge text-2xs font-semibold gap-1 py-2.5 transition-colors ${
@@ -409,7 +417,7 @@ export default function EditClassForm({
             </div>
           </div>
         </fieldset>
-      </form>
+      </ValidatedForm>
     </div>
   );
 }

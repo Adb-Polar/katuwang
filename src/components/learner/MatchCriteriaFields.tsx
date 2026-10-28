@@ -35,12 +35,14 @@ export default function MatchCriteriaFields({
   value,
   onChange,
   gradeHint,
+  gradeRequired = false,
   showFormatFilter = false,
   gradeLocked = false,
 }: {
   value: MatchCriteriaValue;
   onChange: (next: MatchCriteriaValue) => void;
   gradeHint?: string;
+  gradeRequired?: boolean;
   /** Auto Match passes this to show a 1-on-1 / Group selector; topic requests don't. */
   showFormatFilter?: boolean;
   gradeLocked?: boolean;
@@ -61,14 +63,15 @@ export default function MatchCriteriaFields({
   return (
     <div className="space-y-5">
       <div className="grid sm:grid-cols-2 gap-4">
-        <FormField label="Grade level" hint={gradeHint}>
+        <FormField label="Grade level" required={gradeRequired} hint={gradeHint}>
           <select
             className="select select-bordered select-md w-full text-sm"
             value={value.gradeLevel}
+            required={gradeRequired}
             disabled={gradeLocked}
             onChange={(e) => set({ gradeLevel: e.target.value, subject: "", topics: [] })}
           >
-            <option value="">Any grade</option>
+            <option value="">{gradeRequired ? "Select grade" : "Any grade"}</option>
             {GRADE_LEVELS.map((g) => (
               <option key={g.value} value={g.value}>
                 {g.label}
@@ -80,6 +83,7 @@ export default function MatchCriteriaFields({
         <FormField label="Subject" required>
           <select
             className="select select-bordered select-md w-full text-sm"
+            required
             value={value.subject}
             onChange={(e) => onChange({ ...value, subject: e.target.value, topics: [] })}
           >
@@ -138,7 +142,7 @@ export default function MatchCriteriaFields({
       <FormField label="Preferred times" hint="Optional — choose a date for a specific day, or leave it blank for a weekly preference. Times are in Philippine time.">
         <div className="space-y-3">
           {value.slots.map((slot, i) => (
-            <div key={i} className="rounded-lg border border-base-300 bg-base-100 p-3 flex flex-wrap items-center gap-2">
+            <div key={i} data-control-field className="rounded-lg border border-base-300 bg-base-100 p-3 flex flex-wrap items-center gap-2">
               <input type="date" aria-label="Preferred date" value={slot.date ?? ""}
                 onChange={(e) => {
                   const date = e.target.value;
@@ -160,7 +164,7 @@ export default function MatchCriteriaFields({
 
                 <input
                   type="time"
-                  aria-label="Start time"
+                  required aria-label="Start time"
                   value={slot.startTime}
                   onChange={(e) => updateSlot(i, { startTime: e.target.value })}
                   className="input input-bordered input-sm text-xs w-28 min-w-0"
@@ -168,7 +172,7 @@ export default function MatchCriteriaFields({
                 <span className="text-xs text-base-content/50 shrink-0">to</span>
                 <input
                   type="time"
-                  aria-label="End time"
+                  required data-after={slot.startTime} aria-label="End time"
                   value={slot.endTime}
                   onChange={(e) => updateSlot(i, { endTime: e.target.value })}
                   className="input input-bordered input-sm text-xs w-28 min-w-0"
@@ -181,6 +185,7 @@ export default function MatchCriteriaFields({
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
+              <div data-control-feedback />
             </div>
           ))}
           <button

@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -61,16 +65,17 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
 
     if (form.password !== form.confirmPassword) {
-      setError("Passwords do not match.");
+      reportFieldError(e.currentTarget, "Confirm Password", "Passwords do not match.");
       return;
     }
 
     if (form.password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      reportFieldError(e.currentTarget, "Password", "Password must be at least 8 characters.");
       return;
     }
 
@@ -84,6 +89,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
       });
 
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
 
       if (!res.ok) {
         setError(data.error || "Registration failed. Please try again.");
@@ -119,7 +125,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
 
         <FeedbackBanner variant="error" message={error || null} />
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
           {/* First Name & Last Name */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <FormField label="First Name" required>
@@ -248,6 +254,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           </FormField>
 
           {/* Consent Checkbox */}
+          <div data-form-field="Consent" className="space-y-1">
           <div className="alert alert-info bg-info/10 border-info/20 text-base-content text-xs p-4 flex gap-3 items-start">
             <input
               type="checkbox"
@@ -272,6 +279,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               . <span className="text-error">*</span>
             </label>
           </div>
+          <div data-field-feedback />
+          </div>
 
           <button
             type="submit"
@@ -287,7 +296,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <span>{copy.buttonLabel}</span>
             )}
           </button>
-        </form>
+        </ValidatedForm>
       </div>
     </div>
   );

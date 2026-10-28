@@ -17,7 +17,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
-      return NextResponse.json({ error: errorMsg }, { status: 400 });
+      return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
     const { contactInfo, section, gradeLevel, recoveryEmail } = result.data;
@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest) {
     let normalizedContact: string | undefined;
     if (contactInfo !== undefined) {
       const res = normalizeContactInfo(contactInfo);
-      if (!res.ok) return NextResponse.json({ error: res.error }, { status: 400 });
+      if (!res.ok) return NextResponse.json({ error: res.error, fieldErrors: [{ path: ["contactInfo"], message: res.error }] }, { status: 400 });
       normalizedContact = res.value;
     }
 

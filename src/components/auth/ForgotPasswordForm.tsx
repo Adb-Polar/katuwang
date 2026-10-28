@@ -1,5 +1,9 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import React, { useState } from "react";
 import Link from "next/link";
 import BrandMark from "@/components/ui/BrandMark";
@@ -12,6 +16,7 @@ export default function ForgotPasswordForm() {
   const [sent, setSent] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     if (!email) {
       setError("Please enter your email address.");
@@ -26,6 +31,7 @@ export default function ForgotPasswordForm() {
         body: JSON.stringify({ email }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) {
         setError(data.error || "Something went wrong. Please try again.");
         return;
@@ -53,8 +59,8 @@ export default function ForgotPasswordForm() {
         <FeedbackBanner variant="error" message={error || null} />
 
         {!sent && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="form-control w-full">
+          <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
+            <div data-form-field="Email Address" className="form-control w-full">
               <label className="label py-1">
                 <span className="label-text font-semibold text-xs text-base-content/75">Email Address</span>
               </label>
@@ -86,7 +92,7 @@ export default function ForgotPasswordForm() {
                 <span>Send reset link</span>
               )}
             </button>
-          </form>
+          </ValidatedForm>
         )}
 
         <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">

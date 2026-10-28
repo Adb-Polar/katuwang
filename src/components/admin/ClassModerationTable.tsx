@@ -1,5 +1,8 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -87,7 +90,8 @@ export default function ClassModerationTable() {
   const updateStatus = async (
     classId: string,
     status: "SUSPENDED" | "BANNED" | "SCHEDULED",
-    body: Record<string, unknown> = {}
+    body: Record<string, unknown> = {},
+    validationForm?: HTMLFormElement
   ) => {
     setSaving(true);
     try {
@@ -97,6 +101,7 @@ export default function ClassModerationTable() {
         body: JSON.stringify({ status, ...body }),
       });
       const data = await res.json();
+      if (!res.ok && validationForm && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
 
       setSuccess(
@@ -311,7 +316,7 @@ export default function ClassModerationTable() {
         onClose={() => setModerateTarget(null)}
         title={moderateTarget?.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
       >
-        {moderateTarget && <>
+        {moderateTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void updateStatus(moderateTarget.class.id, moderateTarget.action, { reason, ...(moderateTarget.action === "SUSPENDED" && durationDays ? { durationDays: Number(durationDays) } : {}) }, e.currentTarget); }}>
             <p className="text-2xs text-base-content/50 mb-4">
               {subjectDisplayLabel(moderateTarget.class.subject)} · {moderateTarget.class.topics.join(", ")}
             </p>
@@ -334,6 +339,7 @@ export default function ClassModerationTable() {
 
             <FormField label="Reason" hint="Optional — shown for your own records">
               <textarea
+                maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder={
@@ -353,15 +359,7 @@ export default function ClassModerationTable() {
               >
                 Cancel
               </button>
-              <button
-                onClick={() =>
-                  updateStatus(moderateTarget.class.id, moderateTarget.action, {
-                    reason,
-                    ...(moderateTarget.action === "SUSPENDED" && durationDays
-                      ? { durationDays: Number(durationDays) }
-                      : {}),
-                  })
-                }
+              <button type="submit"
                 disabled={saving}
                 className="btn btn-error btn-sm text-xs cursor-pointer"
               >
@@ -374,7 +372,7 @@ export default function ClassModerationTable() {
                 )}
               </button>
             </div>
-        </>}
+        </ValidatedForm>}
       </Modal>
 
       <ConfirmDialog

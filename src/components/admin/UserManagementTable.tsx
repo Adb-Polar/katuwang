@@ -1,5 +1,8 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -103,7 +106,7 @@ export default function UserManagementTable() {
     setError("");
   };
 
-  const handleSave = async () => {
+  const handleSave = async (validationForm: HTMLFormElement) => {
     if (!target) return;
     setSaving(true);
     try {
@@ -117,6 +120,7 @@ export default function UserManagementTable() {
         }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update account.");
 
       setSuccess(
@@ -297,7 +301,7 @@ export default function UserManagementTable() {
       </section>
 
       <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Account">
-        {target && <>
+        {target && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void handleSave(e.currentTarget); }}>
             <p className="text-2xs text-base-content/50 mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>
@@ -333,6 +337,7 @@ export default function UserManagementTable() {
 
               <FormField label="Reason" hint="Optional — shown for your own records">
                 <textarea
+                  maxLength={500}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Why is this account's status changing?"
@@ -349,15 +354,14 @@ export default function UserManagementTable() {
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
+              <button type="submit"
                 disabled={saving}
                 className="btn btn-primary btn-sm text-xs cursor-pointer"
               >
                 {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
               </button>
             </div>
-        </>}
+        </ValidatedForm>}
       </Modal>
     </div>
   );

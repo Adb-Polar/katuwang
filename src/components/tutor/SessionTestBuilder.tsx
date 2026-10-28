@@ -1,5 +1,9 @@
 "use client";
 
+import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -86,7 +90,7 @@ function CreateTestPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const create = async () => {
+  const create = async (validationForm: HTMLFormElement) => {
     setBusy(true);
     setError("");
     try {
@@ -96,7 +100,8 @@ function CreateTestPanel({
         body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create test.");
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
+      if (!res.ok) throw new FormValidationError(data, "Failed to create test.");
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create test.");
@@ -119,8 +124,11 @@ function CreateTestPanel({
             it&apos;s marked complete (post-test), so you can see the gain.
           </p>
           <FeedbackBanner variant="error" message={error || null} />
+          <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void create(e.currentTarget); }}>
           <FormField label="Title" required>
             <input
+              required
+              minLength={3}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               maxLength={120}
@@ -138,11 +146,12 @@ function CreateTestPanel({
             <CharCount value={instructions} max={2000} />
           </FormField>
           <div className="flex justify-end">
-            <button onClick={create} disabled={busy || title.trim().length < 3} className="btn btn-primary btn-sm text-xs">
+            <button type="submit" disabled={busy} className="btn btn-primary btn-sm text-xs">
               {busy && <span className="loading loading-spinner loading-xs" />}
               Create test
             </button>
           </div>
+          </ValidatedForm>
         </div>
       </section>
     </div>
@@ -205,7 +214,7 @@ function BuilderBody({
       return next;
     });
 
-  const saveMeta = async () => {
+  const saveMeta = async (validationForm: HTMLFormElement) => {
     setBusy(true);
     setError("");
     try {
@@ -215,7 +224,8 @@ function BuilderBody({
         body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save.");
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
+      if (!res.ok) throw new FormValidationError(data, "Failed to save.");
       flash("Details saved.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save.");
@@ -234,7 +244,7 @@ function BuilderBody({
         body: JSON.stringify({ questionIds: items.map((i) => i.questionId) }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save questions.");
+      if (!res.ok) throw new FormValidationError(data, "Failed to save questions.");
       setSavedIds(items.map((i) => i.questionId));
       flash("Questions saved.");
     } catch (err) {
@@ -256,7 +266,7 @@ function BuilderBody({
         body: JSON.stringify({ status: next }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to update status.");
+      if (!res.ok) throw new FormValidationError(data, "Failed to update status.");
       setStatus(data.status);
       flash(next === "PUBLISHED" ? "Test published — learners can take the pre-test now." : "Test closed.");
     } catch (err) {
@@ -299,8 +309,11 @@ function BuilderBody({
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Test details</h2>
+          <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveMeta(e.currentTarget); }}>
           <FormField label="Title" required>
             <input
+              required
+              minLength={3}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               disabled={!editable}
@@ -321,12 +334,13 @@ function BuilderBody({
           </FormField>
           {editable && (
             <div className="flex justify-end">
-              <button onClick={saveMeta} disabled={busy} className="btn btn-neutral btn-sm text-xs">
+              <button type="submit" disabled={busy} className="btn btn-neutral btn-sm text-xs">
                 {busy && <span className="loading loading-spinner loading-xs" />}
                 Save details
               </button>
             </div>
           )}
+          </ValidatedForm>
         </div>
       </section>
 
@@ -469,7 +483,7 @@ function BuilderBody({
               body: JSON.stringify({ classId, topic, ...draft }),
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "Failed to add question.");
+            if (!res.ok) throw new FormValidationError(data, "Failed to add question.");
             addQuestions([{ questionId: data.id, prompt: data.prompt, origin: "TUTOR", topic: data.topic }]);
             setShowWrite(false);
           }}
@@ -532,7 +546,7 @@ function AddFromBankModal({
       if (q.trim()) params.set("q", q.trim());
       const res = await fetch(`/api/tutor/question-bank?${params}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to load questions.");
+      if (!res.ok) throw new FormValidationError(data, "Failed to load questions.");
       setRows(data.questions);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load questions.");
@@ -656,7 +670,7 @@ function MyQuestionsModal({
       try {
         const res = await fetch("/api/tutor/questions");
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to load your questions.");
+        if (!res.ok) throw new FormValidationError(data, "Failed to load your questions.");
         if (!cancelled) setRows(data.questions);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Failed to load your questions.");
