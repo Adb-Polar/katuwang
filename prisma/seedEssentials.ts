@@ -1,3 +1,4 @@
+import { curriculumFor } from "../src/lib/curriculum";
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { config as loadEnv } from "dotenv";
@@ -40,8 +41,8 @@ async function seedSubjectsAndTopics() {
   for (const slug of Object.keys(SUBJECT_TOPICS)) {
     const subject = await prisma.subject.upsert({
       where: { slug },
-      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug) },
+      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
+      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug), ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
     });
     sOrder++;
 
@@ -49,8 +50,8 @@ async function seedSubjectsAndTopics() {
     for (const name of SUBJECT_TOPICS[slug]) {
       await prisma.topic.upsert({
         where: { subjectId_name: { subjectId: subject.id, name } },
-        update: { order: tOrder },
-        create: { subjectId: subject.id, name, order: tOrder },
+        update: { order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
+        create: { subjectId: subject.id, name, order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
       });
       tOrder++;
     }

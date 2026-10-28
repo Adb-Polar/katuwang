@@ -79,8 +79,23 @@ describe("/api/admin/topics/[id]", () => {
       expect.objectContaining({ data: { topic: "New Name" } })
     );
     expect(h.topicUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "t1" }, data: expect.objectContaining({ name: "New Name" }) })
+      expect.objectContaining({ where: { id: "t1" }, data: expect.objectContaining({ name: "New Name", curriculum: expect.objectContaining({ status: "admin", sources: [] }) }) })
     );
+  });
+
+  it("PATCH grade changes replace source attribution and preserve the topic name", async () => {
+    const res = await PATCH(patch({ gradeLevels: ["GRADE_9", "GRADE_10"], curriculumNote: "School elective" }), params);
+    expect(res.status).toBe(200);
+    expect(h.topicUpdate).toHaveBeenCalledWith({ where: { id: "t1" }, data: {
+      gradeLevels: ["GRADE_9", "GRADE_10"], curriculum: expect.objectContaining({ status: "admin", note: "School elective", sources: [] }),
+    } });
+    expect(h.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("PATCH rejects empty or invalid grade arrays before writing", async () => {
+    expect((await PATCH(patch({ gradeLevels: [] }), params)).status).toBe(400);
+    expect((await PATCH(patch({ gradeLevels: ["GRADE_99"] }), params)).status).toBe(400);
+    expect(h.topicUpdate).not.toHaveBeenCalled();
   });
 
   it("PATCH order-only change does not fan out", async () => {

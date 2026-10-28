@@ -133,6 +133,8 @@ model Subject {
   topics    Topic[]
 
   @@map("subjects")
+  curriculum Json?
+
 }
 
 model Topic {
@@ -148,6 +150,8 @@ model Topic {
   @@unique([subjectId, name])
   @@index([subjectId, active])
   @@map("topics")
+  curriculum Json?
+
 }
 
 model TutorClass {

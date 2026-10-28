@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, Trash2 } from "lucide-react";
+import CurriculumCoverage from "./CurriculumCoverage";
 import CatalogGradePicker from "./CatalogGradePicker";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -14,6 +15,7 @@ interface TopicRow {
   order: number;
   active: boolean;
   gradeLevels?: unknown;
+  curriculum?: unknown;
 }
 interface SubjectRow {
   id: string;
@@ -22,6 +24,7 @@ interface SubjectRow {
   order: number;
   active: boolean;
   gradeLevels?: unknown;
+  curriculum?: unknown;
   topics: TopicRow[];
 }
 
@@ -364,7 +367,7 @@ export default function SubjectTopicManager() {
               <button
                 type="button"
                 onClick={addSubject}
-                disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim()}
+                disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim() || !newSubjectGrades.length}
                 className="btn btn-primary btn-xs min-h-11 sm:min-h-0 w-full text-2xs"
               >
                 <Plus className="h-3 w-3" /> Add subject
@@ -382,8 +385,8 @@ export default function SubjectTopicManager() {
 
             {selected ? (
               <>
-                <CatalogGradePicker label="Subject grades" value={selected.gradeLevels} disabled={busy}
-                  onChange={(gradeLevels) => { void call(`/api/admin/subjects/${selected.id}`, "PATCH", { gradeLevels }); }} />
+                <CurriculumCoverage gradeLevels={selected.gradeLevels} curriculum={selected.curriculum} disabled={busy}
+                  onSave={(gradeLevels, curriculumNote) => call(`/api/admin/subjects/${selected.id}`, "PATCH", { gradeLevels, curriculumNote })} />
                 <ul className="min-h-0 flex-1 divide-y divide-base-200 overflow-y-auto">
                   {[...selected.topics]
                     .sort((a, b) => a.order - b.order)
@@ -430,8 +433,8 @@ export default function SubjectTopicManager() {
                             >
                               {t.name}
                             </span>
-                            <CatalogGradePicker label="Topic grades" value={t.gradeLevels} disabled={busy}
-                              onChange={(gradeLevels) => { void call(`/api/admin/topics/${t.id}`, "PATCH", { gradeLevels }); }} />
+                            <CurriculumCoverage gradeLevels={t.gradeLevels} curriculum={t.curriculum} disabled={busy}
+                                onSave={(gradeLevels, curriculumNote) => call(`/api/admin/topics/${t.id}`, "PATCH", { gradeLevels, curriculumNote })} />
                             </div>
                             <RowMenu
                               anchorId={`${idBase}-t-${t.id}`}
@@ -493,7 +496,7 @@ export default function SubjectTopicManager() {
                   <button
                     type="button"
                     onClick={addTopic}
-                    disabled={busy || !newTopic.trim()}
+                    disabled={busy || !newTopic.trim() || !newTopicGrades.length}
                     className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs"
                   >
                     <Plus className="h-3 w-3" /> Add

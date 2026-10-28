@@ -1,3 +1,4 @@
+import { curriculumFor } from "@/lib/curriculum";
 import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
 import { availableInGrade } from "@/lib/catalogGrades";
 import type { Subject, Topic } from "@prisma/client";
@@ -41,7 +42,8 @@ function staticFallback(): SubjectWithTopics[] {
     name: slug,
     order: i,
     active: true,
-    gradeLevels: defaultSubjectGrades(slug) ?? null,
+    gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug) ?? null,
+    curriculum: curriculumFor(slug).curriculum ?? null,
     createdAt: now,
     updatedAt: now,
     topics: SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS].map((name, j) => ({
@@ -50,7 +52,8 @@ function staticFallback(): SubjectWithTopics[] {
       name,
       order: j,
       active: true,
-      gradeLevels: null,
+      gradeLevels: curriculumFor(slug, name).curriculum ? curriculumFor(slug, name).gradeLevels : null,
+      curriculum: curriculumFor(slug, name).curriculum ?? null,
       createdAt: now,
     })),
   }));

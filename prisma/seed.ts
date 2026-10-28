@@ -1,3 +1,4 @@
+import { curriculumFor } from "../src/lib/curriculum";
 import { defaultSubjectGrades } from "../src/lib/subjectGradeDefaults";
 import { recordRequestHistory, requestDeadline, requestSnapshot } from "../src/lib/topicRequestHistory";
 import {
@@ -1644,16 +1645,16 @@ async function main() {
   for (const slug of Object.keys(SUBJECT_TOPICS) as string[]) {
     const subject = await prisma.subject.upsert({
       where: { slug },
-      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder },
-      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug) },
+      update: { name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
+      create: { slug, name: SUBJECT_NAMES[slug] ?? slug, order: sOrder, gradeLevels: defaultSubjectGrades(slug), ...(curriculumFor(slug).curriculum ? curriculumFor(slug) : {}) },
     });
     sOrder++;
     let tOrder = 0;
     for (const name of SUBJECT_TOPICS[slug]) {
       await prisma.topic.upsert({
         where: { subjectId_name: { subjectId: subject.id, name } },
-        update: { order: tOrder },
-        create: { subjectId: subject.id, name, order: tOrder },
+        update: { order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
+        create: { subjectId: subject.id, name, order: tOrder, ...(curriculumFor(slug, name).curriculum ? curriculumFor(slug, name) : {}) },
       });
       tOrder++;
     }

@@ -58,16 +58,22 @@ describe("/api/admin/subjects", () => {
   it("POST 409 when name/slug already exists", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     subjectFindFirst.mockResolvedValue({ slug: "MATH" });
-    const res = await POST(post({ name: "Mathematics", slug: "MATH" }));
+    const res = await POST(post({ name: "Mathematics", slug: "MATH", gradeLevels: ["GRADE_7"] }));
     expect(res.status).toBe(409);
+  });
+
+  it("POST rejects an unassigned subject", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    expect((await POST(post({ name: "Robotics", slug: "ROBOTICS" }))).status).toBe(400);
+    expect(subjectCreate).not.toHaveBeenCalled();
   });
 
   it("POST 201 creates + audits, next order", async () => {
     getServerSessionMock.mockResolvedValue(admin);
-    const res = await POST(post({ name: "Robotics", slug: "ROBOTICS" }));
+    const res = await POST(post({ name: "Robotics", slug: "ROBOTICS", gradeLevels: ["GRADE_9", "GRADE_10"] }));
     expect(res.status).toBe(201);
     expect(subjectCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ data: expect.objectContaining({ slug: "ROBOTICS", order: 5 }) })
+      expect.objectContaining({ data: expect.objectContaining({ slug: "ROBOTICS", order: 5, gradeLevels: ["GRADE_9", "GRADE_10"], curriculum: expect.objectContaining({ status: "admin" }) }) })
     );
     expect(auditCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ action: "SUBJECT_CREATED" }) })

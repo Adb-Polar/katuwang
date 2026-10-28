@@ -1,4 +1,5 @@
 import { isAdminRole } from "@/lib/permissions";
+import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -45,7 +46,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { name, slug, gradeLevels } = result.data;
+    const { name, slug, gradeLevels, curriculumNote } = result.data;
 
     const clash = await prisma.subject.findFirst({
       where: { OR: [{ slug }, { name }] },
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     const subject = await prisma.$transaction(async (tx) => {
       const created = await tx.subject.create({
-        data: { name, slug, gradeLevels, order: (max._max.order ?? -1) + 1 },
+        data: { name, slug, gradeLevels, curriculum: adminCurriculumNote(curriculumNote), order: (max._max.order ?? -1) + 1 },
       });
       await tx.auditLog.create({
         data: {

@@ -1,3 +1,4 @@
+import { curriculumFor } from "@/lib/curriculum";
 "use client";
 
 import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
@@ -11,6 +12,8 @@ export interface CatalogSubject {
   topics: string[];
   gradeLevels?: unknown;
   topicGrades?: Record<string, unknown>;
+  curriculum?: unknown;
+  topicDetails?: { name: string; gradeLevels: unknown; curriculum?: unknown }[];
 }
 
 // Static SUBJECT_TOPICS as the instant, offline-safe seed; `/api/subjects`
@@ -18,7 +21,9 @@ export interface CatalogSubject {
 const STATIC: CatalogSubject[] = SUBJECT_SLUGS.map((slug) => ({
   slug,
   name: slug,
-  gradeLevels: defaultSubjectGrades(slug),
+  gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug),
+  curriculum: curriculumFor(slug).curriculum,
+  topicGrades: Object.fromEntries(SUBJECT_TOPICS[slug].map((name) => [name, curriculumFor(slug, name).curriculum ? curriculumFor(slug, name).gradeLevels : null])),
   topics: [...SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS]],
 }));
 

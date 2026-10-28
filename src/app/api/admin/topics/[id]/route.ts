@@ -1,4 +1,5 @@
 import { isAdminRole } from "@/lib/permissions";
+import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -68,7 +69,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       );
     }
 
-    const data = { ...result.data };
+    const { curriculumNote, ...data } = result.data;
     const renameTo = data.name ? normalizeTopic(data.name) : undefined;
     if (renameTo) data.name = renameTo;
 
@@ -89,7 +90,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (renameTo && renameTo !== existing.name) {
         await renameTopicEverywhere(tx, existing.subject.slug, existing.name, renameTo);
       }
-      const row = await tx.topic.update({ where: { id }, data });
+      const row = await tx.topic.update({ where: { id }, data: { ...data, ...(data.gradeLevels || curriculumNote !== undefined || (renameTo && renameTo !== existing.name) ? { curriculum: adminCurriculumNote(curriculumNote) } : {}) } });
       await tx.auditLog.create({
         data: {
           adminId: session.user.id,

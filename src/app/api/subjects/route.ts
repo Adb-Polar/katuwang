@@ -18,6 +18,8 @@ export async function GET() {
         name: s.name,
         gradeLevels: s.gradeLevels,
         topicGrades: Object.fromEntries(s.topics.map((t) => [t.name, t.gradeLevels])),
+        curriculum: s.curriculum,
+        topicDetails: s.topics.map((t) => ({ name: t.name, gradeLevels: t.gradeLevels, curriculum: t.curriculum })),
         topics: s.topics.map((t) => t.name),
       })),
     });

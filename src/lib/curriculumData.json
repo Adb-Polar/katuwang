@@ -1,0 +1,1096 @@
+{
+  "sources": {
+    "math": {
+      "title": "FINAL MATATAG Mathematics CG 2023 Grades 1-10",
+      "url": "https://drive.google.com/file/d/1roXSWyhUuYgWrvCe2EP-XSd7bDjhl1B1/view"
+    },
+    "ap": {
+      "title": "FINAL MATATAG Araling Panlipunan CG 2023 Grades 4-10",
+      "url": "https://drive.google.com/file/d/1zeoO_JDu7xoPms3Vrf3yshmtJJmN5ZS6/view"
+    },
+    "english": {
+      "title": "FINAL MATATAG English CG 2023 Grades 2-10 (withAppendices)",
+      "url": "https://drive.google.com/file/d/1G-gvLhBEvYm6MTkGjt1E2LhrD5q_5tFf/view"
+    },
+    "filipino": {
+      "title": "FINAL MATATAG FILIPINO CG 2023 Grades 2-10",
+      "url": "https://drive.google.com/file/d/19JiNv4CNros5oIB06knAMN4airI-RfIE/view"
+    },
+    "tle": {
+      "title": "FINAL MATATAG EPP_TLE CG 2023 Grades 4 - 10",
+      "url": "https://drive.google.com/file/d/13uLAEc1CrLvmHUWhzAA5ToTRugpib6Ia/view"
+    },
+    "musicArts": {
+      "title": "FINAL MATATAG Music and Arts CG 2023 Grades 4-10",
+      "url": "https://drive.google.com/file/d/15kjMX1f0OluyV8ZLLikdFteAJ1kFGTVl/view"
+    },
+    "peHealth": {
+      "title": "FINAL MATATAG PE and Health CG 2023 Grades 4-10",
+      "url": "https://drive.google.com/file/d/1Syz740qlj8iN3P1NkifnmroWYC4Rdhf8/view"
+    },
+    "science": {
+      "title": "FINAL MATATAG Science CG 2023 Grades 3-10",
+      "url": "https://drive.google.com/file/d/1NVMi3WaYjkVumL9jQY05iL7tA_xl8q7C/view"
+    },
+    "translation": {
+      "title": "DepEd Filipino 10 DLP: Pagsasalin (legacy supplementary material)",
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Q3-Fil10-6-10_TN-Language-edited.pdf"
+    },
+    "ap7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: ap, Grade 7",
+      "url": "https://drive.google.com/file/d/1656ryATGnzYuvNHf9IXtw7KnIdIBlqTk/view"
+    },
+    "english7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: english, Grade 7",
+      "url": "https://drive.google.com/file/d/1R4ur6OQPKrJDuqmurlwXQ1OMY5wqLb23/view"
+    },
+    "filipino7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: filipino, Grade 7",
+      "url": "https://drive.google.com/file/d/1N0L7JQZKhJNzF0XHKKekK7g5FMFyaJhb/view"
+    },
+    "math7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: math, Grade 7",
+      "url": "https://drive.google.com/file/d/1V2phZIAl03YIreX4shpFeVm5McPP_0wz/view"
+    },
+    "science7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: science, Grade 7",
+      "url": "https://drive.google.com/file/d/10nMHshSkxiIswpvfdyojDIqA-5SfAkQR/view"
+    },
+    "mapeh7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: mapeh, Grade 7",
+      "url": "https://drive.google.com/file/d/1xPo82OY6aLIPvYl5vtB0FyG0EM9OS-0Z/view"
+    },
+    "tleGeneral7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: tleGeneral, Grade 7",
+      "url": "https://drive.google.com/file/d/1qLwxFmvhS64NqgZIZ8-0k24D1tZk-t42/view"
+    },
+    "tleICT7BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: tleICT, Grade 7",
+      "url": "https://drive.google.com/file/d/11k-Pm9IhyeMjPDapWwVveCFaKoNqURM-/view"
+    },
+    "ap8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: ap, Grade 8",
+      "url": "https://drive.google.com/file/d/1DTjs01gbcPgQP19w4PTQdmGj6j5oXqxR/view"
+    },
+    "english8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: english, Grade 8",
+      "url": "https://drive.google.com/file/d/1QbQV_DgmoJiQ6AvD2gdZjHz0Tk7hur0r/view"
+    },
+    "filipino8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: filipino, Grade 8",
+      "url": "https://drive.google.com/file/d/1CdKL1LqxStnB82xobvxJbVnQYVvIjKaZ/view"
+    },
+    "math8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: math, Grade 8",
+      "url": "https://drive.google.com/file/d/1RFlCPzSdXK8FnF_uqyuzG4DLse0HPlz8/view"
+    },
+    "science8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: science, Grade 8",
+      "url": "https://drive.google.com/file/d/1SU0IGG6gHbAYH0KdnlYnjCXrtmjJfxS5/view"
+    },
+    "mapeh8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: mapeh, Grade 8",
+      "url": "https://drive.google.com/file/d/1PMED4SPoVJE5fYNPp6BJXLyUVqbtHrHu/view"
+    },
+    "tleGeneral8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: tleGeneral, Grade 8",
+      "url": "https://drive.google.com/file/d/1Y46GvbxkhoDCILyqDKvVKP9e8KCNzPSZ/view"
+    },
+    "tleICT8BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: tleICT, Grade 8",
+      "url": "https://drive.google.com/file/d/1Yml2c-0uPLTNY-ov5VTpzHS12YyNdxmL/view"
+    },
+    "ap9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: ap, Grade 9",
+      "url": "https://drive.google.com/file/d/1JrOQzTPjgAWUdFgS0Os6n55kEN-eKW_g/view"
+    },
+    "english9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: english, Grade 9",
+      "url": "https://drive.google.com/file/d/1vrj1lMHJG0yTVKApoVqePfZ0CJ80eGW0/view"
+    },
+    "filipino9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: filipino, Grade 9",
+      "url": "https://drive.google.com/file/d/1Zq_FNL6KFBUznpYzo3cdn8vlz2afflr2/view"
+    },
+    "math9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: math, Grade 9",
+      "url": "https://drive.google.com/file/d/15HIr4TLB5BBz4XUHp5hsu7_5q0x9Nxpk/view"
+    },
+    "science9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: science, Grade 9",
+      "url": "https://drive.google.com/file/d/1lMlRrlFvkDUoQLsIkNO8hrEu5EONVDHq/view"
+    },
+    "mapeh9BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: mapeh, Grade 9",
+      "url": "https://drive.google.com/file/d/1MDssj4hOXIxeSbEmgNeoMkqjxdIB144O/view"
+    },
+    "ap10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: ap, Grade 10",
+      "url": "https://drive.google.com/file/d/1VSBZP4sO5GTFUsKAFz9MD9JDemKI4Fnf/view"
+    },
+    "english10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: english, Grade 10",
+      "url": "https://drive.google.com/file/d/1Cxy818bjtI6ZNLZWQsQEuDJrE5lccBjA/view"
+    },
+    "filipino10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: filipino, Grade 10",
+      "url": "https://drive.google.com/file/d/1B7G0uZijKpcfud-ayu-m14mNOBKJgxZR/view"
+    },
+    "math10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: math, Grade 10",
+      "url": "https://drive.google.com/file/d/1Gw_DVqcVh5xGsoLohumBO-CZa2MUwGsn/view"
+    },
+    "science10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: science, Grade 10",
+      "url": "https://drive.google.com/file/d/13-4nNifNCikM378gEClkLX86EMEvRXlg/view"
+    },
+    "mapeh10BOW": {
+      "title": "DepEd 2026 three-term Budget of Work: mapeh, Grade 10",
+      "url": "https://drive.google.com/file/d/1cpR-GJ9RhZAuaTq8qUt7DItSOgSPoTRC/view"
+    },
+    "tleAFA910BOW": {
+      "title": "DepEd 2026 three-term BOW: TLE AFA example specialization, Grades 9–10",
+      "url": "https://drive.google.com/file/d/1xYZpMyjkjEuhegdDL_7xyzoptwq2NC6B/view"
+    },
+    "tleICT910BOW": {
+      "title": "DepEd 2026 three-term BOW: TLE ICT example specialization, Grades 9–10",
+      "url": "https://drive.google.com/file/d/1E_QIdp1tisaSULv5efqP2VwMaWNysyPq/view"
+    },
+    "tleFCS910BOW": {
+      "title": "DepEd 2026 three-term BOW: TLE FCS example specialization, Grades 9–10",
+      "url": "https://drive.google.com/file/d/1oohXr7fU1pE7zbn7hUVSWZpSpB71cWNb/view"
+    },
+    "tleIA910BOW": {
+      "title": "DepEd 2026 three-term BOW: TLE IA example specialization, Grades 9–10",
+      "url": "https://drive.google.com/file/d/10ilZVgJo5j_8zudn0mkjpDa4GzhssqHN/view"
+    }
+  },
+  "subjects": {
+    "MATH": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "math7BOW",
+          "math8BOW",
+          "math9BOW",
+          "math10BOW",
+          "math"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Whole Numbers & Operations": {
+          "gradeLevels": [
+            "GRADE_7"
+          ],
+          "status": "foundation",
+          "note": "Mathematics pp. 52–54: rational numbers and integers. Whole-number arithmetic is prerequisite review, not a new Grade 7 competency. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Fractions & Decimals": {
+          "gradeLevels": [
+            "GRADE_7"
+          ],
+          "status": "mapped",
+          "note": "Mathematics p. 52: expressing rational numbers as fractions, decimals and percentages, and operations on rational numbers. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Algebraic Expressions": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8"
+          ],
+          "status": "mapped",
+          "note": "Mathematics pp. 55–56: simple equations, algebraic expressions, polynomial operations and factoring. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math8BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Linear Equations & Inequalities": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8"
+          ],
+          "status": "mapped",
+          "note": "Mathematics p. 55: simple equations; pp. 58–59: linear equations, systems and inequalities. Grade 7 covers the introductory equations part only. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math8BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Geometry & Measurement": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Mathematics pp. 52–68: polygons, measurement, volume, geometry, triangles and coordinate geometry, with different subtopics by grade. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math8BOW",
+            "math9BOW",
+            "math10BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Statistics & Probability": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Mathematics pp. 23–24 grade-level standards and pp. 54, 56, 59, 64, 66: statistical data/graphs (Grade 7), descriptive statistics/probability (Grade 8), simple/compound events and interpreting data (Grade 9), and statistical distributions/probability (Grade 10). Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math7BOW",
+            "math8BOW",
+            "math9BOW",
+            "math10BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Trigonometry": {
+          "gradeLevels": [
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Mathematics pp. 64–65: right-triangle trigonometric ratios in Grade 9; laws of sines and cosines in Grade 10. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math9BOW",
+            "math10BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Functions & Graphing": {
+          "gradeLevels": [
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Mathematics pp. 57–58, 60, 62–63, 65–67: coordinate plane and linear graphs (Grade 8); linear/quadratic functions (Grade 9); further coordinate graphs (Grade 10). Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "math8BOW",
+            "math9BOW",
+            "math10BOW",
+            "math"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "ENGLISH": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "english7BOW",
+          "english8BOW",
+          "english9BOW",
+          "english10BOW",
+          "english"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Grammar & Sentence Structure": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: language features and sentence construction are embedded in text analysis and composition. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Reading Comprehension": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: interpreting literary and informational texts. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Vocabulary Building": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: word choice, vocabulary, and language features in context. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Essay & Paragraph Writing": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: composing and revising literary/informational texts; text type varies by grade. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Literature Analysis": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: literary analysis; national/regional/world literature coverage varies. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Public Speaking & Oral Communication": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English Grades 7–10 sections, pp. 143–185: delivery, presentation and multimodal communication; this is a tutoring umbrella, not the SHS course title. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Research Writing": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "English pp. 151, 162, 173: research language and academic exposition in Grades 7–9; pp. 180–184: Grade 10 research reports based on literature review. Complexity differs by grade. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "english7BOW",
+            "english8BOW",
+            "english9BOW",
+            "english10BOW",
+            "english"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "SCIENCE": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "science7BOW",
+          "science8BOW",
+          "science9BOW",
+          "science10BOW",
+          "science"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Scientific Method & Inquiry": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 46–66: inquiry and investigations are embedded across grade-level science domains. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Cell Biology & Genetics": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 47, 51, 59: cells/reproduction (Grade 7), inheritance (Grade 8), DNA and mutations (Grade 9). The combined label spans different competencies. Grade 10 p. 67 extends heredity through evolution and biotechnology; the cell-biology part is foundational. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Chemical Reactions & Matter": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 46, 52, 60, 64–65: particle model/matter (Grade 7), atomic model (Grade 8), bonding/new substances (Grade 9), chemical reactions (Grade 10). Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Force, Motion & Energy": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 48, 54–56, 63: forces and motion progress across all four grades. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Ecosystems & the Environment": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 47, 51, 59, 61–62, 67: food webs, cycles, biodiversity, climate/environment, and life-science applications. Subtopics differ by grade. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Earth & Space Science": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science pp. 49–50, 53, 57–58, 61–62: earthquakes, Earth systems, solar system, tectonics and climate. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science7BOW",
+            "science8BOW",
+            "science9BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Human Body Systems": {
+          "gradeLevels": [
+            "GRADE_8",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Science p. 51: digestive/excretory systems and organ systems working together (Grade 8); p. 67: homeostasis and feedback across human body systems (Grade 10). Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "science8BOW",
+            "science10BOW",
+            "science"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "FILIPINO": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "filipino7BOW",
+          "filipino8BOW",
+          "filipino9BOW",
+          "filipino10BOW",
+          "filipino"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Balarila (Gramatika)": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Filipino pp. 118–171: linguistic elements and communicative use are embedded in texts; this is not a separate grammar course. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "filipino7BOW",
+            "filipino8BOW",
+            "filipino9BOW",
+            "filipino10BOW",
+            "filipino"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Pagbasa at Pag-unawa": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Filipino pp. 118–171: comprehension and analysis of literary, informational and visual texts. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "filipino7BOW",
+            "filipino8BOW",
+            "filipino9BOW",
+            "filipino10BOW",
+            "filipino"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Panitikang Pilipino": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9"
+          ],
+          "status": "mapped",
+          "note": "Filipino pp. 122–156: Philippine literary periods and works in Grades 7–9. Grade 10 focuses on world literature, so it is not automatically included under this specifically Philippine label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "filipino7BOW",
+            "filipino8BOW",
+            "filipino9BOW",
+            "filipino"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Pagsulat ng Sanaysay": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9"
+          ],
+          "status": "mapped",
+          "note": "Filipino pp. 122–156: essay composition and multimodal essay tasks. Grade 10 emphasizes other outputs, including research proposals. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "filipino7BOW",
+            "filipino8BOW",
+            "filipino9BOW",
+            "filipino"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Pagsasalin": {
+          "gradeLevels": [
+            "GRADE_10"
+          ],
+          "status": "legacy",
+          "note": "Legacy Filipino 10 supplementary DLP explicitly teaches translation. Not located as an explicit competency in the inspected revised Filipino guide; retain for review and flag as legacy, not current verified coverage.",
+          "sourceIds": [
+            "translation"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Retorika at Pampublikong Pagsasalita": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Filipino pp. 134–171: persuasive/argumentative texts, speech/debate and presentations. Broad tutoring label; exact genre differs by grade. The current Grade 7 BOW also includes speeches (talumpati) among informational text examples; this is introductory text work, not a full rhetoric course. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "filipino7BOW",
+            "filipino8BOW",
+            "filipino9BOW",
+            "filipino10BOW",
+            "filipino"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "ARALING_PANLIPUNAN": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "ap7BOW",
+          "ap8BOW",
+          "ap9BOW",
+          "ap10BOW",
+          "ap"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Kasaysayan ng Pilipinas": {
+          "gradeLevels": [
+            "GRADE_7"
+          ],
+          "status": "mapped",
+          "note": "AP Grade 7: Philippines in Southeast Asia, including historical connections, colonialism, nationalism and nationhood; not an exhaustive standalone Philippine-history course. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap7BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Heograpiya": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8"
+          ],
+          "status": "mapped",
+          "note": "AP Grades 7–8: physical/human geography in Southeast Asian and world-history contexts. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap7BOW",
+            "ap8BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Ekonomiks": {
+          "gradeLevels": [
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "AP Grade 9: economics toward sustainable development; corroborated by DepEd Grade 9 DLP economics materials. Grade 10 p. 70 covers contemporary economic issues, rather than the full Grade 9 economics course. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap9BOW",
+            "ap10BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Sibika at Pamahalaan": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "AP Grades 7–8 historical/political institutions and nationhood; Grade 10 citizenship, rights and civic participation. Broad thematic mapping. Grade 9 pp. 61–63 explicitly covers government and the economy. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap7BOW",
+            "ap8BOW",
+            "ap9BOW",
+            "ap10BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Kultura at Lipunan": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "AP Grades 7–8 societies and civilizations; Grade 10 contemporary social issues. This umbrella spans selected thematic units. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap7BOW",
+            "ap8BOW",
+            "ap10BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Kasalukuyang Pangyayari (Current Events)": {
+          "gradeLevels": [
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "AP Grade 10: contemporary issues. Current events may contextualize other grades, but the catalog tag identifies the principal curriculum placement. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "ap10BOW",
+            "ap"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "TLE": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+        "sourceIds": [
+          "tleAFA910BOW",
+          "tleICT910BOW",
+          "tleFCS910BOW",
+          "tleIA910BOW",
+          "tleGeneral7BOW",
+          "tleGeneral8BOW",
+          "tleICT7BOW",
+          "tle"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Computer Basics & ICT": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "EPP/TLE Grade 7 and Grade 8 ICT components; Grade 9/10 ICT specialization is dependent on school offering. Basic computer skills are review within advanced specializations. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+          "sourceIds": [
+            "tleICT910BOW",
+            "tleGeneral7BOW",
+            "tleGeneral8BOW",
+            "tleICT7BOW",
+            "tle"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Home Economics": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "EPP/TLE Grades 7–8 exploratory/family and consumer science content; Grades 9–10 depend on the selected home-economics specialization. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+          "sourceIds": [
+            "tleFCS910BOW",
+            "tleGeneral7BOW",
+            "tleGeneral8BOW",
+            "tleICT7BOW",
+            "tle"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Agri-Fishery Arts": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "EPP/TLE Grades 7–8 agriculture/fishery components; Grades 9–10 apply only to the selected agri-fishery specialization. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+          "sourceIds": [
+            "tleAFA910BOW",
+            "tleGeneral7BOW",
+            "tleGeneral8BOW",
+            "tleICT7BOW",
+            "tle"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Industrial Arts": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "EPP/TLE Grades 7–8 industrial arts components; Grades 9–10 apply only to the selected industrial specialization. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+          "sourceIds": [
+            "tleIA910BOW",
+            "tleGeneral7BOW",
+            "tleGeneral8BOW",
+            "tleICT7BOW",
+            "tle"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Entrepreneurship": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "EPP/TLE Grade 7 ICT includes qualities of successful entrepreneurs (p. 69); business/career opportunities recur across components and specializations. Embedded theme, not a separate subject at every grade. Cross-checked with the current 2026 BOW. Grades 9–10 share sector BOWs and are specialization-dependent; the listed sources include representative sectors, not a requirement to take every sector.",
+          "sourceIds": [
+            "tleICT910BOW",
+            "tleAFA910BOW",
+            "tleFCS910BOW",
+            "tleIA910BOW",
+            "tleGeneral7BOW",
+            "tleGeneral8BOW",
+            "tleICT7BOW",
+            "tle"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    },
+    "MAPEH": {
+      "subject": {
+        "gradeLevels": [
+          "GRADE_7",
+          "GRADE_8",
+          "GRADE_9",
+          "GRADE_10"
+        ],
+        "status": "mapped",
+        "note": "Junior-high coverage of this existing tutoring category. SHS uses distinct courses and electives; Grades 11–12 are not inferred from this JHS label. MAPEH is retained as the app umbrella for Music and Arts plus PE and Health. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+        "sourceIds": [
+          "mapeh7BOW",
+          "mapeh8BOW",
+          "mapeh9BOW",
+          "mapeh10BOW",
+          "musicArts",
+          "peHealth"
+        ],
+        "reviewedAt": "2026-10-27",
+        "schoolYear": "2026-2027"
+      },
+      "topics": {
+        "Music Theory & Appreciation": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Music and Arts Grades 7–10: musical elements, appreciation and performance in different cultural contexts. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "mapeh7BOW",
+            "mapeh8BOW",
+            "mapeh9BOW",
+            "mapeh10BOW",
+            "musicArts",
+            "peHealth"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Visual Arts": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "Music and Arts Grades 7–10: visual elements, art analysis and production; themes vary by grade. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "mapeh7BOW",
+            "mapeh8BOW",
+            "mapeh9BOW",
+            "mapeh10BOW",
+            "musicArts",
+            "peHealth"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Physical Education & Sports": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "PE and Health Grades 7–10: movement, physical activity, fitness and sports with grade-specific activities. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "mapeh7BOW",
+            "mapeh8BOW",
+            "mapeh9BOW",
+            "mapeh10BOW",
+            "musicArts",
+            "peHealth"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        },
+        "Health Education": {
+          "gradeLevels": [
+            "GRADE_7",
+            "GRADE_8",
+            "GRADE_9",
+            "GRADE_10"
+          ],
+          "status": "mapped",
+          "note": "PE and Health Grades 7–10: personal/community health and well-being with grade-specific issues. Cross-checked against the available 2026 three-term Budget of Work for the assigned grades.",
+          "sourceIds": [
+            "mapeh7BOW",
+            "mapeh8BOW",
+            "mapeh9BOW",
+            "mapeh10BOW",
+            "musicArts",
+            "peHealth"
+          ],
+          "reviewedAt": "2026-10-27",
+          "schoolYear": "2026-2027"
+        }
+      }
+    }
+  }
+}
