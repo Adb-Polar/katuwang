@@ -1,5 +1,8 @@
 "use client";
 
+import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidation";
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -68,7 +71,7 @@ export default function QuestionFormModal({
       return next;
     });
 
-  const submit = async () => {
+  const submit = async (validationForm: HTMLFormElement) => {
     setSaving(true);
     setError("");
     try {
@@ -78,6 +81,7 @@ export default function QuestionFormModal({
         options: options.map((o) => ({ text: o.text, isCorrect: o.isCorrect })),
       });
     } catch (err) {
+      if (err instanceof FormValidationError && reportServerFieldErrors(validationForm, err)) return;
       setError(err instanceof Error ? err.message : "Failed to save question.");
     } finally {
       setSaving(false);
@@ -86,7 +90,7 @@ export default function QuestionFormModal({
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 kt-card space-y-4">
+      <ValidatedForm className="modal-box max-w-lg p-6 kt-card space-y-4" onSubmit={(e) => { e.preventDefault(); void submit(e.currentTarget); }}>
         <div>
           <h3 className="font-bold text-sm text-base-content">{title}</h3>
           {contextLabel && <p className="text-2xs text-base-content/50 mt-0.5">{contextLabel}</p>}
@@ -97,6 +101,7 @@ export default function QuestionFormModal({
         {topicField && (
           <FormField label="Topic" required>
             <select
+              required
               value={topicField.value}
               onChange={(e) => topicField.onChange(e.target.value)}
               className="select select-bordered select-sm text-xs w-full focus:select-primary truncate"
@@ -112,6 +117,8 @@ export default function QuestionFormModal({
 
         <FormField label="Question prompt" required>
           <textarea
+            required
+            minLength={5}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={3}
@@ -123,7 +130,8 @@ export default function QuestionFormModal({
         <FormField label="Options" hint="Select the one correct answer">
           <div className="space-y-2">
             {options.map((o, i) => (
-              <div key={i} className="flex items-center gap-2">
+              <div key={i} data-control-field>
+              <div className="flex items-center gap-2">
                 <input
                   type="radio"
                   name="correct-option"
@@ -133,6 +141,8 @@ export default function QuestionFormModal({
                 />
                 <input
                   type="text"
+                  required
+                  aria-label={`Option ${i + 1}`}
                   value={o.text}
                   onChange={(e) => setText(i, e.target.value)}
                   maxLength={500}
@@ -148,6 +158,8 @@ export default function QuestionFormModal({
                 >
                   ✕
                 </button>
+              </div>
+              <div data-control-feedback />
               </div>
             ))}
             {options.length < OPTION_COUNT_MAX && (
@@ -169,15 +181,15 @@ export default function QuestionFormModal({
         </FormField>
 
         <div className="modal-action pt-1">
-          <button className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving}>
             Cancel
           </button>
-          <button className="btn btn-primary btn-sm" onClick={submit} disabled={saving}>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
             {saving && <span className="loading loading-spinner loading-xs" />}
             {submitLabel}
           </button>
         </div>
-      </div>
+      </ValidatedForm>
       <label className="modal-backdrop" onClick={onClose} aria-label="Close" />
     </div>
   );

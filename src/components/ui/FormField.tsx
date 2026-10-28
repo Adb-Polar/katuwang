@@ -33,21 +33,21 @@ export default function FormField({
 
   if (orientation === "horizontal") {
     return (
-      <div className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
+      <div data-form-field={label} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
         <label className="sm:w-40 sm:shrink-0 sm:pt-2">{labelNode}</label>
         <div className="w-full">
           {children}
-          {feedback}
+          <div data-field-feedback>{feedback}</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full flex flex-col gap-1.5">
+    <div data-form-field={label} className="w-full flex flex-col gap-1.5">
       <label>{labelNode}</label>
       {children}
-      {feedback}
+      <div data-field-feedback>{feedback}</div>
     </div>
   );
 }

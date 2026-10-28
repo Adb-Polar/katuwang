@@ -1,5 +1,9 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
@@ -68,6 +72,7 @@ export default function SessionActions({
   };
 
   const handleReschedule = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setRescheduling(true);
     setRescheduleError("");
@@ -78,6 +83,7 @@ export default function SessionActions({
         body: JSON.stringify({ topic, scheduledAt: new Date(scheduledAt).toISOString(), duration }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to reschedule session.");
       setIsRescheduling(false);
       router.refresh();
@@ -163,7 +169,7 @@ export default function SessionActions({
 
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
-            <form onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
+            <ValidatedForm onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
               <FormField label="Topic" required>
                 <select
                   value={topic}
@@ -216,7 +222,7 @@ export default function SessionActions({
                   {rescheduling ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           </div>
         </div>,
         document.body

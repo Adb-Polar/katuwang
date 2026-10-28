@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     const result = requestQuestionsSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
-      return NextResponse.json({ error: errorMsg }, { status: 400 });
+      return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
     const { subject, topic, note } = result.data;

@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -42,13 +46,15 @@ export default function ProfileEditForm({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
     setSuccess("");
 
     const contactCheck = normalizeContactInfo(contactInfo);
     if (!contactCheck.ok) {
-      setContactError(contactCheck.error);
+      setContactError("");
+      reportFieldError(e.currentTarget, "Contact info", contactCheck.error);
       return;
     }
     setContactError("");
@@ -61,6 +67,7 @@ export default function ProfileEditForm({
         body: JSON.stringify({ contactInfo, section, gradeLevel }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update profile.");
       setContactInfo(data.contactInfo ?? "");
       setSection(data.section ?? "");
@@ -75,7 +82,7 @@ export default function ProfileEditForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
       <FeedbackBanner variant="error" message={error || null} />
       <FeedbackBanner variant="success" message={success || null} />
 
@@ -134,6 +141,6 @@ export default function ProfileEditForm({
           {saving ? <span className="loading loading-spinner loading-sm"></span> : "Save changes"}
         </button>
       </div>
-    </form>
+    </ValidatedForm>
   );
 }

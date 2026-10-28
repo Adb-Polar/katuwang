@@ -1,5 +1,7 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ClassScheduleFields, { ClassScheduleSubmitPayload } from "@/components/tutor/ClassScheduleFields";
@@ -14,7 +16,7 @@ export default function NewClassForm({ allowedTopics }: { allowedTopics?: string
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleCreateClass = async (payload: ClassScheduleSubmitPayload) => {
+  const handleCreateClass = async (payload: ClassScheduleSubmitPayload, validationForm: HTMLFormElement) => {
     setError("");
     setSubmitting(true);
     try {
@@ -24,6 +26,7 @@ export default function NewClassForm({ allowedTopics }: { allowedTopics?: string
         body: JSON.stringify({ ...payload, gradeLevel: payload.gradeLevel || null }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) { setSubmitting(false); return; }
       if (!res.ok) throw new Error(data.error || "Failed to create class.");
 
       // Land on the class we just made.

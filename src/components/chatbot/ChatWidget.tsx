@@ -1,5 +1,7 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
 import { askChatbot, type ChatTurn } from "@/components/chatbot/chatbotClient";
@@ -128,7 +130,7 @@ export default function ChatWidget() {
 
           {error && <p className="px-3 pb-1 text-2xs text-error">{error}</p>}
 
-          <form
+          <ValidatedForm
             onSubmit={(e) => {
               e.preventDefault();
               send(input);
@@ -151,7 +153,7 @@ export default function ChatWidget() {
             >
               <Send className="h-4 w-4" />
             </button>
-          </form>
+          </ValidatedForm>
         </div>
       )}
     </>

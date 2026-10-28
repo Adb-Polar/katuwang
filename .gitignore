@@ -48,3 +48,6 @@ next-env.d.ts
 # Local scratch & agent skills (not part of the app)
 /scratchpad/
 /docs/reviews/scratchpad/
+
+# Local task work and verification assets
+/work/

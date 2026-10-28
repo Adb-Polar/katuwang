@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -81,9 +85,10 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
   }, [query]);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     if (!selected) {
-      setError("Search for and select a learner first.");
+      reportFieldError(e.currentTarget, "Learner", "Search for and select a learner first.");
       return;
     }
     setError("");
@@ -96,6 +101,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
         body: JSON.stringify({ learnerId: selected.id, note }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to recommend this class.");
       setSuccess(`Recommended to ${selected.anonymousId}.`);
       setSelected(null);
@@ -121,7 +127,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
         <FeedbackBanner variant="error" message={error || null} />
         <FeedbackBanner variant="success" message={success || null} />
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <ValidatedForm onSubmit={handleSubmit} className="space-y-3">
           <FormField label="Learner" required hint="Search by anonymous ID or name.">
             {selected ? (
               <div className="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
@@ -187,12 +193,12 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
 
           <button
             type="submit"
-            disabled={saving || !selected}
+            disabled={saving}
             className="btn btn-primary btn-sm text-xs cursor-pointer"
           >
             {saving ? <span className="loading loading-spinner loading-xs"></span> : "Recommend class"}
           </button>
-        </form>
+        </ValidatedForm>
 
         {recommendations.length > 0 && (
           <div className="border-t border-base-200 pt-3">

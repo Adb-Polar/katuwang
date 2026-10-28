@@ -63,7 +63,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const result = updateTopicSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error.issues[0]?.message || "Invalid inputs." },
+        { error: result.error.issues[0]?.message || "Invalid inputs.", fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) },
         { status: 400 }
       );
     }

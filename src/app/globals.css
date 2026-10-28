@@ -325,3 +325,9 @@ b, strong { font-weight: var(--font-weight-bold); }
      Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
   .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
 }
+
+/* Keep invalid controls visible while their field-level feedback is shown. */
+input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
+  border-color: var(--color-error);
+  outline-color: var(--color-error);
+}

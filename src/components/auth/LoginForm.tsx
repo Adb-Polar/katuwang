@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import React, { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,10 +41,11 @@ export default function LoginForm() {
 
   // Handle Form Submission using NextAuth
   const handleSubmit = async (e: React.SubmitEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
 
     if (!email || !password) {
-      setError("Please fill in all fields.");
+      reportFieldError(validationForm, !email ? "Email Address" : "Password", "Please fill in this field.");
       return;
     }
 
@@ -69,7 +74,11 @@ export default function LoginForm() {
           router.push(`/account-unverified?email=${encodeURIComponent(email)}`);
           return;
         }
-        setError(result.error);
+        if (result.error === "Invalid email or password." || result.error === "CredentialsSignin") {
+          reportFieldError(validationForm, "Password", "Invalid email or password. Check both fields and try again.");
+        } else {
+          setError(result.error);
+        }
         setLoading(false);
       } else {
         setSuccess(true);
@@ -110,9 +119,9 @@ export default function LoginForm() {
           </div>
         ) : (
           /* Primary Login Form */
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
             {/* Email Input */}
-            <div className="form-control w-full">
+            <div data-form-field="Email Address" className="form-control w-full">
               <label className="label py-1">
                 <span className="label-text font-semibold text-xs text-base-content/75">Email Address</span>
               </label>
@@ -131,7 +140,7 @@ export default function LoginForm() {
             </div>
 
             {/* Password Input */}
-            <div className="form-control w-full">
+            <div data-form-field="Password" className="form-control w-full">
               <div className="flex items-center justify-between">
                 <label className="label py-1">
                   <span className="label-text font-semibold text-xs text-base-content/75">Password</span>
@@ -193,7 +202,7 @@ export default function LoginForm() {
                 <span>Sign In to Portal</span>
               )}
             </button>
-          </form>
+          </ValidatedForm>
         )}
 
         {/* Registration Redirection Links */}

@@ -1,5 +1,7 @@
 "use client";
 
+import ValidatedForm from "./ValidatedForm";
+
 import { useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import CharCount from "./CharCount";
@@ -31,7 +33,7 @@ export default function PromptDialog({
   noteLabel?: string;
   notePlaceholder?: string;
   noteMax?: number;
-  /** When true the confirm button stays disabled until the note is non-empty. */
+  /** When true an empty note blocks submission and receives inline feedback. */
   noteRequired?: boolean;
   confirmLabel?: string;
   cancelLabel?: string;
@@ -49,11 +51,11 @@ export default function PromptDialog({
     setNote("");
   }
 
-  const confirmDisabled = loading || (noteRequired && note.trim().length === 0);
+  const confirmDisabled = loading;
 
   return (
     <Modal open={open} onClose={onCancel} title={title} bare>
-      <div>
+      <ValidatedForm onSubmit={(e) => { e.preventDefault(); onConfirm(note.trim()); }}>
         <div className="flex items-start gap-3">
           {tone === "danger" && (
             <div className="p-2 rounded-lg bg-error/10 text-error shrink-0">
@@ -71,6 +73,7 @@ export default function PromptDialog({
             {noteLabel}
           </span>
           <textarea
+            required={noteRequired}
             value={note}
             onChange={(e) => setNote(e.target.value)}
             rows={3}
@@ -91,16 +94,15 @@ export default function PromptDialog({
             {cancelLabel}
           </button>
           <button
-            type="button"
+            type="submit"
             className={`btn btn-sm ${tone === "danger" ? "btn-error" : "btn-primary"}`}
-            onClick={() => onConfirm(note.trim())}
             disabled={confirmDisabled}
           >
             {loading && <span className="loading loading-spinner loading-xs" />}
             {confirmLabel}
           </button>
         </div>
-      </div>
+      </ValidatedForm>
     </Modal>
   );
 }

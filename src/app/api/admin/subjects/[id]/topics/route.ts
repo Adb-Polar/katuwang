@@ -25,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const result = createTopicSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
-        { error: result.error.issues[0]?.message || "Invalid inputs." },
+        { error: result.error.issues[0]?.message || "Invalid inputs.", fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) },
         { status: 400 }
       );
     }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       select: { id: true },
     });
     if (clash) {
-      return NextResponse.json({ error: "That topic already exists for this subject." }, { status: 409 });
+      return NextResponse.json({ error: "That topic already exists for this subject.", fieldErrors: [{ path: ["name"], message: "That topic already exists for this subject." }] }, { status: 409 });
     }
 
     const max = await prisma.topic.aggregate({ where: { subjectId }, _max: { order: true } });

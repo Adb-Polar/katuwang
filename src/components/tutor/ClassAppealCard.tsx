@@ -1,5 +1,8 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Gavel } from "lucide-react";
@@ -36,7 +39,7 @@ export default function ClassAppealCard({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const submit = async () => {
+  const submit = async (validationForm: HTMLFormElement) => {
     setSaving(true);
     setError("");
     try {
@@ -46,6 +49,7 @@ export default function ClassAppealCard({
         body: JSON.stringify({ reason }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not submit the appeal.");
       setOpen(false);
       setReason("");
@@ -88,10 +92,12 @@ export default function ClassAppealCard({
       )}
 
       {open ? (
-        <div className="space-y-2">
+        <ValidatedForm className="space-y-2" onSubmit={(e) => { e.preventDefault(); void submit(e.currentTarget); }}>
           <FeedbackBanner variant="error" message={error || null} />
           <FormField label="Why should this moderation be lifted?" required>
             <textarea
+              required
+              minLength={10}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               maxLength={REASON_MAX}
@@ -109,15 +115,14 @@ export default function ClassAppealCard({
               Cancel
             </button>
             <button
-              type="button"
-              onClick={submit}
-              disabled={saving || reason.trim().length < 10}
+              type="submit"
+              disabled={saving}
               className="btn btn-primary btn-xs text-2xs"
             >
               {saving ? <span className="loading loading-spinner loading-xs" /> : "Submit appeal"}
             </button>
           </div>
-        </div>
+        </ValidatedForm>
       ) : (
         <div className="flex items-center justify-between gap-3">
           <p className="text-base-content/70">

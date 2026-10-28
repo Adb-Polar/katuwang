@@ -34,7 +34,7 @@ export async function PATCH(
       : createTopicRequestSchema.safeParse(body);
     if (!parsed.success) {
       const errorMsg = parsed.error.issues[0]?.message || "Invalid inputs.";
-      return NextResponse.json({ error: errorMsg }, { status: 400 });
+      return NextResponse.json({ error: errorMsg, fieldErrors: parsed.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
     const existing = await prisma.topicRequest.findUnique({

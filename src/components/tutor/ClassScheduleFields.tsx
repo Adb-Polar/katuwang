@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -77,7 +81,7 @@ export default function ClassScheduleFields({
   /** "modal" = compact controls for the dialog (accept-request flow); "page" = comfortable full-size controls. */
   variant?: "modal" | "page";
   onCancel: () => void;
-  onSubmit: (payload: ClassScheduleSubmitPayload) => void;
+  onSubmit: (payload: ClassScheduleSubmitPayload, form: HTMLFormElement) => void;
 }) {
   const page = variant === "page";
   const inputCls = page ? "input-md text-sm" : "input-sm text-xs";
@@ -172,14 +176,14 @@ export default function ClassScheduleFields({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    if (!form.subject) return setFormError("Please select a subject.");
-    if (selectedTopics.length === 0) return setFormError("Please select at least one topic.");
-    if (sessionRows.length === 0) return setFormError("Please add at least one session.");
+    if (!form.subject) return reportFieldError(e.currentTarget, "Subject Area", "Please select a subject.");
+    if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topic(s)", "Please select at least one topic.");
+    if (sessionRows.length === 0) return reportFieldError(e.currentTarget, "Sessions", "Please add at least one session.");
     if (sessionRows.some((r) => !r.topic || !r.scheduledAt)) {
-      return setFormError("Every session needs a topic and a date/time.");
+      return reportFieldError(e.currentTarget, "Sessions", "Every session needs a topic and a date/time.");
     }
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
-      return setFormError("Please provide a location (building/room) or a meeting link.");
+      return reportFieldError(e.currentTarget, "Location", "Please provide a location (building/room) or a meeting link.");
     }
 
     onSubmit({
@@ -190,11 +194,11 @@ export default function ClassScheduleFields({
         scheduledAt: new Date(r.scheduledAt).toISOString(),
         duration: r.duration,
       })),
-    });
+    }, e.currentTarget as HTMLFormElement);
   };
 
   return (
-    <form onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
+    <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
 
       <FormField size={fieldSize} label="Subject Area" required>
@@ -362,6 +366,7 @@ export default function ClassScheduleFields({
             {sessionRows.map((row, i) => (
               <div
                 key={row.key}
+                data-control-field
                 className="border border-base-300 bg-base-200/40 rounded-lg p-2.5 space-y-1.5"
               >
                 <div className="flex items-center gap-1.5">
@@ -391,6 +396,8 @@ export default function ClassScheduleFields({
                 <div className="flex flex-wrap gap-1.5">
                   <input
                     type="datetime-local"
+                    required
+                    aria-label={`Session ${i + 1} date and time`}
                     value={row.scheduledAt}
                     onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
                     className={`input input-bordered ${rowInputCls} flex-1 min-w-[9.5rem]`}
@@ -407,10 +414,12 @@ export default function ClassScheduleFields({
                     <option value={120}>120m</option>
                   </select>
                 </div>
+                <div data-control-feedback />
               </div>
             ))}
             <button
               type="button"
+              data-validation-change
               onClick={addSessionRow}
               className={`btn btn-ghost ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
             >
@@ -479,6 +488,6 @@ export default function ClassScheduleFields({
           {submitting ? <span className="loading loading-spinner loading-sm"></span> : submitLabel}
         </button>
       </div>
-    </form>
+    </ValidatedForm>
   );
 }

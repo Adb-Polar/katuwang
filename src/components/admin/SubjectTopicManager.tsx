@@ -1,5 +1,8 @@
 "use client";
 
+import { reportServerFieldErrors } from "@/lib/formValidation";
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Plus, Check, X, MoreVertical, Pencil, ArrowUp, ArrowDown, ToggleLeft, Trash2 } from "lucide-react";
@@ -177,7 +180,7 @@ export default function SubjectTopicManager() {
     setTimeout(() => setSuccess(""), 3500);
   };
 
-  const call = async (url: string, method: string, body?: unknown) => {
+  const call = async (url: string, method: string, body?: unknown, validationForm?: HTMLFormElement) => {
     setError("");
     setBusy(true);
     try {
@@ -186,6 +189,7 @@ export default function SubjectTopicManager() {
         ...(body ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {}),
       });
       const json = await res.json().catch(() => ({}));
+      if (!res.ok && validationForm && reportServerFieldErrors(validationForm, json)) return null;
       if (!res.ok) throw new Error(json.error || "Request failed.");
       load();
       return json;
@@ -199,12 +203,12 @@ export default function SubjectTopicManager() {
 
   const selected = subjects.find((s) => s.id === selectedId) ?? null;
 
-  const addSubject = async () => {
+  const addSubject = async (validationForm: HTMLFormElement) => {
     if (!newSubjectName.trim() || !newSubjectSlug.trim()) return;
     const r = await call("/api/admin/subjects", "POST", {
       name: newSubjectName.trim(),
       slug: newSubjectSlug.trim().toUpperCase(),
-    });
+    }, validationForm);
     if (r) {
       setNewSubjectName("");
       setNewSubjectSlug("");
@@ -221,21 +225,21 @@ export default function SubjectTopicManager() {
     await call(`/api/admin/subjects/${sorted[j].id}`, "PATCH", { order: sorted[i].order });
   };
 
-  const addTopic = async () => {
+  const addTopic = async (validationForm: HTMLFormElement) => {
     if (!selected || !newTopic.trim()) return;
-    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim() });
+    const r = await call(`/api/admin/subjects/${selected.id}/topics`, "POST", { name: newTopic.trim() }, validationForm);
     if (r) {
       setNewTopic("");
       flash("Topic added.");
     }
   };
 
-  const saveTopicName = async (t: TopicRow) => {
+  const saveTopicName = async (t: TopicRow, validationForm: HTMLFormElement) => {
     if (!editingTopicName.trim() || editingTopicName.trim() === t.name) {
       setEditingTopicId(null);
       return;
     }
-    const r = await call(`/api/admin/topics/${t.id}`, "PATCH", { name: editingTopicName.trim() });
+    const r = await call(`/api/admin/topics/${t.id}`, "PATCH", { name: editingTopicName.trim() }, validationForm);
     if (r) {
       flash("Topic renamed everywhere it's used.");
       setEditingTopicId(null);
@@ -332,29 +336,46 @@ export default function SubjectTopicManager() {
               ))}
             </ul>
 
-            <div className="shrink-0 space-y-2 border-t border-base-200 pt-3">
+            <ValidatedForm className="shrink-0 space-y-2 border-t border-base-200 pt-3" onSubmit={(e) => { e.preventDefault(); void addSubject(e.currentTarget); }}>
               <p className="text-2xs text-base-content/60">Add a subject</p>
-              <input
-                value={newSubjectName}
-                onChange={(e) => setNewSubjectName(e.target.value)}
-                placeholder="Name (e.g. Mathematics)"
-                className="input input-bordered input-xs w-full text-xs"
-              />
-              <input
-                value={newSubjectSlug}
-                onChange={(e) => setNewSubjectSlug(e.target.value.toUpperCase())}
-                placeholder="SLUG (e.g. MATH)"
-                className="input input-bordered input-xs w-full font-mono text-xs"
-              />
+              <div data-control-field className="min-w-0 flex-1 w-full">
+                <input
+                  required
+                  minLength={2}
+                  maxLength={80}
+                  name="name"
+                  aria-label="Subject name"
+                  value={newSubjectName}
+                  onChange={(e) => setNewSubjectName(e.target.value)}
+                  placeholder="Name (e.g. Mathematics)"
+                  className="input input-bordered input-xs w-full text-xs"
+                />
+                <div data-control-feedback />
+              </div>
+              <div data-control-field className="min-w-0 flex-1 w-full">
+                <input
+                  required
+                  minLength={2}
+                  maxLength={40}
+                  pattern="[A-Z][A-Z0-9_]*"
+                  title="Use uppercase letters, digits and underscores, starting with a letter."
+                  name="slug"
+                  aria-label="Subject slug"
+                  value={newSubjectSlug}
+                  onChange={(e) => setNewSubjectSlug(e.target.value.toUpperCase())}
+                  placeholder="SLUG (e.g. MATH)"
+                  className="input input-bordered input-xs w-full font-mono text-xs"
+                />
+                <div data-control-feedback />
+              </div>
               <button
-                type="button"
-                onClick={addSubject}
-                disabled={busy || !newSubjectName.trim() || !newSubjectSlug.trim()}
+                type="submit"
+                disabled={busy}
                 className="btn btn-primary btn-xs w-full text-2xs"
               >
                 <Plus className="h-3 w-3" /> Add subject
               </button>
-            </div>
+            </ValidatedForm>
           </div>
         </section>
 
@@ -373,21 +394,27 @@ export default function SubjectTopicManager() {
                     .map((t, idx, arr) => (
                       <li key={t.id} className="flex items-center gap-1 py-1.5 text-xs">
                         {editingTopicId === t.id ? (
-                          <>
-                            <input
-                              value={editingTopicName}
-                              onChange={(e) => setEditingTopicName(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") saveTopicName(t);
+                          <ValidatedForm className="flex flex-wrap items-center gap-1 w-full" onSubmit={(e) => { e.preventDefault(); void saveTopicName(t, e.currentTarget); }}>
+                            <div data-control-field className="min-w-0 flex-1 w-full">
+                              <input
+                                required
+                                minLength={2}
+                                maxLength={80}
+                                name="name"
+                                aria-label="Topic name"
+                                value={editingTopicName}
+                                onChange={(e) => setEditingTopicName(e.target.value)}
+                                onKeyDown={(e) => {
                                 if (e.key === "Escape") setEditingTopicId(null);
-                              }}
-                              className="input input-bordered input-xs min-w-0 flex-1 text-xs"
-                              autoFocus
-                            />
+                                }}
+                                className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                                autoFocus
+                              />
+                              <div data-control-feedback />
+                            </div>
                             <button
-                              type="button"
+                              type="submit"
                               disabled={busy}
-                              onClick={() => saveTopicName(t)}
                               className="btn btn-ghost btn-xs btn-square shrink-0 text-success"
                               aria-label="Save"
                             >
@@ -401,7 +428,7 @@ export default function SubjectTopicManager() {
                             >
                               <X className="h-3.5 w-3.5" />
                             </button>
-                          </>
+                          </ValidatedForm>
                         ) : (
                           <>
                             <span
@@ -458,23 +485,29 @@ export default function SubjectTopicManager() {
                   )}
                 </ul>
 
-                <div className="flex shrink-0 flex-wrap gap-2 border-t border-base-200 pt-3">
-                  <input
-                    value={newTopic}
-                    onChange={(e) => setNewTopic(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addTopic()}
-                    placeholder="New topic name"
-                    className="input input-bordered input-xs min-w-0 flex-1 text-xs"
-                  />
+                <ValidatedForm className="flex shrink-0 flex-wrap gap-2 border-t border-base-200 pt-3" onSubmit={(e) => { e.preventDefault(); void addTopic(e.currentTarget); }}>
+                  <div data-control-field className="min-w-0 flex-1 w-full">
+                    <input
+                      required
+                      minLength={2}
+                      maxLength={80}
+                      name="name"
+                      aria-label="Topic name"
+                      value={newTopic}
+                      onChange={(e) => setNewTopic(e.target.value)}
+                      placeholder="New topic name"
+                      className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                    />
+                    <div data-control-feedback />
+                  </div>
                   <button
-                    type="button"
-                    onClick={addTopic}
-                    disabled={busy || !newTopic.trim()}
+                    type="submit"
+                    disabled={busy}
                     className="btn btn-primary btn-xs text-2xs"
                   >
                     <Plus className="h-3 w-3" /> Add
                   </button>
-                </div>
+                </ValidatedForm>
               </>
             ) : (
               <p className="py-6 text-center text-xs italic text-base-content/40">

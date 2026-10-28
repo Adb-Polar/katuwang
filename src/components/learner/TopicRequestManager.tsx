@@ -1,5 +1,9 @@
 "use client";
 
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
+
+import ValidatedForm from "@/components/ui/ValidatedForm";
+
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, Clock, X, Pencil } from "lucide-react";
@@ -78,11 +82,12 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   };
 
   const saveEdit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
-    if (!editCriteria.subject) return setError("Please choose a subject.");
-    if (editCriteria.topics.length === 0) return setError("Please choose at least one topic.");
-    if (!editCriteria.gradeLevel) return setError("Please choose a grade level.");
+    if (!editCriteria.subject) return reportFieldError(e.currentTarget, "Subject", "Please choose a subject.");
+    if (editCriteria.topics.length === 0) return reportFieldError(e.currentTarget, "Topics", "Please choose at least one topic.");
+    if (!editCriteria.gradeLevel) return reportFieldError(e.currentTarget, "Grade level", "Please choose a grade level.");
 
     setSavingEdit(true);
     try {
@@ -92,6 +97,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
         body: JSON.stringify({ ...criteriaToBody(editCriteria), note: editNote }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not save your changes.");
       setEditId(null);
       refetch();
@@ -110,11 +116,12 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
   const formMode = showForm || editId !== null;
 
   const submit = async (e: React.FormEvent) => {
+    const validationForm = e.currentTarget;
     e.preventDefault();
     setError("");
-    if (!criteria.subject) return setError("Please choose a subject.");
-    if (criteria.topics.length === 0) return setError("Please choose at least one topic.");
-    if (!criteria.gradeLevel) return setError("Please choose a grade level.");
+    if (!criteria.subject) return reportFieldError(e.currentTarget, "Subject", "Please choose a subject.");
+    if (criteria.topics.length === 0) return reportFieldError(e.currentTarget, "Topics", "Please choose at least one topic.");
+    if (!criteria.gradeLevel) return reportFieldError(e.currentTarget, "Grade level", "Please choose a grade level.");
 
     setSubmitting(true);
     try {
@@ -124,6 +131,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
         body: JSON.stringify({ ...criteriaToBody(criteria), note }),
       });
       const data = await res.json();
+      if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not post your request.");
       setSuccess("Request posted. Tutors teaching this subject can now respond.");
       setShowForm(false);
@@ -190,8 +198,8 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
           )}
 
           {showForm && (
-            <form onSubmit={submit} className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20">
-              <MatchCriteriaFields value={criteria} onChange={setCriteria} />
+            <ValidatedForm onSubmit={submit} className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20">
+              <MatchCriteriaFields gradeRequired value={criteria} onChange={setCriteria} />
               <FormField label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={note}
@@ -219,11 +227,11 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                   Back to requests
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           )}
 
           {editingRequest && (
-            <form
+            <ValidatedForm
               onSubmit={saveEdit}
               className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20"
             >
@@ -233,7 +241,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                 </span>
                 Editing your open request
               </div>
-              <MatchCriteriaFields value={editCriteria} onChange={setEditCriteria} />
+              <MatchCriteriaFields gradeRequired value={editCriteria} onChange={setEditCriteria} />
               <FormField label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={editNote}
@@ -258,7 +266,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                   Back to requests
                 </button>
               </div>
-            </form>
+            </ValidatedForm>
           )}
 
           {formMode ? null : loading ? (

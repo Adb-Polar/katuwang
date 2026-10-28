@@ -1,5 +1,8 @@
 "use client";
 
+import ValidatedForm from "@/components/ui/ValidatedForm";
+import { reportServerFieldErrors } from "@/lib/formValidation";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { Role, GradeLevel } from "@prisma/client";
@@ -72,7 +75,7 @@ export default function RegistrationApprovalTable() {
     "registrations"
   );
 
-  const review = async (user: PendingUser, decision: "APPROVE" | "DECLINE", declineReason = "") => {
+  const review = async (user: PendingUser, decision: "APPROVE" | "DECLINE", declineReason = "", validationForm?: HTMLFormElement) => {
     setBusyId(user.id);
     setError("");
     try {
@@ -82,6 +85,7 @@ export default function RegistrationApprovalTable() {
         body: JSON.stringify({ decision, ...(declineReason ? { reason: declineReason } : {}) }),
       });
       const data = await res.json();
+      if (!res.ok && validationForm && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to review registration.");
 
       setSuccess(
@@ -225,8 +229,8 @@ export default function RegistrationApprovalTable() {
 
       {declineTarget && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
+          <ValidatedForm onSubmit={(e) => { e.preventDefault(); void review(declineTarget, "DECLINE", reason, e.currentTarget); }} className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
+            <button type="button"
               onClick={() => setDeclineTarget(null)}
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             >
@@ -241,6 +245,7 @@ export default function RegistrationApprovalTable() {
 
             <FormField label="Reason" hint="Optional — stored on the account and in the audit log">
               <textarea
+                maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Why is this registration being declined?"
@@ -256,8 +261,7 @@ export default function RegistrationApprovalTable() {
               >
                 Cancel
               </button>
-              <button
-                onClick={() => review(declineTarget, "DECLINE", reason)}
+              <button type="submit"
                 disabled={busyId === declineTarget.id}
                 className="btn btn-error btn-sm text-xs cursor-pointer"
               >
@@ -268,7 +272,7 @@ export default function RegistrationApprovalTable() {
                 )}
               </button>
             </div>
-          </div>
+          </ValidatedForm>
         </div>
       )}
     </div>
