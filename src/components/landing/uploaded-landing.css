@@ -1,0 +1,49 @@
+
+    /* Custom Styling for Katuwang Aesthetics */
+    .uploaded-landing {
+      background-color: #FAF8F5;
+      color: #1F252E;
+      font-family: var(--font-apfel), system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .uploaded-landing .font-mono-ui {
+      font-family: var(--font-fragment-mono), monospace;
+    }
+
+    .uploaded-landing .paper-border {
+      border: 1px solid #EFECE6;
+    }
+
+    .uploaded-landing .paper-shadow {
+      box-shadow: 0 4px 20px -2px rgba(31, 37, 46, 0.04), 0 2px 6px -1px rgba(31, 37, 46, 0.02);
+    }
+
+    .uploaded-landing .headline-900 {
+      font-weight: 900;
+      letter-spacing: -0.035em;
+    }
+
+    /* Custom scrollbar for clean UI */
+    .uploaded-landing ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .uploaded-landing ::-webkit-scrollbar-track {
+      background: #FAF8F5;
+    }
+    .uploaded-landing ::-webkit-scrollbar-thumb {
+      background: #EFECE6;
+      border-radius: 4px;
+    }
+    .uploaded-landing ::-webkit-scrollbar-thumb:hover {
+      background: #0F685C;
+    }
+  
+.uploaded-landing .font-bold { font-weight: 700; }
+.uploaded-landing .font-semibold { font-weight: 600; }
+.uploaded-landing .font-medium { font-weight: 500; }
+.uploaded-landing .font-sans { font-family: var(--font-apfel), system-ui, sans-serif; }
+.uploaded-landing section[id] { scroll-margin-top: 6rem; }
+
+.uploaded-landing :is(a, button):focus-visible { outline: 2px solid #0F685C; outline-offset: 4px; }
