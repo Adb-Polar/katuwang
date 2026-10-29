@@ -79,9 +79,19 @@ export const authOptions: NextAuthOptions = {
         // Verification is checked before approval/pending status — a user who
         // hasn't confirmed their email shouldn't be told their account is
         // "pending admin review", which implies verification already happened.
-        if (!user.emailVerifiedAt && (await getSetting("requireEmailVerification"))) {
-          // Sentinel — LoginForm redirects this to /account-unverified.
-          throw new Error("ACCOUNT_UNVERIFIED");
+        if (!user.emailVerifiedAt) {
+          const globallyRequired = await getSetting("requireEmailVerification");
+          // Signup-only enforcement preserves access for legacy accounts that
+          // never received a verification token. Expired tokens still require
+          // verification; the user can request a fresh link.
+          const signupRequired = process.env.REQUIRE_SIGNUP_EMAIL_VERIFICATION === "true" &&
+            Boolean(await prisma.verificationToken.findFirst({
+              where: { userId: user.id },
+              select: { id: true },
+            }));
+          if (globallyRequired || signupRequired) {
+            throw new Error("ACCOUNT_UNVERIFIED");
+          }
         }
 
         if (user.status === "PENDING") {

@@ -116,3 +116,11 @@ Dashboard). The Chatbot Assistant module and a learner-facing pre-/post-test
 assessment are not yet implemented — see
 [`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md) for the full
 breakdown.
+
+### Signup email verification
+
+Set `REQUIRE_SIGNUP_EMAIL_VERIFICATION=true` to send a verification link through
+the configured mailer on every public signup. New accounts must verify before
+signing in; expired links can be resent from the verification screen. Existing
+accounts without a verification token retain access unless the separate global
+`requireEmailVerification` admin setting requires verification for all users.

@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
     }
 
     const requireApproval = await getSetting("requireRegistrationApproval");
-    const requireEmailVerification = await getSetting("requireEmailVerification");
+    const requireEmailVerification = process.env.REQUIRE_SIGNUP_EMAIL_VERIFICATION === "true" ||
+      await getSetting("requireEmailVerification");
 
     const body = await req.json();
 

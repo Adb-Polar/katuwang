@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 const { userFindUnique, userCreate, transactionMock, platformSettingFindUnique, sendMailMock } = vi.hoisted(() => ({
@@ -57,6 +57,7 @@ const validLearner = {
 };
 
 describe("POST /api/register", () => {
+  afterEach(() => vi.unstubAllEnvs());
   beforeEach(() => {
     vi.clearAllMocks();
     platformSettingFindUnique.mockResolvedValue(null);
@@ -191,6 +192,19 @@ describe("POST /api/register", () => {
     );
     expect(sendMailMock).toHaveBeenCalledTimes(1);
     expect(sendMailMock.mock.calls[0][0].to).toBe(validLearner.email);
+  });
+
+  it("emails a verification link when signup verification is enabled despite the global setting being off", async () => {
+    vi.stubEnv("REQUIRE_SIGNUP_EMAIL_VERIFICATION", "true");
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({ id: "U1", anonymousId: "STU-0001", email: validLearner.email, role: "STUDENT_LEARNER" });
+    const createToken = vi.fn().mockResolvedValue({});
+    transactionMock.mockImplementation(async (fn) => fn({ user: { create: userCreate }, verificationToken: { create: createToken } }));
+    const response = await POST(makeRequest(validLearner));
+    expect(response.status).toBe(201);
+    expect((await response.json()).requiresVerification).toBe(true);
+    expect(createToken).toHaveBeenCalled();
+    expect(sendMailMock).toHaveBeenCalledWith(expect.objectContaining({ to: validLearner.email, html: expect.stringContaining("/verify-email?token=") }));
   });
 
   it("returns 500 when an unexpected error occurs", async () => {

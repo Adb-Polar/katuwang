@@ -1,13 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
-const { userFindUnique, userUpdate, getSettingMock } = vi.hoisted(() => ({
+const { userFindUnique, userUpdate, verificationFindFirst, getSettingMock } = vi.hoisted(() => ({
   userFindUnique: vi.fn(),
   userUpdate: vi.fn(),
+  verificationFindFirst: vi.fn(),
   getSettingMock: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    verificationToken: { findFirst: verificationFindFirst },
     user: {
       findUnique: userFindUnique,
       update: userUpdate,
@@ -41,10 +43,27 @@ function authorize(credentials?: Record<"email" | "password", string>) {
 }
 
 describe("auth authorize()", () => {
+  afterEach(() => vi.unstubAllEnvs());
   beforeEach(() => {
     vi.clearAllMocks();
     // Verification off by default — most tests exercise unrelated status branches.
     getSettingMock.mockResolvedValue(false);
+  });
+
+  it("requires verification for a new signup even with the global setting off", async () => {
+    vi.stubEnv("REQUIRE_SIGNUP_EMAIL_VERIFICATION", "true");
+    userFindUnique.mockResolvedValue({ id: "new", email: "new@example.test", password: "hash", status: "ACTIVE", emailVerifiedAt: null });
+    verificationFindFirst.mockResolvedValue({ id: "expired-token" });
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    await expect(authorize({ email: "new@example.test", password: "password123" })).rejects.toThrow("ACCOUNT_UNVERIFIED");
+  });
+
+  it("preserves legacy account access when signup verification is enabled", async () => {
+    vi.stubEnv("REQUIRE_SIGNUP_EMAIL_VERIFICATION", "true");
+    userFindUnique.mockResolvedValue({ id: "old", email: "old@example.test", password: "hash", status: "ACTIVE", emailVerifiedAt: null });
+    verificationFindFirst.mockResolvedValue(null);
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+    await expect(authorize({ email: "old@example.test", password: "password123" })).resolves.toMatchObject({ id: "old" });
   });
 
   it("throws when email or password is missing", async () => {
