@@ -28,7 +28,7 @@ async function loadMail(env: Record<string, string | undefined>) {
   // The transporter is cached on globalThis (survives module reload by design);
   // drop it so each scenario builds its own.
   delete (globalThis as Record<string, unknown>).mailTransporter;
-  for (const key of ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_SECURE", "MAIL_FROM"]) {
+  for (const key of ["RESEND_API_KEY", "RESEND_FROM", "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "SMTP_SECURE", "MAIL_FROM"]) {
     vi.stubEnv(key, env[key] ?? "");
   }
   return import("@/lib/mail");
@@ -41,6 +41,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
 });
 
 describe("isMailConfigured", () => {
@@ -112,5 +113,34 @@ describe("renderPasswordResetEmail", () => {
     expect(text).toContain(url);
     expect(html).toContain("30 minutes");
     expect(text).toContain("30 minutes");
+  });
+});
+
+
+describe("Resend HTTPS delivery", () => {
+  it("prefers HTTPS over configured SMTP and sends both email bodies", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: "email-1" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendMail, isMailConfigured } = await loadMail({ ...SMTP_ENV, RESEND_API_KEY: "test-key", RESEND_FROM: "sender@verified.test" });
+    expect(isMailConfigured()).toBe(true);
+    await sendMail({ to: "recipient@example.test", subject: "Reset", html: "<p>Reset</p>", text: "Reset" });
+    expect(createTransportMock).not.toHaveBeenCalled();
+    const [url, options] = fetchMock.mock.calls[0];
+    expect(url).toBe("https://api.resend.com/emails");
+    expect(options.headers.Authorization).toBe("Bearer test-key");
+    expect(JSON.parse(options.body)).toEqual({ from: "sender@verified.test", to: ["recipient@example.test"], subject: "Reset", html: "<p>Reset</p>", text: "Reset" });
+  });
+
+  it("reports provider rejection without leaking its response body", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
+    const { sendMail } = await loadMail({ RESEND_API_KEY: "test-key", MAIL_FROM: "sender@verified.test" });
+    await expect(sendMail({ to: "a@b.test", subject: "s", html: "h", text: "t" })).rejects.toThrow("HTTP 403");
+    expect(createTransportMock).not.toHaveBeenCalled();
+  });
+
+  it("fails rather than silently discarding mail when Resend has no sender", async () => {
+    const { sendMail, isMailConfigured } = await loadMail({ RESEND_API_KEY: "test-key" });
+    expect(isMailConfigured()).toBe(false);
+    await expect(sendMail({ to: "a@b.test", subject: "s", html: "h", text: "t" })).rejects.toThrow("requires RESEND_FROM");
   });
 });

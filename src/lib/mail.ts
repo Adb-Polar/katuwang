@@ -3,20 +3,12 @@ import { RESET_TOKEN_TTL_MS } from "@/lib/passwordReset";
 import { VERIFICATION_TOKEN_TTL_MS } from "@/lib/emailVerification";
 import { MINUTE_MS, HOUR_MS } from "@/lib/datetime";
 
-/**
- * Transactional email. Transport is plain SMTP, configured entirely from the
- * environment so no provider SDK or secret ever lives in the app or its DB:
- *
- *   SMTP_HOST    required to send at all
- *   SMTP_PORT    default 587
- *   SMTP_SECURE  "true" for TLS-on-connect; defaults to true only on port 465
- *   SMTP_USER    optional (omit for an open relay / Mailpit)
- *   SMTP_PASS    optional
- *   MAIL_FROM    required to send at all, e.g. "Katuwang <no-reply@example.com>"
- *
- * When SMTP_HOST / MAIL_FROM are unset, `sendMail` logs what it would have sent
- * and returns — so local dev works with zero setup.
+/** Transactional email: prefer Resend HTTPS when RESEND_API_KEY is set.
+ * RESEND_FROM (or MAIL_FROM) must be a verified sender. SMTP remains available
+ * for local development and deployments that allow outbound SMTP connections.
  */
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const RESEND_FROM = process.env.RESEND_FROM || process.env.MAIL_FROM;
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587);
@@ -29,7 +21,9 @@ const MAIL_FROM = process.env.MAIL_FROM;
 
 /** True when there is enough configuration to actually send an email. */
 export function isMailConfigured(): boolean {
-  return Boolean(SMTP_HOST && MAIL_FROM);
+  return RESEND_API_KEY
+    ? Boolean(RESEND_FROM)
+    : Boolean(SMTP_HOST && MAIL_FROM);
 }
 
 // Cache the transporter across dev HMR reloads, same pattern as `src/lib/prisma.ts`.
@@ -59,6 +53,30 @@ export interface MailContent {
  * Throws on transport failure — the caller decides whether that is fatal.
  */
 export async function sendMail(opts: { to: string } & MailContent): Promise<void> {
+  if (RESEND_API_KEY) {
+    if (!RESEND_FROM) throw new Error("Resend requires RESEND_FROM or MAIL_FROM");
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: RESEND_FROM,
+        to: [opts.to],
+        subject: opts.subject,
+        html: opts.html,
+        text: opts.text,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
+    // Do not include provider response bodies: they may contain message content.
+    if (!response.ok) throw new Error(`Resend email delivery failed (HTTP ${response.status})`);
+    const result = await response.json() as { id?: string };
+    if (!result.id) throw new Error("Resend did not return an email ID");
+    return;
+  }
   if (!isMailConfigured()) {
     console.info("[mail] not configured — would send:", { to: opts.to, subject: opts.subject });
     return;

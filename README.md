@@ -31,6 +31,8 @@ pnpm install
 #   DATABASE_URL=
 #   NEXTAUTH_URL=
 #   NEXTAUTH_SECRET=
+#   RESEND_API_KEY=      # preferred on Render (HTTPS)
+#   RESEND_FROM=         # verified Resend sender; falls back to MAIL_FROM
 #   # optional SMTP — unset means reset links are logged to the server
 #   # console instead of emailed (fine for local dev):
 #   SMTP_HOST=
@@ -48,9 +50,10 @@ pnpm dev                  # http://localhost:3000
 
 ### Email
 
-Transactional email (currently just the password-reset link) goes out over plain
-SMTP via Nodemailer — configured entirely by the `SMTP_*` / `MAIL_FROM` env vars
-above, no provider SDK. If `SMTP_HOST` / `MAIL_FROM` are unset, `sendMail()`
+Transactional email uses the Resend HTTPS API when `RESEND_API_KEY` is set,
+with `RESEND_FROM` (or `MAIL_FROM`) as the verified sender. This is the recommended
+transport on Render, where free services block common SMTP ports. Otherwise it
+uses SMTP via Nodemailer, configured by `SMTP_*` / `MAIL_FROM`. If `SMTP_HOST` / `MAIL_FROM` are unset, `sendMail()`
 logs what it *would* have sent and the flow still completes, so local dev needs
 no setup.
 
@@ -90,8 +93,9 @@ pnpm exec tsx prisma/seed.ts  # seed the database
 
 ## Status
 
-All six core modules (User Management, Session Management, Tutor Matching,
-Assessment — tutor certification plus learner per-session pre-/post-tests,
-Chatbot Assistant, Analytics Dashboard) are built and working — see
+Five of six core modules are built and working (User Management, Session
+Management, Tutor Matching, tutor-side Assessment/Certification, Analytics
+Dashboard). The Chatbot Assistant module and a learner-facing pre-/post-test
+assessment are not yet implemented — see
 [`docs/reference/feature-checklist.md`](docs/reference/feature-checklist.md) for the full
 breakdown.
