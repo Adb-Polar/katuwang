@@ -1,0 +1,3795 @@
+{
+  "tested_commit": "8b5d7d6c2612965e8e27f77c21b4feb3e365d411",
+  "target": "https://katuwang-dev-test.onrender.com",
+  "suite": {
+    "passed": 970,
+    "failed": 17,
+    "test_files": 128
+  },
+  "features": [
+    {
+      "id": "G01",
+      "title": "Landing experience and privacy information",
+      "outcome": "Pass"
+    },
+    {
+      "id": "G02",
+      "title": "Select role and register",
+      "outcome": "Partial"
+    },
+    {
+      "id": "G03",
+      "title": "Sign in and route to the portal",
+      "outcome": "Pass"
+    },
+    {
+      "id": "G04",
+      "title": "Verify email and resend a link",
+      "outcome": "Pass"
+    },
+    {
+      "id": "G05",
+      "title": "Request and complete password recovery",
+      "outcome": "Pass"
+    },
+    {
+      "id": "G06",
+      "title": "Account-state and access guidance",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L01",
+      "title": "Dashboard and weekly schedule",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L02",
+      "title": "Browse, filter and inspect classes",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L03",
+      "title": "Find tutors and inspect anonymized profiles",
+      "outcome": "Partial"
+    },
+    {
+      "id": "L04",
+      "title": "Auto Match",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L05",
+      "title": "Enroll in or leave a class",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L06",
+      "title": "My Classes and attendance information",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L07",
+      "title": "Create and track public/directed class requests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L08",
+      "title": "Edit or cancel a class request",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L09",
+      "title": "Take PRE/POST session tests and inspect an attempt",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L10",
+      "title": "Personal progress",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L11",
+      "title": "Report a tutor/class and track review",
+      "outcome": "Pass"
+    },
+    {
+      "id": "L12",
+      "title": "Own profile and shared tools",
+      "outcome": "Partial"
+    },
+    {
+      "id": "T01",
+      "title": "Dashboard, class listing and teaching timetable",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T02",
+      "title": "Create a class with initial sessions",
+      "outcome": "Defect"
+    },
+    {
+      "id": "T03",
+      "title": "Inspect, edit, publish or unpublish an own class",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T04",
+      "title": "Complete, cancel, reopen or delete a class",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T05",
+      "title": "Add, reschedule, complete, cancel or delete a session",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T06",
+      "title": "Browse eligible learner requests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T07",
+      "title": "Accept request and create a class",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T08",
+      "title": "View anonymized students and relationship history",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T09",
+      "title": "Assessment readiness, certification listing and manual requests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T10",
+      "title": "Start/resume, submit and review certification quizzes",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T11",
+      "title": "Request more assessment questions",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T12",
+      "title": "Build, edit, delete, publish and close session tests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T13",
+      "title": "Browse bank and manage own custom session questions",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T14",
+      "title": "View class/session results and individual answers",
+      "outcome": "Partial"
+    },
+    {
+      "id": "T15",
+      "title": "Appeal class suspension or ban",
+      "outcome": "Pass"
+    },
+    {
+      "id": "T16",
+      "title": "Own profile and shared tools",
+      "outcome": "Partial"
+    },
+    {
+      "id": "A01",
+      "title": "Dashboard and attention queues",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A02",
+      "title": "Browse accounts and inspect private detail",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A03",
+      "title": "Suspend, ban or reactivate accounts",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A04",
+      "title": "Review pending registrations",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A05",
+      "title": "Browse global classes and inspect teaching context",
+      "outcome": "Partial"
+    },
+    {
+      "id": "A06",
+      "title": "Suspend, ban or reinstate classes",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A07",
+      "title": "Review class appeals",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A08",
+      "title": "Review abuse reports",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A09",
+      "title": "Moderate class requests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A10",
+      "title": "Recommend a class to a learner",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A11",
+      "title": "Manage subjects and topics",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A12",
+      "title": "Author, edit, retire and delete bank questions",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A13",
+      "title": "Inspect bank coverage and resolve question requests",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A14",
+      "title": "Review certification quiz attempts",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A15",
+      "title": "Approve/reject topic certifications",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A16",
+      "title": "Inspect all session tests and diagnostic results",
+      "outcome": "Partial"
+    },
+    {
+      "id": "A17",
+      "title": "Platform reports, charts and CSV export",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A18",
+      "title": "Inspect audit history",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A19",
+      "title": "Review chatbot misses",
+      "outcome": "Pass"
+    },
+    {
+      "id": "A20",
+      "title": "Configure platform flags and global assessment tuning",
+      "outcome": "Partial"
+    },
+    {
+      "id": "A21",
+      "title": "Own account, shared tools and non-production factory",
+      "outcome": "Partial"
+    },
+    {
+      "id": "S01",
+      "title": "Own profile display and editing",
+      "outcome": "Partial"
+    },
+    {
+      "id": "S02",
+      "title": "Change own password and sign out",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S03",
+      "title": "Notifications, unread counts and deep links",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S04",
+      "title": "Role-aware global search",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S05",
+      "title": "Role-specific help and FAQ navigation",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S06",
+      "title": "Intent-based assistant and learner recommendations",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S07",
+      "title": "Portal UI, tables, schedules and charts",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S08",
+      "title": "Taxonomy delivery and caches",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S09",
+      "title": "Platform settings/defaults and action gates",
+      "outcome": "Partial"
+    },
+    {
+      "id": "S10",
+      "title": "Automatic grading and results aggregation",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S11",
+      "title": "Request-driven maintenance, identifiers and SMTP",
+      "outcome": "Pass"
+    },
+    {
+      "id": "S12",
+      "title": "Rate limiting and response security",
+      "outcome": "Partial"
+    },
+    {
+      "id": "D01",
+      "title": "Development previews, quick login and data factory",
+      "outcome": "Expected unavailable"
+    },
+    {
+      "id": "D02",
+      "title": "Seed and migration operator workflows",
+      "outcome": "Partial"
+    }
+  ],
+  "observations": {
+    "public-results.json": [
+      {
+        "path": "/",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/privacy-policy",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/login",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/register",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/register/learner",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/register/tutor",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/forgot-password",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/reset-password",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/verify-email",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/verify-email/check-email",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/pending-approval",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/account-unverified",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/account-declined",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/unauthorized",
+        "status": 200,
+        "expected": 200,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/learner",
+        "status": 307,
+        "expected": 307,
+        "pass": true,
+        "location": "/api/auth/signin?callbackUrl=%2Flearner",
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/tutor",
+        "status": 307,
+        "expected": 307,
+        "pass": true,
+        "location": "/api/auth/signin?callbackUrl=%2Ftutor",
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/admin",
+        "status": 307,
+        "expected": 307,
+        "pass": true,
+        "location": "/api/auth/signin?callbackUrl=%2Fadmin",
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/dev",
+        "status": 404,
+        "expected": 404,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/dev",
+        "status": 404,
+        "expected": 404,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/classes",
+        "status": 401,
+        "expected": 401,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/tutor/classes",
+        "status": 401,
+        "expected": 401,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/admin/users",
+        "status": 401,
+        "expected": 401,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/subjects",
+        "status": 401,
+        "expected": 401,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      },
+      {
+        "path": "/api/notifications",
+        "status": 401,
+        "expected": 401,
+        "pass": true,
+        "location": null,
+        "security_headers": {
+          "X-Content-Type-Options": "nosniff",
+          "Referrer-Policy": "strict-origin-when-cross-origin",
+          "X-Frame-Options": "DENY"
+        }
+      }
+    ],
+    "guard-results.json": [
+      {
+        "method": "PATCH",
+        "path": "/api/admin/abuse-reports/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/abuse-reports",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/admins/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/admins/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/admins",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/admins",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-attempts/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-attempts",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-configs",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/assessment-configs",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-questions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/assessment-questions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/admin/assessment-questions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-questions/coverage",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/assessment-questions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/assessment-questions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/audit-log",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/certifications/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/certifications",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/chatbot-misses",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/class-appeals/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/class-appeals",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/classes/audit-nonexistent/recommendations",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/classes/audit-nonexistent/recommendations",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/classes/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/classes",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/profile/password",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/question-requests/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/question-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/registrations/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/registrations",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/reports",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session-tests/audit-nonexistent/attempts/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session-tests/audit-nonexistent/results",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/session-tests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/settings",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/settings",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/subjects/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/admin/subjects/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/subjects/audit-nonexistent/topics",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/subjects",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/subjects",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/topic-requests/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/topic-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/topics/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/admin/topics/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/admin/users/audit-nonexistent/avatar-action",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/admin/users/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/admin/users",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/chatbot",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/classes/audit-nonexistent/enroll",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/classes/audit-nonexistent/enroll",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/classes",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/dev",
+        "status": 404,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/dev",
+        "status": 404,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/health",
+        "status": 200,
+        "pass": true,
+        "response_excerpt": "{\"status\":\"healthy\",\"database\":\"connected\",\"timestamp\":\"2026-10-29T05:43:10.989Z\"}",
+        "assessment": "Intentional public health endpoint, not a protected business API."
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/classes/audit-nonexistent/session-tests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/classes/audit-nonexistent/sessions/audit-nonexistent/test/audit-nonexistent/start",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/match",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/profile/password",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/learner/profile",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/progress",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/reports",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/reports",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/session-test-attempts/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/session-test-attempts/audit-nonexistent/submit",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/learner/topic-requests/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/topic-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/learner/topic-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/learner/tutors",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/notifications/read",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/notifications",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/search",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/subjects",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/assessments/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/assessments/audit-nonexistent/submit",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/assessments",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/assessments",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/classes/audit-nonexistent/appeal",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/classes/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/tutor/classes/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test/attempts/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PUT",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test/questions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test/results",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions/audit-nonexistent/test/status",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/classes/audit-nonexistent/sessions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/classes/audit-nonexistent/test-results",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/classes",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/classes",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/profile/password",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/profile",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/question-bank",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/question-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/question-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/tutor/questions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/tutor/questions/audit-nonexistent",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/questions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/questions",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/students",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/topic-certifications",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/topic-certifications",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "POST",
+        "path": "/api/tutor/topic-requests/audit-nonexistent/accept",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/tutor/topic-requests",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "GET",
+        "path": "/api/user/profile-picture",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/user/profile-picture",
+        "status": 401,
+        "pass": true,
+        "response_excerpt": ""
+      }
+    ],
+    "browser-public-results.json": [
+      {
+        "route": "/",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Katuwang \u2014 free peer tutoring for Grades 7\u201312"
+      },
+      {
+        "route": "/login",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Sign In | Katuwang Portal"
+      },
+      {
+        "route": "/register",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Join Katuwang | Register"
+      },
+      {
+        "route": "/register/learner",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Register as Learner | Katuwang"
+      },
+      {
+        "route": "/register/tutor",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Register as Tutor | Katuwang"
+      },
+      {
+        "route": "/forgot-password",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Reset Password | Katuwang Portal"
+      },
+      {
+        "route": "/verify-email?token=invalid",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Verify Email | Katuwang"
+      },
+      {
+        "route": "/reset-password?token=invalid",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Set a New Password | Katuwang Portal"
+      },
+      {
+        "route": "/privacy-policy",
+        "width": 1440,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Privacy Policy | Katuwang"
+      },
+      {
+        "route": "/",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Katuwang \u2014 free peer tutoring for Grades 7\u201312"
+      },
+      {
+        "route": "/login",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Sign In | Katuwang Portal"
+      },
+      {
+        "route": "/register",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Join Katuwang | Register"
+      },
+      {
+        "route": "/register/learner",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Register as Learner | Katuwang"
+      },
+      {
+        "route": "/register/tutor",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Register as Tutor | Katuwang"
+      },
+      {
+        "route": "/forgot-password",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Reset Password | Katuwang Portal"
+      },
+      {
+        "route": "/verify-email?token=invalid",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Verify Email | Katuwang"
+      },
+      {
+        "route": "/reset-password?token=invalid",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Set a New Password | Katuwang Portal"
+      },
+      {
+        "route": "/privacy-policy",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "title": "Privacy Policy | Katuwang"
+      }
+    ],
+    "browser-role-results.json": [
+      {
+        "role": "learner",
+        "path": "/learner",
+        "status": 200,
+        "final_path": "/learner",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/classes",
+        "status": 200,
+        "final_path": "/learner/classes",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/help",
+        "status": 200,
+        "final_path": "/learner/help",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/match",
+        "status": 200,
+        "final_path": "/learner/match",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/my-classes",
+        "status": 200,
+        "final_path": "/learner/my-classes",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/notifications",
+        "status": 200,
+        "final_path": "/learner/notifications",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/profile",
+        "status": 200,
+        "final_path": "/learner/profile",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/profile/edit",
+        "status": 200,
+        "final_path": "/learner/profile/edit",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/progress",
+        "status": 200,
+        "final_path": "/learner/progress",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/reports",
+        "status": 200,
+        "final_path": "/learner/reports",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/requests",
+        "status": 200,
+        "final_path": "/learner/requests",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner/tutors",
+        "status": 200,
+        "final_path": "/learner/tutors",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "learner",
+        "path": "/learner",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      },
+      {
+        "role": "learner",
+        "path": "/learner/profile",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor",
+        "status": 200,
+        "final_path": "/tutor",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/assessments",
+        "status": 200,
+        "final_path": "/tutor/assessments",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/classes",
+        "status": 200,
+        "final_path": "/tutor/classes",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/classes/new",
+        "status": 200,
+        "final_path": "/tutor/classes/new",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/help",
+        "status": 200,
+        "final_path": "/tutor/help",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/notifications",
+        "status": 200,
+        "final_path": "/tutor/notifications",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/profile",
+        "status": 200,
+        "final_path": "/tutor/profile",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/profile/edit",
+        "status": 200,
+        "final_path": "/tutor/profile/edit",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/requests",
+        "status": 200,
+        "final_path": "/tutor/requests",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/students",
+        "status": 200,
+        "final_path": "/tutor/students",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      },
+      {
+        "role": "tutor",
+        "path": "/tutor/profile",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      },
+      {
+        "role": "admin",
+        "path": "/admin",
+        "status": 200,
+        "final_path": "/admin",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/abuse-reports",
+        "status": 200,
+        "final_path": "/admin/abuse-reports",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/admins",
+        "status": 200,
+        "final_path": "/admin/admins",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/assessment/certifications",
+        "status": 200,
+        "final_path": "/admin/assessment/certifications",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/assessment/question-bank",
+        "status": 200,
+        "final_path": "/admin/assessment/question-bank",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/assessment/requests",
+        "status": 200,
+        "final_path": "/admin/assessment/requests",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/assessment/results",
+        "status": 200,
+        "final_path": "/admin/assessment/results",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/audit-log",
+        "status": 200,
+        "final_path": "/admin/audit-log",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/certifications",
+        "status": 200,
+        "final_path": "/admin/assessment/certifications",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/chatbot",
+        "status": 200,
+        "final_path": "/admin/chatbot",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/class-appeals",
+        "status": 200,
+        "final_path": "/admin/class-appeals",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/classes",
+        "status": 200,
+        "final_path": "/admin/classes",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/help",
+        "status": 200,
+        "final_path": "/admin/help",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/notifications",
+        "status": 200,
+        "final_path": "/admin/notifications",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/question-bank",
+        "status": 200,
+        "final_path": "/admin/assessment/question-bank",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/registrations",
+        "status": 200,
+        "final_path": "/admin/registrations",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/reports",
+        "status": 200,
+        "final_path": "/admin/reports",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": [],
+        "csv_export_download": "katuwang-report-2026-10-29.csv"
+      },
+      {
+        "role": "admin",
+        "path": "/admin/session-tests",
+        "status": 200,
+        "final_path": "/admin/session-tests",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/settings",
+        "status": 200,
+        "final_path": "/admin/settings",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/subjects",
+        "status": 200,
+        "final_path": "/admin/subjects",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/topic-requests",
+        "status": 200,
+        "final_path": "/admin/topic-requests",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin/users",
+        "status": 200,
+        "final_path": "/admin/users",
+        "horizontal_overflow": false,
+        "page_errors": [],
+        "server_errors": []
+      },
+      {
+        "role": "admin",
+        "path": "/admin",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      },
+      {
+        "role": "admin",
+        "path": "/admin/reports",
+        "width": 390,
+        "status": 200,
+        "horizontal_overflow": false
+      }
+    ],
+    "member-results.json": {
+      "checks": [
+        {
+          "name": "Sign in",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/auth/callback/credentials",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Sign in",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/auth/callback/credentials",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Current learner session",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/auth/session",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Current tutor session",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/auth/session",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Live subject catalog",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/subjects",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/classes?scope=browse",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/classes?scope=browse",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/classes?scope=mine",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/classes?scope=mine",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/classes?scope=browse&gradeLevel=GRADE_10",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/classes?scope=browse&gradeLevel=GRADE_10",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/learner/tutors",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/tutors",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/learner/topic-requests",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/topic-requests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/learner/progress",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/progress",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/learner/reports",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/reports",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/notifications",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/notifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/search?q=math",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/search?q=math",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Chatbot navigation help",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/chatbot",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject other role API",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/tutor/classes",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Reject admin API",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/admin/users",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Read /api/tutor/classes",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/classes",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/students",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/students",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/topic-requests",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/topic-requests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/topic-requests?tab=directed",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/topic-requests?tab=directed",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/assessments",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/assessments",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/topic-certifications",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/topic-certifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/question-requests",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/question-requests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/question-bank",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/question-bank",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/tutor/questions",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/questions",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/notifications",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/notifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/search?q=math",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/search?q=math",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Chatbot navigation help",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/chatbot",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject other role API",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/classes",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Reject admin API",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/admin/users",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Auto Match valid live topic",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/match",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject unknown matching topic",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/match",
+          "status": 400,
+          "pass": true,
+          "details": "One or more topics are not valid for MATH."
+        },
+        {
+          "name": "Create unpublished QA class",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "published:false respected on create",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes",
+          "status": 201,
+          "pass": false,
+          "details": "Actual published=True"
+        },
+        {
+          "name": "Edit class description",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Publish class",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject overlapping session",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions",
+          "status": 409,
+          "pass": true,
+          "details": "Time conflict detected: You already have a session scheduled during this time."
+        },
+        {
+          "name": "Add another session",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reschedule added session",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eo4i00033re3sv1nf8ui",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete added session",
+          "role": "tutor",
+          "method": "DELETE",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eo4i00033re3sv1nf8ui",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Enroll in QA class",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/classes/cmvt4eigh00003re32q4kk3ji/enroll",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject duplicate enrollment",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/classes/cmvt4eigh00003re32q4kk3ji/enroll",
+          "status": 409,
+          "pass": true,
+          "details": "You are already enrolled in this class."
+        },
+        {
+          "name": "Inspect enrolled class page",
+          "role": "learner",
+          "method": "GET",
+          "path": "/learner/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "My class list after enrollment",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/classes?scope=mine",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Author custom question",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/questions",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Edit custom question",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/questions/cmvt4f14n00063re3mi0ollbe",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create session test draft",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Edit draft test",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Set test questions",
+          "role": "tutor",
+          "method": "PUT",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/questions",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Publish session test",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/status",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "List enrolled session tests",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/classes/cmvt4eigh00003re32q4kk3ji/session-tests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Start PRE attempt",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/PRE/start",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "PRE answers hidden",
+          "role": "learner",
+          "method": "POST",
+          "path": "PRE/start",
+          "status": 201,
+          "pass": true,
+          "details": "No isCorrect in learner in-progress response"
+        },
+        {
+          "name": "Submit PRE attempt",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/session-test-attempts/cmvt4fa4u000c3re3vf99xwwd/submit",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Review submitted PRE",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/session-test-attempts/cmvt4fa4u000c3re3vf99xwwd",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Complete teaching session",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Start POST attempt",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/POST/start",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Submit POST attempt",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/session-test-attempts/cmvt4ff3b000g3re3m2elkkxe/submit",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Tutor test results",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/results",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Paired learner progress",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/learner/progress?classId=cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Close session test",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji/sessions/cmvt4eimk00023re3cb7e1c0b/test/status",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create public class request",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/topic-requests",
+          "status": 400,
+          "pass": false,
+          "details": "One or more topics are not valid for MATH."
+        },
+        {
+          "name": "Tutor recovery-email save",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/profile",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Tutor recovery email returned/persisted",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/profile",
+          "status": 200,
+          "pass": false,
+          "details": "Response omits recoveryEmail; handler omits persistence"
+        },
+        {
+          "name": "Unenroll from QA class",
+          "role": "learner",
+          "method": "DELETE",
+          "path": "/api/classes/cmvt4eigh00003re32q4kk3ji/enroll",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Complete QA class",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reopen QA class",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Cancel QA class",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete QA class",
+          "role": "tutor",
+          "method": "DELETE",
+          "path": "/api/tutor/classes/cmvt4eigh00003re32q4kk3ji",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "meta": {
+        "learner_id": "cmvrox5sv00633rgn0f3w0j4i",
+        "tutor_id": "cmvrowjzx004p3rgninev9vuj",
+        "class_id": "cmvt4eigh00003re32q4kk3ji",
+        "question_id": "cmvt4f14n00063re3mi0ollbe",
+        "test_id": "cmvt4f3lw00093re3mo6dxv5y",
+        "pre_attempt": "cmvt4fa4u000c3re3vf99xwwd",
+        "cleanup": "QA class and enrollment removed; cancelled QA request retained; custom QA question retained if referenced by results."
+      }
+    },
+    "integration-results.json": {
+      "checks": [
+        {
+          "name": "Sign in",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/auth/callback/credentials",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Sign in",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/auth/callback/credentials",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Learner context",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/auth/session",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Tutor context",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/auth/session",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Catalog for grade-valid fixtures",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/subjects",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Certifications for request acceptance",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/topic-certifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create grade-valid public request",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/topic-requests",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Edit grade-valid own request",
+          "role": "learner",
+          "method": "PATCH",
+          "path": "/api/learner/topic-requests/cmvt4kb7d00103re3gbup2hpz",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Close QA topic request",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/topic-requests/cmvt4kb7d00103re3gbup2hpz",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reopen QA topic request",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/topic-requests/cmvt4kb7d00103re3gbup2hpz",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Cancel QA public request",
+          "role": "learner",
+          "method": "PATCH",
+          "path": "/api/learner/topic-requests/cmvt4kb7d00103re3gbup2hpz",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create QA moderation class",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Enroll for moderation/report relationship",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/classes/cmvt4kmkd001d3re3ikeqvxek/enroll",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create private QA class report",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/reports",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject duplicate pending report",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/reports",
+          "status": 409,
+          "pass": true,
+          "details": "You already have a report about this class awaiting review."
+        },
+        {
+          "name": "Dismiss QA abuse report",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/abuse-reports/cmvt4kq72001i3re3qsg4arae",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Recommend QA class to learner",
+          "role": "admin",
+          "method": "POST",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek/recommendations",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject duplicate recommendation",
+          "role": "admin",
+          "method": "POST",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek/recommendations",
+          "status": 409,
+          "pass": true,
+          "details": "This class has already been recommended to that learner."
+        },
+        {
+          "name": "List class recommendations",
+          "role": "admin",
+          "method": "GET",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek/recommendations",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Suspend QA class",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Suspended class blocks editing",
+          "role": "tutor",
+          "method": "PATCH",
+          "path": "/api/tutor/classes/cmvt4kmkd001d3re3ikeqvxek",
+          "status": 403,
+          "pass": true,
+          "details": "This class was suspended or banned by an administrator and can't be modified."
+        },
+        {
+          "name": "Submit QA class appeal",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/classes/cmvt4kmkd001d3re3ikeqvxek/appeal",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Approve QA appeal",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/class-appeals/cmvt4kx0d001q3re3h39i8oeg",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Ban QA class",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reinstate QA class",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/classes/cmvt4kmkd001d3re3ikeqvxek",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Unenroll from moderation fixture",
+          "role": "learner",
+          "method": "DELETE",
+          "path": "/api/classes/cmvt4kmkd001d3re3ikeqvxek/enroll",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete moderation fixture class",
+          "role": "tutor",
+          "method": "DELETE",
+          "path": "/api/tutor/classes/cmvt4kmkd001d3re3ikeqvxek",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create directed QA request",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/learner/topic-requests",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Accept directed request into class",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/topic-requests/cmvt4l4l9001y3re3lnumu82t/accept",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Enroll accepted directed-request class",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/classes/cmvt4l83h00223re3g9qz0wih/enroll",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Leave accepted directed-request class",
+          "role": "learner",
+          "method": "DELETE",
+          "path": "/api/classes/cmvt4l83h00223re3g9qz0wih/enroll",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete accepted QA class",
+          "role": "tutor",
+          "method": "DELETE",
+          "path": "/api/tutor/classes/cmvt4l83h00223re3g9qz0wih",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Cancel reopened directed QA request",
+          "role": "learner",
+          "method": "PATCH",
+          "path": "/api/learner/topic-requests/cmvt4l4l9001y3re3lnumu82t",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Start qualifying topic quiz",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/assessments",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Resume own qualifying quiz",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/tutor/assessments/cmvt4linu002f3re3h2kfqnqp",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Submit qualifying quiz",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/assessments/cmvt4linu002f3re3h2kfqnqp/submit",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Inspect qualifying attempt as admin",
+          "role": "admin",
+          "method": "GET",
+          "path": "/api/admin/assessment-attempts/cmvt4linu002f3re3h2kfqnqp",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Request more bank questions",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/tutor/question-requests",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Dismiss newly created QA question request",
+          "role": "admin",
+          "method": "PATCH",
+          "path": "/api/admin/question-requests/cmvt4loij002m3re31zon2tvx",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read workflow notifications",
+          "role": "learner",
+          "method": "GET",
+          "path": "/api/notifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Mark one notification read",
+          "role": "learner",
+          "method": "POST",
+          "path": "/api/notifications/read",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read workflow notifications",
+          "role": "tutor",
+          "method": "GET",
+          "path": "/api/notifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Mark one notification read",
+          "role": "tutor",
+          "method": "POST",
+          "path": "/api/notifications/read",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "meta": {
+        "fixture_grade": "GRADE_10",
+        "fixture_subject": "MATH",
+        "fixture_topic": "Linear Equations & Inequalities",
+        "public_request_id": "cmvt4kb7d00103re3gbup2hpz",
+        "moderation_class_id": "cmvt4kmkd001d3re3ikeqvxek",
+        "report_id": "cmvt4kq72001i3re3qsg4arae",
+        "appeal_id": "cmvt4kx0d001q3re3h39i8oeg",
+        "directed_request_id": "cmvt4l4l9001y3re3lnumu82t",
+        "qualifying_attempt": "cmvt4linu002f3re3h2kfqnqp"
+      }
+    },
+    "admin-results.json": {
+      "checks": [
+        {
+          "name": "Read /api/admin/users",
+          "method": "GET",
+          "path": "/api/admin/users",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/users?q=demo",
+          "method": "GET",
+          "path": "/api/admin/users?q=demo",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/classes",
+          "method": "GET",
+          "path": "/api/admin/classes",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/registrations",
+          "method": "GET",
+          "path": "/api/admin/registrations",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/class-appeals",
+          "method": "GET",
+          "path": "/api/admin/class-appeals",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/abuse-reports",
+          "method": "GET",
+          "path": "/api/admin/abuse-reports",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/topic-requests",
+          "method": "GET",
+          "path": "/api/admin/topic-requests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/subjects",
+          "method": "GET",
+          "path": "/api/admin/subjects",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/assessment-questions",
+          "method": "GET",
+          "path": "/api/admin/assessment-questions",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/assessment-questions/coverage",
+          "method": "GET",
+          "path": "/api/admin/assessment-questions/coverage",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/question-requests",
+          "method": "GET",
+          "path": "/api/admin/question-requests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/assessment-attempts",
+          "method": "GET",
+          "path": "/api/admin/assessment-attempts",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/certifications",
+          "method": "GET",
+          "path": "/api/admin/certifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/session-tests",
+          "method": "GET",
+          "path": "/api/admin/session-tests",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/reports",
+          "method": "GET",
+          "path": "/api/admin/reports",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/audit-log",
+          "method": "GET",
+          "path": "/api/admin/audit-log",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/chatbot-misses",
+          "method": "GET",
+          "path": "/api/admin/chatbot-misses",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/settings",
+          "method": "GET",
+          "path": "/api/admin/settings",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/assessment-configs",
+          "method": "GET",
+          "path": "/api/admin/assessment-configs",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/admin/admins",
+          "method": "GET",
+          "path": "/api/admin/admins",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/notifications",
+          "method": "GET",
+          "path": "/api/notifications",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read /api/search?q=math",
+          "method": "GET",
+          "path": "/api/search?q=math",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Admin chatbot help",
+          "method": "POST",
+          "path": "/api/chatbot",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Admin cannot use tutor API",
+          "method": "GET",
+          "path": "/api/tutor/classes",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Admin cannot enroll as learner",
+          "method": "POST",
+          "path": "/api/classes/audit-nonexistent/enroll",
+          "status": 401,
+          "pass": true,
+          "details": "Unauthorized."
+        },
+        {
+          "name": "Create QA subject",
+          "method": "POST",
+          "path": "/api/admin/subjects",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create QA catalog topic",
+          "method": "POST",
+          "path": "/api/admin/subjects/cmvt4gzkc000j3re328u46bsm/topics",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Edit QA subject",
+          "method": "PATCH",
+          "path": "/api/admin/subjects/cmvt4gzkc000j3re328u46bsm",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Rename QA topic",
+          "method": "PATCH",
+          "path": "/api/admin/topics/cmvt4h0j6000l3re3l3i9oghe",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Create QA bank question",
+          "method": "POST",
+          "path": "/api/admin/assessment-questions",
+          "status": 201,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Inspect QA bank question",
+          "method": "GET",
+          "path": "/api/admin/assessment-questions/cmvt4h402000p3re3ebs3tquo",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Edit unused QA bank question",
+          "method": "PATCH",
+          "path": "/api/admin/assessment-questions/cmvt4h402000p3re3ebs3tquo",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Retire QA bank question",
+          "method": "PATCH",
+          "path": "/api/admin/assessment-questions/cmvt4h402000p3re3ebs3tquo",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete unused QA bank question",
+          "method": "DELETE",
+          "path": "/api/admin/assessment-questions/cmvt4h402000p3re3ebs3tquo",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete unused QA topic",
+          "method": "DELETE",
+          "path": "/api/admin/topics/cmvt4h0j6000l3re3l3i9oghe",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Delete unused QA subject",
+          "method": "DELETE",
+          "path": "/api/admin/subjects/cmvt4gzkc000j3re328u46bsm",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read settings baseline",
+          "method": "GET",
+          "path": "/api/admin/settings",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Save unchanged platform flag",
+          "method": "PATCH",
+          "path": "/api/admin/settings",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Read global assessment config baseline",
+          "method": "GET",
+          "path": "/api/admin/assessment-configs",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Save unchanged assessment count",
+          "method": "PATCH",
+          "path": "/api/admin/assessment-configs",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject unknown setting",
+          "method": "PATCH",
+          "path": "/api/admin/settings",
+          "status": 400,
+          "pass": true,
+          "details": "Invalid setting key."
+        },
+        {
+          "name": "Provision QA standard admin",
+          "method": "POST",
+          "path": "/api/admin/admins",
+          "status": 500,
+          "pass": false,
+          "details": "Failed to create admin account."
+        },
+        {
+          "name": "Super-admin current session",
+          "method": "GET",
+          "path": "/api/auth/session",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        },
+        {
+          "name": "Reject super-admin self-suspension",
+          "method": "PATCH",
+          "path": "/api/admin/admins/cmvc9nyae0000h6i5zcpsbde7",
+          "status": 400,
+          "pass": true,
+          "details": "You cannot suspend or modify your own account status."
+        },
+        {
+          "name": "Read audit history after mutations",
+          "method": "GET",
+          "path": "/api/admin/audit-log",
+          "status": 200,
+          "pass": true,
+          "details": ""
+        }
+      ],
+      "meta": {
+        "subject_id": "cmvt4gzkc000j3re328u46bsm",
+        "topic_id": "cmvt4h0j6000l3re3l3i9oghe"
+      }
+    },
+    "admin-activation-results.json": [
+      {
+        "name": "Retry QA admin provisioning after ID collision",
+        "path": "/api/admin/admins",
+        "status": 500,
+        "pass": false,
+        "details": "Failed to create admin account."
+      }
+    ],
+    "registration-admin-results.json": [
+      {
+        "name": "Read approval setting baseline",
+        "path": "/api/admin/settings",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Enable approval for QA applicants",
+        "path": "/api/admin/settings",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Register QA approve applicant",
+        "path": "/api/register",
+        "status": 201,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Applicant requires both approval and email verification",
+        "status": 201,
+        "pass": true
+      },
+      {
+        "name": "Find newly created QA applicant",
+        "path": "/api/admin/registrations?q=katuwangtris%[owned QA mailbox]",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Register QA decline applicant",
+        "path": "/api/register",
+        "status": 201,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Applicant requires both approval and email verification",
+        "status": 201,
+        "pass": true
+      },
+      {
+        "name": "Find newly created QA applicant",
+        "path": "/api/admin/registrations?q=katuwangtris%[owned QA mailbox]",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Restore original registration approval setting",
+        "path": "/api/admin/settings",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Review QA approve applicant",
+        "path": "/api/admin/registrations/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Reject repeated applicant review",
+        "path": "/api/admin/registrations/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 400,
+        "pass": true,
+        "details": "This account is not awaiting approval."
+      },
+      {
+        "name": "QA account status SUSPENDED",
+        "path": "/api/admin/users/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "QA account status ACTIVE",
+        "path": "/api/admin/users/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "QA account status BANNED",
+        "path": "/api/admin/users/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "QA account status ACTIVE",
+        "path": "/api/admin/users/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "QA account status SUSPENDED",
+        "path": "/api/admin/users/cmvt4mnqr002q3re3jbkslnz5",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Review QA decline applicant",
+        "path": "/api/admin/registrations/cmvt4msbn002s3re352xfh9vt",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Reject repeated applicant review",
+        "path": "/api/admin/registrations/cmvt4msbn002s3re352xfh9vt",
+        "status": 400,
+        "pass": true,
+        "details": "This account is not awaiting approval."
+      },
+      {
+        "name": "List admin identities for counter diagnosis",
+        "path": "/api/admin/admins",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Existing admin anonymous IDs",
+        "pass": true,
+        "ids": [
+          "ADM-0001",
+          "ADM-0002",
+          "ADM-0003"
+        ]
+      },
+      {
+        "name": "Documented standard-admin fixture login",
+        "pass": false,
+        "status": 401
+      }
+    ],
+    "email-e2e-results.json": [
+      {
+        "name": "Verify disposable tutor email",
+        "status": 200,
+        "pass": true
+      },
+      {
+        "name": "Reject reused verification token",
+        "status": 400,
+        "pass": true
+      },
+      {
+        "name": "Request reset to verified QA tutor email",
+        "status": 200,
+        "pass": true
+      },
+      {
+        "name": "Reset disposable tutor password",
+        "status": 200,
+        "pass": true
+      },
+      {
+        "name": "Reject reused reset token",
+        "status": 400,
+        "pass": true
+      },
+      {
+        "name": "Verified tutor can sign in after password reset",
+        "status": 200,
+        "pass": true
+      },
+      {
+        "name": "Change own tutor password",
+        "status": 200,
+        "pass": true
+      }
+    ],
+    "disposable-certification-results.json": [
+      {
+        "name": "Disposable tutor loads subject catalog",
+        "path": "/api/subjects",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Disposable tutor requests manual certification",
+        "path": "/api/tutor/topic-certifications",
+        "status": 201,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Admin rejects disposable pending certification",
+        "path": "/api/admin/certifications/cmvt4xgg000373re3oyndmigh",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Disposable tutor re-requests rejected certification",
+        "path": "/api/tutor/topic-certifications",
+        "status": 201,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Admin approves disposable pending certification",
+        "path": "/api/admin/certifications/cmvt4xgg000373re3oyndmigh",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Admin cannot re-review approved certification",
+        "path": "/api/admin/certifications/cmvt4xgg000373re3oyndmigh",
+        "status": 400,
+        "pass": true,
+        "details": "Only a pending certification request can be reviewed."
+      },
+      {
+        "name": "Certified disposable tutor reads eligible bank",
+        "path": "/api/tutor/question-bank?subject=MATH",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Disposable tutor changes own section",
+        "path": "/api/tutor/profile",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Read all diagnostic session tests",
+        "path": "/api/admin/session-tests",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Inspect diagnostic results as admin",
+        "path": "/api/admin/session-tests/cmvs1mwe6002o4rgn5cqosotk/results",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      }
+    ],
+    "avatar-results.json": [
+      {
+        "name": "Upload avatar through real profile UI",
+        "pass": true,
+        "image_persisted": true,
+        "failed_requests": []
+      },
+      {
+        "name": "Super-admin can moderate disposable user avatar",
+        "status": 401,
+        "pass": false,
+        "error": "Unauthorized."
+      },
+      {
+        "name": "Remove disposable avatar after test",
+        "status": 200,
+        "pass": true
+      }
+    ],
+    "cleanup-results.json": [
+      {
+        "name": "Sign in using changed QA password",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Reject wrong current password",
+        "status": 401,
+        "pass": true,
+        "details": "",
+        "assessment": "401 is the current-password authentication rejection contract; initial probe expected 400."
+      },
+      {
+        "name": "Reject invalid profile phone",
+        "status": 400,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Save disposable profile grade/section",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Admin can inspect disposable user detail",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Cleanup: disable disposable QA tutor",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Suspended QA session loses API access immediately",
+        "status": 401,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Sign out QA session",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Signed-out session is empty",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      },
+      {
+        "name": "Post-audit live health and database",
+        "status": 200,
+        "pass": true,
+        "details": ""
+      }
+    ],
+    "final-probes.json": [
+      {
+        "name": "Malformed registration JSON returns client error",
+        "method": "POST",
+        "path": "/api/register",
+        "expected": 400,
+        "status": 500,
+        "pass": false
+      },
+      {
+        "name": "Delete unused audit custom question",
+        "method": "DELETE",
+        "path": "/api/tutor/questions/cmvt4f14n00063re3mi0ollbe",
+        "status": 200,
+        "pass": true
+      },
+      {
+        "name": "Exported admin CSV parses",
+        "pass": true,
+        "row_count": 65
+      }
+    ]
+  }
+}
