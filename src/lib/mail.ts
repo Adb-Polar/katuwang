@@ -3,10 +3,15 @@ import { RESET_TOKEN_TTL_MS } from "@/lib/passwordReset";
 import { VERIFICATION_TOKEN_TTL_MS } from "@/lib/emailVerification";
 import { MINUTE_MS, HOUR_MS } from "@/lib/datetime";
 
-/** Transactional email: prefer Resend HTTPS when RESEND_API_KEY is set.
- * RESEND_FROM (or MAIL_FROM) must be a verified sender. SMTP remains available
- * for local development and deployments that allow outbound SMTP connections.
+/** Transactional email over HTTPS (Brevo or Resend), with optional local SMTP.
+ * EMAIL_PROVIDER selects brevo/resend/smtp explicitly. Without it, prefer a
+ * configured Brevo key, then Resend, then SMTP. Never fall back after a failure.
  */
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_FROM_EMAIL = process.env.BREVO_FROM_EMAIL;
+const BREVO_FROM_NAME = process.env.BREVO_FROM_NAME || "Katuwang";
+const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER ||
+  (BREVO_API_KEY ? "brevo" : process.env.RESEND_API_KEY ? "resend" : "smtp");
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RESEND_FROM = process.env.RESEND_FROM || process.env.MAIL_FROM;
 
@@ -21,9 +26,9 @@ const MAIL_FROM = process.env.MAIL_FROM;
 
 /** True when there is enough configuration to actually send an email. */
 export function isMailConfigured(): boolean {
-  return RESEND_API_KEY
-    ? Boolean(RESEND_FROM)
-    : Boolean(SMTP_HOST && MAIL_FROM);
+  if (EMAIL_PROVIDER === "brevo") return Boolean(BREVO_API_KEY && BREVO_FROM_EMAIL);
+  if (EMAIL_PROVIDER === "resend") return Boolean(RESEND_API_KEY && RESEND_FROM);
+  return EMAIL_PROVIDER === "smtp" && Boolean(SMTP_HOST && MAIL_FROM);
 }
 
 // Cache the transporter across dev HMR reloads, same pattern as `src/lib/prisma.ts`.
@@ -53,8 +58,35 @@ export interface MailContent {
  * Throws on transport failure — the caller decides whether that is fatal.
  */
 export async function sendMail(opts: { to: string } & MailContent): Promise<void> {
-  if (RESEND_API_KEY) {
-    if (!RESEND_FROM) throw new Error("Resend requires RESEND_FROM or MAIL_FROM");
+  if (EMAIL_PROVIDER === "brevo") {
+    if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
+      throw new Error("Brevo requires BREVO_API_KEY and BREVO_FROM_EMAIL");
+    }
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": BREVO_API_KEY,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: BREVO_FROM_NAME, email: BREVO_FROM_EMAIL },
+        to: [{ email: opts.to }],
+        subject: opts.subject,
+        htmlContent: opts.html,
+        textContent: opts.text,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok) throw new Error(`Brevo email delivery failed (HTTP ${response.status})`);
+    const result = await response.json() as { messageId?: string };
+    if (!result.messageId) throw new Error("Brevo did not return a message ID");
+    console.info("[mail] Brevo accepted email", { messageId: result.messageId });
+    return;
+  }
+  if (EMAIL_PROVIDER === "resend") {
+    if (!RESEND_API_KEY || !RESEND_FROM) throw new Error("Resend requires RESEND_API_KEY and RESEND_FROM or MAIL_FROM");
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -77,6 +109,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
     if (!result.id) throw new Error("Resend did not return an email ID");
     return;
   }
+  if (EMAIL_PROVIDER !== "smtp") throw new Error("Unsupported EMAIL_PROVIDER");
   if (!isMailConfigured()) {
     console.info("[mail] not configured — would send:", { to: opts.to, subject: opts.subject });
     return;

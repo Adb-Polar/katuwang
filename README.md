@@ -33,7 +33,11 @@ pnpm install
 #   DATABASE_URL=
 #   NEXTAUTH_URL=
 #   NEXTAUTH_SECRET=
-#   RESEND_API_KEY=      # preferred on Render (HTTPS)
+#   EMAIL_PROVIDER=brevo # brevo, resend, or smtp
+#   BREVO_API_KEY=       # Brevo API key, not SMTP key
+#   BREVO_FROM_EMAIL=    # sender verified in Brevo
+#   BREVO_FROM_NAME=     # optional; defaults to Katuwang
+#   RESEND_API_KEY=      # optional alternative HTTPS provider
 #   RESEND_FROM=         # verified Resend sender; falls back to MAIL_FROM
 #   # optional SMTP — unset means reset links are logged to the server
 #   # console instead of emailed (fine for local dev):
@@ -52,17 +56,28 @@ pnpm dev                  # http://localhost:3000
 
 ### Email
 
-Transactional email uses the Resend HTTPS API when `RESEND_API_KEY` is set,
-with `RESEND_FROM` (or `MAIL_FROM`) as the verified sender. This is the recommended
-transport on Render, where free services block common SMTP ports. Otherwise it
-uses SMTP via Nodemailer, configured by `SMTP_*` / `MAIL_FROM`. If `SMTP_HOST` / `MAIL_FROM` are unset, `sendMail()`
-logs what it *would* have sent and the flow still completes, so local dev needs
-no setup.
+Password-reset and verification emails support Brevo and Resend over HTTPS,
+which works on Render's free tier. Set `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`,
+and `BREVO_FROM_EMAIL` (an address verified in Brevo). `BREVO_FROM_NAME` defaults
+to `Katuwang`. Use an API key, not an SMTP key. Account activation or sender
+approval may also be required by Brevo before sending to recipients.
+
+The selected provider never silently falls back to another provider after an
+error or when credentials are missing. Without `EMAIL_PROVIDER`, the app chooses
+Brevo when its key is present, then Resend, then SMTP. Local SMTP remains
+available via `EMAIL_PROVIDER=smtp` and `SMTP_*` / `MAIL_FROM`; when unconfigured,
+it logs that email would have been sent.
+
+For `katuwang-dev-test`, configure the Brevo variables in Render, save and deploy,
+then request a password reset for an existing account you control. Check Brevo's
+transactional logs for delivery; `[mail] Brevo accepted email` in Render confirms
+API acceptance, not inbox delivery. The public reset response stays neutral even
+when sending fails.
 
 Zero-cost relays that work without owning a domain:
 
-- **Brevo** — verify a single sender address, 300 emails/day free. Use its SMTP
-  host/port/login.
+- **Brevo** — verify a single sender address, Use its HTTPS API
+  with the variables above; sending limits depend on your account plan.
 - **Gmail / Google Workspace** — `smtp.gmail.com:587` with an
   [App Password](https://support.google.com/accounts/answer/185833) (needs 2FA).
 - **Mailpit** (local only) — `docker run -p 1025:1025 -p 8025:8025 axllent/mailpit`,
