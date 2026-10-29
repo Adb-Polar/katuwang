@@ -325,3 +325,19 @@ b, strong { font-weight: var(--font-weight-bold); }
      Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
   .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
 }
+
+/* Palette from the supplied Katuwang landing page. */
+@theme {
+  --color-bg-main: #FAF8F5;
+  --color-card-surface: #FCFBF9;
+  --color-border-subtle: #EFECE6;
+  --color-text-main: #1F252E;
+  --color-brand-teal: #0F685C;
+  --color-brand-teal-light: #E6F3F1;
+  --color-learner-violet: #7B3293;
+  --color-learner-violet-light: #F5EBF8;
+  --color-tutor-gold: #D98E04;
+  --color-tutor-gold-light: #FDF6E2;
+  --color-dark-neutral: #242C38;
+  --color-dark-gold-text: #5E3D00;
+}
