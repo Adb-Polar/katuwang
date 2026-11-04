@@ -76,7 +76,7 @@ export async function PATCH(
           existing.learnerId,
           "TOPIC_REQUEST_REOPENED",
           `Your ${existing.subject} topic request was closed by an administrator.${reason ? ` Reason: ${reason}` : ""}`,
-          "/learner/requests"
+          "/learner/tutors?tab=requests"
         );
       } else {
         await notify(
@@ -84,7 +84,7 @@ export async function PATCH(
           existing.learnerId,
           "TOPIC_REQUEST_REOPENED",
           `Your ${existing.subject} topic request was re-opened by an administrator.`,
-          "/learner/requests"
+          "/learner/tutors?tab=requests"
         );
       }
 

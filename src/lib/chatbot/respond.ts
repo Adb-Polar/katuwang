@@ -84,7 +84,7 @@ async function buildReply(
         : "Tell me the subject you need help with (e.g. \"recommend a science class\"), or post a class request and a tutor can build a class for you.",
       intentId: fallbackToRequest ? "recommend_no_match" : intent.id,
       category: "recommend",
-      links: [{ href: "/learner/requests", label: "Post a class request" }],
+      links: [{ href: "/learner/tutors?tab=requests", label: "Post a class request" }],
       suggestions: ["Recommend a math class", "Recommend an english class"],
     };
   }

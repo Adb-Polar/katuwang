@@ -9,7 +9,7 @@ export default function FindTutorRequests() {
           <h2 className="card-title text-sm font-bold"><Inbox className="h-4 w-4 text-primary" /> Can&apos;t find a subject or topic?</h2>
           <p className="mt-1 text-xs text-base-content/60">Request a class so tutors can respond to what you need.</p>
         </div>
-        <Link href="/learner/requests" className="btn btn-primary btn-sm text-xs">Request a topic</Link>
+        <Link href="/learner/tutors?tab=requests" className="btn btn-primary btn-sm text-xs">Request a topic</Link>
       </div>
     </section>
   );

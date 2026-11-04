@@ -182,7 +182,7 @@ export async function PATCH(
               r.learnerId,
               "TOPIC_REQUEST_REOPENED",
               `Your ${r.subject} class was cancelled. Your request is open again.`,
-              "/learner/requests"
+              "/learner/tutors?tab=requests"
             );
           }
         }
@@ -280,7 +280,7 @@ export async function DELETE(
           r.learnerId,
           "TOPIC_REQUEST_REOPENED",
           `Your ${r.subject} class was cancelled. Your request is open again.`,
-          "/learner/requests"
+          "/learner/tutors?tab=requests"
         );
       }
 

@@ -89,7 +89,7 @@ export const FAQ_ENTRIES: FaqEntry[] = [
       "Post a class request from My Requests. Pick the subject, topics, your grade level and preferred times; a tutor can accept it and build a class for you. You can also send it to one specific tutor.",
     keywords: ["no", "match", "nothing", "empty", "request", "cant", "find", "fallback"],
     roles: [LEARNER],
-    link: { href: "/learner/requests", label: "My Requests" },
+    link: { href: "/learner/tutors?tab=requests", label: "Request Tutor" },
   },
   {
     id: "faq_class_cancelled",

@@ -47,7 +47,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       { label: "Browse Classes", href: "/learner/classes" },
       { label: "My Classes", href: "/learner/my-classes" },
       { label: "Auto Match", href: "/learner/match" },
-      { label: "My Requests", href: "/learner/requests" },
+      { label: "Request Tutor", href: "/learner/tutors?tab=requests" },
       { label: "Notifications", href: "/learner/notifications" },
       { label: "Profile", href: "/learner/profile" },
     ],

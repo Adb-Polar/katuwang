@@ -57,7 +57,7 @@ export default function RequestTopicButton({
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not send your request.");
       setOpen(false);
-      router.push("/learner/requests");
+      router.push("/learner/tutors?tab=requests");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your request.");
     } finally {

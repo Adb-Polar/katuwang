@@ -130,7 +130,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                 <p className="text-xs text-base-content/50 italic">
                   Nothing open fits this right now.
                 </p>
-                <Link href="/learner/requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
+                <Link href="/learner/tutors?tab=requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
                   Post a class request instead
                 </Link>
               </div>

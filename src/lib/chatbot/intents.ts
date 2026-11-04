@@ -70,9 +70,9 @@ export const INTENTS: Intent[] = [
     keywords: ["request", "topic", "no", "match", "post", "ask"],
     patterns: [/\b(post|submit|make|create)\b.*\brequest\b/, /\bno (class|tutor)\b/, /\bcan'?t find\b/],
     response: {
-      text: "If nothing fits, open My Requests and post a class request — pick the subject, topics, your grade level and preferred times. A tutor can accept it and build a class for you. You can also direct it at one specific tutor from their profile.",
+      text: "If nothing fits, open the Request Tutor tab on Find Tutors and post a class request — pick the subject, topics, your grade level and preferred times. A tutor can accept it and build a class for you. You can also direct it at one specific tutor from their profile.",
     },
-    link: { href: "/learner/requests", label: "My Requests" },
+    link: { href: "/learner/tutors?tab=requests", label: "Request Tutor" },
   },
   {
     id: "nav_find_tutors",

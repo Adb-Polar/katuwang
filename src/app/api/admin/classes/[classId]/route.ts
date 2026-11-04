@@ -96,7 +96,7 @@ export async function PATCH(
             r.learnerId,
             "TOPIC_REQUEST_REOPENED",
             `Your ${r.subject} class was removed by an administrator. Your request is open again.`,
-            "/learner/requests"
+            "/learner/tutors?tab=requests"
           );
         }
 

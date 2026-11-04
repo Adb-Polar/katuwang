@@ -83,7 +83,7 @@ export default async function LearnerDashboard() {
     {
       label: "Open requests",
       value: openRequestCount,
-      href: "/learner/requests",
+      href: "/learner/tutors?tab=requests",
       icon: Inbox,
       tint: "accent",
     },
