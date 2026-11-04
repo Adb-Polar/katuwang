@@ -1,6 +1,6 @@
 import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Inbox, Bell, UserCircle, HelpCircle, Users, TrendingUp, Flag } from "lucide-react";
+import { LayoutDashboard, BookOpen, GraduationCap, Sparkles, Bell, UserCircle, HelpCircle, Users, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
@@ -32,9 +32,7 @@ export default async function LearnerLayout({
     { label: "My Classes", href: "/learner/my-classes", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
     { label: "My Progress", href: "/learner/progress", icon: <TrendingUp className="w-4 h-4" />, group: "Main menu" },
     { label: "Auto Match", href: "/learner/match", icon: <Sparkles className="w-4 h-4" />, group: "Tools" },
-    { label: "My Requests", href: "/learner/requests", icon: <Inbox className="w-4 h-4" />, group: "Tools" },
-    { label: "My Reports", href: "/learner/reports", icon: <Flag className="w-4 h-4" />, group: "Tools" },
-    { label: "Notifications", href: "/learner/notifications", icon: <Bell className="w-4 h-4" />, group: "Tools", badge: unreadCount },
+    { label: "Updates", href: "/learner/notifications", icon: <Bell className="w-4 h-4" />, group: "Tools", badge: unreadCount },
     { label: "Profile", href: "/learner/profile", icon: <UserCircle className="w-4 h-4" />, group: "Account" },
     { label: "Help & FAQs", href: "/learner/help", icon: <HelpCircle className="w-4 h-4" />, group: "Account" },
   ];
@@ -48,7 +46,6 @@ export default async function LearnerLayout({
       idRole="LEARNER"
       unreadCount={unreadCount}
       notificationsHref="/learner/notifications"
-      helpHref="/learner/help"
       profileHref="/learner/profile"
       defaultExpandedGroups={["Main menu", "Tools"]}
       chatbotEnabled={chatbotEnabled}

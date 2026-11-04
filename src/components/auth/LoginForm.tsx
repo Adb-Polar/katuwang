@@ -74,8 +74,12 @@ export default function LoginForm() {
           router.push(`/account-unverified?email=${encodeURIComponent(email)}`);
           return;
         }
-        if (result.error === "Invalid email or password." || result.error === "CredentialsSignin") {
-          reportFieldError(validationForm, "Password", "Invalid email or password. Check both fields and try again.");
+        if (result.error === "EMAIL_NOT_FOUND") {
+          reportFieldError(validationForm, "Email Address", "Email does not exist");
+        } else if (result.error === "INCORRECT_PASSWORD") {
+          reportFieldError(validationForm, "Password", "Incorrect password.");
+        } else if (result.error === "CredentialsSignin") {
+          setError("Could not sign in. Please try again.");
         } else {
           setError(result.error);
         }

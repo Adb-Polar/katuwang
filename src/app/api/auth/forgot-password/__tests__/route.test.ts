@@ -26,8 +26,6 @@ vi.mock("@/lib/mail", () => ({
 
 import { POST } from "@/app/api/auth/forgot-password/route";
 
-const NEUTRAL_MSG = "If an account matches that address, we've sent a password reset link.";
-
 function makeRequest(body: unknown) {
   return new NextRequest("http://localhost/api/auth/forgot-password", {
     method: "POST",
@@ -51,7 +49,7 @@ describe("POST /api/auth/forgot-password", () => {
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.message).toBe(NEUTRAL_MSG);
+    expect(json.message).toBe("Password reset link sent to us****@example.com");
     // earlier unused tokens invalidated, then a new one created
     expect(updateManyMock).toHaveBeenCalledWith({
       where: { userId: "U1", usedAt: null },
@@ -74,13 +72,13 @@ describe("POST /api/auth/forgot-password", () => {
     expect(arg.html).toMatch(/\/reset-password\?token=[a-f0-9]{64}$/);
   });
 
-  it("still returns the neutral 200 when the email send fails", async () => {
+  it("reports a mail failure rather than claiming a link was sent", async () => {
     findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
     sendMailMock.mockRejectedValueOnce(new Error("smtp down"));
 
     const res = await POST(makeRequest({ email: "user@example.com" }));
-    expect(res.status).toBe(200);
-    expect((await res.json()).message).toBe(NEUTRAL_MSG);
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toMatch(/Could not send/);
     expect(createMock).toHaveBeenCalledTimes(1); // token was still issued
   });
 
@@ -94,19 +92,20 @@ describe("POST /api/auth/forgot-password", () => {
     );
   });
 
-  it("returns the neutral message without a token when no account matches", async () => {
+  it("identifies a missing email without creating a token", async () => {
     findFirstMock.mockResolvedValue(null);
     const res = await POST(makeRequest({ email: "ghost@example.com" }));
     const json = await res.json();
-    expect(res.status).toBe(200);
-    expect(json.message).toBe(NEUTRAL_MSG);
+    expect(res.status).toBe(404);
+    expect(json.error).toBe("Email does not exist");
     expect(createMock).not.toHaveBeenCalled();
   });
 
   it("does not issue a token for a banned account", async () => {
     findFirstMock.mockResolvedValue({ id: "U3", status: "BANNED" });
     const res = await POST(makeRequest({ email: "banned@example.com" }));
-    expect((await res.json()).message).toBe(NEUTRAL_MSG);
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toMatch(/cannot reset/);
     expect(createMock).not.toHaveBeenCalled();
   });
 

@@ -6,10 +6,10 @@ import { sendMail, renderPasswordResetEmail } from "@/lib/mail";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 
-// Neutral response — never reveals whether an account matched.
-const NEUTRAL = {
-  message: "If an account matches that address, we've sent a password reset link.",
-};
+function maskEmail(email: string) {
+  const [local, domain] = email.split("@");
+  return `${local.slice(0, 2)}****@${domain}`;
+}
 
 // ─── POST: Request a password reset link ──────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -24,8 +24,7 @@ export async function POST(req: NextRequest) {
 
     const { email } = result.data;
 
-    // Throttle so this route can't be used to email-bomb an address or spray
-    // reset-token rows. Both checks answer with the same neutral 429.
+    // Throttle account lookups and reset-token creation.
     if (rateLimitEnabled()) {
       const ip = clientIp(req.headers);
       const byIp = rateLimit(`forgot:ip:${ip}`, 5, 15 * MINUTE_MS);
@@ -40,37 +39,38 @@ export async function POST(req: NextRequest) {
       select: { id: true, status: true },
     });
 
-    // Only issue a token for a usable account, but always answer identically.
-    if (user && user.status !== "BANNED") {
-      const rawToken = generateResetToken();
-
-      await prisma.$transaction([
-        // Invalidate any earlier unused tokens for this user.
-        prisma.passwordResetToken.updateMany({
-          where: { userId: user.id, usedAt: null },
-          data: { usedAt: new Date() },
-        }),
-        prisma.passwordResetToken.create({
-          data: {
-            userId: user.id,
-            tokenHash: hashResetToken(rawToken),
-            expiresAt: resetTokenExpiry(),
-          },
-        }),
-      ]);
-
-      const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
-      const resetUrl = `${base}/reset-password?token=${rawToken}`;
-      try {
-        await sendMail({ to: email, ...renderPasswordResetEmail(resetUrl) });
-      } catch (err) {
-        // Never surface a mail failure to the caller — the response must stay
-        // neutral, or a send error leaks that this account exists.
-        console.error("[password-reset] failed to send reset email:", err);
-      }
+    if (!user) {
+      return NextResponse.json({ error: "Email does not exist", fieldErrors: [{ path: ["email"], message: "Email does not exist" }] }, { status: 404 });
     }
+    if (user.status === "BANNED") {
+      return NextResponse.json({ error: "This account cannot reset its password. Contact an administrator." }, { status: 403 });
+    }
+    const rawToken = generateResetToken();
 
-    return NextResponse.json(NEUTRAL, { status: 200 });
+    await prisma.$transaction([
+      // Invalidate any earlier unused tokens for this user.
+      prisma.passwordResetToken.updateMany({
+        where: { userId: user.id, usedAt: null },
+        data: { usedAt: new Date() },
+      }),
+      prisma.passwordResetToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: hashResetToken(rawToken),
+          expiresAt: resetTokenExpiry(),
+        },
+      }),
+    ]);
+
+    const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
+    const resetUrl = `${base}/reset-password?token=${rawToken}`;
+    try {
+      await sendMail({ to: email, ...renderPasswordResetEmail(resetUrl) });
+    } catch (err) {
+      console.error("[password-reset] failed to send reset email:", err);
+      return NextResponse.json({ error: "Could not send the reset link. Please try again." }, { status: 503 });
+    }
+    return NextResponse.json({ message: `Password reset link sent to ${maskEmail(email)}` }, { status: 200 });
   } catch (error) {
     console.error("Error handling forgot-password:", error);
     return NextResponse.json(

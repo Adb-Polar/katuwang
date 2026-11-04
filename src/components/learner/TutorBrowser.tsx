@@ -17,6 +17,12 @@ import { subjectDisplayLabel } from "@/lib/displayLabels";
 import UserAvatar from "@/components/profile/UserAvatar";
 
 const PAGE_SIZE = BROWSE_PAGE_SIZE;
+const SUBJECT_GROUPS = [
+  { label: "STEM", slugs: ["MATH", "SCIENCE", "RESEARCH_DIGITAL_LITERACY"] },
+  { label: "Humanities & social sciences", slugs: ["ENGLISH", "FILIPINO", "ARALING_PANLIPUNAN", "VALUES_EDUCATION"] },
+  { label: "Business", slugs: ["BUSINESS_ENTREPRENEURSHIP"] },
+  { label: "Arts, health & other", slugs: ["MAPEH", "MISCELLANEOUS"] },
+];
 
 interface TutorRow {
   id: string;
@@ -40,6 +46,13 @@ export default function TutorBrowser() {
   const { subjects: catalog } = useSubjectCatalog(gradeLevel);
   const [q, setQ] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
+  const [sort, setSort] = useState("codeAsc");
+  const subjectGroups = SUBJECT_GROUPS.map((group) => ({
+    label: group.label,
+    items: catalog.filter((subject) => group.slugs.includes(subject.slug)),
+  }));
+  const otherSubjects = catalog.filter((subject) => !SUBJECT_GROUPS.some((group) => group.slugs.includes(subject.slug)));
+  if (otherSubjects.length) subjectGroups.push({ label: "Other subjects", items: otherSubjects });
 
   const toggleSubject = (slug: string) =>
     setSubjects((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug]));
@@ -61,6 +74,7 @@ export default function TutorBrowser() {
       ...(gradeLevel ? { gradeLevel } : {}),
       ...(q.trim() ? { q: q.trim() } : {}),
       ...(subjects.length ? { subjects: [...subjects].sort().join(",") } : {}),
+      sort,
     },
     PAGE_SIZE,
     "Could not load tutors.",
@@ -89,13 +103,23 @@ export default function TutorBrowser() {
               <details className="dropdown">
                 <summary className="btn btn-outline btn-sm">Teaches{subjects.length ? ` (${subjects.length})` : ""}</summary>
                 <div className="dropdown-content z-20 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg w-64 max-h-64 overflow-y-auto">
-                  {catalog.map((s) => <label key={s.slug} className="flex items-center gap-2 py-1.5 text-xs">
-                    <input type="checkbox" className="checkbox checkbox-xs checkbox-primary" checked={subjects.includes(s.slug)}
-                      onChange={() => toggleSubject(s.slug)} />{s.name}
-                  </label>)}
+                  {subjectGroups.filter((group) => group.items.length).map((group) => (
+                    <fieldset key={group.label} className="mb-2 border-b border-base-200 pb-2 last:border-0">
+                      <legend className="text-2xs font-semibold uppercase tracking-wide text-base-content/55">{group.label}</legend>
+                      {group.items.map((s) => <label key={s.slug} className="flex items-center gap-2 py-1.5 text-xs">
+                        <input type="checkbox" className="checkbox checkbox-xs checkbox-primary" checked={subjects.includes(s.slug)}
+                          onChange={() => toggleSubject(s.slug)} />{s.name}
+                      </label>)}
+                    </fieldset>
+                  ))}
                   <button type="button" className="btn btn-ghost btn-xs" onClick={() => setSubjects([])}>Clear</button>
                 </div>
               </details>
+              <select aria-label="Sort matching tutors" className="select select-bordered select-sm" value={sort} onChange={(e) => setSort(e.target.value)}>
+                <option value="codeAsc">Tutor ID: A–Z</option>
+                <option value="codeDesc">Tutor ID: Z–A</option>
+                <option value="newest">Newest tutors</option>
+              </select>
             </div>
           </div>
 

@@ -4,6 +4,7 @@ import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import PageHeader from "@/components/ui/PageHeader";
 import TopicChip from "@/components/ui/TopicChip";
 import UserAvatar from "@/components/profile/UserAvatar";
+import AccountControls from "@/components/profile/AccountControls";
 import { GRADE_LEVELS, gradeLabel } from "@/lib/gradeLevels";
 
 /**
@@ -165,6 +166,7 @@ export default function ProfileView({
           </div>
         </section>
       )}
+      <AccountControls />
     </div>
   );
 }

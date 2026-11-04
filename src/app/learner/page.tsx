@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
-import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight } from "lucide-react";
+import { CalendarClock, BookOpen, Inbox } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
@@ -83,7 +83,7 @@ export default async function LearnerDashboard() {
     {
       label: "Open requests",
       value: openRequestCount,
-      href: "/learner/requests",
+      href: "/learner/tutors#requests",
       icon: Inbox,
       tint: "accent",
     },
@@ -97,8 +97,8 @@ export default async function LearnerDashboard() {
         ))}
       </div>
 
-      <div className="order-1 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="lg:col-span-2 card kt-card">
+      <div className="order-1">
+        <section className="card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <CalendarClock className="h-4 w-4 text-primary" />
@@ -145,29 +145,6 @@ export default async function LearnerDashboard() {
                 })}
               </ul>
             )}
-          </div>
-        </section>
-
-        <section className="card kt-card">
-          <div className="card-body gap-2">
-            <h2 className="card-title text-sm font-bold">Quick links</h2>
-            {[
-              { label: "Browse classes", href: "/learner/classes", icon: BookOpen },
-              { label: "Auto Match", href: "/learner/match", icon: Sparkles },
-              { label: "My class requests", href: "/learner/requests", icon: Inbox },
-            ].map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className="flex items-center justify-between gap-2 py-2 text-xs font-medium text-base-content/80 hover:text-primary"
-              >
-                <span className="flex items-center gap-2">
-                  <l.icon className="h-4 w-4" />
-                  {l.label}
-                </span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ))}
           </div>
         </section>
       </div>

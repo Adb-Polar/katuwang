@@ -36,7 +36,7 @@ export default function ForgotPasswordForm() {
         setError(data.error || "Something went wrong. Please try again.");
         return;
       }
-      setSent(data.message || "If an account matches that address, we've sent a reset link.");
+      setSent(data.message);
     } catch {
       setError("A network error occurred. Please try again.");
     } finally {

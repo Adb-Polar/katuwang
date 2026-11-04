@@ -38,6 +38,10 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
+    const sort = searchParams.get("sort") || "codeAsc";
+    const orderBy = sort === "newest"
+      ? { createdAt: "desc" as const }
+      : { anonymousId: sort === "codeDesc" ? "desc" as const : "asc" as const };
     // `subjects` is a comma-separated slug list (multi-select); `subject` is the
     // legacy single-value param, still accepted.
     const subjectsParam = searchParams.get("subjects")?.trim() || "";
@@ -111,7 +115,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy: { anonymousId: "asc" },
+        orderBy,
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

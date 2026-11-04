@@ -5,13 +5,9 @@ import { prisma } from "./prisma";
 import { rateLimit, rateLimitEnabled, clientIp } from "./rateLimit";
 import { getSetting } from "./settings";
 
-// A real bcrypt hash (cost 12) of a throwaway string. Compared against on the
-// no-such-user path so a wrong email costs the same time as a wrong password —
-// removes the timing side-channel that lets an attacker enumerate accounts.
+// A real bcrypt hash (cost 12) of a throwaway string keeps missing-account
+// requests comparable in cost to wrong-password requests.
 const DUMMY_PASSWORD_HASH = "$2b$12$IoGXJ6Gc974qVtoXzHgX0ON1saFbEG.vkr3Fz2b44U45Ct9uLiaLK";
-
-// One generic message for both "no account" and "wrong password" — see above.
-const INVALID_CREDENTIALS = "Invalid email or password.";
 
 // How long a decoded JWT's cached role/status is trusted before the `jwt`
 // callback re-reads them from the DB for client/proxy display. Protected server
@@ -46,9 +42,9 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
-          // Spend the same time as a real compare, then answer generically.
+          // Keep response time comparable even though field feedback differs.
           await bcrypt.compare(credentials.password, DUMMY_PASSWORD_HASH);
-          throw new Error(INVALID_CREDENTIALS);
+          throw new Error("EMAIL_NOT_FOUND");
         }
 
         const passwordMatch = await bcrypt.compare(
@@ -57,7 +53,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!passwordMatch) {
-          throw new Error(INVALID_CREDENTIALS);
+          throw new Error("INCORRECT_PASSWORD");
         }
 
         if (user.status === "SUSPENDED" && user.statusExpiresAt && user.statusExpiresAt <= new Date()) {

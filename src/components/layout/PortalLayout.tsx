@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { ChevronDown, HelpCircle, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
@@ -35,7 +35,7 @@ interface PortalLayoutProps {
   unreadCount?: number;
   /** portal-specific notifications page, e.g. "/tutor/notifications" */
   notificationsHref?: string;
-  /** portal-specific Help & FAQs page, e.g. "/tutor/help"; drives the topbar help button */
+  /** Kept for portal callers; Help & FAQs lives in the sidebar. */
   helpHref?: string;
   /** portal-specific profile page, e.g. "/learner/profile"; makes the topbar avatar a link */
   profileHref?: string;
@@ -56,7 +56,6 @@ export default function PortalLayout({
   userImage,
   unreadCount = 0,
   notificationsHref = "/dashboard",
-  helpHref,
   profileHref,
   defaultExpandedGroups,
   chatbotEnabled = false,
@@ -266,15 +265,6 @@ export default function PortalLayout({
 
           <div className="flex-1" />
 
-          {helpHref ? (
-            <Link href={helpHref} className="kt-icon-btn" aria-label="Help & FAQs">
-              <HelpCircle className="w-4 h-4" />
-            </Link>
-          ) : (
-            <button type="button" className="kt-icon-btn" aria-label="Help">
-              <HelpCircle className="w-4 h-4" />
-            </button>
-          )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           {profileHref ? (
             <Link
