@@ -5,7 +5,7 @@ export interface SessionTestRow {
   sessionId: string;
   topic: string;
   scheduledAt: string;
-  test: { id: string; title: string; status: "DRAFT" | "PUBLISHED" | "CLOSED" } | null;
+  test: { id: string; title: string; status: "DRAFT" | "PUBLISHED" | "CLOSED"; pretestClosedAt?: string | null } | null;
   /** learner audience only — needed to know whether the post window is open. */
   sessionStatus?: "SCHEDULED" | "COMPLETED" | "CANCELLED";
   pre?: { status: "IN_PROGRESS" | "SUBMITTED"; scorePercent: number } | null;
@@ -18,7 +18,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
 
   const preSubmitted = row.pre?.status === "SUBMITTED";
   const postSubmitted = row.post?.status === "SUBMITTED";
-  const canTakePost = preSubmitted && row.test.status === "PUBLISHED" && row.sessionStatus === "COMPLETED";
+  const canTakePost = row.test.status === "PUBLISHED" && row.sessionStatus === "COMPLETED";
 
   // The single "next thing to do" action, if any.
   let primary: React.ReactNode = null;
@@ -40,7 +40,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
         Resume pre-test
       </Link>
     );
-  } else if (!row.pre && !row.post && row.test.status === "PUBLISHED" && row.sessionStatus !== "COMPLETED") {
+  } else if (!row.pre && !row.post && row.test.status === "PUBLISHED" && row.sessionStatus === "SCHEDULED" && !row.test.pretestClosedAt) {
     primary = (
       <Link href={href("pre")} className="btn btn-primary btn-xs text-2xs font-bold">
         Take pre-test
@@ -68,7 +68,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
   }
 
   if (!primary && reviews.length === 0) {
-    return <span className="text-2xs text-base-content/40">Closed — not taken</span>;
+    return <span className="text-2xs text-base-content/40">Not available</span>;
   }
 
   return (
@@ -126,6 +126,9 @@ export default function SessionTestsCard({
           if (!row.test) return null; // learner: nothing published for this session
 
           const st = STATUS_TONE[row.test.status];
+          const statusLabel = row.test.status === "PUBLISHED"
+            ? row.sessionStatus === "COMPLETED" ? "Post-test open" : row.sessionStatus === "CANCELLED" ? "Session cancelled" : row.test.pretestClosedAt ? "Pre-test closed" : "Pre-test open"
+            : st.label;
 
           return (
             <div
@@ -141,12 +144,13 @@ export default function SessionTestsCard({
                     {row.pre?.status === "SUBMITTED" ? `Pre ${row.pre.scorePercent}%` : "Pre not taken"}
                     {" · "}
                     {row.post?.status === "SUBMITTED" ? `Post ${row.post.scorePercent}%` : "Post not taken"}
+                    {row.test.pretestClosedAt && row.sessionStatus === "SCHEDULED" && " · Pre-test closed"}
                   </div>
                 )}
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                <StatusBadge tone={st.tone} label={st.label} size="xs" />
+                <StatusBadge tone={st.tone} label={statusLabel} size="xs" />
 
                 {audience === "tutor" && (
                   <>

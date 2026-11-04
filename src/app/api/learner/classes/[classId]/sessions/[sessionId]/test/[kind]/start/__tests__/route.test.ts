@@ -123,6 +123,26 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect((await res.json()).code).toBe("PRE_WINDOW_CLOSED");
   });
 
+  it("409 for a new PRE attempt after the tutor closes the pre-test", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
+    const res = await POST(req(), ctx("PRE"));
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe("PRE_WINDOW_CLOSED");
+    expect(sessionTestAttemptCreate).not.toHaveBeenCalled();
+  });
+
+  it("still allows a new POST attempt after the pre-test closes and the session completes", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED" });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
+    sessionTestAttemptCreate.mockResolvedValue({
+      id: "at-post", kind: "POST", status: "IN_PROGRESS", totalQuestions: 1,
+      correctCount: 0, scorePercent: 0, startedAt: new Date(), submittedAt: null,
+      sessionTest: { id: "st1", title: "t", instructions: null }, items: [],
+    });
+    const res = await POST(req(), ctx("POST"));
+    expect(res.status).toBe(201);
+  });
+
   it("409 per the gating table — no new starts once the session is CANCELLED", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "CANCELLED" });
     const res = await POST(req(), ctx("PRE"));

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import LearnerUpdates from "@/components/learner/LearnerUpdates";
 
 export const metadata = {
-  title: "Updates | Katuwang",
+  title: "Notifications | Katuwang",
 };
 
 export default function LearnerNotificationsPage() {
@@ -11,7 +11,7 @@ export default function LearnerNotificationsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Learner Portal"
-        title="Updates"
+        title="Notifications"
         subtitle="Notifications and the reports you have filed."
       />
       <Suspense fallback={<div className="loading loading-spinner loading-md" />}><LearnerUpdates /></Suspense>

@@ -8,7 +8,7 @@ import { getSetting } from "@/lib/settings";
 
 type Ctx = { params: Promise<{ classId: string; sessionId: string }> };
 
-// ─── PATCH: Publish or Close a Test ──────────────────────────────────────
+// ─── PATCH: Publish, Close the Pre-test, or Close the Whole Test ───────────
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
     const session = await getActiveServerSession();
@@ -71,9 +71,26 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json(updated);
     }
 
+    if (status === "PRETEST_CLOSED") {
+      if (owned.test.status !== "PUBLISHED" || owned.test.pretestClosedAt) {
+        return NextResponse.json({ error: "Only an open pre-test can be closed." }, { status: 409 });
+      }
+      if (owned.session.status !== "SCHEDULED") {
+        return NextResponse.json({ error: "The pre-test window has already ended." }, { status: 409 });
+      }
+      const updated = await prisma.sessionTest.update({
+        where: { id: owned.test.id },
+        data: { pretestClosedAt: now },
+      });
+      return NextResponse.json(updated);
+    }
+
     // status === "CLOSED"
     if (owned.test.status !== "PUBLISHED") {
       return NextResponse.json({ error: "Only a published test can be closed." }, { status: 409 });
+    }
+    if (owned.session.status === "SCHEDULED") {
+      return NextResponse.json({ error: "Complete the session before closing the whole test. Use Close pre-test to stop new pre-test starts." }, { status: 409 });
     }
     const updated = await prisma.sessionTest.update({
       where: { id: owned.test.id },

@@ -90,7 +90,24 @@ describe("PATCH /test/status", () => {
     expect(res.status).toBe(409);
   });
 
+  it("closes only the pre-test while keeping the post-test available later", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: null, questions: [] });
+    sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date() });
+    const res = await PATCH(patch({ status: "PRETEST_CLOSED" }), ctx());
+    expect(res.status).toBe(200);
+    expect(sessionTestUpdate).toHaveBeenCalledWith(expect.objectContaining({ data: { pretestClosedAt: expect.any(Date) } }));
+    expect((await res.json()).status).toBe("PUBLISHED");
+  });
+
+  it("prevents closing the whole test before the post-test window", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [] });
+    const res = await PATCH(patch({ status: "CLOSED" }), ctx());
+    expect(res.status).toBe(409);
+    expect(sessionTestUpdate).not.toHaveBeenCalled();
+  });
+
   it("closes a published test", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED", topic: "Fractions" });
     sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "CLOSED" });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());

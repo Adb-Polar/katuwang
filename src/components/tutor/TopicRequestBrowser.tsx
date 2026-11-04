@@ -81,13 +81,14 @@ export default function TopicRequestBrowser() {
 
       <Tabs
         tabs={[
-          { key: "directed", label: "Directed to me" },
-          { key: "public", label: "Public requests" },
-          { key: "accepted", label: "Accepted by me" },
+          { key: "directed", label: `Private requests (${directedList.total})` },
+          { key: "public", label: `Public requests (${publicList.total})` },
+          { key: "accepted", label: `Accepted by me (${acceptedList.total})` },
         ]}
         active={tab}
         onChange={(k) => setTab(k as "directed" | "public" | "accepted")}
       />
+      <p className="text-xs text-base-content/60">Only requests that are still open appear here. Learners can renew an expired request from My Requests.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <FormField label="Subject">
@@ -116,7 +117,7 @@ export default function TopicRequestBrowser() {
         openList.data.length === 0 ? (
           <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
             {tab === "directed"
-              ? "No learner has sent you a request directly."
+              ? "No active private requests were sent directly to you."
               : "No public requests match these filters."}
           </div>
         ) : (

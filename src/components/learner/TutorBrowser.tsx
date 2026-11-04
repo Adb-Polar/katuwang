@@ -1,7 +1,7 @@
 "use client";
 
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { BadgeCheck, CalendarClock, GraduationCap } from "lucide-react";
@@ -42,11 +42,26 @@ function fmtNext(iso: string) {
 }
 
 export default function TutorBrowser() {
+  const subjectMenuRef = useRef<HTMLDetailsElement>(null);
   const [gradeLevel, setGradeLevel] = useState("");
   const { subjects: catalog } = useSubjectCatalog(gradeLevel);
   const [q, setQ] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [sort, setSort] = useState("codeAsc");
+  useEffect(() => {
+    const closeOnOutsideClick = (event: PointerEvent) => {
+      if (!subjectMenuRef.current?.contains(event.target as Node)) subjectMenuRef.current?.removeAttribute("open");
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") subjectMenuRef.current?.removeAttribute("open");
+    };
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
   const subjectGroups = SUBJECT_GROUPS.map((group) => ({
     label: group.label,
     items: catalog.filter((subject) => group.slugs.includes(subject.slug)),
@@ -96,11 +111,12 @@ export default function TutorBrowser() {
             />
             <div className="flex flex-wrap items-start gap-3">
               <select aria-label="Grade level" className="select select-bordered select-sm" value={gradeLevel}
+                onFocus={() => subjectMenuRef.current?.removeAttribute("open")}
                 onChange={(e) => { setGradeLevel(e.target.value); setSubjects([]); }}>
                 <option value="">All grades</option>
                 {GRADE_LEVELS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
               </select>
-              <details className="dropdown">
+              <details ref={subjectMenuRef} className="dropdown">
                 <summary className="btn btn-outline btn-sm">Teaches{subjects.length ? ` (${subjects.length})` : ""}</summary>
                 <div className="dropdown-content z-20 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg w-64 max-h-64 overflow-y-auto">
                   {subjectGroups.filter((group) => group.items.length).map((group) => (
@@ -115,7 +131,9 @@ export default function TutorBrowser() {
                   <button type="button" className="btn btn-ghost btn-xs" onClick={() => setSubjects([])}>Clear</button>
                 </div>
               </details>
-              <select aria-label="Sort matching tutors" className="select select-bordered select-sm" value={sort} onChange={(e) => setSort(e.target.value)}>
+              <select aria-label="Sort matching tutors" className="select select-bordered select-sm" value={sort}
+                onFocus={() => subjectMenuRef.current?.removeAttribute("open")}
+                onChange={(e) => setSort(e.target.value)}>
                 <option value="codeAsc">Tutor ID: A–Z</option>
                 <option value="codeDesc">Tutor ID: Z–A</option>
                 <option value="newest">Newest tutors</option>

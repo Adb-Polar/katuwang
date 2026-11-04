@@ -37,7 +37,7 @@ export default async function TutorClassDetailPage({
       topics: true,
       sessions: {
         orderBy: { scheduledAt: "asc" },
-        include: { test: { select: { id: true, title: true, status: true } } },
+        include: { test: { select: { id: true, title: true, status: true, pretestClosedAt: true } } },
       },
       enrollments: {
         include: {
@@ -124,7 +124,8 @@ export default async function TutorClassDetailPage({
               sessionId: s.id,
               topic: s.topic,
               scheduledAt: s.scheduledAt.toISOString(),
-              test: s.test ? { id: s.test.id, title: s.test.title, status: s.test.status } : null,
+              sessionStatus: s.status,
+              test: s.test ? { id: s.test.id, title: s.test.title, status: s.test.status, pretestClosedAt: s.test.pretestClosedAt?.toISOString() ?? null } : null,
             }))}
           />
         </div>

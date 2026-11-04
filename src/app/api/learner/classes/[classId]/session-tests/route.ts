@@ -37,6 +37,7 @@ export async function GET(
             id: true,
             title: true,
             status: true,
+            pretestClosedAt: true,
             attempts: {
               where: { learnerId: session.user.id },
               select: { id: true, kind: true, status: true, scorePercent: true, submittedAt: true },
@@ -55,7 +56,7 @@ export async function GET(
         scheduledAt: s.scheduledAt.toISOString(),
         sessionStatus: s.status,
         test: test
-          ? { id: test.id, title: test.title, status: test.status }
+          ? { id: test.id, title: test.title, status: test.status, pretestClosedAt: test.pretestClosedAt }
           : null,
         pre: attemptOf("PRE"),
         post: attemptOf("POST"),

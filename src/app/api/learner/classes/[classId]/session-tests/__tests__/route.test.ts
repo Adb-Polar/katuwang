@@ -66,6 +66,7 @@ describe("GET /api/learner/classes/[classId]/session-tests", () => {
           id: "st1",
           title: "t",
           status: "PUBLISHED",
+          pretestClosedAt: null,
           attempts: [
             { kind: "PRE", status: "SUBMITTED", scorePercent: 40, submittedAt: new Date() },
           ],
@@ -73,7 +74,7 @@ describe("GET /api/learner/classes/[classId]/session-tests", () => {
       },
     ]);
     const json = await (await GET(getReq(), ctx())).json();
-    expect(json.sessions[0].test).toEqual({ id: "st1", title: "t", status: "PUBLISHED" });
+    expect(json.sessions[0].test).toEqual({ id: "st1", title: "t", status: "PUBLISHED", pretestClosedAt: null });
     expect(json.sessions[0].pre.scorePercent).toBe(40);
     expect(json.sessions[0].post).toBeNull();
   });

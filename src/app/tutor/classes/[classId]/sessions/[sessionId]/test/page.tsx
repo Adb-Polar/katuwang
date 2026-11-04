@@ -29,6 +29,7 @@ export default async function TutorSessionTestBuilderPage({
       classSubject={owned.tutorClass.subject}
       classTopics={owned.tutorClass.topics.map((t) => t.topic)}
       sessionTopic={owned.session.topic}
+      sessionStatus={owned.session.status}
       test={
         serialized
           ? {
@@ -36,6 +37,7 @@ export default async function TutorSessionTestBuilderPage({
               title: serialized.title,
               instructions: serialized.instructions,
               status: serialized.status as "DRAFT" | "PUBLISHED" | "CLOSED",
+              pretestClosedAt: serialized.pretestClosedAt,
               questions: serialized.questions.map((q) => ({
                 questionId: q.questionId,
                 prompt: q.prompt,

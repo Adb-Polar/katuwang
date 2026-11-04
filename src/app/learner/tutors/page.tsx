@@ -2,18 +2,12 @@ import Link from "next/link";
 import PageHeader from "@/components/ui/PageHeader";
 import TutorBrowser from "@/components/learner/TutorBrowser";
 import FindTutorRequests from "@/components/learner/FindTutorRequests";
-import { getActiveServerSession } from "@/lib/serverSession";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Find Tutors | Katuwang",
 };
 
 export default async function LearnerTutorsPage() {
-  const session = await getActiveServerSession();
-  if (!session) redirect("/login");
-  const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { gradeLevel: true } });
   return (
     <div className="space-y-6">
       <PageHeader
@@ -27,7 +21,7 @@ export default async function LearnerTutorsPage() {
         }
       />
       <TutorBrowser />
-      <FindTutorRequests defaultGrade={user?.gradeLevel ?? ""} />
+      <FindTutorRequests />
     </div>
   );
 }
