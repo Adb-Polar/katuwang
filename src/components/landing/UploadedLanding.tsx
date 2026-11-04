@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import "./uploaded-landing.css";
 
 const privacyData = {
@@ -46,7 +47,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
   <header className="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md paper-border border-t-0 border-x-0">
     <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
-      <a href="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-teal rounded-md p-1">
+      <Link href="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-teal rounded-md p-1">
         <div className="w-8 h-8 rounded-lg bg-brand-teal/10 flex items-center justify-center text-brand-teal transition-transform group-hover:scale-105">
 
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -60,7 +61,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
           <span className="text-lg font-bold tracking-tight text-text-main group-hover:text-brand-teal transition-colors">Katuwang</span>
           <span className="font-mono-ui text-[10px] text-brand-teal bg-brand-teal-light px-1.5 py-0.5 rounded border border-brand-teal/20 ml-1.5">sa TRIS</span>
         </div>
-      </a>
+      </Link>
 
       <nav className="hidden md:flex items-center gap-6 font-mono-ui text-xs tracking-tight">
         <a href="#how-it-works" className="text-text-main/70 hover:text-brand-teal transition-colors">How It Works</a>
@@ -340,7 +341,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
         <div className="space-y-2">
           <h3 className="text-2xl font-bold text-text-main">Get the academic support you need</h3>
           <p className="text-sm text-text-main/70 leading-relaxed">
-            Find peer tutors who recently mastered the exact topics you're studying in class. Learn at a comfortable pace with relatable classmates.
+            Find peer tutors who recently mastered the exact topics you&apos;re studying in class. Learn at a comfortable pace with relatable classmates.
           </p>
         </div>
 
@@ -481,7 +482,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
     <div className="text-center space-y-2">
       <span className="font-mono-ui text-xs text-brand-teal font-semibold tracking-wider uppercase">Got Questions?</span>
       <h2 className="text-3xl sm:text-4xl font-bold text-text-main tracking-tight">Frequently Asked Questions</h2>
-      <p className="text-text-main/70 text-sm">Clear, factual details about Katuwang's operations at TRIS.</p>
+      <p className="text-text-main/70 text-sm">Clear, factual details about Katuwang&apos;s operations at TRIS.</p>
     </div>
 
     <div className="space-y-3 font-mono-ui text-xs">
@@ -562,7 +563,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
       </div>
 
       <p className="text-[11px] font-mono-ui text-white/60 relative z-10">
-        Already have an account? <a href={signedIn ? "/dashboard" : "/login"} className="underline text-white font-semibold">Log in to your portal</a>
+        {signedIn ? "Go to " : "Already have an account? "}<a href={signedIn ? "/dashboard" : "/login"} className="underline text-white font-semibold">{signedIn ? "Your portal" : "Log in"}</a>
       </p>
 
     </div>
@@ -590,7 +591,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
       <div className="md:col-span-3 space-y-2">
         <span className="text-white font-bold text-[11px] block tracking-wider uppercase text-brand-teal">PLATFORM</span>
         <ul className="space-y-1.5 text-white/70">
-          <li><a href={signedIn ? "/dashboard" : "/login"} className="hover:text-white transition-colors">Log In</a></li>
+          <li><a href={signedIn ? "/dashboard" : "/login"} className="hover:text-white transition-colors">{signedIn ? "Your portal" : "Log in"}</a></li>
           <li><a href="/register/learner" className="hover:text-white transition-colors">Learner Registration</a></li>
           <li><a href="/register/tutor" className="hover:text-white transition-colors">Tutor Application</a></li>
           <li><a href="/dashboard" className="hover:text-white transition-colors">Student Portal</a></li>
