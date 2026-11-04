@@ -8,8 +8,20 @@ import { MINUTE_MS } from "@/lib/datetime";
 export async function DELETE(req: NextRequest) {
   try {
     const origin = req.headers.get("origin");
-    if (origin && origin !== req.nextUrl.origin) {
-      return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+    if (origin) {
+      let sameHost = false;
+      try {
+        const parsedOrigin = new URL(origin);
+        // The request URL can use an internal origin behind a reverse proxy.
+        // Compare the browser origin with the public request host instead.
+        const hosts = [req.headers.get("host"), req.headers.get("x-forwarded-host")?.split(",")[0]];
+        sameHost = origin === parsedOrigin.origin && hosts.some((host) => host?.trim().toLowerCase() === parsedOrigin.host);
+      } catch {
+        // Malformed Origin headers are never valid same-origin requests.
+      }
+      if (!sameHost) {
+        return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+      }
     }
     const session = await getActiveServerSession();
     if (!session || !["STUDENT_LEARNER", "STUDENT_TUTOR"].includes(session.user.role)) {

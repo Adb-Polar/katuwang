@@ -20,10 +20,10 @@ vi.mock("@/lib/prisma", () => ({
 
 import { DELETE } from "@/app/api/account/route";
 
-function request(password = "correct", confirm = "DELETE") {
+function request(password = "correct", confirm = "DELETE", headers: Record<string, string> = {}) {
   return new NextRequest("http://localhost/api/account", {
     method: "DELETE",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...headers },
     body: JSON.stringify({ password, confirm }),
   });
 }
@@ -68,5 +68,47 @@ describe("DELETE /api/account", () => {
     const response = await DELETE(request());
     expect(response.status).toBe(200);
     expect(deleteUser).toHaveBeenCalledWith({ where: { id: "learner-1" } });
+  });
+
+  it("accepts the public Host when the request URL uses an internal origin", async () => {
+    const response = await DELETE(request("correct", "DELETE", {
+      origin: "https://katuwang.example",
+      host: "katuwang.example",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(deleteUser).toHaveBeenCalledWith({ where: { id: "learner-1" } });
+  });
+
+  it("accepts X-Forwarded-Host when the proxy rewrites Host", async () => {
+    const response = await DELETE(request("correct", "DELETE", {
+      origin: "https://katuwang.example",
+      host: "internal:3000",
+      "x-forwarded-host": "katuwang.example",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(deleteUser).toHaveBeenCalledWith({ where: { id: "learner-1" } });
+  });
+
+  it("rejects a different browser origin before checking the session", async () => {
+    const response = await DELETE(request("correct", "DELETE", {
+      origin: "https://other.example",
+      host: "katuwang.example",
+    }));
+
+    expect(response.status).toBe(403);
+    expect((await response.json()).error).toBe("Invalid request origin.");
+    expect(sessionMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects malformed Origin headers", async () => {
+    const response = await DELETE(request("correct", "DELETE", {
+      origin: "not-an-origin",
+      host: "katuwang.example",
+    }));
+
+    expect(response.status).toBe(403);
+    expect(sessionMock).not.toHaveBeenCalled();
   });
 });
