@@ -123,7 +123,7 @@ export default function ClassCard({
       <div className="space-y-1.5">
         <div className="flex flex-wrap gap-1">
           {shownTopics.map((topic) => (
-            <TopicChip key={topic} topic={topic} verified={verifiedTopics?.includes(topic)} />
+            <TopicChip key={topic} topic={topic} verified={verifiedTopics?.includes(topic)} className="max-w-full min-w-0 truncate" />
           ))}
           {overflowCount > 0 && (
             <span className="badge badge-ghost badge-sm text-2xs font-semibold py-2.5">

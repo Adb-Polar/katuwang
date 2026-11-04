@@ -19,12 +19,13 @@ export default function TopicChip({
   const base = tone === "primary" ? "badge-primary" : "";
   return (
     <span
+      title={topic}
       className={`badge badge-outline badge-sm text-2xs font-semibold gap-1 py-2.5 ${
         verified ? "border-success/60 text-success" : base
       } ${className}`}
     >
-      {verified && <BadgeCheck className="h-3 w-3" />}
-      {topic}
+      {verified && <BadgeCheck className="h-3 w-3 shrink-0" />}
+      <span className="min-w-0 truncate">{topic}</span>
     </span>
   );
 }

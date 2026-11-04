@@ -17,6 +17,8 @@ import { subjectDisplayLabel } from "@/lib/displayLabels";
 import UserAvatar from "@/components/profile/UserAvatar";
 
 const PAGE_SIZE = BROWSE_PAGE_SIZE;
+const MAX_VISIBLE_SUBJECTS = 2;
+const MAX_VISIBLE_CLASSES = 3;
 const SUBJECT_GROUPS = [
   { label: "STEM", slugs: ["MATH", "SCIENCE", "RESEARCH_DIGITAL_LITERACY"] },
   { label: "Humanities & social sciences", slugs: ["ENGLISH", "FILIPINO", "ARALING_PANLIPUNAN", "VALUES_EDUCATION"] },
@@ -157,7 +159,7 @@ export default function TutorBrowser() {
                 <Link
                   key={t.id}
                   href={`/learner/tutors/${t.id}`}
-                  className="flex flex-col gap-2.5 rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
+                  className="flex h-64 max-h-64 min-w-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -179,44 +181,50 @@ export default function TutorBrowser() {
                   </div>
 
                   {t.subjects.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {t.subjects.map((s) => (
-                        <span key={s} className="badge badge-neutral badge-sm text-2xs">
-                          {subjectDisplayLabel(s)}
+                    <div className="flex min-h-5 min-w-0 items-center gap-1 overflow-hidden">
+                      {t.subjects.slice(0, MAX_VISIBLE_SUBJECTS).map((s) => (
+                        <span key={s} className="badge badge-neutral badge-sm min-w-0 max-w-[45%] truncate text-2xs" title={subjectDisplayLabel(s)}>
+                          <span className="min-w-0 truncate">{subjectDisplayLabel(s)}</span>
                         </span>
                       ))}
+                      {t.subjects.length > MAX_VISIBLE_SUBJECTS && (
+                        <span className="shrink-0 text-2xs text-base-content/55">+{t.subjects.length - MAX_VISIBLE_SUBJECTS} more</span>
+                      )}
                     </div>
                   )}
 
                   {t.verifiedClasses.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-2xs text-base-content/45">Verified classes</span>
-                      {t.verifiedClasses.map((c) => (
+                    <div className="flex max-h-12 flex-wrap items-center gap-1 overflow-hidden">
+                      <span className="shrink-0 text-2xs text-base-content/45">Verified classes</span>
+                      {t.verifiedClasses.slice(0, MAX_VISIBLE_CLASSES).map((c) => (
                         <span
                           key={c.code}
-                          className="badge badge-success badge-sm gap-1 text-2xs"
+                          className="badge badge-success badge-sm shrink-0 gap-1 text-2xs"
                           title={`${subjectDisplayLabel(c.subject)} · ${c.code}`}
                         >
                           <BadgeCheck className="h-2.5 w-2.5" />
                           {c.code}
                         </span>
                       ))}
+                      {t.verifiedClasses.length > MAX_VISIBLE_CLASSES && (
+                        <span className="shrink-0 text-2xs text-base-content/55">+{t.verifiedClasses.length - MAX_VISIBLE_CLASSES} more</span>
+                      )}
                     </div>
                   )}
 
-                  <div className="mt-auto grid grid-cols-2 gap-2 border-t border-base-300 pt-2 text-2xs text-base-content/60">
-                    <span className="flex items-center gap-1">
-                      <BadgeCheck className="h-3 w-3 text-success" />
-                      {t.verifiedTopicCount} verified {t.verifiedTopicCount === 1 ? "topic" : "topics"}
+                  <div className="mt-auto grid min-w-0 grid-cols-2 gap-2 border-t border-base-300 pt-2 text-2xs text-base-content/60">
+                    <span className="flex min-w-0 items-center gap-1 truncate">
+                      <BadgeCheck className="h-3 w-3 shrink-0 text-success" />
+                      <span className="min-w-0 truncate">{t.verifiedTopicCount} verified {t.verifiedTopicCount === 1 ? "topic" : "topics"}</span>
                     </span>
-                    <span className="flex items-center gap-1">
-                      <GraduationCap className="h-3 w-3 text-primary" />
-                      {t.publishedClassCount} {t.publishedClassCount === 1 ? "class" : "classes"}
+                    <span className="flex min-w-0 items-center gap-1 truncate">
+                      <GraduationCap className="h-3 w-3 shrink-0 text-primary" />
+                      <span className="min-w-0 truncate">{t.publishedClassCount} {t.publishedClassCount === 1 ? "class" : "classes"}</span>
                     </span>
                     {t.nextSessionAt && (
-                      <span className="col-span-2 flex items-center gap-1">
-                        <CalendarClock className="h-3 w-3 text-base-content/40" />
-                        Next session {fmtNext(t.nextSessionAt)}
+                      <span className="col-span-2 flex min-w-0 items-center gap-1 truncate" title={`Next session ${fmtNext(t.nextSessionAt)}`}>
+                        <CalendarClock className="h-3 w-3 shrink-0 text-base-content/40" />
+                        <span className="min-w-0 truncate">Next session {fmtNext(t.nextSessionAt)}</span>
                       </span>
                     )}
                   </div>
