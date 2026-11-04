@@ -10,6 +10,7 @@ import ClassManageMenu from "@/components/tutor/ClassManageMenu";
 import ClassAppealCard from "@/components/tutor/ClassAppealCard";
 import SessionTestsCard from "@/components/classes/SessionTestsCard";
 import ClassProgressPanel from "@/components/tutor/ClassProgressPanel";
+import SessionActions from "@/components/tutor/SessionActions";
 
 export const metadata = {
   title: "Class Details | Katuwang",
@@ -37,7 +38,7 @@ export default async function TutorClassDetailPage({
       topics: true,
       sessions: {
         orderBy: { scheduledAt: "asc" },
-        include: { test: { select: { id: true, title: true, status: true, pretestClosedAt: true } } },
+        include: { test: { select: { id: true, title: true, status: true, pretestClosedAt: true, posttestOpenedAt: true } } },
       },
       enrollments: {
         include: {
@@ -105,6 +106,7 @@ export default async function TutorClassDetailPage({
               duration: s.duration,
               status: s.status,
             }))}
+            renderActions={locked ? undefined : (s) => <SessionActions classId={tutorClass.id} session={s} classTopics={classTopics} />}
           />
         </>
       }
@@ -125,8 +127,9 @@ export default async function TutorClassDetailPage({
               topic: s.topic,
               scheduledAt: s.scheduledAt.toISOString(),
               sessionStatus: s.status,
-              test: s.test ? { id: s.test.id, title: s.test.title, status: s.test.status, pretestClosedAt: s.test.pretestClosedAt?.toISOString() ?? null } : null,
+              test: s.test ? { id: s.test.id, title: s.test.title, status: s.test.status, pretestClosedAt: s.test.pretestClosedAt?.toISOString() ?? null, posttestOpenedAt: s.test.posttestOpenedAt?.toISOString() ?? null } : null,
             }))}
+            tutorActionsEnabled={!locked}
           />
         </div>
       }

@@ -36,6 +36,7 @@ export interface SessionTestBuilderProps {
     instructions: string | null;
     status: "DRAFT" | "PUBLISHED" | "CLOSED";
     pretestClosedAt: string | null;
+    posttestOpenedAt: string | null;
     questions: { questionId: string; prompt: string; origin: string; topic: string }[];
   } | null;
   attemptCount: number;
@@ -124,8 +125,8 @@ function CreateTestPanel({
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Create this session&apos;s test</h2>
           <p className="text-2xs text-base-content/50">
-            One question set — learners take it once before the session (pre-test) and once after
-            it&apos;s marked complete (post-test), so you can see the gain.
+            One question set — learners take it before the session (pre-test) and again
+            when you post the post-test, so you can see the gain.
           </p>
           <FeedbackBanner variant="error" message={error || null} />
           <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void create(e.currentTarget); }}>
@@ -179,6 +180,7 @@ function BuilderBody({
   sessionStatus: SessionTestBuilderProps["sessionStatus"];
   attemptCount: number;
 }) {
+  const router = useRouter();
   const editable = test.status === "DRAFT" && attemptCount === 0;
 
   const [title, setTitle] = useState(test.title);
@@ -187,6 +189,7 @@ function BuilderBody({
   const [savedIds, setSavedIds] = useState<string[]>(test.questions.map((q) => q.questionId));
   const [status, setStatus] = useState(test.status);
   const [pretestClosed, setPretestClosed] = useState(Boolean(test.pretestClosedAt));
+  const [posttestOpen, setPosttestOpen] = useState(Boolean(test.posttestOpenedAt));
 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -197,6 +200,7 @@ function BuilderBody({
   const [writeTopic, setWriteTopic] = useState<string>(classTopics[0] ?? "");
   const [confirmPublish, setConfirmPublish] = useState(false);
   const [confirmPretestClose, setConfirmPretestClose] = useState(false);
+  const [confirmPosttestOpen, setConfirmPosttestOpen] = useState(false);
   const [confirmClose, setConfirmClose] = useState(false);
 
   const dirty = JSON.stringify(items.map((i) => i.questionId)) !== JSON.stringify(savedIds);
@@ -262,9 +266,10 @@ function BuilderBody({
     }
   };
 
-  const changeStatus = async (next: "PUBLISHED" | "PRETEST_CLOSED" | "CLOSED") => {
+  const changeStatus = async (next: "PUBLISHED" | "PRETEST_CLOSED" | "POSTTEST_OPEN" | "CLOSED") => {
     setConfirmPublish(false);
     setConfirmPretestClose(false);
+    setConfirmPosttestOpen(false);
     setConfirmClose(false);
     setBusy(true);
     setError("");
@@ -278,7 +283,12 @@ function BuilderBody({
       if (!res.ok) throw new FormValidationError(data, "Failed to update status.");
       setStatus(data.status);
       if (next === "PRETEST_CLOSED") setPretestClosed(true);
-      flash(next === "PUBLISHED" ? "Test published — learners can take the pre-test now." : next === "PRETEST_CLOSED" ? "Pre-test closed. The post-test opens when the session is completed." : "Test closed.");
+      if (next === "POSTTEST_OPEN") {
+        setPretestClosed(true);
+        setPosttestOpen(true);
+      }
+      flash(next === "PUBLISHED" ? "Test published — learners can take the pre-test now." : next === "PRETEST_CLOSED" ? "Pre-test closed. Post the post-test when it is ready." : next === "POSTTEST_OPEN" ? "Post-test posted — learners can take it now." : "Test closed.");
+      router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update status.");
     } finally {
@@ -288,7 +298,7 @@ function BuilderBody({
 
   const statusTone = status === "PUBLISHED" ? "success" : status === "CLOSED" ? "warning" : "neutral";
   const statusLabel = status === "PUBLISHED"
-    ? sessionStatus === "COMPLETED" ? "Post-test open" : sessionStatus === "CANCELLED" ? "Session cancelled" : pretestClosed ? "Pre-test closed" : "Pre-test open"
+    ? sessionStatus === "CANCELLED" ? "Session cancelled" : posttestOpen ? "Post-test open" : sessionStatus === "COMPLETED" || pretestClosed ? "Pre-test closed" : "Pre-test open"
     : status.toLowerCase();
 
   return (
@@ -300,9 +310,14 @@ function BuilderBody({
         </Link>
         <div className="flex items-center gap-2">
           <StatusBadge tone={statusTone} label={statusLabel} size="sm" />
-          {status === "PUBLISHED" && sessionStatus === "SCHEDULED" && !pretestClosed && (
+          {status === "PUBLISHED" && sessionStatus === "SCHEDULED" && !pretestClosed && !posttestOpen && (
             <button type="button" onClick={() => setConfirmPretestClose(true)} disabled={busy} className="btn btn-warning btn-sm min-h-11 text-xs font-semibold">
               Close pre-test
+            </button>
+          )}
+          {status === "PUBLISHED" && sessionStatus !== "CANCELLED" && !posttestOpen && (
+            <button type="button" onClick={() => setConfirmPosttestOpen(true)} disabled={busy} className="btn btn-primary btn-sm min-h-11 text-xs font-semibold">
+              Publish post-test
             </button>
           )}
           {status !== "DRAFT" && (
@@ -321,7 +336,7 @@ function BuilderBody({
       </p>
       {status === "PUBLISHED" && (
         <p className="text-xs text-base-content/65">
-          {sessionStatus === "COMPLETED" ? "Post-test available to enrolled learners." : sessionStatus === "CANCELLED" ? "This session was cancelled; no new test attempts can start." : pretestClosed ? "Pre-test closed. Complete the session to open the post-test." : "Pre-test open to enrolled learners. Close it here before the session ends."}
+          {sessionStatus === "CANCELLED" ? "This session was cancelled; no new test attempts can start." : posttestOpen ? "Post-test available to enrolled learners." : pretestClosed || sessionStatus === "COMPLETED" ? "Pre-test closed. Post the post-test when it is ready." : "Pre-test open to enrolled learners. Post the post-test when it is ready."}
         </p>
       )}
 
@@ -453,7 +468,7 @@ function BuilderBody({
             </div>
           )}
 
-          {status === "PUBLISHED" && sessionStatus !== "SCHEDULED" && (
+          {status === "PUBLISHED" && (posttestOpen || sessionStatus === "CANCELLED") && (
             <div className="flex justify-end pt-1">
               <button onClick={() => setConfirmClose(true)} disabled={busy} className="btn btn-outline btn-warning btn-sm text-xs">
                 Close all testing
@@ -525,12 +540,21 @@ function BuilderBody({
       <ConfirmDialog
         open={confirmPretestClose}
         title="Close the pre-test?"
-        description="Learners cannot start a new pre-test after this. In-progress attempts can still be finished. The post-test opens when you mark the session complete."
+        description="Learners cannot start a new pre-test after this. In-progress attempts can still be finished. Post the post-test separately when it is ready."
         confirmLabel="Close pre-test"
         tone="danger"
         loading={busy}
         onConfirm={() => changeStatus("PRETEST_CLOSED")}
         onCancel={() => setConfirmPretestClose(false)}
+      />
+      <ConfirmDialog
+        open={confirmPosttestOpen}
+        title="Post the post-test?"
+        description="This closes new pre-test starts and opens the post-test to enrolled learners. They will be notified."
+        confirmLabel="Publish post-test"
+        loading={busy}
+        onConfirm={() => changeStatus("POSTTEST_OPEN")}
+        onCancel={() => setConfirmPosttestOpen(false)}
       />
       <ConfirmDialog
         open={confirmClose}

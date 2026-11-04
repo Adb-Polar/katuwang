@@ -38,11 +38,11 @@ export default async function LearnerTutorsPage({
           </Link>
         }
       />
-      <div role="tablist" aria-label="Find tutors" className="tabs tabs-boxed w-fit">
-        <Link href="/learner/tutors" role="tab" aria-selected={!requestTab} className={`tab ${!requestTab ? "tab-active" : ""}`}>
+      <div role="tablist" aria-label="Find tutors" className="kt-tabs flex-wrap">
+        <Link href="/learner/tutors" role="tab" aria-selected={!requestTab} data-active={!requestTab} className="kt-tab inline-flex min-h-11 items-center md:min-h-0">
           Find Tutors
         </Link>
-        <Link href="/learner/tutors?tab=requests" role="tab" aria-selected={requestTab} className={`tab ${requestTab ? "tab-active" : ""}`}>
+        <Link href="/learner/tutors?tab=requests" role="tab" aria-selected={requestTab} data-active={requestTab} className="kt-tab inline-flex min-h-11 items-center md:min-h-0">
           Request Tutor
         </Link>
       </div>

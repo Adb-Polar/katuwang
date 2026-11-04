@@ -187,7 +187,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     expect(sessionFindMany).not.toHaveBeenCalled();
   });
 
-  it("SCHEDULED -> COMPLETED with a PUBLISHED session test notifies every enrolled learner", async () => {
+  it("SCHEDULED -> COMPLETED does not post the post-test", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     classFindUnique.mockResolvedValue(makeClass());
@@ -197,12 +197,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
 
     const res = await patch({ status: "COMPLETED" });
     expect(res.status).toBe(200);
-    expect(notificationCreateMany).toHaveBeenCalledWith({
-      data: [
-        { userId: "L1", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
-        { userId: "L2", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
-      ],
-    });
+    expect(notificationCreateMany).not.toHaveBeenCalled();
   });
 
   it("SCHEDULED -> COMPLETED with no test (or a DRAFT one) sends no post-test notification", async () => {

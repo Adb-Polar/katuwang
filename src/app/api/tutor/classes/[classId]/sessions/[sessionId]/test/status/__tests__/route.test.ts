@@ -84,6 +84,15 @@ describe("PATCH /test/status", () => {
     });
   });
 
+  it("publishes a test on a completed session without an unusable pre-test notification", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED", topic: "Fractions" });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
+    sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED" });
+    const res = await PATCH(patch({ status: "PUBLISHED" }), ctx());
+    expect(res.status).toBe(200);
+    expect(notificationCreateMany).not.toHaveBeenCalled();
+  });
+
   it("409 closing a test that isn't published", async () => {
     sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [], _count: { attempts: 0 } });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());
@@ -99,7 +108,7 @@ describe("PATCH /test/status", () => {
     expect((await res.json()).status).toBe("PUBLISHED");
   });
 
-  it("prevents closing the whole test before the post-test window", async () => {
+  it("prevents closing the whole test before the post-test is posted", async () => {
     sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [] });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());
     expect(res.status).toBe(409);
@@ -108,10 +117,31 @@ describe("PATCH /test/status", () => {
 
   it("closes a published test", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED", topic: "Fractions" });
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", posttestOpenedAt: new Date(), questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "CLOSED" });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());
     expect(res.status).toBe(200);
+    expect(notificationCreateMany).not.toHaveBeenCalled();
+  });
+
+  it("posts the post-test before session completion and notifies enrolled learners", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: null, posttestOpenedAt: null, questions: [] });
+    sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED", posttestOpenedAt: new Date(), pretestClosedAt: new Date() });
+    const res = await PATCH(patch({ status: "POSTTEST_OPEN" }), ctx());
+    expect(res.status).toBe(200);
+    expect(sessionTestUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      data: { posttestOpenedAt: expect.any(Date), pretestClosedAt: expect.any(Date) },
+    }));
+    expect(notificationCreateMany).toHaveBeenCalledWith({ data: [
+      { userId: "L1", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
+      { userId: "L2", type: "SESSION_POSTTEST_OPEN", message: expect.any(String), link: expect.any(String) },
+    ] });
+  });
+
+  it("does not post the post-test twice", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", posttestOpenedAt: new Date(), questions: [] });
+    const res = await PATCH(patch({ status: "POSTTEST_OPEN" }), ctx());
+    expect(res.status).toBe(409);
     expect(notificationCreateMany).not.toHaveBeenCalled();
   });
 });

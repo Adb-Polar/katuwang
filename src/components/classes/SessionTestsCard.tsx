@@ -1,11 +1,12 @@
 import Link from "next/link";
 import StatusBadge from "@/components/ui/StatusBadge";
+import PostPosttestButton from "@/components/tutor/PostPosttestButton";
 
 export interface SessionTestRow {
   sessionId: string;
   topic: string;
   scheduledAt: string;
-  test: { id: string; title: string; status: "DRAFT" | "PUBLISHED" | "CLOSED"; pretestClosedAt?: string | null } | null;
+  test: { id: string; title: string; status: "DRAFT" | "PUBLISHED" | "CLOSED"; pretestClosedAt?: string | null; posttestOpenedAt?: string | null } | null;
   /** learner audience only — needed to know whether the post window is open. */
   sessionStatus?: "SCHEDULED" | "COMPLETED" | "CANCELLED";
   pre?: { status: "IN_PROGRESS" | "SUBMITTED"; scorePercent: number } | null;
@@ -18,7 +19,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
 
   const preSubmitted = row.pre?.status === "SUBMITTED";
   const postSubmitted = row.post?.status === "SUBMITTED";
-  const canTakePost = row.test.status === "PUBLISHED" && row.sessionStatus === "COMPLETED";
+  const canTakePost = row.test.status === "PUBLISHED" && row.sessionStatus !== "CANCELLED" && Boolean(row.test.posttestOpenedAt);
 
   // The single "next thing to do" action, if any.
   let primary: React.ReactNode = null;
@@ -40,7 +41,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
         Resume pre-test
       </Link>
     );
-  } else if (!row.pre && !row.post && row.test.status === "PUBLISHED" && row.sessionStatus === "SCHEDULED" && !row.test.pretestClosedAt) {
+  } else if (!row.pre && !row.post && row.test.status === "PUBLISHED" && row.sessionStatus === "SCHEDULED" && !row.test.pretestClosedAt && !row.test.posttestOpenedAt) {
     primary = (
       <Link href={href("pre")} className="btn btn-primary btn-xs text-2xs font-bold">
         Take pre-test
@@ -90,10 +91,12 @@ export default function SessionTestsCard({
   classId,
   audience,
   rows,
+  tutorActionsEnabled = true,
 }: {
   classId: string;
   audience: "tutor" | "learner";
   rows: SessionTestRow[];
+  tutorActionsEnabled?: boolean;
 }) {
   return (
     <div className="space-y-3">
@@ -127,13 +130,13 @@ export default function SessionTestsCard({
 
           const st = STATUS_TONE[row.test.status];
           const statusLabel = row.test.status === "PUBLISHED"
-            ? row.sessionStatus === "COMPLETED" ? "Post-test open" : row.sessionStatus === "CANCELLED" ? "Session cancelled" : row.test.pretestClosedAt ? "Pre-test closed" : "Pre-test open"
+            ? row.sessionStatus === "CANCELLED" ? "Session cancelled" : row.test.posttestOpenedAt ? "Post-test open" : row.test.pretestClosedAt || row.sessionStatus === "COMPLETED" ? "Pre-test closed" : "Pre-test open"
             : st.label;
 
           return (
             <div
               key={row.sessionId}
-              className="flex items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
+              className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
             >
               <div className="min-w-0">
                 <div className="font-semibold text-base-content/80 truncate">
@@ -144,16 +147,19 @@ export default function SessionTestsCard({
                     {row.pre?.status === "SUBMITTED" ? `Pre ${row.pre.scorePercent}%` : "Pre not taken"}
                     {" · "}
                     {row.post?.status === "SUBMITTED" ? `Post ${row.post.scorePercent}%` : "Post not taken"}
-                    {row.test.pretestClosedAt && row.sessionStatus === "SCHEDULED" && " · Pre-test closed"}
+                    {(row.test.pretestClosedAt || row.sessionStatus === "COMPLETED") && !row.test.posttestOpenedAt && " · Pre-test closed"}
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge tone={st.tone} label={statusLabel} size="xs" />
 
                 {audience === "tutor" && (
                   <>
+                    {tutorActionsEnabled && row.test.status === "PUBLISHED" && row.sessionStatus !== "CANCELLED" && !row.test.posttestOpenedAt && (
+                      <PostPosttestButton classId={classId} sessionId={row.sessionId} />
+                    )}
                     <Link
                       href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`}
                       className="btn btn-outline btn-xs text-2xs font-bold"

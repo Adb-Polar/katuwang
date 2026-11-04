@@ -68,11 +68,12 @@ per-question and per-learner pre→post gain can be measured. Gated by the
   one question. Once published (or once any attempt exists), the question
   set can no longer be edited.
   (`PATCH .../test/status` with `{ "status": "PUBLISHED" }`)
-- **The post-test opens automatically** when you mark that specific session
-  `COMPLETED` (not on class-level status changes) — learners are notified
-  (`SESSION_POSTTEST_OPEN`). A learner already mid-pre-test when you do this
-  keeps working; only *new* pre-test starts are blocked once the session is
-  complete.
+- **Post the post-test** from that session's published test card or builder,
+  whenever it is ready. This closes new pre-test starts and notifies learners
+  (`SESSION_POSTTEST_OPEN`). A learner already mid-pre-test keeps working.
+  (`PATCH .../test/status` with `{ "status": "POSTTEST_OPEN" }`)
+- **Finish a session** directly from its card on the class page. Completing
+  a session closes new pre-test starts but does not post the post-test.
 - **Close** — stops new attempts on a `PUBLISHED` test; already-collected
   results stay fully readable.
   (`PATCH .../test/status` with `{ "status": "CLOSED" }`)

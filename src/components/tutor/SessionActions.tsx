@@ -126,11 +126,11 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("complete")}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-success cursor-pointer tooltip"
-            data-tip="Mark complete"
-            aria-label="Mark session complete"
+            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 cursor-pointer gap-1"
+            aria-label="Finish session"
           >
             <CheckCircle className="h-3.5 w-3.5" />
+            Finish session
           </button>
           <button
             type="button"
@@ -158,7 +158,7 @@ export default function SessionActions({
         title={
           pendingAction === "delete"
             ? "Delete this session?"
-            : `Mark this session as ${pendingAction === "cancel" ? "cancelled" : "completed"}?`
+            : pendingAction === "complete" ? "Finish this session?" : "Cancel this session?"
         }
         description={pendingAction === "delete" ? "This cannot be undone." : undefined}
         confirmLabel={pendingAction === "delete" ? "Delete" : "Confirm"}

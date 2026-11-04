@@ -47,7 +47,8 @@ export default async function LearnerClassDetailPage({
                 id: true,
                 title: true,
                 status: true,
-                  pretestClosedAt: true,
+                pretestClosedAt: true,
+                posttestOpenedAt: true,
                 attempts: {
                   where: { learnerId: session!.user.id },
                   select: { kind: true, status: true, scorePercent: true },
@@ -182,7 +183,7 @@ export default async function LearnerClassDetailPage({
                   topic: s.topic,
                   scheduledAt: s.scheduledAt.toISOString(),
                   sessionStatus: s.status,
-                  test: test ? { id: test.id, title: test.title, status: test.status, pretestClosedAt: test.pretestClosedAt?.toISOString() ?? null } : null,
+                  test: test ? { id: test.id, title: test.title, status: test.status, pretestClosedAt: test.pretestClosedAt?.toISOString() ?? null, posttestOpenedAt: test.posttestOpenedAt?.toISOString() ?? null } : null,
                   pre: attemptOf("PRE"),
                   post: attemptOf("POST"),
                 };

@@ -8,7 +8,7 @@ import { getSetting } from "@/lib/settings";
 
 type Ctx = { params: Promise<{ classId: string; sessionId: string }> };
 
-// ─── PATCH: Publish, Close the Pre-test, or Close the Whole Test ───────────
+// ─── PATCH: Publish the test, open the post-test, or close a test window ───
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   try {
     const session = await getActiveServerSession();
@@ -53,17 +53,19 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
           data: { status: "PUBLISHED", publishedAt: now },
         });
 
-        const learners = await tx.classEnrollment.findMany({
-          where: { classId },
-          select: { learnerId: true },
-        });
-        await notifyMany(
-          tx,
-          learners.map((l) => l.learnerId),
-          "SESSION_PRETEST_OPEN",
-          `A pre-test is now open for your upcoming "${owned.session.topic}" session.`,
-          `/learner/classes/${classId}`,
-        );
+        if (owned.session.status === "SCHEDULED") {
+          const learners = await tx.classEnrollment.findMany({
+            where: { classId },
+            select: { learnerId: true },
+          });
+          await notifyMany(
+            tx,
+            learners.map((l) => l.learnerId),
+            "SESSION_PRETEST_OPEN",
+            `A pre-test is now open for your upcoming "${owned.session.topic}" session.`,
+            `/learner/classes/${classId}`,
+          );
+        }
 
         return t;
       });
@@ -72,7 +74,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
 
     if (status === "PRETEST_CLOSED") {
-      if (owned.test.status !== "PUBLISHED" || owned.test.pretestClosedAt) {
+      if (owned.test.status !== "PUBLISHED" || owned.test.pretestClosedAt || owned.test.posttestOpenedAt) {
         return NextResponse.json({ error: "Only an open pre-test can be closed." }, { status: 409 });
       }
       if (owned.session.status !== "SCHEDULED") {
@@ -85,12 +87,43 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json(updated);
     }
 
+    if (status === "POSTTEST_OPEN") {
+      if (!(await getSetting("sessionTestsEnabled"))) {
+        return NextResponse.json({ error: "Session tests are disabled." }, { status: 403 });
+      }
+      if (owned.test.status !== "PUBLISHED" || owned.test.posttestOpenedAt) {
+        return NextResponse.json({ error: "Only a published test without an open post-test can be posted." }, { status: 409 });
+      }
+      if (owned.session.status === "CANCELLED") {
+        return NextResponse.json({ error: "A cancelled session cannot have a post-test." }, { status: 409 });
+      }
+      const updated = await prisma.$transaction(async (tx) => {
+        const t = await tx.sessionTest.update({
+          where: { id: owned.test!.id },
+          data: { posttestOpenedAt: now, pretestClosedAt: owned.test!.pretestClosedAt ?? now },
+        });
+        const learners = await tx.classEnrollment.findMany({
+          where: { classId },
+          select: { learnerId: true },
+        });
+        await notifyMany(
+          tx,
+          learners.map((l) => l.learnerId),
+          "SESSION_POSTTEST_OPEN",
+          `A post-test is now open for your "${owned.session.topic}" session.`,
+          `/learner/classes/${classId}`,
+        );
+        return t;
+      });
+      return NextResponse.json(updated);
+    }
+
     // status === "CLOSED"
     if (owned.test.status !== "PUBLISHED") {
       return NextResponse.json({ error: "Only a published test can be closed." }, { status: 409 });
     }
-    if (owned.session.status === "SCHEDULED") {
-      return NextResponse.json({ error: "Complete the session before closing the whole test. Use Close pre-test to stop new pre-test starts." }, { status: 409 });
+    if (!owned.test.posttestOpenedAt && owned.session.status !== "CANCELLED") {
+      return NextResponse.json({ error: "Post the post-test before closing all testing." }, { status: 409 });
     }
     const updated = await prisma.sessionTest.update({
       where: { id: owned.test.id },

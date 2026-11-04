@@ -38,6 +38,7 @@ export default async function TutorSessionTestBuilderPage({
               instructions: serialized.instructions,
               status: serialized.status as "DRAFT" | "PUBLISHED" | "CLOSED",
               pretestClosedAt: serialized.pretestClosedAt,
+              posttestOpenedAt: serialized.posttestOpenedAt,
               questions: serialized.questions.map((q) => ({
                 questionId: q.questionId,
                 prompt: q.prompt,

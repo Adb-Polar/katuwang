@@ -1,9 +1,11 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import SessionTestsCard from "../SessionTestsCard";
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
 describe("SessionTestsCard", () => {
-  it("offers the post-test after completion even when the learner missed the pre-test", () => {
+  it("offers the posted post-test before completion even when the learner missed the pre-test", () => {
     const html = renderToStaticMarkup(
       <SessionTestsCard
         classId="class-1"
@@ -12,8 +14,8 @@ describe("SessionTestsCard", () => {
           sessionId: "session-1",
           topic: "Fractions",
           scheduledAt: new Date().toISOString(),
-          sessionStatus: "COMPLETED",
-          test: { id: "test-1", title: "Check-in", status: "PUBLISHED", pretestClosedAt: null },
+          sessionStatus: "SCHEDULED",
+          test: { id: "test-1", title: "Check-in", status: "PUBLISHED", pretestClosedAt: new Date().toISOString(), posttestOpenedAt: new Date().toISOString() },
           pre: null,
           post: null,
         }]}
@@ -41,5 +43,22 @@ describe("SessionTestsCard", () => {
     );
     expect(html).toContain("Pre-test closed");
     expect(html).not.toContain("Take pre-test");
+  });
+
+  it("shows a tutor action on a published test without an open post-test", () => {
+    const html = renderToStaticMarkup(
+      <SessionTestsCard
+        classId="class-1"
+        audience="tutor"
+        rows={[{
+          sessionId: "session-1",
+          topic: "Fractions",
+          scheduledAt: new Date().toISOString(),
+          sessionStatus: "COMPLETED",
+          test: { id: "test-1", title: "Check-in", status: "PUBLISHED", pretestClosedAt: null, posttestOpenedAt: null },
+        }]}
+      />,
+    );
+    expect(html).toContain("Publish post-test");
   });
 });
