@@ -12,7 +12,7 @@ const PENDING_MESSAGE =
   "Registration received. An administrator needs to approve your account before you can sign in.";
 
 const VERIFY_EMAIL_MESSAGE =
-  "Registration received. Check your email for a verification link before you can sign in.";
+  "Registration received. Enter the verification code sent to your email before you can sign in.";
 
 const TUTOR_SUCCESS_MESSAGE =
   "Registration successful. Start by creating your first class — you can request a topic assessment once you're teaching it.";
@@ -66,19 +66,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (account.verificationToken) {
-      const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
-      const verifyUrl = `${base}/verify-email?token=${account.verificationToken}`;
+    if (account.verificationCode) {
       try {
-        await sendMail({ to: data.email, ...renderVerificationEmail(verifyUrl) });
+        await sendMail({ to: data.email, ...renderVerificationEmail(account.verificationCode) });
       } catch (err) {
         // Registration already succeeded — a mail failure shouldn't fail the
-        // request. The account can request a new link via resend-verification.
+        // request. The account can request a new code via resend-verification.
         console.error("[register] failed to send verification email:", err);
       }
     }
 
-    const requiresVerification = Boolean(account.verificationToken);
+    const requiresVerification = Boolean(account.verificationCode);
     const message = requiresVerification
       ? VERIFY_EMAIL_MESSAGE
       : account.pendingApproval

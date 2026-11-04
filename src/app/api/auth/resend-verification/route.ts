@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resendVerificationSchema } from "@/lib/validations/emailVerification";
-import { generateVerificationToken, hashVerificationToken, verificationTokenExpiry } from "@/lib/emailVerification";
+import { generateVerificationCode, hashVerificationCode, verificationCodeExpiry } from "@/lib/emailVerification";
 import { sendMail, renderVerificationEmail } from "@/lib/mail";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 
 // Neutral response — never reveals whether an account matched or is already verified.
 const NEUTRAL = {
-  message: "If an account matches that address and needs verification, we've sent a new link.",
+  message: "If an account matches that address and needs verification, we've sent a new code.",
 };
 
-// ─── POST: Resend an email-verification link ──────────────────────────────────
+// ─── POST: Resend an email-verification code ──────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // Only issue a token for an unverified, non-banned account, but always answer identically.
     if (user && !user.emailVerifiedAt && user.status !== "BANNED") {
-      const rawToken = generateVerificationToken();
+      const code = generateVerificationCode();
 
       await prisma.$transaction([
         // Invalidate any earlier unused tokens for this user.
@@ -53,16 +53,14 @@ export async function POST(req: NextRequest) {
         prisma.verificationToken.create({
           data: {
             userId: user.id,
-            tokenHash: hashVerificationToken(rawToken),
-            expiresAt: verificationTokenExpiry(),
+            tokenHash: hashVerificationCode(email, code),
+            expiresAt: verificationCodeExpiry(),
           },
         }),
       ]);
 
-      const base = process.env.NEXTAUTH_URL ?? req.nextUrl.origin;
-      const verifyUrl = `${base}/verify-email?token=${rawToken}`;
       try {
-        await sendMail({ to: email, ...renderVerificationEmail(verifyUrl) });
+        await sendMail({ to: email, ...renderVerificationEmail(code) });
       } catch (err) {
         // Never surface a mail failure to the caller — the response must stay
         // neutral, or a send error leaks that this account exists.

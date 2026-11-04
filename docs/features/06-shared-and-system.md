@@ -136,7 +136,8 @@ Global numeric settings: `assessmentQuestionCount=5`, `assessmentPassPercent=80`
 | Sign-in | 10 per IP+email / 10 minutes |
 | Register | 5 per IP / 60 minutes |
 | Forgot password / resend verification | 5 per IP and 3 per email / 15 minutes |
-| Reset password / verify email | 10 per IP / 15 minutes |
+| Reset password | 10 per IP / 15 minutes |
+| Verify email | 10 per IP and 5 per email / 15 minutes |
 | Chatbot | 20 per user / minute |
 | Global search | 40 per user / minute |
 

@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import { GradeLevel, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateAnonymousId } from "@/lib/idGenerator";
-import { generateVerificationToken, hashVerificationToken, verificationTokenExpiry } from "@/lib/emailVerification";
+import { generateVerificationCode, hashVerificationCode, verificationCodeExpiry } from "@/lib/emailVerification";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared account-registration core. This is the single place that turns a set
@@ -24,7 +24,7 @@ export type RegisterAccountInput = {
   consentGiven: boolean;
   /** When true, the account is created with status PENDING (awaiting admin approval). */
   requireApproval?: boolean;
-  /** When true, a VerificationToken is issued and its raw value returned for the caller to email. */
+  /** When true, a verification code is issued and returned for the caller to email. */
   requireEmailVerification?: boolean;
 };
 
@@ -34,8 +34,8 @@ export type RegisterAccountResult =
       anonymousId: string;
       role: Role;
       pendingApproval: boolean;
-      /** Raw (unhashed) verification token — only the caller ever sees this, to put in the emailed link. */
-      verificationToken: string | null;
+      /** Raw code for the registration email only. */
+      verificationCode: string | null;
     }
   | { ok: false; code: "DUPLICATE_EMAIL" };
 
@@ -78,22 +78,22 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
   };
   const select = { id: true, anonymousId: true, email: true, role: true } as const;
 
-  const rawVerificationToken = requireEmailVerification ? generateVerificationToken() : null;
+  const verificationCode = requireEmailVerification ? generateVerificationCode() : null;
   const createData = isTutor ? { ...data, tutorProfile: { create: {} } } : data;
 
   // Only reach for a transaction when there's more than one table to write —
   // a plain learner signup with no verification stays a single insert.
   const user =
-    isTutor || rawVerificationToken
+    isTutor || verificationCode
       ? await prisma.$transaction(async (tx) => {
           const created = await tx.user.create({ data: createData, select });
 
-          if (rawVerificationToken) {
+          if (verificationCode) {
             await tx.verificationToken.create({
               data: {
                 userId: created.id,
-                tokenHash: hashVerificationToken(rawVerificationToken),
-                expiresAt: verificationTokenExpiry(),
+                tokenHash: hashVerificationCode(email, verificationCode),
+                expiresAt: verificationCodeExpiry(),
               },
             });
           }
@@ -107,6 +107,6 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     anonymousId: user.anonymousId,
     role: user.role,
     pendingApproval: requireApproval,
-    verificationToken: rawVerificationToken,
+    verificationCode,
   };
 }

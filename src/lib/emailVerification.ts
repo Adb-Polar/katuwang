@@ -1,26 +1,35 @@
-import { createHash, randomBytes } from "crypto";
-import { HOUR_MS } from "@/lib/datetime";
+import { createHmac, randomBytes, randomInt, timingSafeEqual } from "crypto";
+import { MINUTE_MS } from "@/lib/datetime";
 
-/**
- * Email-verification token helpers, mirroring src/lib/passwordReset.ts: the raw
- * token only ever appears in the emailed link, and the database stores its
- * SHA-256 hash so a leaked table row can't be used to verify an account.
- */
+export const VERIFICATION_CODE_TTL_MS = 10 * MINUTE_MS;
 
-/** How long an issued verification token stays valid. */
-export const VERIFICATION_TOKEN_TTL_MS = 24 * HOUR_MS;
-
-/** Cryptographically-random raw token for the emailed link. */
-export function generateVerificationToken(): string {
-  return randomBytes(32).toString("hex");
+/** A six-digit code that keeps leading zeroes. */
+export function generateVerificationCode(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
-/** Stable hash of a raw token, for storage and lookup. */
-export function hashVerificationToken(token: string): string {
-  return createHash("sha256").update(token).digest("hex");
+/** Store a random salt and a keyed digest, never the emailed code. */
+export function hashVerificationCode(email: string, code: string): string {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("NEXTAUTH_SECRET is required for email verification");
+  const salt = randomBytes(16).toString("hex");
+  const digest = createHmac("sha256", secret)
+    .update(`${salt}:${email.toLowerCase()}:${code}`)
+    .digest("hex");
+  return `${salt}:${digest}`;
 }
 
-/** Absolute expiry for a token issued `from` now (or a supplied clock). */
-export function verificationTokenExpiry(from: Date = new Date()): Date {
-  return new Date(from.getTime() + VERIFICATION_TOKEN_TTL_MS);
+export function matchesVerificationCode(email: string, code: string, stored: string): boolean {
+  const secret = process.env.NEXTAUTH_SECRET;
+  if (!secret) throw new Error("NEXTAUTH_SECRET is required for email verification");
+  const [salt, digest] = stored.split(":");
+  if (!salt || !digest || !/^[a-f0-9]{32}$/.test(salt) || !/^[a-f0-9]{64}$/.test(digest)) return false;
+  const candidate = createHmac("sha256", secret)
+    .update(`${salt}:${email.toLowerCase()}:${code}`)
+    .digest();
+  return timingSafeEqual(candidate, Buffer.from(digest, "hex"));
+}
+
+export function verificationCodeExpiry(from: Date = new Date()): Date {
+  return new Date(from.getTime() + VERIFICATION_CODE_TTL_MS);
 }

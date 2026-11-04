@@ -1,7 +1,7 @@
 import nodemailer, { type Transporter } from "nodemailer";
 import { RESET_TOKEN_TTL_MS } from "@/lib/passwordReset";
-import { VERIFICATION_TOKEN_TTL_MS } from "@/lib/emailVerification";
-import { MINUTE_MS, HOUR_MS } from "@/lib/datetime";
+import { VERIFICATION_CODE_TTL_MS } from "@/lib/emailVerification";
+import { MINUTE_MS } from "@/lib/datetime";
 
 /** Transactional email over HTTPS (Brevo or Resend), with optional local SMTP.
  * EMAIL_PROVIDER selects brevo/resend/smtp explicitly. Without it, prefer a
@@ -151,29 +151,26 @@ export function renderPasswordResetEmail(resetUrl: string): MailContent {
   return { subject, html, text };
 }
 
-const VERIFICATION_TTL_HOURS = Math.round(VERIFICATION_TOKEN_TTL_MS / HOUR_MS);
+const VERIFICATION_TTL_MINUTES = Math.round(VERIFICATION_CODE_TTL_MS / MINUTE_MS);
 
-/** Email-verification message for a ready-to-use verify link. */
-export function renderVerificationEmail(verifyUrl: string): MailContent {
+/** Email-verification message containing a one-time code. */
+export function renderVerificationEmail(code: string): MailContent {
   const subject = "Verify your Katuwang email address";
   const text = [
     "Welcome to Katuwang! Confirm your email address to finish setting up your account.",
     "",
-    "Open this link to verify:",
-    verifyUrl,
+    "Enter this code on the Katuwang email verification page:",
+    code,
     "",
-    `This link expires in ${VERIFICATION_TTL_HOURS} hours and can be used once.`,
+    `This code expires in ${VERIFICATION_TTL_MINUTES} minutes and can be used once.`,
     "If you didn't create this account, you can ignore this email.",
   ].join("\n");
 
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;max-width:520px">
   <h1 style="font-size:18px;margin:0 0 12px">Verify your Katuwang email address</h1>
   <p style="margin:0 0 16px">Welcome to Katuwang! Confirm your email address to finish setting up your account.</p>
-  <p style="margin:0 0 16px">
-    <a href="${verifyUrl}" style="display:inline-block;padding:10px 18px;background:#4338ca;color:#fff;text-decoration:none;border-radius:6px">Verify email</a>
-  </p>
-  <p style="margin:0 0 16px;word-break:break-all;color:#4b5563">Or paste this link into your browser:<br>${verifyUrl}</p>
-  <p style="margin:0;color:#6b7280;font-size:13px">This link expires in ${VERIFICATION_TTL_HOURS} hours and can be used once. If you didn't create this account, you can ignore this email.</p>
+  <p style="margin:0 0 16px;font-size:28px;font-weight:700;letter-spacing:0.2em">${code}</p>
+  <p style="margin:0;color:#6b7280;font-size:13px">Enter this code on the email verification page. It expires in ${VERIFICATION_TTL_MINUTES} minutes and can be used once. If you didn't create this account, you can ignore this email.</p>
 </div>`;
 
   return { subject, html, text };

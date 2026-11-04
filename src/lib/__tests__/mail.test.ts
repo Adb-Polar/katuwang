@@ -116,6 +116,19 @@ describe("renderPasswordResetEmail", () => {
   });
 });
 
+describe("renderVerificationEmail", () => {
+  it("puts the six-digit code in both bodies without a verification link", async () => {
+    const { renderVerificationEmail } = await loadMail({});
+    const { html, text } = renderVerificationEmail("012345");
+    expect(html).toContain("012345");
+    expect(text).toContain("012345");
+    expect(html).toContain("10 minutes");
+    expect(text).toContain("10 minutes");
+    expect(html).not.toContain("verify-email?token=");
+    expect(text).not.toContain("verify-email?token=");
+  });
+});
+
 
 describe("Resend HTTPS delivery", () => {
   it("prefers HTTPS over configured SMTP and sends both email bodies", async () => {

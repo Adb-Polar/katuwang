@@ -558,7 +558,7 @@ Direct model operations: `user.findFirst`, `passwordResetToken.updateMany`, `pas
 
 Source: [route.ts](../../src/app/api/auth/resend-verification/route.ts).
 
-Operations: POST: Resend an email-verification link.
+Operations: POST: Resend an email-verification code.
 
 Body validators: `resendVerificationSchema`. Their field constraints are specified in the role chapters and [validation modules](../../src/lib/validations).
 
@@ -582,15 +582,15 @@ Explicit restrictions/errors:
 
 Source: [route.ts](../../src/app/api/auth/verify-email/route.ts).
 
-Operations: POST: Confirm an email address via its verification token.
+Operations: POST: Confirm an email address via its six-digit code.
 
 Body validators: `verifyEmailSchema`. Their field constraints are specified in the role chapters and [validation modules](../../src/lib/validations).
 
-Direct model operations: `verificationToken.findUnique`, `user.update`, `verificationToken.update`.
+Direct model operations: `user.findUnique`, `verificationToken.findFirst`, `verificationToken.updateMany`, `user.update`.
 
 Explicit restrictions/errors:
 
-- This verification link is invalid or has expired.
+- This verification code is invalid or has expired.
 
 ### `/api/chatbot`
 

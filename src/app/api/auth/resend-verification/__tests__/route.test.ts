@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+import { matchesVerificationCode } from "@/lib/emailVerification";
 
 const { findUniqueMock, updateManyMock, createMock, transactionMock, sendMailMock } = vi.hoisted(
   () => ({
@@ -21,12 +22,12 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/lib/mail", () => ({
   sendMail: sendMailMock,
-  renderVerificationEmail: (url: string) => ({ subject: "s", html: url, text: url }),
+  renderVerificationEmail: (code: string) => ({ subject: "s", html: code, text: code }),
 }));
 
 import { POST } from "@/app/api/auth/resend-verification/route";
 
-const NEUTRAL_MSG = "If an account matches that address and needs verification, we've sent a new link.";
+const NEUTRAL_MSG = "If an account matches that address and needs verification, we've sent a new code.";
 
 function makeRequest(body: unknown) {
   return new NextRequest("http://localhost/api/auth/resend-verification", {
@@ -37,7 +38,11 @@ function makeRequest(body: unknown) {
 }
 
 describe("POST /api/auth/resend-verification", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("NEXTAUTH_SECRET", "test-secret-for-email-codes");
+  });
+  afterEach(() => vi.unstubAllEnvs());
 
   it("400 on an invalid email", async () => {
     const res = await POST(makeRequest({ email: "not-an-email" }));
@@ -59,17 +64,19 @@ describe("POST /api/auth/resend-verification", () => {
     expect(createMock).toHaveBeenCalledTimes(1);
     const created = createMock.mock.calls[0][0].data;
     expect(created.userId).toBe("U1");
-    expect(created.tokenHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(created.tokenHash).toMatch(/^[a-f0-9]{32}:[a-f0-9]{64}$/);
+    expect(created.expiresAt.getTime()).toBeGreaterThan(Date.now());
   });
 
-  it("emails the verify link (with the raw token) to the submitted address", async () => {
+  it("emails the six-digit code to the submitted address", async () => {
     findUniqueMock.mockResolvedValue({ id: "U1", emailVerifiedAt: null, status: "ACTIVE" });
     await POST(makeRequest({ email: "user@example.com" }));
 
     expect(sendMailMock).toHaveBeenCalledTimes(1);
     const arg = sendMailMock.mock.calls[0][0];
     expect(arg.to).toBe("user@example.com");
-    expect(arg.html).toMatch(/\/verify-email\?token=[a-f0-9]{64}$/);
+    expect(arg.html).toMatch(/^\d{6}$/);
+    expect(matchesVerificationCode(arg.to, arg.html, createMock.mock.calls[0][0].data.tokenHash)).toBe(true);
   });
 
   it("returns the neutral message without a token when no account matches", async () => {

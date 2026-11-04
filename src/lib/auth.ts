@@ -79,7 +79,7 @@ export const authOptions: NextAuthOptions = {
           const globallyRequired = await getSetting("requireEmailVerification");
           // Signup-only enforcement preserves access for legacy accounts that
           // never received a verification token. Expired tokens still require
-          // verification; the user can request a fresh link.
+          // verification; the user can request a fresh code.
           const signupRequired = process.env.REQUIRE_SIGNUP_EMAIL_VERIFICATION === "true" &&
             Boolean(await prisma.verificationToken.findFirst({
               where: { userId: user.id },

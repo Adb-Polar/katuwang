@@ -934,3 +934,8 @@ Security-review fixes (Changes.md Part 57)
 
 
 
+Email verification OTP (codex/email-verification-otp)
+ [] With signup verification enabled, register a learner and a tutor; each receives a six-digit code and can verify on the check-email screen, then sign in.
+ [] On the account-unverified screen, enter the original code or resend a new one; the old code fails, the new code succeeds, and a verified account can sign in.
+ [] Check the code-entry screen at mobile width and confirm an expired code shows an error and can be replaced by a resend.
+

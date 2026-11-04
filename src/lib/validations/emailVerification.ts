@@ -1,8 +1,9 @@
 import { z } from "zod";
 
-/** `POST /api/auth/verify-email` — the emailed verification token. */
+/** `POST /api/auth/verify-email` — email and its six-digit code. */
 export const verifyEmailSchema = z.object({
-  token: z.string().min(1, "Verification token is required."),
+  email: z.string().trim().toLowerCase().pipe(z.string().email("Enter a valid email address.")),
+  code: z.string().regex(/^\d{6}$/, "Enter the six-digit verification code."),
 });
 
 /** `POST /api/auth/resend-verification` — an account's login email. */

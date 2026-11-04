@@ -17,7 +17,7 @@ A Guest is unauthenticated. Guests can learn about Katuwang and enter account wo
 
 - **Description:** Creates a learner or tutor account with an anonymous identifier.
 - **Trigger/entry point:** `/register` → `/register/learner` or `/register/tutor`; submit form → `POST /api/register`.
-- **Underlying logic/business rules:** (1) Apply registration IP rate limit. (2) Reject when `registrationOpen=false`. (3) Validate discriminated `type` payload and read approval/verification flags. (4) Reject existing email. (5) Hash password at bcrypt cost 12 and generate anonymous ID. (6) Create User and, for a tutor, TutorProfile. Set `PENDING` when approval is required; otherwise use ACTIVE default. (7) If verification is required, create a hashed, expiring token and attempt SMTP delivery. (8) Return flags so the form routes to check-email, approval guidance, or login.
+- **Underlying logic/business rules:** (1) Apply registration IP rate limit. (2) Reject when `registrationOpen=false`. (3) Validate discriminated `type` payload and read approval/verification flags. (4) Reject existing email. (5) Hash password at bcrypt cost 12 and generate anonymous ID. (6) Create User and, for a tutor, TutorProfile. Set `PENDING` when approval is required; otherwise use ACTIVE default. (7) If verification is required, store a hashed six-digit code and attempt email delivery. (8) Return flags so the form routes to the code-entry screen, approval guidance, or login.
 - **Inputs:** `type: LEARNER|TUTOR`, first/last names (1–50 characters), normalized lowercase valid email, password, grade enum GRADE_7–GRADE_12, nonempty section, optional contact information, optional recovery email in the schema, and `consentGiven:true`.
 - **Outputs/side effects:** HTTP 201 `{message,anonymousId,pendingApproval,requiresVerification}`; account/profile/token rows and optional email. Verification takes precedence in the success message. The route currently does **not persist recoveryEmail** from registration.
 - **Permissions/edge cases:** No Admin type. 400 for validation/consent failure; 403 closed registration; 409 duplicate email; 429 rate limit. Password is at least 8 characters, at most 72 UTF-8 bytes, and outside a common-password blocklist. Email delivery failure does not roll back registration; resend is the recovery path. Registration contact input is less strictly validated than profile edits.
@@ -32,13 +32,13 @@ A Guest is unauthenticated. Guests can learn about Katuwang and enter account wo
 - **Permissions/edge cases:** Incorrect email/password share one error. Missing fields are rejected. `ACCOUNT_UNVERIFIED` routes to `/account-unverified?email=...`, pending to `/pending-approval`, declined to `/account-declined` with optional reason. Wrong-role portal access reaches `/unauthorized`. JWT expiration and refresh behavior are described in the architecture chapter.
 - **Evidence:** [auth.ts](../../src/lib/auth.ts), [LoginForm](../../src/components/auth/LoginForm.tsx), [dashboard](../../src/app/dashboard/page.tsx).
 
-## G04 — Verify email and resend a link
+## G04 — Verify email and resend a code
 
 - **Description:** Confirms control of the login email address independently of admin approval.
-- **Trigger/entry point:** `/verify-email?token=...`, `/verify-email/check-email`, `/account-unverified`; `POST /api/auth/verify-email`, `POST /api/auth/resend-verification`.
-- **Underlying logic/business rules:** Verify hashes supplied token, requires unused/unexpired record, updates `User.emailVerifiedAt` and token `usedAt` transactionally. Resend finds the normalized login email, ignores verified/banned/nonexistent accounts, invalidates earlier unused tokens, issues a fresh 24-hour token and attempts mail.
-- **Inputs/outputs:** Verify `{token}` → success message or 400 invalid/expired. Resend `{email}` → neutral 200 message that does not confirm account existence or verification status; optional token/mail side effects.
-- **Permissions/edge cases:** Public but throttled. Resend: 5/IP and 3/email per 15 minutes; verification: 10/IP per 15 minutes. Old or used links fail. Verification does not approve a pending registration. Mail errors remain server-side while the neutral response is retained.
+- **Trigger/entry point:** `/verify-email`, `/verify-email/check-email`, `/account-unverified`; `POST /api/auth/verify-email`, `POST /api/auth/resend-verification`.
+- **Underlying logic/business rules:** Verify checks the latest unused code for the supplied email, requires it to be unexpired, and updates `User.emailVerifiedAt` and token `usedAt` transactionally. Resend finds the normalized login email, ignores verified/banned/nonexistent accounts, invalidates earlier unused codes, issues a fresh 10-minute code and attempts mail.
+- **Inputs/outputs:** Verify `{email,code}` → success message or 400 invalid/expired. Resend `{email}` → neutral 200 message that does not confirm account existence or verification status; optional code/mail side effects.
+- **Permissions/edge cases:** Public but throttled. Resend: 5/IP and 3/email per 15 minutes; verification: 10/IP and 5/email per 15 minutes. Old or used codes fail. Verification does not approve a pending registration. Mail errors remain server-side while the neutral response is retained.
 - **Evidence:** [verification handlers](../../src/app/api/auth/verify-email/route.ts), [resend handler](../../src/app/api/auth/resend-verification/route.ts), [token helpers](../../src/lib/emailVerification.ts).
 
 ## G05 — Request and complete password recovery
