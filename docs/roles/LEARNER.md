@@ -46,8 +46,8 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 ## Session Pre/Post-Tests (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`)
 
 For a session with a published test, a short diagnostic quiz is taken
-**twice**: once before the session (pre-test), once after your tutor marks
-it `COMPLETED` (post-test). Both runs serve the identical question set, so
+**twice**: once before the session (pre-test), once your tutor posts the
+post-test. Both runs serve the identical question set, so
 your own score change is measurable question-by-question. It's diagnostic
 only — no pass/fail, no grade impact.
 
@@ -55,8 +55,8 @@ only — no pass/fail, no grade impact.
   your tutor publishes it. Answer all questions and submit; you can leave
   and resume an in-progress attempt any time before submitting.
   (`POST /api/learner/classes/[classId]/sessions/[sessionId]/test/PRE/start`)
-- **The post-test opens automatically** once your tutor marks that specific
-  session complete — you're notified. If you were still mid-pre-test at that
+- **The post-test opens** when your tutor posts it on the session test —
+  you're notified. If you were still mid-pre-test at that
   moment, it isn't cut short; you can still finish and submit it.
 - **Review a submitted attempt** — see which answers were correct, the
   correct option and explanation for each question, and your score. A
@@ -70,8 +70,8 @@ only — no pass/fail, no grade impact.
   page. Shows only your own scores — no tutor identity, no class-average
   figure (a small class would make "class average" identify a classmate).
   (`GET /api/learner/progress?classId=`)
-- Missing the pre-test window (session already completed) or the post-test
-  window (session not yet completed) simply means that run isn't available —
+- Missing the pre-test window (session already completed or post-test posted) or the post-test
+  window (not yet posted) simply means that run isn't available —
   it isn't an error you caused.
 
 ## Automatic Matching (`/learner/match`)

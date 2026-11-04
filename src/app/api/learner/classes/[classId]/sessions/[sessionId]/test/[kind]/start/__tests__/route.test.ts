@@ -109,8 +109,15 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect((await POST(req(), ctx())).status).toBe(409);
   });
 
-  it("409 per the gating table — POST not open while the session is SCHEDULED", async () => {
+  it("409 when the tutor has not posted the post-test", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "SCHEDULED" });
+    const res = await POST(req(), ctx("POST"));
+    expect(res.status).toBe(409);
+    expect((await res.json()).code).toBe("POST_NOT_OPEN");
+  });
+
+  it("keeps the post-test closed after session completion until the tutor posts it", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED" });
     const res = await POST(req(), ctx("POST"));
     expect(res.status).toBe(409);
     expect((await res.json()).code).toBe("POST_NOT_OPEN");
@@ -131,9 +138,8 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect(sessionTestAttemptCreate).not.toHaveBeenCalled();
   });
 
-  it("still allows a new POST attempt after the pre-test closes and the session completes", async () => {
-    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED" });
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
+  it("allows a new POST attempt once posted even while the session is scheduled", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date(), posttestOpenedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
     sessionTestAttemptCreate.mockResolvedValue({
       id: "at-post", kind: "POST", status: "IN_PROGRESS", totalQuestions: 1,
       correctCount: 0, scorePercent: 0, startedAt: new Date(), submittedAt: null,

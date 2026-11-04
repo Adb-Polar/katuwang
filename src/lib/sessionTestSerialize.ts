@@ -107,6 +107,7 @@ export interface SerializedSessionTest {
   status: string;
   publishedAt: string | null;
   pretestClosedAt: string | null;
+  posttestOpenedAt: string | null;
   closedAt: string | null;
   questions: SerializedSessionTestQuestion[];
 }
@@ -121,6 +122,7 @@ export function serializeSessionTest(test: SessionTestWithQuestions): Serialized
     status: test.status,
     publishedAt: test.publishedAt ? test.publishedAt.toISOString() : null,
     pretestClosedAt: test.pretestClosedAt ? test.pretestClosedAt.toISOString() : null,
+    posttestOpenedAt: test.posttestOpenedAt ? test.posttestOpenedAt.toISOString() : null,
     closedAt: test.closedAt ? test.closedAt.toISOString() : null,
     questions: [...test.questions]
       .sort((a, b) => a.position - b.position)

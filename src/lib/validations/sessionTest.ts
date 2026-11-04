@@ -49,7 +49,7 @@ export const setSessionTestQuestionsSchema = z.object({
 export type SetSessionTestQuestionsInput = z.infer<typeof setSessionTestQuestionsSchema>;
 
 export const sessionTestStatusSchema = z.object({
-  status: z.enum(["PUBLISHED", "PRETEST_CLOSED", "CLOSED"], { message: "Invalid status transition." }),
+  status: z.enum(["PUBLISHED", "PRETEST_CLOSED", "POSTTEST_OPEN", "CLOSED"], { message: "Invalid status transition." }),
 });
 
 export type SessionTestStatusInput = z.infer<typeof sessionTestStatusSchema>;

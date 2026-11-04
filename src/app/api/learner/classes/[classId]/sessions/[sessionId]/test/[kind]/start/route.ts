@@ -19,9 +19,9 @@ const ATTEMPT_INCLUDE = {
  * is always resumable, so a learner who opened the pre-test seconds before
  * the tutor marked the session complete never loses their work.
  */
-function newStartBlockReason(kind: SessionTestKind, sessionStatus: SessionStatus, pretestClosed: boolean): string | null {
+function newStartBlockReason(kind: SessionTestKind, sessionStatus: SessionStatus, pretestClosed: boolean, posttestOpen: boolean): string | null {
   if (sessionStatus === "CANCELLED") return "SESSION_CANCELLED";
-  if (sessionStatus === "SCHEDULED" && kind === "POST") return "POST_NOT_OPEN";
+  if (kind === "POST" && !posttestOpen) return "POST_NOT_OPEN";
   if (kind === "PRE" && (sessionStatus === "COMPLETED" || pretestClosed)) return "PRE_WINDOW_CLOSED";
   return null;
 }
@@ -72,13 +72,13 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json(serializeSessionTestAttempt(existing, { reveal: false }), { status: 200 });
     }
 
-    const blocked = newStartBlockReason(kind, access.session.status, Boolean(test.pretestClosedAt));
+    const blocked = newStartBlockReason(kind, access.session.status, Boolean(test.pretestClosedAt), Boolean(test.posttestOpenedAt));
     if (blocked) {
       const message =
         blocked === "SESSION_CANCELLED"
           ? "This session was cancelled."
           : blocked === "POST_NOT_OPEN"
-            ? "The post-test opens once the session is marked complete."
+            ? "The tutor has not posted the post-test yet."
             : "The pre-test window has closed.";
       return NextResponse.json({ error: message, code: blocked }, { status: 409 });
     }

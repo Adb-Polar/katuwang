@@ -517,6 +517,7 @@ model SessionTest {
   status          SessionTestStatus     @default(DRAFT)
   publishedAt     DateTime?
   pretestClosedAt DateTime?
+  posttestOpenedAt DateTime?
   closedAt        DateTime?
   createdAt       DateTime              @default(now())
   updatedAt       DateTime              @updatedAt

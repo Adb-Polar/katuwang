@@ -172,8 +172,8 @@ profile fields. Only `firstName` / `lastName` / `email` require an admin route.
 **Decision:** The pre/post-test assessment (thesis module 4) is scoped to one
 `SessionTest` per `ClassSession`, not per `TutorClass`. A class with 5
 sessions can carry 5 independent tests, each gated to that specific
-session's lifecycle (pre-test opens once published; post-test opens once
-that one session is marked COMPLETED).
+session's lifecycle (pre-test opens once published; post-test opens when the
+tutor posts it on that session's test).
 
 **Thesis text says otherwise (implicitly):** the thesis and the first
 implementation attempt (an unmerged branch, `class-pre-post-tests`, commit
