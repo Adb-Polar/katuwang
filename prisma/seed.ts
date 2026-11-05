@@ -1671,7 +1671,8 @@ async function main() {
   await prisma.idCounter.upsert({
     where: { role: "ADMIN" },
     create: { role: "ADMIN", count: 1 },
-    update: { count: 1 },
+    // Preserve IDs already allocated to administrators on subsequent seed runs.
+    update: {},
   });
 
   log.header("[3/12] Tutor Accounts & Topic Certifications");

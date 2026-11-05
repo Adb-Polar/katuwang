@@ -27,12 +27,14 @@ export async function generateAnonymousId(
   }
 
   let count = updated.count;
-  if (role === "ADMIN" && count === 1) {
-    const existing = await prisma.user.findUnique({
-      where: { anonymousId: `${prefix}-0001` },
+  if (role === "ADMIN") {
+    // Seeded/imported accounts can be ahead of a missing or stale counter.
+    // Every candidate must be checked, not just ADM-0001. Keep using atomic
+    // increments so simultaneous requests reserve different counter values.
+    while (await prisma.user.findUnique({
+      where: { anonymousId: `${prefix}-${String(count).padStart(4, "0")}` },
       select: { id: true },
-    });
-    if (existing) {
+    })) {
       const bumped = await prisma.idCounter.update({
         where: { role },
         data: { count: { increment: 1 } },

@@ -16,7 +16,7 @@ vi.mock("@/lib/prisma", () => ({
 import { generateAnonymousId, generateClassCode } from "@/lib/idGenerator";
 
 describe("generateAnonymousId", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it("formats a zero-padded tutor ID", async () => {
     idCounterUpdate.mockResolvedValue({ role: "TUTOR", count: 7 });
@@ -34,7 +34,7 @@ describe("generateAnonymousId", () => {
 
   it("upserts and bumps count if ADM-0001 already exists", async () => {
     idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 1 });
-    userFindUnique.mockResolvedValue({ id: "existing-seeded-admin" });
+    userFindUnique.mockResolvedValueOnce({ id: "existing-seeded-admin" }).mockResolvedValueOnce(null);
     idCounterUpdate.mockResolvedValue({ role: "ADMIN", count: 2 });
 
     await expect(generateAnonymousId("ADMIN")).resolves.toBe("ADM-0002");
@@ -49,6 +49,50 @@ describe("generateAnonymousId", () => {
     });
   });
 
+  it("skips occupied admin IDs when the counter was reset by seeding", async () => {
+    idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 2 });
+    userFindUnique
+      .mockResolvedValueOnce({ id: "existing-admin-2" })
+      .mockResolvedValueOnce({ id: "existing-admin-3" })
+      .mockResolvedValueOnce(null);
+    idCounterUpdate
+      .mockResolvedValueOnce({ role: "ADMIN", count: 3 })
+      .mockResolvedValueOnce({ role: "ADMIN", count: 4 });
+
+    await expect(generateAnonymousId("ADMIN")).resolves.toBe("ADM-0004");
+    expect(userFindUnique.mock.calls.map(([args]) => args.where.anonymousId))
+      .toEqual(["ADM-0002", "ADM-0003", "ADM-0004"]);
+  });
+
+  it("checks occupied IDs even when the admin counter is newly created", async () => {
+    idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 1 });
+    userFindUnique
+      .mockResolvedValueOnce({ id: "super-admin" })
+      .mockResolvedValueOnce({ id: "standard-admin" })
+      .mockResolvedValueOnce(null);
+    idCounterUpdate
+      .mockResolvedValueOnce({ role: "ADMIN", count: 2 })
+      .mockResolvedValueOnce({ role: "ADMIN", count: 3 });
+
+    await expect(generateAnonymousId("ADMIN")).resolves.toBe("ADM-0003");
+  });
+
+  it("reserves distinct available IDs for concurrent admin requests", async () => {
+    let count = 1;
+    idCounterUpsert.mockImplementation(async () => ({ role: "ADMIN", count: ++count }));
+    idCounterUpdate.mockImplementation(async () => ({ role: "ADMIN", count: ++count }));
+    userFindUnique.mockImplementation(async ({ where }) =>
+      ["ADM-0002", "ADM-0003"].includes(where.anonymousId) ? { id: "existing" } : null
+    );
+
+    const ids = await Promise.all([
+      generateAnonymousId("ADMIN"),
+      generateAnonymousId("ADMIN"),
+    ]);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids.sort()).toEqual(["ADM-0004", "ADM-0005"]);
+  });
+
   it("formats ADM-0001 if not already taken", async () => {
     idCounterUpsert.mockResolvedValue({ role: "ADMIN", count: 1 });
     userFindUnique.mockResolvedValue(null);
@@ -58,7 +102,7 @@ describe("generateAnonymousId", () => {
 });
 
 describe("generateClassCode", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it("upserts the CLASS counter and formats C-000N", async () => {
     idCounterUpsert.mockResolvedValue({ role: "CLASS", count: 1 });
