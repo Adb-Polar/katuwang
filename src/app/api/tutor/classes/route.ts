@@ -86,9 +86,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
-    if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
-
     const body = await req.json();
     const result = createClassSchema.safeParse(body);
 
@@ -97,8 +94,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
+    const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions, published = true } =
       result.data;
+
+    if (published) {
+      const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
+      if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
+    }
 
     // Normalize + de-duplicate topics (case-insensitive). Custom topics that
     // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
@@ -177,6 +179,7 @@ export async function POST(req: NextRequest) {
           room: room || null,
           meetingLink: meetingLink || null,
           status: "SCHEDULED",
+          published,
           sessions: {
             create: parsedSessions.map((s) => ({
               topic: s.topic,

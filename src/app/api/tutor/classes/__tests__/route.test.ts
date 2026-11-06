@@ -116,6 +116,25 @@ describe("POST /api/tutor/classes", () => {
     sessionFindMany.mockResolvedValue([]);
   });
 
+  it.each([false, true, undefined])("persists publication %s with an explicit true default", async (published) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
+    classCreate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+    const response = await POST(makeRequest({ ...validBody(), ...(published === undefined ? {} : { published }) }));
+    expect(response.status).toBe(201);
+    expect(classCreate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ published: published ?? true }) }));
+  });
+
+  it("allows an unpublished draft without a picture when publication requires one", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null, gradeLevel: "GRADE_10" } });
+    getProfilePictureRequirementMock.mockResolvedValue("TUTORS_ONLY");
+    classCreate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+    const response = await POST(makeRequest({ ...validBody(), published: false }));
+    expect(response.status).toBe(201);
+    expect(classCreate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ published: false }) }));
+  });
+
   it("rejects class creation when profile picture is mandatory for tutors and tutor has no picture", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null } });

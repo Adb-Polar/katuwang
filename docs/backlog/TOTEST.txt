@@ -967,3 +967,5 @@ Email verification OTP (codex/email-verification-otp)
 [] Picture policy: TUTORS_ONLY blocks missing-avatar creation/publication and request acceptance; ALL_USERS also blocks learner enrollment with actionable copy; profile remains accessible; OPTIONAL allows enrollment. Restore the original dev-test setting after QA.
 
 [] Recovery email: registration and both profile APIs persist normalized addresses; current password required for changes; backup cannot reset until verified; code expiry/reuse/address change rejected; duplicate primary/backup or verified backup matches reject recovery with no token/mail; local SMTP browser flow verifies ownership without external mail; live UI and invalid-code checks preserve seeded account recovery addresses.
+
+[] Publication: create published:false, verify tutor persistence and absence from learner Browse/search/matching and direct class view/enrollment; publish and verify discoverability. Omitted flag defaults true. Avatar-required settings permit drafts while protecting publication.

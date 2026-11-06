@@ -127,3 +127,11 @@ Fix 13 deployed as 6e6040cf2e233d533c832524b36b29aeaa508283, Render dep-dbmtsj8n
 Persist normalized backup addresses for registration and both profile roles. Require the current password to change a backup address; clear ownership on change. Profile controls save, send a short-lived code and verify ownership. Conditional token consumption and current-address matching reject reuse, expiry and address changes. Password recovery queries only verified backup addresses and rejects ambiguous matches without issuing tokens or sending mail.
 
 Fix 14 pre-commit validation: 34 focused profile/registration/forgot-password tests and 6 real-MariaDB verification tests pass. Full suite 1,127 passes / 11 baseline failures / 31 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Isolated Chromium and local SMTP: save/reload, reject unverified backup, deliver code, verify, reject reuse, deliver password-reset link to verified backup and clear verification on address change all pass with no page errors or external mail.
+
+Fix 14 deployed as 1d9678420a6ee3175b44cf43f486a2abf94c9170, Render dep-dbn1ja17lnhs73dcp6ig, live 2026-11-07 02:19 PHT. Live Chromium profile/registration controls visible, invalid code/address 400, four unauthenticated checks 401, seeded recovery state unchanged, no mail sent or page errors.
+
+## Fix 15: honor class publication input
+
+Persist the submitted boolean on creation; omitted values explicitly default true. Avatar publication prerequisites apply to published classes while drafts can be saved without a picture.
+
+Fix 15 pre-commit validation: 28 focused creation tests pass. Full suite 1,131 passes / 11 baseline failures / 31 opt-in tests skipped. TypeScript, changed-file lint and production build pass. No schema change.

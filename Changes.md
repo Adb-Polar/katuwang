@@ -4244,3 +4244,8 @@ The same action policy now protects tutor publishing/request acceptance and lear
 ## 2026-11-06 — Persist and verify recovery email ownership
 
 Registration and learner/tutor profile updates persist normalized backup addresses. Changing them requires the current password and clears verified status. Added self-service recovery settings with expiring single-use emailed codes, conditional consumption and current-address checks. Password recovery accepts only verified backups and rejects ambiguous account matches before token/mail side effects. Six isolated MariaDB tests exercise persistence, verification, reuse/concurrency, expiry, address change, delivery failure and ambiguity. Picture policy 6e6040c passed live browser QA with the original setting restored.
+
+
+## 2026-11-07 — Preserve class publication input
+
+Class creation now persists published:false and explicitly defaults to true when omitted. The picture prerequisite applies when publishing, allowing unpublished drafts to be saved. Added false/true/omitted and mandatory-picture draft regressions. Recovery-email 1d96784 passed isolated SMTP/browser verification and live authenticated/invalid-input UI checks.
