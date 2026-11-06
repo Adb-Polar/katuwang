@@ -170,7 +170,7 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session" size="md">
+      <Modal portal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session" size="md">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <ValidatedForm onSubmit={handleReschedule} className="space-y-5 mt-4">

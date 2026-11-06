@@ -67,7 +67,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
         Add Session
       </button>
 
-      <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Add a Session" size="md">
+      <Modal portal open={isOpen} onClose={() => setIsOpen(false)} title="Add a Session" size="md">
             <FeedbackBanner variant="error" message={error || null} />
 
             <ValidatedForm onSubmit={handleSubmit} className="space-y-5 mt-4">

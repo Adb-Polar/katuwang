@@ -4,6 +4,7 @@ import { act, createElement as h, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import LoginForm from "@/components/auth/LoginForm";
+import Modal from "../Modal";
 import ValidatedForm from "../ValidatedForm";
 import FormField from "../FormField";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
@@ -187,6 +188,26 @@ describe("inline form validation", () => {
     expect(save).not.toHaveBeenCalled();
     expect(host.querySelectorAll('[role="alert"]')).toHaveLength(2);
     expect(host.querySelector('option[value="60"]')!.textContent).toBe("1hr");
+  });
+
+  it("keeps session dialog validation isolated from the surrounding edit-class form", async () => {
+    const outerSave = vi.fn();
+    const innerSave = vi.fn((event) => event.preventDefault());
+    await act(async () => root.render(<ValidatedForm onSubmit={outerSave}>
+      <Modal portal open onClose={() => {}} title="Session">
+        <ValidatedForm onSubmit={innerSave}><FormField label="Date"><input required type="date" /></FormField></ValidatedForm>
+      </Modal>
+    </ValidatedForm>));
+    const dialog = document.querySelector('[role="dialog"]')!;
+    expect(dialog.closest("form")).toBeNull();
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(outerSave).not.toHaveBeenCalled();
+    expect(innerSave).not.toHaveBeenCalled();
+    expect(dialog.querySelector('[role="alert"]')).not.toBeNull();
+    await change(dialog.querySelector("input")!, "2027-01-20");
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(innerSave).toHaveBeenCalledOnce();
+    expect(outerSave).not.toHaveBeenCalled();
   });
 
   it("focuses server errors after a pending form re-enables its inputs", async () => {
