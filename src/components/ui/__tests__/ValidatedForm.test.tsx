@@ -127,6 +127,41 @@ describe("inline form validation", () => {
     expect(document.activeElement?.closest("[data-control-field]")?.querySelector('[role="alert"]')).not.toBeNull();
   });
 
+  it("places missing session date and time errors under each input and preserves the other error on correction", async () => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [{key: "one", topic: "Algebra", duration: 60}]}}
+      onCancel={() => {}} onSubmit={vi.fn()} />));
+    await submit();
+    const date = host.querySelector<HTMLInputElement>('input[type="date"]')!;
+    const time = host.querySelector<HTMLInputElement>('input[type="time"]')!;
+    for (const input of [date, time]) {
+      const feedback = input.closest("[data-control-field]")!.querySelector('[role="alert"]')!;
+      expect(feedback.textContent).toContain("Please fill in this field.");
+      expect(input.getAttribute("aria-describedby")).toContain(feedback.id);
+    }
+    await change(date, "2027-01-20");
+    expect(date.hasAttribute("aria-invalid")).toBe(false);
+    expect(time.getAttribute("aria-invalid")).toBe("true");
+    expect(time.closest("[data-control-field]")!.querySelector('[role="alert"]')).not.toBeNull();
+  });
+
+  it.each(["topic", "duration", "scheduledAt"])("maps a server %s error to the correct input in the second session", async (control) => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [
+        {key: "one", topic: "Algebra", date: "2027-01-20", time: "10:00", duration: 60},
+        {key: "two", topic: "Algebra", date: "2027-01-21", time: "10:00", duration: 60},
+      ]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["sessions", 1, control], message: "Please correct this session field."}],
+    }); });
+    const rows = host.querySelectorAll("[data-session-row]");
+    const target = rows[1].querySelector(`[data-session-control="${control}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-control-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Please correct this session field.");
+    expect(rows[0].querySelector('[role="alert"]')).toBeNull();
+  });
+
   it("focuses server errors after a pending form re-enables its inputs", async () => {
     function PendingForm() {
       const [pending, setPending] = useState(false);

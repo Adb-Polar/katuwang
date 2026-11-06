@@ -41,7 +41,13 @@ export function reportServerFieldErrors(form: EventTarget, data: { fieldErrors?:
       const index = issue.path[1];
       if (typeof index === "number") {
         if (key === "options") target = field.querySelectorAll<HTMLInputElement>('input[type="text"]')[index];
-        if (key === "sessions") target = field.querySelectorAll<HTMLElement>("[data-control-field]")[index]?.querySelector<HTMLInputElement>(issue.path[2] === "duration" ? "select:last-of-type" : issue.path[2] === "topic" ? "select" : 'input[type="date"]') ?? undefined;
+        if (key === "sessions") {
+          const rows = field.querySelectorAll<HTMLElement>("[data-session-row]");
+          const row = rows.length ? rows[index] : field.querySelectorAll<HTMLElement>("[data-control-field]")[index];
+          const control = issue.path[2] === "duration" ? "duration" : issue.path[2] === "topic" ? "topic" : "scheduledAt";
+          target = row?.querySelector<HTMLElement>(`[data-session-control="${control}"]`) ??
+            row?.querySelector<HTMLElement>(control === "duration" ? "select:last-of-type" : control === "topic" ? "select" : 'input[type="date"]') ?? undefined;
+        }
         if (key === "preferredSlots") target = field.querySelectorAll<HTMLInputElement>('input[type="time"]')[index * 2 + (issue.path[2] === "endTime" ? 1 : 0)];
       }
       form.dispatchEvent(new CustomEvent("field-error", { detail: { label: field.dataset.formField!, target, message: issue.message } }));
