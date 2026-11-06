@@ -4,9 +4,8 @@ import { ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
-import { subjectExists } from "@/lib/subjects";
-import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
-import { getSetting, getProfilePictureRequirement } from "@/lib/settings";
+import { classTeachingError } from "@/lib/classTeachingPolicy";
+import { getProfilePictureRequirement } from "@/lib/settings";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -110,18 +109,6 @@ export async function POST(req: NextRequest) {
     const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
       result.data;
 
-    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
-    if (gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorGradeLevel)) {
-      return NextResponse.json(
-        { error: "Target grade cannot be higher than your current grade level." },
-        { status: 400 }
-      );
-    }
-
-    if (!(await subjectExists(subject))) {
-      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
-    }
-
     // Normalize + de-duplicate topics (case-insensitive). Custom topics that
     // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
     // something the catalog doesn't list yet; they're stored verbatim.
@@ -146,23 +133,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If enabled, only allow topics the tutor holds a CERTIFIED certification for
-    const requireCertification = await getSetting("requireCertificationForClassCreation");
-    if (requireCertification) {
-      const certifiedTopics = await prisma.topicCertification.findMany({
-        where: { tutorProfileId: tutorProfile.id, subject: subject, status: "CERTIFIED" },
-        select: { topic: true },
-      });
-      const certifiedTopicSet = new Set(certifiedTopics.map((c) => c.topic));
-      const uncertifiedTopics = topics.filter((t) => !certifiedTopicSet.has(t));
-
-      if (uncertifiedTopics.length > 0) {
-        return NextResponse.json(
-          { error: `You are not certified for: ${uncertifiedTopics.join(", ")}.` },
-          { status: 400 }
-        );
-      }
-    }
+    const teachingError = await classTeachingError({
+      tutorProfileId: tutorProfile.id,
+      tutorGradeLevel: tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null,
+      subject, gradeLevel: gradeLevel ?? null, topics,
+    });
+    if (teachingError) return NextResponse.json({ error: teachingError }, { status: 400 });
 
     const parsedSessions = sessions.map((s, i) => ({
       topic: sessionTopics[i] as string,

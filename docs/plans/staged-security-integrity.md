@@ -19,3 +19,11 @@ Use the shared administrative role predicate for both caller authorization and p
 Live QA: sign in as each administrator role, warn/lock/unlock a test learner and tutor, confirm notifications and audit records, and verify direct requests cannot target ADMIN or SUPER_ADMIN accounts.
 
 Validation before commit: focused avatar suite 15/15 passes; TypeScript and production build pass; lint 0 errors / 8 pre-existing warnings. Full suite 1,000 passes / 18 failures in seven unrelated files. All 18 failures reproduced on untouched develop in an isolated baseline checkout (13 failures across five files plus 5 across the remaining two). Live verification pending deployment. No schema change in this fix.
+
+Fix 1 deployed as 4fc798a6a81d5b70b959a8f248cf64c5ffaf2f0b, Render dep-dbmpu2e7bikc73bn2shg, live 2026-11-06 17:36 PHT. Health 200/database connected; no error-level runtime logs after deploy. Authenticated Chromium QA as SUPER_ADMIN: learner and tutor lock/unlock actions returned 200, unlocked state persisted after reload, and targeting ADMIN/SUPER_ADMIN returned 400. No browser page errors. Standard ADMIN caller covered by regression tests; live QA used the available seeded SUPER_ADMIN login.
+
+## Fix 2: effective class-edit teaching scope
+
+Share subject, grade, selected-topic and certification checks between creation and editing. Validate retained fields as well as submitted fields, including description-only edits after certification revocation or tutor-grade change. Existing session topics must remain selected. Preserve the documented allowance for custom topic names when certification is disabled. Cancellation/completion without teaching-scope edits stays available to stop an ineligible class.
+
+Fix 2 pre-commit checks: 47 focused class creation/edit tests pass. Full suite: 1,007 passes and the same 18 baseline failures. TypeScript, production build and changed-file lint pass. Live editor and API rejection checks prepared.

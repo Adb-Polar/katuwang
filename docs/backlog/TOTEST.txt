@@ -940,4 +940,6 @@ Email verification OTP (codex/email-verification-otp)
  [] Check the code-entry screen at mobile width and confirm an expired code shows an error and can be replaced by a resend.
 
 
-[ ] Avatar moderation hierarchy (fix/staged-security-integrity): verify ADMIN and SUPER_ADMIN can warn/lock/unlock learner and tutor avatars on dev-test, with notifications/audit records; direct requests targeting either administrator role must fail without changes.
+[Good: SUPER_ADMIN browser / ADMIN regression tests] Avatar moderation hierarchy (fix/staged-security-integrity): verify ADMIN and SUPER_ADMIN can warn/lock/unlock learner and tutor avatars on dev-test, with notifications/audit records; direct requests targeting either administrator role must fail without changes.
+
+[ ] Effective class-edit scope: on dev-test, save and restore a valid class description through the editor; reject a nonexistent subject and a target grade above the tutor's grade; with certification enabled, subject/topic-only edits and retained uncertified topics must be rejected.

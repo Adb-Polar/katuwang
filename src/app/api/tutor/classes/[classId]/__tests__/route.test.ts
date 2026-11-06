@@ -14,6 +14,9 @@ const {
   notificationCreate,
   notificationCreateMany,
   enrollmentFindMany,
+  getSettingMock,
+  subjectExistsMock,
+  topicCertificationFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
@@ -27,6 +30,9 @@ const {
   notificationCreate: vi.fn(),
   notificationCreateMany: vi.fn(),
   enrollmentFindMany: vi.fn(),
+  getSettingMock: vi.fn(),
+  subjectExistsMock: vi.fn(),
+  topicCertificationFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
@@ -34,8 +40,12 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    tutorClass: { findUnique: classFindUnique, update: classUpdate, findMany: classFindMany },
+    tutorClass: { findUnique: async (...args: unknown[]) => {
+      const found = await classFindUnique(...args);
+      return found ? { subject: "MATH", gradeLevel: null, topics: [{ topic: "Algebraic Expressions" }], sessions: [], ...found } : found;
+    }, update: classUpdate, findMany: classFindMany },
     tutorProfile: { findUnique: tutorProfileFindUnique },
+    topicCertification: { findMany: topicCertificationFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         tutorClass: { update: classUpdate, delete: classDelete },
@@ -48,6 +58,9 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (tx: { topicRequest: { update: (args: unknown) => unknown } }, id: string, data: Record<string, unknown>) => tx.topicRequest.update({ where: { id }, data }) }));
+
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+vi.mock("@/lib/subjects", () => ({ subjectExists: subjectExistsMock }));
 
 import { PATCH, DELETE } from "@/app/api/tutor/classes/[classId]/route";
 
@@ -67,6 +80,9 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     sessionUpdateMany.mockResolvedValue({ count: 0 });
+    getSettingMock.mockResolvedValue(false);
+    subjectExistsMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue([]);
     topicRequestFindMany.mockResolvedValue([]);
     enrollmentFindMany.mockResolvedValue([]);
   });
@@ -212,6 +228,68 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     expect(classUpdate).toHaveBeenCalled();
   });
 
+  it.each([
+    { patch: { subject: "SCIENCE" }, certified: [], error: /not certified/i },
+    { patch: { description: "keep teaching" }, certified: [], error: /not certified/i },
+    { patch: { topics: ["Geometry"] }, certified: [{ topic: "Algebraic Expressions" }], error: /Geometry/ },
+  ])("validates effective certifications for $patch", async ({ patch: updates, certified, error }) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue(certified);
+    const res = await patch(updates);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(error);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rechecks retained grade against the current tutor grade", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", gradeLevel: "GRADE_12", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+    const res = await patch({ description: "keep teaching" });
+    expect(res.status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a nonexistent effective subject", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    subjectExistsMock.mockResolvedValue(false);
+    const res = await patch({ subject: "missing" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Invalid subject.");
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("permits cancellation after certification is revoked", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    classUpdate.mockResolvedValue({ id: "c1", status: "CANCELLED", topics: [], sessions: [] });
+    const res = await patch({ status: "CANCELLED" });
+    expect(res.status).toBe(200);
+    expect(topicCertificationFindMany).not.toHaveBeenCalled();
+  });
+
+  it("accepts certified retained topics with normalized whitespace and case", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue([{ topic: " algebraic   EXPRESSIONS " }]);
+    classUpdate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+    const res = await patch({ description: "Updated" });
+    expect(res.status).toBe(200);
+    expect(topicCertificationFindMany).toHaveBeenCalledWith({
+      where: { tutorProfileId: "tp1", subject: "MATH", status: "CERTIFIED" },
+      select: { topic: true },
+    });
+  });
+
   it("toggles published", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     classFindUnique.mockResolvedValue({
@@ -320,7 +398,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
       id: "c1",
       tutorProfileId: "tp1",
       status: "SCHEDULED",
-      topics: [],
+      topics: [{ topic: "Algebraic Expressions" }],
       sessions: [],
       _count: { enrollments: 0 },
     });
@@ -339,7 +417,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
       id: "c1",
       tutorProfileId: "tp1",
       status: "SCHEDULED",
-      topics: [],
+      topics: [{ topic: "Algebraic Expressions" }],
       sessions: [],
       _count: { enrollments: 0 },
     });

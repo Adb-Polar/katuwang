@@ -4174,3 +4174,8 @@ Separated combined `datetime-local` input fields into distinct `<input type="dat
 ## 2026-11-06 — Avatar moderation hierarchy
 
 The avatar moderation endpoint now uses the shared administrative role predicate: ADMIN and SUPER_ADMIN may moderate learner/tutor avatars, and both administrator roles are protected targets. Added role-matrix regressions and side-effect checks for protected accounts. Deployment and browser verification tracked in docs/plans/staged-security-integrity.md.
+
+
+## 2026-11-06 — Effective class-edit authorization
+
+Class creation and editing share the teaching-scope policy. Partial edits now validate the resulting subject, grade and topics against current tutor eligibility and certification requirements, including retained fields. Existing session topics must remain selected. Added regression coverage for subject-only changes, uncertified replacement topics, revoked certifications, invalid subjects, and retained grades above the tutor's current grade. Avatar moderation live verification passed on dev-test (4fc798a).

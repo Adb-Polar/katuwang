@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
-import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
+import { classTeachingError } from "@/lib/classTeachingPolicy";
 import { notify, notifyMany } from "@/lib/notifications";
 
 
@@ -68,14 +68,6 @@ export async function PATCH(
 
     const { topics: rawTopics, subject: rawSubject, ...updates } = result.data;
 
-    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
-    if (updates.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(updates.gradeLevel, tutorGradeLevel)) {
-      return NextResponse.json(
-        { error: "Target grade cannot be higher than your current grade level." },
-        { status: 400 }
-      );
-    }
-
     const subjectUpdate = rawSubject !== undefined ? { subject: rawSubject } : {};
 
     // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
@@ -131,6 +123,27 @@ export async function PATCH(
           { error: `Cannot remove topic(s) currently used by a session: ${blockedRemovals.join(", ")}.` },
           { status: 400 }
         );
+      }
+    }
+
+    // Always check the resulting scope, including retained fields. A description-only
+    // edit must not bypass a revoked certification or a changed tutor grade.
+    // Cancellation/completion remain available so tutors can stop an ineligible class.
+    const stoppingClass = body.status === "CANCELLED" || body.status === "COMPLETED";
+    const changesScope = rawSubject !== undefined || rawTopics !== undefined || "gradeLevel" in updates;
+    if (!stoppingClass || changesScope || updates.published === true) {
+      const teachingError = await classTeachingError({
+        tutorProfileId: tutorProfile.id,
+        tutorGradeLevel: tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null,
+        subject: rawSubject ?? existingClass.subject,
+        gradeLevel: "gradeLevel" in updates ? updates.gradeLevel ?? null : existingClass.gradeLevel,
+        topics: topics ?? existingClass.topics.map(({ topic }) => topic),
+      });
+      if (teachingError) return NextResponse.json({ error: teachingError }, { status: 400 });
+      const selectedTopics = new Set((topics ?? existingClass.topics.map(({ topic }) => topic))
+        .map((topic) => normalizeTopic(topic).toLowerCase()));
+      if (existingClass.sessions.some(({ topic }) => !selectedTopics.has(normalizeTopic(topic).toLowerCase()))) {
+        return NextResponse.json({ error: "Every session's topic must be one of the class's selected topics." }, { status: 400 });
       }
     }
 
