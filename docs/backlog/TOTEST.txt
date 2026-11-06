@@ -957,3 +957,5 @@ Email verification OTP (codex/email-verification-otp)
 [Good: browser/API d17e718 and real DB races] Assessment submission: race browser and duplicate API submissions on a disposable learner test; verify one 200, remaining 409, one persisted score and one tutor notification. Qualification concurrency and access-change rollback use real isolated MariaDB tests.
 
 [ ] Reset token: complete a valid reset through the isolated production app, verify reuse fails and new-password sign-in works; on dev-test verify a fabricated invalid link is rejected with a generic error. Keep demo credentials unchanged. Real DB races verify one password/version update and expiry after lookup.
+
+[] Session history: completed session reopening/topic/time changes return 409; deleting a scheduled session or class with test records returns 409; cancellation preserves tests and attempts. Database foreign key protects against direct/cascading deletion and test-creation races.

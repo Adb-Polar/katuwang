@@ -8,6 +8,7 @@ const {
   classUpdate,
   classFindMany,
   classDelete,
+  sessionTestFindFirst,
   sessionUpdateMany,
   topicRequestFindMany,
   topicRequestUpdate,
@@ -25,6 +26,7 @@ const {
   classUpdate: vi.fn(),
   classFindMany: vi.fn(),
   classDelete: vi.fn(),
+  sessionTestFindFirst: vi.fn().mockResolvedValue(null),
   sessionUpdateMany: vi.fn(),
   topicRequestFindMany: vi.fn(),
   topicRequestUpdate: vi.fn(),
@@ -51,9 +53,9 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
-        tutorClass: { update: classUpdate, delete: classDelete },
+        tutorClass: { findUnique: classFindUnique, update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
-        sessionTest: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        sessionTest: { findFirst: sessionTestFindFirst, updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         classEnrollment: { findMany: enrollmentFindMany, count: enrollmentCount },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
         notification: { create: notificationCreate, createMany: notificationCreateMany },
@@ -455,6 +457,7 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionTestFindFirst.mockResolvedValue(null);
     topicRequestFindMany.mockResolvedValue([]);
   });
 
@@ -475,5 +478,21 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
     );
     expect(classDelete).toHaveBeenCalledWith({ where: { id: "c1" } });
+  });
+});
+
+// A draft test is still a record; it must be removed explicitly before deleting its class.
+describe("class assessment retention", () => {
+  it("blocks class deletion before request or notification mutations", async () => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", _count: { enrollments: 0 } });
+    sessionTestFindFirst.mockResolvedValue({ id: "test1" });
+    const response = await DELETE(new NextRequest("http://localhost/qa", { method: "DELETE" }), { params: Promise.resolve({ classId: "c1" }) });
+    expect(response.status).toBe(409);
+    expect(classDelete).not.toHaveBeenCalled();
+    expect(topicRequestUpdate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
   });
 });

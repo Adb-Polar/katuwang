@@ -524,7 +524,7 @@ model SessionTest {
   updatedAt       DateTime              @updatedAt
   attempts        SessionTestAttempt[]
   questions       SessionTestQuestion[]
-  session         ClassSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session         ClassSession          @relation(fields: [sessionId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@map("session_tests")

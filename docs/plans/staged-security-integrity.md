@@ -87,3 +87,11 @@ Fix 8 deployed as d17e7185be4537e11198589dbb603119f081ae29, Render dep-dbmt5dgu0
 Hash outside the transaction, lock the token row, then conditionally consume only an unused and currently unexpired token. Read the clock after acquiring the lock. Password hash and session-version update commit in the same transaction; losing or expired claims return the existing generic invalid-link response without a user write. Real MariaDB tests race four different passwords and expire a token after the initial lookup. Positive browser reset QA remains isolated, preserving seeded passwords as requested.
 
 Fix 9 pre-commit validation: 7 focused tests and 5 real-MariaDB reset/session-version tests pass. Full suite 1,051 passes / 17 baseline failures / 22 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Isolated Chromium reset succeeded, reused token returned 400, old session returned 401, fresh login succeeded, and session version increased once; no page errors. Seeded dev-test passwords unchanged.
+
+Fix 9 deployed as 327b16ec1fd5615ee20695d3268f99e6d90a4dc6, Render dep-dbmtbc0n74is73bfoco0, live 2026-11-06 21:29 PHT. Live Chromium invalid reset returned 400 and generic error with no page errors. Positive reset/reuse/session invalidation verified in isolation as authorized.
+
+## Fix 10: retain session assessment history
+
+Completed sessions cannot be reopened or have their schedule/topic rewritten. Session/class deletion checks current assessment records under class locks; cancel instead. A restrictive session-test foreign key prevents cascading assessment deletion even when test creation races with deletion.
+
+Fix 10 pre-commit validation: 53 focused route tests and 2 real-MariaDB retention/race tests pass. Full suite 1,057 passes / 17 baseline failures / 24 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Migration applied successfully to isolated MariaDB.

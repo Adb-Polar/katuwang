@@ -76,6 +76,12 @@ export async function PATCH(
         }
       }
 
+      if (targetSession.status === "COMPLETED" && (
+        (status !== undefined && status !== "COMPLETED") || topic !== undefined || scheduledAt !== undefined || duration !== undefined
+      )) {
+        return NextResponse.json({ error: "Completed sessions are kept for history and cannot be reopened or rescheduled." }, { status: 409 });
+      }
+
       const effectiveStatus = status ?? targetSession.status;
       const effectiveStart = scheduledAt ? new Date(scheduledAt) : targetSession.scheduledAt;
       const effectiveDuration = duration ?? targetSession.duration;
@@ -146,56 +152,68 @@ export async function DELETE(
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      include: {
-        sessions: true,
-        _count: { select: { enrollments: true } },
-      },
-    });
-
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
-
-    if (existingClass.tutorProfileId !== tutorProfile.id) {
-      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-    }
-
-    if (existingClass.status === "SUSPENDED" || existingClass.status === "BANNED") {
-      return NextResponse.json(
-        { error: "This class was suspended or banned by an administrator and can't be modified." },
-        { status: 403 }
-      );
-    }
-
-    const targetSession = existingClass.sessions.find((s) => s.id === sessionId);
-    if (!targetSession) {
-      return NextResponse.json({ error: "Session not found." }, { status: 404 });
-    }
-
-    if (targetSession.status !== "SCHEDULED") {
-      return NextResponse.json(
-        { error: "Cannot delete a completed or cancelled session; its record is kept for history." },
-        { status: 400 }
-      );
-    }
-
-    const isLastSession = existingClass.sessions.length === 1;
-    if (isLastSession && existingClass._count.enrollments > 0) {
-      return NextResponse.json(
-        {
-          error:
-            "Cannot delete the only session of a class with enrolled learners — cancel or delete the whole class instead.",
+    return await prisma.$transaction(async (tx) => {
+      await lockTutorSchedule(tx, tutorProfile.id);
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId },
+        include: {
+          sessions: true,
+          _count: { select: { enrollments: true } },
         },
-        { status: 400 }
-      );
-    }
+      });
 
-    await prisma.classSession.delete({ where: { id: sessionId } });
+      if (!existingClass) {
+        return NextResponse.json({ error: "Class not found." }, { status: 404 });
+      }
 
-    return NextResponse.json({ message: "Session deleted successfully." });
+      if (existingClass.tutorProfileId !== tutorProfile.id) {
+        return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+      }
+
+      if (existingClass.status === "SUSPENDED" || existingClass.status === "BANNED") {
+        return NextResponse.json(
+          { error: "This class was suspended or banned by an administrator and can't be modified." },
+          { status: 403 }
+        );
+      }
+
+      const targetSession = existingClass.sessions.find((s) => s.id === sessionId);
+      if (!targetSession) {
+        return NextResponse.json({ error: "Session not found." }, { status: 404 });
+      }
+
+      if (targetSession.status !== "SCHEDULED") {
+        return NextResponse.json(
+          { error: "Cannot delete a completed or cancelled session; its record is kept for history." },
+          { status: 400 }
+        );
+      }
+
+      if (await tx.sessionTest.findUnique({ where: { sessionId }, select: { id: true } })) {
+        return NextResponse.json({ error: "This session has assessment records. Cancel it instead to preserve history." }, { status: 409 });
+      }
+
+      const isLastSession = existingClass.sessions.length === 1;
+      if (isLastSession && existingClass._count.enrollments > 0) {
+        return NextResponse.json(
+          {
+            error:
+              "Cannot delete the only session of a class with enrolled learners — cancel the session or class instead.",
+          },
+          { status: 400 }
+        );
+      }
+
+      await tx.classSession.delete({ where: { id: sessionId } });
+
+      return NextResponse.json({ message: "Session deleted successfully." });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+      return NextResponse.json({ error: "This session has assessment records. Cancel it instead to preserve history." }, { status: 409 });
+    }
     console.error("Error deleting class session:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

@@ -265,37 +265,20 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      include: {
-        _count: {
-          select: { enrollments: true },
-        },
-      },
-    });
-
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
-
-    const tutorProfile = await prisma.tutorProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
-      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-    }
-
-    // Restrict deletion if students are enrolled
-    if (existingClass._count.enrollments > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete a class that has enrolled learners. Please cancel the class instead." },
-        { status: 400 }
-      );
-    }
+    const tutorProfile = await prisma.tutorProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } });
+    if (!tutorProfile) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
 
     await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId }, include: { _count: { select: { enrollments: true } } },
+      });
+      if (!existingClass) throw new ClassWriteError("Class not found.", 404);
+      if (existingClass.tutorProfileId !== tutorProfile.id) throw new ClassWriteError("Forbidden.", 403);
+      if (existingClass._count.enrollments > 0) throw new ClassWriteError("Cannot delete a class that has enrolled learners. Please cancel the class instead.", 400);
+      if (await tx.sessionTest.findFirst({ where: { session: { classId } }, select: { id: true } })) {
+        throw new ClassWriteError("This class has assessment records. Cancel it instead to preserve history.", 409);
+      }
       const linkedRequests = await tx.topicRequest.findMany({
         where: { fulfilledClassId: classId, status: "ACCEPTED" },
         select: { id: true, learnerId: true, subject: true },
@@ -313,10 +296,14 @@ export async function DELETE(
       }
 
       await tx.tutorClass.delete({ where: { id: classId } });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ message: "Class deleted successfully." });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+      return NextResponse.json({ error: "This class has assessment records. Cancel it instead to preserve history." }, { status: 409 });
+    }
     console.error("Error deleting tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

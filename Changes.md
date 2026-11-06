@@ -4219,3 +4219,8 @@ Learner and tutor assessments now claim IN_PROGRESS attempts atomically before w
 ## 2026-11-06 — Consume reset tokens atomically
 
 Password reset locks and conditionally consumes an unused, unexpired token before updating the password and session version in the same transaction. Rechecks use the post-lock clock, so hashing/waiting cannot bypass expiry. Added losing-claim coverage and real-MariaDB reuse/expiry tests. Single-submission live verification passed on dev-test (d17e718) with one score and notification.
+
+
+## 2026-11-06 — Preserve session assessment history
+
+Completed sessions reject reopening and schedule/topic rewrites. Session and class deletion inspect current assessment records under class locks and direct tutors to cancellation. A restrictive foreign key also prevents cascading history loss during concurrent test creation. Added route regressions and two isolated MariaDB constraint/race checks. Reset fix 327b16e passed isolated positive/reuse/session browser QA and live invalid-link verification.
