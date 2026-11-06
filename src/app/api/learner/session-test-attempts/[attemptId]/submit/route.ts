@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { canRevealLearnerSessionAnswers } from "@/lib/sessionTestFeedback";
 import { AssessmentSubmissionError, assertSubmissionClaim } from "@/lib/assessmentSubmission";
 import { checkLearnerAttemptAccess } from "@/lib/sessionTestAccess";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
@@ -100,7 +101,7 @@ export async function POST(
       return submitted;
     }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
-    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true, revealBankAnswers: false }));
+    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true, revealAnswers: await canRevealLearnerSessionAnswers(updated) }));
   } catch (error) {
     if (error instanceof AssessmentSubmissionError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error submitting session test:", error);

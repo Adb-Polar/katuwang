@@ -161,3 +161,11 @@ Publication and qualification starts lock selected question rows and record immu
 Fix 18 pre-commit validation: 37 focused route tests; full suite 1,150 passes / 45 opt-in tests skipped / zero failures. Ten real-MariaDB version/immutability cases pass, including first-publication locking, corrected-version preserved grading, concurrent successors, retirement during selection, stale BANK/TUTOR edits and draft replacement/deletion after publication. TypeScript, changed-file lint and production build pass. Final malformed-body guard is covered by the DB route test and repeat type/lint checks. Migration backfills existing published/attempted question locks.
 
 Fix 18 follow-up: a successor also freezes an unpublished original. The ten MariaDB version tests, six focused route tests, TypeScript and changed-file lint pass.
+
+Fix 18 deployed as 83d4d90bfa29262edb15bd4d09f7a36b2dbd6260, Render dep-dbn2hbgae00c739ijvmg, live 2026-11-07 03:23 PHT. Browser: published edit/delete409 before attempts, Edit disabled, corrected version201, lineage/original options/test links preserved, future selection uses successor and excludes retired versions. No page errors; class cmw5d5cw900003tg2ew2u5jh1 retained cancelled/unpublished and QA versions retired.
+
+## Fix 19: withhold PRE answer feedback until POST submission
+
+Use one learner feedback policy on submission and reload: submitted POST unlocks keys for the same learner/test only. Withhold options, per-item grades and explanations for both origins until then; retain aggregate scores and neutral selected-answer UI. Staff review remains available.
+
+Fix 19 pre-commit validation: full suite 1,155 passes / 46 opt-in skipped / zero failures. Eleven real-MariaDB checks pass, including mixed-origin PRE submission/reload, another learner POST, own in-progress POST, final POST feedback and unlocked PRE review. TypeScript, changed-file lint and production build pass. No schema change.

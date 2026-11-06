@@ -26,7 +26,7 @@ vi.mock("@/lib/sessionTestAccess", () => ({ checkLearnerAttemptAccess: accessMoc
 vi.mock("@/lib/notifications", () => ({ notify: notifyMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    sessionTestAttempt: { findUnique: sessionTestAttemptFindUnique },
+    sessionTestAttempt: { findUnique: sessionTestAttemptFindUnique, findFirst: vi.fn().mockResolvedValue(null) },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         sessionTestAttemptItem: { update: sessionTestAttemptItemUpdate },
@@ -127,7 +127,7 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     expect(res.status).toBe(400);
   });
 
-  it("200 grades, persists, and reveals the result", async () => {
+  it("200 grades and persists the aggregate result without PRE feedback", async () => {
     sessionTestAttemptRead.mockResolvedValue({
       ...inProgressAttempt,
       status: "SUBMITTED",
@@ -142,7 +142,8 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.scorePercent).toBe(100);
-    expect(json.items[0].isCorrect).toBe(true);
+    expect(json.items[0]).not.toHaveProperty("isCorrect");
+    expect(json.answersRevealed).toBe(false);
     expect(attemptClaim).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ status: "SUBMITTED", correctCount: 1, scorePercent: 100 }),

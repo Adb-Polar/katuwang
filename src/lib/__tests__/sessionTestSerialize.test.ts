@@ -109,14 +109,15 @@ describe("serializeSessionTest", () => {
   });
 });
 
-it("withholds shared-bank keys from learner review while preserving their own score and feedback", () => {
+it.each(["BANK", "TUTOR"])("withholds %s answer feedback while preserving the aggregate score", (origin) => {
   const submitted = {
     ...baseAttempt, status: "SUBMITTED", scorePercent: 100,
-    items: [{ ...baseAttempt.items[0], isCorrect: true, selectedOptionId: "o2", question: { ...baseAttempt.items[0].question, origin: "BANK" } }],
+    items: [{ ...baseAttempt.items[0], isCorrect: true, selectedOptionId: "o2", question: { ...baseAttempt.items[0].question, origin } }],
   } as unknown as SessionTestAttemptWithItems;
-  const result = serializeSessionTestAttempt(submitted, { reveal: true, revealBankAnswers: false });
+  const result = serializeSessionTestAttempt(submitted, { reveal: true, revealAnswers: false });
   expect(result.scorePercent).toBe(100);
-  expect(result.items[0].isCorrect).toBe(true);
+  expect(result.items[0]).not.toHaveProperty("isCorrect");
+  expect(result.answersRevealed).toBe(false);
   expect(result.items[0]).not.toHaveProperty("explanation");
   expect(result.items[0].options.every((o) => !("isCorrect" in o))).toBe(true);
 });

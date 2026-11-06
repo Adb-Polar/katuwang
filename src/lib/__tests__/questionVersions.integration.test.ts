@@ -13,6 +13,7 @@ import { DELETE as deleteTest } from "@/app/api/tutor/classes/[classId]/sessions
 import { PATCH as editTutor } from "@/app/api/tutor/questions/[questionId]/route";
 import { POST as startQualification } from "@/app/api/tutor/assessments/route";
 import { POST as startPre } from "@/app/api/learner/classes/[classId]/sessions/[sessionId]/test/[kind]/start/route";
+import { GET as readLearnerAttempt } from "@/app/api/learner/session-test-attempts/[attemptId]/route";
 import { POST as submitPre } from "@/app/api/learner/session-test-attempts/[attemptId]/submit/route";
 const context = new AsyncLocalStorage<{ user: { id: string; role: string; anonymousId: string }; operation?: string }>();
 const hooks = vi.hoisted(() => ({ beforeQuestionLock: undefined as undefined | (() => Promise<void>), beforeTestLock: undefined as undefined | (() => Promise<void>), afterPick: undefined as undefined | (() => Promise<void>) }));
@@ -37,7 +38,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB immutable question
   const users: string[] = [];const profiles: string[] = [];
   let classId: string;let sessionId: string;let testId: string;let questionId: string;let topicId: string;let topic: string;
   const req = (method: string, body?: unknown) => new NextRequest("http://localhost/qa", { method, ...(body === undefined ? {} : { headers: { "content-type": "application/json" }, body: JSON.stringify(body) }) });
-  const asUser = <T>(index: number, fn: () => T, operation?: string) => context.run({ user: { id: users[index], role: index === 0 ? "ADMIN" : index === 3 ? "STUDENT_LEARNER" : "STUDENT_TUTOR", anonymousId: users[index] }, operation }, fn);
+  const asUser = <T>(index: number, fn: () => T, operation?: string) => context.run({ user: { id: users[index], role: index === 0 ? "ADMIN" : index >= 3 ? "STUDENT_LEARNER" : "STUDENT_TUTOR", anonymousId: users[index] }, operation }, fn);
   const qctx = () => ({ params: Promise.resolve({ questionId }) });
   const tctx = () => ({ params: Promise.resolve({ classId, sessionId }) });
   const publishTest = () => asUser(1, () => publish(req("PATCH", { status: "PUBLISHED" }), tctx()));
@@ -55,7 +56,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB immutable question
     const url = new URL(process.env.TEST_DATABASE_URL!);
     if (process.env.DATABASE_URL !== process.env.TEST_DATABASE_URL || !["localhost", "127.0.0.1"].includes(url.hostname) || !url.pathname.includes("verification")) throw Error("Use an isolated local verification database.");
     const suffix = randomBytes(8).toString("hex");topic = `QA versions ${suffix}`;
-    for (let i = 0; i < 4; i++) users.push((await prisma.user.create({ data: { anonymousId: `QA-QV-${suffix}-${i}`, email: `qa-qv-${suffix}-${i}@example.test`, firstName: "QA", lastName: "Versions", password: "unused-test-hash", role: i === 0 ? "ADMIN" : i === 3 ? "STUDENT_LEARNER" : "STUDENT_TUTOR", gradeLevel: "GRADE_10", section: "QA" } })).id);
+    for (let i = 0; i < 5; i++) users.push((await prisma.user.create({ data: { anonymousId: `QA-QV-${suffix}-${i}`, email: `qa-qv-${suffix}-${i}@example.test`, firstName: "QA", lastName: "Versions", password: "unused-test-hash", role: i === 0 ? "ADMIN" : i >= 3 ? "STUDENT_LEARNER" : "STUDENT_TUTOR", gradeLevel: "GRADE_10", section: "QA" } })).id);
     for (const userId of users.slice(1, 3)) profiles.push((await prisma.tutorProfile.create({ data: { userId } })).id);
     const subject = await prisma.subject.findUniqueOrThrow({ where: { slug: "MATH" } });
     topicId = (await prisma.topic.create({ data: { subjectId: subject.id, name: topic, gradeLevels: ["GRADE_10"] } })).id;
@@ -73,6 +74,32 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB immutable question
     if (profiles.length) await prisma.tutorProfile.deleteMany({ where: { id: { in: profiles } } });
     if (users.length) await prisma.user.deleteMany({ where: { id: { in: users } } });
     if (topicId) await prisma.topic.delete({ where: { id: topicId } });invalidateSubjectCache();await prisma.$disconnect();
+  });
+  it("withholds both origins until the same learner submits POST, including reload", async () => {
+    const tutorQuestion = await prisma.assessmentQuestion.create({ data: { subject: "MATH", topic, prompt: "Tutor-authored answer feedback QA", explanation: "Tutor explanation", origin: "TUTOR", createdById: users[1], options: { create: [{ text: "Tutor correct", isCorrect: true, position: 0 }, { text: "Tutor wrong", isCorrect: false, position: 1 }] } }, include: { options: true } });
+    await prisma.sessionTestQuestion.create({ data: { sessionTestId: testId, questionId: tutorQuestion.id, position: 1 } });
+    await publishTest();await prisma.classEnrollment.create({ data: { classId, learnerId: users[3] } });
+    const start = await asUser(3, () => startPre(req("POST"), { params: Promise.resolve({ classId, sessionId, kind: "PRE" }) }));expect(start.status).toBe(201);const pre = await start.json();
+    const original = await prisma.assessmentQuestion.findUniqueOrThrow({ where: { id: questionId }, include: { options: true } });
+    const answers = [{ questionId, optionId: original.options.find(o => o.isCorrect)!.id }, { questionId: tutorQuestion.id, optionId: tutorQuestion.options.find(o => o.isCorrect)!.id }];
+    const attemptCtx = (attemptId: string) => ({ params: Promise.resolve({ attemptId }) });
+    const hidden = (body: { answersRevealed: boolean; items: Record<string, unknown>[] }) => {
+      expect(body.answersRevealed).toBe(false);expect(body.items).toHaveLength(2);
+      for (const item of body.items) { expect(item).not.toHaveProperty("isCorrect");expect(item).not.toHaveProperty("explanation");for (const option of item.options as object[]) expect(option).not.toHaveProperty("isCorrect"); }
+    };
+    const submitted = await asUser(3, () => submitPre(req("POST", { answers }), attemptCtx(pre.id)));expect(submitted.status).toBe(200);hidden(await submitted.json());
+    const reload = () => asUser(3, () => readLearnerAttempt(req("GET"), attemptCtx(pre.id)));
+    hidden(await (await reload()).json());
+    await prisma.sessionTestAttempt.create({ data: { sessionTestId: testId, learnerId: users[4], kind: "POST", status: "SUBMITTED", totalQuestions: 2, submittedAt: new Date() } });
+    hidden(await (await reload()).json());
+    await prisma.sessionTest.update({ where: { id: testId }, data: { pretestClosedAt: new Date(), posttestOpenedAt: new Date() } });
+    const postResponse = await asUser(3, () => startPre(req("POST"), { params: Promise.resolve({ classId, sessionId, kind: "POST" }) }));expect(postResponse.status).toBe(201);const post = await postResponse.json();
+    hidden(await (await reload()).json());
+    const postSubmitted = await asUser(3, () => submitPre(req("POST", { answers }), attemptCtx(post.id)));expect(postSubmitted.status).toBe(200);
+    for (const body of [await postSubmitted.json(), await (await reload()).json()]) {
+      expect(body.answersRevealed).toBe(true);expect(body.scorePercent).toBe(100);
+      for (const item of body.items) { expect(item.isCorrect).toBe(true);expect(item).toHaveProperty("explanation");expect(item.options.some((o: { isCorrect: boolean }) => o.isCorrect)).toBe(true); }
+    }
   });
   it("requires an administrator and a meaningful correction reason", async () => {
     expect((await asUser(2, () => createVersion(req("POST", versionBody), qctx()))).status).toBe(401);

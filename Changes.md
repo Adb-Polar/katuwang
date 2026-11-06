@@ -4266,3 +4266,9 @@ Withdrawal timestamps the existing row under the class lock; re-enrollment react
 Question rows lock when published or selected for qualification, including before the first answer. Edits, retirement and test question replacement serialize with publication/selection. Draft deletion rechecks lifecycle under the same test lock. Admins can create an audited corrected successor with a required reason; the original retires while existing links/options/scores stay unchanged. Ten MariaDB cases cover versions, stale edits/deletes, retirement races and preserved grading. Enrollment history 1675176 passed live browser withdrawal/re-enrollment checks.
 
 Fix 18 follow-up: a successor also freezes an unpublished original. The ten MariaDB version tests, six focused route tests, TypeScript and changed-file lint pass.
+
+Fix 18 live browser verification passed on 83d4d90: immutable publication, corrected-version modal, preserved original test content and retirement selection. QA history archived.
+
+## 2026-11-07 — Withhold PRE answer feedback until POST submission
+
+A shared learner policy unlocks answer keys only after the same learner submits the matching POST. Both BANK and TUTOR questions withhold per-item grades, option correctness and explanations on PRE submission/reload; aggregate scores remain visible. Selected answers use neutral styling and explain when feedback unlocks. Staff review retains answers. Full suite 1,155 passes, zero failures; eleven real-MariaDB version/feedback checks pass, including another learner and in-progress POST isolation. TypeScript, changed-file lint and production build pass.

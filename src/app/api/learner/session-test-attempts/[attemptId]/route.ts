@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { canRevealLearnerSessionAnswers } from "@/lib/sessionTestFeedback";
 import { checkLearnerAttemptAccess } from "@/lib/sessionTestAccess";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 
@@ -34,7 +35,7 @@ export async function GET(
     if (accessError) return NextResponse.json({ error: accessError.error }, { status: accessError.status });
 
     return NextResponse.json(
-      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED", revealBankAnswers: false }),
+      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED", revealAnswers: await canRevealLearnerSessionAnswers(attempt) }),
     );
   } catch (error) {
     console.error("Error fetching session-test attempt:", error);
