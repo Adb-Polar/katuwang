@@ -73,11 +73,42 @@ describe("POST /api/admin/users/[userId]/avatar-action", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 401 when user is not ADMIN", async () => {
+  it("returns 401 when user is not an administrator", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     const { req, params } = makeRequest("u2", { action: "WARN", reason: "Policy violation" });
     const res = await POST(req, { params });
     expect(res.status).toBe(401);
+  });
+
+  it.each(["ADMIN", "SUPER_ADMIN"])("protects %s targets before any side effects", async (role) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "SUPER_ADMIN" } });
+    userFindUniqueMock.mockResolvedValue({ id: "admin2", role, imageKey: "protected" });
+    const { req, params } = makeRequest("admin2", { action: "REMOVE" });
+    const res = await POST(req, { params });
+    expect(res.status).toBe(400);
+    expect(transactionMock).not.toHaveBeenCalled();
+    expect(deleteFilesMock).not.toHaveBeenCalled();
+    expect(userUpdateMock).not.toHaveBeenCalled();
+    expect(auditLogCreateMock).not.toHaveBeenCalled();
+    expect(notificationCreateMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["ADMIN", "SUPER_ADMIN"].flatMap((actor) =>
+    ["STUDENT_LEARNER", "STUDENT_TUTOR"].map((target) => [actor, target])
+  ))("allows %s to moderate %s avatars", async (actor, target) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: actor } });
+    userFindUniqueMock.mockResolvedValue({ id: "u2", role: target });
+    const { req, params } = makeRequest("u2", { action: "WARN", reason: "Policy violation" });
+    const res = await POST(req, { params });
+    expect(res.status).toBe(200);
+    expect(auditLogCreateMock).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ adminId: "admin1", targetId: "u2" }),
+    }));
+    expect(notificationCreateMock).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        userId: "u2", link: target === "STUDENT_TUTOR" ? "/tutor/profile" : "/learner/profile",
+      }),
+    }));
   });
 
   it("returns 404 when target user is not found", async () => {

@@ -4169,3 +4169,8 @@ Separated combined `datetime-local` input fields into distinct `<input type="dat
 
 
 
+
+
+## 2026-11-06 — Avatar moderation hierarchy
+
+The avatar moderation endpoint now uses the shared administrative role predicate: ADMIN and SUPER_ADMIN may moderate learner/tutor avatars, and both administrator roles are protected targets. Added role-matrix regressions and side-effect checks for protected accounts. Deployment and browser verification tracked in docs/plans/staged-security-integrity.md.

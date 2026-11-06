@@ -5,6 +5,7 @@ import { moderateAvatarSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { notify } from "@/lib/notifications";
 import { UTApi } from "uploadthing/server";
+import { isAdminRole } from "@/lib/permissions";
 
 const utapi = new UTApi();
 
@@ -17,7 +18,7 @@ export async function POST(
     const session = await getActiveServerSession();
     const { userId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session || !isAdminRole(session.user.role)) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
@@ -37,7 +38,7 @@ export async function POST(
       return NextResponse.json({ error: "User not found." }, { status: 404 });
     }
 
-    if (targetUser.role === "ADMIN") {
+    if (isAdminRole(targetUser.role)) {
       return NextResponse.json({ error: "Cannot moderate an admin account." }, { status: 400 });
     }
 
