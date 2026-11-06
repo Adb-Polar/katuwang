@@ -26,6 +26,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     tutorClass: { findMany: classFindMany, create: classCreate },
     classSession: { findMany: sessionFindMany },

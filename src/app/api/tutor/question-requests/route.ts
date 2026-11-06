@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -30,6 +31,8 @@ export async function GET() {
 
     return NextResponse.json(requests);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing tutor question requests:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -125,6 +128,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(request, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating question request:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

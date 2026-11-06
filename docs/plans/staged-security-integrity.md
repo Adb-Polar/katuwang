@@ -135,3 +135,11 @@ Fix 14 deployed as 1d9678420a6ee3175b44cf43f486a2abf94c9170, Render dep-dbn1ja17
 Persist the submitted boolean on creation; omitted values explicitly default true. Avatar publication prerequisites apply to published classes while drafts can be saved without a picture.
 
 Fix 15 pre-commit validation: 28 focused creation tests pass. Full suite 1,131 passes / 11 baseline failures / 31 opt-in tests skipped. TypeScript, changed-file lint and production build pass. No schema change.
+
+Fix 15 deployed as cf10319bd78df448791c0d2d0065064e7332f1f2, Render dep-dbn1meh42hec73alnjhg, live 2026-11-07 02:26 PHT. Live browser: draft persisted false; hidden from Browse/Search/Match; direct view 404; enrollment 400; tutor menu publish 200 makes class visible. Omitted publication defaults true. No page errors; fixtures deleted.
+
+## Fix 16: database-authoritative runtime catalog
+
+Remove static fallback validation and picker choices. Coverage, question-bank navigation, chatbot extraction and dev sampling use active DB subjects/topics. Catalog failures become retryable 503 responses and never authorize a write using static data.
+
+Fix 16 pre-commit validation: full suite 1,146 passes / 31 opt-in tests skipped / zero failures. Ten real-MariaDB scheduling/acceptance checks pass. TypeScript, changed-file lint and final production build pass; focused picker retry also passes after the final React lint correction. Explicit DB fixtures and current canonical topics replace fallback-dependent test assumptions; login-focus mock now uses the current INCORRECT_PASSWORD contract. Server outage test proves retryable 503 before any question write.

@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -141,6 +142,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ tutors, total, page, pageSize });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing tutors:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

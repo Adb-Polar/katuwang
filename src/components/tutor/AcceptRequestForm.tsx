@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { reportServerFieldErrors } from "@/lib/formValidation";
@@ -69,7 +71,7 @@ export default function AcceptRequestForm({
   tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
-  const { topicsFor } = useSubjectCatalog();
+  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -120,7 +122,9 @@ export default function AcceptRequestForm({
 
   return (
     <section className="card kt-card">
-      <div className="card-body gap-4 p-6 sm:p-8">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <div className="card-body gap-4 p-6 sm:p-8">
         <p className="text-xs text-base-content/60">
           This creates a full class from the {subjectDisplayLabel(request.subject)} request. Include every requested topic. You must be certified for all selected topics.
         </p>

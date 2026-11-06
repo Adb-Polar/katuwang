@@ -38,6 +38,7 @@ const {
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     user: {
       findMany: userFindMany,
       count: userCount,

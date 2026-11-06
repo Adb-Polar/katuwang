@@ -969,3 +969,5 @@ Email verification OTP (codex/email-verification-otp)
 [] Recovery email: registration and both profile APIs persist normalized addresses; current password required for changes; backup cannot reset until verified; code expiry/reuse/address change rejected; duplicate primary/backup or verified backup matches reject recovery with no token/mail; local SMTP browser flow verifies ownership without external mail; live UI and invalid-code checks preserve seeded account recovery addresses.
 
 [] Publication: create published:false, verify tutor persistence and absence from learner Browse/search/matching and direct class view/enrollment; publish and verify discoverability. Omitted flag defaults true. Avatar-required settings permit drafts while protecting publication.
+
+[] Live catalog: add a temporary subject/topic and verify picker, coverage, question authoring and chatbot use it; inactive topic disappears and rejects writes. Intercept a browser catalog failure: no static options appear, retry recovers. Server outage regression must return retryable 503 with no write. Remove QA catalog records afterward.

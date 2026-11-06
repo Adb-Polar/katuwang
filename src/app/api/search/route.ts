@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
@@ -320,6 +321,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ groups });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error running search:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

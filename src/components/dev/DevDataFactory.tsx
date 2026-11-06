@@ -1,7 +1,9 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useCallback, useEffect, useState } from "react";
-import { SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { formatTime } from "@/lib/datetime";
 
 type Snapshot = {
@@ -19,7 +21,6 @@ type Snapshot = {
 };
 
 const GRADES = ["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"];
-const SUBJECTS = SUBJECT_SLUGS;
 const ROLES = [
   { value: "STUDENT_LEARNER", label: "Learners" },
   { value: "STUDENT_TUTOR", label: "Tutors" },
@@ -29,6 +30,8 @@ const ROLES = [
 type LogEntry = { ok: boolean; text: string; at: string };
 
 export default function DevDataFactory() {
+  const { subjects, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
+  const SUBJECTS = subjects.map(subject => subject.slug);
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -93,7 +96,7 @@ export default function DevDataFactory() {
   const [uPending, setUPending] = useState(false);
 
   const [cTutor, setCTutor] = useState("");
-  const [cSubject, setCSubject] = useState(SUBJECTS[0]);
+  const [cSubject, setCSubject] = useState("");
   const [cTopicCount, setCTopicCount] = useState(2);
   const [cSessions, setCSessions] = useState(2);
   const [cMax, setCMax] = useState(3);
@@ -106,7 +109,9 @@ export default function DevDataFactory() {
 
   return (
     <div className="space-y-4">
-      {/* Snapshot */}
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            {/* Snapshot */}
       <div className="stats stats-horizontal w-full border border-base-200 bg-base-100 shadow-sm">
         {snap ? (
           <>

@@ -22,6 +22,7 @@ const {
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     topicRequest: { findMany: findManyMock, count: countMock, create: createMock },
     user: { findFirst: userFindFirstMock },
     tutorProfile: { findUnique: vi.fn() },

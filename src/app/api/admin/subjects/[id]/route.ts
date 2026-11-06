@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
@@ -72,6 +73,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     invalidateSubjectCache();
     return NextResponse.json(updated);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error updating subject:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -116,6 +119,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     invalidateSubjectCache();
     return NextResponse.json({ message: "Subject deleted." });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error deleting subject:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

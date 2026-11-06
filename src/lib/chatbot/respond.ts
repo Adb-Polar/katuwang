@@ -63,7 +63,7 @@ async function buildReply(
 
   // ── Recommendation intent (learner) ──
   if (intent && intent.category === "recommend") {
-    const criteria = extractCriteria(message);
+    const criteria = await extractCriteria(message);
     const { cards, fallbackToRequest, subject } = await recommendClasses(ctx, criteria);
 
     if (cards.length > 0) {

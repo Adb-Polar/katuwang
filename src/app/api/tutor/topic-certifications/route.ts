@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -53,6 +54,8 @@ export async function GET() {
       }))
     );
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error fetching topic certifications:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
@@ -134,6 +137,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(certification, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error requesting topic certification:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

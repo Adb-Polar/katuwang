@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
@@ -25,6 +26,8 @@ export async function GET() {
 
     return NextResponse.json({ subjects });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing subjects:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -80,6 +83,8 @@ export async function POST(req: NextRequest) {
     invalidateSubjectCache();
     return NextResponse.json(subject, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating subject:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

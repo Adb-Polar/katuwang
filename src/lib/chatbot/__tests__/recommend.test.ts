@@ -1,3 +1,6 @@
+import { prisma } from "@/lib/prisma";
+import { invalidateSubjectCache } from "@/lib/subjects";
+import { catalogFixture } from "@/test/catalogFixture";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const { findManyMock, settingMock } = vi.hoisted(() => ({
@@ -5,7 +8,7 @@ const { findManyMock, settingMock } = vi.hoisted(() => ({
   settingMock: vi.fn(),
 }));
 
-vi.mock("@/lib/prisma", () => ({ prisma: { tutorClass: { findMany: findManyMock } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: { subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: settingMock }));
 
 import { extractCriteria, recommendClasses } from "@/lib/chatbot/recommend";
@@ -42,14 +45,23 @@ function classRow(over: Record<string, unknown> = {}) {
 }
 
 describe("extractCriteria", () => {
-  it("detects the subject from keywords", () => {
-    expect(extractCriteria("recommend a math class").subject).toBe("MATH");
-    expect(extractCriteria("I need help with biology").subject).toBe("SCIENCE");
-    expect(extractCriteria("hello there").subject).toBeNull();
+  beforeEach(() => invalidateSubjectCache());
+  it("recognizes DB-added subjects/topics and never resurrects absent static subjects", async () => {
+    const row = catalogFixture()[0];
+    vi.mocked(prisma.subject.findMany).mockResolvedValueOnce([{ ...row, slug: "ASTRONOMY_LAB", name: "Astronomy Lab", topics: [{ ...row.topics[0], name: "Orbital Dynamics" }] }] as never);
+    const criteria = await extractCriteria("recommend an astronomy lab class on orbital dynamics");
+    expect(criteria).toEqual({ subject: "ASTRONOMY_LAB", topics: ["Orbital Dynamics"] });
+    expect((await extractCriteria("recommend math")).subject).toBeNull();
   });
 
-  it("detects a named topic within the subject", () => {
-    const c = extractCriteria("help me with algebraic expressions");
+  it("detects the subject from keywords", async () => {
+    expect((await extractCriteria("recommend a math class")).subject).toBe("MATH");
+    expect((await extractCriteria("I need help with biology")).subject).toBe("SCIENCE");
+    expect((await extractCriteria("hello there")).subject).toBeNull();
+  });
+
+  it("detects a named topic within the subject", async () => {
+    const c = await extractCriteria("help me with algebraic expressions");
     expect(c.subject).toBe("MATH");
     expect(c.topics).toContain("Algebraic Expressions & Factoring");
   });

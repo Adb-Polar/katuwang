@@ -1,10 +1,11 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { createClassSchema } from "@/lib/validations/class";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { classTeachingError } from "@/lib/classTeachingPolicy";
 import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
@@ -60,6 +61,8 @@ export async function GET(req: NextRequest) {
       classes.map((c) => ({ ...c, topics: c.topics.map((t) => t.topic) }))
     );
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error fetching tutor classes:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
@@ -102,9 +105,8 @@ export async function POST(req: NextRequest) {
       if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
     }
 
-    // Normalize + de-duplicate topics (case-insensitive). Custom topics that
-    // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
-    // something the catalog doesn't list yet; they're stored verbatim.
+    // Normalize + de-duplicate topics. Custom class topics remain supported;
+    // subject validity and required certifications use database records.
     const canonicalByKey = new Map<string, string>();
     for (const raw of result.data.topics) {
       const t = normalizeTopic(raw);
@@ -197,6 +199,8 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error creating tutor class:", error);
     return NextResponse.json(

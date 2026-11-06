@@ -9,7 +9,8 @@ const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
-vi.mock("@/lib/prisma", () => ({ prisma: { tutorClass: { findMany: findManyMock } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));
 

@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
@@ -56,6 +57,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ questions, total, page, pageSize });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing assessment questions:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -122,6 +125,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ...created, inUse: false }, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

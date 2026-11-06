@@ -4249,3 +4249,8 @@ Registration and learner/tutor profile updates persist normalized backup address
 ## 2026-11-07 — Preserve class publication input
 
 Class creation now persists published:false and explicitly defaults to true when omitted. The picture prerequisite applies when publishing, allowing unpublished drafts to be saved. Added false/true/omitted and mandatory-picture draft regressions. Recovery-email 1d96784 passed isolated SMTP/browser verification and live authenticated/invalid-input UI checks.
+
+
+## 2026-11-07 — Make the live catalog authoritative
+
+Removed static fallback validation and picker choices. Question-bank coverage/navigation, chatbot extraction and development sampling use active database entries. Catalog read failures return retryable 503 responses before writes; picker failures show a retry control with no seed choices. Request acceptance also rechecks active topics. Isolated normalization from seed data. Tests explicitly supply database catalog fixtures, correcting stale topic names and the old login-error fixture; all baseline failures are resolved. Publication cf10319 passed live browser privacy/publish verification.

@@ -2,7 +2,7 @@ import type { GradeLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { subjectExists } from "@/lib/subjects";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 
 /** Validate a complete teaching scope for both creation and partial edits. */

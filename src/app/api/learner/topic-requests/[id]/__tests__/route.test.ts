@@ -10,7 +10,8 @@ const { getServerSessionMock, findUniqueMock, updateMock } = vi.hoisted(() => ({
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
+  prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
 }));
 
 vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), requestSnapshot: vi.fn().mockResolvedValue({ slots: [], note: null }), recordRequestHistory: vi.fn() }));

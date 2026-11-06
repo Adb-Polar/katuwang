@@ -1,12 +1,14 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { reportFieldError } from "@/lib/formValidation";
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -100,7 +102,7 @@ export default function ClassScheduleFields({
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
   const topicLabelCls = page ? "text-xs" : "text-2xs";
   const fieldSize = page ? "md" : "sm";
-  const { subjects, topicsFor } = useSubjectCatalog();
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
     gradeLevel: initial?.gradeLevel ?? "",
@@ -138,7 +140,8 @@ export default function ClassScheduleFields({
   const allowedTopicSet = allowedTopics ? new Set(allowedTopics.map((t) => t.toLowerCase())) : null;
   const customAllowed = allowCustomTopics && !allowedTopicSet;
   const isTopicDisabled = (topic: string) =>
-    disabledTopicSet.has(topic) || (allowedTopicSet ? !allowedTopicSet.has(topic.toLowerCase()) : false);
+
+          disabledTopicSet.has(topic) || (allowedTopicSet ? !allowedTopicSet.has(topic.toLowerCase()) : false);
 
   const toggleTopic = (topic: string) => {
     if (isTopicDisabled(topic)) return;
@@ -253,6 +256,7 @@ export default function ClassScheduleFields({
 
   return (
     <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
       <FeedbackBanner variant="error" message={formError || error || null} />
       <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 

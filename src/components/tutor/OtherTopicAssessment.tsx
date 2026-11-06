@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
@@ -17,7 +19,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
  */
 export default function OtherTopicAssessment() {
   const router = useRouter();
-  const { subjects, topicsFor } = useSubjectCatalog();
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,7 +54,9 @@ export default function OtherTopicAssessment() {
 
   return (
     <ValidatedForm onSubmit={(e) => { e.preventDefault(); void start(e.currentTarget); }} className="border border-base-200 bg-base-200/20 rounded-xl p-4 space-y-3">
-      <div>
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <div>
         <h3 className="text-xs font-bold text-base-content/80">Take an assessment for any topic</h3>
         <p className="text-2xs text-base-content/55 mt-0.5">
           You don&apos;t need a class for it — pass now and you&apos;ll be verified when you do teach it.

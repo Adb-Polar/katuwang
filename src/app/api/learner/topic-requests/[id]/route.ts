@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -146,6 +147,8 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") return NextResponse.json({ error: "This request changed. Refresh and try again." }, { status: 409 });
     console.error("Error updating topic request:", error);
     return NextResponse.json(

@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -47,7 +49,7 @@ export default function StudentRoster() {
   const [q, setQ] = useState("");
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | "">("");
   const [section, setSection] = useState("");
-  const { subjects: catalog } = useSubjectCatalog();
+  const { subjects: catalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subject, setSubject] = useState<string>("");
 
   const {
@@ -73,6 +75,8 @@ export default function StudentRoster() {
 
   return (
     <div className="space-y-4">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <FormField label="Search">

@@ -1,3 +1,5 @@
+import { subjectExists, topicExists } from "@/lib/subjects";
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { NextRequest, NextResponse } from "next/server";
@@ -7,7 +9,7 @@ import { Prisma } from "@prisma/client";
 import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { getSetting } from "@/lib/settings";
 import { acceptTopicRequestSchema } from "@/lib/validations/match";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -121,6 +123,10 @@ export async function POST(
     const missingTopics = missingRequestedTopics(request.topics.map(({ topic }) => topic), topics);
     if (missingTopics.length > 0) {
       return NextResponse.json({ error: `The class must cover every requested topic. Missing: ${missingTopics.join(", ")}.` }, { status: 400 });
+    }
+
+    if (!(await subjectExists(subject)) || (await Promise.all(topics.map(topic => topicExists(subject, topic)))).some(valid => !valid)) {
+      return NextResponse.json({ error: "The subject or selected topics are no longer active in the catalog. Refresh and try again." }, { status: 400 });
     }
 
     const sessionTopics = sessions.map((s) => canonicalByKey.get(normalizeTopic(s.topic).toLowerCase()));
@@ -248,6 +254,8 @@ export async function POST(
 
     return NextResponse.json({ request: updatedRequest, classId: newClass.id }, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") return NextResponse.json({ error: "This request is no longer open or has changed." }, { status: 409 });
     console.error("Error accepting topic request:", error);

@@ -1,13 +1,11 @@
-import { SUBJECT_NAMES } from "@/lib/subjectCatalog";
-import { curriculumFor } from "@/lib/curriculum";
-import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
+import { CatalogUnavailableError } from "@/lib/catalogError";
 import { availableInGrade } from "@/lib/catalogGrades";
 import type { Subject, Topic } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { normalizeTopic, SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 
 // ─── Admin-editable subject / topic taxonomy ─────────────────────────────────
-// DB-backed replacement for the static SUBJECT_TOPICS map. Cached in-process
+// Database-authoritative catalog. Cached in-process
 // with a short TTL; the admin write routes call `invalidateSubjectCache()`.
 // See docs/plans/subject-topic-management.md.
 
@@ -32,62 +30,26 @@ export function invalidateSubjectCache(): void {
   cache.inflight = null;
 }
 
-let warnedFallback = false;
-
-/** Static SUBJECT_TOPICS shaped like the DB rows — used only if the DB read fails. */
-function staticFallback(): SubjectWithTopics[] {
-  const now = new Date();
-  return SUBJECT_SLUGS.map((slug, i) => ({
-    id: `static-${slug}`,
-    slug,
-    name: SUBJECT_NAMES[slug] ?? slug,
-    order: i,
-    active: true,
-    gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug) ?? null,
-    curriculum: curriculumFor(slug).curriculum ?? null,
-    createdAt: now,
-    updatedAt: now,
-    topics: SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS].map((name, j) => ({
-      id: `static-${slug}-${j}`,
-      subjectId: `static-${slug}`,
-      name,
-      order: j,
-      active: true,
-      gradeLevels: curriculumFor(slug, name).curriculum ? curriculumFor(slug, name).gradeLevels : null,
-      curriculum: curriculumFor(slug, name).curriculum ?? null,
-      createdAt: now,
-    })),
-  }));
-}
-
 async function loadAll(): Promise<SubjectWithTopics[]> {
   if (cache.data && cache.expires > Date.now()) return cache.data;
   if (cache.inflight) return cache.inflight;
-
-  cache.inflight = (async () => {
+  const pending = (async () => {
     try {
-      const rows = await prisma.subject.findMany({
+      return await prisma.subject.findMany({
         orderBy: [{ order: "asc" }, { name: "asc" }],
         include: { topics: { orderBy: [{ order: "asc" }, { name: "asc" }] } },
       });
-      cache.data = rows;
-      cache.expires = Date.now() + CACHE_TTL_MS;
-      return rows;
-    } catch (err) {
-      // The taxonomy tables not being reachable (e.g. a unit test that mocks
-      // prisma without `subject`) must not break validation — fall back to the
-      // compile-time SUBJECT_TOPICS. Not cached, so a real DB recovers next call.
-      if (!warnedFallback) {
-        console.warn("[subjects] DB read failed, using static SUBJECT_TOPICS fallback:", err);
-        warnedFallback = true;
-      }
-      return staticFallback();
-    } finally {
-      cache.inflight = null;
-    }
+    } catch (error) { throw new CatalogUnavailableError(error); }
   })();
-
-  return cache.inflight;
+  cache.inflight = pending;
+  try {
+    const rows = await pending;
+    // An admin invalidation while reading must not repopulate an outdated cache.
+    if (cache.inflight === pending) { cache.data = rows; cache.expires = Date.now() + CACHE_TTL_MS; }
+    return rows;
+  } finally {
+    if (cache.inflight === pending) cache.inflight = null;
+  }
 }
 
 /** All subjects (with their topics). `includeInactive` defaults to false. */

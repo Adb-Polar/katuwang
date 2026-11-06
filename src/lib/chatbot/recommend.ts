@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { browsableOrEnrolledWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
 import { rankMatches, upcomingScheduledSessions, type ClassForMatching } from "@/lib/matching";
-import { SUBJECT_TOPICS } from "@/lib/subjectTopics";
+import { getSubjects } from "@/lib/subjects";
 import type { ChatContext, RecommendationCard } from "@/lib/chatbot/types";
 
 // ─── Recommendation intent: parse a message + rank live classes ───────────
@@ -21,7 +21,6 @@ const SUBJECT_KEYWORDS: Record<string, string[]> = {
   MAPEH: ["mapeh", "music", "arts", "physical education", "health", "sports", "dance", "pe"],
 };
 
-const SUBJECTS = Object.keys(SUBJECT_KEYWORDS) as string[];
 
 export interface ExtractedCriteria {
   subject: string | null;
@@ -29,13 +28,16 @@ export interface ExtractedCriteria {
 }
 
 /** Best-effort subject + topic extraction from a free-text message. */
-export function extractCriteria(message: string): ExtractedCriteria {
+export async function extractCriteria(message: string): Promise<ExtractedCriteria> {
+  const catalog = await getSubjects();
   const text = message.toLowerCase();
 
   let subject: string | null = null;
   let subjectHits = 0;
-  for (const s of SUBJECTS) {
-    const hits = SUBJECT_KEYWORDS[s].filter((k) => text.includes(k)).length;
+  for (const entry of catalog) {
+    const s = entry.slug;
+    const keywords = [entry.name.toLowerCase(), s.toLowerCase().replace(/_/g, " "), ...(SUBJECT_KEYWORDS[s] ?? [])];
+    const hits = keywords.filter(keyword => text.includes(keyword)).length + entry.topics.filter(topic => text.includes(topic.name.toLowerCase())).length;
     if (hits > subjectHits) {
       subject = s;
       subjectHits = hits;
@@ -43,7 +45,7 @@ export function extractCriteria(message: string): ExtractedCriteria {
   }
 
   const topics = subject
-    ? SUBJECT_TOPICS[subject].filter((t) => {
+    ? (catalog.find(entry => entry.slug === subject)?.topics ?? []).map(topic => topic.name).filter((t) => {
         // match on the topic itself or its first significant word
         const head = t.toLowerCase().split(/[\s&(]/)[0];
         return text.includes(t.toLowerCase()) || (head.length >= 4 && text.includes(head));

@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -41,7 +43,7 @@ interface AcceptedRequest {
 }
 
 export default function TopicRequestBrowser() {
-  const { subjects } = useSubjectCatalog();
+  const { subjects, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [tab, setTab] = useState<"directed" | "public" | "accepted">("directed");
   const [subject, setSubject] = useState<string>("");
 
@@ -78,6 +80,8 @@ export default function TopicRequestBrowser() {
 
   return (
     <div className="space-y-4">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
 
       <Tabs
         tabs={[

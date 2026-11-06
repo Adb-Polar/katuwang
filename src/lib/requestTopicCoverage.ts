@@ -1,4 +1,4 @@
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 
 /** Every requested topic must be represented; additional certified topics are allowed. */
 export function missingRequestedTopics(requested: string[], proposed: string[]): string[] {

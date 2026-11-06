@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
@@ -19,7 +21,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { GradeLevel } from "@prisma/client";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -81,7 +83,7 @@ export default function EditClassForm({
   suspendedUntil?: string | null;
 }) {
   const router = useRouter();
-  const { topicsFor } = useSubjectCatalog();
+  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
   const [customTopic, setCustomTopic] = useState("");
@@ -170,7 +172,9 @@ export default function EditClassForm({
           : ""
       }`}
     >
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <div className="flex items-center justify-between gap-4 flex-wrap">
         <BackLink href={backHref}>Back to Class</BackLink>
         <div className="flex items-center gap-2">
           <Link href={backHref} className="btn btn-neutral btn-outline btn-sm text-xs">

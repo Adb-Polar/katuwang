@@ -27,6 +27,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 vi.mock("@/lib/assessmentPicker", () => ({ pickQuestionIds: pickQuestionIdsMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     assessmentAttempt: { findFirst: attemptFindFirst, aggregate: attemptAggregate, create: attemptCreate },
     topicCertification: { findUnique: certFindUnique },
@@ -50,13 +51,13 @@ function post(body: unknown) {
     headers: { "content-type": "application/json" },
   });
 }
-const validBody = { subject: "MATH", topic: "Algebraic Expressions" };
+const validBody = { subject: "MATH", topic: "Algebraic Expressions & Factoring" };
 
 function fakeAttempt(itemIds: string[]) {
   return {
     id: "at1",
     subject: "MATH",
-    topic: "Algebraic Expressions",
+    topic: "Algebraic Expressions & Factoring",
     attemptNo: 1,
     status: "IN_PROGRESS",
     questionCount: itemIds.length,

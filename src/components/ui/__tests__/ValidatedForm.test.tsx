@@ -16,7 +16,7 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next-auth/react", () => ({
-  signIn: vi.fn(async () => ({error: "Invalid email or password."})),
+  signIn: vi.fn(async () => ({error: "INCORRECT_PASSWORD"})),
 }));
 
 let root: Root;
@@ -117,6 +117,7 @@ describe("inline form validation", () => {
     expect(row.querySelector('[role="alert"]')!.textContent).toBe("Third option is invalid.");
   });
   it("focuses the add-session action, then the missing date in a newly added session", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ subjects: [{ slug: "MATH", name: "Mathematics", topics: ["Algebra"] }] }) })));
     await act(async () => root.render(<ClassScheduleFields initial={{subject: "MATH", topics: ["Algebra"]}} onCancel={() => {}} onSubmit={vi.fn()} />));
     await submit();
     expect(document.activeElement?.textContent).toContain("Add Session");
@@ -152,7 +153,7 @@ describe("inline form validation", () => {
     await change(inputs[1], "Wrong secret123");
     await submit();
     expect(document.activeElement).toBe(inputs[1]);
-    expect(inputs[1].closest("[data-form-field]")?.querySelector('[role="alert"]')?.textContent).toContain("Invalid email or password");
+    expect(inputs[1].closest("[data-form-field]")?.querySelector('[role="alert"]')?.textContent).toContain("Incorrect password");
   });
 
 });

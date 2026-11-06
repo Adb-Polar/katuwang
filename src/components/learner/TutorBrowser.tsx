@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { useEffect, useRef, useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
@@ -46,7 +48,7 @@ function fmtNext(iso: string) {
 export default function TutorBrowser() {
   const subjectMenuRef = useRef<HTMLDetailsElement>(null);
   const [gradeLevel, setGradeLevel] = useState("");
-  const { subjects: catalog } = useSubjectCatalog(gradeLevel);
+  const { subjects: catalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(gradeLevel);
   const [q, setQ] = useState("");
   const [subjects, setSubjects] = useState<string[]>([]);
   const [sort, setSort] = useState("codeAsc");
@@ -72,7 +74,8 @@ export default function TutorBrowser() {
   if (otherSubjects.length) subjectGroups.push({ label: "Other subjects", items: otherSubjects });
 
   const toggleSubject = (slug: string) =>
-    setSubjects((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug]));
+
+          setSubjects((cur) => (cur.includes(slug) ? cur.filter((s) => s !== slug) : [...cur, slug]));
 
   const {
     data: tutors,
@@ -100,6 +103,7 @@ export default function TutorBrowser() {
 
   return (
     <div className="space-y-6">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">

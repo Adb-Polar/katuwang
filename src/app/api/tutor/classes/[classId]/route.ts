@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
@@ -7,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { lockClassRow, ClassWriteError } from "@/lib/classLocks";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { classTeachingError } from "@/lib/classTeachingPolicy";
 import { notify, notifyMany } from "@/lib/notifications";
 
@@ -263,6 +264,8 @@ export async function PATCH(
       topics: updatedClass.topics.map((t) => t.topic),
     });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating tutor class:", error);
     return NextResponse.json(
@@ -319,6 +322,8 @@ export async function DELETE(
 
     return NextResponse.json({ message: "Class deleted successfully." });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
       return NextResponse.json({ error: "This class has assessment records. Cancel it instead to preserve history." }, { status: 409 });

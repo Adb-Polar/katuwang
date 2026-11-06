@@ -33,6 +33,7 @@ const {
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     topicRequest: { findUnique: topicRequestFindUnique, findFirst: topicRequestFindFirst, update: topicRequestUpdate },
     topicCertification: { findMany: topicCertFindMany },
@@ -52,7 +53,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
 
-vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({ topics: ["Algebraic Expressions"] }), recordRequestHistory: vi.fn() }));
+vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({ topics: ["Algebraic Expressions & Factoring"] }), recordRequestHistory: vi.fn() }));
 
 import { POST } from "@/app/api/tutor/topic-requests/[id]/accept/route";
 
@@ -65,9 +66,9 @@ function validBody(overrides: Record<string, unknown> = {}) {
   return {
     subject: "MATH",
     gradeLevel: "GRADE_9",
-    topics: ["Algebraic Expressions"],
+    topics: ["Algebraic Expressions & Factoring"],
     maxStudents: 3,
-    sessions: [{ topic: "Algebraic Expressions", scheduledAt: futureDate, duration: 60 }],
+    sessions: [{ topic: "Algebraic Expressions & Factoring", scheduledAt: futureDate, duration: 60 }],
     meetingLink: "https://meet.google.com/abc-defg-hij",
     ...overrides,
   };
@@ -88,9 +89,9 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     getSettingMock.mockResolvedValue(true);
     topicRequestClaim.mockResolvedValue({ count: 1 });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions" }], expiresAt: new Date(Date.now() + 86400000) });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions & Factoring" }], expiresAt: new Date(Date.now() + 86400000) });
     topicRequestFindFirst.mockResolvedValue({ id: "r1" }); // eligible by default
-    topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
+    topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions & Factoring" }]);
     classSessionFindMany.mockResolvedValue([]);
     idCounterUpsert.mockResolvedValue({ role: "CLASS", count: 1 });
     tutorClassCreate.mockResolvedValue({ id: "c1" });
@@ -105,7 +106,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
 
   it("rejects a request at its deadline", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions" }], expiresAt: new Date(0) });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions & Factoring" }], expiresAt: new Date(0) });
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(409);
     expect(tutorClassCreate).not.toHaveBeenCalled();
@@ -139,7 +140,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
 
   it("rejects partial coverage before claiming or creating anything", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000), topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }] });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000), topics: [{ topic: "Algebraic Expressions & Factoring" }, { topic: "Quadratic Equations" }] });
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("Quadratic Equations");
@@ -156,7 +157,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
       subject: "MATH",
       learnerId: "L1",
       expiresAt: new Date(Date.now() + 86400000),
-      topics: [{ topic: "Algebraic Expressions" }],
+      topics: [{ topic: "Algebraic Expressions & Factoring" }],
       gradeLevel: "GRADE_11", // higher than tutor's GRADE_10
     });
     const res = await POST(makeRequest(validBody()), { params });
@@ -195,7 +196,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     const res = await POST(
       makeRequest(
         validBody({
-          sessions: [{ topic: "Algebraic Expressions", scheduledAt: new Date(Date.now() - 60000).toISOString(), duration: 60 }],
+          sessions: [{ topic: "Algebraic Expressions & Factoring", scheduledAt: new Date(Date.now() - 60000).toISOString(), duration: 60 }],
         })
       ),
       { params }
@@ -225,7 +226,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
 
   it("rechecks certifications inside the acceptance transaction", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    topicCertFindMany.mockResolvedValueOnce([{ subject: "MATH", topic: "Algebraic Expressions" }]).mockResolvedValueOnce([]);
+    topicCertFindMany.mockResolvedValueOnce([{ subject: "MATH", topic: "Algebraic Expressions & Factoring" }]).mockResolvedValueOnce([]);
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(403);
     expect(topicRequestClaim).not.toHaveBeenCalled();

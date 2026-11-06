@@ -12,6 +12,7 @@ const { getServerSessionMock, findManyMock, countMock, createMock, auditLogCreat
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     assessmentQuestion: { findMany: findManyMock, count: countMock, create: createMock },
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
@@ -39,7 +40,7 @@ function postReq(body: unknown) {
 
 const validBody = {
   subject: "MATH",
-  topic: "Algebraic Expressions",
+  topic: "Algebraic Expressions & Factoring",
   prompt: "Simplify 3x + 2x",
   options: [
     { text: "5x", isCorrect: true },
@@ -64,7 +65,7 @@ describe("GET /api/admin/assessment-questions", () => {
     ]);
     countMock.mockResolvedValue(2);
 
-    const res = await GET(getReq("http://localhost/api/admin/assessment-questions?subject=MATH&topic=Algebraic%20Expressions"));
+    const res = await GET(getReq("http://localhost/api/admin/assessment-questions?subject=MATH&topic=Algebraic%20Expressions%20%26%20Factoring"));
     const json = await res.json();
 
     expect(res.status).toBe(200);
@@ -74,7 +75,7 @@ describe("GET /api/admin/assessment-questions", () => {
       expect.objectContaining({
         where: expect.objectContaining({
           subject: "MATH",
-          topic: "Algebraic Expressions",
+          topic: "Algebraic Expressions & Factoring",
           origin: "BANK",
         }),
       })
@@ -131,7 +132,7 @@ describe("POST /api/admin/assessment-questions", () => {
       expect.objectContaining({
         data: expect.objectContaining({
           subject: "MATH",
-          topic: "Algebraic Expressions",
+          topic: "Algebraic Expressions & Factoring",
           createdById: "A1",
           origin: "BANK",
           options: { create: [

@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+vi.mock("@/lib/subjects", () => ({ getSubjects: async () => (await import("@/test/catalogFixture")).catalogFixture() }));
+import { describe, it, expect, vi } from "vitest";
 import { SUBJECT_CATALOG, SUBJECT_NAMES } from "../subjectCatalog";
 import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "../subjectTopics";
 import { topicsInGrade } from "../catalogGrades";
@@ -39,10 +40,10 @@ describe("approved general-subject catalog", () => {
     expect(topicsInGrade(catalog, "GRADE_7")).not.toContain("Server Administration");
     expect(topicsInGrade(catalog, "GRADE_12")).toContain("Server Administration");
   });
-  it("routes skill requests to Miscellaneous rather than a removed TLE subject", () => {
-    expect(extractCriteria("I need help with cooking").subject).toBe("MISCELLANEOUS");
-    expect(extractCriteria("help with welding").subject).toBe("MISCELLANEOUS");
-    expect(extractCriteria("entrepreneurship and business planning").subject).toBe("BUSINESS_ENTREPRENEURSHIP");
-    expect(extractCriteria("qualitative research").subject).toBe("RESEARCH_DIGITAL_LITERACY");
+  it("routes skill requests to Miscellaneous rather than a removed TLE subject", async () => {
+    expect((await extractCriteria("I need help with cooking")).subject).toBe("MISCELLANEOUS");
+    expect((await extractCriteria("help with welding")).subject).toBe("MISCELLANEOUS");
+    expect((await extractCriteria("entrepreneurship and business planning")).subject).toBe("BUSINESS_ENTREPRENEURSHIP");
+    expect((await extractCriteria("qualitative research")).subject).toBe("RESEARCH_DIGITAL_LITERACY");
   });
 });

@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
@@ -49,7 +51,7 @@ interface AdminClass {
 export default function ClassModerationTable() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
-  const { subjects: subjectCatalog } = useSubjectCatalog();
+  const { subjects: subjectCatalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subjectFilter, setSubjectFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<ClassLifecycleStatus | "">("");
   const [moderateTarget, setModerateTarget] = useState<{ class: AdminClass; action: "SUSPENDED" | "BANNED" } | null>(
@@ -133,7 +135,9 @@ export default function ClassModerationTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="success" message={success || null} />
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={moderateTarget || loadError ? null : error || null} />
 
       <section className="card kt-card">

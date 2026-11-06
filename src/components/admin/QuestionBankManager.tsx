@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidation";
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
@@ -9,7 +9,8 @@ import { ChevronRight, CornerUpLeft } from "lucide-react";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
-import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -25,7 +26,6 @@ import LoadErrorState from "@/components/ui/LoadErrorState";
 import Modal from "@/components/ui/Modal";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
-const SUBJECTS = SUBJECT_SLUGS;
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -247,13 +247,12 @@ function QuestionsTab({
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  const subject: string = selSubject ?? SUBJECTS[0];
-  const topic: string = selTopic ?? SUBJECT_TOPICS[subject][0];
+  const SUBJECTS = [...new Set(coverage.map(row => row.subject))];
+  const topicsFor = (subject: string) => coverage.filter(row => row.subject === subject).map(row => row.topic);
+  const subject: string = selSubject ?? SUBJECTS[0] ?? "";
+  const topic: string = selTopic ?? topicsFor(subject)[0] ?? "";
 
-  const cov = useMemo(
-    () => coverage.find((c) => c.subject === subject && c.topic === topic),
-    [coverage, subject, topic]
-  );
+  const cov = coverage.find(c => c.subject === subject && c.topic === topic);
 
   const {
     data: questions,
@@ -331,7 +330,7 @@ function QuestionsTab({
         <div className="border border-base-200 rounded-xl divide-y divide-base-200">
           {SUBJECTS.map((s) => {
             const rows = coverage.filter((c) => c.subject === s);
-            const totalTopics = SUBJECT_TOPICS[s].length;
+            const totalTopics = topicsFor(s).length;
             const ready = rows.filter((r) => r.ready).length;
             const activeQ = rows.reduce((n, r) => n + r.activeCount, 0);
             const openReq = rows.reduce((n, r) => n + r.openRequests, 0);
@@ -375,7 +374,7 @@ function QuestionsTab({
       <div className="space-y-4">
         <FeedbackBanner variant="success" message={success || null} />
         <div className="border border-base-200 rounded-xl divide-y divide-base-200">
-          {SUBJECT_TOPICS[selSubject].map((t) => {
+          {topicsFor(selSubject).map((t) => {
             const row = coverage.find((c) => c.subject === selSubject && c.topic === t);
             const active = row?.activeCount ?? 0;
             const min = row?.config.minBankSize ?? 5;
@@ -809,6 +808,8 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
 // ─── Results tab ────────────────────────────────────────────────────────────
 
 function ResultsTab() {
+  const { subjects, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
+  const SUBJECTS = subjects.map(subject => subject.slug);
   const [subject, setSubject] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState("");
   const [q, setQ] = useState("");
@@ -869,6 +870,7 @@ function ResultsTab() {
 
   return (
     <div className="space-y-4">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <input

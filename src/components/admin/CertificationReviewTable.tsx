@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 
@@ -48,7 +50,7 @@ const TAB_STATUS: Record<Tab, string> = {
 export default function CertificationReviewTable() {
   const [tab, setTab] = useState<Tab>("pending");
   const [q, setQ] = useState("");
-  const { subjects: catalog } = useSubjectCatalog();
+  const { subjects: catalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subject, setSubject] = useState<string>("");
   const [sort, setSort] = useState("requested");
   const [success, setSuccess] = useState("");
@@ -116,7 +118,9 @@ export default function CertificationReviewTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="success" message={success || null} />
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={approveTarget || rejectTarget ? null : error || null} />
 
       <section className="card kt-card">
