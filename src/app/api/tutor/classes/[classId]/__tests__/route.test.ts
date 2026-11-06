@@ -1,3 +1,4 @@
+import { getProfilePictureRequirement } from "@/lib/settings";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -65,7 +66,7 @@ vi.mock("@/lib/prisma", () => ({
 
 vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (tx: { topicRequest: { update: (args: unknown) => unknown } }, id: string, data: Record<string, unknown>) => tx.topicRequest.update({ where: { id }, data }) }));
 
-vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
 vi.mock("@/lib/subjects", () => ({ subjectExists: subjectExistsMock }));
 
 import { PATCH, DELETE } from "@/app/api/tutor/classes/[classId]/route";
@@ -85,6 +86,7 @@ function patch(body: unknown, classId = "c1") {
 describe("PATCH /api/tutor/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     sessionUpdateMany.mockResolvedValue({ count: 0 });
     getSettingMock.mockResolvedValue(false);
     subjectExistsMock.mockResolvedValue(true);
@@ -408,6 +410,17 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     );
   });
 
+  it("blocks publication without an avatar when required", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", published: false, _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null } });
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("TUTORS_ONLY");
+    const response = await patch({ published: true });
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain("publish a class");
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
   it("cannot remove coverage promised to a linked request", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }], sessions: [], _count: { enrollments: 0 } });
@@ -466,6 +479,7 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     sessionTestFindFirst.mockResolvedValue(null);
     topicRequestFindMany.mockResolvedValue([]);
   });
@@ -494,6 +508,7 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
 describe("class assessment retention", () => {
   it("blocks class deletion before request or notification mutations", async () => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", _count: { enrollments: 0 } });

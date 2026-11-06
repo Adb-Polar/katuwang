@@ -1,3 +1,4 @@
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -176,9 +177,11 @@ export async function POST(
       }
       await lockTopicRequestRow(tx, id);
       const liveTutor = await tx.tutorProfile.findUnique({
-        where: { id: tutorProfile.id }, select: { user: { select: { gradeLevel: true } } },
+        where: { id: tutorProfile.id }, select: { user: { select: { gradeLevel: true, image: true } } },
       });
       if (!liveTutor) throw new ClassWriteError("Tutor profile not found.", 404);
+      const pictureError = await profilePictureActionError("ACCEPT_REQUEST", liveTutor.user.image, tx);
+      if (pictureError) throw new ClassWriteError(pictureError, 400);
       const liveCertified = await tx.topicCertification.findMany({
         where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" }, select: { subject: true, topic: true },
       });

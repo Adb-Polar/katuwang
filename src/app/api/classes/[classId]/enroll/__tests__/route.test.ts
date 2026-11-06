@@ -1,3 +1,5 @@
+import { getProfilePictureRequirement } from "@/lib/settings";
+vi.mock("@/lib/settings", () => ({ getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -93,10 +95,22 @@ const learner = { user: { id: "l1", role: "STUDENT_LEARNER", anonymousId: "STU-0
 describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     topicRequestFindMany.mockResolvedValue([{ id: "r1" }]);
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestUpdateMany.mockResolvedValue({ count: 0 });
     userFindUnique.mockResolvedValue({ gradeLevel: "GRADE_9" });
+  });
+
+  it("blocks enrollment without an avatar only when learner pictures are required", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("ALL_USERS");
+    const response = await POST(makeRequest("POST"), makeParams());
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain("enroll in a class");
+    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {
@@ -270,6 +284,7 @@ describe("POST /api/classes/[classId]/enroll", () => {
 describe("DELETE /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {

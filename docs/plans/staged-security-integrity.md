@@ -111,3 +111,11 @@ Fix 11 deployed as fe7f1f4a6a08daf59e403ef90c8d97bb87aa655b, Render dep-dbmtjuon
 Acceptance requires all requested topics, rechecked from the locked snapshot. Tutors missing requested certifications cannot open a partial acceptance form. Learner request cards display actual linked class topics.
 
 Fix 12 pre-commit validation: 51 focused route/coverage tests and 5 real-MariaDB acceptance tests pass. Full suite 1,112 passes / 11 baseline failures / 25 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Also prevent later linked-class edits from removing promised coverage.
+
+Fix 12 deployed as 959385e2d085644f38c760bf2e048299b8c09157, Render dep-dbmtntuc6qcc73bi3i5g, live 2026-11-06 21:56 PHT. Live two-topic request: partial 400 leaves OPEN, complete 201, later removal 400, actual class coverage visible in learner request card. No page errors. QA requests cancelled/classes deleted. Browser assertion corrected to open the existing Past tab for accepted requests and ignore topic ordering.
+
+## Fix 13: shared avatar action prerequisites
+
+One backend policy governs tutor publication/request acceptance and learner enrollment. Optional and tutor-only/all-user setting modes retain their scope. Setting wording names the actions precisely.
+
+Fix 13 pre-commit validation: 94 focused policy/route tests and 8 real-MariaDB enrollment/acceptance tests pass. Full suite 1,124 passes / 11 baseline failures / 25 opt-in tests skipped. TypeScript, changed-file lint and production build pass.

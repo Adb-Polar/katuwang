@@ -69,8 +69,8 @@ export async function getAssessmentConfig(): Promise<ResolvedTopicConfig> {
 export type ProfilePictureRequirement = "OPTIONAL" | "TUTORS_ONLY" | "ALL_USERS";
 export const PROFILE_PICTURE_REQUIREMENT_KEY = "profilePictureRequirement";
 
-export async function getProfilePictureRequirement(): Promise<ProfilePictureRequirement> {
-  const row = await prisma.platformSetting.findUnique({
+export async function getProfilePictureRequirement(db: Prisma.TransactionClient = prisma): Promise<ProfilePictureRequirement> {
+  const row = await db.platformSetting.findUnique({
     where: { key: PROFILE_PICTURE_REQUIREMENT_KEY },
   });
   if (!row) return "OPTIONAL";

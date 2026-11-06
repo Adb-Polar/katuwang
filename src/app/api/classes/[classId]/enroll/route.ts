@@ -1,3 +1,4 @@
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -39,8 +40,11 @@ export async function POST(
 
       const learner = await tx.user.findUnique({
         where: { id: session.user.id },
-        select: { gradeLevel: true },
+        select: { gradeLevel: true, image: true },
       });
+
+      const pictureError = await profilePictureActionError("ENROLL", learner?.image, tx);
+      if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
 
       const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
       const tutorGrade = existingClass.tutorProfile?.user?.gradeLevel ?? null;

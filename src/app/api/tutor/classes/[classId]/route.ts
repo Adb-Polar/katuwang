@@ -1,3 +1,4 @@
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
@@ -40,7 +41,7 @@ export async function PATCH(
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true, user: { select: { gradeLevel: true } } },
+      select: { id: true, user: { select: { gradeLevel: true, image: true } } },
     });
 
     if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
@@ -71,6 +72,11 @@ export async function PATCH(
     const { topics: rawTopics, subject: rawSubject, ...updates } = result.data;
 
     const subjectUpdate = rawSubject !== undefined ? { subject: rawSubject } : {};
+
+    if (updates.published === true) {
+      const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
+      if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
+    }
 
     // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
     const topics = rawTopics

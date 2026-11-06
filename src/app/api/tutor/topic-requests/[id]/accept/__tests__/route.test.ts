@@ -1,3 +1,4 @@
+import { getProfilePictureRequirement } from "@/lib/settings";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -49,7 +50,7 @@ vi.mock("@/lib/prisma", () => ({
       }),
   },
 }));
-vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
 
 vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({ topics: ["Algebraic Expressions"] }), recordRequestHistory: vi.fn() }));
 
@@ -83,6 +84,7 @@ function makeRequest(body: unknown) {
 describe("POST /api/tutor/topic-requests/[id]/accept", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     getSettingMock.mockResolvedValue(true);
     topicRequestClaim.mockResolvedValue({ count: 1 });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
@@ -122,6 +124,16 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     topicRequestFindFirst.mockResolvedValue(null);
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(403);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+  });
+
+  it("blocks acceptance without an avatar before claiming the request", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("TUTORS_ONLY");
+    const response = await POST(makeRequest(validBody()), { params });
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain("accept a tutoring request");
+    expect(topicRequestClaim).not.toHaveBeenCalled();
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 

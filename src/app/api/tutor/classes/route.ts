@@ -6,7 +6,7 @@ import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { classTeachingError } from "@/lib/classTeachingPolicy";
-import { getProfilePictureRequirement } from "@/lib/settings";
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -86,18 +86,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const picReq = await getProfilePictureRequirement();
-    if (picReq === "TUTORS_ONLY" || picReq === "ALL_USERS") {
-      if (!tutorProfile.user?.image) {
-        return NextResponse.json(
-          {
-            error:
-              "A profile picture is required to create classes. Please upload one in your profile settings.",
-          },
-          { status: 400 }
-        );
-      }
-    }
+    const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
+    if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
 
     const body = await req.json();
     const result = createClassSchema.safeParse(body);

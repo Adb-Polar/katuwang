@@ -4234,3 +4234,8 @@ Learners can discover tutors/classes, request tutoring and enroll across grades 
 ## 2026-11-06 — Require full requested-topic coverage
 
 Request acceptance checks every requested topic before claiming and against the locked snapshot. Linked classes also reject later subject/topic edits that break promised coverage. The tutor form explains missing certifications and requires full coverage; learner cards show actual linked class topics. Five MariaDB acceptance tests pass, including partial/no-side-effects and complete coverage. Any-grade fe7f1f4 passed Grade 12 browser enrollment with a Grade 10 tutor / Grade 9 class.
+
+
+## 2026-11-06 — Share profile-picture prerequisites
+
+The same action policy now protects tutor publishing/request acceptance and learner enrollment, honoring OPTIONAL, TUTORS_ONLY and ALL_USERS modes. Enrollment and acceptance read the requirement through their transaction connection. Setting labels name the protected actions. Added nine mode/action matrix tests and blocked-action endpoint regressions. Complete request coverage 959385e passed live API/browser verification.

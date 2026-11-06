@@ -963,3 +963,5 @@ Email verification OTP (codex/email-verification-otp)
 [] Any-grade policy: Grade 12 learner sees a lower-grade tutor and class in Browse/search/profile and Auto Match, can request/enroll, and receives chatbot recommendations. Explicit grade filters still apply; tutor cannot target above their own grade.
 
 [] Request coverage: rejecting a two-topic request with one class topic leaves it OPEN with no class/notification; accepting all topics succeeds; learner sees actual class coverage; later edits cannot remove promised topics or change the subject.
+
+[] Picture policy: TUTORS_ONLY blocks missing-avatar creation/publication and request acceptance; ALL_USERS also blocks learner enrollment with actionable copy; profile remains accessible; OPTIONAL allows enrollment. Restore the original dev-test setting after QA.
