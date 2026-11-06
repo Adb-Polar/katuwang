@@ -89,6 +89,7 @@ export default function Modal({
       role="dialog"
       aria-modal="true"
       aria-label={title}
+      onSubmit={(event) => event.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
       <div

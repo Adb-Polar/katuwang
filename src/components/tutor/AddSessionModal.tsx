@@ -67,7 +67,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
 
       {isOpen && typeof document !== "undefined" &&
         createPortal(
-        <div className="modal modal-open">
+        <div className="modal modal-open" onSubmit={(event) => event.stopPropagation()}>
           <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
             <button
               type="button"

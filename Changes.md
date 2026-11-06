@@ -4199,3 +4199,8 @@ Enrollment now acquires a class-row lock and validates current eligibility, publ
 ## 2026-11-06 — Serialize tutor schedule checks and writes
 
 Class creation, session additions/rescheduling and request acceptance now share a tutor-profile row lock. Overlap checks use the transaction client and current state, preventing competing writes from both passing an earlier check. Session edits/additions also lock the class. Moderated classes retain scheduled-time reservations so reinstatement cannot introduce overlaps. Added five guarded real-MariaDB scheduling tests; all pass. Enrollment capacity live verification passed on dev-test (334024e).
+
+
+## 2026-11-06 — Isolate scheduling modal forms
+
+Live scheduling QA exposed reschedule submissions reaching the enclosing class editor. The reschedule dialog now renders in a body portal, and scheduling modal submit events stop before reaching the parent form. Added UI regressions verifying that rescheduling makes one session PATCH and that rejected modal validation cannot submit the class.

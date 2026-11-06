@@ -5,6 +5,7 @@ import { reportServerFieldErrors } from "@/lib/formValidation";
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
@@ -168,7 +169,7 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session">
+      {isRescheduling && createPortal(<Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <ValidatedForm onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
@@ -239,7 +240,7 @@ export default function SessionActions({
                 </button>
               </div>
             </ValidatedForm>
-      </Modal>
+      </Modal>, document.body)}
     </>
   );
 }
