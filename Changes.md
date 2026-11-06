@@ -4184,3 +4184,8 @@ Class creation and editing share the teaching-scope policy. Partial edits now va
 ## 2026-11-06 — Revoke sessions after password changes/resets
 
 Added an additive user sessionVersion migration, JWT/session claims, immediate live-version checks at the protected server boundary, and atomic version increments with password updates/resets. Legacy sessions require a new login. The password-change form signs out after success and the login page explains the change. Added revocation regressions and opt-in integration tests guarded to an isolated local verification database. Class-edit live verification passed on dev-test (3a09934), including certification rejection and successful browser save/restore.
+
+
+## 2026-11-06 — Current assessment access and bounded closure grace
+
+Direct learner attempt reads and submissions now enforce current enrollment, class moderation, testing enablement and cancellation restrictions. Ordinary test closure permits only existing attempts, for 15 minutes, with the earliest closure controlling the deadline. Session completion stamps PRE closure atomically with status changes. Added access, deadline, direct-read and no-write regression coverage; tutor closure copy states the grace policy. Session revocation live checks passed on dev-test (eb45a4f).

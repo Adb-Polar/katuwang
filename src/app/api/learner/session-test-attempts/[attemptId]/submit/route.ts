@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { checkLearnerAttemptAccess } from "@/lib/sessionTestAccess";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 import { gradeAttempt } from "@/lib/gradeAttempt";
@@ -36,6 +37,9 @@ export async function POST(
     if (attempt.status !== "IN_PROGRESS") {
       return NextResponse.json({ error: "This attempt has already been submitted." }, { status: 409 });
     }
+
+    const accessError = await checkLearnerAttemptAccess(session.user.id, attempt);
+    if (accessError) return NextResponse.json({ error: accessError.error }, { status: accessError.status });
 
     const body = await req.json();
     const result = submitAssessmentSchema.safeParse(body);

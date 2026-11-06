@@ -50,6 +50,7 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         tutorClass: { update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
+        sessionTest: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         classEnrollment: { findMany: enrollmentFindMany },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
         notification: { create: notificationCreate, createMany: notificationCreateMany },

@@ -9,6 +9,7 @@ const {
   sessionUpdate,
   sessionDelete,
   sessionTestFindUnique,
+  sessionTestUpdateMany,
   classEnrollmentFindMany,
   notificationCreateMany,
 } = vi.hoisted(() => ({
@@ -19,6 +20,7 @@ const {
   sessionUpdate: vi.fn(),
   sessionDelete: vi.fn(),
   sessionTestFindUnique: vi.fn(),
+  sessionTestUpdateMany: vi.fn().mockResolvedValue({ count: 0 }),
   classEnrollmentFindMany: vi.fn(),
   notificationCreateMany: vi.fn(),
 }));
@@ -31,12 +33,12 @@ vi.mock("@/lib/prisma", () => ({
     tutorProfile: { findUnique: tutorProfileFindUnique },
     tutorClass: { findUnique: classFindUnique },
     classSession: { findMany: sessionFindMany, update: sessionUpdate, delete: sessionDelete },
-    sessionTest: { findUnique: sessionTestFindUnique },
+    sessionTest: { findUnique: sessionTestFindUnique, updateMany: sessionTestUpdateMany },
     classEnrollment: { findMany: classEnrollmentFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         classSession: { update: sessionUpdate },
-        sessionTest: { findUnique: sessionTestFindUnique },
+        sessionTest: { findUnique: sessionTestFindUnique, updateMany: sessionTestUpdateMany },
         classEnrollment: { findMany: classEnrollmentFindMany },
         notification: { createMany: notificationCreateMany },
       }),
@@ -183,6 +185,10 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     sessionUpdate.mockResolvedValue({ ...targetSession, status: "COMPLETED" });
 
     const res = await patch({ status: "COMPLETED" });
+    expect(sessionTestUpdateMany).toHaveBeenCalledWith({
+      where: { sessionId: "s1", pretestClosedAt: null },
+      data: { pretestClosedAt: expect.any(Date) },
+    });
     expect(res.status).toBe(200);
     expect(sessionFindMany).not.toHaveBeenCalled();
   });

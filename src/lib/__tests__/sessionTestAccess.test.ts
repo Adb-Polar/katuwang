@@ -10,12 +10,14 @@ const {
   classSessionFindUnique,
   sessionTestFindUnique,
   classEnrollmentFindUnique,
+  getSettingMock,
 } = vi.hoisted(() => ({
   tutorProfileFindUnique: vi.fn(),
   tutorClassFindUnique: vi.fn(),
   classSessionFindUnique: vi.fn(),
   sessionTestFindUnique: vi.fn(),
   classEnrollmentFindUnique: vi.fn(),
+  getSettingMock: vi.fn(),
 }));
 
 vi.mock("@/lib/prisma", () => ({
@@ -28,7 +30,10 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+
 import {
+  checkLearnerAttemptAccess,
   isAccessError,
   loadOwnedClass,
   loadOwnedSession,
@@ -37,6 +42,7 @@ import {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  getSettingMock.mockResolvedValue(true);
   tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
   tutorClassFindUnique.mockResolvedValue({
     id: "c1",
@@ -139,5 +145,41 @@ describe("linked qualification-bank confidentiality", () => {
     expect(isAccessError(await loadOwnedSession("U1", "c1", "s1"))).toBe(false);
     expect(certifiedBankTopics).not.toHaveBeenCalled();
     vi.mocked(certifiedBankTopics).mockReset().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]);
+  });
+});
+
+
+describe("current learner attempt access", () => {
+  const attempt = { sessionTestId: "st1", kind: "PRE" as const, status: "IN_PROGRESS" as const, startedAt: new Date(Date.now() - 60_000) };
+  beforeEach(() => sessionTestFindUnique.mockResolvedValue({
+    id: "st1", sessionId: "s1", session: { classId: "c1" }, status: "PUBLISHED", closedAt: null, pretestClosedAt: null,
+  }));
+  it("allows a currently enrolled learner", async () => {
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toBeNull();
+  });
+  it("rejects after tests are disabled before reading questions", async () => {
+    getSettingMock.mockResolvedValue(false);
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toMatchObject({ status: 403 });
+    expect(sessionTestFindUnique).not.toHaveBeenCalled();
+  });
+  it("rejects after withdrawal", async () => {
+    classEnrollmentFindUnique.mockResolvedValue(null);
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toMatchObject({ status: 403 });
+  });
+  it.each(["SUSPENDED", "BANNED", "CANCELLED"])("rejects a class that is now %s", async (status) => {
+    tutorClassFindUnique.mockResolvedValue({ id: "c1", status });
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toMatchObject({ status: 403 });
+  });
+  it("rejects cancelled sessions", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "CANCELLED" });
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toMatchObject({ status: 409 });
+  });
+  it("allows ordinary closure within grace", async () => {
+    sessionTestFindUnique.mockResolvedValue({ sessionId: "s1", session: { classId: "c1" }, status: "CLOSED", closedAt: new Date(), pretestClosedAt: null });
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toBeNull();
+  });
+  it("rejects ordinary closure after grace", async () => {
+    sessionTestFindUnique.mockResolvedValue({ sessionId: "s1", session: { classId: "c1" }, status: "CLOSED", closedAt: new Date(Date.now() - 16 * 60_000), pretestClosedAt: null });
+    expect(await checkLearnerAttemptAccess("L1", attempt)).toMatchObject({ status: 409 });
   });
 });

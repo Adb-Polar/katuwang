@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { checkLearnerAttemptAccess } from "@/lib/sessionTestAccess";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 
 // ─── GET: One of the Learner's Own Session-Test Attempts ──────────────────
@@ -28,6 +29,9 @@ export async function GET(
     if (!attempt || attempt.learnerId !== session.user.id) {
       return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
     }
+
+    const accessError = await checkLearnerAttemptAccess(session.user.id, attempt);
+    if (accessError) return NextResponse.json({ error: accessError.error }, { status: accessError.status });
 
     return NextResponse.json(
       serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED", revealBankAnswers: false }),

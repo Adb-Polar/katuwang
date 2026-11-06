@@ -944,4 +944,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: browser/API checks passed 3a09934] Effective class-edit scope: on dev-test, save and restore a valid class description through the editor; reject a nonexistent subject and a target grade above the tutor's grade; with certification enabled, subject/topic-only edits and retained uncertified topics must be rejected.
 
-[ ] Password session revocation: on dev-test, change a seeded test account password through the profile form; confirm a second existing browser session immediately loses API access, fresh login with the new password works, and restore the fixture password. Legacy pre-migration sessions must require sign-in. Reset version increment covered by isolated MariaDB integration.
+[Good: isolated browser flow and live stale/fresh checks eb45a4f] Password session revocation: on dev-test, change a seeded test account password through the profile form; confirm a second existing browser session immediately loses API access, fresh login with the new password works, and restore the fixture password. Legacy pre-migration sessions must require sign-in. Reset version increment covered by isolated MariaDB integration.
+
+[ ] Assessment current-access checks: on dev-test, resume an existing attempt during ordinary closure grace; withdraw and moderate its disposable class and confirm direct resume/submission are rejected. Use isolated tests for expired grace and platform-wide disabling.

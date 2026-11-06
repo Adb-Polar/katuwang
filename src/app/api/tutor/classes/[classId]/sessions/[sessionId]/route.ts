@@ -101,7 +101,15 @@ export async function PATCH(
       ...(status !== undefined ? { status } : {}),
     };
 
-    const updated = await prisma.classSession.update({ where: { id: sessionId }, data: sessionData });
+    const updated = await prisma.$transaction(async (tx) => {
+      const updated = await tx.classSession.update({ where: { id: sessionId }, data: sessionData });
+      if (status === "COMPLETED" && targetSession.status !== "COMPLETED") {
+        await tx.sessionTest.updateMany({
+          where: { sessionId, pretestClosedAt: null }, data: { pretestClosedAt: new Date() },
+        });
+      }
+      return updated;
+    });
 
     return NextResponse.json(updated);
   } catch (error) {

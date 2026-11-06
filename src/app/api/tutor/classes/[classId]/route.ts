@@ -151,6 +151,12 @@ export async function PATCH(
     const newStatus = body.status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | undefined;
 
     const updatedClass = await prisma.$transaction(async (tx) => {
+      if (newStatus === "COMPLETED") {
+        await tx.sessionTest.updateMany({
+          where: { session: { classId, status: "SCHEDULED" }, pretestClosedAt: null }, data: { pretestClosedAt: new Date() },
+        });
+      }
+
       if (newStatus === "CANCELLED" || newStatus === "COMPLETED") {
         await tx.classSession.updateMany({
           where: { classId, status: "SCHEDULED" },

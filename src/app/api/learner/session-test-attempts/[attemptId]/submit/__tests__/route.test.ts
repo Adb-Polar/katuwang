@@ -8,6 +8,7 @@ const {
   sessionTestAttemptUpdate,
   sessionTestFindUnique,
   notifyMock,
+  accessMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   sessionTestAttemptFindUnique: vi.fn(),
@@ -15,9 +16,11 @@ const {
   sessionTestAttemptUpdate: vi.fn(),
   sessionTestFindUnique: vi.fn(),
   notifyMock: vi.fn(),
+  accessMock: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
+vi.mock("@/lib/sessionTestAccess", () => ({ checkLearnerAttemptAccess: accessMock }));
 vi.mock("@/lib/notifications", () => ({ notify: notifyMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
@@ -72,6 +75,7 @@ const inProgressAttempt = {
 beforeEach(() => {
   vi.clearAllMocks();
   getServerSessionMock.mockResolvedValue(learner);
+  accessMock.mockResolvedValue(null);
   sessionTestAttemptFindUnique.mockResolvedValue(inProgressAttempt);
 });
 
@@ -86,6 +90,14 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     sessionTestAttemptFindUnique.mockResolvedValue({ ...inProgressAttempt, status: "SUBMITTED" });
     const res = await POST(post({ answers: [] }), ctx());
     expect(res.status).toBe(409);
+  });
+
+  it.each(["Enrollment withdrawn", "Class under moderation", "Tests disabled"])("blocks writes when access changed: %s", async (error) => {
+    accessMock.mockResolvedValue({ error, status: 403 });
+    const res = await POST(post({ answers: [] }), ctx());
+    expect(res.status).toBe(403);
+    expect(sessionTestAttemptItemUpdate).not.toHaveBeenCalled();
+    expect(sessionTestAttemptUpdate).not.toHaveBeenCalled();
   });
 
   it("400 on a malformed body", async () => {

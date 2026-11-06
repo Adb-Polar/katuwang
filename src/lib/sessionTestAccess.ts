@@ -1,5 +1,7 @@
 import { certifiedBankTopics } from "@/lib/teachingBankAccess";
 import { prisma } from "@/lib/prisma";
+import { getSetting } from "@/lib/settings";
+import { attemptWindowError } from "@/lib/sessionTestWindow";
 
 export type AccessError = { error: string; status: number };
 
@@ -111,4 +113,29 @@ export async function loadEnrolledSession(userId: string, classId: string, sessi
   }
 
   return { tutorClass, session };
+}
+
+/** Recheck current restrictions on every attempt read/resume and submission. */
+export async function checkLearnerAttemptAccess(userId: string, attempt: {
+  sessionTestId: string;
+  kind: import("@prisma/client").SessionTestKind;
+  status: import("@prisma/client").SessionTestAttemptStatus;
+  startedAt: Date;
+}): Promise<AccessError | null> {
+  if (!(await getSetting("sessionTestsEnabled"))) {
+    return { error: "Session tests are disabled.", status: 403 };
+  }
+  const test = await prisma.sessionTest.findUnique({
+    where: { id: attempt.sessionTestId },
+    select: { status: true, closedAt: true, pretestClosedAt: true,
+      sessionId: true, session: { select: { classId: true } } },
+  });
+  if (!test || test.status === "DRAFT") return { error: "Test not found.", status: 404 };
+  const access = await loadEnrolledSession(userId, test.session.classId, test.sessionId);
+  if (isAccessError(access)) return access;
+  if (attempt.status === "IN_PROGRESS" && access.tutorClass.status === "CANCELLED") {
+    return { error: "This class was cancelled.", status: 403 };
+  }
+  const error = attemptWindowError(attempt, test, access.session.status);
+  return error ? { error, status: 409 } : null;
 }
