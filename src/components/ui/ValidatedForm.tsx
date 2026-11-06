@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { fieldValidationMessage } from "@/lib/formValidation";
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
-type Failure = { target: HTMLElement; container: HTMLElement; message: string; id: string };
+type Failure = { target: HTMLElement; container: HTMLElement; message: string; id: string; group?: Element | null };
 const controls = (form: HTMLFormElement) => Array.from(form.querySelectorAll<Control>("input, select, textarea"));
 
 /** Keeps native constraints, renders persistent inline feedback, and focuses the first failure. */
@@ -36,6 +36,7 @@ export default function ValidatedForm({ onSubmit, children, ...props }: Componen
         if (details) details.open = true;
         if (!target.matches("input, select, textarea, button")) target.tabIndex = -1;
         const next = failure(target, message, 0);
+        next.group = target.closest("[data-validation-group]");
         focusRequested.current = true;
         setFailures([next]);
       }
@@ -76,7 +77,14 @@ export default function ValidatedForm({ onSubmit, children, ...props }: Componen
       props.onClickCapture?.(event);
     }} onChangeCapture={(event) => {
       const target = event.target as HTMLElement;
-      setFailures((prev) => prev.filter((item) => item.target !== target && (!target.closest("[data-form-field]") || item.target.closest("[data-form-field]") !== target.closest("[data-form-field]"))));
+      const controlField = target.closest("[data-control-field]");
+      const formField = target.closest("[data-form-field]");
+      setFailures((prev) => prev.filter((item) => {
+        if (item.target === target) return false;
+        if (item.group && item.group === target.closest("[data-validation-group]")) return false;
+        if (controlField) return item.target.closest("[data-control-field]") !== controlField;
+        return !formField || item.target.closest("[data-form-field]") !== formField;
+      }));
       props.onChangeCapture?.(event);
     }} onSubmit={(event) => {
       const invalid = controls(event.currentTarget).flatMap((field, index) => {

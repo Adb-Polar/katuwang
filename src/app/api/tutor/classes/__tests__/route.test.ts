@@ -246,6 +246,7 @@ describe("POST /api/tutor/classes", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toMatch(/past/i);
+    expect(json.fieldErrors).toEqual([{ path: ["sessions", 0, "scheduledAt"], message: expect.stringMatching(/future/i) }]);
   });
 
   it("returns 409 when two submitted sessions overlap each other", async () => {
@@ -264,6 +265,8 @@ describe("POST /api/tutor/classes", () => {
       )
     );
     expect(res.status).toBe(409);
+    const json = await res.json();
+    expect(json.fieldErrors).toEqual([{ path: ["sessions", 0, "scheduledAt"], message: expect.any(String) }]);
     expect(classCreate).not.toHaveBeenCalled();
   });
 
@@ -275,6 +278,8 @@ describe("POST /api/tutor/classes", () => {
     ]);
     const res = await POST(makeRequest(validBody()));
     expect(res.status).toBe(409);
+    const json = await res.json();
+    expect(json.fieldErrors).toEqual([{ path: ["sessions", 0, "scheduledAt"], message: expect.any(String) }]);
     expect(classCreate).not.toHaveBeenCalled();
   });
 

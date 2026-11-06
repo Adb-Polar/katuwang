@@ -143,7 +143,7 @@ export async function GET(req: NextRequest) {
           ? prisma.tutorClass.findMany({
               where: {
                 AND: [
-                  browseClassesWhere(session.user.id, learnerGrade),
+                  browseClassesWhere(session.user.id),
                   { OR: classOr },
                 ],
               },

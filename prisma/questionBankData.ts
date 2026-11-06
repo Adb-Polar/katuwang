@@ -13,59 +13,6 @@ export interface GeneratedQuestion {
   }[];
 }
 
-interface TopicProfile {
-  coreConcept: string;
-  ruleOrTheorem: string;
-  problem: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  misconception: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  procedure: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  comparison: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  realWorld: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  formulaOrTool: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  componentOrElement: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-  conditionOrBoundary: {
-    stem: string;
-    correct: string;
-    distractors: [string, string, string];
-    explanation: string;
-  };
-}
-
 // Deterministic pseudo-random number generator for reproducible option shuffling
 function seededRng(seed: number) {
   let s = seed % 2147483647;
@@ -92,6 +39,8 @@ export function generateQuestionsForTopic(
   topicName: string,
   competencyHint?: string
 ): GeneratedQuestion[] {
+  // Reserved for topic-specific generators; retain the public call signature.
+  void competencyHint;
   const questions: GeneratedQuestion[] = [];
   const t = topicName.trim();
   const s = subjectName.trim();
@@ -108,8 +57,6 @@ export function generateQuestionsForTopic(
   // 15 distinct question patterns tailored to the topic and subject context
   const isFilipino = slug.includes("FILIPINO") || slug.includes("KOMUNIKASYON") || slug.includes("PAGBASA") || slug.includes("PILING_LARANG") || slug.includes("VALUES_EDUCATION") || slug.includes("ARALING_PANLIPUNAN");
   const isMath = slug.includes("MATH") || slug.includes("CALC") || slug.includes("STAT");
-  const isScience = slug.includes("SCIENCE") || slug.includes("BIO") || slug.includes("PHYS") || slug.includes("CHEM");
-  const isTech = slug.includes("TLE") || slug.includes("TVL") || slug.includes("ETECH");
 
   // Question 1: Definition / Core Concept
   if (isFilipino) {

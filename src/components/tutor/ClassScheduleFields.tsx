@@ -1,6 +1,6 @@
 "use client";
 
-import { reportFieldError } from "@/lib/formValidation";
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
@@ -218,13 +218,17 @@ export default function ClassScheduleFields({
     if (!form.subject) return reportFieldError(e.currentTarget, "Subject Area", "Please select a subject.");
     if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topic(s)", "Please select at least one topic.");
     if (sessionRows.length === 0) return reportFieldError(e.currentTarget, "Sessions", "Please add at least one session.");
-    const invalidSession = sessionRows.some((r) => {
+    const invalidSession = sessionRows.findIndex((r) => {
       const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
       const t = r.time || parseLocalDateAndTime(r.scheduledAt).time;
-      return !r.topic || !d || !t;
+      return !selectedTopics.includes(r.topic) || !d || !t;
     });
-    if (invalidSession) {
-      return reportFieldError(e.currentTarget, "Sessions", "Every session needs a topic, date, and time.");
+    if (invalidSession !== -1) {
+      reportServerFieldErrors(e.currentTarget, { fieldErrors: [{
+        path: ["sessions", invalidSession, "topic"],
+        message: "Choose one of the class's selected topics.",
+      }] });
+      return;
     }
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       return reportFieldError(e.currentTarget, "Location", "Please provide a location (building/room) or a meeting link.");
@@ -252,29 +256,35 @@ export default function ClassScheduleFields({
   const availableGrades = tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS;
 
   return (
-    <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-5" : "space-y-3.5"}>
+    <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-8" : "space-y-3.5"}>
       <FeedbackBanner variant="error" message={formError || error || null} />
       <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
-      <FormField size={fieldSize} label="Subject Area" required>
-        <select
-          name="subject"
-          value={form.subject}
-          onChange={handleInputChange}
-          required
-          disabled={subjectLocked}
-          className={`select select-bordered ${selectCls} w-full focus:select-primary disabled:opacity-70`}
-        >
-          <option value="">Select subject</option>
-          {subjects.map((sub) => (
-            <option key={sub.slug} value={sub.slug}>
-              {sub.name}
-            </option>
-          ))}
-        </select>
-      </FormField>
+      <div className="space-y-4">
+        <div>
+          <h2 className="font-bold text-base">Class details</h2>
+          <p className="text-sm text-base-content/60">Choose what you’ll teach and the grade level of the material.</p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <FormField size={fieldSize} label="Subject Area" required>
+            <select
+              name="subject"
+              value={form.subject}
+              onChange={handleInputChange}
+              required
+              disabled={subjectLocked}
+              className={`select select-bordered ${selectCls} w-full focus:select-primary disabled:opacity-70`}
+            >
+              <option value="">Select subject</option>
+              {subjects.map((sub) => (
+                <option key={sub.slug} value={sub.slug}>
+                  {sub.name}
+                </option>
+              ))}
+            </select>
+          </FormField>
 
-      <FormField size={fieldSize} label="Target Grade" hint="Optional — helps matching. Leave as 'Any grade' if it's open to all.">
+      <FormField size={fieldSize} label="Target Grade" hint="The level of the material. Learners from any grade can enroll.">
         <select
           name="gradeLevel"
           value={form.gradeLevel}
@@ -289,6 +299,9 @@ export default function ClassScheduleFields({
           ))}
         </select>
       </FormField>
+
+        </div>
+      </div>
 
       <FormField size={fieldSize} label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
         {!form.subject ? (
@@ -335,6 +348,7 @@ export default function ClassScheduleFields({
                       className={`checkbox ${checkboxCls} checkbox-primary`}
                     />
                     <span>{topic}</span>
+                    <span data-control-feedback className="block" />
                   </label>
                 );
               })}
@@ -419,76 +433,94 @@ export default function ClassScheduleFields({
             Select a subject and at least one topic first.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-4">
             {sessionRows.map((row, i) => (
-              <div
+              <fieldset
                 key={row.key}
-                data-control-field
-                className="border border-base-300 bg-base-200/40 rounded-lg p-2.5 space-y-1.5"
+                data-session-row
+                className="min-w-0 rounded-xl border border-base-300 bg-base-200/20 p-4 sm:p-5"
               >
-                <div className="flex items-center gap-1.5">
-                  <span className={`${page ? "text-xs" : "text-2xs"} font-semibold text-base-content/50 shrink-0`}>
-                    #{i + 1}
-                  </span>
-                  <select
-                    aria-label={`Session #${i + 1} topic`}
-                    value={row.topic}
-                    onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
-                    className={`select select-bordered ${rowSelectCls} flex-1 min-w-0 truncate`}
-                  >
-                    {selectedTopics.map((t) => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
+                <legend className="px-2 text-sm font-bold">Session {i + 1}</legend>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-xs text-base-content/60">Set the topic, start time, and length.</p>
                   <button
                     type="button"
+                    data-validation-change
                     onClick={() => removeSessionRow(row.key)}
                     className={`btn btn-ghost ${rowBtnCls} text-error shrink-0 cursor-pointer`}
-                    aria-label="Remove session"
+                    aria-label={`Remove session ${i + 1}`}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <Trash2 className="h-4 w-4" /> Remove
                   </button>
                 </div>
-                <div className="flex flex-wrap items-center gap-1.5">
-                  <input
-                    type="date"
-                    required
-                    aria-label={`Session #${i + 1} date`}
-                    value={row.date ?? parseLocalDateAndTime(row.scheduledAt).date}
-                    onChange={(e) => updateSessionRow(row.key, "date", e.target.value)}
-                    className={`input input-bordered ${rowInputCls} flex-1 min-w-[8.5rem]`}
-                  />
-                  <input
-                    type="time"
-                    required
-                    aria-label={`Session #${i + 1} time`}
-                    value={row.time ?? parseLocalDateAndTime(row.scheduledAt).time}
-                    onChange={(e) => updateSessionRow(row.key, "time", e.target.value)}
-                    className={`input input-bordered ${rowInputCls} w-28 shrink-0`}
-                  />
-                  <select
-                    value={row.duration}
-                    aria-label={`Session #${i + 1} duration`}
-                    onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
-                    className={`select select-bordered ${rowSelectCls} shrink-0`}
-                  >
-                    <option value={30}>30m</option>
-                    <option value={45}>45m</option>
-                    <option value={60}>60m</option>
-                    <option value={90}>90m</option>
-                    <option value={120}>120m</option>
-                  </select>
+                <div className={page ? "grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_9rem_8rem]" : "grid gap-3"}>
+                  <label data-control-field className="min-w-0 space-y-1.5">
+                    <span className="block text-xs font-semibold">Topic</span>
+                    <select
+                      data-session-control="topic"
+                      value={row.topic}
+                      onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
+                      required
+                      className={`select select-bordered ${rowSelectCls} w-full`}
+                    >
+                      <option value="" disabled>Select topic</option>
+                      {selectedTopics.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                    <span data-control-feedback className="block" />
+                  </label>
+                  <div data-validation-group className="contents">
+                  <label data-control-field className="min-w-0 space-y-1.5">
+                    <span className="block text-xs font-semibold">Date</span>
+                    <input
+                      data-session-control="scheduledAt"
+                      type="date"
+                      value={row.date ?? parseLocalDateAndTime(row.scheduledAt).date}
+                      onChange={(e) => updateSessionRow(row.key, "date", e.target.value)}
+                      required
+                      className={`input input-bordered ${rowInputCls} w-full min-w-0`}
+                    />
+                    <span data-control-feedback className="block" />
+                  </label>
+                  <label data-control-field className="min-w-0 space-y-1.5">
+                    <span className="block text-xs font-semibold">Start time</span>
+                    <input type="time" required value={row.time ?? parseLocalDateAndTime(row.scheduledAt).time}
+                      onChange={(e) => updateSessionRow(row.key, "time", e.target.value)}
+                      className={`input input-bordered ${rowInputCls} w-full min-w-0`} />
+                    <span data-control-feedback className="block" />
+                  </label>
+                  </div>
+                  <label data-control-field className="min-w-0 space-y-1.5">
+                    <span className="block text-xs font-semibold">Duration</span>
+                    <select
+                      data-session-control="duration"
+                      value={row.duration}
+                      onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
+                      className={`select select-bordered ${rowSelectCls} w-full`}
+                    >
+                      <option value={30}>30m</option>
+                      <option value={45}>45m</option>
+                      <option value={60}>1hr</option>
+                      <option value={90}>1hr 30m</option>
+                      <option value={120}>2hr</option>
+                    </select>
+                    <span data-control-feedback className="block" />
+                  </label>
                 </div>
-                <div data-control-feedback />
-              </div>
+              </fieldset>
             ))}
+            {sessionRows.length === 0 && (
+              <p className="rounded-lg border border-dashed border-base-300 p-5 text-center text-sm text-base-content/60">
+                No sessions yet. Add your first session to set a date and time.
+              </p>
+            )}
             <button
               type="button"
               data-validation-change
               onClick={addSessionRow}
-              className={`btn btn-ghost ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
+              disabled={sessionRows.length >= 20}
+              className={`btn btn-outline btn-primary ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
             >
               <Plus className="h-3 w-3" /> Add Session
             </button>
@@ -496,56 +528,63 @@ export default function ClassScheduleFields({
         )}
       </FormField>
 
-      <FormField size={fieldSize} label="Location" hint="A location or a meeting link is required — for an in-person class">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <input
-            type="text"
-            aria-label="Building"
-            name="building"
-            value={form.building}
-            onChange={handleInputChange}
-            placeholder="Building"
-            className={`input input-bordered ${inputCls} flex-1 min-w-[10rem] focus:input-primary`}
-          />
-          <input
-            type="text"
-            aria-label="Room"
-            name="room"
-            value={form.room}
-            onChange={handleInputChange}
-            placeholder="Room"
-            className={`input input-bordered ${inputCls} ${page ? "w-28" : "w-24"} shrink-0 focus:input-primary`}
-          />
+      <div className="space-y-4 border-t border-base-200 pt-6">
+        <div>
+          <h2 className="font-bold text-base">Attendance details</h2>
+          <p className="text-sm text-base-content/60">Add a room or an online meeting link, then set the class capacity.</p>
         </div>
-      </FormField>
-
-      <div className="grid grid-cols-2 gap-4">
-        <FormField size={fieldSize} label="Max Capacity" required>
-          <input
-            type="number"
-            name="maxStudents"
-            value={form.maxStudents}
-            onChange={handleInputChange}
-            required
-            min={1}
-            max={10}
-            className={`input input-bordered ${inputCls} w-full focus:input-primary`}
-          />
+        <FormField size={fieldSize} label="Location" hint="A location or a meeting link is required — for an in-person class">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <input
+              type="text"
+              aria-label="Building"
+              name="building"
+              value={form.building}
+              onChange={handleInputChange}
+              placeholder="Building"
+              className={`input input-bordered ${inputCls} flex-1 min-w-[10rem] focus:input-primary`}
+            />
+            <input
+              type="text"
+              aria-label="Room"
+              name="room"
+              value={form.room}
+              onChange={handleInputChange}
+              placeholder="Room"
+              className={`input input-bordered ${inputCls} ${page ? "w-28" : "w-24"} shrink-0 focus:input-primary`}
+            />
+          </div>
         </FormField>
 
-        <FormField size={fieldSize} label="Meeting Link" hint="Required if no location is set">
-          <input
-            type="url"
-            name="meetingLink"
-            value={form.meetingLink}
-            onChange={handleInputChange}
-            placeholder="https://meet.google.com/..."
-            className={`input input-bordered ${inputCls} w-full focus:input-primary`}
-          />
-        </FormField>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField size={fieldSize} label="Max Capacity" required>
+            <input
+              type="number"
+              name="maxStudents"
+              value={form.maxStudents}
+              onChange={handleInputChange}
+              required
+              min={1}
+              max={10}
+              className={`input input-bordered ${inputCls} w-full focus:input-primary`}
+            />
+          </FormField>
+
+          <FormField size={fieldSize} label="Meeting Link" hint="Required if no location is set">
+            <input
+              type="url"
+              name="meetingLink"
+              value={form.meetingLink}
+              onChange={handleInputChange}
+              placeholder="https://meet.google.com/..."
+              className={`input input-bordered ${inputCls} w-full focus:input-primary`}
+            />
+          </FormField>
+        </div>
+
       </div>
 
-      <div className={`${page ? "flex justify-end gap-2" : "modal-action"} pt-2`}>
+      <div className={`${page ? "flex flex-wrap justify-end gap-3 border-t border-base-200 pt-6" : "modal-action pt-2"}`}>
         <button
           type="button"
           onClick={onCancel}

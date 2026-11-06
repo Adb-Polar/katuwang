@@ -3,10 +3,13 @@
 import { act, createElement as h, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { signIn } from "next-auth/react";
 import LoginForm from "@/components/auth/LoginForm";
+import Modal from "../Modal";
 import ValidatedForm from "../ValidatedForm";
 import FormField from "../FormField";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
+import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ClassScheduleFields from "@/components/tutor/ClassScheduleFields";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import { reportServerFieldErrors } from "@/lib/formValidation";
@@ -16,13 +19,14 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next-auth/react", () => ({
-  signIn: vi.fn(async () => ({error: "Invalid email or password."})),
+  signIn: vi.fn(),
 }));
 
 let root: Root;
 let host: HTMLDivElement;
 
 beforeEach(() => {
+  vi.mocked(signIn).mockResolvedValue({ error: "INCORRECT_PASSWORD", status: 401, ok: false, url: null });
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   host = document.createElement("div");
   document.body.append(host);
@@ -127,6 +131,87 @@ describe("inline form validation", () => {
     expect(document.activeElement?.closest("[data-control-field]")?.querySelector('[role="alert"]')).not.toBeNull();
   });
 
+  it("places missing session date and time errors under each input and preserves the other error on correction", async () => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [{key: "one", topic: "Algebra", duration: 60}]}}
+      onCancel={() => {}} onSubmit={vi.fn()} />));
+    await submit();
+    const date = host.querySelector<HTMLInputElement>('input[type="date"]')!;
+    const time = host.querySelector<HTMLInputElement>('input[type="time"]')!;
+    for (const input of [date, time]) {
+      const feedback = input.closest("[data-control-field]")!.querySelector('[role="alert"]')!;
+      expect(feedback.textContent).toContain("Please fill in this field.");
+      expect(input.getAttribute("aria-describedby")).toContain(feedback.id);
+    }
+    await change(date, "2027-01-20");
+    expect(date.hasAttribute("aria-invalid")).toBe(false);
+    expect(time.getAttribute("aria-invalid")).toBe("true");
+    expect(time.closest("[data-control-field]")!.querySelector('[role="alert"]')).not.toBeNull();
+  });
+
+  it.each(["topic", "duration", "scheduledAt"])("maps a server %s error to the correct input in the second session", async (control) => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [
+        {key: "one", topic: "Algebra", date: "2027-01-20", time: "10:00", duration: 60},
+        {key: "two", topic: "Algebra", date: "2027-01-21", time: "10:00", duration: 60},
+      ]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["sessions", 1, control], message: "Please correct this session field."}],
+    }); });
+    const rows = host.querySelectorAll("[data-session-row]");
+    const target = rows[1].querySelector(`[data-session-control="${control}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-control-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Please correct this session field.");
+    expect(rows[0].querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it.each(["topic", "scheduledAt", "duration"])("shows single-session server %s errors beside the correct shared control", async (name) => {
+    await act(async () => root.render(<ValidatedForm>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="2027-01-20" time="10:00" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: [name], message: "Correct this session field."}],
+    }); });
+    const target = host.querySelector(`[name="${name}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-form-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Correct this session field.");
+  });
+
+  it("shows separate missing date and start time errors in the shared session form", async () => {
+    const save = vi.fn();
+    await act(async () => root.render(<ValidatedForm onSubmit={save}>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="" time="" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await submit();
+    expect(save).not.toHaveBeenCalled();
+    expect(host.querySelectorAll('[role="alert"]')).toHaveLength(2);
+    expect(host.querySelector('option[value="60"]')!.textContent).toBe("1hr");
+  });
+
+  it("keeps session dialog validation isolated from the surrounding edit-class form", async () => {
+    const outerSave = vi.fn();
+    const innerSave = vi.fn((event) => event.preventDefault());
+    await act(async () => root.render(<ValidatedForm onSubmit={outerSave}>
+      <Modal portal open onClose={() => {}} title="Session">
+        <ValidatedForm onSubmit={innerSave}><FormField label="Date"><input required type="date" /></FormField></ValidatedForm>
+      </Modal>
+    </ValidatedForm>));
+    const dialog = document.querySelector('[role="dialog"]')!;
+    expect(dialog.closest("form")).toBeNull();
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(outerSave).not.toHaveBeenCalled();
+    expect(innerSave).not.toHaveBeenCalled();
+    expect(dialog.querySelector('[role="alert"]')).not.toBeNull();
+    await change(dialog.querySelector("input")!, "2027-01-20");
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(innerSave).toHaveBeenCalledOnce();
+    expect(outerSave).not.toHaveBeenCalled();
+  });
+
   it("focuses server errors after a pending form re-enables its inputs", async () => {
     function PendingForm() {
       const [pending, setPending] = useState(false);
@@ -145,14 +230,59 @@ describe("inline form validation", () => {
     expect(host.querySelector('[role="alert"]')?.textContent).toBe("Email already exists.");
   });
 
-  it("focuses the password field when sign-in credentials are rejected", async () => {
+  it.each(["date", "time"])("clears a scheduling conflict when only %s changes and submits the corrected session", async (type) => {
+    const save = vi.fn((event) => event.preventDefault());
+    await act(async () => root.render(<ValidatedForm onSubmit={save}>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="2027-01-20" time="10:00" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["scheduledAt"], message: "This session conflicts with another session."}],
+    }); });
+    const date = host.querySelector<HTMLInputElement>('input[type="date"]')!;
+    expect(date.getAttribute("aria-invalid")).toBe("true");
+    await change(host.querySelector<HTMLInputElement>(`input[type="${type}"]`)!, type === "time" ? "12:00" : "2027-01-21");
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+    expect(date.hasAttribute("aria-invalid")).toBe(false);
+    expect(date.hasAttribute("aria-describedby")).toBe(false);
+    await submit();
+    expect(save).toHaveBeenCalledOnce();
+  });
+
+  it("keeps a conflict on another row or when an unrelated field changes", async () => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [
+        {key: "one", topic: "Algebra", date: "2027-01-20", time: "10:00", duration: 60},
+        {key: "two", topic: "Algebra", date: "2027-01-21", time: "10:00", duration: 60},
+      ]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["sessions", 1, "scheduledAt"], message: "Scheduling conflict."}],
+    }); });
+    const rows = host.querySelectorAll("[data-session-row]");
+    await change(rows[0].querySelector<HTMLInputElement>('input[type="time"]')!, "12:00");
+    expect(rows[1].querySelector('[role="alert"]')?.textContent).toBe("Scheduling conflict.");
+    await change(host.querySelector<HTMLInputElement>('input[name="building"]')!, "Building A");
+    expect(rows[1].querySelector('[role="alert"]')?.textContent).toBe("Scheduling conflict.");
+    await change(rows[1].querySelector<HTMLInputElement>('input[type="time"]')!, "12:00");
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it.each([
+    { code: "INCORRECT_PASSWORD", index: 1, message: "Incorrect password." },
+    { code: "EMAIL_NOT_FOUND", index: 0, message: "Email does not exist" },
+  ])("focuses the correct field with accessible inline feedback for $code", async ({ code, index, message }) => {
+    vi.mocked(signIn).mockResolvedValue({ error: code, status: 401, ok: false, url: null });
     await act(async () => root.render(<LoginForm />));
     const inputs = host.querySelectorAll("input");
     await change(inputs[0], "a@example.com");
     await change(inputs[1], "Wrong secret123");
     await submit();
-    expect(document.activeElement).toBe(inputs[1]);
-    expect(inputs[1].closest("[data-form-field]")?.querySelector('[role="alert"]')?.textContent).toContain("Invalid email or password");
+    expect(document.activeElement).toBe(inputs[index]);
+    const feedback = inputs[index].closest("[data-form-field]")!.querySelector('[role="alert"]')!;
+    expect(feedback.textContent).toBe(message);
+    expect(inputs[index].getAttribute("aria-invalid")).toBe("true");
+    expect(inputs[index].getAttribute("aria-describedby")).toContain(feedback.id);
+    expect(inputs[1 - index].hasAttribute("aria-invalid")).toBe(false);
   });
 
 });

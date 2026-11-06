@@ -138,8 +138,8 @@ export default function SessionTestsCard({
               key={row.sessionId}
               className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
             >
-              <div className="min-w-0">
-                <div className="font-semibold text-base-content/80 truncate">
+              <div className="min-w-0 max-w-full">
+                <div className="font-semibold text-base-content/80 break-words">
                   {row.topic}: {row.test.title}
                 </div>
                 {audience === "learner" && (

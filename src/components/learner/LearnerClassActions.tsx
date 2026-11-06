@@ -103,7 +103,7 @@ export default function LearnerClassActions({
       <ConfirmDialog
         open={confirmUnenroll}
         title="Unenroll from this class?"
-        description="You can browse and re-enroll later if seats are still available."
+        description="You can re-enroll before the first session starts if seats are still available."
         confirmLabel="Unenroll"
         tone="danger"
         loading={loading}

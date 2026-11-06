@@ -147,6 +147,26 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(json.error).toMatch(/no upcoming sessions/i);
   });
 
+  it.each(["SCHEDULED", "COMPLETED", "CANCELLED"])(
+    "rejects a started %s session even when later sessions remain",
+    async (status) => {
+      getServerSessionMock.mockResolvedValue(learner);
+      tutorClassFindUnique.mockResolvedValue({
+        ...futureClass,
+        sessions: [
+          ...futureClass.sessions,
+          { id: "past", status, scheduledAt: new Date(Date.now() - 60_000), duration: 60 },
+        ],
+      });
+
+      const res = await POST(makeRequest("POST"), makeParams());
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/already started/i);
+      expect(enrollmentCreate).not.toHaveBeenCalled();
+      expect(notificationCreate).not.toHaveBeenCalled();
+    }
+  );
+
   it("returns 409 when the class is full", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     tutorClassFindUnique.mockResolvedValue({
@@ -187,6 +207,17 @@ describe("POST /api/classes/[classId]/enroll", () => {
     );
   });
 
+  it.each(["GRADE_7", "GRADE_12", null])("allows a Grade 9 learner to enroll in a %s class", async (gradeLevel) => {
+    getServerSessionMock.mockResolvedValue({ user: { ...learner.user, gradeLevel: "GRADE_9" } });
+    tutorClassFindUnique.mockResolvedValue({ ...futureClass, gradeLevel });
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
+    notificationCreate.mockResolvedValue({ id: "n1" });
+
+    const res = await POST(makeRequest("POST"), makeParams());
+    expect(res.status).toBe(201);
+  });
+
   it("returns 201 on successful enrollment and notifies the tutor", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     tutorClassFindUnique.mockResolvedValue(futureClass);
@@ -207,33 +238,14 @@ describe("POST /api/classes/[classId]/enroll", () => {
     );
   });
 
-  it("returns 403 when tutor grade level is lower than student grade level", async () => {
-    getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
-    tutorClassFindUnique.mockResolvedValue({
-      ...futureClass,
-      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_8" } },
-    });
-
+  it("allows enrollment with a tutor below the learner's grade", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue({ ...futureClass, gradeLevel: "GRADE_8",
+      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_8" } } });
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
     const res = await POST(makeRequest("POST"), makeParams());
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot enroll in a class taught by a tutor in a lower grade level/i);
-    expect(enrollmentCreate).not.toHaveBeenCalled();
-  });
-
-  it("returns 403 when class target grade level is lower than student grade level", async () => {
-    getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
-    tutorClassFindUnique.mockResolvedValue({
-      ...futureClass,
-      gradeLevel: "GRADE_8", // target grade is 8, lower than student's 9
-      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_10" } },
-    });
-
-    const res = await POST(makeRequest("POST"), makeParams());
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot enroll in a class targeted at a lower grade level than your own/i);
-    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
   });
 
   it("allows enrollment when class target grade level is null (open) and tutor grade >= student grade", async () => {

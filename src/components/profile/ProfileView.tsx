@@ -74,6 +74,20 @@ export default function ProfileView({
         actions={<AnonymousIdBadge id={anonymousId} role={idRole} size="md" showIcon />}
       />
 
+      {idRole === "TUTOR" && (
+        <section aria-label="Tutor grade and section" className="rounded-xl border border-base-300 bg-base-100 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-bold">Grade and section</h2>
+              <p className="mt-1 text-sm text-base-content/70">
+                {gradeText === "—" ? "Grade not set" : gradeText} · {section || "Section not set"}
+              </p>
+            </div>
+            <Link href={editHref} className="btn btn-outline btn-primary btn-sm">Update details</Link>
+          </div>
+        </section>
+      )}
+
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Read-only identity */}
         <section className="card kt-card lg:col-span-2">

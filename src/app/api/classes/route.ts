@@ -109,7 +109,7 @@ export async function GET(req: NextRequest) {
     const mineTab: MineTab =
       tabParam === "completed" || tabParam === "cancelled" ? tabParam : "upcoming";
 
-    const browseWhere = browseClassesWhere(session.user.id, learnerGrade);
+    const browseWhere = browseClassesWhere(session.user.id);
     const mineWhere = myClassesWhere(session.user.id);
     const filteredBrowse = scope === "browse" && hasFilters;
     // The unfiltered browse list is ranked by light personalization (see

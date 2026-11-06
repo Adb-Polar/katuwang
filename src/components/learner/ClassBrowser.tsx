@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import type { GradeLevel } from "@prisma/client";
-import { GRADE_LEVELS, getEligibleClassTargetGradesForStudent } from "@/lib/gradeLevels";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SearchInput from "@/components/ui/SearchInput";
@@ -69,15 +67,6 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const isBrowse = scope === "browse";
   const isMine = scope === "mine";
 
-  const { data: sessionData } = useSession();
-  const learnerGrade = sessionData?.user?.gradeLevel;
-  const eligibleGradeLevels = learnerGrade
-    ? getEligibleClassTargetGradesForStudent(learnerGrade)
-    : null;
-  const displayedGradeLevels = eligibleGradeLevels
-    ? GRADE_LEVELS.filter((g) => eligibleGradeLevels.includes(g.value as GradeLevel))
-    : GRADE_LEVELS;
-
   const {
     data: classes,
     total,
@@ -125,6 +114,11 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
             />
           )}
 
+          {isBrowse && (
+            <p className="text-sm text-base-content/65">
+              Explore classes across Grades 7–12. You can enroll at any grade level.
+            </p>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <SearchInput
               label="Search classes"
@@ -138,8 +132,8 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               value={gradeLevel}
               onChange={(e) => { setGradeLevel(e.target.value); setSubject(""); setTopic(""); }}
             >
-              <option value="">All grades</option>
-              {displayedGradeLevels.map((g) => (
+              <option value="">All grade levels (7–12)</option>
+              {GRADE_LEVELS.map((g) => (
                 <option key={g.value} value={g.value}>
                   {g.label}
                 </option>

@@ -13,7 +13,7 @@
   }
 
   var saved = null;
-  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  try { saved = localStorage.getItem(KEY); } catch {}
   apply(saved);
 
   function effective() {
@@ -37,7 +37,7 @@
       btn.addEventListener("click", function () {
         var next = effective() === "dark" ? "light" : "dark";
         apply(next);
-        try { localStorage.setItem(KEY, next); } catch (e) {}
+        try { localStorage.setItem(KEY, next); } catch {}
         Array.prototype.forEach.call(
           document.querySelectorAll("[data-theme-toggle]"), relabel
         );

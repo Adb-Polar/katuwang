@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { catalogFixture } from "@/test/fixtures/catalog";
 
 const {
   getServerSessionMock,
@@ -22,6 +23,7 @@ const {
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => catalogFixture) },
     topicRequest: { findMany: findManyMock, count: countMock, create: createMock },
     user: { findFirst: userFindFirstMock },
     tutorProfile: { findUnique: vi.fn() },
@@ -50,7 +52,7 @@ function makeRequest(body: unknown) {
 }
 
 const learner = { user: { id: "L1", role: "STUDENT_LEARNER", anonymousId: "STU-0001", gradeLevel: "GRADE_9" } };
-const validBody = { subject: "MATH", topics: ["Algebraic Expressions"], gradeLevel: "GRADE_9" };
+const validBody = { subject: "MATH", topics: ["Quadratic Equations"], gradeLevel: "GRADE_9" };
 
 const dbRow = {
   id: "r1",
@@ -59,7 +61,7 @@ const dbRow = {
   note: null,
   status: "OPEN",
   createdAt: new Date(),
-  topics: [{ topic: "Algebraic Expressions" }],
+  topics: [{ topic: "Quadratic Equations" }],
   slots: [],
   directedTutor: null,
   fulfilledClass: null,
@@ -80,7 +82,7 @@ describe("GET /api/learner/topic-requests", () => {
     expect(res.status).toBe(200);
     expect(findManyMock).toHaveBeenCalledWith(expect.objectContaining({ where: { learnerId: "L1" } }));
     const json = await res.json();
-    expect(json[0].topics).toEqual(["Algebraic Expressions"]);
+    expect(json[0].topics).toEqual(["Quadratic Equations"]);
     expect(json[0].directedTo).toBeNull();
   });
 });

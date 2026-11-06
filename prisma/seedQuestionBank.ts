@@ -100,10 +100,8 @@ export async function seedQuestionBankDatabase() {
   const allQuestions: DbQuestion[] = [];
   const allOptions: DbOption[] = [];
 
-  let topicCounter = 0;
   for (const s of subjects) {
     for (const t of s.topics) {
-      topicCounter++;
       const hint = competencyMap.get(`${s.slug}::${t.name}`);
       const generated = generateQuestionsForTopic(s.slug, s.name, t.name, hint);
 

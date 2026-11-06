@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 const MAX_WIDTH = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl" } as const;
@@ -20,6 +21,7 @@ export default function Modal({
   title,
   size = "sm",
   bare = false,
+  portal = false,
   closeOnBackdrop = true,
   children,
 }: {
@@ -29,6 +31,8 @@ export default function Modal({
   size?: keyof typeof MAX_WIDTH;
   /** Skip the built-in header/close button — the child renders its own chrome. */
   bare?: boolean;
+  /** Render outside a surrounding form to keep dialog forms independent. */
+  portal?: boolean;
   closeOnBackdrop?: boolean;
   children: ReactNode;
 }) {
@@ -81,11 +85,12 @@ export default function Modal({
     };
   }, [open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  const content = (
     <div
       className="modal modal-open"
+      onSubmit={(event) => event.stopPropagation()}
       role="dialog"
       aria-modal="true"
       aria-label={title}
@@ -130,4 +135,5 @@ export default function Modal({
       />
     </div>
   );
+  return portal ? createPortal(content, document.body) : content;
 }

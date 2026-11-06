@@ -67,6 +67,8 @@ export default function GroupedBarChart({
   title,
   data,
   xKey,
+  tickKey = xKey,
+  minChartWidth,
   series,
   unit,
   yDomain,
@@ -78,6 +80,9 @@ export default function GroupedBarChart({
   title: string;
   data: ChartRow[];
   xKey: string;
+  /** Optional short axis label; tooltip and table retain the full xKey. */
+  tickKey?: string;
+  minChartWidth?: number;
   series: ChartSeries[];
   unit?: string;
   yDomain?: [number, number];
@@ -96,7 +101,7 @@ export default function GroupedBarChart({
   // would show the first's numbers. Run the axis on a unique synthetic index and
   // map back to the real label for ticks + the tooltip title.
   const chartData: ChartRow[] = data.map((d, i) => ({ ...d, __x: String(i) }));
-  const xTickLabel = (v: unknown) => String(chartData[Number(v)]?.[xKey] ?? "");
+  const xTickLabel = (v: unknown) => String(chartData[Number(v)]?.[tickKey] ?? "");
 
   const columns: DataColumn<ChartRow>[] =
     tableColumns ??
@@ -116,48 +121,50 @@ export default function GroupedBarChart({
       <div className="card-body gap-2 p-5">
         <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">{title}</h3>
         {hasData ? (
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
-                <XAxis
-                  dataKey="__x"
-                  tickFormatter={xTickLabel}
-                  tick={{ fontSize: 10, fill: c.text }}
-                  interval={0}
-                  angle={-20}
-                  textAnchor="end"
-                  height={48}
-                />
-                <YAxis
-                  allowDecimals={false}
-                  domain={yDomain}
-                  tick={{ fontSize: 10, fill: c.text }}
-                  tickFormatter={unit ? (v) => `${v}${unit}` : undefined}
-                />
-                <Tooltip
-                  cursor={{ fill: c.grid, opacity: 0.4 }}
-                  content={(props) => renderTooltip(props, series, unit ?? "", xKey, missingLabel)}
-                />
-                <Legend wrapperStyle={{ fontSize: 11 }} itemSorter={() => 0} />
-                {series.map((s) => (
-                  <Bar
-                    key={s.key}
-                    dataKey={s.key}
-                    name={s.name}
-                    fill={s.color}
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={40}
+          <div className="w-full overflow-x-auto" tabIndex={minChartWidth ? 0 : undefined} aria-label={minChartWidth ? "Session comparison chart; scroll horizontally for more sessions" : undefined}>
+            <div className="h-56 w-full" style={{ minWidth: minChartWidth }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
+                  <XAxis
+                    dataKey="__x"
+                    tickFormatter={xTickLabel}
+                    tick={{ fontSize: 10, fill: c.text }}
+                    interval={0}
+                    angle={-20}
+                    textAnchor="end"
+                    height={48}
                   />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
+                  <YAxis
+                    allowDecimals={false}
+                    domain={yDomain}
+                    tick={{ fontSize: 10, fill: c.text }}
+                    tickFormatter={unit ? (v) => `${v}${unit}` : undefined}
+                  />
+                  <Tooltip
+                    cursor={{ fill: c.grid, opacity: 0.4 }}
+                    content={(props) => renderTooltip(props, series, unit ?? "", xKey, missingLabel)}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 11 }} itemSorter={() => 0} />
+                  {series.map((s) => (
+                    <Bar
+                      key={s.key}
+                      dataKey={s.key}
+                      name={s.name}
+                      fill={s.color}
+                      radius={[4, 4, 0, 0]}
+                      maxBarSize={40}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         ) : (
           <p className="py-8 text-center text-xs italic text-base-content/40">{emptyHint}</p>
         )}
         {footer}
-        <DataTable rows={data} columns={columns} />
+        <div className="overflow-x-auto"><DataTable rows={data} columns={columns} /></div>
       </div>
     </div>
   );

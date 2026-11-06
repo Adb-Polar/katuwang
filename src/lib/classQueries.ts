@@ -25,7 +25,8 @@ export function gradeEligibilityWhere(
 
 /**
  * Classes a learner may see: every SCHEDULED + published class with at least one
- * upcoming SCHEDULED session, plus any class the learner is already enrolled in.
+ * upcoming SCHEDULED session and no session that has started, plus any class
+ * the learner is already enrolled in.
  * Shared by the class browser (`GET /api/classes`) and the matcher so the two
  * never drift apart.
  */
@@ -36,7 +37,7 @@ export function browsableOrEnrolledWhere(
   const schedWhere: Prisma.TutorClassWhereInput = {
     status: "SCHEDULED",
     published: true,
-    sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
+    sessions: enrollmentSessionsWhere(),
     ...(learnerGrade ? gradeEligibilityWhere(learnerGrade) : {}),
   };
 
@@ -48,25 +49,26 @@ export function browsableOrEnrolledWhere(
   };
 }
 
+/** Enrollment closes at the earliest session start, regardless of session status. */
+function enrollmentSessionsWhere(): NonNullable<Prisma.TutorClassWhereInput["sessions"]> {
+  const now = new Date();
+  return {
+    some: { status: "SCHEDULED", scheduledAt: { gt: now } },
+    none: { scheduledAt: { lte: now } },
+  };
+}
+
+export function hasClassStarted(sessions: { scheduledAt: Date | string }[], now = Date.now()): boolean {
+  return sessions.some((session) => new Date(session.scheduledAt).getTime() <= now);
+}
+
 /** The "Browse" tab: enrollable classes the learner is NOT already in. */
-export function browseClassesWhere(
-  learnerId: string,
-  learnerGrade?: GradeLevel | string | null
-): Prisma.TutorClassWhereInput {
-  const base: Prisma.TutorClassWhereInput = {
+export function browseClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
+  return {
     status: "SCHEDULED",
     published: true,
-    sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
+    sessions: enrollmentSessionsWhere(),
     enrollments: { none: { learnerId } },
-  };
-
-  if (!learnerGrade) return base;
-
-  const gradeFilter = gradeEligibilityWhere(learnerGrade);
-  return {
-    ...base,
-    tutorProfile: gradeFilter.tutorProfile,
-    OR: gradeFilter.OR,
   };
 }
 

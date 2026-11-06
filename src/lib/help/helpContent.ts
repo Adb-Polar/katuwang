@@ -297,7 +297,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       { label: "Certifications", href: "/admin/assessment/certifications" },
       { label: "Class Appeals", href: "/admin/class-appeals" },
       { label: "Question Bank", href: "/admin/assessment/question-bank" },
-      { label: "Reports", href: "/admin/reports" },
+      { label: "Analytics", href: "/admin/reports" },
       { label: "Audit Log", href: "/admin/audit-log" },
       { label: "Subjects & Topics", href: "/admin/subjects" },
       { label: "Settings", href: "/admin/settings" },
@@ -403,7 +403,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       },
       {
         category: "Analytics",
-        question: "What do the Reports show?",
+        question: "What does Analytics show?",
         answer:
           "Descriptive aggregates only — user counts, class and certification totals, enrollment trends. No prediction or data-mining by design.",
       },

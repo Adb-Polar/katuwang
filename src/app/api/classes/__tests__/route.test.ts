@@ -122,19 +122,11 @@ describe("GET /api/classes", () => {
     expect(call.where).toEqual({
       status: "SCHEDULED",
       published: true,
-      sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } } },
-      enrollments: { none: { learnerId: "u1" } },
-      tutorProfile: {
-        user: {
-          gradeLevel: {
-            in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"],
-          },
-        },
+      sessions: {
+        some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } },
+        none: { scheduledAt: { lte: expect.any(Date) } },
       },
-      OR: [
-        { gradeLevel: null },
-        { gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] } },
-      ],
+      enrollments: { none: { learnerId: "u1" } },
     });
     expect(call.skip).toBeUndefined();
     expect(call.take).toBeUndefined();
@@ -171,6 +163,32 @@ describe("GET /api/classes", () => {
     const json = await res.json();
     expect(json.classes.map((c: { id: string }) => c.id)).toEqual(["match", "newer"]);
   });
+
+  it("shows every grade to a Grade 9 learner without a grade visibility restriction", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    const grades = ["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12", null];
+    findManyMock.mockResolvedValue(grades.map((gradeLevel, i) => browseRow(`c${i}`, { gradeLevel })));
+    countMock.mockResolvedValue(7);
+
+    const res = await GET(makeRequest());
+    const json = await res.json();
+    expect(res.status).toBe(200);
+    expect(json.classes).toHaveLength(7);
+    expect(json.classes.map((c: { gradeLevel: string | null }) => c.gradeLevel)).toEqual(expect.arrayContaining(grades));
+    expect(findManyMock.mock.calls[0][0].where).not.toHaveProperty("gradeLevel");
+    expect(findManyMock.mock.calls[0][0].where).not.toHaveProperty("tutorProfile");
+    expect(findManyMock.mock.calls[0][0].where).not.toHaveProperty("OR");
+  });
+
+  it.each(["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"])(
+    "lets a learner explicitly filter classes at %s",
+    async (gradeLevel) => {
+      getServerSessionMock.mockResolvedValue(learner);
+      const res = await GET(makeRequest(`?gradeLevel=${gradeLevel}`));
+      expect(res.status).toBe(200);
+      expect(findManyMock.mock.calls[0][0].where.AND[1]).toEqual({ gradeLevel });
+    }
+  );
 
   it("ANDs browse filters (q / subject / gradeLevel) onto the base browse where", async () => {
     getServerSessionMock.mockResolvedValue(learner);

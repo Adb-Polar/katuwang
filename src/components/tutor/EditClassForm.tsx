@@ -229,7 +229,7 @@ export default function EditClassForm({
         <fieldset disabled={locked} className="contents">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Main column */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="min-w-0 lg:col-span-2 space-y-6">
               <div className="card kt-card">
                 <div className="card-body gap-4">
                   <h2 className="card-title text-sm font-bold">Class Info</h2>
@@ -387,7 +387,7 @@ export default function EditClassForm({
             </div>
 
             {/* Sidebar */}
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
               <div className="card kt-card">
                 <div className="card-body gap-3">
                   <h2 className="card-title text-sm font-bold">At a Glance</h2>
