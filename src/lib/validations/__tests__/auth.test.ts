@@ -81,6 +81,7 @@ describe("registerSchema", () => {
 
   it("rejects when consentGiven is missing", () => {
     const { consentGiven, ...rest } = baseLearner();
+    expect(consentGiven).toBe(true);
     const result = registerSchema.safeParse(rest);
     expect(result.success).toBe(false);
   });
