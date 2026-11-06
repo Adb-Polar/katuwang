@@ -79,3 +79,11 @@ Fix 7 deployed as b0296958b65c0e2f09e7ce5917865bfffe11d992, Render dep-dbmsu6nav
 Learner session tests and tutor qualification quizzes conditionally transition IN_PROGRESS attempts inside the transaction before any item grades, notifications or certification changes. Losers get 409. Learner access is checked again through the same transaction client after claiming, so restrictions changed while waiting roll the claim back. Tutor certification updates serialize on the tutor profile and re-read the existing badge. Five real-MariaDB tests cover competing scores, notification uniqueness, existing certification, concurrent pass/fail attempts and withdrawal-triggered rollback.
 
 Fix 8 pre-commit checks: 40 focused submission/access tests and 5 real-MariaDB integration tests pass. Full suite 1,050 passes / 17 baseline failures / 20 opt-in DB tests skipped. TypeScript, changed-file lint and production build pass. No schema change.
+
+Fix 8 deployed as d17e7185be4537e11198589dbb603119f081ae29, Render dep-dbmt5dgu01pc739guv6g, live 2026-11-06 21:17 PHT. Browser plus three API submissions returned [200,409,409,409]. Stored score/answer matched the winning response, one tutor notification was emitted, reload showed a read-only finalized attempt, and repeat submission returned 409. Fixtures cleaned; no page or error-level runtime logs.
+
+## Fix 9: single-use reset tokens
+
+Hash outside the transaction, lock the token row, then conditionally consume only an unused and currently unexpired token. Read the clock after acquiring the lock. Password hash and session-version update commit in the same transaction; losing or expired claims return the existing generic invalid-link response without a user write. Real MariaDB tests race four different passwords and expire a token after the initial lookup. Positive browser reset QA remains isolated, preserving seeded passwords as requested.
+
+Fix 9 pre-commit validation: 7 focused tests and 5 real-MariaDB reset/session-version tests pass. Full suite 1,051 passes / 17 baseline failures / 22 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Isolated Chromium reset succeeded, reused token returned 400, old session returned 401, fresh login succeeded, and session version increased once; no page errors. Seeded dev-test passwords unchanged.

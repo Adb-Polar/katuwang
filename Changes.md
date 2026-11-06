@@ -4214,3 +4214,8 @@ Acceptance now locks and conditionally claims an eligible open request before cr
 ## 2026-11-06 — Claim each assessment submission once
 
 Learner and tutor assessments now claim IN_PROGRESS attempts atomically before writing grades or side effects. Only the winning transaction finalizes the attempt. Learner access is rechecked on the transaction connection; changed restrictions roll the claim back. Qualification updates serialize and re-read certification state to preserve earned badges across competing attempts. Added five guarded real-MariaDB tests and focused loser/no-write regressions. Two-tutor acceptance passed dev-test verification (b029695).
+
+
+## 2026-11-06 — Consume reset tokens atomically
+
+Password reset locks and conditionally consumes an unused, unexpired token before updating the password and session version in the same transaction. Rechecks use the post-lock clock, so hashing/waiting cannot bypass expiry. Added losing-claim coverage and real-MariaDB reuse/expiry tests. Single-submission live verification passed on dev-test (d17e718) with one score and notification.

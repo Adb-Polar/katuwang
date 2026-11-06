@@ -954,4 +954,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: two-tutor browser/API b029695; history via DB integration] Request acceptance: on dev-test, accept a disposable request with duplicate competing calls; verify one class, accepted linkage, history and learner notification; repeat must return 409. Real DB tests cover two different tutors, expiry, rollback and stale learner edits.
 
-[ ] Assessment submission: race browser and duplicate API submissions on a disposable learner test; verify one 200, remaining 409, one persisted score and one tutor notification. Qualification concurrency and access-change rollback use real isolated MariaDB tests.
+[Good: browser/API d17e718 and real DB races] Assessment submission: race browser and duplicate API submissions on a disposable learner test; verify one 200, remaining 409, one persisted score and one tutor notification. Qualification concurrency and access-change rollback use real isolated MariaDB tests.
+
+[ ] Reset token: complete a valid reset through the isolated production app, verify reuse fails and new-password sign-in works; on dev-test verify a fabricated invalid link is rejected with a generic error. Keep demo credentials unchanged. Real DB races verify one password/version update and expiry after lookup.
