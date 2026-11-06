@@ -4229,3 +4229,8 @@ Completed sessions reject reopening and schedule/topic rewrites. Session and cla
 ## 2026-11-06 — Unify any-grade learner access
 
 Learners can discover tutors/classes, request tutoring and enroll across grades through the shared policy. Removed implicit grade query cutoffs from discovery, search and request pools. Auto Match uses grade for relevance, keeping all catalog topics available; explicit browse filters and tutor class target-grade validation remain. Added all-grade/missing-grade matrix coverage and updated endpoint regressions and stale canonical catalog fixtures. Session history c99df65 passed live browser checks.
+
+
+## 2026-11-06 — Require full requested-topic coverage
+
+Request acceptance checks every requested topic before claiming and against the locked snapshot. Linked classes also reject later subject/topic edits that break promised coverage. The tutor form explains missing certifications and requires full coverage; learner cards show actual linked class topics. Five MariaDB acceptance tests pass, including partial/no-side-effects and complete coverage. Any-grade fe7f1f4 passed Grade 12 browser enrollment with a Grade 10 tutor / Grade 9 class.

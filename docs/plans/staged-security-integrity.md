@@ -103,3 +103,11 @@ Fix 10 deployed as c99df6597d764b0a97cac5e2b8cf8ae795c04bfb, Render dep-dbmtf2vf
 Use one unrestricted grade policy for class/tutor discovery, enrollment, profiles and request pools. Keep explicit grade filters, class-topic/target validity and relevance ranking.
 
 Fix 11 pre-commit validation: all 142 focused grade/discovery/request/enrollment/search/chatbot/match tests pass (137 routes/policy plus 5 match tests). Full suite 1,108 passes / 11 remaining baseline failures / 24 opt-in tests skipped. Corrected canonical catalog fixtures in touched request/match tests resolve six baseline failures. TypeScript, changed-file lint and production build pass. Auto Match grade is a relevance signal and does not narrow topic validation or its picker.
+
+Fix 11 deployed as fe7f1f4a6a08daf59e403ef90c8d97bb87aa655b, Render dep-dbmtjuon74is73bg3pig, live 2026-11-06 21:47 PHT. Grade 12 browser saw Grade 10 tutor / Grade 9 class, request action, cross-grade Auto Match and enrollment 201; chatbot 200. No page errors. Temporary class withdrawn/deleted.
+
+## Fix 12: complete requested-topic coverage
+
+Acceptance requires all requested topics, rechecked from the locked snapshot. Tutors missing requested certifications cannot open a partial acceptance form. Learner request cards display actual linked class topics.
+
+Fix 12 pre-commit validation: 51 focused route/coverage tests and 5 real-MariaDB acceptance tests pass. Full suite 1,112 passes / 11 baseline failures / 25 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Also prevent later linked-class edits from removing promised coverage.

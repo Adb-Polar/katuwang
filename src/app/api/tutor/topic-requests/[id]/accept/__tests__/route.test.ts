@@ -51,7 +51,7 @@ vi.mock("@/lib/prisma", () => ({
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 
-vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({}), recordRequestHistory: vi.fn() }));
+vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({ topics: ["Algebraic Expressions"] }), recordRequestHistory: vi.fn() }));
 
 import { POST } from "@/app/api/tutor/topic-requests/[id]/accept/route";
 
@@ -86,7 +86,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     getSettingMock.mockResolvedValue(true);
     topicRequestClaim.mockResolvedValue({ count: 1 });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000) });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions" }], expiresAt: new Date(Date.now() + 86400000) });
     topicRequestFindFirst.mockResolvedValue({ id: "r1" }); // eligible by default
     topicCertFindMany.mockResolvedValue([{ subject: "MATH", topic: "Algebraic Expressions" }]);
     classSessionFindMany.mockResolvedValue([]);
@@ -103,7 +103,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
 
   it("rejects a request at its deadline", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
-    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(0) });
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", topics: [{ topic: "Algebraic Expressions" }], expiresAt: new Date(0) });
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(409);
     expect(tutorClassCreate).not.toHaveBeenCalled();
@@ -125,6 +125,17 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
+  it("rejects partial coverage before claiming or creating anything", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000), topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }] });
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("Quadratic Equations");
+    expect(topicRequestClaim).not.toHaveBeenCalled();
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
+  });
+
   it("accepts when the request grade level is higher than the tutor grade level", async () => {
     getServerSessionMock.mockResolvedValue(tutor); // tutor is GRADE_10
     topicRequestFindUnique.mockResolvedValue({
@@ -133,6 +144,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
       subject: "MATH",
       learnerId: "L1",
       expiresAt: new Date(Date.now() + 86400000),
+      topics: [{ topic: "Algebraic Expressions" }],
       gradeLevel: "GRADE_11", // higher than tutor's GRADE_10
     });
     const res = await POST(makeRequest(validBody()), { params });

@@ -79,6 +79,23 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB request acceptance
     expect(await prisma.topicRequestHistory.count({ where: { requestId } })).toBe(1);
     expect(await prisma.notification.count({ where: { userId: learnerId, type: "TOPIC_REQUEST_ACCEPTED" } })).toBe(1);
   });
+  it("rejects partial coverage without side effects and accepts complete coverage", async () => {
+    const second = "Quadratic Equations";
+    await prisma.topicRequestTopic.create({ data: { requestId, topic: second } });
+    await prisma.topicCertification.create({ data: { tutorProfileId: tutorIds[0], subject: "MATH", topic: second, status: "CERTIFIED" } });
+    expect((await accepting(0)).status).toBe(400);
+    expect((await prisma.topicRequest.findUniqueOrThrow({ where: { id: requestId } })).status).toBe("OPEN");
+    expect(await prisma.tutorClass.count({ where: { tutorProfileId: { in: tutorIds } } })).toBe(0);
+    expect(await prisma.topicRequestHistory.count({ where: { requestId } })).toBe(0);
+    expect(await prisma.notification.count({ where: { userId: learnerId } })).toBe(0);
+    const response = await asUser(0, "STUDENT_TUTOR", () => accept(req("POST", {
+      subject: "MATH", gradeLevel: null, topics: [topic, second], maxStudents: 2,
+      meetingLink: "https://example.test/qa", sessions: [{ topic, scheduledAt: future, duration: 60 }],
+    }), { params: Promise.resolve({ id: requestId }) }));
+    expect(response.status).toBe(201);
+    const linked = await prisma.topicRequest.findUniqueOrThrow({ where: { id: requestId }, include: { fulfilledClass: { include: { topics: true } } } });
+    expect(linked.fulfilledClass!.topics.map(t => t.topic).sort()).toEqual([topic, second].sort());
+  });
   it("rolls back the claim when class creation fails", async () => {
     const conflict = await prisma.tutorClass.create({ data: { code: `${codePrefix}-collision`, tutorProfileId: tutorIds[0], subject: "MATH", maxStudents: 1 } });
     mocks.code.mockResolvedValue(conflict.code);

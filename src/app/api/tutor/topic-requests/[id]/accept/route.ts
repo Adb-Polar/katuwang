@@ -1,3 +1,4 @@
+import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -52,7 +53,7 @@ export async function POST(
 
     const request = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, expiresAt: true, updatedAt: true },
+      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, topics: { select: { topic: true } }, expiresAt: true, updatedAt: true },
     });
     if (!request) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
@@ -114,6 +115,11 @@ export async function POST(
     const topics = [...canonicalByKey.values()];
     if (topics.length === 0) {
       return NextResponse.json({ error: "Please select at least one topic." }, { status: 400 });
+    }
+
+    const missingTopics = missingRequestedTopics(request.topics.map(({ topic }) => topic), topics);
+    if (missingTopics.length > 0) {
+      return NextResponse.json({ error: `The class must cover every requested topic. Missing: ${missingTopics.join(", ")}.` }, { status: 400 });
     }
 
     const sessionTopics = sessions.map((s) => canonicalByKey.get(normalizeTopic(s.topic).toLowerCase()));
@@ -185,6 +191,9 @@ export async function POST(
         throw new ClassWriteError("Target grade cannot be higher than your current grade level.", 400);
       }
       const before = await requestSnapshot(tx, id);
+      if (missingRequestedTopics(before.topics, topics).length > 0) {
+        throw new ClassWriteError("The request topics changed. Refresh and include every requested topic.", 409);
+      }
       const claimed = await tx.topicRequest.updateMany({
         where: { id, ...tutorPoolWhere(tutorProfile.id, liveCertified, liveTutor.user.gradeLevel),
           subject, updatedAt: request.updatedAt },

@@ -20,6 +20,7 @@ const requestInclude = {
     select: {
       id: true,
       subject: true,
+      topics: { select: { topic: true } },
       sessions: {
         where: { status: "SCHEDULED" as const },
         orderBy: { scheduledAt: "asc" as const },
@@ -47,6 +48,7 @@ function serialize(r: {
     | {
         id: string;
         subject: string;
+        topics: { topic: string }[];
         sessions: { scheduledAt: Date }[];
         tutorProfile: { user: { anonymousId: string } };
       }
@@ -68,6 +70,7 @@ function serialize(r: {
       ? {
           id: r.fulfilledClass.id,
           subject: r.fulfilledClass.subject,
+          topics: r.fulfilledClass.topics.map(({ topic }) => topic),
           nextSessionAt: r.fulfilledClass.sessions[0]?.scheduledAt ?? null,
           tutorAnonymousId: r.fulfilledClass.tutorProfile.user.anonymousId,
         }

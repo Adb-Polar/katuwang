@@ -1,3 +1,4 @@
+import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -153,6 +154,18 @@ export async function PATCH(
 
     const updatedClass = await prisma.$transaction(async (tx) => {
       await lockClassRow(tx, classId);
+      if (topics || rawSubject !== undefined) {
+        const requests = await tx.topicRequest.findMany({
+          where: { fulfilledClassId: classId, status: { in: ["ACCEPTED", "ENROLLED", "FULFILLED"] } },
+          select: { subject: true, topics: { select: { topic: true } } },
+        });
+        for (const request of requests) {
+          if ((rawSubject !== undefined && rawSubject !== request.subject) ||
+            (topics && missingRequestedTopics(request.topics.map(({ topic }) => topic), topics).length > 0)) {
+            throw new ClassWriteError("This class must keep the subject and every topic promised to its linked requests.", 400);
+          }
+        }
+      }
       if (updates.maxStudents !== undefined) {
         const enrollmentCount = await tx.classEnrollment.count({ where: { classId } });
         if (updates.maxStudents < enrollmentCount) {

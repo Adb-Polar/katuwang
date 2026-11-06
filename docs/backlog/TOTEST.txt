@@ -961,3 +961,5 @@ Email verification OTP (codex/email-verification-otp)
 [] Session history: completed session reopening/topic/time changes return 409; deleting a scheduled session or class with test records returns 409; cancellation preserves tests and attempts. Database foreign key protects against direct/cascading deletion and test-creation races.
 
 [] Any-grade policy: Grade 12 learner sees a lower-grade tutor and class in Browse/search/profile and Auto Match, can request/enroll, and receives chatbot recommendations. Explicit grade filters still apply; tutor cannot target above their own grade.
+
+[] Request coverage: rejecting a two-topic request with one class topic leaves it OPEN with no class/notification; accepting all topics succeeds; learner sees actual class coverage; later edits cannot remove promised topics or change the subject.

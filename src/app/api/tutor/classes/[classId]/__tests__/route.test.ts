@@ -408,6 +408,15 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     );
   });
 
+  it("cannot remove coverage promised to a linked request", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }], sessions: [], _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicRequestFindMany.mockResolvedValue([{ subject: "MATH", topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }] }]);
+    expect((await patch({ topics: ["Algebraic Expressions"] })).status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
   it("rejects updating target grade higher than tutor grade level", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
     classFindUnique.mockResolvedValue({
