@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import { ProgressAreaChart } from "@/components/charts";
+import { GroupedBarChart } from "@/components/charts";
+import { formatDate } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface ProgressRow {
@@ -68,8 +69,13 @@ export default function MyProgressView({
   }, [classId, retryCount]);
 
   const chartData =
-    data?.series.map((r) => ({
-      label: `${r.classCode} · ${r.topic}`,
+    data?.series.map((r, index) => ({
+      session: `Session ${index + 1}`,
+      label: `Session ${index + 1} · ${r.classCode} · ${r.topic} · ${formatDate(r.scheduledAt)}`,
+      date: formatDate(r.scheduledAt),
+      topic: r.topic,
+      classCode: r.classCode,
+      delta: r.delta,
       pre: r.preScore,
       post: r.postScore,
     })) ?? [];
@@ -118,7 +124,7 @@ export default function MyProgressView({
             <span className="kt-stat-value">{data.summary.pairedCount}</span>
           </div>
           <div className="card kt-card kt-stat p-4">
-            <span className="kt-stat-title">Avg gain</span>
+            <span className="kt-stat-title">Average gain</span>
             <span
               className={`kt-stat-value ${
                 data.summary.avgDelta == null
@@ -136,14 +142,30 @@ export default function MyProgressView({
                 ? `+${data.summary.avgDelta}`
                 : data.summary.avgDelta}
             </span>
+            <span className="text-xs text-base-content/60">percentage points · paired tests only</span>
           </div>
         </div>
       )}
 
-      {!loading && !error && data && data.summary.sessionsWithTest > 0 && <ProgressAreaChart
-        title="Pre vs post score, by session"
+      {!loading && !error && data && data.summary.sessionsWithTest > 0 && <GroupedBarChart
+        title="Pre-test and post-test scores by session"
         data={chartData}
         xKey="label"
+        tickKey="session"
+        unit="%"
+        yDomain={[0, 100]}
+        minChartWidth={Math.max(320, chartData.length * 90)}
+        missingLabel="Not taken yet"
+        footer={<p className="text-xs text-base-content/60">Compare the two scores within each session. Topics and assessment difficulty may differ between sessions. Missing attempts are not zero scores. Scroll horizontally to view more sessions.</p>}
+        tableColumns={[
+          { header: "Session", cell: (r) => String(r.session) },
+          { header: "Class", cell: (r) => String(r.classCode) },
+          { header: "Date (PHT)", cell: (r) => String(r.date) },
+          { header: "Topic", cell: (r) => String(r.topic) },
+          { header: "Pre-test", align: "right", cell: (r) => r.pre == null ? "Not taken yet" : `${r.pre}%` },
+          { header: "Post-test", align: "right", cell: (r) => r.post == null ? "Not taken yet" : `${r.post}%` },
+          { header: "Gain", align: "right", cell: (r) => r.delta == null ? "Awaiting paired scores" : `${Number(r.delta) > 0 ? "+" : ""}${r.delta} percentage points` },
+        ]}
         series={[
           { key: "pre", name: "Pre-test", color: "var(--color-accent)" },
           { key: "post", name: "Post-test", color: "var(--color-success)" },

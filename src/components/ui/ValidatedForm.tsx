@@ -76,7 +76,13 @@ export default function ValidatedForm({ onSubmit, children, ...props }: Componen
       props.onClickCapture?.(event);
     }} onChangeCapture={(event) => {
       const target = event.target as HTMLElement;
-      setFailures((prev) => prev.filter((item) => item.target !== target && (!target.closest("[data-form-field]") || item.target.closest("[data-form-field]") !== target.closest("[data-form-field]"))));
+      const controlField = target.closest("[data-control-field]");
+      const formField = target.closest("[data-form-field]");
+      setFailures((prev) => prev.filter((item) => {
+        if (item.target === target) return false;
+        if (controlField) return item.target.closest("[data-control-field]") !== controlField;
+        return !formField || item.target.closest("[data-form-field]") !== formField;
+      }));
       props.onChangeCapture?.(event);
     }} onSubmit={(event) => {
       const invalid = controls(event.currentTarget).flatMap((field, index) => {

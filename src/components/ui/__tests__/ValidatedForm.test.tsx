@@ -4,9 +4,11 @@ import { act, createElement as h, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import LoginForm from "@/components/auth/LoginForm";
+import Modal from "../Modal";
 import ValidatedForm from "../ValidatedForm";
 import FormField from "../FormField";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
+import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ClassScheduleFields from "@/components/tutor/ClassScheduleFields";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import { reportServerFieldErrors } from "@/lib/formValidation";
@@ -125,6 +127,87 @@ describe("inline form validation", () => {
     await submit();
     expect(document.activeElement?.getAttribute("type")).toBe("date");
     expect(document.activeElement?.closest("[data-control-field]")?.querySelector('[role="alert"]')).not.toBeNull();
+  });
+
+  it("places missing session date and time errors under each input and preserves the other error on correction", async () => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [{key: "one", topic: "Algebra", duration: 60}]}}
+      onCancel={() => {}} onSubmit={vi.fn()} />));
+    await submit();
+    const date = host.querySelector<HTMLInputElement>('input[type="date"]')!;
+    const time = host.querySelector<HTMLInputElement>('input[type="time"]')!;
+    for (const input of [date, time]) {
+      const feedback = input.closest("[data-control-field]")!.querySelector('[role="alert"]')!;
+      expect(feedback.textContent).toContain("Please fill in this field.");
+      expect(input.getAttribute("aria-describedby")).toContain(feedback.id);
+    }
+    await change(date, "2027-01-20");
+    expect(date.hasAttribute("aria-invalid")).toBe(false);
+    expect(time.getAttribute("aria-invalid")).toBe("true");
+    expect(time.closest("[data-control-field]")!.querySelector('[role="alert"]')).not.toBeNull();
+  });
+
+  it.each(["topic", "duration", "scheduledAt"])("maps a server %s error to the correct input in the second session", async (control) => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [
+        {key: "one", topic: "Algebra", date: "2027-01-20", time: "10:00", duration: 60},
+        {key: "two", topic: "Algebra", date: "2027-01-21", time: "10:00", duration: 60},
+      ]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["sessions", 1, control], message: "Please correct this session field."}],
+    }); });
+    const rows = host.querySelectorAll("[data-session-row]");
+    const target = rows[1].querySelector(`[data-session-control="${control}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-control-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Please correct this session field.");
+    expect(rows[0].querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it.each(["topic", "scheduledAt", "duration"])("shows single-session server %s errors beside the correct shared control", async (name) => {
+    await act(async () => root.render(<ValidatedForm>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="2027-01-20" time="10:00" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: [name], message: "Correct this session field."}],
+    }); });
+    const target = host.querySelector(`[name="${name}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-form-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Correct this session field.");
+  });
+
+  it("shows separate missing date and start time errors in the shared session form", async () => {
+    const save = vi.fn();
+    await act(async () => root.render(<ValidatedForm onSubmit={save}>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="" time="" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await submit();
+    expect(save).not.toHaveBeenCalled();
+    expect(host.querySelectorAll('[role="alert"]')).toHaveLength(2);
+    expect(host.querySelector('option[value="60"]')!.textContent).toBe("1hr");
+  });
+
+  it("keeps session dialog validation isolated from the surrounding edit-class form", async () => {
+    const outerSave = vi.fn();
+    const innerSave = vi.fn((event) => event.preventDefault());
+    await act(async () => root.render(<ValidatedForm onSubmit={outerSave}>
+      <Modal portal open onClose={() => {}} title="Session">
+        <ValidatedForm onSubmit={innerSave}><FormField label="Date"><input required type="date" /></FormField></ValidatedForm>
+      </Modal>
+    </ValidatedForm>));
+    const dialog = document.querySelector('[role="dialog"]')!;
+    expect(dialog.closest("form")).toBeNull();
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(outerSave).not.toHaveBeenCalled();
+    expect(innerSave).not.toHaveBeenCalled();
+    expect(dialog.querySelector('[role="alert"]')).not.toBeNull();
+    await change(dialog.querySelector("input")!, "2027-01-20");
+    await act(async () => { dialog.querySelector("form")!.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true})); });
+    expect(innerSave).toHaveBeenCalledOnce();
+    expect(outerSave).not.toHaveBeenCalled();
   });
 
   it("focuses server errors after a pending form re-enables its inputs", async () => {

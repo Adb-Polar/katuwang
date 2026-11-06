@@ -12,7 +12,7 @@ export default function LearnerBrowseClassesPage() {
       <PageHeader
         eyebrow="Learner Portal"
         title="Browse classes"
-        subtitle="Upcoming classes from certified Student Tutors you can enroll in."
+        subtitle="Discover upcoming classes for Grades 7–12. Choose any grade level, regardless of your own."
         actions={
           <Link href="/learner/my-classes" className="btn btn-ghost btn-sm text-xs">
             My classes →

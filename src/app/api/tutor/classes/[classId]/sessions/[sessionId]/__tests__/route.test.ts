@@ -143,6 +143,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     classFindUnique.mockResolvedValue(makeClass());
     const res = await patch({ scheduledAt: new Date(Date.now() - 3600_000).toISOString() });
     expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
   });
 
   it("returns 400 for an invalid status value", async () => {
@@ -160,6 +161,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     sessionFindMany.mockResolvedValue([{ scheduledAt: new Date(Date.now() + 172_800_000), duration: 60 }]);
     const res = await patch({ scheduledAt: new Date(Date.now() + 172_800_000).toISOString() });
     expect(res.status).toBe(409);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
     expect(sessionUpdate).not.toHaveBeenCalled();
   });
 

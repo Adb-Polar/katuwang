@@ -63,24 +63,12 @@ export function hasClassStarted(sessions: { scheduledAt: Date | string }[], now 
 }
 
 /** The "Browse" tab: enrollable classes the learner is NOT already in. */
-export function browseClassesWhere(
-  learnerId: string,
-  learnerGrade?: GradeLevel | string | null
-): Prisma.TutorClassWhereInput {
-  const base: Prisma.TutorClassWhereInput = {
+export function browseClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
+  return {
     status: "SCHEDULED",
     published: true,
     sessions: enrollmentSessionsWhere(),
     enrollments: { none: { learnerId } },
-  };
-
-  if (!learnerGrade) return base;
-
-  const gradeFilter = gradeEligibilityWhere(learnerGrade);
-  return {
-    ...base,
-    tutorProfile: gradeFilter.tutorProfile,
-    OR: gradeFilter.OR,
   };
 }
 

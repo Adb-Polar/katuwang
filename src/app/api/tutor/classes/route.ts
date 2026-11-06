@@ -141,7 +141,7 @@ export async function POST(req: NextRequest) {
     const sessionTopics = sessions.map((s) => canonicalByKey.get(normalizeTopic(s.topic).toLowerCase()));
     if (sessionTopics.some((t) => t === undefined)) {
       return NextResponse.json(
-        { error: "Every session's topic must be one of the class's selected topics." },
+        { error: "Every session's topic must be one of the class's selected topics.", fieldErrors: [{ path: ["sessions", sessionTopics.findIndex((t) => t === undefined), "topic"], message: "Choose one of the class's selected topics." }] },
         { status: 400 }
       );
     }
@@ -173,26 +173,32 @@ export async function POST(req: NextRequest) {
     // Prevent scheduling any session in the past
     if (parsedSessions.some((s) => s.start.getTime() < Date.now())) {
       return NextResponse.json(
-        { error: "Cannot schedule a session in the past." },
+        { error: "Cannot schedule a session in the past.", fieldErrors: [{ path: ["sessions", parsedSessions.findIndex((s) => s.start.getTime() < Date.now()), "scheduledAt"], message: "Choose a date and start time in the future." }] },
         { status: 400 }
       );
     }
 
     // Sessions submitted together must not overlap each other
     if (hasInternalOverlap(parsedSessions.map((s) => ({ scheduledAt: s.start, duration: s.duration })))) {
+      const index = parsedSessions.findIndex((session, i) => parsedSessions.some((other, j) =>
+        i !== j && hasInternalOverlap([
+          { scheduledAt: session.start, duration: session.duration },
+          { scheduledAt: other.start, duration: other.duration },
+        ])
+      ));
       return NextResponse.json(
-        { error: "Two or more of the submitted sessions overlap each other." },
+        { error: "Two or more of the submitted sessions overlap each other.", fieldErrors: [{ path: ["sessions", index, "scheduledAt"], message: "Two or more sessions overlap. Choose different dates or start times." }] },
         { status: 409 }
       );
     }
 
     // Each session must not overlap any of the tutor's existing sessions (any class)
-    for (const s of parsedSessions) {
+    for (const [index, s] of parsedSessions.entries()) {
       const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
       const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
       if (conflict) {
         return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time." },
+          { error: "Time conflict detected: You already have a session scheduled during this time.", fieldErrors: [{ path: ["sessions", index, "scheduledAt"], message: "You already have a session at this time. Choose another date or start time." }] },
           { status: 409 }
         );
       }
