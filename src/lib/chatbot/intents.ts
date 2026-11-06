@@ -295,7 +295,7 @@ export const INTENTS: Intent[] = [
     keywords: ["report", "analytics", "stats", "dashboard", "usage", "chart"],
     patterns: [/\b(reports?|analytics|statistics)\b/],
     response: { text: "Open Reports for aggregate stats — users, classes, certifications, and enrolment trends." },
-    link: { href: "/admin/reports", label: "Reports" },
+    link: { href: "/admin/reports", label: "Analytics" },
   },
   {
     id: "nav_admin_settings",
