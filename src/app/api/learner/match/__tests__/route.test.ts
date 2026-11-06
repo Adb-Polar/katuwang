@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { catalogFixture } from "@/test/fixtures/catalog";
 
 const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
@@ -9,7 +10,7 @@ const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
-vi.mock("@/lib/prisma", () => ({ prisma: { tutorClass: { findMany: findManyMock } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: { subject: { findMany: vi.fn(async () => catalogFixture) }, tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));
 
@@ -23,7 +24,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const validBody = { subject: "MATH", topics: ["Algebraic Expressions"] };
+const validBody = { subject: "MATH", topics: ["Quadratic Equations"] };
 
 describe("POST /api/learner/match", () => {
   beforeEach(() => {
@@ -62,14 +63,14 @@ describe("POST /api/learner/match", () => {
         status: "SCHEDULED",
         published: true,
         maxStudents: 3,
-        topics: [{ topic: "Algebraic Expressions" }],
+        topics: [{ topic: "Quadratic Equations" }],
         sessions: [
-          { id: "s1", topic: "Algebraic Expressions", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
+          { id: "s1", topic: "Quadratic Equations", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
         ],
         tutorProfile: {
           id: "tp1",
           user: { id: "t1", anonymousId: "TUT-0001" },
-          topicCertifications: [{ subject: "MATH", topic: "Algebraic Expressions" }],
+          topicCertifications: [{ subject: "MATH", topic: "Quadratic Equations" }],
         },
         _count: { enrollments: 0 },
         enrollments: [],
@@ -81,8 +82,8 @@ describe("POST /api/learner/match", () => {
     const json = await res.json();
     expect(json.matches).toHaveLength(1);
     expect(json.matches[0].class.id).toBe("c1");
-    expect(json.matches[0].reasons.matchedTopics).toEqual(["Algebraic Expressions"]);
-    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Algebraic Expressions"]);
+    expect(json.matches[0].reasons.matchedTopics).toEqual(["Quadratic Equations"]);
+    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Quadratic Equations"]);
     expect(json.matches[0].score).toBeGreaterThan(0);
   });
 

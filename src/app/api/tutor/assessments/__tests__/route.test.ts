@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { catalogFixture } from "@/test/fixtures/catalog";
 
 const {
   getServerSessionMock,
@@ -27,6 +28,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 vi.mock("@/lib/assessmentPicker", () => ({ pickQuestionIds: pickQuestionIdsMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
+    subject: { findMany: vi.fn(async () => catalogFixture) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     assessmentAttempt: { findFirst: attemptFindFirst, aggregate: attemptAggregate, create: attemptCreate },
     topicCertification: { findUnique: certFindUnique },
@@ -50,13 +52,13 @@ function post(body: unknown) {
     headers: { "content-type": "application/json" },
   });
 }
-const validBody = { subject: "MATH", topic: "Algebraic Expressions" };
+const validBody = { subject: "MATH", topic: "Quadratic Equations" };
 
 function fakeAttempt(itemIds: string[]) {
   return {
     id: "at1",
     subject: "MATH",
-    topic: "Algebraic Expressions",
+    topic: "Quadratic Equations",
     attemptNo: 1,
     status: "IN_PROGRESS",
     questionCount: itemIds.length,

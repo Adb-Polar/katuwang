@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { catalogFixture } from "@/test/fixtures/catalog";
 
 const { getServerSessionMock, findUniqueMock, updateMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
@@ -9,7 +10,8 @@ const { getServerSessionMock, findUniqueMock, updateMock } = vi.hoisted(() => ({
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
-  prisma: { topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
+  prisma: {
+    subject: { findMany: vi.fn(async () => catalogFixture) }, topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
 }));
 
 vi.mock("@/lib/topicRequestHistory", () => ({ requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), requestSnapshot: vi.fn().mockResolvedValue({ slots: [], note: null }), recordRequestHistory: vi.fn() }));
@@ -83,7 +85,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     const res = await PATCH(
       makeRequest({
         subject: "MATH",
-        topics: ["Fractions & Decimals"],
+        topics: ["Quadratic Equations"],
         gradeLevel: "GRADE_9",
         preferredSlots: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }],
         note: "focus on word problems",
@@ -99,7 +101,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
           subject: "MATH",
           gradeLevel: "GRADE_9",
           note: "focus on word problems",
-          topics: { deleteMany: {}, create: [{ topic: "Fractions & Decimals" }] },
+          topics: { deleteMany: {}, create: [{ topic: "Quadratic Equations" }] },
           slots: {
             deleteMany: {},
             create: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }],
@@ -131,7 +133,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     getServerSessionMock.mockResolvedValue(learner);
     findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "FULFILLED" });
     const res = await PATCH(
-      makeRequest({ subject: "MATH", topics: ["Fractions & Decimals"], gradeLevel: "GRADE_9" }),
+      makeRequest({ subject: "MATH", topics: ["Quadratic Equations"], gradeLevel: "GRADE_9" }),
       { params }
     );
     expect(res.status).toBe(400);
