@@ -112,6 +112,7 @@ export const authOptions: NextAuthOptions = {
           fullName: `${user.firstName} ${user.lastName}`.trim(),
           ...(user.image ? { image: user.image } : {}),
           gradeLevel: user.gradeLevel,
+          sessionVersion: user.sessionVersion,
         };
       },
     }),
@@ -124,6 +125,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.anonymousId = user.anonymousId;
         token.role = user.role;
+        token.sessionVersion = user.sessionVersion;
         token.fullName = user.fullName;
         if (user.image) token.image = user.image;
         if (user.gradeLevel) token.gradeLevel = user.gradeLevel;
@@ -137,12 +139,14 @@ export const authOptions: NextAuthOptions = {
       if (token.id && (!token.checkedAt || Date.now() - token.checkedAt > TOKEN_STALE_MS)) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, status: true, image: true, gradeLevel: true },
+          select: { role: true, status: true, image: true, gradeLevel: true, sessionVersion: true },
         });
         token.checkedAt = Date.now();
         // Never adopt a changed role into an existing login. The live server
         // boundary rejects mismatches immediately; the proxy catches up here.
-        token.status = fresh && fresh.role === token.role ? fresh.status : "BANNED";
+        token.status = fresh && fresh.role === token.role &&
+          typeof token.sessionVersion === "number" && fresh.sessionVersion === token.sessionVersion
+          ? fresh.status : "BANNED";
         if (fresh) {
           token.image = fresh.image ?? null;
           token.gradeLevel = fresh.gradeLevel ?? null;
@@ -160,6 +164,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.fullName = token.fullName;
         session.user.status = token.status ?? "ACTIVE";
+        session.user.sessionVersion = token.sessionVersion;
         session.user.image = token.image ?? null;
         session.user.gradeLevel = token.gradeLevel ?? null;
       }

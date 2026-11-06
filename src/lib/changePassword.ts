@@ -22,7 +22,7 @@ export async function changeOwnPassword(
   if (!matches) return { ok: false, code: "WRONG_CURRENT_PASSWORD" };
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
-  await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword } });
+  await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword, sessionVersion: { increment: 1 } } });
 
   return { ok: true };
 }

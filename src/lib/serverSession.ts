@@ -14,9 +14,11 @@ export async function getActiveServerSession(): Promise<Session | null> {
 
   const account = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { role: true, status: true, gradeLevel: true, image: true },
+    select: { role: true, status: true, gradeLevel: true, image: true, sessionVersion: true },
   });
-  if (!account || account.status !== "ACTIVE" || account.role !== session.user.role) {
+  if (!account || account.status !== "ACTIVE" || account.role !== session.user.role ||
+      typeof session.user.sessionVersion !== "number" ||
+      account.sessionVersion !== session.user.sessionVersion) {
     return null;
   }
 

@@ -12,6 +12,7 @@ declare module "next-auth" {
       fullName: string;
       email: string;
       status: AccountStatus;
+      sessionVersion?: number;
       image?: string | null;
       gradeLevel?: GradeLevel | null;
     };
@@ -22,6 +23,7 @@ declare module "next-auth" {
     anonymousId: string;
     role: "SUPER_ADMIN" | "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
     fullName: string;
+    sessionVersion: number;
     image?: string | null;
     gradeLevel?: GradeLevel | null;
   }
@@ -38,5 +40,7 @@ declare module "next-auth/jwt" {
     gradeLevel?: GradeLevel | null;
     /** Epoch ms of the last DB re-sync of `role`/`status`. */
     checkedAt: number;
+    /** Captured at sign-in; never refreshed to adopt a newer session version. */
+    sessionVersion?: number;
   }
 }

@@ -84,7 +84,7 @@ describe("POST /api/auth/reset-password", () => {
     expect(bcryptHashMock).toHaveBeenCalledWith("longenough", 12);
     expect(userUpdateMock).toHaveBeenCalledWith({
       where: { id: "U1" },
-      data: { password: "hashed-pw" },
+      data: { password: "hashed-pw", sessionVersion: { increment: 1 } },
     });
     expect(tokenUpdateMock).toHaveBeenCalledWith({
       where: { id: "T1" },

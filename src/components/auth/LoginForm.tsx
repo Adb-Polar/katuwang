@@ -31,7 +31,9 @@ export default function LoginForm() {
   const isPending = params.get("pending") === "true";
   const id = params.get("id");
   const role = params.get("role");
-  const successMsg = isPending
+  const successMsg = params.get("passwordChanged") === "true"
+    ? "Password updated. Please sign in again with your new password."
+    : isPending
     ? `Registration received! Your ${role === "tutor" ? "tutor" : "learner"} ID is ${id}. An administrator needs to approve your account before you can sign in — you'll be able to log in once that's done.`
     : isRegistered
     ? role === "tutor"

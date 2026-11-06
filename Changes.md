@@ -4179,3 +4179,8 @@ The avatar moderation endpoint now uses the shared administrative role predicate
 ## 2026-11-06 — Effective class-edit authorization
 
 Class creation and editing share the teaching-scope policy. Partial edits now validate the resulting subject, grade and topics against current tutor eligibility and certification requirements, including retained fields. Existing session topics must remain selected. Added regression coverage for subject-only changes, uncertified replacement topics, revoked certifications, invalid subjects, and retained grades above the tutor's current grade. Avatar moderation live verification passed on dev-test (4fc798a).
+
+
+## 2026-11-06 — Revoke sessions after password changes/resets
+
+Added an additive user sessionVersion migration, JWT/session claims, immediate live-version checks at the protected server boundary, and atomic version increments with password updates/resets. Legacy sessions require a new login. The password-change form signs out after success and the login page explains the change. Added revocation regressions and opt-in integration tests guarded to an isolated local verification database. Class-edit live verification passed on dev-test (3a09934), including certification rejection and successful browser save/restore.
