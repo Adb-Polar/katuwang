@@ -3,6 +3,7 @@
 import { act, createElement as h, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { signIn } from "next-auth/react";
 import LoginForm from "@/components/auth/LoginForm";
 import Modal from "../Modal";
 import ValidatedForm from "../ValidatedForm";
@@ -18,13 +19,14 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 vi.mock("next-auth/react", () => ({
-  signIn: vi.fn(async () => ({error: "Invalid email or password."})),
+  signIn: vi.fn(),
 }));
 
 let root: Root;
 let host: HTMLDivElement;
 
 beforeEach(() => {
+  vi.mocked(signIn).mockResolvedValue({ error: "INCORRECT_PASSWORD", status: 401, ok: false, url: null });
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   host = document.createElement("div");
   document.body.append(host);
@@ -265,14 +267,22 @@ describe("inline form validation", () => {
     expect(host.querySelector('[role="alert"]')).toBeNull();
   });
 
-  it("focuses the password field when sign-in credentials are rejected", async () => {
+  it.each([
+    { code: "INCORRECT_PASSWORD", index: 1, message: "Incorrect password." },
+    { code: "EMAIL_NOT_FOUND", index: 0, message: "Email does not exist" },
+  ])("focuses the correct field with accessible inline feedback for $code", async ({ code, index, message }) => {
+    vi.mocked(signIn).mockResolvedValue({ error: code, status: 401, ok: false, url: null });
     await act(async () => root.render(<LoginForm />));
     const inputs = host.querySelectorAll("input");
     await change(inputs[0], "a@example.com");
     await change(inputs[1], "Wrong secret123");
     await submit();
-    expect(document.activeElement).toBe(inputs[1]);
-    expect(inputs[1].closest("[data-form-field]")?.querySelector('[role="alert"]')?.textContent).toContain("Invalid email or password");
+    expect(document.activeElement).toBe(inputs[index]);
+    const feedback = inputs[index].closest("[data-form-field]")!.querySelector('[role="alert"]')!;
+    expect(feedback.textContent).toBe(message);
+    expect(inputs[index].getAttribute("aria-invalid")).toBe("true");
+    expect(inputs[index].getAttribute("aria-describedby")).toContain(feedback.id);
+    expect(inputs[1 - index].hasAttribute("aria-invalid")).toBe(false);
   });
 
 });
