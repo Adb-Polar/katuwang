@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { lockTutorSchedule, lockClassRow, ClassWriteError } from "@/lib/classLocks";
 import { addSessionSchema } from "@/lib/validations/class";
 import { hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
@@ -27,75 +28,80 @@ export async function POST(
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      include: { topics: true },
-    });
+    return await prisma.$transaction(async (tx) => {
+      await lockTutorSchedule(tx, tutorProfile.id);
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId },
+        include: { topics: true },
+      });
 
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
+      if (!existingClass) {
+        return NextResponse.json({ error: "Class not found." }, { status: 404 });
+      }
 
-    if (existingClass.tutorProfileId !== tutorProfile.id) {
-      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-    }
+      if (existingClass.tutorProfileId !== tutorProfile.id) {
+        return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+      }
 
-    if (existingClass.status === "SUSPENDED" || existingClass.status === "BANNED") {
-      return NextResponse.json(
-        { error: "This class was suspended or banned by an administrator and can't be modified." },
-        { status: 403 }
-      );
-    }
+      if (existingClass.status === "SUSPENDED" || existingClass.status === "BANNED") {
+        return NextResponse.json(
+          { error: "This class was suspended or banned by an administrator and can't be modified." },
+          { status: 403 }
+        );
+      }
 
-    if (existingClass.status !== "SCHEDULED") {
-      return NextResponse.json(
-        { error: "Cannot add a session to a class that isn't scheduled." },
-        { status: 400 }
-      );
-    }
+      if (existingClass.status !== "SCHEDULED") {
+        return NextResponse.json(
+          { error: "Cannot add a session to a class that isn't scheduled." },
+          { status: 400 }
+        );
+      }
 
-    const body = await req.json();
-    const result = addSessionSchema.safeParse(body);
+      const body = await req.json();
+      const result = addSessionSchema.safeParse(body);
 
-    if (!result.success) {
-      const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
-      return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
-    }
+      if (!result.success) {
+        const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
+        return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
+      }
 
-    const { topic, scheduledAt, duration } = result.data;
+      const { topic, scheduledAt, duration } = result.data;
 
-    const classTopics = existingClass.topics.map((t) => t.topic);
-    if (!classTopics.includes(topic)) {
-      return NextResponse.json(
-        { error: "Session topic must be one of the class's selected topics." },
-        { status: 400 }
-      );
-    }
+      const classTopics = existingClass.topics.map((t) => t.topic);
+      if (!classTopics.includes(topic)) {
+        return NextResponse.json(
+          { error: "Session topic must be one of the class's selected topics." },
+          { status: 400 }
+        );
+      }
 
-    const start = new Date(scheduledAt);
-    const end = new Date(start.getTime() + duration * MINUTE_MS);
+      const start = new Date(scheduledAt);
+      const end = new Date(start.getTime() + duration * MINUTE_MS);
 
-    if (start.getTime() < Date.now()) {
-      return NextResponse.json(
-        { error: "Cannot schedule a session in the past." },
-        { status: 400 }
-      );
-    }
+      if (start.getTime() < Date.now()) {
+        return NextResponse.json(
+          { error: "Cannot schedule a session in the past." },
+          { status: 400 }
+        );
+      }
 
-    const conflict = await hasSessionOverlap(tutorProfile.id, start, end);
-    if (conflict) {
-      return NextResponse.json(
-        { error: "Time conflict detected: You already have a session scheduled during this time." },
-        { status: 409 }
-      );
-    }
+      const conflict = await hasSessionOverlap(tutorProfile.id, start, end, undefined, tx);
+      if (conflict) {
+        return NextResponse.json(
+          { error: "Time conflict detected: You already have a session scheduled during this time." },
+          { status: 409 }
+        );
+      }
 
-    const newSession = await prisma.classSession.create({
-      data: { classId, topic, scheduledAt: start, duration },
-    });
+      const newSession = await tx.classSession.create({
+        data: { classId, topic, scheduledAt: start, duration },
+      });
 
-    return NextResponse.json(newSession, { status: 201 });
+      return NextResponse.json(newSession, { status: 201 });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error adding class session:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

@@ -37,7 +37,9 @@ vi.mock("@/lib/prisma", () => ({
     classEnrollment: { findMany: classEnrollmentFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        classSession: { update: sessionUpdate },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "locked" }]),
+        tutorClass: { findUnique: classFindUnique },
+        classSession: { update: sessionUpdate, findMany: sessionFindMany },
         sessionTest: { findUnique: sessionTestFindUnique, updateMany: sessionTestUpdateMany },
         classEnrollment: { findMany: classEnrollmentFindMany },
         notification: { createMany: notificationCreateMany },

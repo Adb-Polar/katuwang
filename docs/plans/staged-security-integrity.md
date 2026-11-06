@@ -51,3 +51,11 @@ Fix 4 deployed as b91a335fdb9ebbfb07534985b07177fc0a80983a, Render dep-dbmqfe0u0
 Lock the class row inside the enrollment transaction before reading eligibility/counts and inserting. Recheck publication, status, current grades, duplicate enrollment, capacity and session cutoff while holding the lock. Enrollment closes when the first non-cancelled session starts, even if later sessions remain. Capacity edits take the same row lock and recount before writing. Real local MariaDB integration exercises last-seat races, duplicate retries and concurrent capacity reduction.
 
 Fix 5 pre-commit validation: 42 focused route tests and 3 real-MariaDB concurrency tests pass (including fixture cleanup). Full suite: 1,041 passes / 18 baseline failures / 6 opt-in database tests skipped. TypeScript, changed-file lint and production build pass. No schema change.
+
+Fix 5 deployed as 334024eb3c8efe52d157bd9a068652ce7614c658, Render dep-dbmqk9mc6qcc73bdsilg, live 2026-11-06 18:24 PHT. Browser enrollment plus three duplicate requests returned [201,409,409,409], with exactly one enrollment and one tutor notification. Browser withdrawal succeeded, the class was deleted, and no page/runtime errors were found.
+
+## Fix 6: serialize tutor scheduling
+
+Every class/session creation, session reschedule and request-created class takes the tutor-profile row lock. Database overlap checks and writes run in the same ReadCommitted transaction. Session additions/reschedules also lock their class and validate its current state and retained session fields. Scheduled times in moderated classes remain reserved to prevent conflicts when reinstated; cancelled/completed classes release them. Real MariaDB tests cover additions across classes, reschedules, mixed add/reschedule, class creation versus addition, and suspended-class reservation.
+
+Fix 6 pre-commit validation: 68 focused tests and 5 real-MariaDB race/reservation tests pass. Full suite 1,041 passes / 18 baseline failures / 11 opt-in database tests skipped. TypeScript, changed-file lint and production build pass.

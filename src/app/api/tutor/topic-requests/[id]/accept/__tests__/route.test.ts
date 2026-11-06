@@ -37,6 +37,8 @@ vi.mock("@/lib/prisma", () => ({
     idCounter: { upsert: idCounterUpsert },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
+        classSession: { findMany: classSessionFindMany },
         tutorClass: { create: tutorClassCreate },
         topicRequest: { update: topicRequestUpdate, findUniqueOrThrow: topicRequestFindUnique },
         notification: { create: notificationCreate },

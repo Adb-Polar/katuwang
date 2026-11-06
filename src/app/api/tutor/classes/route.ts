@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { createClassSchema } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
 import { classTeachingError } from "@/lib/classTeachingPolicy";
@@ -162,49 +163,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Each session must not overlap any of the tutor's existing sessions (any class)
-    for (const s of parsedSessions) {
-      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
-      const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
-      if (conflict) {
-        return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time." },
-          { status: 409 }
-        );
-      }
-    }
-
     const code = await generateClassCode();
 
-    const newClass = await prisma.tutorClass.create({
-      data: {
-        tutorProfileId: tutorProfile.id,
-        code,
-        subject: subject,
-        gradeLevel: gradeLevel ?? null,
-        topics: { create: topics.map((topic) => ({ topic })) },
-        description: description || null,
-        maxStudents,
-        building: building || null,
-        room: room || null,
-        meetingLink: meetingLink || null,
-        status: "SCHEDULED",
-        sessions: {
-          create: parsedSessions.map((s) => ({
-            topic: s.topic,
-            scheduledAt: s.start,
-            duration: s.duration,
-          })),
+    const newClass = await prisma.$transaction(async (tx) => {
+      await lockTutorSchedule(tx, tutorProfile.id);
+      for (const s of parsedSessions) {
+        if (s.start.getTime() < Date.now()) throw new ClassWriteError("Cannot schedule a session in the past.", 400);
+        const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
+        if (await hasSessionOverlap(tutorProfile.id, s.start, end, undefined, tx)) {
+          throw new ClassWriteError("Time conflict detected: You already have a session scheduled during this time.", 409);
+        }
+      }
+      return tx.tutorClass.create({
+        data: {
+          tutorProfileId: tutorProfile.id,
+          code,
+          subject: subject,
+          gradeLevel: gradeLevel ?? null,
+          topics: { create: topics.map((topic) => ({ topic })) },
+          description: description || null,
+          maxStudents,
+          building: building || null,
+          room: room || null,
+          meetingLink: meetingLink || null,
+          status: "SCHEDULED",
+          sessions: {
+            create: parsedSessions.map((s) => ({
+              topic: s.topic,
+              scheduledAt: s.start,
+              duration: s.duration,
+            })),
+          },
         },
-      },
-      include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
-    });
+        include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
+      });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(
       { ...newClass, topics: newClass.topics.map((t) => t.topic) },
       { status: 201 }
     );
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error creating tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

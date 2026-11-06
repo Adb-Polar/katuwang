@@ -30,6 +30,11 @@ vi.mock("@/lib/prisma", () => ({
     tutorClass: { findMany: classFindMany, create: classCreate },
     classSession: { findMany: sessionFindMany },
     topicCertification: { findMany: topicCertificationFindMany },
+    $transaction: (fn: (tx: unknown) => unknown) => fn({
+      $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
+      tutorClass: { create: classCreate },
+      classSession: { findMany: sessionFindMany },
+    }),
   },
 }));
 

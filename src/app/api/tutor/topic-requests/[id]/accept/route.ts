@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { getSetting } from "@/lib/settings";
 import { acceptTopicRequestSchema } from "@/lib/validations/match";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -155,20 +156,17 @@ export async function POST(
       );
     }
 
-    for (const s of parsedSessions) {
-      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
-      const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
-      if (conflict) {
-        return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time." },
-          { status: 409 }
-        );
-      }
-    }
-
     const code = await generateClassCode();
 
     const { newClass, updatedRequest } = await prisma.$transaction(async (tx) => {
+      await lockTutorSchedule(tx, tutorProfile.id);
+      for (const s of parsedSessions) {
+        if (s.start.getTime() < Date.now()) throw new ClassWriteError("Cannot schedule a session in the past.", 400);
+        const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
+        if (await hasSessionOverlap(tutorProfile.id, s.start, end, undefined, tx)) {
+          throw new ClassWriteError("Time conflict detected: You already have a session scheduled during this time.", 409);
+        }
+      }
       const current = await tx.topicRequest.findUniqueOrThrow({ where: { id }, select: { status: true, expiresAt: true } });
       if (current.status !== "OPEN" || current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
       const newClass = await tx.tutorClass.create({
@@ -213,10 +211,11 @@ export async function POST(
       );
 
       return { newClass, updatedRequest };
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ request: updatedRequest, classId: newClass.id }, { status: 201 });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     if (error instanceof Error && error.message === "Request expired before acceptance.") return NextResponse.json({ error: "This request has expired." }, { status: 409 });
     console.error("Error accepting topic request:", error);
     return NextResponse.json(

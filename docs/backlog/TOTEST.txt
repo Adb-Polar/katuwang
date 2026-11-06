@@ -948,4 +948,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: browser/API b91a335] Assessment current-access checks: on dev-test, resume an existing attempt during ordinary closure grace; withdraw and moderate its disposable class and confirm direct resume/submission are rejected. Use isolated tests for expired grace and platform-wide disabling.
 
-[ ] Enrollment capacity: on dev-test, race enrollment retries for a disposable one-seat class, confirm exactly one enrollment and one tutor notification, reject additional enrollment/full or duplicate, then withdraw and clean up. Real MariaDB tests also cover distinct learners and a concurrent capacity reduction.
+[Good: browser/API 334024e and real DB races] Enrollment capacity: on dev-test, race enrollment retries for a disposable one-seat class, confirm exactly one enrollment and one tutor notification, reject additional enrollment/full or duplicate, then withdraw and clean up. Real MariaDB tests also cover distinct learners and a concurrent capacity reduction.
+
+[ ] Tutor scheduling: on dev-test, race overlapping additions to a disposable class and confirm only one succeeds; reschedule through the browser and confirm persistence; reject a conflicting move; clean fixtures. Isolated real DB tests cover all writer combinations and moderated-class reservations.
