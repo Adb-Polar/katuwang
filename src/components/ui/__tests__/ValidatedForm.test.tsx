@@ -228,6 +228,43 @@ describe("inline form validation", () => {
     expect(host.querySelector('[role="alert"]')?.textContent).toBe("Email already exists.");
   });
 
+  it.each(["date", "time"])("clears a scheduling conflict when only %s changes and submits the corrected session", async (type) => {
+    const save = vi.fn((event) => event.preventDefault());
+    await act(async () => root.render(<ValidatedForm onSubmit={save}>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="2027-01-20" time="10:00" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["scheduledAt"], message: "This session conflicts with another session."}],
+    }); });
+    const date = host.querySelector<HTMLInputElement>('input[type="date"]')!;
+    expect(date.getAttribute("aria-invalid")).toBe("true");
+    await change(host.querySelector<HTMLInputElement>(`input[type="${type}"]`)!, type === "time" ? "12:00" : "2027-01-21");
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+    expect(date.hasAttribute("aria-invalid")).toBe(false);
+    expect(date.hasAttribute("aria-describedby")).toBe(false);
+    await submit();
+    expect(save).toHaveBeenCalledOnce();
+  });
+
+  it("keeps a conflict on another row or when an unrelated field changes", async () => {
+    await act(async () => root.render(<ClassScheduleFields
+      initial={{subject: "MATH", topics: ["Algebra"], sessionRows: [
+        {key: "one", topic: "Algebra", date: "2027-01-20", time: "10:00", duration: 60},
+        {key: "two", topic: "Algebra", date: "2027-01-21", time: "10:00", duration: 60},
+      ]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: ["sessions", 1, "scheduledAt"], message: "Scheduling conflict."}],
+    }); });
+    const rows = host.querySelectorAll("[data-session-row]");
+    await change(rows[0].querySelector<HTMLInputElement>('input[type="time"]')!, "12:00");
+    expect(rows[1].querySelector('[role="alert"]')?.textContent).toBe("Scheduling conflict.");
+    await change(host.querySelector<HTMLInputElement>('input[name="building"]')!, "Building A");
+    expect(rows[1].querySelector('[role="alert"]')?.textContent).toBe("Scheduling conflict.");
+    await change(rows[1].querySelector<HTMLInputElement>('input[type="time"]')!, "12:00");
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+  });
+
   it("focuses the password field when sign-in credentials are rejected", async () => {
     await act(async () => root.render(<LoginForm />));
     const inputs = host.querySelectorAll("input");

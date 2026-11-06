@@ -115,12 +115,12 @@ export default function SessionActions({
       {error && <span className="text-2xs text-error">{error}</span>}
 
       {session.status === "SCHEDULED" && (
-        <div className="flex items-center gap-1">
+        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-1">
           <button
             type="button"
             onClick={openRescheduleModal}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 cursor-pointer tooltip"
-            data-tip="Reschedule"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 cursor-pointer"
+            title="Reschedule"
             aria-label="Reschedule session"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -137,8 +137,8 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("cancel")}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
-            data-tip="Cancel"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer"
+            title="Cancel"
             aria-label="Cancel session"
           >
             <XCircle className="h-3.5 w-3.5" />
@@ -146,8 +146,8 @@ export default function SessionActions({
           <button
             type="button"
             onClick={() => setPendingAction("delete")}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer tooltip"
-            data-tip="Delete"
+            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer"
+            title="Delete"
             aria-label="Delete session"
           >
             <Trash2 className="h-3.5 w-3.5" />

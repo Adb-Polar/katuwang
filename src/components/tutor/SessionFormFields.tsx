@@ -24,7 +24,7 @@ export default function SessionFormFields({ topics, topic, date, time, duration,
           {topics.map((value) => <option key={value} value={value}>{value}</option>)}
         </select>
       </FormField>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div data-validation-group className="grid gap-4 sm:grid-cols-2">
         <FormField label="Date" required size="md">
           <input name="scheduledAt" type="date" value={date} onChange={(e) => onDate(e.target.value)} required className="input input-bordered w-full min-w-0 min-h-11 text-base sm:text-sm" />
         </FormField>

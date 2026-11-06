@@ -470,6 +470,7 @@ export default function ClassScheduleFields({
                     </select>
                     <span data-control-feedback className="block" />
                   </label>
+                  <div data-validation-group className="contents">
                   <label data-control-field className="min-w-0 space-y-1.5">
                     <span className="block text-xs font-semibold">Date</span>
                     <input
@@ -489,6 +490,7 @@ export default function ClassScheduleFields({
                       className={`input input-bordered ${rowInputCls} w-full min-w-0`} />
                     <span data-control-feedback className="block" />
                   </label>
+                  </div>
                   <label data-control-field className="min-w-0 space-y-1.5">
                     <span className="block text-xs font-semibold">Duration</span>
                     <select

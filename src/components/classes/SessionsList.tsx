@@ -37,10 +37,10 @@ export default function SessionsList({
             key={s.id}
             className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
           >
-            <div className="min-w-0 space-y-1">
-              <div className="font-semibold text-base-content/80 truncate">{s.topic}</div>
+            <div className="min-w-0 max-w-full space-y-1">
+              <div className="font-semibold text-base-content/80 break-words">{s.topic}</div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-base-content/50">
-                <span className="flex items-center gap-1">
+                <span className="flex min-w-0 items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {formatDateTime(s.scheduledAt)}
                 </span>
@@ -50,7 +50,7 @@ export default function SessionsList({
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
               <StatusBadge tone={tone} label={label} size="xs" />
               {renderActions?.(s)}
             </div>
