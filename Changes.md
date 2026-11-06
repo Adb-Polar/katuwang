@@ -4204,3 +4204,8 @@ Class creation, session additions/rescheduling and request acceptance now share 
 ## 2026-11-06 — Isolate scheduling modal forms
 
 Live scheduling QA exposed reschedule submissions reaching the enclosing class editor. The reschedule dialog now renders in a body portal, and scheduling modal submit events stop before reaching the parent form. Added UI regressions verifying that rescheduling makes one session PATCH and that rejected modal validation cannot submit the class.
+
+
+## 2026-11-06 — Atomically claim topic requests
+
+Acceptance now locks and conditionally claims an eligible open request before creating its class, with a version check against intervening request edits and a live certification/grade recheck. Class, history, fulfillment link and notification commit together; competitors receive 409. Learner lifecycle mutations share the lock and reject stale state. Four guarded real-MariaDB integration tests pass. Corrected a stale catalog fixture in the touched learner-edit tests. Corrected scheduling dialogs passed dev-test browser verification (d6ef4a5).

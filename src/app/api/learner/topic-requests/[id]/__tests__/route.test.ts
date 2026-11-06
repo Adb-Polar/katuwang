@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 
 const { getServerSessionMock, findUniqueMock, updateMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
@@ -12,7 +13,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: { topicRequest: { findUnique: findUniqueMock, update: updateMock, count: vi.fn().mockResolvedValue(0) }, $transaction: (fn: (tx: unknown) => unknown) => fn({ topicRequest: { update: updateMock } }) },
 }));
 
-vi.mock("@/lib/topicRequestHistory", () => ({ requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), requestSnapshot: vi.fn().mockResolvedValue({ slots: [], note: null }), recordRequestHistory: vi.fn() }));
+vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestDeadline: (d: Date) => new Date(d.getTime() + 259200000), requestSnapshot: vi.fn().mockResolvedValue({ slots: [], note: null }), recordRequestHistory: vi.fn() }));
 
 import { PATCH } from "@/app/api/learner/topic-requests/[id]/route";
 
@@ -52,7 +53,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "r1" },
+        where: expect.objectContaining({ id: "r1" }),
         data: { status: "CANCELLED", fulfilledClassId: null },
       })
     );
@@ -71,7 +72,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     const res = await PATCH(makeRequest({ status: "CANCELLED" }), { params });
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { id: "r1" }, data: { status: "CANCELLED", fulfilledClassId: null } })
+      expect.objectContaining({ where: expect.objectContaining({ id: "r1" }), data: { status: "CANCELLED", fulfilledClassId: null } })
     );
   });
 
@@ -83,7 +84,7 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     const res = await PATCH(
       makeRequest({
         subject: "MATH",
-        topics: ["Fractions & Decimals"],
+        topics: ["Quadratic Equations"],
         gradeLevel: "GRADE_9",
         preferredSlots: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }],
         note: "focus on word problems",
@@ -94,12 +95,12 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     expect(res.status).toBe(200);
     expect(updateMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { id: "r1" },
+        where: expect.objectContaining({ id: "r1" }),
         data: expect.objectContaining({
           subject: "MATH",
           gradeLevel: "GRADE_9",
           note: "focus on word problems",
-          topics: { deleteMany: {}, create: [{ topic: "Fractions & Decimals" }] },
+          topics: { deleteMany: {}, create: [{ topic: "Quadratic Equations" }] },
           slots: {
             deleteMany: {},
             create: [{ day: "MONDAY", startTime: "15:00", endTime: "17:00" }],
@@ -131,10 +132,19 @@ describe("PATCH /api/learner/topic-requests/[id]", () => {
     getServerSessionMock.mockResolvedValue(learner);
     findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "FULFILLED" });
     const res = await PATCH(
-      makeRequest({ subject: "MATH", topics: ["Fractions & Decimals"], gradeLevel: "GRADE_9" }),
+      makeRequest({ subject: "MATH", topics: ["Quadratic Equations"], gradeLevel: "GRADE_9" }),
       { params }
     );
     expect(res.status).toBe(400);
     expect(updateMock).not.toHaveBeenCalled();
   });
+});
+
+
+it("returns a conflict if a request changes after the initial edit check", async () => {
+  getServerSessionMock.mockResolvedValue(learner);
+  findUniqueMock.mockResolvedValue({ learnerId: "L1", status: "OPEN", updatedAt: new Date() });
+  updateMock.mockRejectedValueOnce(new Prisma.PrismaClientKnownRequestError("Request changed", { code: "P2025", clientVersion: "test" }));
+  const res = await PATCH(makeRequest({ subject: "MATH", topics: ["Quadratic Equations"], gradeLevel: "GRADE_9" }), { params });
+  expect(res.status).toBe(409);
 });

@@ -10,6 +10,7 @@ const {
   classSessionFindMany,
   tutorClassCreate,
   topicRequestUpdate,
+  topicRequestClaim,
   notificationCreate,
   idCounterUpsert,
   getSettingMock,
@@ -22,6 +23,7 @@ const {
   classSessionFindMany: vi.fn(),
   tutorClassCreate: vi.fn(),
   topicRequestUpdate: vi.fn(),
+  topicRequestClaim: vi.fn(),
   notificationCreate: vi.fn(),
   idCounterUpsert: vi.fn(),
   getSettingMock: vi.fn(),
@@ -39,15 +41,17 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
         classSession: { findMany: classSessionFindMany },
+        tutorProfile: { findUnique: tutorProfileFindUnique },
+        topicCertification: { findMany: topicCertFindMany },
         tutorClass: { create: tutorClassCreate },
-        topicRequest: { update: topicRequestUpdate, findUniqueOrThrow: topicRequestFindUnique },
+        topicRequest: { update: topicRequestUpdate, updateMany: topicRequestClaim, findUniqueOrThrow: topicRequestFindUnique },
         notification: { create: notificationCreate },
       }),
   },
 }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 
-vi.mock("@/lib/topicRequestHistory", () => ({ requestSnapshot: vi.fn().mockResolvedValue({}), recordRequestHistory: vi.fn() }));
+vi.mock("@/lib/topicRequestHistory", () => ({ lockTopicRequestRow: vi.fn(), requestSnapshot: vi.fn().mockResolvedValue({}), recordRequestHistory: vi.fn() }));
 
 import { POST } from "@/app/api/tutor/topic-requests/[id]/accept/route";
 
@@ -80,6 +84,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     getSettingMock.mockResolvedValue(true);
+    topicRequestClaim.mockResolvedValue({ count: 1 });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_10" } });
     topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(Date.now() + 86400000) });
     topicRequestFindFirst.mockResolvedValue({ id: "r1" }); // eligible by default
@@ -100,15 +105,15 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     getServerSessionMock.mockResolvedValue(tutor);
     topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "OPEN", subject: "MATH", learnerId: "L1", gradeLevel: "GRADE_9", expiresAt: new Date(0) });
     const res = await POST(makeRequest(validBody()), { params });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
-  it("400 when the request is not OPEN", async () => {
+  it("409 when the request is not OPEN", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     topicRequestFindUnique.mockResolvedValue({ id: "r1", status: "ACCEPTED", subject: "MATH", learnerId: "L1" });
     const res = await POST(makeRequest(validBody()), { params });
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(409);
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
@@ -182,6 +187,25 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     ]);
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(409);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+  });
+
+  it("returns 409 without class or notification writes when another tutor claims it", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicRequestClaim.mockResolvedValue({ count: 0 });
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(409);
+    expect(tutorClassCreate).not.toHaveBeenCalled();
+    expect(topicRequestUpdate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
+  });
+
+  it("rechecks certifications inside the acceptance transaction", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    topicCertFindMany.mockResolvedValueOnce([{ subject: "MATH", topic: "Algebraic Expressions" }]).mockResolvedValueOnce([]);
+    const res = await POST(makeRequest(validBody()), { params });
+    expect(res.status).toBe(403);
+    expect(topicRequestClaim).not.toHaveBeenCalled();
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 

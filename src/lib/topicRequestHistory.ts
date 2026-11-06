@@ -5,6 +5,11 @@ export const requestDeadline = (from = new Date()) => new Date(from.getTime() + 
 export const activeOpenWhere = (now = new Date()): Prisma.TopicRequestWhereInput => ({ status: "OPEN", expiresAt: { gt: now } });
 export const expiredOpenWhere = (now = new Date()): Prisma.TopicRequestWhereInput => ({ status: "OPEN", expiresAt: { lte: now } });
 
+/** Serialize request lifecycle changes, including nested criteria updates. */
+export async function lockTopicRequestRow(tx: Tx, id: string): Promise<void> {
+  await tx.$queryRaw`SELECT id FROM topic_requests WHERE id = ${id} FOR UPDATE`;
+}
+
 export async function requestSnapshot(tx: Tx, id: string) {
   const request = await tx.topicRequest.findUniqueOrThrow({
     where: { id },
