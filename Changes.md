@@ -4189,3 +4189,8 @@ Added an additive user sessionVersion migration, JWT/session claims, immediate l
 ## 2026-11-06 — Current assessment access and bounded closure grace
 
 Direct learner attempt reads and submissions now enforce current enrollment, class moderation, testing enablement and cancellation restrictions. Ordinary test closure permits only existing attempts, for 15 minutes, with the earliest closure controlling the deadline. Session completion stamps PRE closure atomically with status changes. Added access, deadline, direct-read and no-write regression coverage; tutor closure copy states the grace policy. Session revocation live checks passed on dev-test (eb45a4f).
+
+
+## 2026-11-06 — Serialize enrollment and capacity edits
+
+Enrollment now acquires a class-row lock and validates current eligibility, publication, status, capacity, duplicate membership and the first-session cutoff within one transaction. Class edits use the same lock and recheck enrollment count before reducing capacity. Added focused regressions and guarded real-MariaDB concurrency tests. Assessment access/grace live verification passed on dev-test (b91a335), and disposable fixtures were cleaned.

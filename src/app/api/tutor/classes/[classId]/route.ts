@@ -2,6 +2,7 @@ import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { lockClassRow, ClassWriteError } from "@/lib/classLocks";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
 import { normalizeTopic } from "@/lib/subjectTopics";
@@ -151,6 +152,13 @@ export async function PATCH(
     const newStatus = body.status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | undefined;
 
     const updatedClass = await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      if (updates.maxStudents !== undefined) {
+        const enrollmentCount = await tx.classEnrollment.count({ where: { classId } });
+        if (updates.maxStudents < enrollmentCount) {
+          throw new ClassWriteError(`Cannot reduce capacity below the current enrollment count of ${enrollmentCount}.`, 400);
+        }
+      }
       if (newStatus === "COMPLETED") {
         await tx.sessionTest.updateMany({
           where: { session: { classId, status: "SCHEDULED" }, pretestClosedAt: null }, data: { pretestClosedAt: new Date() },
@@ -236,6 +244,7 @@ export async function PATCH(
       topics: updatedClass.topics.map((t) => t.topic),
     });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

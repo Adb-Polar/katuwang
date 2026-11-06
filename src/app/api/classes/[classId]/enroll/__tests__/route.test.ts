@@ -51,7 +51,10 @@ vi.mock("@/lib/prisma", () => ({
     },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        classEnrollment: { create: enrollmentCreate, delete: enrollmentDelete },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
+        tutorClass: { findUnique: tutorClassFindUnique },
+        user: { findUnique: userFindUnique },
+        classEnrollment: { findUnique: enrollmentFindUnique, create: enrollmentCreate, delete: enrollmentDelete },
         topicRequest: { updateMany: topicRequestUpdateMany, findMany: topicRequestFindMany },
         notification: { create: notificationCreate },
       }),
@@ -145,6 +148,18 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(res.status).toBe(400);
     const json = await res.json();
     expect(json.error).toMatch(/no upcoming sessions/i);
+  });
+
+  it("rejects enrollment after the first session starts even when another is upcoming", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue({ ...futureClass, sessions: [
+      { status: "COMPLETED", scheduledAt: new Date(Date.now() - 60_000) },
+      ...futureClass.sessions,
+    ] });
+    const res = await POST(makeRequest("POST"), makeParams());
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/first session started/i);
+    expect(enrollmentCreate).not.toHaveBeenCalled();
   });
 
   it("returns 409 when the class is full", async () => {

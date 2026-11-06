@@ -43,3 +43,11 @@ Fix 3 deployed as eb45a4f34ab2e3dcc175a45254247bbcc0220a67, Render dep-dbmqb2e8b
 Recheck testing enablement, current enrollment and class moderation on direct attempt reads/resume and submission. Cancellation blocks in-progress work. Ordinary closure gives attempts started before closure 15 minutes; the earliest applicable PRE/all-testing closure controls the deadline. Missing legacy closure timestamps fail closed. Session/class completion stamps PRE closure in the same transaction without extending an earlier deadline. Submitted-result review is exempt from ordinary window expiry while other access restrictions still apply. Tutor closure dialogs describe the grace period.
 
 Fix 4 pre-commit validation: 107 focused access/start/submit/completion/window tests pass; full suite 1,039 passes / 18 baseline failures / 3 opt-in database tests skipped. TypeScript, changed-file lint and production build pass. Live QA will use a disposable class and authored question, leaving platform-wide settings unchanged.
+
+Fix 4 deployed as b91a335fdb9ebbfb07534985b07177fc0a80983a, Render dep-dbmqfe0u01pc739dg3og, live 2026-11-06 18:13 PHT. Live Chromium: resume during ordinary PRE closure grace 200, submission through the runner 200, moderated read/submission 403, and withdrawn read/submission 403. No page errors; disposable class/question cleaned. No error-level logs after deployment.
+
+## Fix 5: enrollment and capacity serialization
+
+Lock the class row inside the enrollment transaction before reading eligibility/counts and inserting. Recheck publication, status, current grades, duplicate enrollment, capacity and session cutoff while holding the lock. Enrollment closes when the first non-cancelled session starts, even if later sessions remain. Capacity edits take the same row lock and recount before writing. Real local MariaDB integration exercises last-seat races, duplicate retries and concurrent capacity reduction.
+
+Fix 5 pre-commit validation: 42 focused route tests and 3 real-MariaDB concurrency tests pass (including fixture cleanup). Full suite: 1,041 passes / 18 baseline failures / 6 opt-in database tests skipped. TypeScript, changed-file lint and production build pass. No schema change.

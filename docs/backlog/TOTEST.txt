@@ -946,4 +946,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: isolated browser flow and live stale/fresh checks eb45a4f] Password session revocation: on dev-test, change a seeded test account password through the profile form; confirm a second existing browser session immediately loses API access, fresh login with the new password works, and restore the fixture password. Legacy pre-migration sessions must require sign-in. Reset version increment covered by isolated MariaDB integration.
 
-[ ] Assessment current-access checks: on dev-test, resume an existing attempt during ordinary closure grace; withdraw and moderate its disposable class and confirm direct resume/submission are rejected. Use isolated tests for expired grace and platform-wide disabling.
+[Good: browser/API b91a335] Assessment current-access checks: on dev-test, resume an existing attempt during ordinary closure grace; withdraw and moderate its disposable class and confirm direct resume/submission are rejected. Use isolated tests for expired grace and platform-wide disabling.
+
+[ ] Enrollment capacity: on dev-test, race enrollment retries for a disposable one-seat class, confirm exactly one enrollment and one tutor notification, reject additional enrollment/full or duplicate, then withdraw and clean up. Real MariaDB tests also cover distinct learners and a concurrent capacity reduction.

@@ -14,6 +14,7 @@ const {
   notificationCreate,
   notificationCreateMany,
   enrollmentFindMany,
+  enrollmentCount,
   getSettingMock,
   subjectExistsMock,
   topicCertificationFindMany,
@@ -30,6 +31,7 @@ const {
   notificationCreate: vi.fn(),
   notificationCreateMany: vi.fn(),
   enrollmentFindMany: vi.fn(),
+  enrollmentCount: vi.fn().mockResolvedValue(0),
   getSettingMock: vi.fn(),
   subjectExistsMock: vi.fn(),
   topicCertificationFindMany: vi.fn(),
@@ -48,10 +50,11 @@ vi.mock("@/lib/prisma", () => ({
     topicCertification: { findMany: topicCertificationFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
         tutorClass: { update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
         sessionTest: { updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
-        classEnrollment: { findMany: enrollmentFindMany },
+        classEnrollment: { findMany: enrollmentFindMany, count: enrollmentCount },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
         notification: { create: notificationCreate, createMany: notificationCreateMany },
       }),
@@ -149,6 +152,16 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
 
+    const res = await patch({ maxStudents: 2 });
+    expect(res.status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rechecks enrollment count after acquiring the capacity lock", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    enrollmentCount.mockResolvedValueOnce(3);
     const res = await patch({ maxStudents: 2 });
     expect(res.status).toBe(400);
     expect(classUpdate).not.toHaveBeenCalled();

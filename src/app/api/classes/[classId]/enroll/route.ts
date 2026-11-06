@@ -2,6 +2,7 @@ import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { lockClassRow, ClassWriteError } from "@/lib/classLocks";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { isStudentEligibleForTutor, isStudentEligibleForClassTarget } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
@@ -21,79 +22,85 @@ export async function POST(
 
     await reinstateExpiredClasses();
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      include: {
-        sessions: true,
-        _count: { select: { enrollments: true } },
-        tutorProfile: { select: { userId: true, user: { select: { gradeLevel: true } } } },
-      },
-    });
+    return await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId },
+        include: {
+          sessions: true,
+          _count: { select: { enrollments: true } },
+          tutorProfile: { select: { userId: true, user: { select: { gradeLevel: true } } } },
+        },
+      });
 
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
+      if (!existingClass) {
+        return NextResponse.json({ error: "Class not found." }, { status: 404 });
+      }
 
-    const learner = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { gradeLevel: true },
-    });
+      const learner = await tx.user.findUnique({
+        where: { id: session.user.id },
+        select: { gradeLevel: true },
+      });
 
-    const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
-    const tutorGrade = existingClass.tutorProfile?.user?.gradeLevel ?? null;
+      const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
+      const tutorGrade = existingClass.tutorProfile?.user?.gradeLevel ?? null;
 
-    // Grade Level Rule 1: A tutor can only teach students in the same or lower grade level.
-    if (!isStudentEligibleForTutor(learnerGrade, tutorGrade)) {
-      return NextResponse.json(
-        { error: "You cannot enroll in a class taught by a tutor in a lower grade level." },
-        { status: 403 }
+      // Grade Level Rule 1: A tutor can only teach students in the same or lower grade level.
+      if (!isStudentEligibleForTutor(learnerGrade, tutorGrade)) {
+        return NextResponse.json(
+          { error: "You cannot enroll in a class taught by a tutor in a lower grade level." },
+          { status: 403 }
+        );
+      }
+
+      // Grade Level Rule 2: A student cannot enroll in a class whose target grade is below the student's grade.
+      if (!isStudentEligibleForClassTarget(learnerGrade, existingClass.gradeLevel)) {
+        return NextResponse.json(
+          { error: "You cannot enroll in a class targeted at a lower grade level than your own." },
+          { status: 403 }
+        );
+      }
+
+      if (existingClass.status !== "SCHEDULED" || !existingClass.published) {
+        return NextResponse.json(
+          { error: "This class is no longer accepting enrollments." },
+          { status: 400 }
+        );
+      }
+
+      const hasUpcomingSession = existingClass.sessions.some(
+        (s) => s.status === "SCHEDULED" && new Date(s.scheduledAt).getTime() > Date.now()
       );
-    }
+      if (!hasUpcomingSession) {
+        return NextResponse.json(
+          { error: "This class has no upcoming sessions to enroll in." },
+          { status: 400 }
+        );
+      }
 
-    // Grade Level Rule 2: A student cannot enroll in a class whose target grade is below the student's grade.
-    if (!isStudentEligibleForClassTarget(learnerGrade, existingClass.gradeLevel)) {
-      return NextResponse.json(
-        { error: "You cannot enroll in a class targeted at a lower grade level than your own." },
-        { status: 403 }
-      );
-    }
+      // Enrollment closes when the first non-cancelled session starts, even if
+      // later sessions are still upcoming. Recheck after acquiring the class lock.
+      if (existingClass.sessions.some((s) => s.status !== "CANCELLED" && new Date(s.scheduledAt).getTime() <= Date.now())) {
+        return NextResponse.json({ error: "Enrollment closed when the first session started." }, { status: 400 });
+      }
 
-    if (existingClass.status !== "SCHEDULED" || !existingClass.published) {
-      return NextResponse.json(
-        { error: "This class is no longer accepting enrollments." },
-        { status: 400 }
-      );
-    }
+      if (existingClass._count.enrollments >= existingClass.maxStudents) {
+        return NextResponse.json(
+          { error: "This class is already full." },
+          { status: 409 }
+        );
+      }
 
-    const hasUpcomingSession = existingClass.sessions.some(
-      (s) => s.status === "SCHEDULED" && new Date(s.scheduledAt).getTime() > Date.now()
-    );
-    if (!hasUpcomingSession) {
-      return NextResponse.json(
-        { error: "This class has no upcoming sessions to enroll in." },
-        { status: 400 }
-      );
-    }
+      const existingEnrollment = await tx.classEnrollment.findUnique({
+        where: { classId_learnerId: { classId, learnerId: session.user.id } },
+      });
 
-    if (existingClass._count.enrollments >= existingClass.maxStudents) {
-      return NextResponse.json(
-        { error: "This class is already full." },
-        { status: 409 }
-      );
-    }
-
-    const existingEnrollment = await prisma.classEnrollment.findUnique({
-      where: { classId_learnerId: { classId, learnerId: session.user.id } },
-    });
-
-    if (existingEnrollment) {
-      return NextResponse.json(
-        { error: "You are already enrolled in this class." },
-        { status: 409 }
-      );
-    }
-
-    const enrollment = await prisma.$transaction(async (tx) => {
+      if (existingEnrollment) {
+        return NextResponse.json(
+          { error: "You are already enrolled in this class." },
+          { status: 409 }
+        );
+      }
       const created = await tx.classEnrollment.create({
         data: { classId, learnerId: session.user.id },
       });
@@ -109,11 +116,10 @@ export async function POST(
         `/tutor/classes/${classId}`
       );
 
-      return created;
-    });
-
-    return NextResponse.json(enrollment, { status: 201 });
+      return NextResponse.json(created, { status: 201 });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error enrolling in class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
