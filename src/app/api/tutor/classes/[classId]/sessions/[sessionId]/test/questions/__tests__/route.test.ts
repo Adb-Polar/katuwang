@@ -37,8 +37,10 @@ vi.mock("@/lib/prisma", () => ({
     assessmentQuestion: { findMany: assessmentQuestionFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "q1" }]),
+        assessmentQuestion: { findMany: assessmentQuestionFindMany },
         sessionTestQuestion: { deleteMany: sessionTestQuestionDeleteMany, createMany: sessionTestQuestionCreateMany },
-        sessionTest: { findUniqueOrThrow: sessionTestFindUniqueOrThrow },
+        sessionTest: { findUniqueOrThrow: (args: { include?: { _count?: unknown } }) => args.include?._count ? sessionTestFindUnique(args) : sessionTestFindUniqueOrThrow(args) },
       }),
   },
 }));
@@ -120,7 +122,7 @@ describe("PUT /test/questions", () => {
         where: expect.objectContaining({
           OR: [
             { origin: "BANK", active: true, subject: "MATH", AND: [{ OR: [{ subject: "MATH", topic: "Fractions" }] }] },
-            { origin: "TUTOR", ownerTutorProfileId: "tp1" },
+            { origin: "TUTOR", active: true, ownerTutorProfileId: "tp1" },
           ],
         }),
       }),

@@ -35,6 +35,8 @@ vi.mock("@/lib/prisma", () => ({
     assessmentQuestion: { count: questionCount },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "q1" }]),
+        assessmentQuestion: { count: questionCount, findMany: vi.fn(async ({ where }: { where: { id: { in: string[] } } }) => where.id.in.map(id => ({ id }))), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         assessmentAttempt: { aggregate: attemptAggregate, create: attemptCreate },
       }),
   },

@@ -1,3 +1,4 @@
+import { lockSessionTestRow, lockActiveQuestions, QuestionWriteError } from "@/lib/questionLocks";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -48,6 +49,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       }
 
       const updated = await prisma.$transaction(async (tx) => {
+        await lockSessionTestRow(tx, owned.test!.id);
+        const current = await tx.sessionTest.findUniqueOrThrow({ where: { id: owned.test!.id }, include: { questions: { select: { questionId: true } } } });
+        if (current.status !== "DRAFT") throw new QuestionWriteError("Only a draft test can be published.");
+        if (!current.questions.length) throw new QuestionWriteError("Add at least one question before publishing.", 400);
+        await lockActiveQuestions(tx, current.questions.map(question => question.questionId));
         const t = await tx.sessionTest.update({
           where: { id: owned.test!.id },
           data: { status: "PUBLISHED", publishedAt: now },
@@ -68,7 +74,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         }
 
         return t;
-      });
+      }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
       return NextResponse.json(updated);
     }
@@ -131,6 +137,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     });
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating session test status:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

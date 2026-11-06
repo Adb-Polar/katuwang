@@ -40,6 +40,7 @@ vi.mock("@/lib/prisma", () => ({
       delete: sessionTestDelete,
     },
     platformSetting: { findUnique: platformSettingFindUnique },
+    $transaction: (callback: (tx: unknown) => unknown) => callback({ $queryRaw: vi.fn().mockResolvedValue([{ id: "st1" }]), sessionTest: { findUnique: sessionTestFindUnique, update: sessionTestUpdate, delete: sessionTestDelete } }),
   },
 }));
 

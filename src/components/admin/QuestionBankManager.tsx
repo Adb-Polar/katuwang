@@ -43,6 +43,10 @@ interface Question {
   explanation: string | null;
   active: boolean;
   inUse: boolean;
+  canDelete?: boolean;
+  version?: number;
+  previousVersionId?: string | null;
+  hasNewerVersion?: boolean;
   options: Option[];
   createdAt: string;
 }
@@ -243,6 +247,8 @@ function QuestionsTab({
 }) {
   const [success, setSuccess] = useState("");
   const [editTarget, setEditTarget] = useState<Question | null>(null);
+  const [versionTarget, setVersionTarget] = useState<Question | null>(null);
+  const formTarget = versionTarget ?? editTarget;
   const [showAdd, setShowAdd] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -279,6 +285,7 @@ function QuestionsTab({
     setSuccess(msg);
     setShowAdd(false);
     setEditTarget(null);
+    setVersionTarget(null);
     setDeleteTarget(null);
     refetch();
     refetchCoverage();
@@ -449,7 +456,7 @@ function QuestionsTab({
                     <td className="max-w-sm whitespace-normal text-base-content/80">
                       {q.prompt}
                       <div className="text-2xs text-base-content/40 mt-0.5">
-                        {q.options.length} options · added {fmt(q.createdAt)}
+                        v{q.version ?? 1} · {q.options.length} options · added {fmt(q.createdAt)}
                       </div>
                     </td>
                     <td className="text-2xs text-base-content/60 max-w-[12rem] whitespace-normal">
@@ -475,11 +482,12 @@ function QuestionsTab({
                             setEditTarget(q);
                           }}
                           disabled={q.inUse || busyId === q.id}
-                          title={q.inUse ? "In use — retire and recreate to change" : undefined}
+                          title={q.inUse ? "Published content is locked — create a corrected version" : undefined}
                           className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Edit
                         </button>
+                        <button onClick={() => { setError(""); setEditTarget(null); setVersionTarget(q); }} disabled={q.hasNewerVersion || busyId === q.id} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs" title={q.hasNewerVersion ? "Open the latest version to make another correction" : undefined}>Create corrected version</button>
                         <button
                           onClick={() => toggleActive(q)}
                           disabled={busyId === q.id}
@@ -492,8 +500,8 @@ function QuestionsTab({
                             setError("");
                             setDeleteTarget(q);
                           }}
-                          disabled={q.inUse || busyId === q.id}
-                          title={q.inUse ? "In use — retire instead" : undefined}
+                          disabled={q.canDelete === false || q.inUse || busyId === q.id}
+                          title={q.canDelete === false || q.inUse ? "History is retained — retire instead" : undefined}
                           className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Delete
@@ -519,17 +527,18 @@ function QuestionsTab({
         onPageSizeChange={setPageSize}
       />
 
-      {(showAdd || editTarget) && (
+      {(showAdd || editTarget || versionTarget) && (
         <QuestionFormModal
-          title={editTarget ? "Edit question" : "Add question"}
+          title={versionTarget ? "Create corrected version" : editTarget ? "Edit question" : "Add question"}
+          requireReason={Boolean(versionTarget)}
           contextLabel={`${subject} · ${topic}`}
-          submitLabel={editTarget ? "Save changes" : "Add question"}
+          submitLabel={versionTarget ? "Create version" : editTarget ? "Save changes" : "Add question"}
           initial={
-            editTarget
+            formTarget
               ? {
-                  prompt: editTarget.prompt,
-                  explanation: editTarget.explanation ?? undefined,
-                  options: editTarget.options.map((o) => ({
+                  prompt: formTarget.prompt,
+                  explanation: formTarget.explanation ?? undefined,
+                  options: formTarget.options.map((o) => ({
                     text: o.text,
                     isCorrect: o.isCorrect,
                   })),
@@ -539,22 +548,25 @@ function QuestionsTab({
           onClose={() => {
             setShowAdd(false);
             setEditTarget(null);
+            setVersionTarget(null);
           }}
           onSubmit={async (draft) => {
             const isEdit = editTarget !== null;
             const res = await fetch(
-              isEdit
+              versionTarget
+                ? `/api/admin/assessment-questions/${versionTarget.id}/versions`
+                : isEdit
                 ? `/api/admin/assessment-questions/${editTarget!.id}`
                 : "/api/admin/assessment-questions",
               {
-                method: isEdit ? "PATCH" : "POST",
+                method: isEdit && !versionTarget ? "PATCH" : "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(isEdit ? draft : { ...draft, subject, topic }),
               }
             );
             const data = await res.json();
             if (!res.ok) throw new FormValidationError(data, "Failed to save question.");
-            afterWrite(isEdit ? "Question updated." : "Question added.");
+            afterWrite(versionTarget ? "Corrected version created. The prior version is retired." : isEdit ? "Question updated." : "Question added.");
           }}
         />
       )}

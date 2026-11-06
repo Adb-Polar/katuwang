@@ -1,3 +1,4 @@
+import { lockActiveQuestions, QuestionWriteError } from "@/lib/questionLocks";
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -50,6 +51,7 @@ export async function GET() {
 
     return NextResponse.json(attempts);
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     const catalogFailure = catalogFailureResponse(error);
     if (catalogFailure) return catalogFailure;
     console.error("Error listing tutor assessment attempts:", error);
@@ -144,6 +146,9 @@ export async function POST(req: NextRequest) {
         count,
       });
 
+      if (questionIds.length !== count) throw new QuestionWriteError("The question bank changed. Refresh and try again.");
+      await lockActiveQuestions(tx, questionIds);
+      if (await tx.assessmentQuestion.count({ where: { subject: subjectEnum, topic, active: true, origin: "BANK" } }) < config.minBankSize) throw new QuestionWriteError("The active question bank is no longer ready. Refresh and try again.");
       return tx.assessmentAttempt.create({
         data: {
           tutorProfileId: tutorProfile.id,
@@ -158,10 +163,11 @@ export async function POST(req: NextRequest) {
         },
         include: ATTEMPT_INCLUDE,
       });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(serializeAttempt(attempt, { reveal: false }), { status: 201 });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     const catalogFailure = catalogFailureResponse(error);
     if (catalogFailure) return catalogFailure;
     console.error("Error starting assessment:", error);

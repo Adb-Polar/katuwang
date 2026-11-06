@@ -1,3 +1,4 @@
+import { isQuestionContentLocked } from "@/lib/questionLocks";
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
@@ -44,7 +45,7 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           options: { orderBy: { position: "asc" } },
-          _count: { select: { attemptItems: true } },
+          _count: { select: { attemptItems: true, sessionTestItems: true, sessionTestLinks: true, nextVersions: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -53,7 +54,10 @@ export async function GET(req: NextRequest) {
       prisma.assessmentQuestion.count({ where }),
     ]);
 
-    const questions = rows.map(({ _count, ...q }) => ({ ...q, inUse: _count.attemptItems > 0 }));
+    const questions = rows.map(({ _count, ...question }) => {
+      const inUse = isQuestionContentLocked({ ...question, _count });
+      return { ...question, inUse, canDelete: !inUse && !_count.sessionTestLinks && !_count.nextVersions && !question.previousVersionId, hasNewerVersion: Boolean(_count.nextVersions) };
+    });
 
     return NextResponse.json({ questions, total, page, pageSize });
   } catch (error) {

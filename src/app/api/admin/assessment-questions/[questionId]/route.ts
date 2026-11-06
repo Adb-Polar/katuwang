@@ -1,18 +1,21 @@
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
+import type { Prisma } from "@prisma/client";
+import { isQuestionContentLocked, lockQuestionRows, QuestionWriteError } from "@/lib/questionLocks";
 import { prisma } from "@/lib/prisma";
 import { updateAssessmentQuestionSchema } from "@/lib/validations/assessment";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
-async function loadQuestion(questionId: string) {
+async function loadQuestion(questionId: string, db: Prisma.TransactionClient = prisma) {
   // Scoped to BANK so tutor-authored custom (session-test) questions are
   // invisible to the admin bank editor.
-  return prisma.assessmentQuestion.findFirst({
+  return db.assessmentQuestion.findFirst({
     where: { id: questionId, origin: "BANK" },
     include: {
       options: { orderBy: { position: "asc" } },
-      _count: { select: { attemptItems: true, sessionTestItems: true } },
+      _count: { select: { attemptItems: true, sessionTestItems: true, sessionTestLinks: true, nextVersions: true } },
+      sessionTestLinks: { include: { sessionTest: { select: { status: true, publishedAt: true } } } },
     },
   });
 }
@@ -38,9 +41,11 @@ export async function GET(
     const { _count, ...q } = question;
     return NextResponse.json({
       ...q,
-      inUse: _count.attemptItems > 0 || _count.sessionTestItems > 0,
+      inUse: isQuestionContentLocked(question),
+      canDelete: !isQuestionContentLocked(question) && !_count.sessionTestLinks && !_count.nextVersions && !question.previousVersionId,
     });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error fetching assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -72,51 +77,31 @@ export async function PATCH(
     }
 
     const { prompt, explanation, options, active } = result.data;
-    const inUse = existing._count.attemptItems > 0 || existing._count.sessionTestItems > 0;
-    const wantsContentEdit = prompt !== undefined || explanation !== undefined || options !== undefined;
-
-    if (inUse && wantsContentEdit) {
-      return NextResponse.json(
-        { error: "This question has been used in an attempt. Retire it and create a new one to change its content." },
-        { status: 409 }
-      );
-    }
-
-    const retiring = active === false && existing.active === true;
-
     const updated = await prisma.$transaction(async (tx) => {
+      await lockQuestionRows(tx, [questionId]);
+      const current = await loadQuestion(questionId, tx);
+      if (!current) throw new QuestionWriteError("Question not found.", 404);
+      const inUse = isQuestionContentLocked(current);
+      if (inUse && (prompt !== undefined || explanation !== undefined || options !== undefined)) {
+        throw new QuestionWriteError("This question is locked by a published test or attempt. Create a corrected version to change its content.");
+      }
+      if (active === true && current._count.nextVersions > 0) throw new QuestionWriteError("A newer version exists. Use that version instead of reactivating this one.");
       if (options !== undefined) {
         await tx.assessmentOption.deleteMany({ where: { questionId } });
-        await tx.assessmentOption.createMany({
-          data: options.map((o, i) => ({ questionId, text: o.text, isCorrect: o.isCorrect, position: i })),
-        });
+        await tx.assessmentOption.createMany({ data: options.map((option, position) => ({ questionId, text: option.text, isCorrect: option.isCorrect, position })) });
       }
-
-      const q = await tx.assessmentQuestion.update({
+      const question = await tx.assessmentQuestion.update({
         where: { id: questionId },
-        data: {
-          ...(prompt !== undefined ? { prompt } : {}),
-          ...(explanation !== undefined ? { explanation: explanation || null } : {}),
-          ...(active !== undefined ? { active } : {}),
-        },
+        data: { ...(prompt !== undefined ? { prompt } : {}), ...(explanation !== undefined ? { explanation: explanation || null } : {}), ...(active !== undefined ? { active } : {}) },
         include: { options: { orderBy: { position: "asc" } } },
       });
+      await tx.auditLog.create({ data: { adminId: session.user.id, action: active === false && current.active ? AUDIT_ACTIONS.QUESTION_RETIRED : AUDIT_ACTIONS.QUESTION_UPDATED, targetType: AUDIT_TARGET_TYPES.QUESTION, targetId: questionId, reason: `${current.subject} · ${current.topic}` } });
+      return { ...question, inUse, canDelete: !inUse && !current._count.sessionTestLinks && !current._count.nextVersions && !current.previousVersionId };
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
-      await tx.auditLog.create({
-        data: {
-          adminId: session.user.id,
-          action: retiring ? AUDIT_ACTIONS.QUESTION_RETIRED : AUDIT_ACTIONS.QUESTION_UPDATED,
-          targetType: AUDIT_TARGET_TYPES.QUESTION,
-          targetId: questionId,
-          reason: `${existing.subject} · ${existing.topic}`,
-        },
-      });
-
-      return q;
-    });
-
-    return NextResponse.json({ ...updated, inUse });
+    return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -140,28 +125,20 @@ export async function DELETE(
       return NextResponse.json({ error: "Question not found." }, { status: 404 });
     }
 
-    if (existing._count.attemptItems > 0 || existing._count.sessionTestItems > 0) {
-      return NextResponse.json(
-        { error: "This question has been used in an attempt. Retire it instead of deleting." },
-        { status: 409 }
-      );
-    }
-
     await prisma.$transaction(async (tx) => {
+      await lockQuestionRows(tx, [questionId]);
+      const current = await loadQuestion(questionId, tx);
+      if (!current) throw new QuestionWriteError("Question not found.", 404);
+      if (isQuestionContentLocked(current) || current._count.sessionTestLinks || current._count.nextVersions || current.previousVersionId) {
+        throw new QuestionWriteError("This question has test or version history. Retire it instead of deleting.");
+      }
       await tx.assessmentQuestion.delete({ where: { id: questionId } });
-      await tx.auditLog.create({
-        data: {
-          adminId: session.user.id,
-          action: AUDIT_ACTIONS.QUESTION_DELETED,
-          targetType: AUDIT_TARGET_TYPES.QUESTION,
-          targetId: questionId,
-          reason: `${existing.subject} · ${existing.topic}`,
-        },
-      });
-    });
+      await tx.auditLog.create({ data: { adminId: session.user.id, action: AUDIT_ACTIONS.QUESTION_DELETED, targetType: AUDIT_TARGET_TYPES.QUESTION, targetId: questionId, reason: `${current.subject} · ${current.topic}` } });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ message: "Question deleted." });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error deleting assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

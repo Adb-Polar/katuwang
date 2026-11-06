@@ -353,6 +353,11 @@ model AssessmentQuestion {
   origin              QuestionOrigin           @default(BANK)
   createdById         String
   ownerTutorProfileId String?
+  lockedAt            DateTime?
+  version             Int                      @default(1)
+  previousVersionId   String?
+  previousVersion     AssessmentQuestion?      @relation("QuestionVersions", fields: [previousVersionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  nextVersions        AssessmentQuestion[]     @relation("QuestionVersions")
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
   attemptItems        AssessmentAttemptItem[]
@@ -362,6 +367,7 @@ model AssessmentQuestion {
   sessionTestItems    SessionTestAttemptItem[]
   sessionTestLinks    SessionTestQuestion[]
 
+  @@unique([previousVersionId, version])
   @@index([subject, topic, active, origin])
   @@index([ownerTutorProfileId])
   @@index([createdById], map: "assessment_questions_createdById_fkey")
