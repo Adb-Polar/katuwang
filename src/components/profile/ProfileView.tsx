@@ -1,3 +1,4 @@
+import RecoveryEmailSettings from "@/components/profile/RecoveryEmailSettings";
 import Link from "next/link";
 import { ShieldCheck, Pencil } from "lucide-react";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -166,6 +167,7 @@ export default function ProfileView({
           </div>
         </section>
       )}
+      <RecoveryEmailSettings />
       <AccountControls />
     </div>
   );

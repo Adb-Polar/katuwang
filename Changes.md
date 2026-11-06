@@ -4239,3 +4239,8 @@ Request acceptance checks every requested topic before claiming and against the 
 ## 2026-11-06 — Share profile-picture prerequisites
 
 The same action policy now protects tutor publishing/request acceptance and learner enrollment, honoring OPTIONAL, TUTORS_ONLY and ALL_USERS modes. Enrollment and acceptance read the requirement through their transaction connection. Setting labels name the protected actions. Added nine mode/action matrix tests and blocked-action endpoint regressions. Complete request coverage 959385e passed live API/browser verification.
+
+
+## 2026-11-06 — Persist and verify recovery email ownership
+
+Registration and learner/tutor profile updates persist normalized backup addresses. Changing them requires the current password and clears verified status. Added self-service recovery settings with expiring single-use emailed codes, conditional consumption and current-address checks. Password recovery accepts only verified backups and rejects ambiguous account matches before token/mail side effects. Six isolated MariaDB tests exercise persistence, verification, reuse/concurrency, expiry, address change, delivery failure and ambiguity. Picture policy 6e6040c passed live browser QA with the original setting restored.

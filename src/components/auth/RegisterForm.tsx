@@ -50,6 +50,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
     firstName: "",
     lastName: "",
     email: "",
+    recoveryEmail: "",
     password: "",
     confirmPassword: "",
     gradeLevel: "",
@@ -163,6 +164,10 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               placeholder="you@example.com"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"
             />
+          </FormField>
+
+          <FormField label="Recovery Email (optional)" hint="Verify this backup address from your profile after signing in before using it for password recovery.">
+            <input type="email" name="recoveryEmail" value={form.recoveryEmail} onChange={handleChange} placeholder="backup@example.com" className="input input-bordered input-sm w-full focus:input-primary text-xs" />
           </FormField>
 
           {/* Grade Level & Section */}

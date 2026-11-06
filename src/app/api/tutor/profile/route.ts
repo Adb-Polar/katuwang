@@ -1,3 +1,4 @@
+import { recoveryEmailUpdateData, RecoveryEmailError } from "@/lib/recoveryEmail";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +21,7 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { contactInfo, section, gradeLevel } = result.data;
+    const { contactInfo, section, gradeLevel, recoveryEmail, currentPassword } = result.data;
 
     let normalizedContact: string | undefined;
     if (contactInfo !== undefined) {
@@ -29,18 +30,21 @@ export async function PATCH(req: NextRequest) {
       normalizedContact = res.value;
     }
 
+    const recoveryUpdate = recoveryEmail !== undefined ? await recoveryEmailUpdateData(session.user.id, recoveryEmail, currentPassword) : {};
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
+        ...recoveryUpdate,
         ...(normalizedContact !== undefined ? { contactInfo: normalizedContact || null } : {}),
         ...(section !== undefined ? { section } : {}),
         ...(gradeLevel !== undefined ? { gradeLevel } : {}),
       },
-      select: { contactInfo: true, section: true, gradeLevel: true },
+      select: { contactInfo: true, section: true, gradeLevel: true, recoveryEmail: true, recoveryEmailVerifiedAt: true },
     });
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof RecoveryEmailError) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Error updating tutor profile:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

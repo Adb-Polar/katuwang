@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
       gradeLevel: data.gradeLevel,
       section: data.section,
       contactInfo: data.contactInfo || null,
+      recoveryEmail: data.recoveryEmail || null,
       consentGiven: data.consentGiven,
       requireApproval,
       requireEmailVerification,

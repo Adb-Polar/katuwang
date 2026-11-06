@@ -21,6 +21,7 @@ model User {
   password                 String
   sessionVersion           Int                   @default(0)
   recoveryEmail            String?
+  recoveryEmailVerifiedAt  DateTime?
   role                     Role
   gradeLevel               GradeLevel
   section                  String
@@ -53,6 +54,7 @@ model User {
   topicRequests            TopicRequest[]        @relation("LearnerTopicRequests")
   tutorProfile             TutorProfile?
   verificationTokens       VerificationToken[]
+  recoveryEmailTokens      RecoveryEmailToken[]
 
   @@map("users")
 }
@@ -81,6 +83,20 @@ model VerificationToken {
 
   @@index([userId])
   @@map("verification_tokens")
+}
+
+model RecoveryEmailToken {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recovery_email_tokens")
 }
 
 model TutorProfile {

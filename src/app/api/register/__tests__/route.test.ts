@@ -90,6 +90,16 @@ describe("POST /api/register", () => {
     expect(userCreate).not.toHaveBeenCalled();
   });
 
+  it.each(["LEARNER", "TUTOR"] as const)("persists normalized, unverified recovery email for %s registration", async (type) => {
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({ id: "new-user", anonymousId: "QA-RECOVERY", email: validLearner.email, role: type === "TUTOR" ? "STUDENT_TUTOR" : "STUDENT_LEARNER" });
+    if (type === "TUTOR") transactionMock.mockImplementationOnce(async cb => cb({ user: { create: userCreate } }));
+    const response = await POST(makeRequest({ ...validLearner, type, recoveryEmail: " Backup@Example.com " }));
+    expect(response.status).toBe(201);
+    expect(userCreate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ recoveryEmail: "backup@example.com" }) }));
+    expect(userCreate.mock.calls[0][0].data.recoveryEmailVerifiedAt).toBeUndefined();
+  });
+
   it("registers a learner successfully", async () => {
     userFindUnique.mockResolvedValue(null);
     userCreate.mockResolvedValue({

@@ -119,3 +119,11 @@ Fix 12 deployed as 959385e2d085644f38c760bf2e048299b8c09157, Render dep-dbmtntuc
 One backend policy governs tutor publication/request acceptance and learner enrollment. Optional and tutor-only/all-user setting modes retain their scope. Setting wording names the actions precisely.
 
 Fix 13 pre-commit validation: 94 focused policy/route tests and 8 real-MariaDB enrollment/acceptance tests pass. Full suite 1,124 passes / 11 baseline failures / 25 opt-in tests skipped. TypeScript, changed-file lint and production build pass.
+
+Fix 13 deployed as 6e6040cf2e233d533c832524b36b29aeaa508283, Render dep-dbmtsj8n74is73bggrr0, live 2026-11-06 22:07 PHT. Live admin setting UI saved 200; missing-avatar tutor create/publish/accept and learner enrollment returned 400; learner profile remained accessible; OPTIONAL enrollment 201. No page errors. Original setting restored and QA fixtures cleaned.
+
+## Fix 14: verified recovery email
+
+Persist normalized backup addresses for registration and both profile roles. Require the current password to change a backup address; clear ownership on change. Profile controls save, send a short-lived code and verify ownership. Conditional token consumption and current-address matching reject reuse, expiry and address changes. Password recovery queries only verified backup addresses and rejects ambiguous matches without issuing tokens or sending mail.
+
+Fix 14 pre-commit validation: 34 focused profile/registration/forgot-password tests and 6 real-MariaDB verification tests pass. Full suite 1,127 passes / 11 baseline failures / 31 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Isolated Chromium and local SMTP: save/reload, reject unverified backup, deliver code, verify, reject reuse, deliver password-reset link to verified backup and clear verification on address change all pass with no page errors or external mail.

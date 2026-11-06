@@ -21,6 +21,7 @@ export type RegisterAccountInput = {
   gradeLevel: GradeLevel;
   section: string;
   contactInfo?: string | null;
+  recoveryEmail?: string | null;
   consentGiven: boolean;
   /** When true, the account is created with status PENDING (awaiting admin approval). */
   requireApproval?: boolean;
@@ -49,6 +50,7 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     gradeLevel,
     section,
     contactInfo,
+    recoveryEmail,
     consentGiven,
     requireApproval = false,
     requireEmailVerification = false,
@@ -73,6 +75,7 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     gradeLevel,
     section,
     contactInfo: contactInfo || null,
+    recoveryEmail: recoveryEmail?.trim().toLowerCase() || null,
     consentGiven,
     ...(requireApproval ? { status: "PENDING" as const } : {}),
   };
