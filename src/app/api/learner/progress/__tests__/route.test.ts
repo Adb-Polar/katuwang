@@ -64,6 +64,7 @@ describe("GET /api/learner/progress", () => {
     expect(json.series).toEqual([
       {
         classCode: "C-0001",
+        withdrawnAt: null,
         subject: "MATH",
         topic: "Fractions",
         scheduledAt: "2026-09-01T00:00:00.000Z",

@@ -29,7 +29,7 @@ export async function POST(
         where: { id: classId },
         include: {
           sessions: true,
-          _count: { select: { enrollments: true } },
+          _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
           tutorProfile: { select: { userId: true, user: { select: { gradeLevel: true } } } },
         },
       });
@@ -87,15 +87,15 @@ export async function POST(
         where: { classId_learnerId: { classId, learnerId: session.user.id } },
       });
 
-      if (existingEnrollment) {
+      if (existingEnrollment && !existingEnrollment.withdrawnAt) {
         return NextResponse.json(
           { error: "You are already enrolled in this class." },
           { status: 409 }
         );
       }
-      const created = await tx.classEnrollment.create({
-        data: { classId, learnerId: session.user.id },
-      });
+      const created = existingEnrollment
+        ? await tx.classEnrollment.update({ where: { id: existingEnrollment.id }, data: { withdrawnAt: null } })
+        : await tx.classEnrollment.create({ data: { classId, learnerId: session.user.id } });
 
       const linkedRequests = await tx.topicRequest.findMany({ where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ACCEPTED" }, select: { id: true } });
       for (const request of linkedRequests) await updateTopicRequest(tx, request.id, { status: "ENROLLED" }, session.user.id);
@@ -133,57 +133,24 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      select: {
-        status: true,
-        code: true,
-        subject: true,
-        tutorProfile: { select: { userId: true } },
-      },
-    });
-
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
-
-    const existingEnrollment = await prisma.classEnrollment.findUnique({
-      where: { classId_learnerId: { classId, learnerId: session.user.id } },
-    });
-
-    if (!existingEnrollment) {
-      return NextResponse.json(
-        { error: "You are not enrolled in this class." },
-        { status: 404 }
-      );
-    }
-
-    if (existingClass.status !== "SCHEDULED") {
-      return NextResponse.json(
-        { error: "Cannot unenroll from a class that is already completed or cancelled." },
-        { status: 400 }
-      );
-    }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.classEnrollment.delete({
-        where: { id: existingEnrollment.id },
+    return await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId },
+        select: { status: true, code: true, subject: true, tutorProfile: { select: { userId: true } } },
       });
-
+      if (!existingClass) return NextResponse.json({ error: "Class not found." }, { status: 404 });
+      const existingEnrollment = await tx.classEnrollment.findUnique({ where: { classId_learnerId: { classId, learnerId: session.user.id } } });
+      if (!existingEnrollment || existingEnrollment.withdrawnAt) return NextResponse.json({ error: "You are not enrolled in this class." }, { status: 404 });
+      if (existingClass.status !== "SCHEDULED") return NextResponse.json({ error: "Cannot unenroll from a class that is already completed or cancelled." }, { status: 400 });
+      await tx.classEnrollment.update({ where: { id: existingEnrollment.id }, data: { withdrawnAt: new Date() } });
       const linkedRequests = await tx.topicRequest.findMany({ where: { fulfilledClassId: classId, learnerId: session.user.id, status: "ENROLLED" }, select: { id: true } });
       for (const request of linkedRequests) await updateTopicRequest(tx, request.id, { status: "ACCEPTED" }, session.user.id);
-
-      await notify(
-        tx,
-        existingClass.tutorProfile.userId,
-        "CLASS_ENROLLMENT_DROPPED",
-        `${session.user.anonymousId} left your ${existingClass.subject} class (${existingClass.code}).`,
-        `/tutor/classes/${classId}`
-      );
-    });
-
-    return NextResponse.json({ message: "Unenrolled successfully." });
+      await notify(tx, existingClass.tutorProfile.userId, "CLASS_ENROLLMENT_DROPPED", `${session.user.anonymousId} left your ${existingClass.subject} class (${existingClass.code}).`, `/tutor/classes/${classId}`);
+      return NextResponse.json({ message: "Unenrolled successfully. Your learning history is retained." });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error unenrolling from class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

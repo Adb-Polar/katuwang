@@ -41,6 +41,7 @@ export default async function TutorClassDetailPage({
         include: { test: { select: { id: true, title: true, status: true, pretestClosedAt: true, posttestOpenedAt: true } } },
       },
       enrollments: {
+        where: { withdrawnAt: null },
         include: {
           learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
         },

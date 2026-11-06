@@ -64,7 +64,7 @@ describe("any-grade discovery", () => {
     const { gradeEligibilityWhere, browseClassesWhere, browsableOrEnrolledWhere } = await import("@/lib/classQueries");
     expect(gradeEligibilityWhere("GRADE_12")).toEqual({});
     const browse = browseClassesWhere("u1", "GRADE_12");
-    expect(browse.enrollments).toEqual({ none: { learnerId: "u1" } });
+    expect(browse.enrollments).toEqual({ none: { learnerId: "u1", withdrawnAt: null } });
     expect(browse.tutorProfile).toBeUndefined();
     expect(browse.gradeLevel).toBeUndefined();
     const where = browsableOrEnrolledWhere("u1", "GRADE_12");
@@ -72,6 +72,6 @@ describe("any-grade discovery", () => {
     expect(scheduled.status).toBe("SCHEDULED");
     expect(scheduled.tutorProfile).toBeUndefined();
     expect(scheduled.gradeLevel).toBeUndefined();
-    expect(where.OR?.[1]).toEqual({ enrollments: { some: { learnerId: "u1" } } });
+    expect(where.OR?.[1]).toEqual({ enrollments: { some: { learnerId: "u1", withdrawnAt: null } } });
   });
 });

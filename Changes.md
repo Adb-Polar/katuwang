@@ -4254,3 +4254,8 @@ Class creation now persists published:false and explicitly defaults to true when
 ## 2026-11-07 — Make the live catalog authoritative
 
 Removed static fallback validation and picker choices. Question-bank coverage/navigation, chatbot extraction and development sampling use active database entries. Catalog read failures return retryable 503 responses before writes; picker failures show a retry control with no seed choices. Request acceptance also rechecks active topics. Isolated normalization from seed data. Tests explicitly supply database catalog fixtures, correcting stale topic names and the old login-error fixture; all baseline failures are resolved. Publication cf10319 passed live browser privacy/publish verification.
+
+
+## 2026-11-07 — Retain withdrawn enrollment history
+
+Withdrawal timestamps the existing row under the class lock; re-enrollment reactivates it without losing its first enrollment date. Capacity, active rosters, notifications and assessment access exclude withdrawn relationships. Learner progress, tutor result cohorts and reporting eligibility retain history, with explicit current/historical counts and withdrawal labels. Four new MariaDB history tests and three existing capacity races pass. Catalog 5ce8ded passed live custom-topic, picker outage/retry and deactivation verification.

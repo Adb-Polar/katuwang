@@ -230,6 +230,7 @@ model ClassEnrollment {
   classId    String
   learnerId  String
   enrolledAt DateTime   @default(now())
+  withdrawnAt DateTime?
   class      TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
   learner    User       @relation("LearnerEnrollments", fields: [learnerId], references: [id], onDelete: Cascade)
 

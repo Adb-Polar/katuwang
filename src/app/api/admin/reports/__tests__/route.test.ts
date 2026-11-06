@@ -55,7 +55,7 @@ describe("GET /api/admin/reports", () => {
   it("returns flattened breakdown counts", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
     userGroupBy.mockResolvedValueOnce([{ role: "STUDENT_LEARNER", _count: { _all: 5 } }]);
-    classEnrollmentCount.mockResolvedValueOnce(10);
+    classEnrollmentCount.mockResolvedValueOnce(10).mockResolvedValueOnce(7);
     classEnrollmentFindMany.mockResolvedValueOnce([
       { enrolledAt: new Date() },
       { enrolledAt: new Date() },
@@ -67,6 +67,9 @@ describe("GET /api/admin/reports", () => {
     const json = await res.json();
     expect(json.usersByRole).toEqual([{ role: "STUDENT_LEARNER", count: 5 }]);
     expect(json.enrollments.total).toBe(10);
+    expect(json.enrollments.current).toBe(7);
+    expect(json.enrollments.withdrawn).toBe(3);
+    expect(classEnrollmentCount).toHaveBeenCalledWith({ where: { withdrawnAt: null } });
     expect(json.enrollments.last30Days).toBe(3);
     expect(json.enrollments.byDay).toHaveLength(30);
     expect(json.enrollments.byDay.reduce((s: number, d: { count: number }) => s + d.count, 0)).toBe(3);

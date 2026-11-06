@@ -13,11 +13,11 @@ export default async function LearnerProgressPage() {
 
   const enrollments = await prisma.classEnrollment.findMany({
     where: { learnerId: session!.user.id },
-    select: { class: { select: { id: true, code: true, subject: true } } },
+    select: { withdrawnAt: true, class: { select: { id: true, code: true, subject: true } } },
     orderBy: { enrolledAt: "asc" },
   });
 
-  const classOptions = enrollments.map((e) => e.class);
+  const classOptions = enrollments.map(e => ({ ...e.class, withdrawnAt: e.withdrawnAt?.toISOString() ?? null }));
 
   return (
     <div className="space-y-6">

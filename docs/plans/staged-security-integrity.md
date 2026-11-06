@@ -143,3 +143,11 @@ Fix 15 deployed as cf10319bd78df448791c0d2d0065064e7332f1f2, Render dep-dbn1meh4
 Remove static fallback validation and picker choices. Coverage, question-bank navigation, chatbot extraction and dev sampling use active DB subjects/topics. Catalog failures become retryable 503 responses and never authorize a write using static data.
 
 Fix 16 pre-commit validation: full suite 1,146 passes / 31 opt-in tests skipped / zero failures. Ten real-MariaDB scheduling/acceptance checks pass. TypeScript, changed-file lint and final production build pass; focused picker retry also passes after the final React lint correction. Explicit DB fixtures and current canonical topics replace fallback-dependent test assumptions; login-focus mock now uses the current INCORRECT_PASSWORD contract. Server outage test proves retryable 503 before any question write.
+
+Fix 16 deployed as 5ce8dedab502c317dac1943a824dbbc3a57493bb, Render dep-dbn1tvks728c73cuf5lg, live 2026-11-07 02:42 PHT. Browser/API: DB-only subject/topic appears in catalog, coverage, chatbot and bank UI; custom question creation 201; failed picker fetch exposes no static choices and retry recovers; inactive topic hidden and write 400. No page errors; QA question/topic/subject removed.
+
+## Fix 17: retained enrollment history
+
+Withdrawal timestamps the enrollment instead of deleting it. Enrollment/withdrawal share the class lock; re-enrollment reactivates the retained row. Active counts, rosters, notifications and assessment access exclude withdrawals. Historical progress, report eligibility and results keep the original relationship and scores.
+
+Fix 17 pre-commit validation: full suite 1,149 passes / 35 opt-in tests skipped / zero failures. Seven real-MariaDB history/capacity tests pass, including retained scores/reporting, assessment rejection, stable re-enrollment ID/date, duplicate withdrawal serialization and capacity with retained rows. TypeScript, changed-file lint and production build pass. Migration applied successfully to isolated MariaDB. Deletion guards continue to protect all enrollment history; progress/report queries retain historical relationships.

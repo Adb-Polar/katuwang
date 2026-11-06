@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
         topics: true,
         sessions: { orderBy: { scheduledAt: "asc" } },
         enrollments: {
+          where: { withdrawnAt: null },
           include: {
             learner: {
               select: {

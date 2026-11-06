@@ -55,7 +55,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
         if (owned.session.status === "SCHEDULED") {
           const learners = await tx.classEnrollment.findMany({
-            where: { classId },
+            where: { classId, withdrawnAt: null },
             select: { learnerId: true },
           });
           await notifyMany(
@@ -103,7 +103,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
           data: { posttestOpenedAt: now, pretestClosedAt: owned.test!.pretestClosedAt ?? now },
         });
         const learners = await tx.classEnrollment.findMany({
-          where: { classId },
+          where: { classId, withdrawnAt: null },
           select: { learnerId: true },
         });
         await notifyMany(

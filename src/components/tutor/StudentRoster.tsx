@@ -25,6 +25,7 @@ interface StudentEnrollment {
   subject: string;
   topics: string[];
   enrolledAt: string;
+  withdrawnAt?: string | null;
 }
 
 interface Student {
@@ -175,7 +176,7 @@ export default function StudentRoster() {
                           className="badge badge-outline badge-sm text-2xs font-mono"
                           title={`${subjectDisplayLabel(enr.subject)} — ${enr.topics.join(", ")}`}
                         >
-                          {enr.code}
+                          {enr.code}{enr.withdrawnAt ? " · Withdrawn" : ""}
                         </span>
                       ))}
                     </div>

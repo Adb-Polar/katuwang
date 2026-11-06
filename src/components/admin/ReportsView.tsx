@@ -30,7 +30,7 @@ interface ReportsData {
   classesBySubject: Breakdown[];
   classesByStatus: Breakdown[];
   certificationsByStatus: Breakdown[];
-  enrollments: { total: number; last30Days: number; byDay: { date: string; count: number }[] };
+  enrollments: { total: number; current: number; withdrawn: number; last30Days: number; byDay: { date: string; count: number }[] };
 }
 
 export default function ReportsView() {
@@ -84,7 +84,9 @@ export default function ReportsView() {
         rows.push({ section, label: String(row[labelKey] ?? ""), count: row.count });
       }
     }
-    rows.push({ section: "enrollments_total", label: "total", count: reports.enrollments.total });
+    rows.push({ section: "enrollments_total", label: "historical", count: reports.enrollments.total });
+    rows.push({ section: "enrollments_total", label: "current", count: reports.enrollments.current });
+    rows.push({ section: "enrollments_total", label: "withdrawn", count: reports.enrollments.withdrawn });
     rows.push({
       section: "enrollments_total",
       label: "last_30_days",
@@ -122,9 +124,11 @@ export default function ReportsView() {
 
           <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto flex-wrap stats-vertical sm:stats-horizontal">
             <div className="stat py-4">
-              <div className="stat-title text-2xs">Total Enrollments</div>
+              <div className="stat-title text-2xs">Historical enrollment records</div>
               <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.total}</div>
             </div>
+            <div className="stat py-4"><div className="stat-title text-2xs">Current enrollments</div><div className="stat-value text-lg font-sans font-medium">{reports.enrollments.current}</div></div>
+            <div className="stat py-4"><div className="stat-title text-2xs">Withdrawn records</div><div className="stat-value text-lg font-sans font-medium">{reports.enrollments.withdrawn}</div></div>
             <div className="stat py-4">
               <div className="stat-title text-2xs">Enrollments (Last 30 Days)</div>
               <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.last30Days}</div>

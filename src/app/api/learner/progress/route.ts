@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
     const enrollments = await prisma.classEnrollment.findMany({
       where: { learnerId: session.user.id, ...(classId ? { classId } : {}) },
       select: {
+        withdrawnAt: true,
         class: {
           select: {
             code: true,
@@ -59,6 +60,7 @@ export async function GET(req: NextRequest) {
             const delta = pre != null && post != null ? post - pre : null;
             return {
               classCode: e.class.code,
+              withdrawnAt: e.withdrawnAt?.toISOString() ?? null,
               subject: e.class.subject,
               topic: s.topic,
               scheduledAt: s.scheduledAt.toISOString(),

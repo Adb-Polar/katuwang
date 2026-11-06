@@ -31,7 +31,7 @@ export async function PATCH(
         topics: { select: { topic: true } },
         sessions: { select: { topic: true } },
         _count: {
-          select: { enrollments: true },
+          select: { enrollments: { where: { withdrawnAt: null } } },
         },
       },
     });
@@ -174,7 +174,7 @@ export async function PATCH(
         }
       }
       if (updates.maxStudents !== undefined) {
-        const enrollmentCount = await tx.classEnrollment.count({ where: { classId } });
+        const enrollmentCount = await tx.classEnrollment.count({ where: { classId, withdrawnAt: null } });
         if (updates.maxStudents < enrollmentCount) {
           throw new ClassWriteError(`Cannot reduce capacity below the current enrollment count of ${enrollmentCount}.`, 400);
         }
@@ -238,7 +238,7 @@ export async function PATCH(
         // via a topic request — the request-linked ones are covered just above).
         const linkedLearnerIds = new Set(linkedRequests.map((r) => r.learnerId));
         const enrolments = await tx.classEnrollment.findMany({
-          where: { classId },
+          where: { classId, withdrawnAt: null },
           select: { learnerId: true },
         });
         const targets = enrolments
@@ -297,7 +297,7 @@ export async function DELETE(
       });
       if (!existingClass) throw new ClassWriteError("Class not found.", 404);
       if (existingClass.tutorProfileId !== tutorProfile.id) throw new ClassWriteError("Forbidden.", 403);
-      if (existingClass._count.enrollments > 0) throw new ClassWriteError("Cannot delete a class that has enrolled learners. Please cancel the class instead.", 400);
+      if (existingClass._count.enrollments > 0) throw new ClassWriteError("Cannot delete a class with enrollment history. Please cancel the class instead.", 400);
       if (await tx.sessionTest.findFirst({ where: { session: { classId } }, select: { id: true } })) {
         throw new ClassWriteError("This class has assessment records. Cancel it instead to preserve history.", 409);
       }

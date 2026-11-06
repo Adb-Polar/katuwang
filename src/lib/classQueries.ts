@@ -26,7 +26,7 @@ export function browsableOrEnrolledWhere(
   return {
     OR: [
       schedWhere,
-      { enrollments: { some: { learnerId } } },
+      { enrollments: { some: { learnerId, withdrawnAt: null } } },
     ],
   };
 }
@@ -40,7 +40,7 @@ export function browseClassesWhere(
     status: "SCHEDULED",
     published: true,
     sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: new Date() } } },
-    enrollments: { none: { learnerId } },
+    enrollments: { none: { learnerId, withdrawnAt: null } },
   };
 
   return { ...base, ...(learnerGrade ? gradeEligibilityWhere(learnerGrade) : {}) };
@@ -48,7 +48,7 @@ export function browseClassesWhere(
 
 /** The "My Classes" tab: every class the learner is enrolled in, any status. */
 export function myClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
-  return { enrollments: { some: { learnerId } } };
+  return { enrollments: { some: { learnerId, withdrawnAt: null } } };
 }
 
 /** Include shape for a learner-facing class listing (anonymized tutor, own enrollment only). */
@@ -66,8 +66,8 @@ export function learnerClassInclude(learnerId: string) {
         },
       },
     },
-    _count: { select: { enrollments: true } },
-    enrollments: { where: { learnerId }, select: { id: true } },
+    _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
+    enrollments: { where: { learnerId, withdrawnAt: null }, select: { id: true } },
   } satisfies Prisma.TutorClassInclude;
 }
 

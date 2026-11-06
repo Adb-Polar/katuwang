@@ -137,17 +137,18 @@ export default function SessionTestResults({
         <h1 className="text-lg font-sans">{data.test.title}</h1>
       </div>
 
+      <p className="text-xs text-base-content/60">{data.totals.enrolled} currently enrolled · {data.totals.historicalEnrolled ?? data.totals.enrolled} historical participants. Submitted results include withdrawn learners.</p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card kt-card kt-stat p-4">
           <span className="kt-stat-title">Pre-test submitted</span>
           <span className="kt-stat-value">
-            {data.totals.preSubmitted} / {data.totals.enrolled}
+            {data.totals.preSubmitted} / {data.totals.historicalEnrolled ?? data.totals.enrolled}
           </span>
         </div>
         <div className="card kt-card kt-stat p-4">
           <span className="kt-stat-title">Post-test submitted</span>
           <span className="kt-stat-value">
-            {data.totals.postSubmitted} / {data.totals.enrolled}
+            {data.totals.postSubmitted} / {data.totals.historicalEnrolled ?? data.totals.enrolled}
           </span>
         </div>
         <div className="card kt-card kt-stat p-4">

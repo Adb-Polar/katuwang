@@ -26,6 +26,7 @@ export async function GET() {
       classesByStatus,
       certificationsByStatus,
       totalEnrollments,
+      currentEnrollments,
       recentEnrollmentRows,
     ] = await Promise.all([
       prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
@@ -35,6 +36,7 @@ export async function GET() {
       prisma.tutorClass.groupBy({ by: ["status"], _count: { _all: true } }),
       prisma.topicCertification.groupBy({ by: ["status"], _count: { _all: true } }),
       prisma.classEnrollment.count(),
+      prisma.classEnrollment.count({ where: { withdrawnAt: null } }),
       prisma.classEnrollment.findMany({
         where: { enrolledAt: { gte: since } },
         select: { enrolledAt: true },
@@ -65,6 +67,8 @@ export async function GET() {
       certificationsByStatus: certificationsByStatus.map((r) => ({ status: r.status, count: r._count._all })),
       enrollments: {
         total: totalEnrollments,
+        current: currentEnrollments,
+        withdrawn: totalEnrollments - currentEnrollments,
         last30Days: recentEnrollmentRows.length,
         byDay: enrollmentsByDay,
       },

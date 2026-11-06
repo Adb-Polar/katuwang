@@ -86,7 +86,7 @@ export async function GET() {
         subject: true,
         status: true,
         maxStudents: true,
-        _count: { select: { enrollments: true } },
+        _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
       },
       orderBy: { createdAt: "desc" },
       take: 100,
@@ -291,7 +291,7 @@ async function enroll(body: Record<string, unknown>) {
 
   const cls = await prisma.tutorClass.findUnique({
     where: { id: classId },
-    select: { id: true, code: true, maxStudents: true, enrollments: { select: { learnerId: true } } },
+    select: { id: true, code: true, maxStudents: true, enrollments: { where: { withdrawnAt: null }, select: { learnerId: true } } },
   });
   if (!cls) return NextResponse.json({ error: "Class not found." }, { status: 404 });
 
@@ -315,7 +315,7 @@ async function enroll(body: Record<string, unknown>) {
   for (const learnerId of learnerIds) {
     if (enrolledIds.has(learnerId)) continue;
     if (enrolledIds.size >= cls.maxStudents) break;
-    await prisma.classEnrollment.create({ data: { classId: cls.id, learnerId } });
+    await prisma.classEnrollment.upsert({ where: { classId_learnerId: { classId: cls.id, learnerId } }, create: { classId: cls.id, learnerId }, update: { withdrawnAt: null } });
     enrolledIds.add(learnerId);
     results.push(learnerId);
   }

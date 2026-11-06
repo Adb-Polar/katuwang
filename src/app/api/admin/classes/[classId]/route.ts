@@ -103,7 +103,7 @@ export async function PATCH(
         // Notify every other enrolled learner (browse-enrolled, not request-linked).
         const linkedLearnerIds = new Set(linkedRequests.map((r) => r.learnerId));
         const enrolments = await tx.classEnrollment.findMany({
-          where: { classId },
+          where: { classId, withdrawnAt: null },
           select: { learnerId: true },
         });
         const targets = enrolments

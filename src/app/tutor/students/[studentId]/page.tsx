@@ -35,6 +35,7 @@ export default async function TutorStudentProfilePage({
     where: { learnerId: studentId, class: { tutorProfileId: tutorProfile.id } },
     select: {
       enrolledAt: true,
+      withdrawnAt: true,
       class: { select: { id: true, subject: true, topics: { select: { topic: true } } } },
       learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
     },
@@ -86,7 +87,7 @@ export default async function TutorStudentProfilePage({
 
       <section className="card kt-card">
         <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Enrolled in your classes ({enrollments.length})</h2>
+          <h2 className="card-title text-sm font-bold">Class history ({enrollments.length})</h2>
           <div className="space-y-2">
             {enrollments.map((enr) => (
               <Link
@@ -98,7 +99,7 @@ export default async function TutorStudentProfilePage({
                   <span className="badge badge-neutral badge-sm text-2xs font-bold">{subjectDisplayLabel(enr.class.subject)}</span>
                   <span className="flex items-center gap-1 text-2xs text-base-content/50">
                     <Calendar className="h-3 w-3" />
-                    {formatDate(enr.enrolledAt)}
+                    {formatDate(enr.enrolledAt)}{enr.withdrawnAt ? ` · Withdrawn ${formatDate(enr.withdrawnAt)}` : ""}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">

@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
       });
       if (!relationship) {
         return NextResponse.json(
-          { error: "You can only report a class you are enrolled in." },
+          { error: "You can only report a class you have joined." },
           { status: 403 }
         );
       }

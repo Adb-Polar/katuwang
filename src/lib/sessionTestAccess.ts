@@ -96,9 +96,9 @@ export async function loadEnrolledSession(userId: string, classId: string, sessi
 
   const enrollment = await db.classEnrollment.findUnique({
     where: { classId_learnerId: { classId, learnerId: userId } },
-    select: { id: true },
+    select: { id: true, withdrawnAt: true },
   });
-  if (!enrollment) {
+  if (!enrollment || enrollment.withdrawnAt) {
     return { error: "You are not enrolled in this class.", status: 403 } as AccessError;
   }
   if (tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED") {

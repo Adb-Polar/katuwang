@@ -102,6 +102,12 @@ describe("loadOwnedSession", () => {
 });
 
 describe("loadEnrolledSession", () => {
+  it("rejects a retained withdrawn enrollment before accessing the session", async () => {
+    classEnrollmentFindUnique.mockResolvedValue({ id: "e1", withdrawnAt: new Date() });
+    const result = await loadEnrolledSession("L1", "c1", "s1");
+    expect(isAccessError(result) && result.status).toBe(403);
+    expect(classSessionFindUnique).not.toHaveBeenCalled();
+  });
   it("403 when the learner is not enrolled", async () => {
     classEnrollmentFindUnique.mockResolvedValue(null);
     const r = await loadEnrolledSession("L1", "c1", "s1");

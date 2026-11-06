@@ -199,7 +199,7 @@ export async function DELETE(
         return NextResponse.json(
           {
             error:
-              "Cannot delete the only session of a class with enrolled learners — cancel the session or class instead.",
+              "Cannot delete the only session of a class with enrollment history — cancel the session or class instead.",
           },
           { status: 400 }
         );

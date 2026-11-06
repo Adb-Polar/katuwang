@@ -68,8 +68,8 @@ export default async function LearnerClassDetailPage({
             },
           },
         },
-        _count: { select: { enrollments: true } },
-        enrollments: { where: { learnerId: session!.user.id }, select: { id: true } },
+        _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
+        enrollments: { where: { learnerId: session!.user.id }, select: { id: true, withdrawnAt: true } },
       },
     }),
     getSetting("showTutorRealNames"),
@@ -81,7 +81,7 @@ export default async function LearnerClassDetailPage({
 
   if (!tutorClass) notFound();
 
-  const isEnrolled = tutorClass.enrollments.length > 0;
+  const isEnrolled = tutorClass.enrollments.some(enrollment => !enrollment.withdrawnAt);
   const isEligible = isStudentEligibleForClass(
     learner?.gradeLevel,
     tutorClass.tutorProfile.user.gradeLevel,
@@ -198,6 +198,7 @@ export default async function LearnerClassDetailPage({
           classId={tutorClass.id}
           status={tutorClass.status}
           isEnrolled={isEnrolled}
+          canReport={tutorClass.enrollments.length > 0}
           isFull={tutorClass._count.enrollments >= tutorClass.maxStudents}
           reportLabel={`${subjectDisplayLabel(tutorClass.subject)} · ${tutorClass.code}`}
         />

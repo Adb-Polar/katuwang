@@ -27,7 +27,7 @@ export default async function LearnerDashboard() {
       where: {
         status: "SCHEDULED",
         scheduledAt: { gt: now },
-        class: { enrollments: { some: { learnerId } } },
+        class: { enrollments: { some: { learnerId, withdrawnAt: null } } },
       },
       orderBy: { scheduledAt: "asc" },
       take: 5,
@@ -43,7 +43,7 @@ export default async function LearnerDashboard() {
       where: {
         status: "SCHEDULED",
         scheduledAt: { gt: now, lte: weekAhead },
-        class: { enrollments: { some: { learnerId } } },
+        class: { enrollments: { some: { learnerId, withdrawnAt: null } } },
       },
       orderBy: { scheduledAt: "asc" },
       select: {

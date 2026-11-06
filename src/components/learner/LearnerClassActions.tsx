@@ -14,6 +14,7 @@ export default function LearnerClassActions({
   isEnrolled,
   isFull,
   reportLabel,
+  canReport,
 }: {
   classId: string;
   status: "SCHEDULED" | "COMPLETED" | "CANCELLED" | "SUSPENDED" | "BANNED";
@@ -21,6 +22,7 @@ export default function LearnerClassActions({
   isFull: boolean;
   /** Anonymised class label ("MATH · C-0231") for the report modal; report shown only when enrolled. */
   reportLabel: string;
+  canReport?: boolean;
 }) {
   const router = useRouter();
   const [confirmUnenroll, setConfirmUnenroll] = useState(false);
@@ -96,7 +98,7 @@ export default function LearnerClassActions({
         )
       )}
 
-      {isEnrolled && (
+      {(canReport ?? isEnrolled) && (
         <ReportButton targetType="CLASS" targetId={classId} targetLabel={reportLabel} />
       )}
 
