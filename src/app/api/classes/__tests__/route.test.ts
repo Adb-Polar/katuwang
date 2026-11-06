@@ -122,7 +122,10 @@ describe("GET /api/classes", () => {
     expect(call.where).toEqual({
       status: "SCHEDULED",
       published: true,
-      sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } } },
+      sessions: {
+        some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } },
+        none: { scheduledAt: { lte: expect.any(Date) } },
+      },
       enrollments: { none: { learnerId: "u1" } },
       tutorProfile: {
         user: {

@@ -4,6 +4,7 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { isStudentEligibleForTutor, isStudentEligibleForClassTarget } from "@/lib/gradeLevels";
+import { hasClassStarted } from "@/lib/classQueries";
 import { notify } from "@/lib/notifications";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
@@ -71,6 +72,13 @@ export async function POST(
     if (!hasUpcomingSession) {
       return NextResponse.json(
         { error: "This class has no upcoming sessions to enroll in." },
+        { status: 400 }
+      );
+    }
+
+    if (hasClassStarted(existingClass.sessions)) {
+      return NextResponse.json(
+        { error: "This class has already started and is no longer accepting enrollments." },
         { status: 400 }
       );
     }

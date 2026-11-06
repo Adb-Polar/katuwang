@@ -1,5 +1,6 @@
 import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound, redirect } from "next/navigation";
+import { hasClassStarted } from "@/lib/classQueries";
 import Link from "next/link";
 import { Users, EyeOff } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -91,6 +92,7 @@ export default async function LearnerClassDetailPage({
     tutorClass.status === "SCHEDULED" &&
     tutorClass.published &&
     isEligible &&
+    !hasClassStarted(tutorClass.sessions) &&
     tutorClass.sessions.some((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > new Date());
 
   if (!isEnrolled && !isBrowsable) notFound();

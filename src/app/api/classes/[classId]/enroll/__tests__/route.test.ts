@@ -147,6 +147,26 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(json.error).toMatch(/no upcoming sessions/i);
   });
 
+  it.each(["SCHEDULED", "COMPLETED", "CANCELLED"])(
+    "rejects a started %s session even when later sessions remain",
+    async (status) => {
+      getServerSessionMock.mockResolvedValue(learner);
+      tutorClassFindUnique.mockResolvedValue({
+        ...futureClass,
+        sessions: [
+          ...futureClass.sessions,
+          { id: "past", status, scheduledAt: new Date(Date.now() - 60_000), duration: 60 },
+        ],
+      });
+
+      const res = await POST(makeRequest("POST"), makeParams());
+      expect(res.status).toBe(400);
+      expect((await res.json()).error).toMatch(/already started/i);
+      expect(enrollmentCreate).not.toHaveBeenCalled();
+      expect(notificationCreate).not.toHaveBeenCalled();
+    }
+  );
+
   it("returns 409 when the class is full", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     tutorClassFindUnique.mockResolvedValue({
