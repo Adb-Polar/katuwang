@@ -222,21 +222,21 @@ describe("POST /api/classes/[classId]/enroll", () => {
     );
   });
 
-  it("returns 403 when tutor grade level is lower than student grade level", async () => {
+  it("allows enrollment when tutor grade level is lower than student grade level", async () => {
     getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
     tutorClassFindUnique.mockResolvedValue({
       ...futureClass,
       tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_8" } },
     });
 
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
     const res = await POST(makeRequest("POST"), makeParams());
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot enroll in a class taught by a tutor in a lower grade level/i);
-    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    expect(enrollmentCreate).toHaveBeenCalled();
   });
 
-  it("returns 403 when class target grade level is lower than student grade level", async () => {
+  it("allows enrollment when class target grade level is lower than student grade level", async () => {
     getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
     tutorClassFindUnique.mockResolvedValue({
       ...futureClass,
@@ -244,11 +244,11 @@ describe("POST /api/classes/[classId]/enroll", () => {
       tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_10" } },
     });
 
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
     const res = await POST(makeRequest("POST"), makeParams());
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot enroll in a class targeted at a lower grade level than your own/i);
-    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    expect(enrollmentCreate).toHaveBeenCalled();
   });
 
   it("allows enrollment when class target grade level is null (open) and tutor grade >= student grade", async () => {

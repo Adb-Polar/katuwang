@@ -157,7 +157,7 @@ export async function POST(req: NextRequest) {
       }
       if (!isStudentEligibleForTutor(studentGrade, directedTutor.gradeLevel)) {
         return NextResponse.json(
-          { error: "You cannot request tutoring from a tutor in a lower grade level." },
+          { error: "This tutor is not available for requests." },
           { status: 403 }
         );
       }

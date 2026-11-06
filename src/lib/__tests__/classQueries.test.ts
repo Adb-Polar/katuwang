@@ -59,50 +59,19 @@ describe("toLearnerClassDTO", () => {
   });
 });
 
-describe("grade eligibility query builders", () => {
-  it("gradeEligibilityWhere restricts tutor grade >= student grade and target grade >= student grade or null", async () => {
-    const { gradeEligibilityWhere } = await import("@/lib/classQueries");
-    const where = gradeEligibilityWhere("GRADE_9");
-    expect(where.tutorProfile).toEqual({
-      user: {
-        gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] },
-      },
-    });
-    expect(where.OR).toEqual([
-      { gradeLevel: null },
-      { gradeLevel: { in: ["GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] } },
-    ]);
-  });
-
-  it("browseClassesWhere applies gradeEligibilityWhere when learnerGrade is provided", async () => {
-    const { browseClassesWhere } = await import("@/lib/classQueries");
-    const where = browseClassesWhere("u1", "GRADE_10");
-    expect(where.enrollments).toEqual({ none: { learnerId: "u1" } });
-    expect(where.tutorProfile).toEqual({
-      user: {
-        gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] },
-      },
-    });
-    expect(where.OR).toEqual([
-      { gradeLevel: null },
-      { gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] } },
-    ]);
-  });
-
-  it("browsableOrEnrolledWhere applies grade eligibility to browsable branch but allows enrolled classes", async () => {
-    const { browsableOrEnrolledWhere } = await import("@/lib/classQueries");
-    const where = browsableOrEnrolledWhere("u1", "GRADE_8");
-    expect(where.OR).toBeDefined();
-    expect(where.OR?.length).toBe(2);
-    const schedBranch = where.OR?.[0] as Prisma.TutorClassWhereInput;
-    expect(schedBranch.status).toBe("SCHEDULED");
-    expect(schedBranch.tutorProfile).toEqual({
-      user: {
-        gradeLevel: { in: ["GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12"] },
-      },
-    });
-    const enrollBranch = where.OR?.[1] as Prisma.TutorClassWhereInput;
-    expect(enrollBranch.enrollments).toEqual({ some: { learnerId: "u1" } });
+describe("any-grade discovery", () => {
+  it("adds no implicit grade restriction", async () => {
+    const { gradeEligibilityWhere, browseClassesWhere, browsableOrEnrolledWhere } = await import("@/lib/classQueries");
+    expect(gradeEligibilityWhere("GRADE_12")).toEqual({});
+    const browse = browseClassesWhere("u1", "GRADE_12");
+    expect(browse.enrollments).toEqual({ none: { learnerId: "u1" } });
+    expect(browse.tutorProfile).toBeUndefined();
+    expect(browse.gradeLevel).toBeUndefined();
+    const where = browsableOrEnrolledWhere("u1", "GRADE_12");
+    const scheduled = where.OR?.[0] as Prisma.TutorClassWhereInput;
+    expect(scheduled.status).toBe("SCHEDULED");
+    expect(scheduled.tutorProfile).toBeUndefined();
+    expect(scheduled.gradeLevel).toBeUndefined();
+    expect(where.OR?.[1]).toEqual({ enrollments: { some: { learnerId: "u1" } } });
   });
 });
-

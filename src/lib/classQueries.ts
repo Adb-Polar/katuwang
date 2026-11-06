@@ -1,26 +1,9 @@
 import { Prisma, GradeLevel } from "@prisma/client";
-import {
-  getEligibleTutorGradesForStudent,
-  getEligibleClassTargetGradesForStudent,
-} from "@/lib/gradeLevels";
+import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 
-/**
- * Prisma where condition enforcing:
- * 1. Tutor grade >= student grade (studentGrade <= tutorGrade)
- * 2. Class target grade is null (open) OR target grade >= student grade (studentGrade <= targetGrade)
- */
-export function gradeEligibilityWhere(
-  studentGrade: GradeLevel | string
-): Prisma.TutorClassWhereInput {
-  const eligibleTutorGrades = getEligibleTutorGradesForStudent(studentGrade);
-  const eligibleTargetGrades = getEligibleClassTargetGradesForStudent(studentGrade);
-  return {
-    tutorProfile: { user: { gradeLevel: { in: eligibleTutorGrades } } },
-    OR: [
-      { gradeLevel: null },
-      { gradeLevel: { in: eligibleTargetGrades } },
-    ],
-  };
+/** The shared grade policy imposes no implicit discovery restriction. */
+export function gradeEligibilityWhere(studentGrade: GradeLevel | string): Prisma.TutorClassWhereInput {
+  return isStudentEligibleForClass(studentGrade) ? {} : { id: "__none__" };
 }
 
 /**
@@ -60,14 +43,7 @@ export function browseClassesWhere(
     enrollments: { none: { learnerId } },
   };
 
-  if (!learnerGrade) return base;
-
-  const gradeFilter = gradeEligibilityWhere(learnerGrade);
-  return {
-    ...base,
-    tutorProfile: gradeFilter.tutorProfile,
-    OR: gradeFilter.OR,
-  };
+  return { ...base, ...(learnerGrade ? gradeEligibilityWhere(learnerGrade) : {}) };
 }
 
 /** The "My Classes" tab: every class the learner is enrolled in, any status. */

@@ -51,7 +51,7 @@ export function compareGradeLevels(
 
 /**
  * Business Rule: Tutor can only select target grades that are <= tutor's grade.
- * An empty/null target grade means "Any grade" (open to all eligible students <= tutor).
+ * An empty/null target grade means "Any grade" (open to learners of any grade).
  */
 export function isTargetGradeEligibleForTutor(
   targetGrade: GradeLevel | string | null | undefined,
@@ -62,45 +62,30 @@ export function isTargetGradeEligibleForTutor(
   return gradeNumber(targetGrade) <= gradeNumber(tutorGrade);
 }
 
-/**
- * Business Rule: Tutor can only teach students in the same or lower grade level.
- * `studentGrade <= tutorGrade`
- */
+/** Learner access is unrestricted by grade; grade fit belongs in ranking/filtering. */
+export const LEARNER_GRADE_ACCESS = "ANY_GRADE" as const;
+
 export function isStudentEligibleForTutor(
-  studentGrade: GradeLevel | string | null | undefined,
-  tutorGrade: GradeLevel | string | null | undefined
+  _studentGrade?: GradeLevel | string | null,
+  _tutorGrade?: GradeLevel | string | null
 ): boolean {
-  if (!studentGrade || !tutorGrade) return false;
-  return gradeNumber(studentGrade) <= gradeNumber(tutorGrade);
+  void _studentGrade; void _tutorGrade;
+  return LEARNER_GRADE_ACCESS === "ANY_GRADE";
 }
 
-/**
- * Business Rule: Student can only enroll if studentGrade <= targetGrade.
- * An empty/null target grade imposes no target restriction.
- */
 export function isStudentEligibleForClassTarget(
-  studentGrade: GradeLevel | string | null | undefined,
-  targetGrade: GradeLevel | string | null | undefined
+  _studentGrade?: GradeLevel | string | null,
+  _targetGrade?: GradeLevel | string | null
 ): boolean {
-  if (!targetGrade) return true;
-  if (!studentGrade) return false;
-  return gradeNumber(studentGrade) <= gradeNumber(targetGrade);
+  return isStudentEligibleForTutor(_studentGrade, _targetGrade);
 }
 
-/**
- * Full Class Eligibility Rule:
- * 1. studentGrade <= tutorGrade
- * 2. studentGrade <= targetGrade (if targetGrade specified)
- */
 export function isStudentEligibleForClass(
-  studentGrade: GradeLevel | string | null | undefined,
-  tutorGrade: GradeLevel | string | null | undefined,
+  studentGrade?: GradeLevel | string | null,
+  tutorGrade?: GradeLevel | string | null,
   targetGrade?: GradeLevel | string | null
 ): boolean {
-  return (
-    isStudentEligibleForTutor(studentGrade, tutorGrade) &&
-    isStudentEligibleForClassTarget(studentGrade, targetGrade)
-  );
+  return isStudentEligibleForTutor(studentGrade, tutorGrade) && isStudentEligibleForClassTarget(studentGrade, targetGrade);
 }
 
 /**
@@ -112,37 +97,20 @@ export function getEligibleTargetGrades(tutorGrade: GradeLevel | string | null |
   return GRADE_LEVELS.filter((g) => gradeNumber(g.value) <= max);
 }
 
-/**
- * Returns tutor grade levels that can teach a student of `studentGrade` (grades >= studentGrade).
- */
-export function getEligibleTutorGradesForStudent(
-  studentGrade: GradeLevel | string | null | undefined
-): GradeLevel[] {
-  if (!studentGrade) return [];
-  const min = gradeNumber(studentGrade);
-  return ALL_GRADE_LEVELS.filter((g) => gradeNumber(g) >= min);
+/** Grade options for learner discovery and tutor request pools are unrestricted. */
+export function getEligibleTutorGradesForStudent(_studentGrade?: GradeLevel | string | null): GradeLevel[] {
+  void _studentGrade;
+  return [...ALL_GRADE_LEVELS];
 }
 
-/**
- * Returns class target grade levels that a student of `studentGrade` can enroll in (target grades >= studentGrade).
- */
-export function getEligibleClassTargetGradesForStudent(
-  studentGrade: GradeLevel | string | null | undefined
-): GradeLevel[] {
-  if (!studentGrade) return [];
-  const min = gradeNumber(studentGrade);
-  return ALL_GRADE_LEVELS.filter((g) => gradeNumber(g) >= min);
+export function getEligibleClassTargetGradesForStudent(_studentGrade?: GradeLevel | string | null): GradeLevel[] {
+  void _studentGrade;
+  return [...ALL_GRADE_LEVELS];
 }
 
-/**
- * Returns student grade levels that a tutor of `tutorGrade` can teach (grades <= tutorGrade).
- */
-export function getEligibleStudentGradesForTutor(
-  tutorGrade: GradeLevel | string | null | undefined
-): GradeLevel[] {
-  if (!tutorGrade) return [];
-  const max = gradeNumber(tutorGrade);
-  return ALL_GRADE_LEVELS.filter((g) => gradeNumber(g) <= max);
+export function getEligibleStudentGradesForTutor(_tutorGrade?: GradeLevel | string | null): GradeLevel[] {
+  void _tutorGrade;
+  return [...ALL_GRADE_LEVELS];
 }
 
 /**

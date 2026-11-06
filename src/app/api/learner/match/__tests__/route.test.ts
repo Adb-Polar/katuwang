@@ -23,7 +23,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const validBody = { subject: "MATH", topics: ["Algebraic Expressions"] };
+const validBody = { subject: "MATH", topics: ["Algebraic Expressions & Factoring"], gradeLevel: "GRADE_12" };
 
 describe("POST /api/learner/match", () => {
   beforeEach(() => {
@@ -52,7 +52,7 @@ describe("POST /api/learner/match", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns ranked matches with reasons", async () => {
+  it("ranks matches across curriculum grades with reasons", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     findManyMock.mockResolvedValue([
       {
@@ -62,14 +62,14 @@ describe("POST /api/learner/match", () => {
         status: "SCHEDULED",
         published: true,
         maxStudents: 3,
-        topics: [{ topic: "Algebraic Expressions" }],
+        topics: [{ topic: "Algebraic Expressions & Factoring" }],
         sessions: [
-          { id: "s1", topic: "Algebraic Expressions", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
+          { id: "s1", topic: "Algebraic Expressions & Factoring", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
         ],
         tutorProfile: {
           id: "tp1",
           user: { id: "t1", anonymousId: "TUT-0001" },
-          topicCertifications: [{ subject: "MATH", topic: "Algebraic Expressions" }],
+          topicCertifications: [{ subject: "MATH", topic: "Algebraic Expressions & Factoring" }],
         },
         _count: { enrollments: 0 },
         enrollments: [],
@@ -81,8 +81,8 @@ describe("POST /api/learner/match", () => {
     const json = await res.json();
     expect(json.matches).toHaveLength(1);
     expect(json.matches[0].class.id).toBe("c1");
-    expect(json.matches[0].reasons.matchedTopics).toEqual(["Algebraic Expressions"]);
-    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Algebraic Expressions"]);
+    expect(json.matches[0].reasons.matchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
+    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
     expect(json.matches[0].score).toBeGreaterThan(0);
   });
 

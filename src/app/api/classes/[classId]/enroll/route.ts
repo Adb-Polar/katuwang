@@ -4,7 +4,7 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { lockClassRow, ClassWriteError } from "@/lib/classLocks";
 import { reinstateExpiredClasses } from "@/lib/moderation";
-import { isStudentEligibleForTutor, isStudentEligibleForClassTarget } from "@/lib/gradeLevels";
+import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
@@ -45,20 +45,8 @@ export async function POST(
       const learnerGrade = learner?.gradeLevel ?? session.user.gradeLevel ?? null;
       const tutorGrade = existingClass.tutorProfile?.user?.gradeLevel ?? null;
 
-      // Grade Level Rule 1: A tutor can only teach students in the same or lower grade level.
-      if (!isStudentEligibleForTutor(learnerGrade, tutorGrade)) {
-        return NextResponse.json(
-          { error: "You cannot enroll in a class taught by a tutor in a lower grade level." },
-          { status: 403 }
-        );
-      }
-
-      // Grade Level Rule 2: A student cannot enroll in a class whose target grade is below the student's grade.
-      if (!isStudentEligibleForClassTarget(learnerGrade, existingClass.gradeLevel)) {
-        return NextResponse.json(
-          { error: "You cannot enroll in a class targeted at a lower grade level than your own." },
-          { status: 403 }
-        );
+      if (!isStudentEligibleForClass(learnerGrade, tutorGrade, existingClass.gradeLevel)) {
+        return NextResponse.json({ error: "This class is not available for enrollment." }, { status: 403 });
       }
 
       if (existingClass.status !== "SCHEDULED" || !existingClass.published) {

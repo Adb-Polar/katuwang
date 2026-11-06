@@ -4224,3 +4224,8 @@ Password reset locks and conditionally consumes an unused, unexpired token befor
 ## 2026-11-06 — Preserve session assessment history
 
 Completed sessions reject reopening and schedule/topic rewrites. Session and class deletion inspect current assessment records under class locks and direct tutors to cancellation. A restrictive foreign key also prevents cascading history loss during concurrent test creation. Added route regressions and two isolated MariaDB constraint/race checks. Reset fix 327b16e passed isolated positive/reuse/session browser QA and live invalid-link verification.
+
+
+## 2026-11-06 — Unify any-grade learner access
+
+Learners can discover tutors/classes, request tutoring and enroll across grades through the shared policy. Removed implicit grade query cutoffs from discovery, search and request pools. Auto Match uses grade for relevance, keeping all catalog topics available; explicit browse filters and tutor class target-grade validation remain. Added all-grade/missing-grade matrix coverage and updated endpoint regressions and stale canonical catalog fixtures. Session history c99df65 passed live browser checks.

@@ -50,7 +50,7 @@ function makeRequest(body: unknown) {
 }
 
 const learner = { user: { id: "L1", role: "STUDENT_LEARNER", anonymousId: "STU-0001", gradeLevel: "GRADE_9" } };
-const validBody = { subject: "MATH", topics: ["Algebraic Expressions"], gradeLevel: "GRADE_9" };
+const validBody = { subject: "MATH", topics: ["Quadratic Equations"], gradeLevel: "GRADE_9" };
 
 const dbRow = {
   id: "r1",
@@ -59,7 +59,7 @@ const dbRow = {
   note: null,
   status: "OPEN",
   createdAt: new Date(),
-  topics: [{ topic: "Algebraic Expressions" }],
+  topics: [{ topic: "Quadratic Equations" }],
   slots: [],
   directedTutor: null,
   fulfilledClass: null,
@@ -80,7 +80,7 @@ describe("GET /api/learner/topic-requests", () => {
     expect(res.status).toBe(200);
     expect(findManyMock).toHaveBeenCalledWith(expect.objectContaining({ where: { learnerId: "L1" } }));
     const json = await res.json();
-    expect(json[0].topics).toEqual(["Algebraic Expressions"]);
+    expect(json[0].topics).toEqual(["Quadratic Equations"]);
     expect(json[0].directedTo).toBeNull();
   });
 });
@@ -133,14 +133,12 @@ describe("POST /api/learner/topic-requests", () => {
     expect(createMock).not.toHaveBeenCalled();
   });
 
-  it("403 when directed tutor is in a lower grade level than the learner", async () => {
+  it("allows a directed request when tutor is in a lower grade level than the learner", async () => {
     getServerSessionMock.mockResolvedValue(learner); // learner is GRADE_9
     userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" }, gradeLevel: "GRADE_8" });
     const res = await POST(makeRequest({ ...validBody, directedTutorId: "T1" }));
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot request tutoring from a tutor in a lower grade level/i);
-    expect(createMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    expect(createMock).toHaveBeenCalled();
   });
 
   it("directedTutorId path creates the request and notifies the tutor", async () => {

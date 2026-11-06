@@ -65,7 +65,7 @@ export async function POST(
 
     if (!isStudentEligibleForTutor(request.gradeLevel, tutorGrade)) {
       return NextResponse.json(
-        { error: "You cannot teach students in a higher grade level than your own." },
+        { error: "This request is not available for acceptance." },
         { status: 403 }
       );
     }

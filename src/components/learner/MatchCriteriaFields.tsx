@@ -47,7 +47,7 @@ export default function MatchCriteriaFields({
   showFormatFilter?: boolean;
   gradeLocked?: boolean;
 }) {
-  const { subjects, topicsFor } = useSubjectCatalog(value.gradeLevel);
+  const { subjects, topicsFor } = useSubjectCatalog(gradeRequired ? value.gradeLevel : undefined);
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
 
   const toggleTopic = (topic: string) =>
@@ -69,7 +69,7 @@ export default function MatchCriteriaFields({
             value={value.gradeLevel}
             required={gradeRequired}
             disabled={gradeLocked}
-            onChange={(e) => set({ gradeLevel: e.target.value, subject: "", topics: [] })}
+            onChange={(e) => set({ gradeLevel: e.target.value, ...(gradeRequired ? { subject: "", topics: [] } : {}) })}
           >
             <option value="">{gradeRequired ? "Select grade" : "Any grade"}</option>
             {GRADE_LEVELS.map((g) => (

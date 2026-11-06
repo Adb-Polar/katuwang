@@ -125,20 +125,19 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
-  it("403 when the request grade level is higher than the tutor grade level", async () => {
+  it("accepts when the request grade level is higher than the tutor grade level", async () => {
     getServerSessionMock.mockResolvedValue(tutor); // tutor is GRADE_10
     topicRequestFindUnique.mockResolvedValue({
       id: "r1",
       status: "OPEN",
       subject: "MATH",
       learnerId: "L1",
+      expiresAt: new Date(Date.now() + 86400000),
       gradeLevel: "GRADE_11", // higher than tutor's GRADE_10
     });
     const res = await POST(makeRequest(validBody()), { params });
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot teach students in a higher grade level/i);
-    expect(tutorClassCreate).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    expect(tutorClassCreate).toHaveBeenCalled();
   });
 
   it("400 when the class target grade level is higher than the tutor grade level", async () => {

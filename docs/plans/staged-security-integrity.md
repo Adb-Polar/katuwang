@@ -95,3 +95,11 @@ Fix 9 deployed as 327b16ec1fd5615ee20695d3268f99e6d90a4dc6, Render dep-dbmtbc0n7
 Completed sessions cannot be reopened or have their schedule/topic rewritten. Session/class deletion checks current assessment records under class locks; cancel instead. A restrictive session-test foreign key prevents cascading assessment deletion even when test creation races with deletion.
 
 Fix 10 pre-commit validation: 53 focused route tests and 2 real-MariaDB retention/race tests pass. Full suite 1,057 passes / 17 baseline failures / 24 opt-in tests skipped. TypeScript, changed-file lint and production build pass. Migration applied successfully to isolated MariaDB.
+
+Fix 10 deployed as c99df6597d764b0a97cac5e2b8cf8ae795c04bfb, Render dep-dbmtf2vf3r2c73aqs01g, live 2026-11-06 21:37 PHT. Live browser: completed reopen/rewrite 409, class deletion 409, session delete dialog 409 with preservation message, cancellation 200 and test retained. No page errors. QA class cmw50sbfn00003sdqoqvue6f1 retained unpublished/cancelled.
+
+## Fix 11: shared any-grade learner access
+
+Use one unrestricted grade policy for class/tutor discovery, enrollment, profiles and request pools. Keep explicit grade filters, class-topic/target validity and relevance ranking.
+
+Fix 11 pre-commit validation: all 142 focused grade/discovery/request/enrollment/search/chatbot/match tests pass (137 routes/policy plus 5 match tests). Full suite 1,108 passes / 11 remaining baseline failures / 24 opt-in tests skipped. Corrected canonical catalog fixtures in touched request/match tests resolve six baseline failures. TypeScript, changed-file lint and production build pass. Auto Match grade is a relevance signal and does not narrow topic validation or its picker.
