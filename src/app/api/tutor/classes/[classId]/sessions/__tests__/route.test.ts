@@ -107,6 +107,7 @@ describe("POST /api/tutor/classes/[classId]/sessions", () => {
     classFindUnique.mockResolvedValue(scheduledClass);
     const res = await post({ ...validBody, scheduledAt: new Date(Date.now() - 3600_000).toISOString() });
     expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
   });
 
   it("returns 409 on overlap with another session", async () => {
@@ -116,6 +117,7 @@ describe("POST /api/tutor/classes/[classId]/sessions", () => {
     sessionFindMany.mockResolvedValue([{ scheduledAt: new Date(validBody.scheduledAt), duration: 60 }]);
     const res = await post(validBody);
     expect(res.status).toBe(409);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
     expect(sessionCreate).not.toHaveBeenCalled();
   });
 

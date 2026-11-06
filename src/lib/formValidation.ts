@@ -20,7 +20,7 @@ const FIELD_LABELS: Record<string, string[]> = {
   password: ["Password", "New Password"], newPassword: ["New password"], currentPassword: ["Current password"],
   gradeLevel: ["Grade level", "Target Grade"], section: ["Section"], contactInfo: ["Contact info"],
   subject: ["Subject Area", "Subject"], topics: ["Topic(s)", "Topics"], topic: ["Topic"],
-  sessions: ["Sessions"], scheduledAt: ["Date & Time"], maxStudents: ["Max Capacity", "Capacity"],
+  duration: ["Duration"], sessions: ["Sessions"], scheduledAt: ["Date & Time", "Date"], maxStudents: ["Max Capacity", "Capacity"],
   meetingLink: ["Meeting Link"], building: ["Location"], room: ["Location"],
   preferredSlots: ["Preferred times"], violations: ["Violations"], details: ["Describe the issue"],
   prompt: ["Question prompt"], options: ["Options"], reason: ["Reason", "Why should this moderation"],

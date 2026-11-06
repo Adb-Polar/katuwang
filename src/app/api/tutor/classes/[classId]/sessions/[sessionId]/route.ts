@@ -66,7 +66,7 @@ export async function PATCH(
       const classTopics = existingClass.topics.map((t) => t.topic);
       if (!classTopics.includes(topic)) {
         return NextResponse.json(
-          { error: "Session topic must be one of the class's selected topics." },
+          { error: "Session topic must be one of the class's selected topics.", fieldErrors: [{ path: ["topic"], message: "Session topic must be one of the class's selected topics." }] },
           { status: 400 }
         );
       }
@@ -79,7 +79,7 @@ export async function PATCH(
     if (effectiveStatus === "SCHEDULED") {
       if (effectiveStart.getTime() < Date.now()) {
         return NextResponse.json(
-          { error: "Cannot schedule a session in the past." },
+          { error: "Cannot schedule a session in the past.", fieldErrors: [{ path: ["scheduledAt"], message: "Cannot schedule a session in the past." }] },
           { status: 400 }
         );
       }
@@ -88,7 +88,7 @@ export async function PATCH(
       const conflict = await hasSessionOverlap(tutorProfile.id, effectiveStart, effectiveEnd, sessionId);
       if (conflict) {
         return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time." },
+          { error: "Time conflict detected: You already have a session scheduled during this time.", fieldErrors: [{ path: ["scheduledAt"], message: "Time conflict detected: You already have a session scheduled during this time." }] },
           { status: 409 }
         );
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { reportServerFieldErrors } from "@/lib/formValidation";
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
@@ -9,7 +9,7 @@ import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import FormField from "@/components/ui/FormField";
+import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { SessionSummary } from "@/components/classes/SessionsList";
 import { parseLocalDateAndTime, combineDateAndTime } from "@/lib/datetime";
@@ -85,11 +85,13 @@ export default function SessionActions({
     setRescheduleError("");
     try {
       if (!rescheduleDate || !rescheduleTime) {
-        throw new Error("Please provide both a date and a time.");
+        reportFieldError(validationForm, "Date", "Please provide both a date and a start time.");
+        return;
       }
       const iso = combineDateAndTime(rescheduleDate, rescheduleTime);
       if (!iso) {
-        throw new Error("Invalid date or time.");
+        reportFieldError(validationForm, "Date", "Choose a valid date and start time.");
+        return;
       }
       const res = await fetch(sessionUrl, {
         method: "PATCH",
@@ -168,73 +170,22 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session">
+      <Modal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session" size="md">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
-            <ValidatedForm onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
-              <FormField label="Topic" required>
-                <select
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  {classTopics.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-
-              <div className="grid grid-cols-2 gap-2">
-                <FormField label="Date" required>
-                  <input
-                    type="date"
-                    value={rescheduleDate}
-                    onChange={(e) => setRescheduleDate(e.target.value)}
-                    required
-                    aria-label="Session date"
-                    className="input input-bordered input-sm w-full text-xs"
-                  />
-                </FormField>
-
-                <FormField label="Time" required>
-                  <input
-                    type="time"
-                    value={rescheduleTime}
-                    onChange={(e) => setRescheduleTime(e.target.value)}
-                    required
-                    aria-label="Session time"
-                    className="input input-bordered input-sm w-full text-xs"
-                  />
-                </FormField>
-              </div>
-
-              <FormField label="Duration" required>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  <option value={30}>30 mins</option>
-                  <option value={45}>45 mins</option>
-                  <option value={60}>60 mins</option>
-                  <option value={90}>90 mins</option>
-                  <option value={120}>120 mins</option>
-                </select>
-              </FormField>
+            <ValidatedForm onSubmit={handleReschedule} className="space-y-5 mt-4">
+              <SessionFormFields topics={classTopics} topic={topic} date={rescheduleDate} time={rescheduleTime} duration={duration}
+                onTopic={setTopic} onDate={setRescheduleDate} onTime={setRescheduleTime} onDuration={setDuration} />
 
               <div className="modal-action pt-2">
                 <button
                   type="button"
                   onClick={() => setIsRescheduling(false)}
-                  className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                  className="btn btn-neutral btn-outline min-h-11 text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={rescheduling} className="btn btn-primary btn-sm text-xs cursor-pointer">
+                <button type="submit" disabled={rescheduling} className="btn btn-primary min-h-11 text-sm cursor-pointer">
                   {rescheduling ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
                 </button>
               </div>

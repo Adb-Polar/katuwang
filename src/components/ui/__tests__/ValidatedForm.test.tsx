@@ -7,6 +7,7 @@ import LoginForm from "@/components/auth/LoginForm";
 import ValidatedForm from "../ValidatedForm";
 import FormField from "../FormField";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
+import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ClassScheduleFields from "@/components/tutor/ClassScheduleFields";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import { reportServerFieldErrors } from "@/lib/formValidation";
@@ -160,6 +161,32 @@ describe("inline form validation", () => {
     expect(target.getAttribute("aria-invalid")).toBe("true");
     expect(target.closest("[data-control-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Please correct this session field.");
     expect(rows[0].querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it.each(["topic", "scheduledAt", "duration"])("shows single-session server %s errors beside the correct shared control", async (name) => {
+    await act(async () => root.render(<ValidatedForm>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="2027-01-20" time="10:00" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
+      fieldErrors: [{path: [name], message: "Correct this session field."}],
+    }); });
+    const target = host.querySelector(`[name="${name}"]`)!;
+    expect(document.activeElement).toBe(target);
+    expect(target.getAttribute("aria-invalid")).toBe("true");
+    expect(target.closest("[data-form-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Correct this session field.");
+  });
+
+  it("shows separate missing date and start time errors in the shared session form", async () => {
+    const save = vi.fn();
+    await act(async () => root.render(<ValidatedForm onSubmit={save}>
+      <SessionFormFields topics={["Algebra"]} topic="Algebra" date="" time="" duration={60}
+        onTopic={() => {}} onDate={() => {}} onTime={() => {}} onDuration={() => {}} />
+    </ValidatedForm>));
+    await submit();
+    expect(save).not.toHaveBeenCalled();
+    expect(host.querySelectorAll('[role="alert"]')).toHaveLength(2);
+    expect(host.querySelector('option[value="60"]')!.textContent).toBe("1hr");
   });
 
   it("focuses server errors after a pending form re-enables its inputs", async () => {

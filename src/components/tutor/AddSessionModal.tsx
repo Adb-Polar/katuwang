@@ -1,16 +1,16 @@
 "use client";
 
-import { reportServerFieldErrors } from "@/lib/formValidation";
+import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
-import { createPortal } from "react-dom";
+import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import FormField from "@/components/ui/FormField";
-import { combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import SessionFormFields from "@/components/tutor/SessionFormFields";
+import { combineDateAndTime } from "@/lib/datetime";
 
 export default function AddSessionModal({ classId, classTopics }: { classId: string; classTopics: string[] }) {
   const router = useRouter();
@@ -29,11 +29,13 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
     setError("");
     try {
       if (!sessionDate || !sessionTime) {
-        throw new Error("Please provide both a date and a time.");
+        reportFieldError(validationForm, "Date", "Please provide both a date and a start time.");
+        return;
       }
       const iso = combineDateAndTime(sessionDate, sessionTime);
       if (!iso) {
-        throw new Error("Invalid date or time.");
+        reportFieldError(validationForm, "Date", "Choose a valid date and start time.");
+        return;
       }
       const res = await fetch(`/api/tutor/classes/${classId}/sessions`, {
         method: "POST",
@@ -65,94 +67,27 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
         Add Session
       </button>
 
-      {isOpen && typeof document !== "undefined" &&
-        createPortal(
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-4">Add a Session</h3>
-
+      <Modal open={isOpen} onClose={() => setIsOpen(false)} title="Add a Session" size="md">
             <FeedbackBanner variant="error" message={error || null} />
 
-            <ValidatedForm onSubmit={handleSubmit} className="space-y-3.5 mt-3.5">
-              <p className="text-xs text-base-content/60">Enter the date and time in {SCHOOL_TIME_ZONE_LABEL}.</p>
-              <FormField label="Topic" required>
-                <select
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  {classTopics.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-
-              <div className="grid grid-cols-2 gap-2">
-                <FormField label="Date" required>
-                  <input
-                    type="date"
-                    value={sessionDate}
-                    onChange={(e) => setSessionDate(e.target.value)}
-                    required
-                    aria-label="Session date"
-                    className="input input-bordered input-sm w-full text-xs"
-                  />
-                </FormField>
-
-                <FormField label="Time" required>
-                  <input
-                    type="time"
-                    value={sessionTime}
-                    onChange={(e) => setSessionTime(e.target.value)}
-                    required
-                    aria-label="Session time"
-                    className="input input-bordered input-sm w-full text-xs"
-                  />
-                </FormField>
-              </div>
-
-              <FormField label="Duration" required>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  <option value={30}>30 mins</option>
-                  <option value={45}>45 mins</option>
-                  <option value={60}>60 mins</option>
-                  <option value={90}>90 mins</option>
-                  <option value={120}>120 mins</option>
-                </select>
-              </FormField>
+            <ValidatedForm onSubmit={handleSubmit} className="space-y-5 mt-4">
+              <SessionFormFields topics={classTopics} topic={topic} date={sessionDate} time={sessionTime} duration={duration}
+                onTopic={setTopic} onDate={setSessionDate} onTime={setSessionTime} onDuration={setDuration} />
 
               <div className="modal-action pt-2">
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                  className="btn btn-neutral btn-outline min-h-11 text-sm cursor-pointer"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="btn btn-primary btn-sm text-xs cursor-pointer">
+                <button type="submit" disabled={loading} className="btn btn-primary min-h-11 text-sm cursor-pointer">
                   {loading ? <span className="loading loading-spinner loading-xs"></span> : "Add Session"}
                 </button>
               </div>
             </ValidatedForm>
-          </div>
-        </div>,
-        document.body
-      )}
+      </Modal>
     </>
   );
 }

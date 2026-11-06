@@ -171,6 +171,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
       { params }
     );
     expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
   });
 
   it("409 on a time conflict with an existing session", async () => {
@@ -180,6 +181,7 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     ]);
     const res = await POST(makeRequest(validBody()), { params });
     expect(res.status).toBe(409);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: expect.arrayContaining(["scheduledAt"]), message: expect.any(String) })]));
     expect(tutorClassCreate).not.toHaveBeenCalled();
   });
 
