@@ -74,19 +74,13 @@ describe("grade eligibility query builders", () => {
     ]);
   });
 
-  it("browseClassesWhere applies gradeEligibilityWhere when learnerGrade is provided", async () => {
+  it("browseClassesWhere has no learner or tutor grade restriction", async () => {
     const { browseClassesWhere } = await import("@/lib/classQueries");
-    const where = browseClassesWhere("u1", "GRADE_10");
+    const where = browseClassesWhere("u1");
     expect(where.enrollments).toEqual({ none: { learnerId: "u1" } });
-    expect(where.tutorProfile).toEqual({
-      user: {
-        gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] },
-      },
-    });
-    expect(where.OR).toEqual([
-      { gradeLevel: null },
-      { gradeLevel: { in: ["GRADE_10", "GRADE_11", "GRADE_12"] } },
-    ]);
+    expect(where).not.toHaveProperty("tutorProfile");
+    expect(where).not.toHaveProperty("OR");
+    expect(where).not.toHaveProperty("gradeLevel");
   });
 
   it("browsableOrEnrolledWhere applies grade eligibility to browsable branch but allows enrolled classes", async () => {
