@@ -105,6 +105,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB immutable question
     const responses = await Promise.all([version(), version()]);expect(responses.map(r => r.status).sort()).toEqual([201, 409]);
     const created = await responses.find(r => r.status === 201)!.json();
     expect(await prisma.assessmentQuestion.count({ where: { previousVersionId: questionId } })).toBe(1);
+    expect((await asUser(0, () => editBank(req("PATCH", { prompt: "A successor must freeze its original" }), qctx()))).status).toBe(409);
     expect(await prisma.auditLog.count({ where: { targetId: created.id, action: "QUESTION_VERSION_CREATED" } })).toBe(1);
   });
   it("retirement blocks future publication and question selection", async () => {

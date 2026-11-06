@@ -18,8 +18,8 @@ export async function lockActiveQuestions(tx: Prisma.TransactionClient, ids: str
 }
 export function isQuestionContentLocked(question: {
   lockedAt?: Date | null;
-  _count: { attemptItems?: number; sessionTestItems?: number };
+  _count: { attemptItems?: number; sessionTestItems?: number; nextVersions?: number };
   sessionTestLinks?: { sessionTest: { status: string; publishedAt?: Date | null } }[];
 }) {
-  return Boolean(question.lockedAt || question._count.attemptItems || question._count.sessionTestItems || question.sessionTestLinks?.some(link => link.sessionTest.status !== "DRAFT" || link.sessionTest.publishedAt));
+  return Boolean(question.lockedAt || question._count.attemptItems || question._count.sessionTestItems || question._count.nextVersions || question.sessionTestLinks?.some(link => link.sessionTest.status !== "DRAFT" || link.sessionTest.publishedAt));
 }

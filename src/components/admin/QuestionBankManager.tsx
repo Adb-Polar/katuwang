@@ -482,7 +482,7 @@ function QuestionsTab({
                             setEditTarget(q);
                           }}
                           disabled={q.inUse || busyId === q.id}
-                          title={q.inUse ? "Published content is locked — create a corrected version" : undefined}
+                          title={q.inUse ? "Content is locked — create a corrected version" : undefined}
                           className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                         >
                           Edit

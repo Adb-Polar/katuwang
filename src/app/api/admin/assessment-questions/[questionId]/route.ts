@@ -83,7 +83,7 @@ export async function PATCH(
       if (!current) throw new QuestionWriteError("Question not found.", 404);
       const inUse = isQuestionContentLocked(current);
       if (inUse && (prompt !== undefined || explanation !== undefined || options !== undefined)) {
-        throw new QuestionWriteError("This question is locked by a published test or attempt. Create a corrected version to change its content.");
+        throw new QuestionWriteError("This question has immutable test or version history. Create a corrected version to change its content.");
       }
       if (active === true && current._count.nextVersions > 0) throw new QuestionWriteError("A newer version exists. Use that version instead of reactivating this one.");
       if (options !== undefined) {
