@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { AssessmentSubmissionError, assertSubmissionClaim } from "@/lib/assessmentSubmission";
+import { lockTutorProfile, ClassWriteError } from "@/lib/classLocks";
 import { getSetting } from "@/lib/settings";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
@@ -53,13 +55,17 @@ export async function POST(
     const tutorProfileId = attempt.tutorProfile.id;
     const certKey = { tutorProfileId_subject_topic: { tutorProfileId, subject, topic } };
 
-    const existingCert = await prisma.topicCertification.findUnique({
-      where: certKey,
-      select: { status: true },
-    });
     const autoCertify = passed ? await getSetting("autoCertifyOnAssessmentPass") : false;
 
     const updated = await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const claimed = await tx.assessmentAttempt.updateMany({
+        where: { id: attemptId, tutorProfileId, status: "IN_PROGRESS" },
+        data: { status: passed ? "PASSED" : "FAILED", correctCount, scorePercent, submittedAt: now },
+      });
+      assertSubmissionClaim(claimed);
+      await lockTutorProfile(tx, tutorProfileId);
+      const existingCert = await tx.topicCertification.findUnique({ where: certKey, select: { status: true } });
       for (const g of graded) {
         await tx.assessmentAttemptItem.update({
           where: { id: g.id },
@@ -67,15 +73,8 @@ export async function POST(
         });
       }
 
-      const now = new Date();
-      const attemptRow = await tx.assessmentAttempt.update({
+      const attemptRow = await tx.assessmentAttempt.findUniqueOrThrow({
         where: { id: attemptId },
-        data: {
-          status: passed ? "PASSED" : "FAILED",
-          correctCount,
-          scorePercent,
-          submittedAt: now,
-        },
         include: { items: { include: { question: { include: { options: true } } } } },
       });
 
@@ -123,10 +122,11 @@ export async function POST(
       }
 
       return attemptRow;
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(serializeAttempt(updated, { reveal: true, revealAnswers: false }));
   } catch (error) {
+    if (error instanceof AssessmentSubmissionError || error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error submitting assessment:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

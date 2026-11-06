@@ -4,7 +4,8 @@ import { NextRequest } from "next/server";
 const {
   getServerSessionMock,
   attemptFindUnique,
-  attemptUpdate,
+  attemptRead,
+  attemptClaim,
   itemUpdate,
   certFindUnique,
   certUpsert,
@@ -12,7 +13,8 @@ const {
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   attemptFindUnique: vi.fn(),
-  attemptUpdate: vi.fn(),
+  attemptRead: vi.fn(),
+  attemptClaim: vi.fn(),
   itemUpdate: vi.fn(),
   certFindUnique: vi.fn(),
   certUpsert: vi.fn(),
@@ -28,8 +30,9 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         assessmentAttemptItem: { update: itemUpdate },
-        assessmentAttempt: { update: attemptUpdate },
-        topicCertification: { upsert: certUpsert },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
+        assessmentAttempt: { updateMany: attemptClaim, findUniqueOrThrow: attemptRead },
+        topicCertification: { findUnique: certFindUnique, upsert: certUpsert },
       }),
   },
 }));
@@ -100,9 +103,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   certFindUnique.mockResolvedValue(null);
   getSettingMock.mockResolvedValue(false);
-  attemptUpdate.mockImplementation(({ data }: { data: Record<string, unknown> }) => ({
+  attemptClaim.mockResolvedValue({ count: 1 });
+  attemptRead.mockImplementation(() => ({
     ...fakeAttempt(),
-    ...data,
+    ...attemptClaim.mock.calls.at(-1)?.[0]?.data,
   }));
 });
 
@@ -121,6 +125,18 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
     expect(res.status).toBe(409);
   });
 
+  it("does not write grades or certifications when another submission wins", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    attemptFindUnique.mockResolvedValue(fakeAttempt());
+    attemptClaim.mockResolvedValue({ count: 0 });
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "q1a" }] }), params());
+    expect(res.status).toBe(409);
+    expect(itemUpdate).not.toHaveBeenCalled();
+    expect(attemptRead).not.toHaveBeenCalled();
+    expect(certFindUnique).not.toHaveBeenCalled();
+    expect(certUpsert).not.toHaveBeenCalled();
+  });
+
   it("grades both-correct as 100% PASSED and, with auto-certify on, certifies the topic", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     getSettingMock.mockResolvedValue(true);
@@ -134,7 +150,7 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
       params()
     );
     expect(res.status).toBe(200);
-    expect(attemptUpdate).toHaveBeenCalledWith(
+    expect(attemptClaim).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ status: "PASSED", correctCount: 2, scorePercent: 100 }) })
     );
     expect(certUpsert).toHaveBeenCalledWith(
@@ -155,7 +171,7 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
       params()
     );
     expect(res.status).toBe(200);
-    expect(attemptUpdate).toHaveBeenCalledWith(
+    expect(attemptClaim).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ status: "PASSED", scorePercent: 50 }) })
     );
     expect(certUpsert).toHaveBeenCalledWith(
@@ -177,7 +193,7 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
       params()
     );
     expect(res.status).toBe(200);
-    expect(attemptUpdate).toHaveBeenCalledWith(
+    expect(attemptClaim).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ status: "FAILED", correctCount: 0, scorePercent: 0 }) })
     );
     expect(certUpsert).toHaveBeenCalledWith(

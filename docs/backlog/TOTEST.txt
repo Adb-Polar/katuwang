@@ -952,4 +952,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: browser/API d6ef4a5 and real DB races] Tutor scheduling: on dev-test, race overlapping additions to a disposable class and confirm only one succeeds; reschedule through the browser and confirm persistence; reject a conflicting move; clean fixtures. Isolated real DB tests cover all writer combinations and moderated-class reservations.
 
-[ ] Request acceptance: on dev-test, accept a disposable request with duplicate competing calls; verify one class, accepted linkage, history and learner notification; repeat must return 409. Real DB tests cover two different tutors, expiry, rollback and stale learner edits.
+[Good: two-tutor browser/API b029695; history via DB integration] Request acceptance: on dev-test, accept a disposable request with duplicate competing calls; verify one class, accepted linkage, history and learner notification; repeat must return 409. Real DB tests cover two different tutors, expiry, rollback and stale learner edits.
+
+[ ] Assessment submission: race browser and duplicate API submissions on a disposable learner test; verify one 200, remaining 409, one persisted score and one tutor notification. Qualification concurrency and access-change rollback use real isolated MariaDB tests.

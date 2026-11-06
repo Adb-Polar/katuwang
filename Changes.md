@@ -4209,3 +4209,8 @@ Live scheduling QA exposed reschedule submissions reaching the enclosing class e
 ## 2026-11-06 — Atomically claim topic requests
 
 Acceptance now locks and conditionally claims an eligible open request before creating its class, with a version check against intervening request edits and a live certification/grade recheck. Class, history, fulfillment link and notification commit together; competitors receive 409. Learner lifecycle mutations share the lock and reject stale state. Four guarded real-MariaDB integration tests pass. Corrected a stale catalog fixture in the touched learner-edit tests. Corrected scheduling dialogs passed dev-test browser verification (d6ef4a5).
+
+
+## 2026-11-06 — Claim each assessment submission once
+
+Learner and tutor assessments now claim IN_PROGRESS attempts atomically before writing grades or side effects. Only the winning transaction finalizes the attempt. Learner access is rechecked on the transaction connection; changed restrictions roll the claim back. Qualification updates serialize and re-read certification state to preserve earned badges across competing attempts. Added five guarded real-MariaDB tests and focused loser/no-write regressions. Two-tutor acceptance passed dev-test verification (b029695).

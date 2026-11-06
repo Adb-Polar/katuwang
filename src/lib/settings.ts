@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { ASSESSMENT_DEFAULTS, type ResolvedTopicConfig } from "@/lib/assessmentConfig";
 
 export const PLATFORM_SETTING_KEYS = [
@@ -30,8 +31,8 @@ const DEFAULTS: Record<PlatformSettingKey, boolean> = {
   sessionTestsEnabled: true,
 };
 
-export async function getSetting(key: PlatformSettingKey): Promise<boolean> {
-  const row = await prisma.platformSetting.findUnique({ where: { key } });
+export async function getSetting(key: PlatformSettingKey, db: Pick<Prisma.TransactionClient, "platformSetting"> = prisma): Promise<boolean> {
+  const row = await db.platformSetting.findUnique({ where: { key } });
   if (!row) return DEFAULTS[key];
   return row.value === "true";
 }

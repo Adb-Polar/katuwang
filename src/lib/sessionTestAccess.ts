@@ -1,5 +1,6 @@
 import { certifiedBankTopics } from "@/lib/teachingBankAccess";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { getSetting } from "@/lib/settings";
 import { attemptWindowError } from "@/lib/sessionTestWindow";
 
@@ -86,14 +87,14 @@ export async function loadOwnedSession(userId: string, classId: string, sessionI
  * Assert the caller (a learner) is enrolled in `classId`, the class is not
  * under moderation, and `sessionId` belongs to that class.
  */
-export async function loadEnrolledSession(userId: string, classId: string, sessionId: string) {
-  const tutorClass = await prisma.tutorClass.findUnique({
+export async function loadEnrolledSession(userId: string, classId: string, sessionId: string, db: Prisma.TransactionClient = prisma) {
+  const tutorClass = await db.tutorClass.findUnique({
     where: { id: classId },
     select: { id: true, status: true },
   });
   if (!tutorClass) return { error: "Class not found.", status: 404 } as AccessError;
 
-  const enrollment = await prisma.classEnrollment.findUnique({
+  const enrollment = await db.classEnrollment.findUnique({
     where: { classId_learnerId: { classId, learnerId: userId } },
     select: { id: true },
   });
@@ -104,7 +105,7 @@ export async function loadEnrolledSession(userId: string, classId: string, sessi
     return { error: "This class is under moderation.", status: 403 } as AccessError;
   }
 
-  const session = await prisma.classSession.findUnique({
+  const session = await db.classSession.findUnique({
     where: { id: sessionId },
     select: { id: true, classId: true, status: true },
   });
@@ -121,17 +122,17 @@ export async function checkLearnerAttemptAccess(userId: string, attempt: {
   kind: import("@prisma/client").SessionTestKind;
   status: import("@prisma/client").SessionTestAttemptStatus;
   startedAt: Date;
-}): Promise<AccessError | null> {
-  if (!(await getSetting("sessionTestsEnabled"))) {
+}, db: Prisma.TransactionClient = prisma): Promise<AccessError | null> {
+  if (!(await getSetting("sessionTestsEnabled", db))) {
     return { error: "Session tests are disabled.", status: 403 };
   }
-  const test = await prisma.sessionTest.findUnique({
+  const test = await db.sessionTest.findUnique({
     where: { id: attempt.sessionTestId },
     select: { status: true, closedAt: true, pretestClosedAt: true,
       sessionId: true, session: { select: { classId: true } } },
   });
   if (!test || test.status === "DRAFT") return { error: "Test not found.", status: 404 };
-  const access = await loadEnrolledSession(userId, test.session.classId, test.sessionId);
+  const access = await loadEnrolledSession(userId, test.session.classId, test.sessionId, db);
   if (isAccessError(access)) return access;
   if (attempt.status === "IN_PROGRESS" && access.tutorClass.status === "CANCELLED") {
     return { error: "This class was cancelled.", status: 403 };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { AssessmentSubmissionError, assertSubmissionClaim } from "@/lib/assessmentSubmission";
 import { checkLearnerAttemptAccess } from "@/lib/sessionTestAccess";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
@@ -55,22 +56,21 @@ export async function POST(
     );
 
     const updated = await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const claimed = await tx.sessionTestAttempt.updateMany({
+        where: { id: attemptId, learnerId: session.user.id, status: "IN_PROGRESS" },
+        data: { status: "SUBMITTED", correctCount, scorePercent, submittedAt: now },
+      });
+      assertSubmissionClaim(claimed);
+      const currentAccess = await checkLearnerAttemptAccess(session.user.id, attempt, tx);
+      if (currentAccess) throw new AssessmentSubmissionError(currentAccess.error, currentAccess.status);
       for (const g of graded) {
         await tx.sessionTestAttemptItem.update({
           where: { id: g.id },
           data: { selectedOptionId: g.selectedOptionId, isCorrect: g.isCorrect },
         });
       }
-      const submitted = await tx.sessionTestAttempt.update({
-        where: { id: attemptId },
-        data: {
-          status: "SUBMITTED",
-          correctCount,
-          scorePercent,
-          submittedAt: new Date(),
-        },
-        include: ATTEMPT_INCLUDE,
-      });
+      const submitted = await tx.sessionTestAttempt.findUniqueOrThrow({ where: { id: attemptId }, include: ATTEMPT_INCLUDE });
 
       if (submitted.kind === "PRE") {
         const owner = await tx.sessionTest.findUnique({
@@ -98,10 +98,11 @@ export async function POST(
       }
 
       return submitted;
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true, revealBankAnswers: false }));
   } catch (error) {
+    if (error instanceof AssessmentSubmissionError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error submitting session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

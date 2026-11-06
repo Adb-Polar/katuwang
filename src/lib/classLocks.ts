@@ -10,8 +10,11 @@ export async function lockClassRow(tx: Prisma.TransactionClient, classId: string
   if (rows.length === 0) throw new ClassWriteError("Class not found.", 404);
 }
 
-/** Every schedule writer for a tutor takes this lock before checking conflicts. */
-export async function lockTutorSchedule(tx: Prisma.TransactionClient, tutorProfileId: string): Promise<void> {
+/** Serialize changes that must agree on the current tutor profile state. */
+export async function lockTutorProfile(tx: Prisma.TransactionClient, tutorProfileId: string): Promise<void> {
   const rows = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM tutor_profiles WHERE id = ${tutorProfileId} FOR UPDATE`;
   if (rows.length === 0) throw new ClassWriteError("Tutor profile not found.", 404);
 }
+
+/** All scheduling writers share the tutor-profile serialization point. */
+export const lockTutorSchedule = lockTutorProfile;
