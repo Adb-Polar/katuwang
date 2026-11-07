@@ -978,4 +978,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: local/live 7bbc713, no page errors] PRE feedback: both BANK and TUTOR keys, per-item correctness and explanations hidden on submit/reload until matching POST submitted by same learner. Selected answers stay neutral; POST and later PRE review reveal answers. Archive QA history.
 
-[ ] Certification approval: no-pass standard approval blocked; manual action requires reason and evidence; isolated positive manual approval persists provenance and audit; concurrent reviews yield one decision; live UI/guards without granting unsupported real credentials.
+[Good: local positive and live guards c02dce1, no page errors] Certification approval: no-pass standard approval blocked; manual action requires reason and evidence; isolated positive manual approval persists provenance and audit; concurrent reviews yield one decision; live UI/guards without granting unsupported real credentials.
+
+[ ] Reviewed bank: demo/unreviewed questions labeled and excluded from qualification readiness/start; correction requires new review. In isolated browser verify documented approval, immutability, eligible attempt, revocation and old practice attempt cannot certify. Live guards must not mark any content qualified without actual review evidence.

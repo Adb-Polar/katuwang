@@ -1,3 +1,4 @@
+import { isQualificationAttemptEligible } from "@/lib/qualificationBank";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -59,12 +60,13 @@ export async function POST(
 
     const updated = await prisma.$transaction(async (tx) => {
       const now = new Date();
+      await lockTutorProfile(tx, tutorProfileId);
+      const certificationEligible = await isQualificationAttemptEligible(tx, attempt);
       const claimed = await tx.assessmentAttempt.updateMany({
         where: { id: attemptId, tutorProfileId, status: "IN_PROGRESS" },
-        data: { status: passed ? "PASSED" : "FAILED", correctCount, scorePercent, submittedAt: now },
+        data: { status: passed ? "PASSED" : "FAILED", correctCount, scorePercent, submittedAt: now, certificationEligible },
       });
       assertSubmissionClaim(claimed);
-      await lockTutorProfile(tx, tutorProfileId);
       const existingCert = await tx.topicCertification.findUnique({ where: certKey, select: { status: true } });
       for (const g of graded) {
         await tx.assessmentAttemptItem.update({
@@ -79,7 +81,7 @@ export async function POST(
       });
 
       // Never downgrade a badge the tutor already earned.
-      if (existingCert?.status !== "CERTIFIED") {
+      if (certificationEligible && existingCert?.status !== "CERTIFIED") {
         if (passed && autoCertify) {
           await tx.topicCertification.upsert({
             where: certKey,

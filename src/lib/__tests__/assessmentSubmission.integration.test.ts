@@ -1,3 +1,4 @@
+import { qualificationFixture } from "@/test/qualificationFixture";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -29,7 +30,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB assessment submiss
   const sessionSubmit = (option: number) => actor(learnerId, "STUDENT_LEARNER", () => submitSession(req(questionIds[0], options[0][option]), { params: Promise.resolve({ attemptId: sessionAttemptId }) }));
   const quizSubmit = (option: number, id = quizAttemptId) => actor(tutorUserId, "STUDENT_TUTOR", () => submitQuiz(req(questionIds[1], options[1][option]), { params: Promise.resolve({ attemptId: id }) }));
   const createQuiz = (attemptNo: number) => prisma.assessmentAttempt.create({ data: {
-    tutorProfileId: tutorId, subject: "MATH", topic, attemptNo, questionCount: 1, passPercent: 50,
+    tutorProfileId: tutorId, subject: "MATH", topic, attemptNo, certificationEligible: true, questionCount: 1, passPercent: 50,
     items: { create: { questionId: questionIds[1], position: 0 } },
   } });
   beforeAll(async () => {
@@ -43,6 +44,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB assessment submiss
     const tutor = await prisma.tutorProfile.create({ data: { userId: tutorUserId } });tutorId = tutor.id;
     for (const origin of ["TUTOR", "BANK"] as const) {
       const question = await prisma.assessmentQuestion.create({ data: {
+        ...qualificationFixture(tutorUserId),
         subject: "MATH", topic, prompt: "QA only: choose the first option.", origin, createdById: tutorUserId,
         ...(origin === "TUTOR" ? { ownerTutorProfileId: tutorId } : {}),
         options: { create: [{ text: "First", isCorrect: true, position: 0 }, { text: "Second", isCorrect: false, position: 1 }] },

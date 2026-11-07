@@ -1,3 +1,4 @@
+import { qualificationQuestionWhere } from "@/lib/qualificationBank";
 import { lockActiveQuestions, QuestionWriteError } from "@/lib/questionLocks";
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
@@ -40,6 +41,7 @@ export async function GET() {
         topic: true,
         attemptNo: true,
         status: true,
+        certificationEligible: true,
         questionCount: true,
         correctCount: true,
         scorePercent: true,
@@ -118,12 +120,12 @@ export async function POST(req: NextRequest) {
     const activeCount = await prisma.assessmentQuestion.count({
       // origin: "BANK" — must match pickQuestionIds' pool exactly, or a tutor
       // could author custom questions to clear minBankSize on a thin admin bank.
-      where: { subject: subjectEnum, topic, active: true, origin: "BANK" },
+      where: qualificationQuestionWhere({ subject: subjectEnum, topic }),
     });
     if (activeCount < config.minBankSize) {
       return NextResponse.json(
         {
-          error: "This topic doesn't have enough questions yet. Request that an admin add some.",
+          error: "This topic does not have enough reviewed qualification questions. Ask an admin to arrange qualified topic review. Demo and unreviewed questions cannot grant certification.",
           code: "BANK_NOT_READY",
         },
         { status: 409 }
@@ -148,13 +150,15 @@ export async function POST(req: NextRequest) {
 
       if (questionIds.length !== count) throw new QuestionWriteError("The question bank changed. Refresh and try again.");
       await lockActiveQuestions(tx, questionIds);
-      if (await tx.assessmentQuestion.count({ where: { subject: subjectEnum, topic, active: true, origin: "BANK" } }) < config.minBankSize) throw new QuestionWriteError("The active question bank is no longer ready. Refresh and try again.");
+      if (await tx.assessmentQuestion.count({ where: qualificationQuestionWhere({ id: { in: questionIds }, subject: subjectEnum, topic }) }) !== questionIds.length) throw new QuestionWriteError("The qualification review changed. Refresh and try again.");
+      if (await tx.assessmentQuestion.count({ where: qualificationQuestionWhere({ subject: subjectEnum, topic }) }) < config.minBankSize) throw new QuestionWriteError("The active question bank is no longer ready. Refresh and try again.");
       return tx.assessmentAttempt.create({
         data: {
           tutorProfileId: tutorProfile.id,
           subject: subjectEnum,
           topic,
           attemptNo,
+          certificationEligible: true,
           questionCount: questionIds.length,
           passPercent: config.passPercent,
           items: {

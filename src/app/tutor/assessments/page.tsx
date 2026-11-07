@@ -17,6 +17,7 @@ export interface AttemptSummary {
   topic: string;
   attemptNo: number;
   status: "IN_PROGRESS" | "PASSED" | "FAILED";
+  certificationEligible?: boolean;
   questionCount: number;
   correctCount: number;
   scorePercent: number;
@@ -93,6 +94,7 @@ export default async function TutorAssessmentsPage() {
     topic: a.topic,
     attemptNo: a.attemptNo,
     status: a.status,
+    certificationEligible: a.certificationEligible,
     questionCount: a.questionCount,
     correctCount: a.correctCount,
     scorePercent: a.scorePercent,

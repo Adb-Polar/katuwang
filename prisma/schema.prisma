@@ -39,6 +39,7 @@ model User {
   profilePictureLocked     Boolean               @default(false)
   profilePictureUpdatedAt  DateTime?
   authoredQuestions        AssessmentQuestion[]  @relation("AuthoredQuestions")
+  qualificationReviews AssessmentQuestion[] @relation("QualificationReviewer")
   auditLogs                AuditLog[]
   chatbotMisses            ChatbotMiss[]
   reviewedClassAppeals     ClassAppeal[]         @relation("ReviewedClassAppeals")
@@ -360,6 +361,13 @@ model AssessmentQuestion {
   ownerTutorProfileId String?
   lockedAt            DateTime?
   version             Int                      @default(1)
+  reviewStatus QualificationReviewStatus @default(UNREVIEWED)
+  qualificationReviewedAt DateTime?
+  qualificationReviewerId String?
+  qualificationCompetency String? @db.Text
+  qualificationEvidence String? @db.Text
+  qualificationReviewerCredentials String? @db.Text
+  qualificationReviewer User? @relation("QualificationReviewer", fields: [qualificationReviewerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   previousVersionId   String?
   previousVersion     AssessmentQuestion?      @relation("QuestionVersions", fields: [previousVersionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   nextVersions        AssessmentQuestion[]     @relation("QuestionVersions")
@@ -372,6 +380,8 @@ model AssessmentQuestion {
   sessionTestItems    SessionTestAttemptItem[]
   sessionTestLinks    SessionTestQuestion[]
 
+  @@index([qualificationReviewerId])
+  @@index([subject, topic, active, origin, reviewStatus], map: "assessment_questions_qualification_pool_idx")
   @@unique([previousVersionId, version])
   @@index([subject, topic, active, origin])
   @@index([ownerTutorProfileId])
@@ -400,6 +410,7 @@ model AssessmentAttempt {
   topic          String
   attemptNo      Int
   status         AssessmentAttemptStatus @default(IN_PROGRESS)
+  certificationEligible Boolean @default(false)
   questionCount  Int
   correctCount   Int                     @default(0)
   scorePercent   Int                     @default(0)
@@ -634,6 +645,12 @@ enum GradeLevel {
   GRADE_10
   GRADE_11
   GRADE_12
+}
+
+enum QualificationReviewStatus {
+  UNREVIEWED
+  DEMO
+  APPROVED
 }
 
 enum CertificationApprovalMethod {

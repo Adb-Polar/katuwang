@@ -1,3 +1,4 @@
+import { qualificationQuestionWhere } from "@/lib/qualificationBank";
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { NextResponse } from "next/server";
@@ -23,7 +24,7 @@ export async function GET() {
     const [counts, config, openRequests, catalog] = await Promise.all([
       prisma.assessmentQuestion.groupBy({
         by: ["subject", "topic"],
-        where: { active: true, origin: "BANK" },
+        where: qualificationQuestionWhere(),
         _count: { _all: true },
       }),
       getAssessmentConfig(),

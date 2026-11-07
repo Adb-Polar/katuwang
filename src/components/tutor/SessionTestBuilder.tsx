@@ -588,7 +588,7 @@ function AddFromBankModal({
   const [topic, setTopic] = useState("");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<
-    { id: string; prompt: string; topic: string; options: { text: string; isCorrect: boolean }[] }[]
+    { id: string; prompt: string; topic: string; reviewStatus?: string; options: { text: string; isCorrect: boolean }[] }[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -681,7 +681,7 @@ function AddFromBankModal({
                   <span>
                     <span className="text-base-content/80">{r.prompt}</span>
                     <span className="block text-2xs text-base-content/40">
-                      {r.topic}
+                      {r.topic} · {r.reviewStatus === "APPROVED" ? "Reviewed for qualification" : r.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"}
                       {already && " · already on this test"}
                     </span>
                   </span>

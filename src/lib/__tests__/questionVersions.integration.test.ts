@@ -1,3 +1,4 @@
+import { qualificationFixture } from "@/test/qualificationFixture";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -66,7 +67,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB immutable question
   beforeEach(async () => {
     hooks.beforeQuestionLock = undefined;hooks.beforeTestLock = undefined;hooks.afterPick = undefined;
     await clear();invalidateSubjectCache();
-    questionId = (await prisma.assessmentQuestion.create({ data: { subject: "MATH", topic, prompt: "Original QA wording, preserved for history.", origin: "BANK", createdById: users[0], options: { create: [{ text: "Original correct", isCorrect: true, position: 0 }, { text: "Original wrong", isCorrect: false, position: 1 }] } } })).id;
+    questionId = (await prisma.assessmentQuestion.create({ data: { ...qualificationFixture(users[0]), subject: "MATH", topic, prompt: "Original QA wording, preserved for history.", origin: "BANK", createdById: users[0], options: { create: [{ text: "Original correct", isCorrect: true, position: 0 }, { text: "Original wrong", isCorrect: false, position: 1 }] } } })).id;
     testId = (await prisma.sessionTest.create({ data: { sessionId, title: "QA immutable version test", questions: { create: { questionId, position: 0 } } } })).id;
   });
   afterAll(async () => {

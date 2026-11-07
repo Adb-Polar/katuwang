@@ -30,6 +30,7 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         assessmentAttemptItem: { update: itemUpdate },
+        assessmentQuestion: { count: vi.fn().mockResolvedValue(2) },
         $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
         assessmentAttempt: { updateMany: attemptClaim, findUniqueOrThrow: attemptRead },
         topicCertification: { findUnique: certFindUnique, upsert: certUpsert },
@@ -57,6 +58,7 @@ function fakeAttempt({ passPercent = 50, status = "IN_PROGRESS" as string } = {}
     topic: "Algebraic Expressions",
     attemptNo: 1,
     status,
+    certificationEligible: true,
     questionCount: 2,
     passPercent,
     correctCount: 0,

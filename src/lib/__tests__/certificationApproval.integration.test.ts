@@ -1,3 +1,4 @@
+import { qualificationFixture } from "@/test/qualificationFixture";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
@@ -22,7 +23,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB certification prov
   const req = (body: unknown) => new NextRequest("http://localhost/qa", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   const manual = { status: "CERTIFIED", method: "MANUAL", reviewNote: "Isolated QA competency review reason", evidence: "Isolated QA observed topic work sample, reference QA-ONLY" };
   const decision = (body: unknown, pause = false) => asUser(0, () => review(req(body), { params: Promise.resolve({ certificationId: certId }) }), pause);
-  const attempt = (data: Partial<Prisma.AssessmentAttemptUncheckedCreateInput> = {}) => prisma.assessmentAttempt.create({ data: { tutorProfileId: profiles[0], subject: "MATH", topic, attemptNo: 1, status: "PASSED", submittedAt: new Date(), questionCount: 1, correctCount: 1, scorePercent: 100, passPercent: 80, ...data } });
+  const attempt = (data: Partial<Prisma.AssessmentAttemptUncheckedCreateInput> = {}) => prisma.assessmentAttempt.create({ data: { tutorProfileId: profiles[0], subject: "MATH", topic, attemptNo: 1, status: "PASSED", certificationEligible: true, items: { create: { questionId, position: 0 } }, submittedAt: new Date(), questionCount: 1, correctCount: 1, scorePercent: 100, passPercent: 80, ...data } });
   const barrier = () => { let entered!: () => void;let release!: () => void;const seen = new Promise<void>(r => { entered = r; });const ready = new Promise<void>(r => { release = r; });hooks.beforeLock = async () => { entered();await ready; };return { seen, release }; };
   beforeAll(async () => {
     const url = new URL(process.env.TEST_DATABASE_URL!);if (process.env.DATABASE_URL !== process.env.TEST_DATABASE_URL || !["127.0.0.1", "localhost"].includes(url.hostname) || !url.pathname.includes("verification")) throw Error("Use isolated local verification database only");
@@ -30,7 +31,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB certification prov
     for (let i = 0; i < 3; i++) users.push((await prisma.user.create({ data: { anonymousId: `QA-CA-${suffix}-${i}`, email: `qa-ca-${suffix}-${i}@example.test`, firstName: "QA", lastName: "Approval", password: "unused", role: i === 0 ? "ADMIN" : "STUDENT_TUTOR", gradeLevel: "GRADE_10", section: "QA" } })).id);
     for (const userId of users.slice(1)) profiles.push((await prisma.tutorProfile.create({ data: { userId } })).id);
     const subject = await prisma.subject.findUniqueOrThrow({ where: { slug: "MATH" } });topicId = (await prisma.topic.create({ data: { subjectId: subject.id, name: topic, gradeLevels: ["GRADE_10"] } })).id;
-    const q = await prisma.assessmentQuestion.create({ data: { subject: "MATH", topic, prompt: "Isolated approval QA question", origin: "BANK", createdById: users[0], options: { create: [{ text: "QA correct", position: 0, isCorrect: true }, { text: "QA wrong", position: 1, isCorrect: false }] } }, include: { options: true } });questionId = q.id;correctId = q.options.find(o => o.isCorrect)!.id;
+    const q = await prisma.assessmentQuestion.create({ data: { ...qualificationFixture(users[0]), subject: "MATH", topic, prompt: "Isolated approval QA question", origin: "BANK", createdById: users[0], options: { create: [{ text: "QA correct", position: 0, isCorrect: true }, { text: "QA wrong", position: 1, isCorrect: false }] } }, include: { options: true } });questionId = q.id;correctId = q.options.find(o => o.isCorrect)!.id;
   });
   beforeEach(async () => {
     hooks.beforeLock = undefined;invalidateSubjectCache();
@@ -65,7 +66,7 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB certification prov
     expect((await Promise.all([decision(manual), decision(manual)])).map(r => r.status).sort()).toEqual([200, 409]);expect(await prisma.auditLog.count({ where: { targetId: certId } })).toBe(1);expect(await prisma.notification.count({ where: { userId: users[1], type: "CERTIFICATION_CERTIFIED" } })).toBe(1);
   });
   it("does not let a stale rejection overwrite a quiz-earned badge", async () => {
-    const quiz = await attempt({ status: "IN_PROGRESS", submittedAt: null, scorePercent: 0, correctCount: 0 });await prisma.assessmentAttemptItem.create({ data: { attemptId: quiz.id, questionId, position: 0 } });
+    const quiz = await attempt({ status: "IN_PROGRESS", submittedAt: null, scorePercent: 0, correctCount: 0 });
     const gate = barrier();const rejecting = decision({ status: "REJECTED", reviewNote: "Stale QA decision" }, true);await gate.seen;
     try { const response = await asUser(1, () => submit(req({ answers: [{ questionId, optionId: correctId }] }), { params: Promise.resolve({ attemptId: quiz.id }) }));expect(response.status).toBe(200); } finally { gate.release(); }
     expect((await rejecting).status).toBe(409);expect(await prisma.topicCertification.findUniqueOrThrow({ where: { id: certId } })).toMatchObject({ status: "CERTIFIED", approvalMethod: "ASSESSMENT", qualifyingAttemptId: quiz.id });

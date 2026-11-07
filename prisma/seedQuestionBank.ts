@@ -24,24 +24,11 @@ export async function seedQuestionBankDatabase() {
   if (!adminUser) {
     throw new Error("No admin account found in database. Please run super-admin seed first.");
   }
-  console.log(`Using admin author: ${adminUser.email} (${adminUser.id})`);
+  console.log("Using the configured admin author for demo content.");
 
-  // 2. Clear Question Bank and dependent attempt records
-  console.log("\n[1/4] Clearing existing question bank and related test items...");
-  const delTestAttemptItems = await prisma.sessionTestAttemptItem.deleteMany({});
-  const delSessionQuestions = await prisma.sessionTestQuestion.deleteMany({});
-  const delAttemptItems = await prisma.assessmentAttemptItem.deleteMany({});
-  const delAttempts = await prisma.assessmentAttempt.deleteMany({});
-  const delOptions = await prisma.assessmentOption.deleteMany({});
-  const delQuestions = await prisma.assessmentQuestion.deleteMany({});
-
-  console.log(`  - Deleted ${delTestAttemptItems.count} session test attempt items.`);
-  console.log(`  - Deleted ${delSessionQuestions.count} session test questions.`);
-  console.log(`  - Deleted ${delAttemptItems.count} assessment attempt items.`);
-  console.log(`  - Deleted ${delAttempts.count} assessment attempts.`);
-  console.log(`  - Deleted ${delOptions.count} assessment options.`);
-  console.log(`  - Deleted ${delQuestions.count} bank questions.`);
-  console.log("Question bank cleared cleanly.\n");
+  // Append demo content only. Never delete attempts or replace published links.
+  const existing = await prisma.assessmentQuestion.findMany({ where: { origin: "BANK" }, select: { subject: true, topic: true, prompt: true } });
+  const existingKeys = new Set(existing.map(q => `${q.subject}::${q.topic}::${q.prompt}`));
 
   // 3. Load active subjects and topics from database
   console.log("[2/4] Fetching active subjects and topics from database...");
@@ -86,6 +73,7 @@ export async function seedQuestionBankDatabase() {
     explanation: string | null;
     active: boolean;
     origin: "BANK";
+    reviewStatus: "DEMO";
     createdById: string;
   }
 
@@ -100,14 +88,15 @@ export async function seedQuestionBankDatabase() {
   const allQuestions: DbQuestion[] = [];
   const allOptions: DbOption[] = [];
 
-  let topicCounter = 0;
   for (const s of subjects) {
     for (const t of s.topics) {
-      topicCounter++;
       const hint = competencyMap.get(`${s.slug}::${t.name}`);
       const generated = generateQuestionsForTopic(s.slug, s.name, t.name, hint);
 
       for (const q of generated) {
+        const key = `${s.slug}::${t.name}::${q.prompt}`;
+        if (existingKeys.has(key)) continue;
+        existingKeys.add(key);
         const questionId = generateCuid();
         allQuestions.push({
           id: questionId,
@@ -117,6 +106,7 @@ export async function seedQuestionBankDatabase() {
           explanation: q.explanation || null,
           active: true,
           origin: "BANK",
+          reviewStatus: "DEMO",
           createdById: adminUser.id,
         });
 
@@ -136,73 +126,18 @@ export async function seedQuestionBankDatabase() {
 
   console.log(`\nGenerated a total of ${allQuestions.length} questions and ${allOptions.length} options.`);
 
-  // 5. Bulk insert into database
-  console.log("\n[4/4] Inserting records into MariaDB...");
-  const BATCH_SIZE_Q = 250;
-  for (let i = 0; i < allQuestions.length; i += BATCH_SIZE_Q) {
-    const chunk = allQuestions.slice(i, i + BATCH_SIZE_Q);
-    await prisma.assessmentQuestion.createMany({ data: chunk });
-    const percent = Math.min(100, Math.round(((i + chunk.length) / allQuestions.length) * 100));
-    process.stdout.write(`  Questions progress: ${i + chunk.length}/${allQuestions.length} (${percent}%)\r`);
-  }
-  console.log(`\n  Successfully inserted ${allQuestions.length} questions.`);
-
-  const BATCH_SIZE_OPT = 500;
-  for (let i = 0; i < allOptions.length; i += BATCH_SIZE_OPT) {
-    const chunk = allOptions.slice(i, i + BATCH_SIZE_OPT);
-    await prisma.assessmentOption.createMany({ data: chunk });
-    const percent = Math.min(100, Math.round(((i + chunk.length) / allOptions.length) * 100));
-    process.stdout.write(`  Options progress: ${i + chunk.length}/${allOptions.length} (${percent}%)\r`);
-  }
-  console.log(`\n  Successfully inserted ${allOptions.length} options.`);
-
-  // 6. Re-link existing SessionTest records to new questions
-  console.log("\nSynchronizing existing SessionTest items with new question bank...");
-  const sessionTests = await prisma.sessionTest.findMany({
-    include: {
-      session: {
-        select: {
-          topic: true,
-          class: { select: { subject: true } },
-        },
-      },
-    },
-  });
-
-  for (const st of sessionTests) {
-    const sub = st.session.class.subject;
-    const top = st.session.topic;
-    const candidateQuestions = await prisma.assessmentQuestion.findMany({
-      where: { origin: "BANK", subject: sub, topic: top, active: true },
-      take: 5,
-      select: { id: true },
-    });
-
-    if (candidateQuestions.length > 0) {
-      await prisma.sessionTestQuestion.createMany({
-        data: candidateQuestions.map((q, idx) => ({
-          id: generateCuid(),
-          sessionTestId: st.id,
-          questionId: q.id,
-          position: idx,
-        })),
-      });
-      console.log(`  Linked ${candidateQuestions.length} questions to SessionTest "${st.title}" (${sub} / ${top}).`);
-    }
-  }
-
-  // 7. Ensure platform settings
-  for (const [key, value] of [
-    ["assessmentQuestionCount", "5"],
-    ["assessmentPassPercent", "60"],
-    ["assessmentMinBankSize", "5"],
-  ] as const) {
-    await prisma.platformSetting.upsert({
-      where: { key },
-      update: { value },
-      create: { key, value },
+  // Insert each batch with its options atomically; retain all existing history.
+  console.log("Appending demonstration questions (not eligible for certification).");
+  for (let i = 0; i < allQuestions.length; i += 250) {
+    const chunk = allQuestions.slice(i, i + 250);
+    const ids = new Set(chunk.map(q => q.id));
+    await prisma.$transaction(async tx => {
+      await tx.assessmentQuestion.createMany({ data: chunk });
+      await tx.assessmentOption.createMany({ data: allOptions.filter(o => ids.has(o.questionId)) });
     });
   }
+
+  // Assessment policy is managed separately; demo seeding must not change it.
 
   console.log("\n=======================================================");
   console.log("  Question Bank Seeding Completed Successfully");
@@ -222,13 +157,12 @@ export async function seedQuestionBankDatabase() {
   };
 }
 
-// Execute directly if run as main script
-seedQuestionBankDatabase()
+// Importable for isolated verification; execute only as the main script.
+if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) seedQuestionBankDatabase()
   .catch((err) => {
     console.error("Error seeding question bank:", err);
-    process.exit(1);
+    process.exitCode = 1;
   })
   .finally(async () => {
     await prisma.$disconnect();
-    process.exit(0);
   });

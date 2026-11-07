@@ -14,6 +14,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import QualificationReviewModal from "@/components/admin/QualificationReviewModal";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
@@ -42,6 +43,7 @@ interface Question {
   prompt: string;
   explanation: string | null;
   active: boolean;
+  reviewStatus?: "UNREVIEWED" | "DEMO" | "APPROVED";
   inUse: boolean;
   canDelete?: boolean;
   version?: number;
@@ -70,6 +72,7 @@ interface QRequest {
   tutor: { id: string; anonymousId: string };
 }
 interface AttemptRow {
+  certificationEligible?: boolean;
   id: string;
   subject: string;
   topic: string;
@@ -246,6 +249,7 @@ function QuestionsTab({
   setSelTopic: (t: string | null) => void;
 }) {
   const [success, setSuccess] = useState("");
+  const [reviewTarget, setReviewTarget] = useState<Question | null>(null);
   const [editTarget, setEditTarget] = useState<Question | null>(null);
   const [versionTarget, setVersionTarget] = useState<Question | null>(null);
   const formTarget = versionTarget ?? editTarget;
@@ -285,6 +289,7 @@ function QuestionsTab({
     setSuccess(msg);
     setShowAdd(false);
     setEditTarget(null);
+    setReviewTarget(null);
     setVersionTarget(null);
     setDeleteTarget(null);
     refetch();
@@ -350,7 +355,7 @@ function QuestionsTab({
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-base-content/90">{s}</span>
                   <span className="block text-2xs text-base-content/50">
-                    {totalTopics} topics · {activeQ} active question{activeQ === 1 ? "" : "s"}
+                    {totalTopics} topics · {activeQ} reviewed qualification question{activeQ === 1 ? "" : "s"}
                   </span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0">
@@ -414,6 +419,7 @@ function QuestionsTab({
   // ─── Level 3: questions for subject + topic ───────────────────────────────
   return (
     <div className="space-y-4">
+      <FeedbackBanner variant="info" message="Only questions with documented qualified topic review count toward certification. Demo and unreviewed content is for practice. Corrections require a new review." />
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={editTarget || showAdd || deleteTarget || loadError ? null : error || null} />
 
@@ -469,6 +475,7 @@ function QuestionsTab({
                           label={q.active ? "Active" : "Retired"}
                           size="xs"
                         />
+                        <StatusBadge tone={q.reviewStatus === "APPROVED" ? "success" : "warning"} label={q.reviewStatus === "APPROVED" ? "Reviewed for certification" : q.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"} size="xs" />
                         {q.inUse && (
                           <span className="text-2xs text-base-content/40">in use</span>
                         )}
@@ -487,6 +494,7 @@ function QuestionsTab({
                         >
                           Edit
                         </button>
+                        <button onClick={() => setReviewTarget(q)} disabled={q.reviewStatus !== "APPROVED" && (!q.active || q.hasNewerVersion || q.reviewStatus === "DEMO")} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs">{q.reviewStatus === "APPROVED" ? "Revoke qualification review" : "Record qualified review"}</button>
                         <button onClick={() => { setError(""); setEditTarget(null); setVersionTarget(q); }} disabled={q.hasNewerVersion || busyId === q.id} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs" title={q.hasNewerVersion ? "Open the latest version to make another correction" : undefined}>Create corrected version</button>
                         <button
                           onClick={() => toggleActive(q)}
@@ -526,6 +534,8 @@ function QuestionsTab({
         onPageChange={setPage}
         onPageSizeChange={setPageSize}
       />
+
+      {reviewTarget && <QualificationReviewModal key={reviewTarget.id} question={reviewTarget} revoke={reviewTarget.reviewStatus === "APPROVED"} onClose={() => setReviewTarget(null)} onSaved={() => afterWrite("Qualification review recorded.")} />}
 
       {(showAdd || editTarget || versionTarget) && (
         <QuestionFormModal
@@ -605,7 +615,7 @@ function CoveragePanel({ row }: { row: CoverageRow }) {
     <div className="border border-base-200 bg-base-200/20 rounded-xl p-3 space-y-2 text-xs">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <span className="font-semibold text-base-content/80">
-          {row.activeCount} active question{row.activeCount === 1 ? "" : "s"}
+          {row.activeCount} reviewed qualification question{row.activeCount === 1 ? "" : "s"}
         </span>
         {row.ready ? (
           <StatusBadge tone="success" label={`Ready · needs ≥ ${row.config.minBankSize}`} size="xs" />
@@ -952,8 +962,8 @@ function ResultsTab() {
                   </td>
                   <td>
                     <StatusBadge
-                      tone={ATTEMPT_TONE[a.status].tone}
-                      label={ATTEMPT_TONE[a.status].label}
+                      tone={a.certificationEligible === false ? "neutral" : ATTEMPT_TONE[a.status].tone}
+                      label={a.certificationEligible === false ? "Practice — not for certification" : ATTEMPT_TONE[a.status].label}
                       size="xs"
                     />
                   </td>

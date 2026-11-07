@@ -108,7 +108,7 @@ export default function TopicCertificationList({
         const cert = certByKey.get(key);
         const certStatus = st?.certificationStatus ?? cert?.status ?? null;
         const lastAttempt = st?.lastAttempt ?? null;
-        const awaitingConfirmation = certStatus === "PENDING" && lastAttempt?.status === "PASSED";
+        const awaitingConfirmation = certStatus === "PENDING" && lastAttempt?.status === "PASSED" && lastAttempt.certificationEligible;
         const wasRequested = requested.has(key) || st?.openRequest;
 
         return (
@@ -123,7 +123,7 @@ export default function TopicCertificationList({
                   {subjectDisplayLabel(subject)}
                   {st && !st.bankReady && (
                     <span className="ml-2 text-base-content/40">
-                      · {st.activeQuestionCount}/{st.minBankSize} questions
+                      · {st.activeQuestionCount}/{st.minBankSize} reviewed qualification questions
                     </span>
                   )}
                 </div>

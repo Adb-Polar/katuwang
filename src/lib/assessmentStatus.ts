@@ -1,3 +1,4 @@
+import { qualificationQuestionWhere } from "@/lib/qualificationBank";
 import { TopicCertificationStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getAssessmentConfig } from "@/lib/settings";
@@ -7,7 +8,7 @@ export interface TopicAssessmentStatus {
   activeQuestionCount: number;
   minBankSize: number;
   inProgressAttemptId: string | null;
-  lastAttempt: { id: string; status: "PASSED" | "FAILED"; scorePercent: number } | null;
+  lastAttempt: { id: string; certificationEligible: boolean; status: "PASSED" | "FAILED"; scorePercent: number } | null;
   submittedAttemptCount: number;
   openRequest: boolean;
   certificationStatus: TopicCertificationStatus | null;
@@ -34,14 +35,14 @@ export async function getTopicAssessmentStatus(
   const [counts, cfg, attempts, requests, certs] = await Promise.all([
     prisma.assessmentQuestion.groupBy({
       by: ["subject", "topic"],
-      where: { active: true, origin: "BANK", subject: { in: subjects }, topic: { in: topics } },
+      where: qualificationQuestionWhere({ subject: { in: subjects }, topic: { in: topics } }),
       _count: { _all: true },
     }),
     getAssessmentConfig(),
     prisma.assessmentAttempt.findMany({
       where: { tutorProfileId, subject: { in: subjects }, topic: { in: topics } },
       orderBy: { attemptNo: "desc" },
-      select: { id: true, subject: true, topic: true, status: true, scorePercent: true },
+      select: { id: true, subject: true, topic: true, status: true, scorePercent: true, certificationEligible: true },
     }),
     prisma.questionRequest.findMany({
       where: { tutorProfileId, status: "OPEN", subject: { in: subjects }, topic: { in: topics } },
@@ -77,7 +78,7 @@ export async function getTopicAssessmentStatus(
       minBankSize: cfg.minBankSize,
       inProgressAttemptId: inProgress?.id ?? null,
       lastAttempt: last
-        ? { id: last.id, status: last.status as "PASSED" | "FAILED", scorePercent: last.scorePercent }
+        ? { id: last.id, certificationEligible: last.certificationEligible === true, status: last.status as "PASSED" | "FAILED", scorePercent: last.scorePercent }
         : null,
       submittedAttemptCount: submitted.length,
       openRequest: requestSet.has(k),

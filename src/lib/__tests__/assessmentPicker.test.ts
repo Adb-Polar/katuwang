@@ -52,7 +52,7 @@ describe("pickQuestionIds", () => {
       (tx as unknown as { assessmentQuestion: { findMany: ReturnType<typeof vi.fn> } })
         .assessmentQuestion.findMany,
     ).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) }),
+      expect.objectContaining({ where: expect.objectContaining({ AND: expect.arrayContaining([expect.objectContaining({ origin: "BANK", active: true, reviewStatus: "APPROVED" })]) }) }),
     );
   });
 });

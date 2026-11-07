@@ -41,7 +41,8 @@ async function renameTopicEverywhere(
   await tx.topicCertification.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
   // No origin filter on purpose: a topic rename must reach tutor-authored questions too.
   await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
-  await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: to, reviewStatus: "APPROVED" }, data: { reviewStatus: "UNREVIEWED", qualificationReviewedAt: null } });
+  await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to, certificationEligible: false } });
   await tx.questionRequest.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
 }
 

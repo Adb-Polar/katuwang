@@ -73,8 +73,10 @@ describe("/api/admin/topics/[id]", () => {
   it("PATCH rename fans out to the denormalised columns", async () => {
     const res = await PATCH(patch({ name: "New Name" }), params);
     expect(res.status).toBe(200);
-    // 7 denormalised columns get an updateMany from Old Name -> New Name
-    expect(h.updateMany).toHaveBeenCalledTimes(7);
+    // Rename metadata and invalidate qualification review tied to the former topic.
+    expect(h.updateMany).toHaveBeenCalledTimes(8);
+    expect(h.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { reviewStatus: "UNREVIEWED", qualificationReviewedAt: null } }));
+    expect(h.updateMany).toHaveBeenCalledWith(expect.objectContaining({ data: { topic: "New Name", certificationEligible: false } }));
     expect(h.updateMany).toHaveBeenCalledWith(
       expect.objectContaining({ data: { topic: "New Name" } })
     );

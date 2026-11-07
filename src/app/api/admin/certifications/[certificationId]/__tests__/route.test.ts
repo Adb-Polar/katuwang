@@ -26,6 +26,7 @@ vi.mock("@/lib/prisma", () => ({
       fn({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
         assessmentAttempt: { findMany: passingAttempts },
+        assessmentQuestion: { count: vi.fn().mockResolvedValue(1) },
         topicCertification: { findUnique: topicCertificationFindUnique, update: topicCertificationUpdate, delete: topicCertificationDelete },
         auditLog: { create: auditLogCreate },
         notification: { create: notificationCreate },
@@ -50,7 +51,7 @@ function patch(body: unknown, certificationId = "c1") {
 describe("PATCH /api/admin/certifications/[certificationId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    passingAttempts.mockResolvedValue([{ id: "pass1", scorePercent: 90, passPercent: 80 }]);
+    passingAttempts.mockResolvedValue([{ id: "pass1", certificationEligible: true, subject: "MATH", topic: "Algebra", items: [{ questionId: "q1" }], questionCount: 1, scorePercent: 90, passPercent: 80 }]);
   });
 
   it("returns 401 when unauthenticated", async () => {

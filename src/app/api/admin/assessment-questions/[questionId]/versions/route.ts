@@ -27,8 +27,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ que
       if (!original) throw new QuestionWriteError("Question not found.", 404);
       if (original._count.nextVersions) throw new QuestionWriteError("A newer version already exists. Open the latest version to make another correction.");
       if (original.subject !== preview.subject || original.topic !== preview.topic) throw new QuestionWriteError("The question's catalog topic changed. Refresh and try again.");
-      const { prompt, explanation, options } = parsed.data;
-      const created = await tx.assessmentQuestion.create({ data: { subject: original.subject, topic: original.topic, prompt, explanation: explanation || null, origin: "BANK", createdById: session.user.id, previousVersionId: original.id, version: original.version + 1, options: { create: options.map((option, position) => ({ ...option, position })) } }, include: { options: { orderBy: { position: "asc" } } } });
+      const { prompt, explanation, options, demoOnly } = parsed.data;
+      if (original.reviewStatus === "DEMO" && !demoOnly && prompt === original.prompt) throw new QuestionWriteError("Replace the demo prompt with topic-specific content before requesting qualification review.", 400);
+      const created = await tx.assessmentQuestion.create({ data: { reviewStatus: demoOnly ? "DEMO" : "UNREVIEWED", subject: original.subject, topic: original.topic, prompt, explanation: explanation || null, origin: "BANK", createdById: session.user.id, previousVersionId: original.id, version: original.version + 1, options: { create: options.map((option, position) => ({ ...option, position })) } }, include: { options: { orderBy: { position: "asc" } } } });
       await tx.assessmentQuestion.update({ where: { id: original.id }, data: { active: false } });
       await tx.auditLog.create({ data: { adminId: session.user.id, action: AUDIT_ACTIONS.QUESTION_VERSION_CREATED, targetType: AUDIT_TARGET_TYPES.QUESTION, targetId: created.id, reason: `Corrects ${original.id} (v${original.version}): ${reason.data.reason}` } });
       return created;

@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { subject, topic, prompt, explanation, options } = result.data;
+    const { subject, topic, prompt, explanation, options, demoOnly } = result.data;
 
     if (!(await topicExists(subject, topic))) {
       return NextResponse.json(
@@ -97,6 +97,7 @@ export async function POST(req: NextRequest) {
     const created = await prisma.$transaction(async (tx) => {
       const question = await tx.assessmentQuestion.create({
         data: {
+          reviewStatus: demoOnly ? "DEMO" : "UNREVIEWED",
           subject: subject,
           topic,
           prompt,

@@ -119,7 +119,7 @@ describe("POST /api/tutor/assessments", () => {
 
     await POST(post(validBody));
     expect(questionCount).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) }),
+      expect.objectContaining({ where: expect.objectContaining({ AND: expect.arrayContaining([expect.objectContaining({ origin: "BANK", active: true, reviewStatus: "APPROVED" })]) }) }),
     );
   });
 
@@ -146,7 +146,7 @@ describe("POST /api/tutor/assessments", () => {
   it("201 creates an attempt with the picked questions when the bank is ready", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    questionCount.mockResolvedValue(12);
+    questionCount.mockResolvedValueOnce(12).mockResolvedValueOnce(5).mockResolvedValue(12);
     pickQuestionIdsMock.mockResolvedValue(["q1", "q2", "q3", "q4", "q5"]);
     attemptCreate.mockResolvedValue(fakeAttempt(["q1", "q2", "q3", "q4", "q5"]));
 
