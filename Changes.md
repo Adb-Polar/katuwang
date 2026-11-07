@@ -4272,3 +4272,9 @@ Fix 18 live browser verification passed on 83d4d90: immutable publication, corre
 ## 2026-11-07 — Withhold PRE answer feedback until POST submission
 
 A shared learner policy unlocks answer keys only after the same learner submits the matching POST. Both BANK and TUTOR questions withhold per-item grades, option correctness and explanations on PRE submission/reload; aggregate scores remain visible. Selected answers use neutral styling and explain when feedback unlocks. Staff review retains answers. Full suite 1,155 passes, zero failures; eleven real-MariaDB version/feedback checks pass, including another learner and in-progress POST isolation. TypeScript, changed-file lint and production build pass.
+
+## 2026-11-07 — Require evidenced certification approval
+
+Standard approval requires a submitted passing assessment for the exact tutor/topic and records its source. A distinct manual action requires reason and evidence, persists them, and uses a separate audit action without inventing a quiz pass. Automatic certification records provenance; legacy records remain explicitly unknown. Approval, rejection, re-request and quiz writes share the profile lock and recheck current status to preserve concurrently earned badges. Admin forms expose both paths and their requirements. PRE feedback 7bbc713 passed local/live browser verification after retrying a stalled Render build.
+
+Fix 20 validation: 1,160 tests pass, 54 opt-in skipped; thirteen real-MariaDB checks pass. TypeScript, lint and build pass. Isolated browser verifies blocked standard approval, required manual evidence and positive audited manual certification without a quiz record.

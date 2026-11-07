@@ -1,6 +1,7 @@
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
+import { lockTutorProfile, ClassWriteError } from "@/lib/classLocks";
 import { prisma } from "@/lib/prisma";
 
 import { requestTopicCertificationSchema } from "@/lib/validations/topicCertification";
@@ -54,6 +55,7 @@ export async function GET() {
       }))
     );
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     const catalogFailure = catalogFailureResponse(error);
     if (catalogFailure) return catalogFailure;
     console.error("Error fetching topic certifications:", error);
@@ -107,36 +109,21 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const existing = await prisma.topicCertification.findUnique({
-      where: key,
-      select: { status: true },
-    });
+    const outcome = await prisma.$transaction(async (tx) => {
+      await lockTutorProfile(tx, tutorProfile.id);
+      const existing = await tx.topicCertification.findUnique({ where: key });
+      if (existing?.status === "CERTIFIED") return { certification: existing, status: 200 };
+      const certification = await tx.topicCertification.upsert({
+        where: key,
+        update: { status: "PENDING", requestedAt: new Date(), reviewedAt: null, reviewNote: null, certifiedAt: null, approvalMethod: null, approvalEvidence: null, qualifyingAttemptId: null },
+        create: { tutorProfileId: tutorProfile.id, subject, topic, status: "PENDING" },
+      });
+      return { certification, status: 201 };
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
-    // Already certified → idempotent no-op, never downgrade an earned badge.
-    if (existing?.status === "CERTIFIED") {
-      return NextResponse.json(existing, { status: 200 });
-    }
-
-    // New request, or re-requesting after a PENDING/REJECTED outcome → (re)open as PENDING.
-    const certification = await prisma.topicCertification.upsert({
-      where: key,
-      update: {
-        status: "PENDING",
-        requestedAt: new Date(),
-        reviewedAt: null,
-        reviewNote: null,
-        certifiedAt: null,
-      },
-      create: {
-        tutorProfileId: tutorProfile.id,
-        subject: subject,
-        topic,
-        status: "PENDING",
-      },
-    });
-
-    return NextResponse.json(certification, { status: 201 });
+    return NextResponse.json(outcome.certification, { status: outcome.status });
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     const catalogFailure = catalogFailureResponse(error);
     if (catalogFailure) return catalogFailure;
     console.error("Error requesting topic certification:", error);

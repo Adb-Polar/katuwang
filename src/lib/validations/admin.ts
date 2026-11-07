@@ -21,6 +21,8 @@ export const updateClassStatusSchema = z.object({
 export type UpdateClassStatusInput = z.infer<typeof updateClassStatusSchema>;
 
 export const reviewCertificationSchema = z.object({
+  method: z.enum(["ASSESSMENT", "MANUAL"]).default("ASSESSMENT"),
+  evidence: z.string().trim().max(2000).optional(),
   status: z.enum(["CERTIFIED", "REJECTED"], {
     message: "Invalid certification decision.",
   }),
@@ -30,6 +32,11 @@ export const reviewCertificationSchema = z.object({
     .max(500, "Review note cannot exceed 500 characters.")
     .optional()
     .or(z.literal("")),
+}).superRefine((data, ctx) => {
+  if (data.method !== "MANUAL") return;
+  if (data.status !== "CERTIFIED") ctx.addIssue({ code: "custom", path: ["method"], message: "Manual certification must approve a qualification." });
+  if ((data.reviewNote?.length ?? 0) < 10) ctx.addIssue({ code: "custom", path: ["reviewNote"], message: "A manual certification reason of at least 10 characters is required." });
+  if ((data.evidence?.length ?? 0) < 10) ctx.addIssue({ code: "custom", path: ["evidence"], message: "Qualification evidence of at least 10 characters is required." });
 });
 
 export type ReviewCertificationInput = z.infer<typeof reviewCertificationSchema>;

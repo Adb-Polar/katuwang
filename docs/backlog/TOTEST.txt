@@ -976,4 +976,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: live 83d4d90, no page errors] Question versions: publish a BANK question without attempts; content edit/delete must 409 and UI Edit disabled. Create corrected version through the modal with reason; old prompt/options/test links remain, old version retires, new ID/version selects for future use. Retirement removes successor from selection. Race checks cover publication vs edit/set/delete and qualification selection vs retirement. Archive QA class and retire QA bank versions.
 
-[ ] PRE feedback: both BANK and TUTOR keys, per-item correctness and explanations hidden on submit/reload until matching POST submitted by same learner. Selected answers stay neutral; POST and later PRE review reveal answers. Archive QA history.
+[Good: local/live 7bbc713, no page errors] PRE feedback: both BANK and TUTOR keys, per-item correctness and explanations hidden on submit/reload until matching POST submitted by same learner. Selected answers stay neutral; POST and later PRE review reveal answers. Archive QA history.
+
+[ ] Certification approval: no-pass standard approval blocked; manual action requires reason and evidence; isolated positive manual approval persists provenance and audit; concurrent reviews yield one decision; live UI/guards without granting unsupported real credentials.

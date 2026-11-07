@@ -83,12 +83,14 @@ export async function POST(
         if (passed && autoCertify) {
           await tx.topicCertification.upsert({
             where: certKey,
-            update: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null },
+            update: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null, approvalMethod: "ASSESSMENT", approvalEvidence: null, qualifyingAttemptId: attemptId },
             create: {
               tutorProfileId,
               subject,
               topic,
               status: "CERTIFIED",
+              approvalMethod: "ASSESSMENT",
+              qualifyingAttemptId: attemptId,
               certifiedAt: now,
               reviewedAt: now,
             },
@@ -99,12 +101,13 @@ export async function POST(
             where: certKey,
             update: {
               status: "PENDING",
+              approvalMethod: null, approvalEvidence: null, qualifyingAttemptId: attemptId,
               requestedAt: now,
               reviewedAt: null,
               certifiedAt: null,
               reviewNote: note,
             },
-            create: { tutorProfileId, subject, topic, status: "PENDING", reviewNote: note },
+            create: { tutorProfileId, subject, topic, status: "PENDING", reviewNote: note, qualifyingAttemptId: attemptId },
           });
         } else {
           const note = `Did not pass assessment (${scorePercent}%). You may retake.`;
@@ -112,6 +115,7 @@ export async function POST(
             where: certKey,
             update: {
               status: "REJECTED",
+              approvalMethod: null, approvalEvidence: null, qualifyingAttemptId: null,
               reviewedAt: now,
               certifiedAt: null,
               reviewNote: note,

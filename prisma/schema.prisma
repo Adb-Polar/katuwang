@@ -125,8 +125,13 @@ model TopicCertification {
   certifiedAt    DateTime?
   reviewedAt     DateTime?
   reviewNote     String?                  @db.Text
+  approvalMethod CertificationApprovalMethod?
+  approvalEvidence String? @db.Text
+  qualifyingAttemptId String?
+  qualifyingAttempt AssessmentAttempt? @relation("CertificationQualification", fields: [qualifyingAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   tutorProfile   TutorProfile             @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
+  @@index([qualifyingAttemptId])
   @@unique([tutorProfileId, subject, topic])
   @@map("topic_certifications")
 }
@@ -401,6 +406,7 @@ model AssessmentAttempt {
   passPercent    Int
   startedAt      DateTime                @default(now())
   submittedAt    DateTime?
+  certifications TopicCertification[] @relation("CertificationQualification")
   items          AssessmentAttemptItem[]
   tutorProfile   TutorProfile            @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
@@ -628,6 +634,11 @@ enum GradeLevel {
   GRADE_10
   GRADE_11
   GRADE_12
+}
+
+enum CertificationApprovalMethod {
+  ASSESSMENT
+  MANUAL
 }
 
 enum TopicCertificationStatus {

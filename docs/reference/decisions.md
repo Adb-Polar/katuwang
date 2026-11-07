@@ -389,3 +389,7 @@ thesis reference doc, add a new `##` section above (newest first) with:
 **Decision**, **Thesis text says otherwise** (quote or paraphrase + location
 if relevant), **Why** (who decided, when, and the reason given), and
 **Implication for agents** (the concrete "don't do X" or "do Y instead").
+
+## Certification decisions require qualification evidence
+
+Standard administrator approval requires a submitted passing assessment for the exact tutor/subject/topic, using that attempt's saved threshold. Manual certification is a separate, explicitly selected alternative requiring a reason and topic-specific evidence, persisted with a distinct audit action. It does not fabricate an assessment pass. Automatic quiz certification records its source attempt. Legacy records retain their unknown provenance instead of inventing evidence. All certification writers serialize on the tutor profile. This is the user-approved policy for real-student use (2026-11-07).

@@ -4,6 +4,8 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { reviewCertificationSchema } from "@/lib/validations/admin";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
+import { findPassingQualification } from "@/lib/certificationApproval";
+import { lockTutorProfile, ClassWriteError } from "@/lib/classLocks";
 import { notify } from "@/lib/notifications";
 
 // ─── PATCH: Approve or Reject a Pending Topic Certification ───────────────────
@@ -23,6 +25,7 @@ export async function PATCH(
       where: { id: certificationId },
       select: {
         id: true,
+        tutorProfileId: true,
         status: true,
         subject: true,
         topic: true,
@@ -49,75 +52,47 @@ export async function PATCH(
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { status, reviewNote } = result.data;
-    const now = new Date();
-
-    if (status === "REJECTED") {
-      const rejected = await prisma.$transaction(async (tx) => {
-        const row = await tx.topicCertification.update({
-          where: { id: certificationId },
-          data: {
-            status: "REJECTED",
-            reviewedAt: now,
-            reviewNote: reviewNote || null,
-            certifiedAt: null,
-          },
-        });
-
-        await tx.auditLog.create({
-          data: {
-            adminId: session.user.id,
-            action: AUDIT_ACTIONS.CERTIFICATION_REJECTED,
-            targetType: AUDIT_TARGET_TYPES.CERTIFICATION,
-            targetId: certificationId,
-            reason: reviewNote || null,
-          },
-        });
-
-        await notify(
-          tx,
-          certification.tutorProfile.userId,
-          "CERTIFICATION_REJECTED",
-          `Your certification for ${certification.subject} · ${certification.topic} wasn't approved.${
-            reviewNote ? ` Note: ${reviewNote}` : ""
-          }`,
-          "/tutor/assessments"
-        );
-
-        return row;
-      });
-
-      return NextResponse.json(rejected);
-    }
-
+    const { status, reviewNote, method, evidence } = result.data;
     const updated = await prisma.$transaction(async (tx) => {
-      const certified = await tx.topicCertification.update({
+      await lockTutorProfile(tx, certification.tutorProfileId);
+      const current = await tx.topicCertification.findUnique({ where: { id: certificationId }, include: { tutorProfile: { select: { userId: true } } } });
+      if (!current) throw new ClassWriteError("Certification request not found.", 404);
+      if (current.status !== "PENDING") throw new ClassWriteError("This certification has already been reviewed or earned. Reload before continuing.", 409);
+      let qualifyingAttemptId: string | null = null;
+      if (status === "CERTIFIED" && method === "ASSESSMENT") {
+        const passing = await findPassingQualification(tx, current);
+        if (!passing) throw new ClassWriteError("A submitted passing assessment for this tutor and topic is required. Use manual certification only with documented qualification evidence.", 409);
+        qualifyingAttemptId = passing.id;
+      }
+      const now = new Date();
+      const manual = status === "CERTIFIED" && method === "MANUAL";
+      const row = await tx.topicCertification.update({
         where: { id: certificationId },
-        data: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null },
-      });
-
-      await tx.auditLog.create({
         data: {
-          adminId: session.user.id,
-          action: AUDIT_ACTIONS.CERTIFICATION_APPROVED,
-          targetType: AUDIT_TARGET_TYPES.CERTIFICATION,
-          targetId: certificationId,
+          status, reviewedAt: now, certifiedAt: status === "CERTIFIED" ? now : null,
+          reviewNote: manual || status === "REJECTED" ? reviewNote || null : null,
+          approvalMethod: status === "CERTIFIED" ? method : null,
+          approvalEvidence: manual ? evidence! : null, qualifyingAttemptId,
         },
       });
-
-      await notify(
-        tx,
-        certification.tutorProfile.userId,
-        "CERTIFICATION_CERTIFIED",
-        `You're now certified to teach ${certification.subject} · ${certification.topic}. You can create classes for it.`,
-        "/tutor/assessments"
-      );
-
-      return certified;
-    });
+      await tx.auditLog.create({ data: {
+        adminId: session.user.id,
+        action: status === "REJECTED" ? AUDIT_ACTIONS.CERTIFICATION_REJECTED : manual ? AUDIT_ACTIONS.CERTIFICATION_MANUAL_APPROVED : AUDIT_ACTIONS.CERTIFICATION_APPROVED,
+        targetType: AUDIT_TARGET_TYPES.CERTIFICATION, targetId: certificationId,
+        reason: status === "REJECTED" ? reviewNote || null : JSON.stringify({ method, reason: manual ? reviewNote : null, evidence: manual ? evidence : null, qualifyingAttemptId }),
+      } });
+      await notify(tx, current.tutorProfile.userId,
+        status === "CERTIFIED" ? "CERTIFICATION_CERTIFIED" : "CERTIFICATION_REJECTED",
+        status === "CERTIFIED"
+          ? `You're now certified to teach ${current.subject} · ${current.topic}. You can create classes for it.`
+          : `Your certification for ${current.subject} · ${current.topic} wasn't approved.${reviewNote ? ` Note: ${reviewNote}` : ""}`,
+        "/tutor/assessments");
+      return row;
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error reviewing topic certification:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

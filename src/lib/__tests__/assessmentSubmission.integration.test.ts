@@ -61,15 +61,17 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB assessment submiss
     hooks.beforeTransactionalAccess = undefined;
     await prisma.platformSetting.upsert({ where: { key: settingKey }, create: { key: settingKey, value: "false" }, update: { value: "false" } });
     await prisma.sessionTestAttempt.deleteMany({ where: { sessionTestId: testId } });
-    await prisma.assessmentAttempt.deleteMany({ where: { tutorProfileId: tutorId } });
     await prisma.topicCertification.deleteMany({ where: { tutorProfileId: tutorId } });
+    await prisma.assessmentAttempt.deleteMany({ where: { tutorProfileId: tutorId } });
     await prisma.notification.deleteMany({ where: { userId: tutorUserId } });
     await prisma.classEnrollment.upsert({ where: { classId_learnerId: { classId, learnerId } }, create: { classId, learnerId }, update: {} });
     sessionAttemptId = (await prisma.sessionTestAttempt.create({ data: { sessionTestId: testId, learnerId, kind: "PRE", totalQuestions: 1, items: { create: { questionId: questionIds[0], position: 0 } } } })).id;
     quizAttemptId = (await createQuiz(1)).id;
   });
   afterAll(async () => {
+    if (tutorId) await prisma.topicCertification.deleteMany({ where: { tutorProfileId: tutorId } });
     if (tutorId) await prisma.assessmentAttempt.deleteMany({ where: { tutorProfileId: tutorId } });
+    if (testId) await prisma.sessionTest.deleteMany({ where: { id: testId } });
     if (classId) await prisma.tutorClass.delete({ where: { id: classId } });
     if (questionIds.length) await prisma.assessmentQuestion.deleteMany({ where: { id: { in: questionIds } } });
     if (tutorId) await prisma.tutorProfile.delete({ where: { id: tutorId } });
