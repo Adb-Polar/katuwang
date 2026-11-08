@@ -31,6 +31,13 @@ describe('replacement question bank safety gates', () => {
     const codes=validateBank(b,oneTopic).errors.map(e=>e.code);
     expect(codes).toContain('EXACT_DUPLICATE');expect(codes).toContain('DUPLICATE_OPTION');
   });
+  it('preserves allele case while rejecting equivalent reversed allele pairs', () => {
+    const b=copy();
+    ['AA','Aa','aa','unknown'].forEach((text,i)=>b.questions[0].options[i].text=text);
+    expect(validateBank(b,oneTopic).errors.some(e=>e.code==='DUPLICATE_OPTION')).toBe(false);
+    b.questions[0].options[3].text='aA';
+    expect(validateBank(b,oneTopic).errors.some(e=>e.code==='DUPLICATE_OPTION')).toBe(true);
+  });
   it('flags number-substitution variants for review', () => {
     const b=copy(); b.questions[1].prompt='A school receives 8 packs of 25 pencils and gives out 37 pencils. How many of the received pencils remain?';
     expect(validateBank(b,oneTopic).reviewFlags.some(e=>e.code==='NEAR_DUPLICATE')).toBe(true);

@@ -78,7 +78,7 @@ export function validateBank(input: unknown, inventoryInput: unknown) {
     if (!known.has(k)) fail(q, 'UNKNOWN_TOPIC', 'Question does not match an inventoried subject/topic.');
     groups.set(k, [...(groups.get(k) ?? []), q]);
     if (q.options.filter(o => o.isCorrect).length !== 1) fail(q, 'ANSWER_KEY', 'Exactly one correct option is required.');
-    if (new Set(q.options.map(o => normalize(o.text))).size !== 4) fail(q, 'DUPLICATE_OPTION', 'Option texts must be distinct.');
+    if (new Set(q.options.map(o => { const t=o.text.normalize('NFKC').trim(); return /^([a-z])\1$/i.test(t) ? t.split('').sort().join('') : normalize(t); })).size !== 4) fail(q, 'DUPLICATE_OPTION', 'Option texts must be distinct.');
     const prompt = normalize(q.prompt);
     const existing = prompts.get(prompt);
     if (existing) { bad.add(existing); fail(q, 'EXACT_DUPLICATE', `Same prompt as ${existing}.`); }

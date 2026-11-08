@@ -4289,8 +4289,10 @@ Fix 21 validation: 1,160 unit/route tests pass and all65 isolated database integ
 
 All21 fixes completed sequential commit/push/dev-test deployment and browser checks. Fix21 284ba6e passed live demo/unreviewed readiness and review-form guards without fabricating a qualified review. Marked the earlier recorded browser checks Good and added a concise verification report. Final documentation-only revision uses the same tested application code. Production and seeded demo passwords were not changed.
 
-## Question-bank branch rebuilt from develop (2026-11-08)
+## Current question bank completed on develop (2026-11-08)
 
-Reapplied the 860-question data file and standalone seed/check tooling on develop 75488fb. Preserved develop package scripts/dependencies. The expanded 135-topic catalogue does not match the original 43-topic bank; checks reject it before database writes. No taxonomy remapping or database mutations were performed.
+The original 860-question file could not seed develop's current catalogue. The replacement file now contains 2,700 original researched questions across all 135 existing topics in 10 subjects, with 6 easy / 10 medium / 4 hard per topic. 820 previously researched replacement items map to equivalent current topics; 1,880 new items cover the other 94. No catalogue records were renamed. Research metadata references 152 retrieved sources, and the full answer-key export, CSV inventory and audit match the canonical file.
 
-Verification of the develop-based question-bank branch: 1,210 tests passed, 65 skipped; TypeScript and targeted ESLint passed. Expanded-catalogue rejection is covered by regression tests.
+The standalone seed check now passes with zero structural errors or duplicate flags. Missing/unmatched catalogues produce concise diagnostics. Replacement handles active catalogue rows, SUPER_ADMIN authors and Restrict version links. It retains academic approval and application qualification-review gates; all items await genuine human review. No database connection, write or deployment occurred.
+
+Verification: 1,213 tests passed / 65 skipped (144 files passed / 12 skipped), TypeScript and targeted ESLint passed. 278 independent numerical checks passed, with algebra identities and Mendelian checks. Live seed/browser verification and academic approval remain outstanding. The branch is based on develop 75488fb and targets develop through PR #3.

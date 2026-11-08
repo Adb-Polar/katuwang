@@ -1,0 +1,312 @@
+## Qualitative Research
+@ Interview | Observation | Focus group | Document analysis
+A participant describes an experience in an open conversation. Which method?|0|Interviews elicit detailed accounts.
+A researcher systematically watches activity in context. Which method?|1|Observation records situated behavior.
+A facilitator guides discussion among several participants. Which method?|2|A focus group explores interaction and views.
+A researcher interprets archived letters. Which method?|3|Documents provide recorded material.
+@ Phenomenology | Ethnography | Case study | Grounded theory
+A study investigates the meaning of a lived experience. Which approach fits?|0|Phenomenology centers experienced meaning.
+A study examines a group's cultural practices through sustained engagement. Which approach fits?|1|Ethnography examines culture in context.
+A study investigates one bounded program in depth. Which approach fits?|2|A case study examines a bounded case.
+A study develops an explanatory theory through systematic engagement with data. Which approach fits?|3|Grounded theory builds explanation from analysis.
+@ Coding | Theme | Reflexivity | Context
+Assigning analytic labels to data excerpts is what?|0|Coding organizes meaning-bearing material.
+A patterned meaning across accounts is what?|1|Themes connect related findings.
+Examining how the researcher's position shapes inquiry is what?|2|Reflexivity makes influence visible.
+The surrounding conditions of an account are what?|3|Context informs interpretation.
+@ Purposive sampling | Informed consent | Confidentiality | Participant feedback
+Selecting people with relevant experience illustrates what?|0|Selection serves the research purpose.
+Explaining a study and obtaining voluntary agreement supports what?|1|Consent requires understandable information.
+Restricting unnecessary disclosure of identities supports what?|2|Confidentiality protects sensitive information.
+Inviting participants to comment on interpretations can provide what?|3|Their response may clarify understanding.
+@ Depth does not guarantee population representation | Preserve contradictory cases | Quotations need interpretation | Researcher familiarity does not remove bias
+Why cannot ten detailed interviews automatically establish prevalence in a whole nation?|0|Depth and statistical representativeness differ.
+An account challenges the emerging theme. What should be done?|1|Disconfirming evidence can refine analysis.
+A report lists quotations but never explains patterns. What is missing?|2|Evidence needs analytic connection.
+A researcher studies their own community. What should still be examined?|3|Shared membership does not eliminate assumptions.
+## Quantitative Research
+@ Variable | Measurement | Hypothesis | Population
+A characteristic that can take different values is what?|0|Variables describe changing characteristics.
+Assigning values using a specified rule is what?|1|Measurement makes observations comparable.
+A testable proposed relationship is what?|2|A hypothesis can be assessed using data.
+The full group of interest is what?|3|The population defines inference scope.
+@ Descriptive study | Correlational study | Experiment | Cross-sectional study
+A study summarizes current pupil transport choices. Which purpose?|0|Description characterizes observed patterns.
+A study examines association between sleep and test scores without assigning conditions. Which design?|1|Correlation examines covariation.
+Researchers assign a treatment and compare outcomes. Which design?|2|An experiment manipulates conditions.
+Data are collected at one time from several age groups. Which time structure?|3|A cross-sectional design compares one observation period.
+@ Independent variable | Dependent variable | Control variable | Confounder
+Which variable is deliberately manipulated in a simple experiment?|0|It defines the intervention contrast.
+Which variable is the measured outcome?|1|The response depends on the study conditions.
+Which factor is held constant for fair comparison?|2|Control reduces unwanted differences.
+Which extra factor may explain an apparent relationship?|3|Confounding complicates interpretation.
+@ Random sampling | Random assignment | Reliability | Validity
+Selecting participants by a chance mechanism concerns what?|0|It concerns entry into the sample.
+Allocating participants to study conditions by chance concerns what?|1|It concerns treatment allocation.
+Consistency of a measurement concerns what?|2|Reliability addresses repeatability.
+Whether a measure supports its intended interpretation concerns what?|3|Validity concerns meaning and use.
+@ Association alone does not prove causation | A large biased sample can remain biased | Statistical significance is not effect size | A measured proxy needs justification
+Why cannot an observational correlation alone identify a causal mechanism?|0|Alternative explanations may remain.
+Why does surveying many volunteers not automatically remove selection bias?|1|Participation can still be systematically unequal.
+Why should a small p-value not replace assessment of the effect's magnitude?|2|Evidence against a null differs from practical importance.
+Why should test attendance not automatically be called motivation?|3|The operational measure may reflect other factors.
+## Research Design & Data Collection
+@ Research question | Design | Instrument | Procedure
+What specifies the inquiry's focused problem?|0|The question directs the study.
+What organizes how evidence will answer that problem?|1|Design connects question and evidence.
+What tool records or elicits observations?|2|An instrument implements measurement or questioning.
+What states the sequence of data-gathering actions?|3|Procedures describe implementation.
+@ Survey | Experiment | Observation | Interview
+A structured form collects comparable self-reports. Which method?|0|Survey questions standardize responses.
+A condition is manipulated to examine its effect. Which method?|1|Experimentation changes an explanatory factor.
+Behavior is systematically recorded as it occurs. Which method?|2|Observation examines activity.
+Participants explain experiences through conversation. Which method?|3|Interviews elicit accounts.
+@ Pilot test | Sampling frame | Consent process | Data dictionary
+A small preliminary trial checks unclear questions. What is this?|0|Piloting reveals practical issues.
+The actual list from which a sample is drawn is what?|1|A frame determines available selection units.
+Explaining participation and voluntary choice is part of what?|2|Consent should be informed.
+A record defining dataset fields and codes is what?|3|A dictionary makes coding understandable.
+@ Leading question | Double-barreled question | Ambiguous item | Recall burden
+'Why is our excellent program effective?' has which flaw?|0|It presupposes a favorable conclusion.
+'Is the lesson clear and enjoyable?' combines which problem?|1|Two judgments are requested at once.
+'Do you study often?' without defining often has which limitation?|2|Respondents may interpret it differently.
+A question requires exact details from many years ago. What concern?|3|Memory limitations can affect accuracy.
+@ Minimize unnecessary personal data | Keep the procedure comparable | Record deviations | Protect the right to withdraw
+Why should a school survey avoid collecting unrelated sensitive information?|0|Collection should fit the research purpose.
+Different interviewers explain a scale differently. What needs correction?|1|Inconsistent administration can change responses.
+A planned site becomes inaccessible. What should the report disclose?|2|Changes affect interpretation of methods.
+A participant freely decides to stop. What should researchers respect?|3|Participation must remain voluntary.
+## Research Statistics
+@ Mean | Median | Mode | Range
+Which measure adds observations and divides by their count?|0|The mean is an arithmetic average.
+Which measure locates the middle ordered value?|1|The median splits the ordered observations.
+Which measure identifies the most frequent observed value?|2|The mode concerns frequency.
+Which measure subtracts minimum from maximum?|3|The range describes total observed spread.
+@ 4 | 5 | 6 | 8
+Mean of the sample values 3, 6 and 9?|2|The sum 18 divided by 3 is 6.
+Median of 1, 5 and 9?|1|Five is the middle value.
+Range of 2, 3 and 8?|2|Eight minus two equals six.
+Mean of 6, 8 and 10?|3|Twenty-four divided by three equals eight.
+@ Sample | Parameter | Statistic | Sampling variation
+The observed subset of a population is what?|0|A sample supplies the collected observations.
+A numerical characteristic of a population is what?|1|A parameter describes the population.
+A quantity calculated from a sample is what?|2|A statistic summarizes sample data.
+Different random samples give different means. What explains this?|3|Sample estimates naturally vary.
+@ Null hypothesis | Alternative hypothesis | Significance level | Confidence interval
+Which hypothesis states the reference condition tested?|0|The null supplies the testing baseline.
+Which hypothesis states the competing possibility?|1|The alternative challenges the null.
+Which prespecified threshold governs a test's false-positive control?|2|Alpha sets the significance criterion.
+Which estimate reports a range produced by an interval procedure?|3|An interval expresses estimation uncertainty.
+@ A p-value is not the probability the null is true | Correlation is not causation | Outliers can affect summaries | Uncertainty depends on design as well as size
+Why is 'p=.03 means a 3% probability the null is true' incorrect?|0|The p-value is evaluated under an assumed null model.
+Why does a strong correlation not establish cause by itself?|1|Confounding or reverse direction may remain.
+One extreme value greatly raises the mean. What should be examined?|2|The distribution affects the summary's usefulness.
+Why cannot a large convenience sample automatically justify a narrow unbiased population claim?|3|Sample selection affects inference.
+## Literature Reviews
+@ Search strategy | Inclusion criteria | Critical appraisal | Synthesis
+A planned combination of terms and databases is what?|0|The strategy makes discovery systematic.
+Rules defining which studies qualify are what?|1|Criteria determine scope.
+Evaluation of methods and evidence quality is what?|2|Appraisal assesses trustworthiness.
+Integration of findings across sources is what?|3|Synthesis relates the evidence.
+@ Primary study | Review article | Theoretical paper | Reference list
+An article reports newly collected empirical data. What type?|0|It provides original findings.
+An article evaluates several existing studies. What type?|1|It reviews prior work.
+An article develops an explanatory framework. What type?|2|Its central contribution is conceptual.
+The list identifying cited works is what?|3|It allows readers to trace sources.
+@ Theme | Methodological difference | Research gap | Contradictory evidence
+Studies are grouped by a shared finding. What organizes the review?|0|A theme integrates related ideas.
+Two studies use different sampling and instruments. What should be compared?|1|Methods may explain differing results.
+An important question has little adequate prior investigation. What is identified?|2|A gap can justify further work.
+A well-designed study challenges the prevailing pattern. What should be retained?|3|Disagreement is part of the evidence.
+@ Paraphrase accurately | Cite borrowed ideas | Record source details | Separate source claims from one's analysis
+A finding is restated in new wording. What obligation remains?|0|Meaning must not be distorted.
+A distinctive idea is borrowed without quotation. What is still needed?|1|Changing words does not remove attribution duties.
+A useful article is found during searching. What should be saved?|2|Accurate details support later verification.
+A reviewer adds an interpretation beyond what authors stated. What distinction matters?|3|Readers need to know who makes each claim.
+@ Do not count repeated citations as independent studies | Compare evidence quality | Explain disagreement | Avoid a sequence of disconnected summaries
+Five websites derive their claim from one paper. What should the review recognize?|0|They do not constitute five independent investigations.
+Why should ten weak studies not automatically outweigh one strong study?|1|Quality matters alongside quantity.
+Why is merely listing conflicting findings insufficient?|2|Differences in scope and method need examination.
+What turns an annotated source list into a literature review?|3|The discussion must integrate relationships.
+## Research Defense & Presentation
+@ Research problem | Methods | Findings | Limitations
+Which element explains what the study sought to answer?|0|The problem establishes purpose.
+Which element explains how the study was conducted?|1|Methods enable scrutiny.
+Which element presents what was observed or analyzed?|2|Findings report the evidence.
+Which element states relevant boundaries of interpretation?|3|Limitations qualify conclusions.
+@ Clear visual | Source acknowledgment | Time management | Accessible explanation
+A graph has readable labels and units. What quality?|0|Visuals should communicate accurately.
+A borrowed figure identifies its origin. What practice?|1|Attribution gives credit.
+A presentation fits the allotted duration without rushing essentials. What skill?|2|Timing requires prioritization and rehearsal.
+A technical term is explained for the panel. What skill?|3|Meaning should be understandable.
+@ Clarify the question | Answer from evidence | Admit uncertainty | Correct an error
+A panel question is ambiguous. What should the presenter do first?|0|Clarification avoids answering a different question.
+A panel asks how a conclusion was reached. What should guide the answer?|1|The study's data and reasoning matter.
+A requested claim exceeds the collected data. What is honest?|2|The limits should be acknowledged.
+A slide contains a wrong number. What should happen?|3|Prompt correction preserves accuracy.
+@ Sample scope | Instrument quality | Analysis choice | Ethical safeguards
+A question asks who the findings represent. Which issue?|0|The sample constrains generalization.
+A question asks whether responses measure the intended concept. Which issue?|1|Instrument validity matters.
+A question asks why a particular statistic was used. Which issue?|2|The analysis must fit the data and purpose.
+A question asks how participant privacy was protected. Which issue?|3|Ethical procedures require explanation.
+@ Confidence does not replace evidence | Critique can improve the study | Acknowledging limits strengthens credibility | Defend reasoning rather than personal status
+Why is a confident answer insufficient when its claim lacks support?|0|Delivery cannot establish factual correctness.
+Why should a well-supported panel objection be considered seriously?|1|Review can reveal necessary revisions.
+Why need describing a real limitation not undermine the whole project?|2|Qualified interpretation is more defensible.
+A presenter answers criticism by citing only their rank. What should change?|3|The actual argument needs support.
+## Inquiries, Investigations & Immersion
+@ Problem identification | Planning | Implementation | Evaluation
+A group specifies a community concern it can investigate. What stage?|0|The problem defines the focus.
+The group sets methods, roles and a timetable. What stage?|1|Planning organizes the work.
+The group gathers the agreed evidence. What stage?|2|Implementation carries out the design.
+The group assesses results against objectives. What stage?|3|Evaluation examines achievement and limits.
+@ Feasibility | Relevance | Ethics | Evidence
+Can a project be completed using available time and resources? Which criterion?|0|Feasibility tests practical capacity.
+Does the question address the community's actual concern? Which criterion?|1|Relevance links inquiry to need.
+Are participation and sensitive information handled responsibly? Which criterion?|2|Ethics concerns rights and welfare.
+What observations justify a proposed conclusion? Which criterion?|3|Evidence grounds claims.
+@ Field notes | Data organization | Analysis | Reflection
+Recording context during observation creates what?|0|Field notes preserve details.
+Labeling files and coding observations supports what?|1|Organization enables usable records.
+Interpreting patterns to answer the question is what?|2|Analysis connects data and inquiry.
+Considering lessons from the process is what?|3|Reflection supports future improvement.
+@ Collaboration | Role clarity | Progress monitoring | Revision
+Members coordinate contributions toward a shared project. What practice?|0|Collaboration joins effort.
+Each member knows assigned responsibilities. What supports accountability?|1|Clear roles reduce omissions.
+The group checks completed tasks against its timeline. What practice?|2|Monitoring detects delays.
+New evidence changes an ineffective procedure. What practice?|3|Revision responds to learning.
+@ Community voice matters | Scope must match resources | Activities are not automatically outcomes | Conclusions need a documented basis
+Why should outsiders not assume a community's priorities without consultation?|0|Members have relevant experience and interests.
+Why can a narrow well-executed investigation be better than an unmanageable one?|1|Realistic scope supports reliable work.
+A project conducted many meetings but did not improve its target measure. What distinction matters?|2|Effort does not establish effectiveness.
+Why should an attractive final display not replace data records?|3|Readers must be able to inspect the support.
+## Media & Information Literacy
+@ Media | Information | Audience | Purpose
+Channels and forms used to communicate messages are what?|0|Media carry representations.
+Meaningful content that can inform understanding is what?|1|Information can support knowledge.
+The people a message is designed to reach are what?|2|Audience influences presentation.
+The intended function of a message is what?|3|Purpose can include informing or persuading.
+@ Authorship | Evidence | Currency | Bias
+Who created a message concerns what?|0|Authorship helps assess accountability and expertise.
+What supports its factual claims concerns what?|1|Evidence permits verification.
+When it was produced or updated concerns what?|2|Time affects relevance.
+Which perspectives it emphasizes or omits concerns what?|3|Bias can shape framing.
+@ News report | Advertisement | Opinion piece | Satire
+A message primarily reports verified recent events. Which form?|0|Reporting aims to inform about events.
+A message primarily promotes a product. Which form?|1|Commercial persuasion drives advertising.
+A message argues a personal or editorial viewpoint. Which form?|2|Opinion presents evaluation.
+A message uses humorous exaggeration to criticize. Which form?|3|Satire communicates through comic distortion.
+@ Attribution | Permission | Privacy | Accessibility
+Identifying a borrowed creator is what practice?|0|Credit recognizes authorship.
+Authorization to reproduce restricted work concerns what?|1|Credit alone may not grant usage rights.
+Avoiding unnecessary disclosure of personal details protects what?|2|Privacy concerns personal information.
+Captions and suitable image descriptions improve what?|3|Accessible design helps varied users.
+@ Popularity is not verification | Framing affects interpretation | A real image can be miscontextualized | Cross-check independent sources
+Why do many shares not prove a message true?|0|Circulation and accuracy are different.
+Two reports choose different facts from one event. What should be examined?|1|Selection can shape the perceived story.
+An authentic old photo is presented as today's event. What is wrong?|2|Its claimed time context is false.
+Why should repeated copies of one unsourced post not count as corroboration?|3|Independence and provenance matter.
+## Fact-Checking & Digital Ethics
+@ Original source | Publication date | Independent corroboration | Claim scope
+What should be located behind an attributed quotation?|0|The original wording and context matter.
+What helps detect an old event presented as new?|1|Dates establish time context.
+What checks whether separate reliable evidence supports a claim?|2|Independent accounts strengthen verification.
+What establishes exactly what a headline asserts?|3|The claim's boundaries guide checking.
+@ Reverse-image search | Context review | Author verification | Data inspection
+Which tool can help locate earlier uses of a photograph?|0|Image search can reveal provenance clues.
+What is needed when a short quotation may omit a condition?|1|The surrounding material can alter meaning.
+What is needed when someone claims professional expertise?|2|Credentials should be checked through relevant records.
+What is needed when a graph makes a numerical claim?|3|Values, scales and underlying definitions matter.
+@ Privacy | Intellectual property | Consent | Transparency
+Avoiding disclosure of unrelated personal records protects what?|0|Personal information deserves appropriate limits.
+Respecting lawful rights over creative work concerns what?|1|Creators may hold usage rights.
+Voluntary informed agreement to participation concerns what?|2|Consent requires meaningful choice.
+Disclosing a material edit or conflict of interest supports what?|3|Transparency helps readers evaluate the message.
+@ Correct promptly | Preserve uncertainty | Avoid amplification | Keep a verification trail
+A shared claim is shown false. What should the sharer do?|0|A visible correction limits ongoing error.
+Evidence remains incomplete. What should the report retain?|1|Unresolved claims should not be stated as certain.
+A harmful rumor is unverified. What is prudent?|2|Sharing can increase harm before verification.
+Why record source links and checking steps?|3|Others should be able to inspect the process.
+@ Search results are leads, not proof | Metadata has limits | Attribution is not automatic permission | Verification should apply to preferred claims too
+Why cannot a search snippet settle a disputed detailed claim?|0|The full source and evidence need examination.
+Why is missing camera metadata not proof that an image is fake?|1|Metadata can be removed for benign reasons.
+Why may citing a photographer not authorize reuse?|2|Credit and licensing are separate questions.
+Why should agreeable claims receive the same scrutiny as disagreeable ones?|3|Consistency reduces confirmation bias.
+## Empowerment Technologies
+@ Information technology | Communication technology | Digital collaboration | Online publishing
+Tools for processing and storing digital information concern what?|0|Information technology handles data and computation.
+Tools for transmitting messages across distance concern what?|1|Communication tools connect users.
+People jointly edit a shared digital project. What practice?|2|Collaboration coordinates contributions.
+Making digital content available to an audience is what?|3|Publishing distributes content.
+@ Word processor | Spreadsheet | Presentation software | Web editor
+Which tool best develops a formatted text report?|0|Word processors support document writing.
+Which tool organizes cells and calculations?|1|Spreadsheets support structured numeric work.
+Which tool prepares a sequence of visual speaking aids?|2|Presentation tools organize slides.
+Which tool creates or modifies web content?|3|Web editors support site authoring.
+@ Audience needs | Usability | Security | Accessibility
+Choosing a tool according to users' knowledge addresses what?|0|Users' needs guide selection.
+Making a task straightforward to complete improves what?|1|Usability concerns effective interaction.
+Protecting accounts and data addresses what?|2|Security controls reduce unauthorized access.
+Supporting users with varied abilities addresses what?|3|Accessibility reduces barriers.
+@ Data collection | Analysis | Visualization | Feedback
+A digital form gathers community responses. What function?|0|It collects structured input.
+A spreadsheet finds patterns in responses. What function?|1|Analysis examines relationships and summaries.
+A clear chart communicates the findings. What function?|2|Visualization represents data.
+Users report difficulties with a prototype. What resource?|3|Feedback informs improvement.
+@ Technology is a means, not proof of impact | Participation requires access | Privacy should shape design | Test tools with actual users
+Why does launching an application not establish social benefit?|0|Its outcomes need evaluation.
+Why may an online-only campaign exclude some people?|1|Connectivity and skill access differ.
+Why should a community form avoid unnecessary identifiers?|2|Collection should match purpose and risk.
+Why can an attractive interface still fail its intended task?|3|Real use can reveal design assumptions.
+## Online Productivity
+@ Shared document | Spreadsheet | Calendar | Task board
+Which tool supports collaborative drafting in one text file?|0|Shared documents coordinate writing.
+Which tool supports tabular calculations?|1|Spreadsheets compute over structured cells.
+Which tool organizes dated appointments?|2|Calendars coordinate time.
+Which tool tracks tasks across workflow stages?|3|Task boards visualize progress.
+@ View access | Comment access | Edit access | Ownership
+Which permission allows reading without changing content?|0|Viewers cannot normally alter the document.
+Which permission allows feedback without direct rewriting?|1|Comments distinguish suggestions from edits.
+Which permission allows direct modification?|2|Editors can change content.
+Which role usually controls the highest file-management authority?|3|Ownership governs primary control.
+@ Version history | File naming | Folder organization | Backup
+Which feature helps inspect or restore earlier revisions?|0|History records prior states.
+Which practice makes purpose and date clearer in a filename?|1|A consistent name improves identification.
+Which practice groups related materials logically?|2|Folders support retrieval.
+Which practice provides a recoverable additional copy?|3|Backup supports recovery.
+@ =SUM(B2:B6) | =AVERAGE(B2:B6) | =MAX(B2:B6) | =MIN(B2:B6)
+Which formula totals values from B2 through B6?|0|SUM adds the range.
+Which formula finds their arithmetic mean?|1|AVERAGE divides the sum by the count.
+Which formula returns their largest value?|2|MAX selects the maximum.
+Which formula returns their smallest value?|3|MIN selects the minimum.
+@ Use least necessary access | Resolve conflicting versions | Check calculation ranges | Separate synchronization from backup
+Why should a public link not automatically grant everyone editing rights?|0|Permissions should fit actual roles.
+Two copies contain different recent edits. What must be done?|1|Changes need reconciliation.
+Rows are added below a formula's fixed range. What should be checked?|2|New entries may be omitted.
+A mistaken deletion is synchronized to all devices. What distinction matters?|3|Sync alone may propagate errors rather than preserve versions.
+## Web Design & Technology for Social Change
+@ HTML | CSS | JavaScript | URL
+Which language structures web content semantically?|0|HTML identifies content elements.
+Which language controls visual presentation?|1|CSS defines styles.
+Which language commonly adds browser-side behavior?|2|JavaScript enables programmed interaction.
+What identifies a resource's web address?|3|A URL locates a resource.
+@ Heading | Paragraph | Link | Image alternative text
+Which element indicates a section's hierarchical title?|0|Headings structure the document.
+Which element groups ordinary prose text?|1|Paragraphs organize text blocks.
+Which element provides navigation to another resource?|2|Links connect locations.
+Which description conveys an informative image's purpose when it is not seen?|3|Alternative text supports equivalent access.
+@ Usability | Accessibility | Privacy | Credibility
+Users can complete the intended task easily. What quality?|0|Usability concerns effective use.
+Users with varied abilities can access content. What quality?|1|Accessibility reduces barriers.
+A site limits collection of personal information. What concern?|2|Privacy constrains data handling.
+A page identifies authors and supports factual claims. What quality?|3|Credibility depends on accountable evidence.
+@ Define the social problem | Consult affected users | Prototype | Evaluate outcomes
+What should precede choosing a fashionable platform for a campaign?|0|The actual need should guide technology.
+Who can explain barriers experienced by the target community?|1|Affected users provide essential insight.
+What small testable version can expose design problems?|2|A prototype supports early learning.
+What determines whether a launched site helped its intended cause?|3|Impact requires relevant outcome evidence.
+@ A page title is not a source | Visual polish does not ensure accuracy | Engagement is not necessarily social impact | Security must fit the information collected
+Why cannot a claim be verified solely from its prominent headline?|0|Underlying evidence still matters.
+Why should an attractive advocacy page still document its factual statements?|1|Design cannot establish truth.
+A campaign gains views but no measured improvement in its target problem. What distinction matters?|2|Reach and outcomes are different measures.
+A site collects sensitive community reports. What must be considered before launch?|3|Protection obligations increase with the data's sensitivity.

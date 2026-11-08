@@ -982,4 +982,6 @@ Email verification OTP (codex/email-verification-otp)
 
 [Good: isolated positive and live guards 284ba6e, no page errors] Reviewed bank: demo/unreviewed questions labeled and excluded from qualification readiness/start; correction requires new review. In isolated browser verify documented approval, immutability, eligible attempt, revocation and old practice attempt cannot certify. Live guards must not mark any content qualified without actual review evidence.
 
-[ ] Question-bank develop rebase: expand/review the authored bank against all 135 current topics before seeding; verify qualification review metadata and question-version relationships with a staging database.
+[Good: local checks] Current question bank: 2,700 items cover all 135 topics with 6/10/4 difficulty; standalone check, 1,213 tests, TypeScript, targeted lint and 278 numeric checks pass. No live database writes.
+
+[ ] Academic/staging review: obtain genuine review for all items; verify grade/difficulty/distractor suitability and source support. After approval, run standalone replacement against a disposable staging database with BANK version chains, archived catalogue rows and SUPER_ADMIN-only author; verify rollback, exact 20 active items per topic, practice grading, learner PRE/POST, and qualification exclusion until actual application review evidence exists.

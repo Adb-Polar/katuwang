@@ -12,7 +12,7 @@ export async function replaceDummyBank(db: PrismaClient, input: unknown, mode: R
   const bank = bankSchema.parse(input);
   return db.$transaction(async tx => {
     const subjects = await tx.subject.findMany({
-      orderBy:{id:'asc'},include:{topics:{orderBy:{id:'asc'}}},
+      where:{active:true},orderBy:{id:'asc'},include:{topics:{where:{active:true},orderBy:{id:'asc'}}},
     });
     const inventory = subjects.flatMap(s => s.topics.map(t => ({
       subject:s.slug, subjectName:s.name, subjectId:s.id, topic:t.name, topicId:t.id,
@@ -28,7 +28,7 @@ export async function replaceDummyBank(db: PrismaClient, input: unknown, mode: R
     }
     const settings = await tx.platformSetting.findMany({where:{key:{in:['assessmentQuestionCount','assessmentMinBankSize']}}});
     if (settings.some(s => Number(s.value)>20)) throw new Error('Assessment settings require more than 20 questions per topic.');
-    const author = await tx.user.findFirst({where:{role:'ADMIN'},orderBy:{id:'asc'},select:{id:true}});
+    const author = await tx.user.findFirst({where:{role:{in:['SUPER_ADMIN','ADMIN']}},orderBy:{id:'asc'},select:{id:true}});
     if (!author) throw new Error('An existing administrator author is required; no users will be created.');
     const old = await tx.assessmentQuestion.findMany({where:{origin:'BANK'},select:{id:true}});
     const oldIds = old.map(q => q.id);
@@ -55,6 +55,9 @@ export async function replaceDummyBank(db: PrismaClient, input: unknown, mode: R
       if (testIds.length) await tx.sessionTest.updateMany({where:{id:{in:testIds}},data:{
         status:'DRAFT',publishedAt:null,closedAt:null,
       }});
+      // Successors can otherwise block deletion through the Restrict version FK.
+      // All BANK versions are disposable; retain surviving question content.
+      await tx.assessmentQuestion.updateMany({where:{previousVersionId:{in:oldIds}},data:{previousVersionId:null}});
       // Options cascade on question deletion after dependent references are gone.
       await tx.assessmentQuestion.deleteMany({where:{id:{in:oldIds},origin:'BANK'}});
     }

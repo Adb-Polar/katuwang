@@ -27,6 +27,7 @@ function mockDatabase() {
         return created.map(q=>({...q,options:(q.options as {create:unknown[]}).create}));
       }),
       deleteMany:write('questions'),
+      updateMany:write('version-links'),
       create:vi.fn(async({data}:{data:Record<string,unknown>})=>{mutations.push('insert');created.push(data);return data;}),
     },
     sessionTest:{findMany:vi.fn(async()=>[{id:'test1'}]),updateMany:write('tests')},
@@ -59,9 +60,12 @@ describe('authorized direct dummy bank replacement',()=>{
   });
   it('removes dependent dummy data before deleting BANK questions, then inserts the complete bank',async()=>{
     const m=mockDatabase();const result=await replaceDummyBank(m.db,approvedFixture(),'apply');
-    expect(m.mutations.slice(0,5)).toEqual(['certification-attempts','learner-attempts','links','tests','questions']);
+    expect(m.mutations.slice(0,6)).toEqual(['certification-attempts','learner-attempts','links','tests','version-links','questions']);
     expect(m.tx.assessmentQuestion.deleteMany).toHaveBeenCalledWith({where:{id:{in:['dummy-bank-1','dummy-bank-2']},origin:'BANK'}});
     expect(m.tx.sessionTest.updateMany).toHaveBeenCalledWith({where:{id:{in:['test1']}},data:{status:'DRAFT',publishedAt:null,closedAt:null}});
+    expect(m.tx.assessmentQuestion.updateMany).toHaveBeenCalledWith({where:{previousVersionId:{in:['dummy-bank-1','dummy-bank-2']}},data:{previousVersionId:null}});
+    expect(m.tx.subject.findMany).toHaveBeenCalledWith({where:{active:true},orderBy:{id:'asc'},include:{topics:{where:{active:true},orderBy:{id:'asc'}}}});
+    expect(m.tx.user.findFirst).toHaveBeenCalledWith({where:{role:{in:['SUPER_ADMIN','ADMIN']}},orderBy:{id:'asc'},select:{id:true}});
     expect(m.created).toHaveLength(20);
     expect(m.created[0]).toMatchObject({id:draft.questions[0].id,active:true,origin:'BANK',createdById:'admin1'});
     expect(result.databaseModified).toBe(true);expect(m.committed()).toBe(true);

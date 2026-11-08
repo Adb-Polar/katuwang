@@ -7,6 +7,7 @@ import { pathToFileURL, fileURLToPath } from 'node:url';
 import { bankSchema, validateBank } from '../scripts/question-bank/validate';
 import { SUBJECT_TOPICS } from '../src/lib/subjectTopics';
 import { replaceDummyBank } from '../scripts/question-bank/replace';
+import { bankCoverage, coverageFailureMessage } from '../scripts/question-bank/coverage';
 
 export const DEFAULT_BANK_PATH = fileURLToPath(new URL('./question-bank/questions.json', import.meta.url));
 
@@ -22,6 +23,8 @@ export async function inspectQuestionSeed(path = DEFAULT_BANK_PATH) {
     subject, subjectName:subject, topic, subjectId:null, topicId:null,
     educationalLevel:null, existingActiveBankCount:null,
   })));
+  const coverage = bankCoverage(bank, inventory);
+  if (coverage.missing.length || coverage.unmatched.length) throw new Error(coverageFailureMessage(coverage));
   const validation = validateBank(bank, inventory);
   if (!validation.valid) throw new Error(validation.errors.map(e => e.message).join('\n'));
   return {bank, validation};

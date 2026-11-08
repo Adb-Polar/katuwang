@@ -8,7 +8,8 @@ count=0
 
 def check(topic, expected):
  global count
- rows=[q for q in bank['questions'] if q['topic']==topic]
+ renames={'Fractions & Decimals':'Fractions, Decimals & Rational Numbers','Algebraic Expressions':'Algebraic Expressions & Factoring','Functions & Graphing':'Relations & Functions','Ekonomiks':'Economics & the National Economy','Home Economics':'Home Economics'}
+ rows=[q for q in bank['questions'] if q['topic']==renames.get(topic,topic)]
  for index, value in expected.items():
   actual=next(o['text'] for o in rows[index-1]['options'] if o['isCorrect'])
   assert actual==str(value),(topic,index,actual,str(value))
