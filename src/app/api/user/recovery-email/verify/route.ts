@@ -27,6 +27,9 @@ export async function POST(req: NextRequest) {
       if (consumed.count !== 1) throw new InvalidCode();
       const updated = await tx.user.updateMany({ where: { id: session.user.id, recoveryEmail: record.email }, data: { recoveryEmailVerifiedAt: now } });
       if (updated.count !== 1) throw new InvalidCode();
+      await tx.recoveryChallenge.updateMany({
+        where: { userId: session.user.id, usedAt: null }, data: { usedAt: now },
+      });
     }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
     return NextResponse.json({ message: "Recovery email verified. You can now use it for password recovery." });
   } catch (error) {

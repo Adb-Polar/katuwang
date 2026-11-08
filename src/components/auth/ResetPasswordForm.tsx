@@ -4,7 +4,7 @@ import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation"
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Eye, EyeOff } from "lucide-react";
@@ -13,7 +13,28 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
-  const token = useSearchParams().get("token") ?? "";
+  const legacyToken = useRef(useSearchParams().get("token") ?? "");
+  const [token, setToken] = useState("");
+  const [validating, setValidating] = useState(true);
+  const initialToken = useRef<string | null>(null);
+  useEffect(() => {
+    // Keep the credential in memory and remove it from history/referrers.
+    // The ref also preserves it during React Strict Mode effect replays.
+    initialToken.current ??= new URLSearchParams(window.location.hash.slice(1)).get("token") ?? legacyToken.current;
+    window.history.replaceState(null, "", window.location.pathname);
+    let active = true;
+    async function validate() {
+      try {
+        const res = await fetch("/api/auth/reset-password/validate", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: initialToken.current }),
+        });
+        if (active && res.ok) setToken(initialToken.current ?? "");
+      } finally { if (active) setValidating(false); }
+    }
+    void validate().catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -48,7 +69,7 @@ export default function ResetPasswordForm() {
         return;
       }
       setDone(true);
-      setTimeout(() => router.push("/login"), 2000);
+      setTimeout(() => router.push("/login?reset=true"), 2000);
     } catch {
       setError("A network error occurred. Please try again.");
     } finally {
@@ -75,10 +96,12 @@ export default function ResetPasswordForm() {
             <h3 className="font-sans text-base font-semibold">Password updated</h3>
             <p className="text-xs text-base-content/60">Redirecting you to sign in...</p>
           </div>
+        ) : validating ? (
+          <p className="text-xs text-base-content/60" role="status">Validating reset link…</p>
         ) : !token ? (
           <FeedbackBanner
             variant="error"
-            message="This reset link is missing its token. Request a new link from the sign-in page."
+            message="This reset link is invalid or has expired. Request a new link from the sign-in page."
           />
         ) : (
           <ValidatedForm onSubmit={handleSubmit} className="space-y-4">

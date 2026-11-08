@@ -1,123 +1,37 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-
-const { findUniqueMock, userUpdateMock, tokenUpdateMock, transactionMock, bcryptHashMock } =
-  vi.hoisted(() => ({
-    findUniqueMock: vi.fn(),
-    userUpdateMock: vi.fn(),
-    tokenUpdateMock: vi.fn(),
-    transactionMock: vi.fn(),
-    bcryptHashMock: vi.fn(async () => "hashed-pw"),
-  }));
-
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    passwordResetToken: { findUnique: findUniqueMock },
-    user: { update: userUpdateMock },
-    $transaction: transactionMock,
-  },
-}));
-vi.mock("bcryptjs", () => ({ default: { hash: bcryptHashMock } }));
-
-import { POST } from "@/app/api/auth/reset-password/route";
-
-const INVALID_MSG = "This reset link is invalid or has expired.";
-
-function makeRequest(body: unknown) {
-  return new NextRequest("http://localhost/api/auth/reset-password", {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: { "content-type": "application/json" },
-  });
-}
-
-describe("POST /api/auth/reset-password", () => {
+const m = vi.hoisted(() => ({ find: vi.fn(), claim: vi.fn(), update: vi.fn(), retire: vi.fn(), lock: vi.fn(), user: vi.fn(), hash: vi.fn(async () => "hashed-pw"), transaction: vi.fn() }));
+vi.mock("@/lib/prisma", () => ({ prisma: {
+  passwordResetToken: { findUnique: m.find },
+  $transaction: m.transaction,
+} }));
+vi.mock("bcryptjs", () => ({ default: { hash: m.hash } }));
+import { POST } from "../route";
+const req = (token = "good", password = "longenough") => new NextRequest("https://example.test/api/auth/reset-password", { method: "POST", body: JSON.stringify({ token, password }) });
+const record = () => ({ id: "t", userId: "u", usedAt: null, expiresAt: new Date(Date.now() + 60000) });
+describe("reset redemption", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    tokenUpdateMock.mockResolvedValue({ count: 1 });
-    transactionMock.mockImplementation((fn) => fn({
-      $queryRaw: vi.fn().mockResolvedValue([{ id: "T1" }]),
-      passwordResetToken: { updateMany: tokenUpdateMock },
-      user: { update: userUpdateMock },
-    }));
+    vi.clearAllMocks(); m.find.mockResolvedValue(record()); m.claim.mockResolvedValue({ count: 1 }); m.user.mockResolvedValue({ status: "ACTIVE" });
+    m.transaction.mockImplementation(async fn => fn({ $queryRaw: m.lock, user: { findUnique: m.user, update: m.update }, passwordResetToken: { updateMany: m.claim }, recoveryChallenge: { updateMany: m.retire } }));
   });
-
-  it("400 when the new password is too short", async () => {
-    const res = await POST(makeRequest({ token: "abc", password: "short" }));
-    expect(res.status).toBe(400);
-    expect(findUniqueMock).not.toHaveBeenCalled();
+  it("applies existing password rules", async () => {
+    for (const password of ["short", "password123", "x".repeat(73)]) expect((await POST(req("good", password))).status).toBe(400);
+    expect(m.update).not.toHaveBeenCalled();
   });
-
-  it("400 when the token does not exist", async () => {
-    findUniqueMock.mockResolvedValue(null);
-    const res = await POST(makeRequest({ token: "nope", password: "longenough" }));
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(INVALID_MSG);
+  it.each([null, { ...record(), usedAt: new Date() }, { ...record(), expiresAt: new Date(0) }])("rejects invalid, used and expired tokens: %s", async value => {
+    m.find.mockResolvedValue(value); expect((await POST(req())).status).toBe(400); expect(m.update).not.toHaveBeenCalled();
   });
-
-  it("400 when the token was already used", async () => {
-    findUniqueMock.mockResolvedValue({
-      id: "T1",
-      userId: "U1",
-      usedAt: new Date(),
-      expiresAt: new Date(Date.now() + 10_000),
-    });
-    const res = await POST(makeRequest({ token: "used", password: "longenough" }));
-    expect(res.status).toBe(400);
-    expect(userUpdateMock).not.toHaveBeenCalled();
+  it("hashes the password, claims atomically and invalidates all outstanding credentials", async () => {
+    expect((await POST(req())).status).toBe(200);
+    expect(m.lock).toHaveBeenCalled(); expect(m.hash).toHaveBeenCalledWith("longenough", 12);
+    expect(m.update).toHaveBeenCalledWith({ where: { id: "u" }, data: { password: "hashed-pw", sessionVersion: { increment: 1 } } });
+    expect(m.claim).toHaveBeenCalledWith({ where: { id: "t", usedAt: null, expiresAt: { gt: expect.any(Date) } }, data: { usedAt: expect.any(Date) } });
+    expect(m.claim).toHaveBeenCalledWith({ where: { userId: "u", usedAt: null }, data: { usedAt: expect.any(Date) } });
+    expect(m.retire).toHaveBeenCalled();
   });
-
-  it("400 when the token has expired", async () => {
-    findUniqueMock.mockResolvedValue({
-      id: "T1",
-      userId: "U1",
-      usedAt: null,
-      expiresAt: new Date(Date.now() - 1),
-    });
-    const res = await POST(makeRequest({ token: "old", password: "longenough" }));
-    expect(res.status).toBe(400);
-    expect(userUpdateMock).not.toHaveBeenCalled();
+  it("rejects a concurrent claim or reuse without updating the password", async () => {
+    m.claim.mockResolvedValue({ count: 0 }); expect((await POST(req())).status).toBe(400); expect(m.update).not.toHaveBeenCalled();
   });
-
-  it("hashes the new password and burns the token on success", async () => {
-    findUniqueMock.mockResolvedValue({
-      id: "T1",
-      userId: "U1",
-      usedAt: null,
-      expiresAt: new Date(Date.now() + 60_000),
-    });
-    const res = await POST(makeRequest({ token: "good", password: "longenough" }));
-
-    expect(res.status).toBe(200);
-    expect(bcryptHashMock).toHaveBeenCalledWith("longenough", 12);
-    expect(userUpdateMock).toHaveBeenCalledWith({
-      where: { id: "U1" },
-      data: { password: "hashed-pw", sessionVersion: { increment: 1 } },
-    });
-    expect(tokenUpdateMock).toHaveBeenCalledWith({
-      where: { id: "T1", userId: "U1", usedAt: null, expiresAt: { gt: expect.any(Date) } },
-      data: expect.objectContaining({ usedAt: expect.any(Date) }),
-    });
-  });
-
-  it("rejects a token consumed or expired while hashing without changing the password", async () => {
-    findUniqueMock.mockResolvedValue({ id: "T1", userId: "U1", usedAt: null, expiresAt: new Date(Date.now() + 60_000) });
-    tokenUpdateMock.mockResolvedValue({ count: 0 });
-    const res = await POST(makeRequest({ token: "raced", password: "longenough" }));
-    expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe(INVALID_MSG);
-    expect(userUpdateMock).not.toHaveBeenCalled();
-  });
-
-  it("500 when the update throws", async () => {
-    findUniqueMock.mockResolvedValue({
-      id: "T1",
-      userId: "U1",
-      usedAt: null,
-      expiresAt: new Date(Date.now() + 60_000),
-    });
-    transactionMock.mockRejectedValueOnce(new Error("db down"));
-    const res = await POST(makeRequest({ token: "good", password: "longenough" }));
-    expect(res.status).toBe(500);
-  });
+  it("rejects banned accounts", async () => { m.user.mockResolvedValue({ status: "BANNED" }); expect((await POST(req())).status).toBe(400); expect(m.update).not.toHaveBeenCalled(); });
+  it("reports transaction failure", async () => { m.transaction.mockRejectedValueOnce(new Error("db down")); expect((await POST(req())).status).toBe(500); });
 });

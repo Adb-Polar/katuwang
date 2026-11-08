@@ -68,6 +68,7 @@ describe("sendMail", () => {
     expect(createTransportMock).not.toHaveBeenCalled();
     expect(sendMailMock).not.toHaveBeenCalled();
     expect(info).toHaveBeenCalled();
+    expect(JSON.stringify(info.mock.calls)).not.toContain("a@b.test");
     info.mockRestore();
   });
 
@@ -103,7 +104,7 @@ describe("sendMail", () => {
 });
 
 describe("renderPasswordResetEmail", () => {
-  it("puts the reset URL in both bodies and states the 30-minute expiry", async () => {
+  it("puts the reset URL in both bodies and states the 15-minute expiry", async () => {
     const { renderPasswordResetEmail } = await loadMail({});
     const url = "https://katuwang.test/reset-password?token=abc123";
     const { subject, html, text } = renderPasswordResetEmail(url);
@@ -111,8 +112,8 @@ describe("renderPasswordResetEmail", () => {
     expect(subject).toMatch(/reset/i);
     expect(html).toContain(url);
     expect(text).toContain(url);
-    expect(html).toContain("30 minutes");
-    expect(text).toContain("30 minutes");
+    expect(html).toContain("15 minutes");
+    expect(text).toContain("15 minutes");
   });
 });
 

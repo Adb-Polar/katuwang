@@ -1,125 +1,69 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { hashResetToken } from "@/lib/passwordReset";
 
-const { findManyMock, updateManyMock, createMock, transactionMock, sendMailMock } = vi.hoisted(
-  () => ({
-    findManyMock: vi.fn(),
-    updateManyMock: vi.fn(),
-    createMock: vi.fn(),
-    transactionMock: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
-    sendMailMock: vi.fn(),
-  })
-);
+const mocks = vi.hoisted(() => ({ find: vi.fn(), create: vi.fn(), mail: vi.fn(), after: [] as (() => Promise<void>)[], enabled: vi.fn(() => false) }));
+vi.mock("next/server", async importOriginal => ({ ...await importOriginal<typeof import("next/server")>(), after: (fn: () => Promise<void>) => mocks.after.push(fn) }));
+vi.mock("@/lib/prisma", () => ({ prisma: { user: { findUnique: mocks.find }, recoveryChallenge: { create: mocks.create } } }));
+vi.mock("@/lib/mail", () => ({ sendMail: mocks.mail, renderRecoveryCodeEmail: (code: string) => ({ text: code }) }));
+vi.mock("@/lib/rateLimit", async importOriginal => ({ ...await importOriginal<typeof import("@/lib/rateLimit")>(), rateLimitEnabled: mocks.enabled }));
+import { POST } from "../route";
+const req = (email: string) => new NextRequest("https://example.test/api/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) });
+const user = { id: "u", email: "primary@example.test", status: "ACTIVE", recoveryEmail: "backup@example.test", recoveryEmailVerifiedAt: new Date() };
+async function flush() { for (const fn of mocks.after.splice(0)) await fn(); }
 
-vi.mock("@/lib/prisma", () => ({
-  prisma: {
-    user: { findMany: findManyMock },
-    passwordResetToken: { updateMany: updateManyMock, create: createMock },
-    $transaction: transactionMock,
-  },
-}));
-
-vi.mock("@/lib/mail", () => ({
-  sendMail: sendMailMock,
-  renderPasswordResetEmail: (url: string) => ({ subject: "s", html: url, text: url }),
-}));
-
-import { POST } from "@/app/api/auth/forgot-password/route";
-
-function makeRequest(body: unknown) {
-  return new NextRequest("http://localhost/api/auth/forgot-password", {
-    method: "POST",
-    body: JSON.stringify(body),
-    headers: { "content-type": "application/json" },
+describe("ownership lookup", () => {
+  beforeEach(() => { vi.clearAllMocks(); mocks.after.length = 0; mocks.enabled.mockReturnValue(false); mocks.find.mockResolvedValue(user); });
+  it("validates email", async () => { expect((await POST(req("bad"))).status).toBe(400); });
+  it("responds before lookup or SMTP and only looks up the primary address", async () => {
+    const res = await POST(req(user.email));
+    expect(res.status).toBe(200); expect(mocks.find).not.toHaveBeenCalled();
+    expect(res.headers.get("set-cookie")).toContain("HttpOnly");
+    expect(res.headers.get("cache-control")).toBe("no-store");
+    const json = await res.json(); expect(json).not.toHaveProperty("token"); expect(json).not.toHaveProperty("recovery");
+    await flush();
+    expect(mocks.find).toHaveBeenCalledWith({ where: { email: user.email } });
+    expect(mocks.mail.mock.calls.map(([arg]) => arg.to)).toEqual([user.email, user.recoveryEmail]);
+    const secret = res.cookies.get("kt-recovery")!.value;
+    const data = mocks.create.mock.calls[0][0].data;
+    expect(data.tokenHash).toBe(hashResetToken(secret));
+    expect(data.codeHash).toBe(hashResetToken(secret + mocks.mail.mock.calls[0][0].text));
+    expect(data.expiresAt.getTime() - Date.now()).toBeLessThanOrEqual(900000);
   });
-}
-
-describe("POST /api/auth/forgot-password", () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it("400 on an invalid email", async () => {
-    const res = await POST(makeRequest({ email: "not-an-email" }));
-    expect(res.status).toBe(400);
-    expect(findManyMock).not.toHaveBeenCalled();
+  it.each([null, { ...user, recoveryEmailVerifiedAt: null }])("sends only to primary when recovery is absent/unverified: %s", async value => {
+    mocks.find.mockResolvedValue(value ? value : { ...user, recoveryEmail: null });
+    await POST(req(user.email)); await flush();
+    expect(mocks.mail).toHaveBeenCalledTimes(1); expect(mocks.mail.mock.calls[0][0].to).toBe(user.email);
   });
-
-  it("issues a hashed single-use token for a matching active account", async () => {
-    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
-    const res = await POST(makeRequest({ email: "user@example.com" }));
-    const json = await res.json();
-
-    expect(res.status).toBe(200);
-    expect(json.message).toBe("Password reset link sent to us****@example.com");
-    // earlier unused tokens invalidated, then a new one created
-    expect(updateManyMock).toHaveBeenCalledWith({
-      where: { userId: "U1", usedAt: null },
-      data: expect.objectContaining({ usedAt: expect.any(Date) }),
-    });
-    expect(createMock).toHaveBeenCalledTimes(1);
-    const created = createMock.mock.calls[0][0].data;
-    expect(created.userId).toBe("U1");
-    expect(created.tokenHash).toMatch(/^[a-f0-9]{64}$/); // sha256 hex, not the raw token
-    expect(created.expiresAt.getTime()).toBeGreaterThan(Date.now());
+  it.each([null, { ...user, status: "BANNED" }])("keeps unknown/banned responses identical: %s", async value => {
+    const normal = await POST(req(user.email)); await flush(); vi.clearAllMocks();
+    mocks.find.mockResolvedValue(value);
+    const other = await POST(req(user.email)); await flush();
+    expect(other.status).toBe(normal.status); expect(await other.json()).toEqual(await normal.json());
+    expect(mocks.create).not.toHaveBeenCalled(); expect(mocks.mail).not.toHaveBeenCalled();
   });
-
-  it("emails the reset link (with the raw token) to the submitted address", async () => {
-    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
-    await POST(makeRequest({ email: "user@example.com" }));
-
-    expect(sendMailMock).toHaveBeenCalledTimes(1);
-    const arg = sendMailMock.mock.calls[0][0];
-    expect(arg.to).toBe("user@example.com");
-    expect(arg.html).toMatch(/\/reset-password\?token=[a-f0-9]{64}$/);
+  it("contains lookup and transport failures after the public response", async () => {
+    mocks.find.mockRejectedValueOnce(new Error("db unavailable"));
+    expect((await POST(req(user.email))).status).toBe(200); await flush();
+    mocks.mail.mockRejectedValueOnce(new Error("smtp unavailable"));
+    expect((await POST(req(user.email))).status).toBe(200); await flush();
   });
-
-  it("reports a mail failure rather than claiming a link was sent", async () => {
-    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
-    sendMailMock.mockRejectedValueOnce(new Error("smtp down"));
-
-    const res = await POST(makeRequest({ email: "user@example.com" }));
-    expect(res.status).toBe(503);
-    expect((await res.json()).error).toMatch(/Could not send/);
-    expect(createMock).toHaveBeenCalledTimes(1); // token was still issued
+  it("rate limits an address regardless of whether it exists", async () => {
+    mocks.enabled.mockReturnValue(true);
+    vi.useFakeTimers();
+    for (let i = 0; i < 3; i++) {
+      expect((await POST(req("limited@example.test"))).status).toBe(200);
+      vi.advanceTimersByTime(60_001);
+    }
+    const res = await POST(req("limited@example.test")); expect(res.status).toBe(429); expect(res.headers.get("retry-after")).toBeTruthy();
+    vi.useRealTimers();
   });
+});
 
-  it("matches on the recovery email as well as the primary", async () => {
-    findManyMock.mockResolvedValue([{ id: "U2", status: "ACTIVE" }]);
-    await POST(makeRequest({ email: "backup@example.com" }));
-    expect(findManyMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: { OR: [{ email: "backup@example.com" }, { recoveryEmail: "backup@example.com", recoveryEmailVerifiedAt: { not: null } }] },
-      })
-    );
-  });
-
-  it("rejects ambiguous primary/recovery matches without sending or issuing tokens", async () => {
-    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }, { id: "U2", status: "ACTIVE" }]);
-    const response = await POST(makeRequest({ email: "shared@example.com" }));
-    expect(response.status).toBe(409);
-    expect(createMock).not.toHaveBeenCalled();
-    expect(sendMailMock).not.toHaveBeenCalled();
-  });
-
-  it("identifies a missing email without creating a token", async () => {
-    findManyMock.mockResolvedValue([]);
-    const res = await POST(makeRequest({ email: "ghost@example.com" }));
-    const json = await res.json();
-    expect(res.status).toBe(404);
-    expect(json.error).toBe("Email does not exist");
-    expect(createMock).not.toHaveBeenCalled();
-  });
-
-  it("does not issue a token for a banned account", async () => {
-    findManyMock.mockResolvedValue([{ id: "U3", status: "BANNED" }]);
-    const res = await POST(makeRequest({ email: "banned@example.com" }));
-    expect(res.status).toBe(403);
-    expect((await res.json()).error).toMatch(/cannot reset/);
-    expect(createMock).not.toHaveBeenCalled();
-  });
-
-  it("500 when the lookup throws", async () => {
-    findManyMock.mockRejectedValue(new Error("db down"));
-    const res = await POST(makeRequest({ email: "user@example.com" }));
-    expect(res.status).toBe(500);
-  });
+it("enforces the resend cooldown on the server", async () => {
+  mocks.enabled.mockReturnValue(true);
+  expect((await POST(req("cooldown@example.test"))).status).toBe(200);
+  const res = await POST(req("cooldown@example.test"));
+  expect(res.status).toBe(429);
+  expect(Number(res.headers.get("retry-after"))).toBeGreaterThan(0);
 });

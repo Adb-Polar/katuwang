@@ -13,6 +13,7 @@ datasource db {
 }
 
 model User {
+  recoveryChallenges RecoveryChallenge[]
   id                       String                @id @default(cuid())
   anonymousId              String                @unique
   firstName                String
@@ -750,4 +751,23 @@ enum SessionTestKind {
 enum SessionTestAttemptStatus {
   IN_PROGRESS
   SUBMITTED
+}
+
+// Ownership challenges and recovery-address verification are separate from reset tokens.
+model RecoveryChallenge {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String @unique
+  purpose String
+  email String
+  codeHash String?
+  attempts Int @default(0)
+  verifiedAt DateTime?
+  usedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("recovery_challenges")
 }

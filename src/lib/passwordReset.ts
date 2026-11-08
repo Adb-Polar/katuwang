@@ -8,7 +8,7 @@ import { MINUTE_MS } from "@/lib/datetime";
  */
 
 /** How long an issued reset token stays valid. */
-export const RESET_TOKEN_TTL_MS = 30 * MINUTE_MS;
+export const RESET_TOKEN_TTL_MS = 15 * MINUTE_MS;
 
 /** Cryptographically-random raw token for the emailed link. */
 export function generateResetToken(): string {

@@ -111,7 +111,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
   }
   if (EMAIL_PROVIDER !== "smtp") throw new Error("Unsupported EMAIL_PROVIDER");
   if (!isMailConfigured()) {
-    console.info("[mail] not configured — would send:", { to: opts.to, subject: opts.subject });
+    console.info("[mail] not configured — message not sent");
     return;
   }
   await getTransporter().sendMail({
@@ -174,4 +174,11 @@ export function renderVerificationEmail(code: string): MailContent {
 </div>`;
 
   return { subject, html, text };
+}
+
+/** No user-controlled content is interpolated into these messages. */
+export function renderRecoveryCodeEmail(code: string): MailContent {
+  const subject = "Verify your Katuwang password recovery request";
+  const text = `Your verification code is ${code}. Enter it on the Forgot Password page to choose a recovery method. It expires in 15 minutes. If you did not request this, ignore this email.`;
+  return { subject, text, html: `<p>${text}</p>` };
 }

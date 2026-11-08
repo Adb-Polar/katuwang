@@ -1,3 +1,5 @@
+For the current password-recovery flow, endpoints and migration, see [Password recovery](password-recovery.md).
+
 > **Current authorization boundary — 2026-10-22:** All application server pages,
 > protected APIs and upload middleware use `getActiveServerSession()` from
 > `src/lib/serverSession.ts`. It verifies the current database account on every
