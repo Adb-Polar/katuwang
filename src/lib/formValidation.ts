@@ -17,7 +17,7 @@ export type ServerFieldError = { path: PropertyKey[]; message: string };
 const FIELD_LABELS: Record<string, string[]> = {
   consentGiven: ["Consent"],
   firstName: ["First Name"], lastName: ["Last Name"], email: ["Email Address", "Email"],
-  password: ["Password", "New Password"], newPassword: ["New password"], currentPassword: ["Current password"],
+  password: ["Password", "New Password"], confirmPassword: ["Confirm Password"], newPassword: ["New password"], currentPassword: ["Current password"],
   gradeLevel: ["Grade level", "Target Grade"], section: ["Section"], contactInfo: ["Contact info"],
   subject: ["Subject Area", "Subject"], topics: ["Topic(s)", "Topics"], topic: ["Topic"],
   duration: ["Duration"], sessions: ["Sessions"], scheduledAt: ["Date & Time", "Date"], maxStudents: ["Max Capacity", "Capacity"],

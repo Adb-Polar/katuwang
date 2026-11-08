@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { privateJson } from "@/lib/recovery";
+import { RESET_COOKIE, RESET_COOKIE_PATH, privateJson } from "@/lib/recovery";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { resetPasswordSchema } from "@/lib/validations/passwordReset";
@@ -7,7 +7,7 @@ import { hashResetToken } from "@/lib/passwordReset";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 
-const INVALID = { error: "This reset link is invalid or has expired." };
+const INVALID = { error: "This password reset authorization is invalid or has expired. Request a new code." };
 
 // ─── POST: Complete a password reset ──────────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -17,18 +17,21 @@ export async function POST(req: NextRequest) {
       if (!limited.ok) return tooManyRequests(limited.retryAfter);
     }
 
-    const body = await req.json();
-    const result = resetPasswordSchema.safeParse(body);
+    const body = await req.json().catch(() => null);
+    // Explicit tokens keep previously issued reset links working. New OTP
+    // resets use a server-issued HttpOnly cookie, never an email or UI flag.
+    const token = body?.token ?? req.cookies.get(RESET_COOKIE)?.value;
+    const result = resetPasswordSchema.safeParse(body && { ...body, token });
 
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid input.";
       return privateJson({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, 400);
     }
 
-    const { token, password } = result.data;
+    const { password } = result.data;
 
     const record = await prisma.passwordResetToken.findUnique({
-      where: { tokenHash: hashResetToken(token) },
+      where: { tokenHash: hashResetToken(result.data.token) },
       select: { id: true, userId: true, usedAt: true, expiresAt: true },
     });
 
@@ -59,7 +62,9 @@ export async function POST(req: NextRequest) {
     }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
     if (!changed) return privateJson(INVALID, 400);
 
-    return privateJson({ message: "Your password has been reset. You can now sign in." });
+    const response = privateJson({ message: "Your password has been reset. You can now sign in." });
+    response.cookies.set(RESET_COOKIE, "", { path: RESET_COOKIE_PATH, maxAge: 0 });
+    return response;
   } catch {
     console.error("Error handling reset-password");
     return privateJson({ error: "An unexpected error occurred. Please try again." }, 500);

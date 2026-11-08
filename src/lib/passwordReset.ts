@@ -3,14 +3,14 @@ import { MINUTE_MS } from "@/lib/datetime";
 
 /**
  * Password-reset token helpers. The raw token is a 64-char hex string that only
- * ever appears in the emailed link; the database stores its SHA-256 hash so a
+ * travels in an HttpOnly cookie (or a legacy emailed link); the database stores its SHA-256 hash so a
  * leaked table row can't be used to reset an account.
  */
 
 /** How long an issued reset token stays valid. */
 export const RESET_TOKEN_TTL_MS = 15 * MINUTE_MS;
 
-/** Cryptographically-random raw token for the emailed link. */
+/** Cryptographically-random raw reset authorization. */
 export function generateResetToken(): string {
   return randomBytes(32).toString("hex");
 }

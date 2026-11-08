@@ -15,6 +15,16 @@ describe("reset link validation", () => {
     m.find.mockResolvedValue(value); expect((await POST(req())).status).toBe(400);
   });
   it("rejects malformed tokens before lookup", async () => { expect((await POST(req("bad"))).status).toBe(400); expect(m.find).not.toHaveBeenCalled(); });
+  it("validates the OTP-issued cookie without returning its secret", async () => {
+    const res = await POST(new NextRequest("https://example.test/api/auth/reset-password/validate", {
+      method: "POST", headers: { cookie: `kt-password-reset=${"b".repeat(64)}` }, body: "{}",
+    }));
+    expect(res.status).toBe(200); expect(await res.json()).toEqual({ valid: true });
+  });
+  it("rejects a request without a reset authorization", async () => {
+    expect((await POST(new NextRequest("https://example.test/api/auth/reset-password/validate", { method: "POST", body: "{}" }))).status).toBe(400);
+    expect(m.find).not.toHaveBeenCalled();
+  });
   it("rate limits token validation", async () => {
     m.enabled.mockReturnValue(true);
     for (let i = 0; i < 10; i++) expect((await POST(req())).status).toBe(200);

@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
+import { hashResetToken } from "@/lib/passwordReset";
+import { RESET_COOKIE } from "@/lib/recovery";
 const m = vi.hoisted(() => ({ find: vi.fn(), claim: vi.fn(), update: vi.fn(), retire: vi.fn(), lock: vi.fn(), user: vi.fn(), hash: vi.fn(async () => "hashed-pw"), transaction: vi.fn() }));
 vi.mock("@/lib/prisma", () => ({ prisma: {
   passwordResetToken: { findUnique: m.find },
@@ -33,5 +35,21 @@ describe("reset redemption", () => {
     m.claim.mockResolvedValue({ count: 0 }); expect((await POST(req())).status).toBe(400); expect(m.update).not.toHaveBeenCalled();
   });
   it("rejects banned accounts", async () => { m.user.mockResolvedValue({ status: "BANNED" }); expect((await POST(req())).status).toBe(400); expect(m.update).not.toHaveBeenCalled(); });
+  it("accepts the OTP-issued cookie, validates confirmation, and clears authorization on success", async () => {
+    const token = "a".repeat(64);
+    const request = (confirmPassword = "longenough") => new NextRequest("https://example.test/api/auth/reset-password", {
+      method: "POST", headers: { cookie: `${RESET_COOKIE}=${token}` }, body: JSON.stringify({ password: "longenough", confirmPassword }),
+    });
+    expect((await POST(request("different"))).status).toBe(400); expect(m.update).not.toHaveBeenCalled();
+    const res = await POST(request()); expect(res.status).toBe(200);
+    expect(m.find).toHaveBeenCalledWith(expect.objectContaining({ where: { tokenHash: hashResetToken(token) } }));
+    expect(res.cookies.get(RESET_COOKIE)).toMatchObject({ maxAge: 0, path: "/api/auth/reset-password" });
+  });
+  it("does not authorize a reset from an email address or frontend verification flag", async () => {
+    const res = await POST(new NextRequest("https://example.test/api/auth/reset-password", {
+      method: "POST", body: JSON.stringify({ email: "primary@example.test", verified: true, password: "longenough" }),
+    }));
+    expect(res.status).toBe(400); expect(m.find).not.toHaveBeenCalled(); expect(m.update).not.toHaveBeenCalled();
+  });
   it("reports transaction failure", async () => { m.transaction.mockRejectedValueOnce(new Error("db down")); expect((await POST(req())).status).toBe(500); });
 });

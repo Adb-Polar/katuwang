@@ -3,7 +3,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 
 export const metadata = {
   title: "Reset Password | Katuwang Portal",
-  description: "Request a password reset link for your Katuwang account.",
+  description: "Verify your email with a code and reset your Katuwang password.",
 };
 
 export default function ForgotPasswordPage() {

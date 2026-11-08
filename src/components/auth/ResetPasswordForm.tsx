@@ -15,6 +15,7 @@ export default function ResetPasswordForm() {
   const router = useRouter();
   const legacyToken = useRef(useSearchParams().get("token") ?? "");
   const [token, setToken] = useState("");
+  const [authorized, setAuthorized] = useState(false);
   const [validating, setValidating] = useState(true);
   const initialToken = useRef<string | null>(null);
   useEffect(() => {
@@ -27,9 +28,12 @@ export default function ResetPasswordForm() {
       try {
         const res = await fetch("/api/auth/reset-password/validate", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: initialToken.current }),
+          body: JSON.stringify(initialToken.current ? { token: initialToken.current } : {}),
         });
-        if (active && res.ok) setToken(initialToken.current ?? "");
+        if (active && res.ok) {
+          setToken(initialToken.current ?? "");
+          setAuthorized(true);
+        }
       } finally { if (active) setValidating(false); }
     }
     void validate().catch(() => {});
@@ -60,7 +64,7 @@ export default function ResetPasswordForm() {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+        body: JSON.stringify({ ...(token ? { token } : {}), password, confirmPassword: confirm }),
       });
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
@@ -97,11 +101,11 @@ export default function ResetPasswordForm() {
             <p className="text-xs text-base-content/60">Redirecting you to sign in...</p>
           </div>
         ) : validating ? (
-          <p className="text-xs text-base-content/60" role="status">Validating reset link…</p>
-        ) : !token ? (
+          <p className="text-xs text-base-content/60" role="status">Checking password reset authorization…</p>
+        ) : !authorized ? (
           <FeedbackBanner
             variant="error"
-            message="This reset link is invalid or has expired. Request a new link from the sign-in page."
+            message="This password reset authorization is invalid or has expired. Request a new code from the Forgot Password page."
           />
         ) : (
           <ValidatedForm onSubmit={handleSubmit} className="space-y-4">

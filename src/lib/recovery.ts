@@ -3,7 +3,8 @@ import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/ra
 import { MINUTE_MS } from "@/lib/datetime";
 
 export const RECOVERY_COOKIE = "kt-recovery";
-export const RECOVERY_SENT = "Check your selected inbox for a password reset link. The link expires in 15 minutes.";
+export const RESET_COOKIE = "kt-password-reset";
+export const RESET_COOKIE_PATH = "/api/auth/reset-password";
 export const OWNERSHIP_SENT = "Check your selected inbox for a verification code. Enter the code to continue.";
 export function privateJson(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers: { "Cache-Control": "no-store" } });
