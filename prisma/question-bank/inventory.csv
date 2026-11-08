@@ -1,0 +1,44 @@
+subject,topic,subjectId,topicId,previousProductionCount,literalSeedCount,replacementCount,easy,medium,hard,reviewStatus
+MATH,Whole Numbers & Operations,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Fractions & Decimals,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Algebraic Expressions,unknown,unknown,unknown,6,20,6,10,4,pending-academic-approval
+MATH,Linear Equations & Inequalities,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Geometry & Measurement,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Statistics & Probability,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Trigonometry,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MATH,Functions & Graphing,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Grammar & Sentence Structure,unknown,unknown,unknown,6,20,6,10,4,pending-academic-approval
+ENGLISH,Reading Comprehension,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Vocabulary Building,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Essay & Paragraph Writing,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Literature Analysis,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Public Speaking & Oral Communication,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ENGLISH,Research Writing,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Scientific Method & Inquiry,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Cell Biology & Genetics,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Chemical Reactions & Matter,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,"Force, Motion & Energy",unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Ecosystems & the Environment,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Earth & Space Science,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+SCIENCE,Human Body Systems,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Balarila (Gramatika),unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Pagbasa at Pag-unawa,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Panitikang Pilipino,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Pagsulat ng Sanaysay,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Pagsasalin,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+FILIPINO,Retorika at Pampublikong Pagsasalita,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Kasaysayan ng Pilipinas,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Heograpiya,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Ekonomiks,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Sibika at Pamahalaan,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Kultura at Lipunan,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+ARALING_PANLIPUNAN,Kasalukuyang Pangyayari (Current Events),unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+TLE,Computer Basics & ICT,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+TLE,Home Economics,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+TLE,Agri-Fishery Arts,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+TLE,Industrial Arts,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+TLE,Entrepreneurship,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MAPEH,Music Theory & Appreciation,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MAPEH,Visual Arts,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MAPEH,Physical Education & Sports,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval
+MAPEH,Health Education,unknown,unknown,unknown,0,20,6,10,4,pending-academic-approval

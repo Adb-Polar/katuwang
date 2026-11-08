@@ -1,0 +1,1804 @@
+[
+  {
+    "subject": "MATH",
+    "topic": "Whole Numbers & Operations",
+    "learningObjectives": [
+      "Identify the least whole number.",
+      "Use base-ten place value.",
+      "Add whole numbers with regrouping.",
+      "Subtract across zeros.",
+      "Multiply a two-digit whole number by one digit.",
+      "Divide a whole number with a zero in the quotient.",
+      "Apply multiplication before addition.",
+      "Round whole numbers to a specified place.",
+      "Express whole-number division using quotient and remainder.",
+      "Interpret a nonzero remainder when counting containers.",
+      "Use compensation to calculate a product.",
+      "Distinguish the zero and identity properties of multiplication.",
+      "Translate stock changes into a multistep calculation.",
+      "Compare products using nearby convenient values.",
+      "Work backward through addition and multiplication.",
+      "Check division using dividend equals divisor times quotient plus remainder.",
+      "Diagnose an error involving equally ranked operations.",
+      "Use division and capacity to solve a two-step allocation problem.",
+      "Reverse a sequence of spending operations.",
+      "Combine remainder and divisibility conditions."
+    ],
+    "sourceIds": [
+      "whole",
+      "add",
+      "subtract",
+      "multiply",
+      "divide",
+      "order"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/prealgebra-2e/pages/1-1-introduction-to-whole-numbers",
+      "https://openstax.org/books/prealgebra-2e/pages/1-2-add-whole-numbers",
+      "https://openstax.org/books/prealgebra-2e/pages/1-3-subtract-whole-numbers",
+      "https://openstax.org/books/prealgebra-2e/pages/1-4-multiply-whole-numbers",
+      "https://openstax.org/books/prealgebra-2e/pages/1-5-divide-whole-numbers",
+      "https://openstax.org/books/prealgebra-2e/pages/2-1-use-the-language-of-algebra"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Fractions & Decimals",
+    "learningObjectives": [
+      "Demonstrate Fractions & Decimals: Divide numerator and denominator by 2.",
+      "Demonstrate Fractions & Decimals: 0.25 equals 25/100.",
+      "Demonstrate Fractions & Decimals: Divide 3 by 5.",
+      "Demonstrate Fractions & Decimals: Add numerators over the common denominator.",
+      "Demonstrate Fractions & Decimals: Subtract aligned tenths.",
+      "Demonstrate Fractions & Decimals: Exchange numerator and denominator.",
+      "Demonstrate Fractions & Decimals: Use denominator 12: 8/12 + 3/12.",
+      "Demonstrate Fractions & Decimals: Subtract 10/12 - 3/12.",
+      "Demonstrate Fractions & Decimals: Multiply numerators and denominators, then simplify.",
+      "Demonstrate Fractions & Decimals: Multiply 2/3 by 5/4.",
+      "Demonstrate Fractions & Decimals: 12 × 4 = 48 with two decimal places.",
+      "Demonstrate Fractions & Decimals: Multiply both dividend and divisor by 100.",
+      "Demonstrate Fractions & Decimals: Compare 0.605 with 0.600, 0.590 and 0.580.",
+      "Demonstrate Fractions & Decimals: Subtract 6/8 - 1/8.",
+      "Demonstrate Fractions & Decimals: Multiply 3 by 0.75.",
+      "Demonstrate Fractions & Decimals: Three times 2/3 equals 2.",
+      "Demonstrate Fractions & Decimals: After the first use 2/3 remains; half of that is 1/3.",
+      "Demonstrate Fractions & Decimals: Six pieces use 2.10 m; seven require 2.45 m.",
+      "Demonstrate Fractions & Decimals: Fraction addition requires a common denominator.",
+      "Demonstrate Fractions & Decimals: 240 × 3/4 + 15 = 195."
+    ],
+    "sourceIds": [
+      "fraction",
+      "decimal"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/prealgebra-2e/pages/4-2-multiply-and-divide-fractions",
+      "https://openstax.org/books/prealgebra-2e/pages/5-2-decimal-operations"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Algebraic Expressions",
+    "learningObjectives": [
+      "Demonstrate Algebraic Expressions: The coefficient multiplies the variable.",
+      "Demonstrate Algebraic Expressions: The constant does not contain y.",
+      "Demonstrate Algebraic Expressions: Like terms have matching variable parts and exponents.",
+      "Demonstrate Algebraic Expressions: The highest exponent is four.",
+      "Demonstrate Algebraic Expressions: Substitute 5 for p.",
+      "Demonstrate Algebraic Expressions: Twice means multiplication by two.",
+      "Demonstrate Algebraic Expressions: Combine coefficients: 8 - 3 + 2.",
+      "Demonstrate Algebraic Expressions: Distribute 4 to both terms.",
+      "Demonstrate Algebraic Expressions: Expand to 6a + 2 - a.",
+      "Demonstrate Algebraic Expressions: Square -2 first, then multiply by 3.",
+      "Demonstrate Algebraic Expressions: Both terms share factor 6.",
+      "Demonstrate Algebraic Expressions: Distribute the minus sign before combining terms.",
+      "Demonstrate Algebraic Expressions: Only the notebook cost is multiplied by three.",
+      "Demonstrate Algebraic Expressions: Add exponents for powers of the same base.",
+      "Demonstrate Algebraic Expressions: Subtract exponents for division of equal bases.",
+      "Demonstrate Algebraic Expressions: 2(4) - (-3) = 11.",
+      "Demonstrate Algebraic Expressions: Twice the sum of the side lengths gives 6x + 2.",
+      "Demonstrate Algebraic Expressions: The two cross-products each contribute 3x.",
+      "Demonstrate Algebraic Expressions: Expand both groups: 6x - 3 - 2x - 8.",
+      "Demonstrate Algebraic Expressions: Addition does not combine different powers into one power."
+    ],
+    "sourceIds": [
+      "algebra"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/prealgebra-2e/pages/2-2-evaluate-simplify-and-translate-expressions"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Linear Equations & Inequalities",
+    "learningObjectives": [
+      "Demonstrate Linear Equations & Inequalities: Subtract 7 from both sides.",
+      "Demonstrate Linear Equations & Inequalities: Divide both sides by 4.",
+      "Demonstrate Linear Equations & Inequalities: At most allows the boundary and smaller values.",
+      "Demonstrate Linear Equations & Inequalities: Add 9 to both sides.",
+      "Demonstrate Linear Equations & Inequalities: Five is strictly greater than four.",
+      "Demonstrate Linear Equations & Inequalities: Multiply both sides by 3.",
+      "Demonstrate Linear Equations & Inequalities: Subtract 5 then divide by 3.",
+      "Demonstrate Linear Equations & Inequalities: Collect terms to obtain 3x = 15.",
+      "Demonstrate Linear Equations & Inequalities: Divide by 2 then subtract 3.",
+      "Demonstrate Linear Equations & Inequalities: Dividing by a negative reverses the inequality.",
+      "Demonstrate Linear Equations & Inequalities: Subtract 1 then multiply by 2.",
+      "Demonstrate Linear Equations & Inequalities: Subtract 2 and divide by positive 4.",
+      "Demonstrate Linear Equations & Inequalities: The fixed fee is added once.",
+      "Demonstrate Linear Equations & Inequalities: Subtract 7 and divide by -2.",
+      "Demonstrate Linear Equations & Inequalities: Subtracting x gives the impossible statement 2 = 5.",
+      "Demonstrate Linear Equations & Inequalities: Both sides are the same expression.",
+      "Demonstrate Linear Equations & Inequalities: 12n ≤ 96 gives n ≤ 8.",
+      "Demonstrate Linear Equations & Inequalities: 6x - 3 = 4x + 9 gives 2x = 12.",
+      "Demonstrate Linear Equations & Inequalities: Subtract 1 throughout and divide by 3.",
+      "Demonstrate Linear Equations & Inequalities: Negative scaling reverses order."
+    ],
+    "sourceIds": [
+      "equations",
+      "inequalities"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/elementary-algebra-2e/pages/2-3-solve-equations-with-variables-and-constants-on-both-sides",
+      "https://openstax.org/books/elementary-algebra-2e/pages/2-7-solve-linear-inequalities"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Geometry & Measurement",
+    "learningObjectives": [
+      "Demonstrate Geometry & Measurement: Area measures the product of perpendicular side lengths.",
+      "Demonstrate Geometry & Measurement: Euclidean triangle angles sum to 180 degrees.",
+      "Demonstrate Geometry & Measurement: Volume uses cubic units.",
+      "Demonstrate Geometry & Measurement: Add its four equal sides.",
+      "Demonstrate Geometry & Measurement: Multiply 8 by 3.",
+      "Demonstrate Geometry & Measurement: One meter equals 100 centimeters.",
+      "Demonstrate Geometry & Measurement: Use half the base times perpendicular height.",
+      "Demonstrate Geometry & Measurement: Subtract 110 from 180.",
+      "Demonstrate Geometry & Measurement: Multiply its three dimensions.",
+      "Demonstrate Geometry & Measurement: Use πr².",
+      "Demonstrate Geometry & Measurement: Use 2πr.",
+      "Demonstrate Geometry & Measurement: The square root of 36 + 64 is 10.",
+      "Demonstrate Geometry & Measurement: Half the sum of bases times height gives 32.",
+      "Demonstrate Geometry & Measurement: One kilometer is 1000 meters.",
+      "Demonstrate Geometry & Measurement: Area scales with the square of length.",
+      "Demonstrate Geometry & Measurement: Six faces each have area 9.",
+      "Demonstrate Geometry & Measurement: Subtract pond area 6 from garden area 80.",
+      "Demonstrate Geometry & Measurement: Length + width = 15, so length is 10.",
+      "Demonstrate Geometry & Measurement: Base area 9π times height 5 gives 45π.",
+      "Demonstrate Geometry & Measurement: Actual sides are 4 m and 3 m; area is 12 m²."
+    ],
+    "sourceIds": [
+      "geometry",
+      "volume"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/prealgebra-2e/pages/9-4-use-properties-of-rectangles-triangles-and-trapezoids",
+      "https://openstax.org/books/prealgebra-2e/pages/9-6-solve-geometry-applications-volume-and-surface-area"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Statistics & Probability",
+    "learningObjectives": [
+      "Demonstrate Statistics & Probability: Divide the sum 12 by three.",
+      "Demonstrate Statistics & Probability: The middle ordered observation is 8.",
+      "Demonstrate Statistics & Probability: Three occurs most frequently.",
+      "Demonstrate Statistics & Probability: Subtract minimum 4 from maximum 10.",
+      "Demonstrate Statistics & Probability: Two equally likely outcomes include one head.",
+      "Demonstrate Statistics & Probability: An impossible event has probability zero.",
+      "Demonstrate Statistics & Probability: The sum is 32 across four observations.",
+      "Demonstrate Statistics & Probability: Average the middle two values 4 and 8.",
+      "Demonstrate Statistics & Probability: Three of six equally likely outcomes are even.",
+      "Demonstrate Statistics & Probability: Three of the five balls are red.",
+      "Demonstrate Statistics & Probability: Bar heights can represent category counts.",
+      "Demonstrate Statistics & Probability: 12 out of 20 equals 60 percent.",
+      "Demonstrate Statistics & Probability: Multiply 1/2 by 1/2.",
+      "Demonstrate Statistics & Probability: Simple random selection avoids deliberate unequal selection probabilities.",
+      "Demonstrate Statistics & Probability: The median is less affected by extreme values.",
+      "Demonstrate Statistics & Probability: Labels define what plotted values mean.",
+      "Demonstrate Statistics & Probability: Multiply 3/5 by 2/4.",
+      "Demonstrate Statistics & Probability: A total of 28 is needed; existing scores sum to 18.",
+      "Demonstrate Statistics & Probability: Selection context can bias representation.",
+      "Demonstrate Statistics & Probability: Axis choices affect visual impressions of magnitude."
+    ],
+    "sourceIds": [
+      "statistics",
+      "probability"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/introductory-statistics-2e/pages/2-5-measures-of-the-center-of-the-data",
+      "https://openstax.org/books/introductory-statistics-2e/pages/3-1-terminology"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Trigonometry",
+    "learningObjectives": [
+      "Demonstrate Trigonometry: Sine relates opposite side to hypotenuse.",
+      "Demonstrate Trigonometry: Cosine relates adjacent side to hypotenuse.",
+      "Demonstrate Trigonometry: Tangent relates opposite side to adjacent side.",
+      "Demonstrate Trigonometry: The standard special-angle value is one half.",
+      "Demonstrate Trigonometry: The standard special-angle value is one half.",
+      "Demonstrate Trigonometry: The legs of a 45-degree right triangle are equal.",
+      "Demonstrate Trigonometry: Use opposite divided by hypotenuse.",
+      "Demonstrate Trigonometry: Use adjacent divided by hypotenuse.",
+      "Demonstrate Trigonometry: 8/6 simplifies to 4/3.",
+      "Demonstrate Trigonometry: Height equals 10 sin 30°.",
+      "Demonstrate Trigonometry: Height equals shadow length times tan 45°.",
+      "Demonstrate Trigonometry: Only 30 degrees has this sine in the acute range.",
+      "Demonstrate Trigonometry: The Pythagorean identity follows from the unit circle.",
+      "Demonstrate Trigonometry: Use sin²θ = 1 - 9/25 and the positive root.",
+      "Demonstrate Trigonometry: Complementary angles sum to 90 degrees.",
+      "Demonstrate Trigonometry: The 30-60-90 triangle gives this ratio.",
+      "Demonstrate Trigonometry: The base is √(13² - 12²) = 5.",
+      "Demonstrate Trigonometry: Add eye height to 20 tan 45°.",
+      "Demonstrate Trigonometry: The corresponding right triangle has sides 3, 4 and 5.",
+      "Demonstrate Trigonometry: The two trigonometric ratios use different denominators."
+    ],
+    "sourceIds": [
+      "trig"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/precalculus-2e/pages/5-4-right-triangle-trigonometry"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MATH",
+    "topic": "Functions & Graphing",
+    "learningObjectives": [
+      "Demonstrate Functions & Graphing: Uniqueness of output defines a function.",
+      "Demonstrate Functions & Graphing: Substitute 2 for x.",
+      "Demonstrate Functions & Graphing: Domain specifies permissible input values.",
+      "Demonstrate Functions & Graphing: Range comprises attained function values.",
+      "Demonstrate Functions & Graphing: Both coordinates are zero.",
+      "Demonstrate Functions & Graphing: A vertical line must not meet the graph more than once.",
+      "Demonstrate Functions & Graphing: 2(4) - 1 = 7.",
+      "Demonstrate Functions & Graphing: The coefficient of x is the slope.",
+      "Demonstrate Functions & Graphing: At x = 0, y = 5.",
+      "Demonstrate Functions & Graphing: Input 1 has two different outputs.",
+      "Demonstrate Functions & Graphing: Squaring -3 gives 9.",
+      "Demonstrate Functions & Graphing: Slope is (6 - 2)/(3 - 1).",
+      "Demonstrate Functions & Graphing: The denominator cannot be zero.",
+      "Demonstrate Functions & Graphing: The radicand must be nonnegative.",
+      "Demonstrate Functions & Graphing: Larger inputs give larger outputs on that interval.",
+      "Demonstrate Functions & Graphing: g(3) = 4, then f(4) = 8.",
+      "Demonstrate Functions & Graphing: The constant term is independent of distance.",
+      "Demonstrate Functions & Graphing: Unique outputs per input do not imply unique inputs per output.",
+      "Demonstrate Functions & Graphing: Replacing x with x - 3 shifts the graph right.",
+      "Demonstrate Functions & Graphing: Relationships can change beyond the fitted data range."
+    ],
+    "sourceIds": [
+      "functions"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/precalculus-2e/pages/1-1-functions-and-function-notation"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Grammar & Sentence Structure",
+    "learningObjectives": [
+      "Demonstrate Grammar & Sentence Structure: Each takes a singular verb.",
+      "Demonstrate Grammar & Sentence Structure: A complete sentence expresses a complete thought.",
+      "Demonstrate Grammar & Sentence Structure: Narrow describes the bridge.",
+      "Demonstrate Grammar & Sentence Structure: Because introduces a cause or reason.",
+      "Demonstrate Grammar & Sentence Structure: The sentence asks for information.",
+      "Demonstrate Grammar & Sentence Structure: Bring has the irregular past tense brought.",
+      "Demonstrate Grammar & Sentence Structure: The subject is the singular noun box.",
+      "Demonstrate Grammar & Sentence Structure: Both completed actions use the past tense.",
+      "Demonstrate Grammar & Sentence Structure: A comma and coordinating conjunction join the clauses.",
+      "Demonstrate Grammar & Sentence Structure: Carefully modifies the action worked.",
+      "Demonstrate Grammar & Sentence Structure: A subject position requires I.",
+      "Demonstrate Grammar & Sentence Structure: Until introduces a clause that cannot stand alone here.",
+      "Demonstrate Grammar & Sentence Structure: A plural noun ending in s takes an apostrophe after s.",
+      "Demonstrate Grammar & Sentence Structure: The three listed activities have the same grammatical form.",
+      "Demonstrate Grammar & Sentence Structure: The actual subject two folders is plural.",
+      "Demonstrate Grammar & Sentence Structure: The opening modifier describes the following subject Nilo.",
+      "Demonstrate Grammar & Sentence Structure: With nor, the verb agrees with the nearer subject.",
+      "Demonstrate Grammar & Sentence Structure: The quotation explicitly identifies Bea as the winner.",
+      "Demonstrate Grammar & Sentence Structure: A semicolon precedes the conjunctive adverb; a comma follows it.",
+      "Demonstrate Grammar & Sentence Structure: Only directly precedes the person being singled out."
+    ],
+    "sourceIds": [
+      "grammar",
+      "english"
+    ],
+    "sourceUrls": [
+      "https://owl.purdue.edu/owl/general_writing/grammar/subject_verb_agreement.html",
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Reading Comprehension",
+    "learningObjectives": [
+      "Demonstrate Reading Comprehension: Before establishes the order.",
+      "Demonstrate Reading Comprehension: The location is explicitly stated.",
+      "Demonstrate Reading Comprehension: The sentence connects the mud with the rain.",
+      "Demonstrate Reading Comprehension: Whereas signals a difference.",
+      "Demonstrate Reading Comprehension: The sentence asks readers to perform an action.",
+      "Demonstrate Reading Comprehension: The reason is supplied by the because clause.",
+      "Demonstrate Reading Comprehension: Clouds support the limited inference that rain was possible.",
+      "Demonstrate Reading Comprehension: The main idea includes both stated benefits.",
+      "Demonstrate Reading Comprehension: The passage contrasts initial expense with fuel savings.",
+      "Demonstrate Reading Comprehension: Twelve is less than half of thirty.",
+      "Demonstrate Reading Comprehension: The positive descriptions express approval.",
+      "Demonstrate Reading Comprehension: The missing object sought is a jar.",
+      "Demonstrate Reading Comprehension: Then identifies the second step.",
+      "Demonstrate Reading Comprehension: Also signals additional information.",
+      "Demonstrate Reading Comprehension: The comparison concerns different heat conduction.",
+      "Demonstrate Reading Comprehension: The stated cause of remaining litter is irregular collection.",
+      "Demonstrate Reading Comprehension: Measured composition directly addresses the question.",
+      "Demonstrate Reading Comprehension: Co-occurring changes prevent a simple causal attribution.",
+      "Demonstrate Reading Comprehension: The conclusion generalizes beyond the sampled group.",
+      "Demonstrate Reading Comprehension: The added evidence tests the proposed cause and remedy."
+    ],
+    "sourceIds": [
+      "english"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Vocabulary Building",
+    "learningObjectives": [
+      "Demonstrate Vocabulary Building: Un- negates the adjective happy.",
+      "Demonstrate Vocabulary Building: Abundant describes a large available amount.",
+      "Demonstrate Vocabulary Building: Permanent contrasts with lasting only a short time.",
+      "Demonstrate Vocabulary Building: Fearless means without fear.",
+      "Demonstrate Vocabulary Building: The suffix -er can name a person performing an action.",
+      "Demonstrate Vocabulary Building: Cautious means attentive to possible risks.",
+      "Demonstrate Vocabulary Building: The surrounding hazards establish the meaning.",
+      "Demonstrate Vocabulary Building: The context emphasizes brevity and clarity.",
+      "Demonstrate Vocabulary Building: Cite means acknowledge a source.",
+      "Demonstrate Vocabulary Building: Their shows possession.",
+      "Demonstrate Vocabulary Building: The lack of rain supplies a context clue.",
+      "Demonstrate Vocabulary Building: Low-cost states price without condemning quality.",
+      "Demonstrate Vocabulary Building: The contrast with talkative points to reserved speech.",
+      "Demonstrate Vocabulary Building: Revision changes content or organization to improve the draft.",
+      "Demonstrate Vocabulary Building: Supports fits a formal academic register.",
+      "Demonstrate Vocabulary Building: Loan identifies the financial meaning.",
+      "Demonstrate Vocabulary Building: The adjectives convey contrasting judgments.",
+      "Demonstrate Vocabulary Building: Will eliminate overstates both certainty and effect.",
+      "Demonstrate Vocabulary Building: The animal term conveys a figurative characterization.",
+      "Demonstrate Vocabulary Building: Sensible means showing good judgment."
+    ],
+    "sourceIds": [
+      "english"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Essay & Paragraph Writing",
+    "learningObjectives": [
+      "Demonstrate Essay & Paragraph Writing: It identifies the paragraph's focus.",
+      "Demonstrate Essay & Paragraph Writing: The thesis guides the essay's argument.",
+      "Demonstrate Essay & Paragraph Writing: A conclusion brings the developed discussion together.",
+      "Demonstrate Essay & Paragraph Writing: A draft remains open to improvement.",
+      "Demonstrate Essay & Paragraph Writing: However introduces a contrasting idea.",
+      "Demonstrate Essay & Paragraph Writing: Coherence concerns understandable logical connections.",
+      "Demonstrate Essay & Paragraph Writing: The focused thesis specifies a manageable claim.",
+      "Demonstrate Essay & Paragraph Writing: The measurement addresses the benefit of shade.",
+      "Demonstrate Essay & Paragraph Writing: Stamp collecting does not develop the paragraph's focus.",
+      "Demonstrate Essay & Paragraph Writing: Evidence needs interpretation relevant to the claim.",
+      "Demonstrate Essay & Paragraph Writing: Shared criteria allow a fair comparison.",
+      "Demonstrate Essay & Paragraph Writing: The concise revision retains the meaning without repetition.",
+      "Demonstrate Essay & Paragraph Writing: The counterargument challenges the claimed financial benefit.",
+      "Demonstrate Essay & Paragraph Writing: An outline helps organize the developing argument.",
+      "Demonstrate Essay & Paragraph Writing: The transition makes the logical relationship explicit.",
+      "Demonstrate Essay & Paragraph Writing: Revision addresses content and organization.",
+      "Demonstrate Essay & Paragraph Writing: The evidence supports a narrower conclusion.",
+      "Demonstrate Essay & Paragraph Writing: Evaluation and comparison strengthen the argument.",
+      "Demonstrate Essay & Paragraph Writing: Evidence must contribute to the essay's argument.",
+      "Demonstrate Essay & Paragraph Writing: A reasoned response engages the objection directly."
+    ],
+    "sourceIds": [
+      "english",
+      "writing"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf",
+      "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Literature Analysis",
+    "learningObjectives": [
+      "Demonstrate Literature Analysis: The narrator presents the narrative voice.",
+      "Demonstrate Literature Analysis: Setting locates events in time and space.",
+      "Demonstrate Literature Analysis: Conflict supplies the central struggle.",
+      "Demonstrate Literature Analysis: Theme concerns the work's larger meaning.",
+      "Demonstrate Literature Analysis: The sentence directly compares unlike things without like or as.",
+      "Demonstrate Literature Analysis: Dancing gives leaves a human-like action.",
+      "Demonstrate Literature Analysis: The action shows integrity without external reward.",
+      "Demonstrate Literature Analysis: The narrative I identifies first-person narration.",
+      "Demonstrate Literature Analysis: The repeated context connects the gate with confinement.",
+      "Demonstrate Literature Analysis: The audience knows important information a character lacks.",
+      "Demonstrate Literature Analysis: The struggle involves competing personal commitments.",
+      "Demonstrate Literature Analysis: An early detail prepares readers for a later development.",
+      "Demonstrate Literature Analysis: The descriptions create an unsettling atmosphere.",
+      "Demonstrate Literature Analysis: The nearby words repeat an initial consonant sound.",
+      "Demonstrate Literature Analysis: The change describes character development.",
+      "Demonstrate Literature Analysis: The events support reconciliation through cooperation.",
+      "Demonstrate Literature Analysis: Conflicting evidence may undermine the narrator's self-description.",
+      "Demonstrate Literature Analysis: Interpreting both types of evidence avoids taking claims at face value.",
+      "Demonstrate Literature Analysis: A defensible interpretation rests on the text.",
+      "Demonstrate Literature Analysis: Textual inference can support a theme without proving biography."
+    ],
+    "sourceIds": [
+      "english"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Public Speaking & Oral Communication",
+    "learningObjectives": [
+      "Demonstrate Public Speaking & Oral Communication: The audience interprets the message.",
+      "Demonstrate Public Speaking & Oral Communication: Feedback shows how a message is received.",
+      "Demonstrate Public Speaking & Oral Communication: Its central purpose is understanding.",
+      "Demonstrate Public Speaking & Oral Communication: It orients listeners to the speech.",
+      "Demonstrate Public Speaking & Oral Communication: Gestures and facial expressions can communicate meaning.",
+      "Demonstrate Public Speaking & Oral Communication: Active listening involves attention and comprehension.",
+      "Demonstrate Public Speaking & Oral Communication: Audience adaptation supports understanding.",
+      "Demonstrate Public Speaking & Oral Communication: Feedback suggests that clarification is needed.",
+      "Demonstrate Public Speaking & Oral Communication: A line graph can show a trend over time.",
+      "Demonstrate Public Speaking & Oral Communication: Relevant expertise supports ethos or credibility.",
+      "Demonstrate Public Speaking & Oral Communication: Pauses give listeners processing time.",
+      "Demonstrate Public Speaking & Oral Communication: Paraphrasing reveals what the listener understood.",
+      "Demonstrate Public Speaking & Oral Communication: Honesty maintains trust and avoids misinformation.",
+      "Demonstrate Public Speaking & Oral Communication: External sound interferes with message reception.",
+      "Demonstrate Public Speaking & Oral Communication: The ending reinforces the argument and requested action.",
+      "Demonstrate Public Speaking & Oral Communication: Timed rehearsal tests pacing and length.",
+      "Demonstrate Public Speaking & Oral Communication: Celebrity is not evidence of subject expertise.",
+      "Demonstrate Public Speaking & Oral Communication: Persuasion requires evidence relevant to the conclusion.",
+      "Demonstrate Public Speaking & Oral Communication: Shared meaning and consistent claims are essential.",
+      "Demonstrate Public Speaking & Oral Communication: Tone can alter how the words are interpreted."
+    ],
+    "sourceIds": [
+      "speech",
+      "writing"
+    ],
+    "sourceUrls": [
+      "https://open.lib.umn.edu/commpractice/chapter/the-introduction/",
+      "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Research Writing",
+    "learningObjectives": [
+      "Demonstrate Research Writing: It directs the investigation.",
+      "Demonstrate Research Writing: It gives credit and helps readers trace evidence.",
+      "Demonstrate Research Writing: Plagiarism conceals intellectual borrowing.",
+      "Demonstrate Research Writing: The original responses are direct research data.",
+      "Demonstrate Research Writing: It records source information for readers.",
+      "Demonstrate Research Writing: Paraphrasing retains meaning while changing expression and citing the source.",
+      "Demonstrate Research Writing: It specifies a feasible population, subject and period.",
+      "Demonstrate Research Writing: Currency and evidence affect reliability.",
+      "Demonstrate Research Writing: The primary legal text directly establishes wording.",
+      "Demonstrate Research Writing: Omission must not distort meaning.",
+      "Demonstrate Research Writing: Sampling determines the scope of defensible inference.",
+      "Demonstrate Research Writing: The sample excludes relevant groups.",
+      "Demonstrate Research Writing: Transparent methods allow evaluation and replication.",
+      "Demonstrate Research Writing: Readers need context to interpret percentages.",
+      "Demonstrate Research Writing: Financial interests can influence presentation of evidence.",
+      "Demonstrate Research Writing: Research integrity requires reporting contrary evidence.",
+      "Demonstrate Research Writing: Independence and provenance matter more than repetition.",
+      "Demonstrate Research Writing: Correlation alone does not establish causation.",
+      "Demonstrate Research Writing: Disclosure distinguishes exploration from prespecified testing.",
+      "Demonstrate Research Writing: A qualified conclusion matches the evidence's scope."
+    ],
+    "sourceIds": [
+      "research",
+      "english"
+    ],
+    "sourceUrls": [
+      "https://owl.purdue.edu/owl/research_and_citation/conducting_research/evaluating_sources_of_information/general_guidelines.html",
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Scientific Method & Inquiry",
+    "learningObjectives": [
+      "Demonstrate Scientific Method & Inquiry: A hypothesis can be tested against evidence.",
+      "Demonstrate Scientific Method & Inquiry: A balance measures mass.",
+      "Demonstrate Scientific Method & Inquiry: Seconds are units of time.",
+      "Demonstrate Scientific Method & Inquiry: Observations record evidence.",
+      "Demonstrate Scientific Method & Inquiry: Constants help make comparisons fair.",
+      "Demonstrate Scientific Method & Inquiry: Quantitative observations contain measurements.",
+      "Demonstrate Scientific Method & Inquiry: The independent variable is deliberately changed.",
+      "Demonstrate Scientific Method & Inquiry: The measured response is dependent.",
+      "Demonstrate Scientific Method & Inquiry: Repeated measurements reveal consistency and variation.",
+      "Demonstrate Scientific Method & Inquiry: Light differences could confound fertilizer effects.",
+      "Demonstrate Scientific Method & Inquiry: The control provides a relevant untreated comparison.",
+      "Demonstrate Scientific Method & Inquiry: An incorrect zero produces measurement error.",
+      "Demonstrate Scientific Method & Inquiry: Slope compares changes in the two quantities.",
+      "Demonstrate Scientific Method & Inquiry: Explanations must respond to evidence.",
+      "Demonstrate Scientific Method & Inquiry: The question defines testable variables.",
+      "Demonstrate Scientific Method & Inquiry: Transparent procedures support reproducibility.",
+      "Demonstrate Scientific Method & Inquiry: More than one relevant factor changed.",
+      "Demonstrate Scientific Method & Inquiry: More replicates help separate effects from variation.",
+      "Demonstrate Scientific Method & Inquiry: A third variable can create correlation.",
+      "Demonstrate Scientific Method & Inquiry: The leading wording biases responses."
+    ],
+    "sourceIds": [
+      "science"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/biology-2e/pages/1-1-the-science-of-biology"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Cell Biology & Genetics",
+    "learningObjectives": [
+      "Demonstrate Cell Biology & Genetics: The membrane regulates exchange.",
+      "Demonstrate Cell Biology & Genetics: Mitochondria carry out aerobic respiration stages.",
+      "Demonstrate Cell Biology & Genetics: Chloroplasts contain the photosynthetic machinery.",
+      "Demonstrate Cell Biology & Genetics: DNA stores genetic information.",
+      "Demonstrate Cell Biology & Genetics: Genes encode functional RNA or protein products.",
+      "Demonstrate Cell Biology & Genetics: Alleles are variant gene forms.",
+      "Demonstrate Cell Biology & Genetics: Plant cells have cellulose-containing walls.",
+      "Demonstrate Cell Biology & Genetics: Energy-demanding cells need ATP production.",
+      "Demonstrate Cell Biology & Genetics: Mitosis maintains chromosome number in ordinary growth.",
+      "Demonstrate Cell Biology & Genetics: Meiosis produces haploid cells.",
+      "Demonstrate Cell Biology & Genetics: Water moves across a selectively permeable membrane.",
+      "Demonstrate Cell Biology & Genetics: Its two alleles differ.",
+      "Demonstrate Cell Biology & Genetics: A recessive phenotype requires both copies to be recessive in this model.",
+      "Demonstrate Cell Biology & Genetics: The cross gives AA, Aa, Aa and aa.",
+      "Demonstrate Cell Biology & Genetics: Genetic constitution and expressed traits are different concepts.",
+      "Demonstrate Cell Biology & Genetics: Sexual reproduction generates genetic variation.",
+      "Demonstrate Cell Biology & Genetics: Dominance and population frequency are distinct.",
+      "Demonstrate Cell Biology & Genetics: Ratios describe probabilities, not guaranteed small-sample counts.",
+      "Demonstrate Cell Biology & Genetics: Some mutations are silent or have context-dependent effects.",
+      "Demonstrate Cell Biology & Genetics: Traits can reflect genetic and environmental influences."
+    ],
+    "sourceIds": [
+      "cell",
+      "genetics",
+      "meiosis"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells",
+      "https://openstax.org/books/biology-2e/pages/12-1-mendels-experiments-and-the-laws-of-probability",
+      "https://openstax.org/books/biology-2e/pages/11-1-the-process-of-meiosis"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Chemical Reactions & Matter",
+    "learningObjectives": [
+      "Demonstrate Chemical Reactions & Matter: Protons carry positive charge.",
+      "Demonstrate Chemical Reactions & Matter: Proton number defines an element.",
+      "Demonstrate Chemical Reactions & Matter: Water contains chemically combined hydrogen and oxygen.",
+      "Demonstrate Chemical Reactions & Matter: Melting changes state without changing chemical identity.",
+      "Demonstrate Chemical Reactions & Matter: A liquid takes its container's shape.",
+      "Demonstrate Chemical Reactions & Matter: Reactants undergo chemical change.",
+      "Demonstrate Chemical Reactions & Matter: Precipitation indicates a new insoluble substance.",
+      "Demonstrate Chemical Reactions & Matter: Atoms are conserved in ordinary chemical reactions.",
+      "Demonstrate Chemical Reactions & Matter: Two water molecules require four H and two O atoms.",
+      "Demonstrate Chemical Reactions & Matter: Mass is conserved in the closed system.",
+      "Demonstrate Chemical Reactions & Matter: A filter retains insoluble sand.",
+      "Demonstrate Chemical Reactions & Matter: Removing solvent leaves dissolved salt behind.",
+      "Demonstrate Chemical Reactions & Matter: Isotopes differ in neutron number.",
+      "Demonstrate Chemical Reactions & Matter: An extra electron gives net negative charge.",
+      "Demonstrate Chemical Reactions & Matter: Higher temperature can increase effective collisions.",
+      "Demonstrate Chemical Reactions & Matter: Exothermic processes release heat.",
+      "Demonstrate Chemical Reactions & Matter: Balancing changes coefficients, not chemical formulas.",
+      "Demonstrate Chemical Reactions & Matter: An open system can lose material to its surroundings.",
+      "Demonstrate Chemical Reactions & Matter: A compound has chemically combined elements in fixed proportions.",
+      "Demonstrate Chemical Reactions & Matter: Surface area influences reaction rate."
+    ],
+    "sourceIds": [
+      "chemistry",
+      "atom",
+      "reactions"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/chemistry-2e/pages/2-1-early-ideas-in-atomic-theory",
+      "https://openstax.org/books/chemistry-2e/pages/2-3-atomic-structure-and-symbolism",
+      "https://openstax.org/books/chemistry-2e/pages/4-1-writing-and-balancing-chemical-equations"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Force, Motion & Energy",
+    "learningObjectives": [
+      "Demonstrate Force, Motion & Energy: Force is measured in newtons.",
+      "Demonstrate Force, Motion & Energy: Speed measures distance per unit time.",
+      "Demonstrate Force, Motion & Energy: Acceleration describes velocity change over time.",
+      "Demonstrate Force, Motion & Energy: Sliding friction resists relative motion.",
+      "Demonstrate Force, Motion & Energy: Moving objects possess kinetic energy.",
+      "Demonstrate Force, Motion & Energy: The joule is the SI energy unit.",
+      "Demonstrate Force, Motion & Energy: Divide 120 by 20.",
+      "Demonstrate Force, Motion & Energy: Newton's second law gives acceleration = force/mass.",
+      "Demonstrate Force, Motion & Energy: Opposite forces subtract.",
+      "Demonstrate Force, Motion & Energy: The normal force balances gravity vertically.",
+      "Demonstrate Force, Motion & Energy: Inertia resists a change in motion.",
+      "Demonstrate Force, Motion & Energy: Work equals force times displacement in its direction.",
+      "Demonstrate Force, Motion & Energy: Height raises gravitational potential energy.",
+      "Demonstrate Force, Motion & Energy: The loss in potential energy increases motion energy.",
+      "Demonstrate Force, Motion & Energy: Work on translational displacement requires displacement.",
+      "Demonstrate Force, Motion & Energy: Third-law forces act on different interacting bodies.",
+      "Demonstrate Force, Motion & Energy: Kinetic energy depends on speed squared.",
+      "Demonstrate Force, Motion & Energy: Velocity includes direction.",
+      "Demonstrate Force, Motion & Energy: Zero net force means zero acceleration.",
+      "Demonstrate Force, Motion & Energy: Total energy is conserved despite reduced useful output."
+    ],
+    "sourceIds": [
+      "physics",
+      "energy"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/physics/pages/4-3-newtons-second-law-of-motion",
+      "https://openstax.org/books/physics/pages/9-2-mechanical-energy-and-conservation-of-energy"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Ecosystems & the Environment",
+    "learningObjectives": [
+      "Demonstrate Ecosystems & the Environment: Grass produces organic matter by photosynthesis.",
+      "Demonstrate Ecosystems & the Environment: A population is species-specific within an area.",
+      "Demonstrate Ecosystems & the Environment: Sunlight is nonliving.",
+      "Demonstrate Ecosystems & the Environment: Decomposition recycles nutrients.",
+      "Demonstrate Ecosystems & the Environment: Habitat describes its living environment.",
+      "Demonstrate Ecosystems & the Environment: Consumers obtain organic matter from other organisms.",
+      "Demonstrate Ecosystems & the Environment: Food-chain arrows point toward the consumer receiving energy.",
+      "Demonstrate Ecosystems & the Environment: Not all consumed energy becomes biomass available to the next level.",
+      "Demonstrate Ecosystems & the Environment: Habitat loss can reduce resources.",
+      "Demonstrate Ecosystems & the Environment: Both participants benefit.",
+      "Demonstrate Ecosystems & the Environment: They compete for a limiting resource.",
+      "Demonstrate Ecosystems & the Environment: Decomposition of blooms can consume dissolved oxygen.",
+      "Demonstrate Ecosystems & the Environment: Roots and ground cover stabilize soil.",
+      "Demonstrate Ecosystems & the Environment: Biodiversity spans several levels of biological variation.",
+      "Demonstrate Ecosystems & the Environment: Plant food scraps can decompose into compost.",
+      "Demonstrate Ecosystems & the Environment: Indirect effects can spread through a food web.",
+      "Demonstrate Ecosystems & the Environment: Rapid invader growth can displace native organisms.",
+      "Demonstrate Ecosystems & the Environment: Wetlands can store water and slow runoff.",
+      "Demonstrate Ecosystems & the Environment: Restoration involves ecosystem composition and function.",
+      "Demonstrate Ecosystems & the Environment: Multiple interventions complicate assigning a single cause."
+    ],
+    "sourceIds": [
+      "ecology"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/biology-2e/pages/46-1-ecology-of-ecosystems"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Earth & Space Science",
+    "learningObjectives": [
+      "Demonstrate Earth & Space Science: Rotation alternates locations between sunlight and darkness.",
+      "Demonstrate Earth & Space Science: The Sun is the solar system's central star.",
+      "Demonstrate Earth & Space Science: The focus is the initial rupture location.",
+      "Demonstrate Earth & Space Science: Epicenter refers to the surface location.",
+      "Demonstrate Earth & Space Science: Condensation forms liquid from gas.",
+      "Demonstrate Earth & Space Science: Igneous rocks form by solidification.",
+      "Demonstrate Earth & Space Science: Tilt and revolution produce seasonal sunlight differences.",
+      "Demonstrate Earth & Space Science: It receives longer daylight and more direct sunlight.",
+      "Demonstrate Earth & Space Science: Orbital geometry changes the illuminated portion visible from Earth.",
+      "Demonstrate Earth & Space Science: Fault slip releases energy as seismic waves.",
+      "Demonstrate Earth & Space Science: Weathering breaks material down; erosion transports it.",
+      "Demonstrate Earth & Space Science: Flowing water can move weathered particles.",
+      "Demonstrate Earth & Space Science: Distance from the source affects shaking alongside other factors.",
+      "Demonstrate Earth & Space Science: The distinction concerns time scale and statistical patterns.",
+      "Demonstrate Earth & Space Science: Subduction occurs at convergent plate boundaries.",
+      "Demonstrate Earth & Space Science: Rainfall and drainage capacity jointly influence flooding.",
+      "Demonstrate Earth & Space Science: Damage also depends on exposure and vulnerability.",
+      "Demonstrate Earth & Space Science: Trend assessment requires sustained, representative observations.",
+      "Demonstrate Earth & Space Science: Earth's shadow falls on the Moon.",
+      "Demonstrate Earth & Space Science: Saturation and reduced root support can increase landslide risk."
+    ],
+    "sourceIds": [
+      "earth",
+      "astronomy",
+      "watercycle",
+      "rocks"
+    ],
+    "sourceUrls": [
+      "https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes",
+      "https://openstax.org/books/astronomy-2e/pages/4-2-the-seasons",
+      "https://www.usgs.gov/water-science-school/water-cycle",
+      "https://www.nps.gov/subjects/geology/rocks-and-minerals.htm"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Human Body Systems",
+    "learningObjectives": [
+      "Demonstrate Human Body Systems: The heart drives blood circulation.",
+      "Demonstrate Human Body Systems: Alveoli provide thin exchange surfaces.",
+      "Demonstrate Human Body Systems: Neurons transmit rapid signals.",
+      "Demonstrate Human Body Systems: Kidneys regulate waste and fluid removal.",
+      "Demonstrate Human Body Systems: The small intestine has specialized absorptive surfaces.",
+      "Demonstrate Human Body Systems: Homeostasis maintains suitable internal conditions.",
+      "Demonstrate Human Body Systems: Greater metabolism raises gas-exchange demands.",
+      "Demonstrate Human Body Systems: Hemoglobin in red cells binds oxygen.",
+      "Demonstrate Human Body Systems: Platelets contribute to clot formation.",
+      "Demonstrate Human Body Systems: Larger absorptive area improves nutrient uptake.",
+      "Demonstrate Human Body Systems: Tendons transmit muscle force to bone.",
+      "Demonstrate Human Body Systems: Insulin helps regulate blood glucose downward.",
+      "Demonstrate Human Body Systems: Evaporating sweat removes heat.",
+      "Demonstrate Human Body Systems: Circulation links lung gas exchange with tissue needs.",
+      "Demonstrate Human Body Systems: Bones provide protection and mechanical leverage.",
+      "Demonstrate Human Body Systems: The biological targets differ.",
+      "Demonstrate Human Body Systems: Respiration and circulation must both function.",
+      "Demonstrate Human Body Systems: The response counteracts the initial deviation.",
+      "Demonstrate Human Body Systems: Hormonal signals adjust kidney water handling.",
+      "Demonstrate Human Body Systems: Motor nerve pathways activate skeletal muscles."
+    ],
+    "sourceIds": [
+      "body",
+      "homeostasis",
+      "antibiotic"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-2-structural-organization-of-the-human-body",
+      "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis",
+      "https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Balarila (Gramatika)",
+    "learningObjectives": [
+      "Demonstrate Balarila (Gramatika): Pangngalan ang tawag sa tao, bagay o lugar.",
+      "Demonstrate Balarila (Gramatika): Inilalarawan nito si Lea.",
+      "Demonstrate Balarila (Gramatika): Nagsasaad ito ng kilos.",
+      "Demonstrate Balarila (Gramatika): Pumapalit ito sa ngalan ng tao.",
+      "Demonstrate Balarila (Gramatika): Nag-uugnay ito ng mga salita o sugnay.",
+      "Demonstrate Balarila (Gramatika): Inilalarawan nito ang paraan ng pagtakbo.",
+      "Demonstrate Balarila (Gramatika): Ng ang pananda ng layon dito.",
+      "Demonstrate Balarila (Gramatika): Nang ang ginagamit bago ang pang-abay dito.",
+      "Demonstrate Balarila (Gramatika): Kahapon at nagluto ang tumutukoy sa natapos na kilos.",
+      "Demonstrate Balarila (Gramatika): Humihingi ito ng impormasyon.",
+      "Demonstrate Balarila (Gramatika): Nagpapagawa ito ng kilos.",
+      "Demonstrate Balarila (Gramatika): Ikinakabit ang -ng sa salitang nagtatapos sa patinig.",
+      "Demonstrate Balarila (Gramatika): Na ang pang-angkop matapos ang katinig na hindi n.",
+      "Demonstrate Balarila (Gramatika): Ipinapakilala nito ang dahilan.",
+      "Demonstrate Balarila (Gramatika): May dalawang sugnay na makapag-iisa.",
+      "Demonstrate Balarila (Gramatika): Kay Rosa ang pariralang nagsasaad ng tagatanggap.",
+      "Demonstrate Balarila (Gramatika): Tahasan nitong tinutukoy ang nanalo.",
+      "Demonstrate Balarila (Gramatika): Iniuugnay nito ang sugnay na dahilan sa pangunahing diwa.",
+      "Demonstrate Balarila (Gramatika): Ang isda ang naging paksa ng ikalawang pangungusap.",
+      "Demonstrate Balarila (Gramatika): Bunga ng pag-aaral ang pagpasa sa konteksto."
+    ],
+    "sourceIds": [
+      "filipino"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pagbasa at Pag-unawa",
+    "learningObjectives": [
+      "Demonstrate Pagbasa at Pag-unawa: Tuwirang binanggit ang lugar.",
+      "Demonstrate Pagbasa at Pag-unawa: Muna at bago ang nagsasaad ng pagkakasunod.",
+      "Demonstrate Pagbasa at Pag-unawa: Ang ulan ang dahilan ng pagdadala.",
+      "Demonstrate Pagbasa at Pag-unawa: Sa wakas ay palatandaan ng pagtatapos.",
+      "Demonstrate Pagbasa at Pag-unawa: Ito ang pinakabuod na diwa.",
+      "Demonstrate Pagbasa at Pag-unawa: May ebidensiyang pinagbabatayan ang hinuha.",
+      "Demonstrate Pagbasa at Pag-unawa: Ang kilos at temperatura ang mga pahiwatig.",
+      "Demonstrate Pagbasa at Pag-unawa: Parehong kaugnay ng pag-iwas sa plastik ang detalye.",
+      "Demonstrate Pagbasa at Pag-unawa: Labindalawa ay higit sa kalahati ng dalawampu.",
+      "Demonstrate Pagbasa at Pag-unawa: Natapos ang gawain sa kabila ng pagod.",
+      "Demonstrate Pagbasa at Pag-unawa: Upang ang nagpapakilala ng layunin.",
+      "Demonstrate Pagbasa at Pag-unawa: Direktang nakababawas ng nasasayang na tubig ang pagkukumpuni.",
+      "Demonstrate Pagbasa at Pag-unawa: Papuri ang mga salitang ginamit.",
+      "Demonstrate Pagbasa at Pag-unawa: Maaaring makaapekto ang interes sa pagbebenta sa paglalahad.",
+      "Demonstrate Pagbasa at Pag-unawa: Pinananatili ng buod ang mahahalagang ideya.",
+      "Demonstrate Pagbasa at Pag-unawa: Pagkansela ng laro ang epekto ng baha.",
+      "Demonstrate Pagbasa at Pag-unawa: Lumampas ang pahayag sa saklaw ng ebidensiya.",
+      "Demonstrate Pagbasa at Pag-unawa: Nakasalalay sa ebidensiya ang pagsusuri.",
+      "Demonstrate Pagbasa at Pag-unawa: Sabay na nagbago ang dalawang salik.",
+      "Demonstrate Pagbasa at Pag-unawa: Maaaring labis na pinasimple ng pamagat ang nilalaman."
+    ],
+    "sourceIds": [
+      "filipino"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikang Pilipino",
+    "learningObjectives": [
+      "Demonstrate Panitikang Pilipino: Karaniwang ipinapaliwanag ng alamat ang pinagmulan ng bagay o lugar.",
+      "Demonstrate Panitikang Pilipino: Karaniwang may tauhang hayop at aral ang pabula.",
+      "Demonstrate Panitikang Pilipino: Dito nagaganap ang salaysay.",
+      "Demonstrate Panitikang Pilipino: Tauhan ang mga kalahok sa salaysay.",
+      "Demonstrate Panitikang Pilipino: Banghay ang balangkas ng mga pangyayari.",
+      "Demonstrate Panitikang Pilipino: Tunog sa dulo ang tinutukoy ng tugma.",
+      "Demonstrate Panitikang Pilipino: Tuwiran ang paghahambing nang walang tulad o parang.",
+      "Demonstrate Panitikang Pilipino: Parang ang tahasang panandang paghahambing.",
+      "Demonstrate Panitikang Pilipino: Ginawang kilos-tao ang galaw ng dahon.",
+      "Demonstrate Panitikang Pilipino: Ang pagsasauli ang ebidensiya ng katapatan.",
+      "Demonstrate Panitikang Pilipino: Panloob na pagpapasiya ang suliranin.",
+      "Demonstrate Panitikang Pilipino: Ang konteksto ng paglitaw ang batayan ng simbolismo.",
+      "Demonstrate Panitikang Pilipino: Hindi awtomatikong katumbas ng makata ang persona.",
+      "Demonstrate Panitikang Pilipino: Pantig ang batayan ng sukat.",
+      "Demonstrate Panitikang Pilipino: Nangangailangan ng tekstuwal na batayan ang interpretasyon.",
+      "Demonstrate Panitikang Pilipino: Sinusuportahan ng pangyayari ang pagkakasundo.",
+      "Demonstrate Panitikang Pilipino: Maaaring hindi lubos na mapagkakatiwalaan ang kaniyang paglalarawan.",
+      "Demonstrate Panitikang Pilipino: Ebidensiya ang nagpapalakas sa interpretasyon.",
+      "Demonstrate Panitikang Pilipino: Kailangang suriin ang kabuuang paglalatag at bunga ng kilos.",
+      "Demonstrate Panitikang Pilipino: Maaaring umunlad ang simbolikong kahulugan sa akda."
+    ],
+    "sourceIds": [
+      "filipino"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pagsulat ng Sanaysay",
+    "learningObjectives": [
+      "Demonstrate Pagsulat ng Sanaysay: Tesis ang gumagabay sa talakay.",
+      "Demonstrate Pagsulat ng Sanaysay: Inihahanda nito ang mambabasa sa paksa.",
+      "Demonstrate Pagsulat ng Sanaysay: Dito inilalahad ang paliwanag at patunay.",
+      "Demonstrate Pagsulat ng Sanaysay: Binubuo nito ang kabuuang talakay.",
+      "Demonstrate Pagsulat ng Sanaysay: Nakakatulong ito sa organisasyon.",
+      "Demonstrate Pagsulat ng Sanaysay: Nagpapakilala ito ng kaibahan.",
+      "Demonstrate Pagsulat ng Sanaysay: Tiyak ang saklaw at pahayag.",
+      "Demonstrate Pagsulat ng Sanaysay: Direktang pinauunlad nito ang paksa.",
+      "Demonstrate Pagsulat ng Sanaysay: Hindi sapat ang datos kung walang pagsusuri.",
+      "Demonstrate Pagsulat ng Sanaysay: Mas malawak ito kaysa pagwawasto ng baybay.",
+      "Demonstrate Pagsulat ng Sanaysay: Tinitingnan nito ang mekanika ng teksto.",
+      "Demonstrate Pagsulat ng Sanaysay: Magkakatulad na pamantayan ang batayan ng patas na paghahambing.",
+      "Demonstrate Pagsulat ng Sanaysay: Pinatitibay ng makatarungang pagtugon ang argumento.",
+      "Demonstrate Pagsulat ng Sanaysay: Ugnayan ng ideya ang kailangang ayusin.",
+      "Demonstrate Pagsulat ng Sanaysay: May etikal at praktikal na tungkulin ang pagsipi.",
+      "Demonstrate Pagsulat ng Sanaysay: Angkop sa pormal na paglalahad ang una.",
+      "Demonstrate Pagsulat ng Sanaysay: Dapat tumugma ang saklaw ng konklusyon sa patunay.",
+      "Demonstrate Pagsulat ng Sanaysay: Kalidad at konteksto ang mahalaga sa pagsusuri.",
+      "Demonstrate Pagsulat ng Sanaysay: Dapat may ambag ang detalye sa argumento.",
+      "Demonstrate Pagsulat ng Sanaysay: Dapat tumugon sa matibay na ebidensiya ang argumento."
+    ],
+    "sourceIds": [
+      "filipino"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pagsasalin",
+    "learningObjectives": [
+      "Demonstrate Pagsasalin: Kahulugan at konteksto ang pangunahing isinasaalang-alang.",
+      "Demonstrate Pagsasalin: Dito nanggagaling ang tekstong isinasalin.",
+      "Demonstrate Pagsasalin: Ito ang wikang ginagamit sa salin.",
+      "Demonstrate Pagsasalin: Nakaaapekto sa kahulugan ang gamit at kalagayan.",
+      "Demonstrate Pagsasalin: May nakaugaliang di-literal na kahulugan ang idyoma.",
+      "Demonstrate Pagsasalin: Inaangkop ang pahayag sa kaalaman at pangangailangan ng babasa.",
+      "Demonstrate Pagsasalin: Umaga ang tinutukoy na bahagi ng araw.",
+      "Demonstrate Pagsasalin: Kontekstong pinansiyal ang nagtatakda ng kahulugan.",
+      "Demonstrate Pagsasalin: Pampang ang gilid ng ilog.",
+      "Demonstrate Pagsasalin: Pagpapahayag ito ng pagbati, hindi utos na manakit.",
+      "Demonstrate Pagsasalin: Pinananatili nito ang magalang na utos at kahulugan.",
+      "Demonstrate Pagsasalin: May mga salitang maraming kahulugan.",
+      "Demonstrate Pagsasalin: Pormalidad at gamit ng wika ang tinutukoy.",
+      "Demonstrate Pagsasalin: Mahalaga ang pagkakapare-pareho sa katumpakan.",
+      "Demonstrate Pagsasalin: Dapat mapanatili ang posibilidad o katiyakang ipinahayag.",
+      "Demonstrate Pagsasalin: Sinusuri ang bisa at katumpakan ng salin.",
+      "Demonstrate Pagsasalin: Maaaring mangailangan ng malikhaing ngunit tapat na pagtutumbas.",
+      "Demonstrate Pagsasalin: Kritikal sa babala ang pagpapanatili ng negasyon.",
+      "Demonstrate Pagsasalin: Maaaring pasimplehin ang pahayag nang tapat sa nilalaman.",
+      "Demonstrate Pagsasalin: Pinagsasabay ang pagiging likas at pagiging tapat."
+    ],
+    "sourceIds": [
+      "filipino"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Retorika at Pampublikong Pagsasalita",
+    "learningObjectives": [
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Inaangkop nito ang pagpapahayag sa sitwasyon.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Sila ang umuunawa sa mensahe.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Kaugnay ito ng tiwala at pagiging kapani-paniwala.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Mga dahilan at ebidensiya ang sentro nito.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Damdamín ng tagapakinig ang nilalapitan nito.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Pag-unawa ang pangunahing layunin nito.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Kailangang iangkop sa kaalaman ng tagapakinig.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Senyal ang kanilang reaksiyon na kailangan ng paglilinaw.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: May panahon ang tagapakinig na iproseso ang ideya.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Kailangang mabasa at maipaliwanag ang pagbabago.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Pinananatili nito ang katapatan at tiwala.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Malinaw nitong pinagdurugtong ang mga bahagi.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Hindi sapat ang basta pagtanggap ng mensahe.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Nasusuri nito ang haba at pacing.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Dapat malinaw ang mensahe at hinihiling na kilos.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Mahalaga ang pinagmulan sa etika at kredibilidad.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Hindi awtomatikong katumbas ng kadalubhasaan ang kasikatan.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Tao ang inatake sa halip na argumento.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Hindi pamalit sa patunay ang emosyon lamang.",
+      "Demonstrate Retorika at Pampublikong Pagsasalita: Kailangang magkakaugnay at konsistent ang mensahe."
+    ],
+    "sourceIds": [
+      "filipino",
+      "writing",
+      "speech"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf",
+      "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts",
+      "https://open.lib.umn.edu/commpractice/chapter/the-introduction/"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Kasaysayan ng Pilipinas",
+    "learningObjectives": [
+      "Demonstrate Kasaysayan ng Pilipinas: The declaration occurred in June 1898.",
+      "Demonstrate Kasaysayan ng Pilipinas: Kawit was the declaration site.",
+      "Demonstrate Kasaysayan ng Pilipinas: Aguinaldo led the proclamation.",
+      "Demonstrate Kasaysayan ng Pilipinas: The Katipunan organized revolutionary resistance.",
+      "Demonstrate Kasaysayan ng Pilipinas: American colonial rule formally ended with recognition in 1946.",
+      "Demonstrate Kasaysayan ng Pilipinas: A diary can directly document its period.",
+      "Demonstrate Kasaysayan ng Pilipinas: Accounts can differ in access and viewpoint.",
+      "Demonstrate Kasaysayan ng Pilipinas: Chronology places 1898 before the other dates.",
+      "Demonstrate Kasaysayan ng Pilipinas: A proclaimed claim and its recognition are distinct.",
+      "Demonstrate Kasaysayan ng Pilipinas: Institutional position can shape interpretation.",
+      "Demonstrate Kasaysayan ng Pilipinas: Context is needed to identify what it documents.",
+      "Demonstrate Kasaysayan ng Pilipinas: Oral accounts broaden available perspectives.",
+      "Demonstrate Kasaysayan ng Pilipinas: A timeline organizes events by time.",
+      "Demonstrate Kasaysayan ng Pilipinas: Fiction can use history without documenting every detail.",
+      "Demonstrate Kasaysayan ng Pilipinas: Source criticism examines context and intended use.",
+      "Demonstrate Kasaysayan ng Pilipinas: Continuity concerns features that endure.",
+      "Demonstrate Kasaysayan ng Pilipinas: Differences may reflect counting scope and evidence.",
+      "Demonstrate Kasaysayan ng Pilipinas: Retrospective accounts require contextual evaluation.",
+      "Demonstrate Kasaysayan ng Pilipinas: Causal explanation requires more than sequence.",
+      "Demonstrate Kasaysayan ng Pilipinas: Multiple social perspectives improve historical coverage."
+    ],
+    "sourceIds": [
+      "history",
+      "historyph"
+    ],
+    "sourceUrls": [
+      "https://history.house.gov/Exhibitions-and-Publications/APA/Historical-essays/Exclusion-and-Empire/The-Philippines/",
+      "https://pvao.gov.ph/wp-content/uploads/2018/02/Philippine-History.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Heograpiya",
+    "learningObjectives": [
+      "Demonstrate Heograpiya: The equator is latitude zero.",
+      "Demonstrate Heograpiya: The prime meridian is longitude zero.",
+      "Demonstrate Heograpiya: The legend identifies symbol meanings.",
+      "Demonstrate Heograpiya: Scale expresses a distance relationship.",
+      "Demonstrate Heograpiya: A mountain is a natural landform.",
+      "Demonstrate Heograpiya: Settlement reflects human activity.",
+      "Demonstrate Heograpiya: Multiply the map distance by the scale.",
+      "Demonstrate Heograpiya: Rivers can provide resources and connectivity.",
+      "Demonstrate Heograpiya: Low coastal elevation increases exposure.",
+      "Demonstrate Heograpiya: Density relates population to area.",
+      "Demonstrate Heograpiya: The same population occupies less area.",
+      "Demonstrate Heograpiya: Elevation changes rapidly over short distance.",
+      "Demonstrate Heograpiya: Accessibility influences settlement decisions.",
+      "Demonstrate Heograpiya: An archipelago consists of multiple islands.",
+      "Demonstrate Heograpiya: The design responds to environmental conditions.",
+      "Demonstrate Heograpiya: Projections involve unavoidable trade-offs.",
+      "Demonstrate Heograpiya: Protective capacity can reduce but not eliminate risk.",
+      "Demonstrate Heograpiya: More people occupy the same area.",
+      "Demonstrate Heograpiya: Site decisions require multiple spatial factors.",
+      "Demonstrate Heograpiya: Projection choice can misrepresent relative area."
+    ],
+    "sourceIds": [
+      "geography"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/ARALING-PANLIPUNAN-GRADES-4-7.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Ekonomiks",
+    "learningObjectives": [
+      "Demonstrate Ekonomiks: Resources cannot satisfy every competing want.",
+      "Demonstrate Ekonomiks: A choice sacrifices its next-best alternative.",
+      "Demonstrate Ekonomiks: Effective demand requires purchasing ability.",
+      "Demonstrate Ekonomiks: Supply describes sellers' price-quantity relationship.",
+      "Demonstrate Ekonomiks: Equilibrium balances planned purchases and sales.",
+      "Demonstrate Ekonomiks: Consumption involves using outputs.",
+      "Demonstrate Ekonomiks: The movie is the sacrificed alternative.",
+      "Demonstrate Ekonomiks: This is movement along a downward-sloping demand curve.",
+      "Demonstrate Ekonomiks: Higher prices can make additional output worthwhile.",
+      "Demonstrate Ekonomiks: Quantity demanded exceeds quantity supplied.",
+      "Demonstrate Ekonomiks: Quantity supplied exceeds quantity demanded.",
+      "Demonstrate Ekonomiks: Normal-good demand rises with income.",
+      "Demonstrate Ekonomiks: Labor contributes to producing goods and services.",
+      "Demonstrate Ekonomiks: Profit equals revenue minus cost.",
+      "Demonstrate Ekonomiks: A budget coordinates available funds and planned spending.",
+      "Demonstrate Ekonomiks: Saving transfers purchasing capacity across time.",
+      "Demonstrate Ekonomiks: A supply reduction can raise equilibrium price.",
+      "Demonstrate Ekonomiks: Observed price and quantity require distinguishing shifts from movements.",
+      "Demonstrate Ekonomiks: Some costs fall on parties outside the transaction.",
+      "Demonstrate Ekonomiks: Value depends on benefits and costs beyond purchase price."
+    ],
+    "sourceIds": [
+      "economics"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Sibika at Pamahalaan",
+    "learningObjectives": [
+      "Demonstrate Sibika at Pamahalaan: Article II locates sovereignty in the people.",
+      "Demonstrate Sibika at Pamahalaan: Congress exercises legislative power.",
+      "Demonstrate Sibika at Pamahalaan: Executive power is vested in the President.",
+      "Demonstrate Sibika at Pamahalaan: Courts exercise judicial power.",
+      "Demonstrate Sibika at Pamahalaan: The Constitution is the fundamental legal framework.",
+      "Demonstrate Sibika at Pamahalaan: Suffrage concerns participation through voting.",
+      "Demonstrate Sibika at Pamahalaan: Separated powers help restrain concentration of authority.",
+      "Demonstrate Sibika at Pamahalaan: Consultation allows public involvement in decisions.",
+      "Demonstrate Sibika at Pamahalaan: The Bill of Rights provides the presumption of innocence.",
+      "Demonstrate Sibika at Pamahalaan: Fair legal procedures constrain arbitrary action.",
+      "Demonstrate Sibika at Pamahalaan: The mayor leads the local executive.",
+      "Demonstrate Sibika at Pamahalaan: Citizens can comply and participate in democratic change.",
+      "Demonstrate Sibika at Pamahalaan: Provenance and currency help establish authenticity.",
+      "Demonstrate Sibika at Pamahalaan: Public office carries responsibility to the people.",
+      "Demonstrate Sibika at Pamahalaan: Equal protection bars unjustified discriminatory treatment.",
+      "Demonstrate Sibika at Pamahalaan: Lawful expression and petition support participation.",
+      "Demonstrate Sibika at Pamahalaan: Constitutional protections constrain majoritarian impulses.",
+      "Demonstrate Sibika at Pamahalaan: Private interests may compromise public decision-making.",
+      "Demonstrate Sibika at Pamahalaan: Legal interpretation requires the applicable authoritative text and context.",
+      "Demonstrate Sibika at Pamahalaan: Transparency and participation improve public scrutiny."
+    ],
+    "sourceIds": [
+      "constitution"
+    ],
+    "sourceUrls": [
+      "https://www.officialgazette.gov.ph/constitutions/1987-constitution/"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Kultura at Lipunan",
+    "learningObjectives": [
+      "Demonstrate Kultura at Lipunan: Culture includes shared learned ways of life.",
+      "Demonstrate Kultura at Lipunan: The basket is a tangible cultural object.",
+      "Demonstrate Kultura at Lipunan: Values are intangible cultural elements.",
+      "Demonstrate Kultura at Lipunan: People learn society's expectations through socialization.",
+      "Demonstrate Kultura at Lipunan: Norms guide conduct in a social setting.",
+      "Demonstrate Kultura at Lipunan: Roles organize social expectations.",
+      "Demonstrate Kultura at Lipunan: Greeting practices carry local meanings.",
+      "Demonstrate Kultura at Lipunan: Ethnocentrism treats one's culture as the benchmark.",
+      "Demonstrate Kultura at Lipunan: Understanding context is distinct from endorsing every practice.",
+      "Demonstrate Kultura at Lipunan: Shared interpretation varies between cultural settings.",
+      "Demonstrate Kultura at Lipunan: Living traditions depend on their practitioners.",
+      "Demonstrate Kultura at Lipunan: A group label does not describe every individual.",
+      "Demonstrate Kultura at Lipunan: Language supports transmission of meaning.",
+      "Demonstrate Kultura at Lipunan: Individuals occupy several positions and responsibilities.",
+      "Demonstrate Kultura at Lipunan: Social interaction and new conditions can reshape culture.",
+      "Demonstrate Kultura at Lipunan: Cultural forms can persist while changing their expression.",
+      "Demonstrate Kultura at Lipunan: Explanation and moral endorsement are distinct tasks.",
+      "Demonstrate Kultura at Lipunan: Community perspectives clarify cultural significance.",
+      "Demonstrate Kultura at Lipunan: A narrow sample cannot represent all cultural variation.",
+      "Demonstrate Kultura at Lipunan: Social outcomes involve both meaning and structure."
+    ],
+    "sourceIds": [
+      "culture"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/introduction-sociology-3e/pages/3-1-what-is-culture"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "ARALING_PANLIPUNAN",
+    "topic": "Kasalukuyang Pangyayari (Current Events)",
+    "learningObjectives": [
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): WMO publishes the climate assessment.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Its publication date is March 23, 2026.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): The agenda's target year is 2030.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): The UN report page records that launch date.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Its stated comparison uses 1850–1900.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): The original report directly states its findings.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): An anomaly compares an average with a defined reference.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): The qualification preserves the reported uncertainty.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Uneven progress does not mean either universal success or failure.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Dates determine what the finding describes.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Source context helps test headline accuracy.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Transparent indicators support informed evaluation.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Reporting and observation periods serve different roles.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Ocean observations address the reported change.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Global and local evidence answer different questions.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): A cutoff makes the assessment's time context explicit.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Annual conditions and long-term thresholds require distinct interpretation.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Aggregation can mask differences among groups.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Revision can reflect improved information or methods.",
+      "Demonstrate Kasalukuyang Pangyayari (Current Events): Different references can change displayed anomaly values."
+    ],
+    "sourceIds": [
+      "sdg2026",
+      "climate2025"
+    ],
+    "sourceUrls": [
+      "https://unstats.un.org/sdgs/report/2026/",
+      "https://public.wmo.int/publication-series/state-of-global-climate/state-of-global-climate-2025"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "TLE",
+    "topic": "Computer Basics & ICT",
+    "learningObjectives": [
+      "Demonstrate Computer Basics & ICT: A keyboard sends user input to the computer.",
+      "Demonstrate Computer Basics & ICT: The CPU executes instructions.",
+      "Demonstrate Computer Basics & ICT: RAM normally loses its contents without power.",
+      "Demonstrate Computer Basics & ICT: An operating system manages hardware and software resources.",
+      "Demonstrate Computer Basics & ICT: Spreadsheets support formulas and tabular calculation.",
+      "Demonstrate Computer Basics & ICT: Backups support data recovery.",
+      "Demonstrate Computer Basics & ICT: Word processors support document writing and formatting.",
+      "Demonstrate Computer Basics & ICT: Uniqueness and length reduce common password risks.",
+      "Demonstrate Computer Basics & ICT: Independent verification helps detect phishing.",
+      "Demonstrate Computer Basics & ICT: A separate factor strengthens account access control.",
+      "Demonstrate Computer Basics & ICT: Updates can address discovered security weaknesses.",
+      "Demonstrate Computer Basics & ICT: The colon denotes a cell range.",
+      "Demonstrate Computer Basics & ICT: A monitor displays information to the user.",
+      "Demonstrate Computer Basics & ICT: Extensions commonly identify formats but do not prove safety.",
+      "Demonstrate Computer Basics & ICT: Permissions govern access and editing rights.",
+      "Demonstrate Computer Basics & ICT: Signing out reduces unauthorized later access.",
+      "Demonstrate Computer Basics & ICT: An extension is not a security certificate.",
+      "Demonstrate Computer Basics & ICT: Ranges can omit newly added data.",
+      "Demonstrate Computer Basics & ICT: Sync and independent versioned backup serve different purposes.",
+      "Demonstrate Computer Basics & ICT: Labels allow readers to interpret the values accurately."
+    ],
+    "sourceIds": [
+      "ict",
+      "ictsecurity",
+      "tle"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/workplace-software-skills/pages/1-2-computer-hardware-and-networks",
+      "https://openstax.org/books/workplace-software-skills/pages/1-4-safety-security-privacy-and-the-ethical-use-of-technology",
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics",
+    "learningObjectives": [
+      "Demonstrate Home Economics: Separation limits transfer of pathogens.",
+      "Demonstrate Home Economics: Hand hygiene reduces contamination.",
+      "Demonstrate Home Economics: Basic nutrition supports essential living needs.",
+      "Demonstrate Home Economics: A budget allocates available funds.",
+      "Demonstrate Home Economics: Measuring spoons measure specified small volumes.",
+      "Demonstrate Home Economics: Care instructions reflect material needs.",
+      "Demonstrate Home Economics: Ready-to-eat food should be protected from raw-food contamination.",
+      "Demonstrate Home Economics: Suitable cold storage slows many microbes.",
+      "Demonstrate Home Economics: Prioritization keeps spending aligned with essential needs.",
+      "Demonstrate Home Economics: Multiply quantity by unit price.",
+      "Demonstrate Home Economics: Unit prices permit like-for-like comparison.",
+      "Demonstrate Home Economics: Food must be protected from toxic substances.",
+      "Demonstrate Home Economics: Suitable stitching restores the attachment.",
+      "Demonstrate Home Economics: A broken seal can compromise food safety.",
+      "Demonstrate Home Economics: Planning reduces waste and supports balanced purchases.",
+      "Demonstrate Home Economics: Conditions and traceability support safe storage.",
+      "Demonstrate Home Economics: Waste can outweigh a low unit price.",
+      "Demonstrate Home Economics: Unsafe storage cannot always be corrected by reheating.",
+      "Demonstrate Home Economics: Cost alone does not determine dietary quality.",
+      "Demonstrate Home Economics: Records reveal where the plan and actual spending differ."
+    ],
+    "sourceIds": [
+      "food",
+      "foodpractice",
+      "tle"
+    ],
+    "sourceUrls": [
+      "https://www.who.int/publications/i/item/9789241594639",
+      "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "TLE",
+    "topic": "Agri-Fishery Arts",
+    "learningObjectives": [
+      "Demonstrate Agri-Fishery Arts: Germination starts seedling development.",
+      "Demonstrate Agri-Fishery Arts: Composting transforms organic residues.",
+      "Demonstrate Agri-Fishery Arts: A hoe cultivates soil.",
+      "Demonstrate Agri-Fishery Arts: Gills extract dissolved oxygen.",
+      "Demonstrate Agri-Fishery Arts: Irrigation supplements crop water.",
+      "Demonstrate Agri-Fishery Arts: A seedling is an early plant stage.",
+      "Demonstrate Agri-Fishery Arts: Excess standing water can impair roots.",
+      "Demonstrate Agri-Fishery Arts: Plants compete for light, water and nutrients.",
+      "Demonstrate Agri-Fishery Arts: Gradual adjustment can improve establishment.",
+      "Demonstrate Agri-Fishery Arts: Organic matter can improve soil properties.",
+      "Demonstrate Agri-Fishery Arts: Gasping can indicate inadequate oxygen.",
+      "Demonstrate Agri-Fishery Arts: Organic waste can increase oxygen demand.",
+      "Demonstrate Agri-Fishery Arts: Temperature influences several important pond processes.",
+      "Demonstrate Agri-Fishery Arts: IPM uses informed, complementary management measures.",
+      "Demonstrate Agri-Fishery Arts: Maintenance supports safe efficient work.",
+      "Demonstrate Agri-Fishery Arts: Records help evaluate operations and results.",
+      "Demonstrate Agri-Fishery Arts: Microbial decay can reduce oxygen levels.",
+      "Demonstrate Agri-Fishery Arts: Multiple changes prevent isolating one cause.",
+      "Demonstrate Agri-Fishery Arts: Excess inputs can create costs and environmental harm.",
+      "Demonstrate Agri-Fishery Arts: Water quality needs appropriate observation and testing."
+    ],
+    "sourceIds": [
+      "tle",
+      "fish"
+    ],
+    "sourceUrls": [
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf",
+      "https://www.fao.org/fishery/static/FAO_Training/FAO_Training/General/x6709e/x6709e02.htm"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "TLE",
+    "topic": "Industrial Arts",
+    "learningObjectives": [
+      "Demonstrate Industrial Arts: A matching screwdriver engages the screw head.",
+      "Demonstrate Industrial Arts: A try square checks 90-degree angles.",
+      "Demonstrate Industrial Arts: Clamps stabilize a workpiece.",
+      "Demonstrate Industrial Arts: Eye protection must suit the hazard.",
+      "Demonstrate Industrial Arts: It measures linear dimensions.",
+      "Demonstrate Industrial Arts: Inspection can detect foreseeable faults.",
+      "Demonstrate Industrial Arts: Damaged electrical insulation is hazardous.",
+      "Demonstrate Industrial Arts: Unexpected startup must be prevented.",
+      "Demonstrate Industrial Arts: A stable workpiece improves control.",
+      "Demonstrate Industrial Arts: Proper fit supports safe torque transfer.",
+      "Demonstrate Industrial Arts: A switch changes circuit continuity.",
+      "Demonstrate Industrial Arts: Electricity and moisture can create shock risk.",
+      "Demonstrate Industrial Arts: Sanding improves surface finish.",
+      "Demonstrate Industrial Arts: Guards help separate users from hazards.",
+      "Demonstrate Industrial Arts: Competence and instructions support safe operation.",
+      "Demonstrate Industrial Arts: Preparation helps achieve the required dimensions.",
+      "Demonstrate Industrial Arts: Abnormal behavior may indicate damage or imbalance.",
+      "Demonstrate Industrial Arts: Work-holding and safe procedures reduce exposure.",
+      "Demonstrate Industrial Arts: PPE is only one layer of protection.",
+      "Demonstrate Industrial Arts: Checking avoids propagating an unresolved error."
+    ],
+    "sourceIds": [
+      "tools",
+      "workshopsafety",
+      "tle"
+    ],
+    "sourceUrls": [
+      "https://www.osha.gov/hand-power-tools",
+      "https://www.osha.gov/sites/default/files/publications/OSHA3080.pdf",
+      "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "TLE",
+    "topic": "Entrepreneurship",
+    "learningObjectives": [
+      "Demonstrate Entrepreneurship: Entrepreneurship combines opportunity and resource action.",
+      "Demonstrate Entrepreneurship: Revenue is sales income.",
+      "Demonstrate Entrepreneurship: Profit depends on income after costs.",
+      "Demonstrate Entrepreneurship: A target market defines intended customers.",
+      "Demonstrate Entrepreneurship: Research informs decisions about demand and competition.",
+      "Demonstrate Entrepreneurship: It connects objectives, operations and finances.",
+      "Demonstrate Entrepreneurship: Contribution equals price minus variable cost.",
+      "Demonstrate Entrepreneurship: Divide fixed costs by contribution.",
+      "Demonstrate Entrepreneurship: Demand must relate to willingness and ability to purchase.",
+      "Demonstrate Entrepreneurship: Input costs affect financial feasibility.",
+      "Demonstrate Entrepreneurship: Timing of receipts and payments affects liquidity.",
+      "Demonstrate Entrepreneurship: Missing costs distort decisions.",
+      "Demonstrate Entrepreneurship: Advantage must matter to customers relative to alternatives.",
+      "Demonstrate Entrepreneurship: Small tests reveal assumptions and issues.",
+      "Demonstrate Entrepreneurship: Responsible handling supports quality and trust.",
+      "Demonstrate Entrepreneurship: Fixed costs do not vary with units within the relevant range.",
+      "Demonstrate Entrepreneurship: Liquidity and profitability are distinct.",
+      "Demonstrate Entrepreneurship: Liking does not establish purchase demand.",
+      "Demonstrate Entrepreneurship: Multiple influences complicate causal attribution.",
+      "Demonstrate Entrepreneurship: Expansion creates operational and financing demands."
+    ],
+    "sourceIds": [
+      "business",
+      "economics"
+    ],
+    "sourceUrls": [
+      "https://openstax.org/books/entrepreneurship/pages/11-3-conducting-a-feasibility-analysis",
+      "https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MAPEH",
+    "topic": "Music Theory & Appreciation",
+    "learningObjectives": [
+      "Demonstrate Music Theory & Appreciation: Standard staff notation uses five lines.",
+      "Demonstrate Music Theory & Appreciation: Pitch describes perceived highness or lowness.",
+      "Demonstrate Music Theory & Appreciation: Tempo concerns the pace of beats.",
+      "Demonstrate Music Theory & Appreciation: Dynamics shape musical intensity.",
+      "Demonstrate Music Theory & Appreciation: Rests indicate measured silence.",
+      "Demonstrate Music Theory & Appreciation: Timbre distinguishes sound qualities.",
+      "Demonstrate Music Theory & Appreciation: A sharp raises pitch relative to the natural note.",
+      "Demonstrate Music Theory & Appreciation: A flat lowers the notated pitch.",
+      "Demonstrate Music Theory & Appreciation: The lower 4 assigns the beat to the quarter note.",
+      "Demonstrate Music Theory & Appreciation: The upper number gives four beats per measure.",
+      "Demonstrate Music Theory & Appreciation: Crescendo indicates increasing loudness.",
+      "Demonstrate Music Theory & Appreciation: Decrescendo indicates decreasing loudness.",
+      "Demonstrate Music Theory & Appreciation: The G clef locates G on the second staff line.",
+      "Demonstrate Music Theory & Appreciation: Monophony contains one melodic line.",
+      "Demonstrate Music Theory & Appreciation: Polyphony combines independent melodic lines.",
+      "Demonstrate Music Theory & Appreciation: Ternary form returns to an opening section after contrast.",
+      "Demonstrate Music Theory & Appreciation: Overtone patterns and sound production affect timbre.",
+      "Demonstrate Music Theory & Appreciation: Speed and loudness are independent musical dimensions.",
+      "Demonstrate Music Theory & Appreciation: Context and multiple musical features support interpretation.",
+      "Demonstrate Music Theory & Appreciation: Performance choices shape musical meaning and character."
+    ],
+    "sourceIds": [
+      "music",
+      "musicrhythm",
+      "musictexture",
+      "musicdynamics"
+    ],
+    "sourceUrls": [
+      "https://viva.pressbooks.pub/openmusictheory/chapter/notation-of-notes-clefs-and-ledger-lines/",
+      "https://viva.pressbooks.pub/openmusictheory/chapter/notating-rhythm/",
+      "https://viva.pressbooks.pub/openmusictheory/chapter/texture/",
+      "https://viva.pressbooks.pub/openmusictheory/chapter/other-aspects-of-notation/"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MAPEH",
+    "topic": "Visual Arts",
+    "learningObjectives": [
+      "Demonstrate Visual Arts: A line extends in a direction.",
+      "Demonstrate Visual Arts: Shape has length and width.",
+      "Demonstrate Visual Arts: Form is three-dimensional.",
+      "Demonstrate Visual Arts: Value concerns tonal light and dark.",
+      "Demonstrate Visual Arts: Texture can be tactile or visually implied.",
+      "Demonstrate Visual Arts: Surrounding spaces have their own shapes.",
+      "Demonstrate Visual Arts: Light and dark can suggest volume.",
+      "Demonstrate Visual Arts: Relative size can create spatial recession.",
+      "Demonstrate Visual Arts: White raises value to create a tint.",
+      "Demonstrate Visual Arts: The marks imply surface roughness.",
+      "Demonstrate Visual Arts: Surrounding space defines the subject's edges.",
+      "Demonstrate Visual Arts: Black and white span the value range.",
+      "Demonstrate Visual Arts: The vessel occupies actual volume.",
+      "Demonstrate Visual Arts: The appearance suggests a surface not physically present.",
+      "Demonstrate Visual Arts: A color can retain its hue while changing lightness.",
+      "Demonstrate Visual Arts: Contrast helps separate figure from ground.",
+      "Demonstrate Visual Arts: Interpretation should be grounded in evidence.",
+      "Demonstrate Visual Arts: Context and disclosure matter in documentary images.",
+      "Demonstrate Visual Arts: Positive and negative spaces interact.",
+      "Demonstrate Visual Arts: Formal choices should be interpreted in relation to the whole work."
+    ],
+    "sourceIds": [
+      "art"
+    ],
+    "sourceUrls": [
+      "https://www.getty.edu/education/teachers/building_lessons/elements_art.pdf"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MAPEH",
+    "topic": "Physical Education & Sports",
+    "learningObjectives": [
+      "Demonstrate Physical Education & Sports: Physical activity includes many forms of movement.",
+      "Demonstrate Physical Education & Sports: It supports prolonged aerobic effort.",
+      "Demonstrate Physical Education & Sports: Flexibility relates to joint movement range.",
+      "Demonstrate Physical Education & Sports: Strength concerns force production.",
+      "Demonstrate Physical Education & Sports: Fair play combines integrity and respect.",
+      "Demonstrate Physical Education & Sports: A progressive warm-up prepares movement and effort.",
+      "Demonstrate Physical Education & Sports: Gradual progression supports adaptation.",
+      "Demonstrate Physical Education & Sports: Sustained movement challenges cardiorespiratory capacity.",
+      "Demonstrate Physical Education & Sports: Frequency counts sessions or occasions.",
+      "Demonstrate Physical Education & Sports: Intensity concerns effort or workload.",
+      "Demonstrate Physical Education & Sports: Time refers to session or activity duration.",
+      "Demonstrate Physical Education & Sports: Balance supports stable body positioning.",
+      "Demonstrate Physical Education & Sports: Spacing helps manage shared activity areas.",
+      "Demonstrate Physical Education & Sports: Constructive feedback supports improvement and participation.",
+      "Demonstrate Physical Education & Sports: Concerning symptoms require attention rather than forced exertion.",
+      "Demonstrate Physical Education & Sports: WHO gives an average daily 60-minute recommendation for this age group.",
+      "Demonstrate Physical Education & Sports: Progress should be evaluated alongside recovery and well-being.",
+      "Demonstrate Physical Education & Sports: Equitable participation can require different supports.",
+      "Demonstrate Physical Education & Sports: Sporting success includes ethical and safe conduct.",
+      "Demonstrate Physical Education & Sports: Training effects depend on the combined plan."
+    ],
+    "sourceIds": [
+      "pe"
+    ],
+    "sourceUrls": [
+      "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  },
+  {
+    "subject": "MAPEH",
+    "topic": "Health Education",
+    "learningObjectives": [
+      "Demonstrate Health Education: Variety helps meet different nutrient needs.",
+      "Demonstrate Health Education: Appearance alone cannot establish microbiological safety.",
+      "Demonstrate Health Education: Dietary proteins supply amino acids.",
+      "Demonstrate Health Education: Hand hygiene reduces transmission risk.",
+      "Demonstrate Health Education: Relevant expertise and evidence support reliability.",
+      "Demonstrate Health Education: Health includes psychological as well as physical dimensions.",
+      "Demonstrate Health Education: Labels help assess nutrient intake in context.",
+      "Demonstrate Health Education: Portion context changes the amount consumed.",
+      "Demonstrate Health Education: Standing water can provide breeding sites.",
+      "Demonstrate Health Education: Support can help address persistent distress.",
+      "Demonstrate Health Education: Balanced dietary choices improve nutrient variety.",
+      "Demonstrate Health Education: Excess sodium is associated with hypertension risk.",
+      "Demonstrate Health Education: Bodies and minds need adequate recovery.",
+      "Demonstrate Health Education: Medicines require appropriate individualized use.",
+      "Demonstrate Health Education: Health communication should be accurate and actionable.",
+      "Demonstrate Health Education: Sensitive information requires respectful handling.",
+      "Demonstrate Health Education: Safety depends on the substance, use and evidence.",
+      "Demonstrate Health Education: Unmeasured factors can affect observational findings.",
+      "Demonstrate Health Education: Rates and time context support meaningful comparison.",
+      "Demonstrate Health Education: Evidence quality and currency matter more than presentation."
+    ],
+    "sourceIds": [
+      "health",
+      "foodpractice",
+      "pe",
+      "antibiotic"
+    ],
+    "sourceUrls": [
+      "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+      "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+      "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+      "https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance"
+    ],
+    "researchDate": "2026-11-08",
+    "curriculumAlignment": "Broad topic alignment only; no unverified current competency code claimed.",
+    "academicApproval": "pending",
+    "difficultyDistribution": {
+      "easy": 6,
+      "medium": 10,
+      "hard": 4
+    }
+  }
+]

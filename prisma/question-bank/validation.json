@@ -1,0 +1,827 @@
+{
+  "bankSha256": "a687e259323b7463650888b3337b9a2c1d0e8e7919bc970501bc7769aa4a3696",
+  "valid": true,
+  "productionReady": false,
+  "questionCount": 860,
+  "structurallyPassingQuestions": 860,
+  "requiringManualReview": 860,
+  "errors": [],
+  "reviewFlags": [],
+  "topics": [
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Whole Numbers & Operations",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/prealgebra-2e/pages/1-1-introduction-to-whole-numbers",
+        "https://openstax.org/books/prealgebra-2e/pages/1-2-add-whole-numbers",
+        "https://openstax.org/books/prealgebra-2e/pages/1-3-subtract-whole-numbers",
+        "https://openstax.org/books/prealgebra-2e/pages/1-4-multiply-whole-numbers",
+        "https://openstax.org/books/prealgebra-2e/pages/1-5-divide-whole-numbers",
+        "https://openstax.org/books/prealgebra-2e/pages/2-1-use-the-language-of-algebra"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Fractions & Decimals",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/prealgebra-2e/pages/4-2-multiply-and-divide-fractions",
+        "https://openstax.org/books/prealgebra-2e/pages/5-2-decimal-operations"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Algebraic Expressions",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/prealgebra-2e/pages/2-2-evaluate-simplify-and-translate-expressions"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Linear Equations & Inequalities",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/elementary-algebra-2e/pages/2-3-solve-equations-with-variables-and-constants-on-both-sides",
+        "https://openstax.org/books/elementary-algebra-2e/pages/2-7-solve-linear-inequalities"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Geometry & Measurement",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/prealgebra-2e/pages/9-4-use-properties-of-rectangles-triangles-and-trapezoids",
+        "https://openstax.org/books/prealgebra-2e/pages/9-6-solve-geometry-applications-volume-and-surface-area"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Statistics & Probability",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/introductory-statistics-2e/pages/2-5-measures-of-the-center-of-the-data",
+        "https://openstax.org/books/introductory-statistics-2e/pages/3-1-terminology"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Trigonometry",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/precalculus-2e/pages/5-4-right-triangle-trigonometry"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MATH",
+      "subjectName": "Mathematics",
+      "subjectId": null,
+      "topic": "Functions & Graphing",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/precalculus-2e/pages/1-1-functions-and-function-notation"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Grammar & Sentence Structure",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://owl.purdue.edu/owl/general_writing/grammar/subject_verb_agreement.html",
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Reading Comprehension",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Vocabulary Building",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Essay & Paragraph Writing",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf",
+        "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Literature Analysis",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Public Speaking & Oral Communication",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://open.lib.umn.edu/commpractice/chapter/the-introduction/",
+        "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ENGLISH",
+      "subjectName": "English",
+      "subjectId": null,
+      "topic": "Research Writing",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://owl.purdue.edu/owl/research_and_citation/conducting_research/evaluating_sources_of_information/general_guidelines.html",
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Scientific Method & Inquiry",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/biology-2e/pages/1-1-the-science-of-biology"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Cell Biology & Genetics",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells",
+        "https://openstax.org/books/biology-2e/pages/12-1-mendels-experiments-and-the-laws-of-probability",
+        "https://openstax.org/books/biology-2e/pages/11-1-the-process-of-meiosis"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Chemical Reactions & Matter",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/chemistry-2e/pages/2-1-early-ideas-in-atomic-theory",
+        "https://openstax.org/books/chemistry-2e/pages/2-3-atomic-structure-and-symbolism",
+        "https://openstax.org/books/chemistry-2e/pages/4-1-writing-and-balancing-chemical-equations"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Force, Motion & Energy",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/physics/pages/4-3-newtons-second-law-of-motion",
+        "https://openstax.org/books/physics/pages/9-2-mechanical-energy-and-conservation-of-energy"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Ecosystems & the Environment",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/biology-2e/pages/46-1-ecology-of-ecosystems"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Earth & Space Science",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes",
+        "https://openstax.org/books/astronomy-2e/pages/4-2-the-seasons",
+        "https://www.usgs.gov/water-science-school/water-cycle",
+        "https://www.nps.gov/subjects/geology/rocks-and-minerals.htm"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "SCIENCE",
+      "subjectName": "Science",
+      "subjectId": null,
+      "topic": "Human Body Systems",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-2-structural-organization-of-the-human-body",
+        "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis",
+        "https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Balarila (Gramatika)",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Pagbasa at Pag-unawa",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Panitikang Pilipino",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Pagsulat ng Sanaysay",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Pagsasalin",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "FILIPINO",
+      "subjectName": "Filipino",
+      "subjectId": null,
+      "topic": "Retorika at Pampublikong Pagsasalita",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf",
+        "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts",
+        "https://open.lib.umn.edu/commpractice/chapter/the-introduction/"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Kasaysayan ng Pilipinas",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://history.house.gov/Exhibitions-and-Publications/APA/Historical-essays/Exclusion-and-Empire/The-Philippines/",
+        "https://pvao.gov.ph/wp-content/uploads/2018/02/Philippine-History.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Heograpiya",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/ARALING-PANLIPUNAN-GRADES-4-7.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Ekonomiks",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Sibika at Pamahalaan",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.officialgazette.gov.ph/constitutions/1987-constitution/"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Kultura at Lipunan",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/introduction-sociology-3e/pages/3-1-what-is-culture"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "ARALING_PANLIPUNAN",
+      "subjectName": "Araling Panlipunan",
+      "subjectId": null,
+      "topic": "Kasalukuyang Pangyayari (Current Events)",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://unstats.un.org/sdgs/report/2026/",
+        "https://public.wmo.int/publication-series/state-of-global-climate/state-of-global-climate-2025"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "TLE",
+      "subjectName": "Technology & Livelihood Education",
+      "subjectId": null,
+      "topic": "Computer Basics & ICT",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/workplace-software-skills/pages/1-2-computer-hardware-and-networks",
+        "https://openstax.org/books/workplace-software-skills/pages/1-4-safety-security-privacy-and-the-ethical-use-of-technology",
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "TLE",
+      "subjectName": "Technology & Livelihood Education",
+      "subjectId": null,
+      "topic": "Home Economics",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.who.int/publications/i/item/9789241594639",
+        "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "TLE",
+      "subjectName": "Technology & Livelihood Education",
+      "subjectId": null,
+      "topic": "Agri-Fishery Arts",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf",
+        "https://www.fao.org/fishery/static/FAO_Training/FAO_Training/General/x6709e/x6709e02.htm"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "TLE",
+      "subjectName": "Technology & Livelihood Education",
+      "subjectId": null,
+      "topic": "Industrial Arts",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.osha.gov/hand-power-tools",
+        "https://www.osha.gov/sites/default/files/publications/OSHA3080.pdf",
+        "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "TLE",
+      "subjectName": "Technology & Livelihood Education",
+      "subjectId": null,
+      "topic": "Entrepreneurship",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://openstax.org/books/entrepreneurship/pages/11-3-conducting-a-feasibility-analysis",
+        "https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MAPEH",
+      "subjectName": "MAPEH",
+      "subjectId": null,
+      "topic": "Music Theory & Appreciation",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://viva.pressbooks.pub/openmusictheory/chapter/notation-of-notes-clefs-and-ledger-lines/",
+        "https://viva.pressbooks.pub/openmusictheory/chapter/notating-rhythm/",
+        "https://viva.pressbooks.pub/openmusictheory/chapter/texture/",
+        "https://viva.pressbooks.pub/openmusictheory/chapter/other-aspects-of-notation/"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MAPEH",
+      "subjectName": "MAPEH",
+      "subjectId": null,
+      "topic": "Visual Arts",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.getty.edu/education/teachers/building_lessons/elements_art.pdf"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MAPEH",
+      "subjectName": "MAPEH",
+      "subjectId": null,
+      "topic": "Physical Education & Sports",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    },
+    {
+      "subject": "MAPEH",
+      "subjectName": "MAPEH",
+      "subjectId": null,
+      "topic": "Health Education",
+      "topicId": null,
+      "educationalLevel": null,
+      "existingActiveBankCount": null,
+      "targetCount": 20,
+      "newCount": 20,
+      "easy": 6,
+      "medium": 10,
+      "hard": 4,
+      "sourceUrls": [
+        "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+        "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+        "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+        "https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance"
+      ],
+      "reviewStatus": "incomplete-or-pending"
+    }
+  ]
+}

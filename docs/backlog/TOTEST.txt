@@ -981,3 +981,5 @@ Email verification OTP (codex/email-verification-otp)
 [Good: local positive and live guards c02dce1, no page errors] Certification approval: no-pass standard approval blocked; manual action requires reason and evidence; isolated positive manual approval persists provenance and audit; concurrent reviews yield one decision; live UI/guards without granting unsupported real credentials.
 
 [Good: isolated positive and live guards 284ba6e, no page errors] Reviewed bank: demo/unreviewed questions labeled and excluded from qualification readiness/start; correction requires new review. In isolated browser verify documented approval, immutability, eligible attempt, revocation and old practice attempt cannot certify. Live guards must not mark any content qualified without actual review evidence.
+
+[ ] Question-bank develop rebase: expand/review the authored bank against all 135 current topics before seeding; verify qualification review metadata and question-version relationships with a staging database.
