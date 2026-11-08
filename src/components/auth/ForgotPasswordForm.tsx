@@ -75,7 +75,7 @@ export default function ForgotPasswordForm() {
             <button type="button" disabled={loading || (codeMethod === "recovery" && cooldown > 0)} onClick={() => void request("lookup", "recovery")} className="btn btn-outline btn-primary btn-sm w-full">
               Send code to backup email
             </button>
-            <p className="text-xs text-base-content/60">Uses your saved, verified backup email, if available.</p>
+            <p className="text-xs text-base-content/60">Your backup email must be saved and verified in your profile.</p>
           </div>
         )}
         {(step === "verify" || step === "sent") && <button disabled={loading || cooldown > 0} onClick={() => void request("lookup")} className="btn btn-ghost btn-sm">{cooldown > 0 ? `Resend available in ${cooldown}s` : step === "sent" ? "Resend link (verify again)" : "Resend code"}</button>}

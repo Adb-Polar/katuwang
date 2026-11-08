@@ -8,7 +8,7 @@ import { MINUTE_MS } from "@/lib/datetime";
 
 // Neutral response — never reveals whether an account matched or is already verified.
 const NEUTRAL = {
-  message: "If an account matches that address and needs verification, we've sent a new code.",
+  message: "Check your inbox for a new verification code. Enter the code to verify your email.",
 };
 
 // ─── POST: Resend an email-verification code ──────────────────────────────────

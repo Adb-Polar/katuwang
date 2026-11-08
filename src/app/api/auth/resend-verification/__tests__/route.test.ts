@@ -27,7 +27,7 @@ vi.mock("@/lib/mail", () => ({
 
 import { POST } from "@/app/api/auth/resend-verification/route";
 
-const NEUTRAL_MSG = "If an account matches that address and needs verification, we've sent a new code.";
+const NEUTRAL_MSG = "Check your inbox for a new verification code. Enter the code to verify your email.";
 
 function makeRequest(body: unknown) {
   return new NextRequest("http://localhost/api/auth/resend-verification", {

@@ -39,7 +39,7 @@ describe("verified recovery choices and sending", () => {
   });
   it.each(["primary", "recovery"])("sends to the database-selected %s email and stores only a 15-minute token hash", async method => {
     const res = await POST(req({ action: "send", method, email: "attacker@example.test" })); expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ message: "If your account is eligible, a password reset link has been sent to the selected email address." });
+    expect(await res.json()).toEqual({ message: "Check your selected inbox for a password reset link. The link expires in 15 minutes." });
     expect(m.mail).not.toHaveBeenCalled(); await flush();
     const sent = m.mail.mock.calls[0][0]; expect(sent.to).toBe(method === "primary" ? user.email : user.recoveryEmail);
     const raw = sent.text.split("#token=")[1]; expect(raw).toMatch(/^[a-f0-9]{64}$/);
