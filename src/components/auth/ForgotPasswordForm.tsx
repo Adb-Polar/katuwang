@@ -9,6 +9,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 type Step = "email" | "verify" | "choose" | "sent";
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
+  const [codeMethod, setCodeMethod] = useState<"primary" | "recovery">("primary");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<Step>("email");
   const [options, setOptions] = useState<{ primary: string; recovery: string | null }>({ primary: "", recovery: null });
@@ -27,21 +28,21 @@ export default function ForgotPasswordForm() {
     try {
       const res = await fetch(action === "lookup" ? "/api/auth/forgot-password" : "/api/auth/recovery", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(action === "lookup" ? { email } : action === "verify" ? { action, code } : { action, method }),
+        body: JSON.stringify(action === "lookup" ? { email, method: method ?? codeMethod } : action === "verify" ? { action, code } : { action, method }),
       });
       const data = await res.json();
       if (!res.ok) {
         if (res.status === 429) setCooldown(Number(res.headers.get("Retry-After")) || 60);
         throw new Error(data.error || "Please try again.");
       }
-      if (action === "lookup") { setStep("verify"); setCode(""); setCooldown(60); }
+      if (action === "lookup") { setCodeMethod(method ?? codeMethod); setStep("verify"); setCode(""); setCooldown(60); }
       if (action === "verify") { setOptions(data); setStep("choose"); }
       if (action === "send") { setStep("sent"); setCooldown(60); }
       setMessage(data.message || "");
     } catch (err) { setError(err instanceof Error ? err.message : "A network error occurred. Please try again."); }
     finally { setLoading(false); }
   }
-  function back() { setStep("email"); setCode(""); setOptions({ primary: "", recovery: null }); setError(""); setMessage(""); }
+  function back() { setCodeMethod("primary"); setStep("email"); setCode(""); setOptions({ primary: "", recovery: null }); setError(""); setMessage(""); }
 
   return (
     <div className="card kt-card w-full max-w-md">
@@ -56,8 +57,8 @@ export default function ForgotPasswordForm() {
           <FeedbackBanner variant="error" message={error || null} />
         </div>
         {(step === "email" || step === "verify") && (
-          <ValidatedForm onSubmit={e => { e.preventDefault(); void request(step === "email" ? "lookup" : "verify"); }} className="space-y-4">
-            <label className="form-control w-full gap-2 text-xs font-semibold">
+          <ValidatedForm onSubmit={e => { e.preventDefault(); void request(step === "email" ? "lookup" : "verify"); }} className="flex flex-col gap-4">
+            <label className="form-control flex flex-col w-full gap-2 text-xs font-semibold">
               {step === "email" ? "Primary Email Address" : "Verification code"}
               {step === "email" ? <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered input-sm w-full" required disabled={loading} /> :
                 <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" minLength={8} maxLength={8} className="input input-bordered input-sm w-full" required disabled={loading} />}
@@ -69,6 +70,14 @@ export default function ForgotPasswordForm() {
           <button disabled={loading} onClick={() => void request("send", "primary")} className="btn btn-primary btn-sm w-full h-auto py-3">Send to Primary Email — {options.primary}</button>
           {options.recovery && <button disabled={loading} onClick={() => void request("send", "recovery")} className="btn btn-outline btn-primary btn-sm w-full h-auto py-3">Send to Recovery Email — {options.recovery}</button>}
         </div>}
+        {step === "verify" && (
+          <div className="space-y-2 text-center">
+            <button type="button" disabled={loading || (codeMethod === "recovery" && cooldown > 0)} onClick={() => void request("lookup", "recovery")} className="btn btn-outline btn-primary btn-sm w-full">
+              Send code to backup email
+            </button>
+            <p className="text-xs text-base-content/60">Uses your saved, verified backup email, if available.</p>
+          </div>
+        )}
         {(step === "verify" || step === "sent") && <button disabled={loading || cooldown > 0} onClick={() => void request("lookup")} className="btn btn-ghost btn-sm">{cooldown > 0 ? `Resend available in ${cooldown}s` : step === "sent" ? "Resend link (verify again)" : "Resend code"}</button>}
         {step !== "email" && <button disabled={loading} onClick={back} className="btn btn-ghost btn-sm">Back</button>}
         <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">

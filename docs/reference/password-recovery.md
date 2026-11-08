@@ -5,12 +5,14 @@ password rules, and configured email provider remain the authentication infrastr
 
 ## Flow and endpoints
 
-- `POST /api/auth/forgot-password` accepts `{ email }`, normalized as the primary
+- `POST /api/auth/forgot-password` accepts `{ email, method?: "primary" | "recovery" }`, normalized as the primary
   registered email. Every valid address receives the same message and an opaque
   HttpOnly, SameSite=Strict challenge cookie. Next.js `after` performs lookup and
   SMTP delivery after responding, so public timing does not depend on account
-  existence or mail success. Eligible accounts receive an eight-digit code at
-  their primary and any verified recovery email. No account-specific options or
+  existence or mail success. Eligible accounts receive an eight-digit code only at the selected address
+  (primary by default). The code screen offers an explicit backup-email button,
+  shown identically for every account; backup delivery requires an existing
+  verified recovery address and never falls back to primary. No account-specific options or
   addresses are exposed at this point.
 - `POST /api/auth/recovery` with `{ action: "verify", code }` checks the cookie
   and code, then returns masked `primary` and nullable `recovery` options. Codes
@@ -65,7 +67,7 @@ without a configured mail provider is a no-op; codes/tokens are never printed.
 
 The existing limiter remains per-process (the application's single-instance
 assumption). Public lookup is limited per IP and normalized email; requests have
-an enforced 60-second resend cooldown and a three-per-15-minute address limit.
+an enforced 60-second resend cooldown per destination and a three-per-15-minute address limit.
 Verification, delivery, and reset validation/redemption also have IP limits;
 code attempts additionally persist in the database. Resending a reset link
 requires a fresh ownership code. A horizontally scaled deployment requires a

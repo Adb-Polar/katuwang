@@ -11,8 +11,8 @@ import { RECOVERY_COOKIE, OWNERSHIP_SENT, privateJson, recoveryLimit } from "@/l
 export async function POST(req: NextRequest) {
   const result = forgotPasswordSchema.safeParse(await req.json().catch(() => null));
   if (!result.success) return privateJson({ error: "Enter a valid primary email address." }, 400);
-  const { email } = result.data;
-  const limited = recoveryLimit(req, "forgot", hashResetToken(email), true);
+  const { email, method } = result.data;
+  const limited = recoveryLimit(req, "forgot", hashResetToken(email), true, method);
   if (limited) return limited;
   const secret = generateResetToken();
   const response = privateJson({ message: OWNERSHIP_SENT });
@@ -24,15 +24,16 @@ export async function POST(req: NextRequest) {
     try {
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user || user.status === "BANNED") return;
+      const destination = method === "primary" ? user.email :
+        user.recoveryEmailVerifiedAt ? user.recoveryEmail : null;
+      if (!destination) return;
       const code = String(randomInt(0, 100_000_000)).padStart(8, "0");
       await prisma.recoveryChallenge.create({ data: {
         userId: user.id, purpose: "ownership", email: user.email,
         tokenHash: hashResetToken(secret), codeHash: hashResetToken(secret + code),
         expiresAt: resetTokenExpiry(),
       } });
-      const destinations = new Set([user.email]);
-      if (user.recoveryEmail && user.recoveryEmailVerifiedAt) destinations.add(user.recoveryEmail);
-      await Promise.allSettled([...destinations].map(to => sendMail({ to, ...renderRecoveryCodeEmail(code) })));
+      await sendMail({ to: destination, ...renderRecoveryCodeEmail(code) });
     } catch {
       // Transport errors may contain message bodies/tokens; never log them.
       console.error("[recovery] unable to send ownership code");

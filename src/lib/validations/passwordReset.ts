@@ -3,6 +3,7 @@ import { passwordField } from "@/lib/validations/password";
 
 /** `POST /api/auth/forgot-password` — the primary registered email address. */
 export const forgotPasswordSchema = z.object({
+  method: z.enum(["primary", "recovery"]).default("primary"),
   email: z
     .string()
     .trim()
