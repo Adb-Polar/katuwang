@@ -19,7 +19,10 @@
     "db:studio": "prisma studio",
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
     "seed": "tsx prisma/seed.ts",
-    "seed:reset": "tsx prisma/seed.ts --reset"
+    "seed:reset": "tsx prisma/seed.ts --reset",
+    "question-bank:replace": "tsx scripts/question-bank/replace-cli.ts",
+    "seed:questions": "tsx prisma/seed-question-bank.ts",
+    "seed:questions:check": "tsx prisma/seed-question-bank.ts --check"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",

@@ -1,0 +1,234 @@
+## Percentages
+@ 25% | 50% | 75% | 10%
+What percent equals one quarter?|0|1/4 equals 25/100.
+Convert 0.5 to percent.|1|Multiply the decimal by 100.
+What percent equals three quarters?|2|3/4 equals 75/100.
+Convert 0.1 to percent.|3|0.1 multiplied by 100 is 10.
+@ 20 | 30 | 40 | 50
+Find 10% of 200.|0|0.10 × 200 = 20.
+Find 25% of 120.|1|One quarter of 120 is 30.
+Find 80% of 50.|2|0.80 × 50 = 40.
+A ₱200 item is discounted 25%. Discount amount?|3|200 × 0.25 = 50.
+@ ₱240 | ₱250 | ₱300 | ₱320
+A ₱300 item has a 20% discount. Sale price?|0|300 × 0.8 = 240.
+After a 25% increase, ₱200 becomes what?|1|200 × 1.25 = 250.
+A price rises from ₱240 by 25%. New price?|2|240 + 60 = 300.
+Add 60% to ₱200. Result?|3|200 × 1.6 = 320.
+@ 20% | 25% | 50% | 5%
+A score is 18 out of 24. What percent was missed?|1|Six of twenty-four is one quarter.
+A population rises from 80 to 96. Percent increase?|0|Increase 16 divided by original 80.
+A price drops from 100 to 50. Percent decrease?|2|The decrease is half the original.
+What rate gives interest 15 on principal 300 for one year, using simple interest?|3|15/300 = 0.05.
+@ 1% decrease | No change | 10% increase | 20% increase
+A price rises 10%, then falls 10%. Overall change?|0|1.10 × 0.90 = 0.99.
+A value doubles then decreases 50%. Overall change?|1|2 × 0.5 = 1.
+A value rises 20%, then is multiplied by 11/12. Overall change?|2|1.2 × 11/12 = 1.1.
+A value falls 20%, then rises 50%. Overall change?|3|0.8 × 1.5 = 1.2.
+## Systems of Equations
+@ One solution | No solution | Infinitely many solutions | Not a linear system
+Two nonparallel straight lines intersect. How many common solutions?|0|They intersect at one point.
+Distinct parallel lines represent which result?|1|They have no intersection.
+Both equations describe the same line. What results?|2|Every point on the line satisfies both.
+One equation contains x² with nonzero coefficient. Which classification applies?|3|A nonzero squared term is nonlinear.
+@ (1, 2) | (2, 1) | (-1, 3) | (3, -1)
+Which pair satisfies x + y = 3 and x - y = -1?|0|Adding equations gives x = 1.
+Two pens at x pesos each and one eraser at y pesos cost ₱5. A pen costs ₱1 more than an eraser. Find (x,y).|1|2x+y=5 and x-y=1 imply x=2, y=1.
+Which pair satisfies x + y = 2 and x - y = -4?|2|Adding gives x = -1.
+Which pair satisfies x + y = 2 and 2x + y = 5?|3|Subtracting gives x = 3.
+@ Substitution | Elimination | Graphing | Verification
+Replace y by 2x + 1 in a second equation. Which method?|0|An equivalent expression replaces a variable.
+Add equations to cancel opposite y terms. Which method?|1|A variable is eliminated.
+Plot both lines and find their intersection. Which method?|2|The shared point is found visually.
+Insert a proposed pair into both original equations. What is this step?|3|It checks that both equations hold.
+@ 3 | 4 | 5 | 6
+Two tickets cost ₱14 total; one costs ₱8. Other ticket cost in pesos?|3|Subtract 8 from 14.
+Two numbers sum to 12 and differ by 2. Smaller number?|2|The numbers are 7 and 5.
+Two pens and one ₱3 eraser cost ₱11. Price per pen in pesos?|1|2p + 3 = 11 gives p = 4.
+A father is 30 years older than his son; their ages sum to 36. Son's age?|0|2s + 30 = 36.
+@ Inconsistent equations | Equivalent equations | Unique intersection | Insufficient information
+Elimination produces 0 = 7. What does this imply?|0|The conditions cannot both hold.
+Elimination produces 0 = 0 from two proportional linear equations. What does this imply?|1|Both describe the same line.
+Slopes differ and both equations are linear. What follows?|2|Different slopes give one intersection.
+Only x + y = 8 is provided for two unrestricted unknowns. What prevents a unique pair?|3|One independent condition leaves multiple possibilities.
+## Quadratic Equations
+@ 2 | -2 | 0 | 4
+What is the degree of a quadratic equation?|0|Its highest variable exponent is two.
+One solution of x² = 4 is positive. What is it?|0|The positive square root is 2.
+The repeated root of x² + 4x + 4 = 0 is what?|1|(x + 2)² = 0.
+The only root of x² = 0 is what?|2|Only zero squares to zero.
+@ {2, 3} | {-2, -3} | {-2, 3} | {-3, 2}
+Solve x² - 5x + 6 = 0.|0|(x - 2)(x - 3) = 0.
+Which two real roots have sum -5 and product 6?|1|(x + 2)(x + 3) = 0.
+Solve x² - x - 6 = 0.|2|(x + 2)(x - 3) = 0.
+A quadratic graph crosses the horizontal axis where (x+3)(x-2) = 0. Identify its x-intercepts.|3|(x + 3)(x - 2) = 0.
+@ Two distinct real roots | One repeated real root | No real roots | Linear rather than quadratic
+What follows when b² - 4ac > 0 for a ≠ 0?|0|The square-root term is positive.
+What follows when b² - 4ac = 0 for a ≠ 0?|1|The two formula values coincide.
+What follows when b² - 4ac < 0 over the reals?|2|A negative discriminant has no real square root.
+What if the coefficient of x² is zero and that of x is nonzero?|3|The highest remaining degree is one.
+@ 5 | 6 | 7 | 8
+A square has area 49 cm². Positive side length?|2|The positive root of s² = 49 is 7.
+A rectangle has sides x and x + 1, area 30. Positive x?|0|5 × 6 = 30.
+Two positive consecutive integers have product 42. Smaller integer?|1|6 × 7 = 42.
+A square's area is 64 cm². Positive side length?|3|8² = 64.
+@ Keep only the physically admissible root | Check every candidate in the original conditions | Retain both algebraic roots | Reject the real-solution claim
+A length equation gives -5 and 4. Which response is correct?|0|A physical length must be positive.
+Squaring an equation may introduce extraneous answers. What is needed?|1|Transformed equations may admit extra candidates.
+x² = 9 has no further domain restriction. What should be done?|2|Both 3 and -3 satisfy the equation.
+A real quadratic has a negative discriminant, but a student claims two real roots. What should be done?|3|The discriminant rules out real roots.
+## Exponential & Logarithmic Functions
+@ 8 | 16 | 4 | 3
+Evaluate 2³.|0|Multiply three factors of two.
+Evaluate 2⁴.|1|Four factors of two give 16.
+Evaluate log₂16.|2|Two to the fourth power is 16.
+Evaluate log₁₀1000.|3|Ten cubed is 1000.
+@ Growth | Decay | Constant function | Invalid real logarithm
+Classify y = 3(1.2)ˣ.|0|The base exceeds one.
+Classify y = 5(0.8)ˣ.|1|The positive base lies below one.
+Classify y = 7 for all real x.|2|The output never changes.
+Classify log₁₀(-2) over the real numbers.|3|Its argument is not positive.
+@ 2 | 3 | 4 | 5
+Solve 3ˣ = 9.|0|9 equals 3².
+Solve 2ˣ = 8.|1|8 equals 2³.
+Solve log₂x = 2 for x.|2|x = 2².
+Solve log₅x = 1 for x.|3|x = 5¹.
+@ 100 | 200 | 400 | 800
+A population starts at 100 and doubles each year. After two years?|2|100 × 2² = 400.
+A substance starts at 800 g and halves each period. After one period?|2|800/2 = 400.
+A substance starts at 800 g and halves each period. After three periods?|0|800/2³ = 100.
+A population starts at 100 and doubles each year. After one year?|1|100 × 2 = 200.
+@ log a + log b | log a - log b | k log a | No such general identity
+For positive a,b and a common valid base, log(ab) equals what?|0|Products become sums of logarithms.
+For positive a,b, log(a/b) equals what?|1|A quotient becomes a difference.
+For positive a, log(aᵏ) equals what?|2|A power becomes a multiplier.
+A student writes log(a+b) = log a + log b generally. Which assessment is correct?|3|The product rule does not apply to addition.
+## Sequences, Series & Polynomials
+@ Arithmetic sequence | Geometric sequence | Polynomial | Series
+Which has a constant difference between successive terms?|0|This defines an arithmetic sequence.
+Which has a constant ratio between nonzero successive terms?|1|This defines a geometric sequence.
+What is 3x² + 2x - 1?|2|It has nonnegative integer powers.
+What is a sum of sequence terms called?|3|A series adds terms.
+@ 13 | 16 | 18 | 32
+Next term of 1, 4, 7, 10?|0|Add the common difference 3.
+Next term of 2, 4, 8?|1|Multiply by 2.
+Sixth term of 3, 6, 9, ...?|2|The nth term is 3n.
+Fifth term of 2, 4, 8, 16, ...?|3|2 × 2⁴ = 32.
+@ 15 | 30 | 31 | 10
+Sum the integers 1 through 5.|0|5 × 6 / 2 = 15.
+Sum 2 + 4 + 6 + 8 + 10.|1|Five times the average 6 is 30.
+Sum 1 + 2 + 4 + 8 + 16.|2|The geometric sum is 31.
+Evaluate 2x² + x at x = 2.|3|8 + 2 = 10.
+@ 2 | 3 | 4 | 5
+Degree of 5x² - 7?|0|The highest exponent is 2.
+Remainder of x² + 2x + 3 divided by x?|1|Substitution x = 0 gives 3.
+Evaluate x³ - x at x = 2, then divide by 3.|0|(8 - 2)/3 = 2.
+For x² - 9, positive zero?|1|x = 3 makes the polynomial zero.
+@ Converges to 2 | Diverges | Has zero remainder | Has a constant first difference
+What happens to 1 + 1/2 + 1/4 + ...?|0|Its ratio is 1/2; sum is 1/(1-1/2).
+What happens to 1 + 2 + 4 + ... as more terms are added?|1|Its partial sums grow without bound.
+Division of P(x) by x-a has P(a)=0. What follows?|2|The remainder theorem gives the remainder P(a).
+A sequence has nth term 4n - 3. What property follows?|3|Successive terms differ by four.
+## Coordinate Geometry & Conic Sections
+@ Circle | Parabola | Ellipse | Hyperbola
+A plane curve consists of points at fixed distance from a center. Identify it.|0|Equal radius defines a circle.
+Points are equally distant from a focus and directrix. Identify the locus.|1|This defines a parabola.
+A fixed sum of distances to two foci defines what?|2|This defines an ellipse.
+A fixed positive difference of distances to two foci defines what?|3|This defines a hyperbola.
+@ (0, 0) | (2, -3) | (-2, 3) | (2, 3)
+Center of x² + y² = 9?|0|Both squared variables have zero shift.
+Center of (x-2)² + (y+3)² = 16?|1|Read the center as h = 2, k = -3.
+Complete the squares in x² + y² + 4x - 6y - 3 = 0. Where is the center?|2|The signs inside the squares reverse.
+A circle is translated two units right and three units up from the origin. What is its new center?|3|h = 2 and k = 3.
+@ 5 | 4 | 3 | 2
+Distance from (0,0) to (3,4)?|0|Use √(3²+4²).
+Radius of x² + y² = 16?|1|The radius is √16.
+Radius of (x-1)² + y² = 9?|2|The radius is √9.
+Distance from (1,1) to (1,3)?|3|Only the y-coordinate differs by 2.
+@ (2, 3) | 2 | 3 | 1/2
+Midpoint of (0,1) and (4,5)?|0|Average each coordinate.
+Slope through (0,0) and (2,4)?|1|Rise 4 divided by run 2.
+Slope through (1,2) and (2,5)?|2|Rise 3 divided by run 1.
+A line rises 2 units while moving 4 units to the right. What is its gradient?|3|Rise 2 divided by run 4.
+@ Horizontal major axis | Vertical major axis | No real points | One point only
+For x²/25 + y²/9 = 1, identify the major-axis orientation.|0|The larger denominator is under x².
+An ellipse centered at the origin has intercepts (±3,0) and (0,±5). In which direction does its longer axis run?|1|The larger denominator is under y².
+What is the real locus x² + y² = -1?|2|A sum of real squares cannot be negative.
+What is the real locus x² + y² = 0?|3|Both squares must vanish.
+## Logic & Truth Tables
+@ Proposition | Negation | Conjunction | Disjunction
+A declarative statement with a truth value is what?|0|Propositions can be true or false.
+What logical operation is expressed by 'not p'?|1|It reverses the truth value.
+What operation is p and q?|2|Both components must be true.
+What operation is inclusive p or q?|3|At least one component must be true.
+@ True | False | Both true and false | Not a proposition
+If p is true, what is not p?|1|Negation reverses true to false.
+If p and q are true, what is p and q?|0|Both requirements hold.
+If p is false and q true, what is p or q?|0|One true component suffices.
+Classify 'Close the door' in elementary propositional logic.|3|An imperative has no asserted truth value.
+@ Only when p is true and q false | Whenever p is false | Whenever q is true | Whenever p and q agree
+When is p implies q false?|0|Only a true antecedent with false consequent violates it.
+When is p iff q true?|3|The truth values must match.
+Which condition alone guarantees p implies q is true regardless of q?|1|A false antecedent makes the material conditional true.
+A truth-table row already has q marked true. Which statement about q by itself guarantees p → q, even before p is filled in?|2|A true consequent makes the conditional true.
+@ Tautology | Contradiction | Contingency | Logical equivalence
+What is p or not p?|0|It is true for both values of p.
+What is p and not p?|1|It cannot be true.
+What is a statement true on some valuations and false on others?|2|Its truth depends on the valuation.
+What relation holds between statements with identical truth-table columns?|3|Their truth values match in every valuation.
+@ Modus ponens | Affirming the consequent | Contraposition | De Morgan's law
+Given p implies q and p, infer q. Identify the rule.|0|It applies the asserted conditional to its antecedent.
+Given p implies q and q, a student infers p. Identify the invalid pattern.|1|Other antecedents could produce q.
+p implies q is equivalent to not q implies not p. Identify this transformation.|2|The contrapositive is logically equivalent.
+Not(p and q) is equivalent to not p or not q. Identify the law.|3|Negation changes conjunction into disjunction of negations.
+## Limits & Derivatives
+@ 3 | 6 | 4 | 0
+Find the limit of x + 1 as x approaches 2.|0|Polynomials are continuous; substitute 2.
+Find the derivative of 3x at x = 7.|0|The derivative is the constant coefficient 3.
+Find the derivative of x² at x = 3.|1|2x evaluated at 3 is 6.
+Find the derivative of a constant.|3|A constant does not change.
+@ 2x | 3x² | 4x³ | 1
+Differentiate x².|0|Apply the power rule.
+Differentiate x³.|1|Bring down 3 and reduce the power.
+Differentiate x⁴.|2|Bring down 4 and reduce the power.
+Differentiate x.|3|Its slope is one.
+@ 4 | 6 | 1/2 | 12
+Compute lim(x→2) (x²-4)/(x-2).|0|Cancel x-2 away from the point to obtain x+2.
+Compute lim(x→3) (x²-9)/(x-3).|1|The simplified expression approaches x+3 = 6.
+Differentiate √x at x = 1.|2|1/(2√1) = 1/2.
+For s(t)=t³, find velocity at t=2.|3|s'(t)=3t² gives 12.
+@ Product rule | Chain rule | Quotient rule | Sum rule
+Differentiate x² sin x without expanding. Which rule directly handles the multiplication?|0|Both factors vary with x.
+Which rule handles (3x+1)⁵ most directly?|1|It is a composition of functions.
+Which rule handles x/(x+1) most directly?|2|It is a quotient of variable functions.
+Which rule permits differentiating x³ + x term by term?|3|Differentiation distributes across sums.
+@ A limit may exist despite an undefined point value | Continuity does not guarantee differentiability | Differentiate before evaluating velocity | A zero derivative is not always an extremum
+The simplified limit exists at a removable hole. Which conclusion is justified?|0|Limits concern nearby behavior, not necessarily the point value.
+The function abs(x) has a corner at zero. What principle does it illustrate?|1|It is continuous but has unequal one-sided slopes.
+A student uses s(2) instead of s'(2) for instantaneous velocity. What correction is needed?|2|Position and its rate of change are different quantities.
+f(x)=x³ has f'(0)=0 but changes neither from rising to falling nor vice versa. What follows?|3|A stationary point need not be a maximum or minimum.
+## Integration
+@ x² + C | x³ + C | x + C | C
+Find ∫2x dx.|0|The derivative of x² is 2x.
+Find ∫3x² dx.|1|The derivative of x³ is 3x².
+Find ∫1 dx.|2|The derivative of x is 1.
+Find ∫0 dx.|3|Any constant has derivative zero.
+@ 2 | 4 | 6 | 8
+Evaluate ∫₀² 1 dx.|0|The rectangle has width 2 and height 1.
+Evaluate ∫₀² 2x dx.|1|[x²] from 0 to 2 gives 4.
+Evaluate ∫₀² 3 dx.|2|Constant height 3 times width 2.
+Evaluate ∫₀² 3x² dx.|3|[x³] from 0 to 2 gives 8.
+@ ln(abs(x)) + C | -cos x + C | sin x + C | eˣ + C
+Find ∫(1/x) dx for x ≠ 0.|0|The derivative of ln(abs(x)) is 1/x.
+Find ∫sin x dx.|1|The derivative of -cos x is sin x.
+Find ∫cos x dx.|2|The derivative of sin x is cos x.
+Find ∫eˣ dx.|3|The exponential is its own derivative.
+@ Net displacement | Total distance | Accumulated change | Family of antiderivatives
+What does integrating signed velocity over time give?|0|Opposite directions contribute opposite signs.
+What does integrating speed over time give?|1|Speed accumulates nonnegative distance.
+What does ∫ₐᵇ r(t) dt describe when r is a rate of change?|2|The net-change theorem integrates the rate.
+Why include +C in an indefinite integral?|3|Antiderivatives can differ by a constant.
+@ 0 | Positive | Negative | Reverse the sign
+For an odd continuous function on [-a,a], what is the integral?|0|Symmetric signed areas cancel.
+An integrand is strictly positive on [a,b], a<b. What sign has its integral?|1|Positive area accumulates.
+A continuous curve lies entirely below the horizontal axis between ordered bounds a<b. How is its signed integral classified?|2|All signed contributions are negative.
+How does exchanging the upper and lower bounds change an integral?|3|Reversing orientation negates its value.

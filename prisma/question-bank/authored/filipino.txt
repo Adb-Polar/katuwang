@@ -1,0 +1,126 @@
+## Balarila (Gramatika)
+Alin ang pangngalan?|paaralan|masipag|tumakbo|ngunit|Pangngalan ang tawag sa tao, bagay o lugar.
+Sa 'Masipag si Lea,' alin ang pang-uri?|Masipag|si|Lea|Wala|Inilalarawan nito si Lea.
+Alin ang pandiwa?|sumulat|lapis|malinis|dahil|Nagsasaad ito ng kilos.
+Alin ang panghalip panao?|siya|mesa|kahapon|mabuti|Pumapalit ito sa ngalan ng tao.
+Alin ang pangatnig?|ngunit|bahay|sumayaw|pula|Nag-uugnay ito ng mga salita o sugnay.
+Alin ang pang-abay sa 'Mabilis tumakbo si Lito'?|Mabilis|tumakbo|si|Lito|Inilalarawan nito ang paraan ng pagtakbo.
+Piliin: Bumili siya ___ tinapay.|ng|nang|kay|kina|Ng ang pananda ng layon dito.
+Piliin: Umalis siya ___ maaga.|nang|ng|ni|kay|Nang ang ginagamit bago ang pang-abay dito.
+Alin ang naganap na kilos?|Nagluto si Ana kahapon.|Magluluto si Ana bukas.|Nagluluto si Ana ngayon.|Magluto ka mamaya.|Kahapon at nagluto ang tumutukoy sa natapos na kilos.
+Alin ang pangungusap na patanong?|Saan kayo pupunta?|Pumunta kayo rito.|Maganda ang tanawin.|Naku, umuulan!|Humihingi ito ng impormasyon.
+Alin ang pangungusap na pautos?|Isara mo ang pinto.|Sarado ang pinto.|Nasaan ang pinto?|Kayganda ng pinto!|Nagpapagawa ito ng kilos.
+Piliin ang wastong pang-angkop: bata___ masipag.|-ng|-g|na|at|Ikinakabit ang -ng sa salitang nagtatapos sa patinig.
+Piliin: bahay ___ matibay.|na|ng|nang|-g|Na ang pang-angkop matapos ang katinig na hindi n.
+Ano ang ugnayang ipinapakita ng dahil?|Sanhi.|Pagsalungat.|Pagpili.|Pagkakatulad.|Ipinapakilala nito ang dahilan.
+Alin ang tambalang pangungusap?|Nagbasa si Ana at nagsulat si Ben.|Ang batang masipag.|Dahil sa malakas na ulan.|Sa ilalim ng mesa.|May dalawang sugnay na makapag-iisa.
+Sa 'Ibinigay ni Mila kay Rosa ang aklat,' sino ang tumanggap?|Rosa.|Mila.|Aklat.|Walang tumanggap.|Kay Rosa ang pariralang nagsasaad ng tagatanggap.
+Malabo ang 'Sinabi ni Nena kay Luz na nanalo siya.' Alin ang malinaw kung si Luz ang nanalo?|Sinabi ni Nena kay Luz na si Luz ang nanalo.|Sinabi niya kay Luz na nanalo siya.|Sinabi ni Nena sa kaniya na nanalo siya.|Sinabi ni Nena kay Luz ang kaniyang panalo.|Tahasan nitong tinutukoy ang nanalo.
+Alin ang pinakamaayos na rebisyon ng 'Dahil umulan. Hindi kami tumuloy.'?|Hindi kami tumuloy dahil umulan.|Dahil umulan at.|Hindi dahil kami.|Dahil kami hindi.|Iniuugnay nito ang sugnay na dahilan sa pangunahing diwa.
+Alin ang pagbabago ng pokus mula sa gumaganap patungo sa layon?|Mula 'Bumili si Lea ng isda' tungo sa 'Binili ni Lea ang isda.'|Mula 'Bumili' tungo sa 'Bibili' lamang.|Mula 'Lea' tungo sa 'Liza' lamang.|Mula 'isda' tungo sa 'gulay' lamang.|Ang isda ang naging paksa ng ikalawang pangungusap.
+Piliin ang angkop na ugnayan: 'Nag-aral siya nang mabuti; ___, pumasa siya.'|kaya|ngunit|bagaman|samantala|Bunga ng pag-aaral ang pagpasa sa konteksto.
+## Pagbasa at Pag-unawa
+'Nagpunta si Mara sa palengke.' Saan siya nagpunta?|Sa palengke.|Sa paaralan.|Sa bukid.|Sa ospital.|Tuwirang binanggit ang lugar.
+'Basahin muna ang panuto bago sumagot.' Ano ang unang gagawin?|Basahin ang panuto.|Sagutan agad.|Ipasa ang papel.|Burahin ang sagot.|Muna at bago ang nagsasaad ng pagkakasunod.
+'Umuulan kaya nagdala siya ng payong.' Ano ang sanhi?|Pag-ulan.|Pagdadala ng payong.|Paglalakad.|Pagbili ng sapatos.|Ang ulan ang dahilan ng pagdadala.
+'Sa wakas ay nakauwi rin kami.' Anong yugto ang ipinahihiwatig?|Pagtatapos.|Pagsisimula lamang.|Paghahambing.|Pagtatanong.|Sa wakas ay palatandaan ng pagtatapos.
+Ano ang pangunahing ideya?|Sentral na kaisipan ng teksto.|Lahat ng maliliit na detalye.|Bilang ng pahina.|Pangalan ng imprenta.|Ito ang pinakabuod na diwa.
+Ano ang paghihinuha?|Pagbuo ng palagay batay sa mga pahiwatig.|Paghula nang walang batayan.|Pagkopya ng lahat ng pangungusap.|Pagbilang lamang ng salita.|May ebidensiyang pinagbabatayan ang hinuha.
+'Nanginginig si Pio at niyayakap ang sarili sa malamig na silid.' Ano ang makatwirang hinuha?|Nilalamig siya.|Galit siya sa lahat.|Ayaw niyang magbasa.|May tiyak siyang malubhang sakit.|Ang kilos at temperatura ang mga pahiwatig.
+'Binawasan ang plastik at dumami ang gamit na lalagyang muli.' Ano ang paksa?|Pagbabawas ng basurang plastik.|Kasaysayan ng sapatos.|Pagpapagawa ng kalsada.|Pagtaas ng pamasahe.|Parehong kaugnay ng pag-iwas sa plastik ang detalye.
+'Labindalawa sa dalawampung kalahok ang sumang-ayon.' Alin ang suportado?|Mahigit kalahati ng kalahok ang sumang-ayon.|Lahat ng mamamayan ay sang-ayon.|Walang tumutol.|Lahat ng kabataan ay tinanong.|Labindalawa ay higit sa kalahati ng dalawampu.
+'Bagaman pagod, tinapos niya ang gawain.' Ano ang ugnayan?|Pagsalungat sa inaasahang bunga.|Pagpili ng lugar.|Pagtukoy ng may-ari.|Pagdaragdag ng tauhan.|Natapos ang gawain sa kabila ng pagod.
+'Nagtanim ang klase upang may sariwang gulay.' Ano ang layunin?|Magkaroon ng sariwang gulay.|Magpalit ng guro.|Magbenta ng aklat.|Huminto sa pag-aaral.|Upang ang nagpapakilala ng layunin.
+Aling detalye ang may kaugnayan sa tekstong tungkol sa pagtitipid ng tubig?|Pagkukumpuni ng tumutulong gripo.|Kulay ng bagong sapatos.|Paboritong pelikula.|Haba ng bakasyon.|Direktang nakababawas ng nasasayang na tubig ang pagkukumpuni.
+'Payapa at kaaya-aya ang hardin.' Ano ang tono?|Positibo.|Mapanlibak.|Galit.|Nagbabanta.|Papuri ang mga salitang ginamit.
+'Pinuri ang produkto sa anunsiyo ng nagbebenta.' Ano ang dapat suriin?|Interes at ebidensiya ng pinagmulan.|Laki ng titik lamang.|Kulay ng papel lamang.|Dami ng tandang padamdam lamang.|Maaaring makaapekto ang interes sa pagbebenta sa paglalahad.
+Ano ang wastong buod?|Maikling paglalahad ng pangunahing diwa nang hindi binabago ang kahulugan.|Pagdaragdag ng bagong opinyon bilang katotohanan.|Pagkopya ng buong teksto.|Pagbanggit ng pamagat lamang.|Pinananatili ng buod ang mahahalagang ideya.
+'Hindi natuloy ang laro sapagkat binaha ang palaruan.' Ano ang bunga?|Hindi natuloy ang laro.|Pag-ulan noong nakaraang taon.|Pagbili ng bola.|Pagpapalit ng uniporme.|Pagkansela ng laro ang epekto ng baha.
+Isang klase lang ang sinarbey ngunit sinabi ng ulat na pare-pareho ang lahat ng Pilipino. Ano ang suliranin?|Labis na paglalahat.|Kakulangan ng malaking pamagat.|Masyadong maikling pangalan.|Walang suliranin dahil may bilang.|Lumampas ang pahayag sa saklaw ng ebidensiya.
+Dalawang artikulo ang magkaiba ang paliwanag sa baha. Ano ang pinakamahusay na hakbang?|Ihambing ang datos, petsa at pamamaraan ng bawat isa.|Piliin agad ang mas mahaba.|Paniwalaan ang mas maraming larawan.|Ipagpalagay na kapwa walang saysay.|Nakasalalay sa ebidensiya ang pagsusuri.
+Tumaas ang marka matapos ang bagong aklat at dagdag na oras ng pagtuturo. Ano ang maingat na konklusyon?|Maaaring parehong nakatulong; hindi pa naihihiwalay ang epekto.|Ang aklat lang ang tiyak na sanhi.|Walang kinalaman ang pagtuturo kailanman.|Peke agad ang mga marka.|Sabay na nagbago ang dalawang salik.
+Isang pamagat ang nagsasabing 'Lahat ay ligtas,' ngunit may panganib na binanggit sa teksto. Ano ang dapat gawin?|Suriin ang buong teksto at ang limitasyon ng pamagat.|Pamagat lamang ang basahin.|Alisin sa isip ang babala.|Ibahagi agad nang walang konteksto.|Maaaring labis na pinasimple ng pamagat ang nilalaman.
+## Panitikang Pilipino
+Ano ang alamat?|Salaysay na nagpapaliwanag ng pinagmulan ayon sa tradisyon.|Ulat ng laboratoryo.|Talaan ng presyo.|Manwal ng makina.|Karaniwang ipinapaliwanag ng alamat ang pinagmulan ng bagay o lugar.
+Ano ang pabula?|Kuwentong madalas gumamit ng hayop upang maghatid ng aral.|Eksaktong tala ng panahon.|Talambuhay lamang.|Listahan ng batas.|Karaniwang may tauhang hayop at aral ang pabula.
+Ano ang tagpuan?|Panahon at lugar ng pangyayari.|Pangalan ng palimbagan.|Bilang ng mambabasa.|Presyo ng aklat.|Dito nagaganap ang salaysay.
+Ano ang tauhan?|Gumaganap sa kuwento.|Sukat ng papel.|Tatak ng tinta.|Talaan ng pahina.|Tauhan ang mga kalahok sa salaysay.
+Ano ang banghay?|Pagkakaayos ng mga pangyayari.|Kulay ng pabalat.|Pangalan ng paaralan.|Bilang ng pantig lamang.|Banghay ang balangkas ng mga pangyayari.
+Ano ang tugma?|Pagkakatulad ng tunog sa mga hulihan ng taludtod.|Bilang ng kabanata.|Pangalan ng may-akda.|Laki ng papel.|Tunog sa dulo ang tinutukoy ng tugma.
+'Ang kaniyang tinig ay musika.' Anong tayutay?|Pagwawangis.|Pagtutulad.|Pagmamalabis.|Pagtatanong.|Tuwiran ang paghahambing nang walang tulad o parang.
+'Parang bituin ang kaniyang mga mata.' Anong tayutay?|Pagtutulad.|Pagwawangis.|Pag-uulit lamang.|Pagpapalit-tawag.|Parang ang tahasang panandang paghahambing.
+'Sumayaw ang mga dahon.' Anong tayutay?|Pagsasatao.|Pagtutulad.|Pagtatambis.|Pagtutugma.|Ginawang kilos-tao ang galaw ng dahon.
+Binalik ng tauhan ang napulot na pera nang walang gantimpala. Anong katangian ang ipinakita?|Katapatan.|Kasakiman.|Pagmamataas.|Katamaran.|Ang pagsasauli ang ebidensiya ng katapatan.
+Nag-aalinlangan ang tauhan kung aamin sa pagkakamali. Anong tunggalian?|Tao laban sa sarili.|Tao laban sa bagyo lamang.|Tao laban sa hayop lamang.|Tao laban sa makina lamang.|Panloob na pagpapasiya ang suliranin.
+Paulit-ulit na lumilitaw ang kandila kapag may pag-asa. Ano ang maaaring sagisag nito?|Pag-asa.|Tiyak na kayamanan.|Pagkagutom lamang.|Pagkawala ng lahat ng alaala.|Ang konteksto ng paglitaw ang batayan ng simbolismo.
+Ano ang persona sa tula?|Tinig na nagsasalita sa tula.|Laging mismong may-akda.|Tagalimbag.|Laging unang mambabasa.|Hindi awtomatikong katumbas ng makata ang persona.
+Ano ang sukat sa tradisyonal na taludtod?|Bilang ng pantig.|Bilang ng kuwit.|Bilang ng tauhan.|Haba ng pabalat.|Pantig ang batayan ng sukat.
+Paano pinatutunayan ang tema?|Sa magkakaugnay na detalye ng akda.|Sa paboritong kulay ng mambabasa.|Sa presyo ng aklat.|Sa sabi-sabi tungkol sa may-akda lamang.|Nangangailangan ng tekstuwal na batayan ang interpretasyon.
+Ipinakita ng kuwento ang dating magkaaway na nagtulungan. Aling tema ang angkop?|Maaaring mapagtagumpayan ng pagtutulungan ang hidwaan.|Lahat ng kaaway ay hindi nagbabago.|Walang saysay ang pakikipagkapwa.|Laging masama ang pagbabago.|Sinusuportahan ng pangyayari ang pagkakasundo.
+Sinabi ng tagapagsalaysay na siya ay matapang ngunit palaging tumatakas. Ano ang dapat suriin?|Pagsasalungatan ng kaniyang salita at kilos.|Pangalan ng palimbagan.|Kulay ng mga titik.|Bilang ng pahina lamang.|Maaaring hindi lubos na mapagkakatiwalaan ang kaniyang paglalarawan.
+Dalawang interpretasyon ng tula ang iminungkahi. Alin ang higit na matibay?|Ang may malinaw at magkakaugnay na patunay mula sa tula.|Ang unang nasabi.|Ang may pinakamahabang pamagat.|Ang pinakamaraming likes.|Ebidensiya ang nagpapalakas sa interpretasyon.
+May marahas na tauhan ang akda. Bakit hindi agad masasabi na sinasang-ayunan siya ng may-akda?|Magkaiba ang paglalarawan ng tauhan at pag-endorso sa kilos nito.|Lahat ng tauhan ay tunay na tao.|Walang pananaw ang anumang akda.|Bawal suriin ang tauhan.|Kailangang suriin ang kabuuang paglalatag at bunga ng kilos.
+Nagbago ang kahulugan ng ilog mula panganib tungo sa paglalakbay. Ano ang kailangang isaalang-alang?|Pagbabago ng konteksto at karanasan ng tauhan.|Iisang kahulugan lamang ng bawat simbolo magpakailanman.|Kulay ng aklat.|Presyo ng papel.|Maaaring umunlad ang simbolikong kahulugan sa akda.
+## Pagsulat ng Sanaysay
+Ano ang tesis?|Pangunahing paninindigan o sentral na ideya.|Listahan ng lahat ng salita.|Pangalan ng tagalimbag.|Bilang ng titik.|Tesis ang gumagabay sa talakay.
+Ano ang panimula?|Bahaging nagpapakilala sa paksa.|Listahan lamang ng sanggunian.|Laging huling talata.|Talaan ng gastos.|Inihahanda nito ang mambabasa sa paksa.
+Ano ang katawan ng sanaysay?|Paglinang sa pangunahing mga ideya.|Pabalat ng dokumento.|Lagda lamang.|Pamagat lamang.|Dito inilalahad ang paliwanag at patunay.
+Ano ang wakas?|Paglalagom at makabuluhang pagtatapos.|Pagpasok ng walang kaugnayang paksa.|Listahan ng font.|Pagkopya ng buong katawan.|Binubuo nito ang kabuuang talakay.
+Ano ang balangkas?|Plano ng ayos ng mga ideya.|Tiyak na bilang ng mambabasa.|Uri ng tinta.|Palamuti lamang.|Nakakatulong ito sa organisasyon.
+Alin ang panandang pagsalungat?|Gayunman.|Bukod dito.|Dagdag pa.|Halimbawa.|Nagpapakilala ito ng kaibahan.
+Aling tesis ang tiyak para sa maikling sanaysay?|Makababawas sa basura ng paaralan ang paggamit ng lalagyang muli.|Maraming bagay sa mundo.|Mahalaga ang lahat.|May mga tao.|Tiyak ang saklaw at pahayag.
+Paksa ay hardin ng paaralan. Aling detalye ang may kaugnayan?|Mga gulay na naaani ng mga mag-aaral.|Paboritong artista ng kapitbahay.|Presyo ng sapatos sa ibang bansa.|Bilang ng sasakyan sa karera.|Direktang pinauunlad nito ang paksa.
+Ano ang dapat idagdag matapos ang estadistika?|Paliwanag kung paano ito sumusuporta sa pahayag.|Walang kaugnayang biro.|Bagong paksa agad.|Isa pang pamagat lamang.|Hindi sapat ang datos kung walang pagsusuri.
+Ano ang rebisyon?|Pagpapahusay ng ideya at organisasyon.|Pagpapalit lamang ng kulay.|Paglalagay lang ng pangalan.|Pagbilang lamang ng pahina.|Mas malawak ito kaysa pagwawasto ng baybay.
+Ano ang pagwawasto o proofreading?|Pagsusuri ng baybay, bantas at maliliit na kamalian.|Pagbabago ng lahat ng ebidensiya.|Pag-imbento ng bagong datos.|Pagkansela ng buong argumento.|Tinitingnan nito ang mekanika ng teksto.
+Paano patas na ihahambing ang dalawang programa?|Gumamit ng magkakatulad na pamantayan.|Isang programa lang ang talakayin.|Piliin ang mas sikat nang walang datos.|Paghaluin ang walang kaugnayang detalye.|Magkakatulad na pamantayan ang batayan ng patas na paghahambing.
+May ibang pananaw laban sa tesis. Ano ang dapat gawin?|Ilahad at sagutin gamit ang katwiran at ebidensiya.|Insultuhin ang may-akda nito.|Itago ang lahat ng pagtutol.|Ulitin ang tesis nang walang paliwanag.|Pinatitibay ng makatarungang pagtugon ang argumento.
+Malabo ang ugnayan ng mga talata. Ano ang makatutulong?|Angkop na transisyon at malinaw na pagkakasunod.|Mas maraming dekorasyon.|Mas malalaking titik lamang.|Pag-aalis ng lahat ng pangungusap.|Ugnayan ng ideya ang kailangang ayusin.
+Bakit kailangang kilalanin ang sanggunian?|Upang magbigay-kredito at masundan ang batayan.|Upang itago ang pinagmulan.|Upang hindi na magsuri.|Upang magmukhang sariling tuklas ang hiniram.|May etikal at praktikal na tungkulin ang pagsipi.
+Alin ang higit na pormal?|Ipinakikita ng datos ang pagtaas.|Grabe, sobrang taas, bes!|Ay wow, taas!|Super taas talaga, promise!|Angkop sa pormal na paglalahad ang una.
+Isang karanasan lang ang batayan ng pangkalahatang pahayag. Ano ang pinakamahusay na rebisyon?|Limitahan ang konklusyon at maghanap ng mas malawak na ebidensiya.|Dagdagan ang tandang padamdam.|Gawing mas malaking titik ang pahayag.|Alisin ang lahat ng limitasyon.|Dapat tumugma ang saklaw ng konklusyon sa patunay.
+Magkasalungat ang dalawang sanggunian. Ano ang dapat suriin?|Pamamaraan, petsa, saklaw at ebidensiya.|Kulay ng kanilang logo lamang.|Haba ng pangalan lamang.|Kung alin ang unang lumabas sa search.|Kalidad at konteksto ang mahalaga sa pagsusuri.
+May magandang sipi ngunit walang kaugnayan sa tesis. Ano ang dapat gawin?|Alisin ito o baguhin ang talakay upang magkaroon ng makabuluhang ugnayan.|Panatilihin dahil mahaba.|Dagdagan ng dekorasyon.|Ulitin nang tatlong beses.|Dapat may ambag ang detalye sa argumento.
+Tinatanggihan ng bagong datos ang unang paninindigan. Ano ang makatuwirang hakbang?|Suriin at baguhin ang paninindigan kung kailangan.|Baguhin ang datos nang palihim.|Itago ang sanggunian.|Igiit na walang saysay ang ebidensiya.|Dapat tumugon sa matibay na ebidensiya ang argumento.
+## Pagsasalin
+Ano ang simulaing mahalaga sa pagsasalin?|Pagpapanatili ng kahulugan sa angkop na pahayag.|Palaging salita-sa-salitang pagtutumbas.|Pagdaragdag ng sariling balita.|Pagbabawas ng lahat ng detalye.|Kahulugan at konteksto ang pangunahing isinasaalang-alang.
+Ano ang simulaang wika?|Wika ng orihinal na teksto.|Wika ng salin lamang.|Wika ng unang mambabasa lamang.|Anumang wikang walang kaugnayan.|Dito nanggagaling ang tekstong isinasalin.
+Ano ang tunguhang wika?|Wika ng isinasaling bersiyon.|Laging Ingles.|Laging sinaunang wika.|Pangalan ng may-akda.|Ito ang wikang ginagamit sa salin.
+Ano ang konteksto?|Kaligirang tumutulong magtakda ng kahulugan.|Bilang lamang ng titik.|Presyo ng diksyunaryo.|Haba ng pamagat.|Nakaaapekto sa kahulugan ang gamit at kalagayan.
+Ano ang idyoma?|Pahayag na hindi laging mauunawaan mula sa literal na mga salita.|Anumang bilang.|Eksaktong pangalan ng wika.|Laging pangungusap na patanong.|May nakaugaliang di-literal na kahulugan ang idyoma.
+Bakit mahalaga ang target na mambabasa?|Nakaaapekto ito sa antas at rehistro ng salin.|Wala itong kaugnayan sa pag-unawa.|Ito lang ang pumapalit sa orihinal.|Upang maalis ang lahat ng kahulugan.|Inaangkop ang pahayag sa kaalaman at pangangailangan ng babasa.
+Ano ang angkop na salin ng 'Good morning'?|Magandang umaga.|Magandang gabi.|Paalam bukas.|Maligayang paglalakbay.|Umaga ang tinutukoy na bahagi ng araw.
+Sa usapang salapi, ang 'bank' ay dapat isalin bilang ano?|Bangko.|Pampang.|Banggaan.|Bangko ng upuan lagi.|Kontekstong pinansiyal ang nagtatakda ng kahulugan.
+Sa 'river bank,' ang bank ay ano?|Pampang.|Institusyong pinansiyal.|Pautang.|Barya.|Pampang ang gilid ng ilog.
+Paano isasalin ang 'Break a leg' bilang pagbati bago ang pagtatanghal?|Galingan mo!|Baliin mo ang binti.|Huwag kang maglakad.|Putulin ang entablado.|Pagpapahayag ito ng pagbati, hindi utos na manakit.
+Ano ang pinakamalapit na salin ng 'Please keep the door closed'?|Pakisara at panatilihing nakasara ang pinto.|Sirain ang pinto.|Buksan palagi ang pinto.|Walang pinto rito.|Pinananatili nito ang magalang na utos at kahulugan.
+Bakit hindi sapat ang isang katumbas sa diksyunaryo?|Maaaring iba ang kahulugan sa partikular na konteksto.|Laging mali ang lahat ng diksyunaryo.|Hindi umiiral ang maraming kahulugan.|Kailangan laging mas mahaba ang salin.|May mga salitang maraming kahulugan.
+Ano ang rehistro sa pagsasalin?|Antas at estilo ng wikang angkop sa sitwasyon.|Listahan lamang ng pangalan.|Sukat ng papel.|Bilang ng sipi.|Pormalidad at gamit ng wika ang tinutukoy.
+Sa teknikal na teksto, paano haharapin ang paulit-ulit na termino?|Gumamit ng malinaw at konsistent na katumbas.|Palitan ng ibang kahulugan sa bawat talata.|Tanggalin ang lahat ng termino.|Gawing biro ang termino.|Mahalaga ang pagkakapare-pareho sa katumpakan.
+Anong problema sa saling nagdaragdag ng 'tiyak' sa orihinal na 'may'?|Pinatataas nito ang antas ng katiyakan.|Pinananatili nito ang pag-aalinlangan.|Inaayos lamang nito ang font.|Wala itong epekto sa diwa.|Dapat mapanatili ang posibilidad o katiyakang ipinahayag.
+Ano ang silbi ng muling pagbasa sa salin?|Suriin ang linaw, likas na daloy at katapatan sa orihinal.|Tiyaking pareho ang bilang ng titik.|Alisin ang lahat ng pangungusap.|Palitan ang paksa nang walang pahintulot.|Sinusuri ang bisa at katumpakan ng salin.
+Ang biro ay nakabatay sa salitang may dalawang kahulugan na wala sa tunguhang wika. Ano ang angkop na hakbang?|Humanap ng katumbas na epekto o magpaliwanag kung kailangan.|Ipilit ang literal na salin kahit walang saysay.|Mag-imbento ng di-kaugnay na pangyayari.|Alisin ang konteksto nang walang dahilan.|Maaaring mangailangan ng malikhaing ngunit tapat na pagtutumbas.
+Isinalin ang babalang 'Do not mix' bilang 'Maaaring paghaluin.' Ano ang pinakamalubhang problema?|Nabaligtad ang ipinagbabawal na kilos.|Mas maikli ang salin.|Walang salitang Ingles.|Nagbago ang laki ng titik.|Kritikal sa babala ang pagpapanatili ng negasyon.
+Sa saling pambata, alin ang pinakamainam?|Malinaw na payak na wika nang hindi binabago ang mahalagang diwa.|Pag-aalis ng lahat ng mahahalagang impormasyon.|Walang paliwanag sa napakahirap na termino.|Pagdaragdag ng di-beripikadong aral.|Maaaring pasimplehin ang pahayag nang tapat sa nilalaman.
+Bakit kailangang ihambing ang salin sa orihinal matapos i-edit?|Maaaring lumihis ang kahulugan habang pinapakinis ang estilo.|Laging pareho ang lahat ng wika.|Upang kopyahin ang bawat bantas nang bulag.|Upang matiyak na mas mahaba ang salin.|Pinagsasabay ang pagiging likas at pagiging tapat.
+## Retorika at Pampublikong Pagsasalita
+Ano ang pangunahing layunin ng retorika?|Mabisang paggamit ng wika ayon sa layunin at tagapakinig.|Pagpapahaba ng lahat ng salita.|Pag-iwas sa pakikipag-usap.|Pag-aalis ng lahat ng ebidensiya.|Inaangkop nito ang pagpapahayag sa sitwasyon.
+Sino ang tagapakinig?|Tumatanggap ng mensaheng binibigkas.|Mikropono lamang.|Papel ng talumpati.|Ilaw sa entablado.|Sila ang umuunawa sa mensahe.
+Ano ang ethos?|Apela sa kredibilidad.|Bilang ng talata.|Tindi ng tunog lamang.|Tugma sa hulihan.|Kaugnay ito ng tiwala at pagiging kapani-paniwala.
+Ano ang logos?|Apela sa lohika at katwiran.|Palamuti sa entablado.|Bilis ng lakad.|Taas ng boses lamang.|Mga dahilan at ebidensiya ang sentro nito.
+Ano ang pathos?|Apela sa damdamin.|Pagsukat ng mikropono.|Pagbilang ng titik.|Pangalan ng gusali.|Damdamín ng tagapakinig ang nilalapitan nito.
+Ano ang talumpating impormatibo?|Nagpapaliwanag ng impormasyon.|Laging humihiling ng pagbili.|Laging pananakot.|Laging kathang-isip lamang.|Pag-unawa ang pangunahing layunin nito.
+Humaharap sa mga batang mag-aaral ang tagapagsalita. Ano ang dapat gawin?|Gumamit ng payak na paliwanag at kongkretong halimbawa.|Gumamit ng di-ipinaliliwanag na jargon.|Bumasa nang napakabilis.|Ipagpalagay na alam na nila ang lahat.|Kailangang iangkop sa kaalaman ng tagapakinig.
+Nalilito ang mga nakikinig. Ano ang angkop na tugon?|Linawin muli at magbigay ng halimbawa.|Lakasan lamang ang musika.|Balewalain sila.|Palitan ng mas mahirap na salita.|Senyal ang kanilang reaksiyon na kailangan ng paglilinaw.
+Bakit mahalaga ang paghinto sa mahahalagang punto?|Nagbibigay ng panahon sa pag-unawa.|Pinapalitan nito ang lahat ng ebidensiya.|Tinitiyak nitong sang-ayon ang lahat.|Inaalis nito ang paksa.|May panahon ang tagapakinig na iproseso ang ideya.
+Aling biswal ang angkop sa pagbabago ng datos bawat buwan?|Malinaw na grap na may petsa at yunit.|Walang label na guhit.|Larawang walang kaugnayan.|Napakaliit na buong sanaysay.|Kailangang mabasa at maipaliwanag ang pagbabago.
+Hindi alam ng tagapagsalita ang sagot. Ano ang tapat na tugon?|Aminin ang limitasyon at beripikahin ang impormasyon.|Mag-imbento ng sagot.|Insultuhin ang nagtanong.|Igiit na bawal magtanong.|Pinananatili nito ang katapatan at tiwala.
+Alin ang epektibong transisyon?|Matapos ang mga sanhi, talakayin naman natin ang mga solusyon.|Wala na akong maisip.|Kahit ano na lang.|Basta iyon na.|Malinaw nitong pinagdurugtong ang mga bahagi.
+Ano ang mapanuring pakikinig?|Pagsusuri ng katwiran at ebidensiya habang nakikinig.|Pagsang-ayon agad sa lahat.|Pagtingin lamang sa kasuotan.|Pagsigaw habang nagsasalita ang iba.|Hindi sapat ang basta pagtanggap ng mensahe.
+Nag-eensayo gamit ang orasang panukat. Ano ang sinusuri?|Pagkakasya ng nilalaman sa oras.|Kulay ng pader lamang.|Pangalan ng lahat ng nakikinig.|Pagiging totoo ng lahat ng opinyon.|Nasusuri nito ang haba at pacing.
+Paano angkop na magwakas ang mapanghikayat na talumpati?|Ibuod ang dahilan at maglahad ng malinaw na makatotohanang hakbang.|Magpakilala ng di-ipinaliwang na bagong paksa.|Ulitin ang lahat nang buo.|Tapusin sa insulto.|Dapat malinaw ang mensahe at hinihiling na kilos.
+Bakit mahalagang kilalanin ang hiniram na datos sa talumpati?|Upang magbigay-kredito at masuri ang batayan.|Upang hindi na ito beripikahin.|Upang magmukhang sariling imbensiyon.|Upang pahabain lamang ang talumpati.|Mahalaga ang pinagmulan sa etika at kredibilidad.
+Sikat na artista ang nagsabi ng teknikal na claim na walang ebidensiya. Ano ang wastong pagsusuri?|Hanapin ang kaugnay na ekspertong batayan; hindi sapat ang kasikatan.|Tanggapin dahil sikat.|Tanggihan ang lahat ng siyensiya.|Batayan ang dami ng tagahanga lamang.|Hindi awtomatikong katumbas ng kadalubhasaan ang kasikatan.
+Sinisi ang pagkatao ng kalaban sa halip na sagutin ang kaniyang datos. Anong kamalian?|Ad hominem.|Wastong paghahambing.|Kumpletong patunay.|Matapat na pagsipi.|Tao ang inatake sa halip na argumento.
+Nakaaantig ang kuwento ngunit hindi nito pinatutunayan ang pangkalahatang claim. Ano ang dapat idagdag?|Kaugnay at sapat na ebidensiya.|Mas malakas na iyak lamang.|Mas maraming palamuti.|Mas mahabang palakpakan.|Hindi pamalit sa patunay ang emosyon lamang.
+Magkasalungat ang mga seksiyon ng presentasyon ng pangkat. Ano ang dapat unahin?|Paglilinaw ng termino at pag-aayos ng mga pahayag.|Pagdadagdag lamang ng animation.|Pagpapalit lamang ng kulay.|Pagbilis ng pagbasa.|Kailangang magkakaugnay at konsistent ang mensahe.

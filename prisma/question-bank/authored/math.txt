@@ -1,0 +1,147 @@
+## Fractions & Decimals
+Simplify 6/8.|3/4|2/3|3/8|6/4|Divide numerator and denominator by 2.
+Write 0.25 as a simplified fraction.|1/4|1/25|2/5|3/4|0.25 equals 25/100.
+Which decimal equals 3/5?|0.6|0.3|0.35|0.8|Divide 3 by 5.
+Compute 1/3 + 1/3.|2/3|1/6|2/6|1|Add numerators over the common denominator.
+Compute 0.7 - 0.2.|0.5|0.9|0.05|0.7|Subtract aligned tenths.
+What is the reciprocal of 2/7?|7/2|2/7|-2/7|5/7|Exchange numerator and denominator.
+Compute 2/3 + 1/4.|11/12|3/7|3/12|5/6|Use denominator 12: 8/12 + 3/12.
+Compute 5/6 - 1/4.|7/12|4/2|4/12|2/3|Subtract 10/12 - 3/12.
+Compute (3/4) × (2/5).|3/10|5/9|6/9|3/20|Multiply numerators and denominators, then simplify.
+Compute (2/3) ÷ (4/5).|5/6|8/15|6/5|1/2|Multiply 2/3 by 5/4.
+Compute 1.2 × 0.4.|0.48|4.8|0.048|1.6|12 × 4 = 48 with two decimal places.
+Compute 3.6 ÷ 0.12.|30|3|0.3|300|Multiply both dividend and divisor by 100.
+Which is greatest: 0.58, 3/5, 0.605, 0.59?|0.605|3/5|0.59|0.58|Compare 0.605 with 0.600, 0.590 and 0.580.
+A ribbon is 3/4 m long. After using 1/8 m, how much remains?|5/8 m|2/6 m|7/8 m|1/2 m|Subtract 6/8 - 1/8.
+Three bottles each contain 0.75 L. Total volume?|2.25 L|0.25 L|1.75 L|3.75 L|Multiply 3 by 0.75.
+A recipe uses 2/3 cup per batch. How much for three batches?|2 cups|2/9 cup|3/2 cups|3 cups|Three times 2/3 equals 2.
+A tank starts full. One third of its water is used, then half the remainder. What fraction remains?|1/3|1/6|1/2|2/3|After the first use 2/3 remains; half of that is 1/3.
+A 2.4 m board is cut into 0.35 m pieces with no cutting loss. Maximum whole pieces?|6|7|8|5|Six pieces use 2.10 m; seven require 2.45 m.
+A pupil says (1/2 + 1/3) = 2/5. Which correction is valid?|Use equivalent fractions: 3/6 + 2/6 = 5/6.|Add both denominators to get 5/5.|Multiply only numerators to get 1/5.|The original calculation is correct.|Fraction addition requires a common denominator.
+A price of ₱240 is reduced by one quarter, then a ₱15 fee is added. Final cost?|₱195|₱165|₱255|₱180|240 × 3/4 + 15 = 195.
+## Algebraic Expressions
+In 9x + 4, what is the coefficient of x?|9|4|13|x|The coefficient multiplies the variable.
+Which term is constant in 5y - 8?|-8|5|y|5y|The constant does not contain y.
+Which term is like 3a²?|-7a²|3a|3b²|a³|Like terms have matching variable parts and exponents.
+What is the degree of 6x⁴ + x + 2?|4|6|2|1|The highest exponent is four.
+Evaluate p + 6 for p = 5.|11|30|1|56|Substitute 5 for p.
+Which expression means twice a number n?|2n|n + 2|n/2|n²|Twice means multiplication by two.
+Simplify 8x - 3x + 2x.|7x|13x|3x|7x²|Combine coefficients: 8 - 3 + 2.
+Expand 4(y - 3).|4y - 12|4y - 3|y - 12|4y + 12|Distribute 4 to both terms.
+Simplify 2(3a + 1) - a.|5a + 2|6a + 1|7a + 2|5a + 1|Expand to 6a + 2 - a.
+Evaluate 3x² when x = -2.|12|-12|36|-6|Square -2 first, then multiply by 3.
+Factor 12x + 18 by its greatest common factor.|6(2x + 3)|3(4x + 18)|6(2x + 18)|12(x + 6)|Both terms share factor 6.
+Simplify (5m + 4) - (2m - 3).|3m + 7|3m + 1|7m + 1|7m + 7|Distribute the minus sign before combining terms.
+A notebook costs n pesos. Three notebooks and a ₱10 pen cost what?|3n + 10|3(n + 10)|n + 30|10n + 3|Only the notebook cost is multiplied by three.
+Simplify x³ × x².|x⁵|x⁶|2x³|x|Add exponents for powers of the same base.
+Simplify x⁶ ÷ x² for x ≠ 0.|x⁴|x³|x⁸|x¹²|Subtract exponents for division of equal bases.
+Evaluate 2a - b for a = 4, b = -3.|11|5|-11|-5|2(4) - (-3) = 11.
+Which expression represents the perimeter of a rectangle with sides x + 2 and 2x - 1?|6x + 2|3x + 1|2x² + 3x - 2|6x + 6|Twice the sum of the side lengths gives 6x + 2.
+A student expands (x + 3)² as x² + 9. Which term is missing?|6x|3x|2x|9x²|The two cross-products each contribute 3x.
+Simplify 3(2x - 1) - 2(x + 4).|4x - 11|4x + 5|8x - 11|4x - 5|Expand both groups: 6x - 3 - 2x - 8.
+For nonzero x, a student writes x² + x³ = x⁵. What is the error?|The exponent-addition rule applies to multiplication, not addition.|Exponents can never be added.|All powers of x are like terms.|The expression always equals x.|Addition does not combine different powers into one power.
+## Linear Equations & Inequalities
+Solve x + 7 = 12.|x = 5|x = 19|x = -5|x = 7|Subtract 7 from both sides.
+Solve 4x = 20.|x = 5|x = 16|x = 24|x = 80|Divide both sides by 4.
+Which symbol means 'at most'?|≤|≥|>|= only|At most allows the boundary and smaller values.
+Solve x - 9 = 3.|x = 12|x = -6|x = 6|x = -12|Add 9 to both sides.
+Which value satisfies x > 4?|5|4|3|0|Five is strictly greater than four.
+Solve x/3 = 6.|x = 18|x = 2|x = 9|x = 3|Multiply both sides by 3.
+Solve 3x + 5 = 23.|x = 6|x = 9|x = 28/3|x = 18|Subtract 5 then divide by 3.
+Solve 5x - 4 = 2x + 11.|x = 5|x = 3|x = 7|x = -5|Collect terms to obtain 3x = 15.
+Solve 2(x + 3) = 18.|x = 6|x = 12|x = 9|x = 3|Divide by 2 then subtract 3.
+Solve -3x < 12.|x > -4|x < -4|x > 4|x < 4|Dividing by a negative reverses the inequality.
+Solve x/2 + 1 = 7.|x = 12|x = 3|x = 16|x = 6|Subtract 1 then multiply by 2.
+Solve 4x + 2 ≤ 18.|x ≤ 4|x ≥ 4|x ≤ 5|x < 4|Subtract 2 and divide by positive 4.
+An entrance fee is ₱20 plus ₱15 per ride. Which equation represents total cost ₱95?|20 + 15r = 95|20r + 15 = 95|35r = 95|15r - 20 = 95|The fixed fee is added once.
+Solve 7 - 2x = 15.|x = -4|x = 4|x = -11|x = 11|Subtract 7 and divide by -2.
+Which describes solutions of x + 2 = x + 5?|No solution.|Only x = 3.|Every real number.|Only x = 0.|Subtracting x gives the impossible statement 2 = 5.
+Which describes solutions of 2(x + 1) = 2x + 2?|Every real number.|No solution.|Only x = 0.|Only x = 1.|Both sides are the same expression.
+A ₱50 fixed charge plus ₱12 per item must be at most ₱146. Maximum whole items?|8|7|9|12|12n ≤ 96 gives n ≤ 8.
+Solve 3(2x - 1) = 4x + 9.|x = 6|x = 3|x = -6|x = 12|6x - 3 = 4x + 9 gives 2x = 12.
+Solve -2 ≤ 3x + 1 < 10.|-1 ≤ x < 3|-3 ≤ x < 9|-1 < x ≤ 3|1 ≤ x < 3|Subtract 1 throughout and divide by 3.
+A student changes -5x ≥ 20 into x ≥ -4. What correction is required?|x ≤ -4, because division by -5 reverses the sign.|x ≥ 4, because negatives disappear.|x = -4 only, because inequalities are equations.|No correction is needed.|Negative scaling reverses order.
+## Geometry & Measurement
+Area of a rectangle equals what?|Length × width.|2(length + width).|Length + width.|Length ÷ width.|Area measures the product of perpendicular side lengths.
+How many degrees sum to a triangle's interior angles in plane geometry?|180°|90°|270°|360°|Euclidean triangle angles sum to 180 degrees.
+Which unit measures volume?|cm³|cm|cm²|degrees|Volume uses cubic units.
+Perimeter of a square of side 5 cm?|20 cm|25 cm|10 cm|15 cm|Add its four equal sides.
+Area of a rectangle 8 cm by 3 cm?|24 cm²|22 cm²|11 cm²|48 cm²|Multiply 8 by 3.
+How many centimeters equal 2 meters?|200|20|2000|0.02|One meter equals 100 centimeters.
+Area of a triangle with base 10 cm and height 6 cm?|30 cm²|60 cm²|16 cm²|120 cm²|Use half the base times perpendicular height.
+A triangle has angles 45° and 65°. Third angle?|70°|80°|110°|90°|Subtract 110 from 180.
+Volume of a cuboid 4 cm × 3 cm × 5 cm?|60 cm³|12 cm³|47 cm³|120 cm³|Multiply its three dimensions.
+Area of a circle of radius 7 cm using π = 22/7?|154 cm²|44 cm²|49 cm²|308 cm²|Use πr².
+Circumference of radius 7 cm using π = 22/7?|44 cm|154 cm|22 cm|49 cm|Use 2πr.
+A right triangle has legs 6 and 8. Hypotenuse?|10|14|7|48|The square root of 36 + 64 is 10.
+Area of a trapezoid with parallel bases 6 and 10 cm, height 4 cm?|32 cm²|64 cm²|40 cm²|24 cm²|Half the sum of bases times height gives 32.
+Convert 1.5 km to meters.|1500 m|150 m|15 m|15000 m|One kilometer is 1000 meters.
+A square's side doubles. Its area changes by what factor?|4|2|8|1|Area scales with the square of length.
+Surface area of a cube of side 3 cm?|54 cm²|27 cm²|18 cm²|9 cm²|Six faces each have area 9.
+A 10 m by 8 m garden has a 2 m by 3 m pond inside it. Plantable area?|74 m²|86 m²|68 m²|48 m²|Subtract pond area 6 from garden area 80.
+A rectangle has perimeter 30 cm and width 5 cm. Area?|50 cm²|75 cm²|100 cm²|25 cm²|Length + width = 15, so length is 10.
+A cylinder has radius 3 cm and height 5 cm. Volume in terms of π?|45π cm³|15π cm³|30π cm³|90π cm³|Base area 9π times height 5 gives 45π.
+A map uses 1:100 scale. A room is 4 cm by 3 cm on it. Actual area?|12 m²|1200 m²|0.12 m²|120 m²|Actual sides are 4 m and 3 m; area is 12 m².
+## Statistics & Probability
+Mean of 2, 4 and 6?|4|2|6|12|Divide the sum 12 by three.
+Median of 1, 3, 8, 10, 12?|8|3|10|6.8|The middle ordered observation is 8.
+Mode of 2, 3, 3, 5?|3|2|5|13|Three occurs most frequently.
+Range of 4, 7 and 10?|6|7|10|21|Subtract minimum 4 from maximum 10.
+Probability of heads on a fair coin toss?|1/2|1|0|1/3|Two equally likely outcomes include one head.
+Which probability describes an impossible event?|0|1|1/2|2|An impossible event has probability zero.
+Mean of 5, 7, 8 and 12?|8|7|9|32|The sum is 32 across four observations.
+Median of 2, 4, 8 and 10?|6|4|8|24|Average the middle two values 4 and 8.
+A fair die is rolled. Probability of an even number?|1/2|1/3|2/3|1/6|Three of six equally likely outcomes are even.
+A bag has 3 red and 2 blue balls. Probability of red on one random draw?|3/5|2/5|3/2|1/5|Three of the five balls are red.
+Which chart best compares counts across distinct categories?|Bar chart.|An unlabeled curve.|A paragraph with no counts.|A random photograph.|Bar heights can represent category counts.
+A class has 12 girls and 8 boys. Percentage of girls?|60%|40%|12%|80%|12 out of 20 equals 60 percent.
+Two independent fair coins are tossed. Probability of two heads?|1/4|1/2|3/4|1|Multiply 1/2 by 1/2.
+Which sampling method gives every pupil an equal selection chance?|A properly conducted simple random sample.|Selecting only friends.|Surveying only volunteers online.|Selecting only top scorers.|Simple random selection avoids deliberate unequal selection probabilities.
+One very large outlier is added to a dataset. Which measure is often more resistant?|Median.|Mean.|Sum.|Maximum.|The median is less affected by extreme values.
+Why label graph axes and units?|To make the displayed quantities interpretable.|To guarantee the conclusion is true.|To hide the sample size.|To eliminate data variability.|Labels define what plotted values mean.
+A bag has 3 red and 2 blue balls. Two are drawn without replacement. Probability both red?|3/10|9/25|6/25|3/5|Multiply 3/5 by 2/4.
+Scores 4, 6 and 8 have mean 6. What fourth score produces mean 7?|10|7|9|12|A total of 28 is needed; existing scores sum to 18.
+A poll samples only library visitors about reading habits. What is a key limitation?|It may overrepresent frequent readers.|It gives every resident equal selection chance.|It proves everyone reads daily.|It automatically eliminates bias.|Selection context can bias representation.
+A chart's vertical axis starts at 95 rather than 0. What should a reader examine?|Whether the truncated scale exaggerates apparent differences.|Whether all plotted values are necessarily false.|Whether any graph can be used.|Only the chart's color.|Axis choices affect visual impressions of magnitude.
+## Trigonometry
+In a right triangle, sin θ equals what?|Opposite/hypotenuse.|Adjacent/hypotenuse.|Opposite/adjacent.|Hypotenuse/opposite.|Sine relates opposite side to hypotenuse.
+In a right triangle, cos θ equals what?|Adjacent/hypotenuse.|Opposite/hypotenuse.|Hypotenuse/adjacent.|Adjacent/opposite.|Cosine relates adjacent side to hypotenuse.
+In a right triangle, tan θ equals what?|Opposite/adjacent.|Adjacent/hypotenuse.|Hypotenuse/opposite.|Adjacent/opposite.|Tangent relates opposite side to adjacent side.
+What is sin 30°?|1/2|1|0|√3/2|The standard special-angle value is one half.
+What is cos 60°?|1/2|0|1|√2|The standard special-angle value is one half.
+What is tan 45°?|1|0|1/2|√3|The legs of a 45-degree right triangle are equal.
+Opposite side is 3 and hypotenuse is 5. Find sin θ.|3/5|4/5|5/3|3/4|Use opposite divided by hypotenuse.
+Adjacent side is 12 and hypotenuse is 13. Find cos θ.|12/13|5/13|13/12|5/12|Use adjacent divided by hypotenuse.
+Opposite side is 8 and adjacent side is 6. Find tan θ.|4/3|3/4|4/5|3/5|8/6 simplifies to 4/3.
+A 10 m ladder makes 30° with level ground. Vertical height reached?|5 m|10 m|20 m|5√3 m|Height equals 10 sin 30°.
+An object's shadow is 7 m and the elevation angle is 45°. Height?|7 m|14 m|3.5 m|7√3 m|Height equals shadow length times tan 45°.
+For acute θ, sin θ = 1/2. Find θ.|30°|45°|60°|90°|Only 30 degrees has this sine in the acute range.
+Which identity is valid for all θ?|sin²θ + cos²θ = 1|sin θ + cos θ = 1 always|tan θ = cos θ/sin θ always|sin²θ - cos²θ = 1 always|The Pythagorean identity follows from the unit circle.
+For acute θ, cos θ = 3/5. Find sin θ.|4/5|2/5|3/4|5/4|Use sin²θ = 1 - 9/25 and the positive root.
+Which angle is complementary to 28°?|62°|152°|72°|28°|Complementary angles sum to 90 degrees.
+What is sin 60°?|√3/2|1/2|1|√2/2|The 30-60-90 triangle gives this ratio.
+A 13 m ladder reaches 12 m vertically against a wall. How far is its foot from the wall?|5 m|1 m|25 m|6 m|The base is √(13² - 12²) = 5.
+A tower's elevation angle is 45° from 20 m away; the observer's eye is 1.5 m high. Tower height?|21.5 m|20 m|18.5 m|40 m|Add eye height to 20 tan 45°.
+For acute θ, tan θ = 3/4. Find cos θ.|4/5|3/5|3/4|5/4|The corresponding right triangle has sides 3, 4 and 5.
+Why is sin θ = opposite/adjacent incorrect in right-triangle work?|That ratio defines tangent; sine uses hypotenuse as denominator.|Sine is always the reciprocal of tangent.|All ratios use the adjacent side as denominator.|The opposite side can never be measured.|The two trigonometric ratios use different denominators.
+## Functions & Graphing
+A function assigns each allowed input how many outputs?|Exactly one.|Exactly two.|No output.|Any number without restriction.|Uniqueness of output defines a function.
+If f(x) = x + 3, find f(2).|5|6|1|2|Substitute 2 for x.
+What is the domain?|The set of allowed inputs.|Only the largest output.|The vertical axis alone.|The graph's color.|Domain specifies permissible input values.
+What is the range?|The set of produced outputs.|The set of all possible labels.|Only negative inputs.|The horizontal axis alone.|Range comprises attained function values.
+Which point is the origin?|(0, 0)|(1, 0)|(0, 1)|(1, 1)|Both coordinates are zero.
+Which test checks whether a graph represents y as a function of x?|Vertical line test.|Horizontal ruler length test.|Color test.|Page-size test.|A vertical line must not meet the graph more than once.
+If f(x) = 2x - 1, find f(4).|7|8|9|6|2(4) - 1 = 7.
+What is the slope of y = 3x + 2?|3|2|5|-3|The coefficient of x is the slope.
+What is the y-intercept of y = -2x + 5?|5|-2|2|-5|At x = 0, y = 5.
+Which relation is not a function?|(1, 2), (1, 3)|(1, 2), (2, 3)|(1, 2), (2, 2)|(0, 1), (3, 4)|Input 1 has two different outputs.
+If f(x) = x², find f(-3).|9|-9|6|-6|Squaring -3 gives 9.
+Find the slope through (1, 2) and (3, 6).|2|4|1/2|3|Slope is (6 - 2)/(3 - 1).
+For f(x) = 1/(x - 4), which input is excluded?|4|0|-4|1|The denominator cannot be zero.
+What is the domain of f(x) = √(x - 2) over real numbers?|x ≥ 2|x ≤ 2|x > 0|All real numbers|The radicand must be nonnegative.
+A graph rises as x increases over an interval. What does this indicate?|The function is increasing there.|The function must be constant.|The slope is always zero.|The range is empty.|Larger inputs give larger outputs on that interval.
+If f(x) = 2x and g(x) = x + 1, find f(g(3)).|8|7|6|9|g(3) = 4, then f(4) = 8.
+A taxi fare is f(d) = 40 + 12d for d ≥ 0. What does 40 represent?|A fixed initial charge.|The price per kilometer.|The distance traveled.|The maximum fare.|The constant term is independent of distance.
+If f(x) = x² over all real numbers, is f one-to-one?|No; different inputs such as 2 and -2 have the same output.|Yes; every function is one-to-one.|Yes; squares are always positive.|No; it is not a function at all.|Unique outputs per input do not imply unique inputs per output.
+How does y = (x - 3)² compare with y = x²?|Shifted 3 units right.|Shifted 3 units left.|Shifted 3 units up.|Reflected across the x-axis.|Replacing x with x - 3 shifts the graph right.
+A linear model fitted from 1 to 5 hours is used to predict 100 hours. What caution is needed?|Extrapolation may fail outside the observed range.|Every linear fit is valid indefinitely.|A graph removes all uncertainty.|The model must have no inputs.|Relationships can change beyond the fitted data range.
