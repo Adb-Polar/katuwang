@@ -540,7 +540,7 @@ function BuilderBody({
       <ConfirmDialog
         open={confirmPretestClose}
         title="Close the pre-test?"
-        description="Learners cannot start a new pre-test after this. In-progress attempts can still be finished. Post the post-test separately when it is ready."
+        description="Learners cannot start a new pre-test after this. Existing attempts can be finished within 15 minutes. Post the post-test separately when it is ready."
         confirmLabel="Close pre-test"
         tone="danger"
         loading={busy}
@@ -559,7 +559,7 @@ function BuilderBody({
       <ConfirmDialog
         open={confirmClose}
         title="Close all testing?"
-        description="Learners who haven't started a post-test will no longer be able to take it."
+        description="New starts stop immediately. Existing attempts can be finished within 15 minutes."
         confirmLabel="Close all testing"
         tone="danger"
         loading={busy}
@@ -588,7 +588,7 @@ function AddFromBankModal({
   const [topic, setTopic] = useState("");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<
-    { id: string; prompt: string; topic: string; options: { text: string; isCorrect: boolean }[] }[]
+    { id: string; prompt: string; topic: string; reviewStatus?: string; options: { text: string; isCorrect: boolean }[] }[]
   >([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -681,7 +681,7 @@ function AddFromBankModal({
                   <span>
                     <span className="text-base-content/80">{r.prompt}</span>
                     <span className="block text-2xs text-base-content/40">
-                      {r.topic}
+                      {r.topic} · {r.reviewStatus === "APPROVED" ? "Reviewed for qualification" : r.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"}
                       {already && " · already on this test"}
                     </span>
                   </span>

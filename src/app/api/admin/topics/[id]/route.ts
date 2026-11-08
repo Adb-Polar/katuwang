@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
@@ -6,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { invalidateSubjectCache } from "@/lib/subjects";
 import { updateTopicSchema } from "@/lib/validations/subject";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
 /** Rows across every denormalised `topic` string column for one (slug, name). */
@@ -40,7 +41,8 @@ async function renameTopicEverywhere(
   await tx.topicCertification.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
   // No origin filter on purpose: a topic rename must reach tutor-authored questions too.
   await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
-  await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
+  await tx.assessmentQuestion.updateMany({ where: { subject: slug, topic: to, reviewStatus: "APPROVED" }, data: { reviewStatus: "UNREVIEWED", qualificationReviewedAt: null } });
+  await tx.assessmentAttempt.updateMany({ where: { subject: slug, topic: from }, data: { topic: to, certificationEligible: false } });
   await tx.questionRequest.updateMany({ where: { subject: slug, topic: from }, data: { topic: to } });
 }
 
@@ -106,6 +108,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     invalidateSubjectCache();
     return NextResponse.json(updated);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error updating topic:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -153,6 +157,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
       soft,
     });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error deleting topic:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

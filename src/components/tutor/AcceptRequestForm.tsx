@@ -1,5 +1,9 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
+import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
+import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
 import { useState } from "react";
@@ -67,12 +71,13 @@ export default function AcceptRequestForm({
   tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
-  const { topicsFor } = useSubjectCatalog();
+  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const certifiedSet = new Set(certifiedTopics);
-  const preselectedTopics = request.topics.filter((t) => certifiedSet.has(t));
+  const preselectedTopics = request.topics;
+  const missingCertifications = request.topics.filter((t) => !certifiedSet.has(t));
   const disabledTopics = topicsFor(request.subject).filter((t) => !certifiedSet.has(t));
 
   const firstSlot = request.slots[0];
@@ -91,6 +96,11 @@ export default function AcceptRequestForm({
     : [];
 
   const submit = async (payload: ClassScheduleSubmitPayload, validationForm: HTMLFormElement) => {
+    const missing = missingRequestedTopics(request.topics, payload.topics);
+    if (missing.length > 0) {
+      setError(`Include every requested topic. Missing: ${missing.join(", ")}.`);
+      return;
+    }
     setError("");
     setSubmitting(true);
     try {
@@ -112,23 +122,24 @@ export default function AcceptRequestForm({
 
   return (
     <section className="card kt-card">
-      <div className="card-body gap-4 p-6 sm:p-8">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <div className="card-body gap-4 p-6 sm:p-8">
         <p className="text-xs text-base-content/60">
-          This creates a full class from the {subjectDisplayLabel(request.subject)} request. Only topics you&apos;re certified for can be
-          selected.
+          This creates a full class from the {subjectDisplayLabel(request.subject)} request. Include every requested topic. You must be certified for all selected topics.
         </p>
 
-        {certifiedTopics.length === 0 && (
+        {missingCertifications.length > 0 && (
           <div className="text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-3">
-            You have no certified topics in {subjectDisplayLabel(request.subject)} yet — request an assessment first.
+            You need certification for every requested topic before accepting. Missing: {missingCertifications.join(", ")}.
           </div>
         )}
 
-        <ClassScheduleFields
+        {missingCertifications.length === 0 && <ClassScheduleFields
           variant="page"
           initial={{
             subject: request.subject,
-            gradeLevel: request.gradeLevel,
+            gradeLevel: isTargetGradeEligibleForTutor(request.gradeLevel, tutorGradeLevel) ? request.gradeLevel : "",
             description: request.note ?? "",
             topics: preselectedTopics,
             sessionRows: initialSessionRows,
@@ -142,7 +153,7 @@ export default function AcceptRequestForm({
           error={error}
           onCancel={() => router.push("/tutor/requests")}
           onSubmit={submit}
-        />
+        />}
       </div>
     </section>
   );

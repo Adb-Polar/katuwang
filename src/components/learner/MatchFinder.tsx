@@ -205,7 +205,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   value={criteria}
                   onChange={setCriteria}
                   showFormatFilter
-                  gradeHint="Prefilled from your profile — change it if this class is for a different level."
+                  gradeHint="Used for relevance. Classes and tutors from every grade remain available."
                 />
                 <button
                   type="submit"

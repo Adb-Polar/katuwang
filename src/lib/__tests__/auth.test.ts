@@ -371,3 +371,22 @@ describe("JWT role changes", () => {
     expect(result).toMatchObject({ role: "ADMIN", status: "BANNED" });
   });
 });
+
+
+describe("JWT session revocation", () => {
+  it("captures the version at sign-in", async () => {
+    const token = await authOptions.callbacks!.jwt!({ token: {}, user: { id: "qa", role: "ADMIN", sessionVersion: 4 } } as never);
+    expect(token).toMatchObject({ sessionVersion: 4, status: "ACTIVE" });
+  });
+  it.each([undefined, 0, 1])("does not upgrade a revoked version %s", async (sessionVersion) => {
+    userFindUnique.mockResolvedValue({ role: "ADMIN", status: "ACTIVE", sessionVersion: 2 });
+    const token = await authOptions.callbacks!.jwt!({ token: { id: "qa", role: "ADMIN", sessionVersion, checkedAt: 0 } } as never);
+    expect(token).toMatchObject({ status: "BANNED" });
+    expect(token!.sessionVersion).toBe(sessionVersion);
+  });
+  it("keeps a matching version active", async () => {
+    userFindUnique.mockResolvedValue({ role: "ADMIN", status: "ACTIVE", sessionVersion: 2 });
+    const token = await authOptions.callbacks!.jwt!({ token: { id: "qa", role: "ADMIN", sessionVersion: 2, checkedAt: 0 } } as never);
+    expect(token).toMatchObject({ sessionVersion: 2, status: "ACTIVE" });
+  });
+});

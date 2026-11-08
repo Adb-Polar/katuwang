@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { Plus, Trash2 } from "lucide-react";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
@@ -47,7 +49,7 @@ export default function MatchCriteriaFields({
   showFormatFilter?: boolean;
   gradeLocked?: boolean;
 }) {
-  const { subjects, topicsFor } = useSubjectCatalog(value.gradeLevel);
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(gradeRequired ? value.gradeLevel : undefined);
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
 
   const toggleTopic = (topic: string) =>
@@ -62,14 +64,16 @@ export default function MatchCriteriaFields({
 
   return (
     <div className="space-y-5">
-      <div className="grid sm:grid-cols-2 gap-4">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <div className="grid sm:grid-cols-2 gap-4">
         <FormField label="Grade level" required={gradeRequired} hint={gradeHint}>
           <select
             className="select select-bordered select-md w-full text-sm"
             value={value.gradeLevel}
             required={gradeRequired}
             disabled={gradeLocked}
-            onChange={(e) => set({ gradeLevel: e.target.value, subject: "", topics: [] })}
+            onChange={(e) => set({ gradeLevel: e.target.value, ...(gradeRequired ? { subject: "", topics: [] } : {}) })}
           >
             <option value="">{gradeRequired ? "Select grade" : "Any grade"}</option>
             {GRADE_LEVELS.map((g) => (

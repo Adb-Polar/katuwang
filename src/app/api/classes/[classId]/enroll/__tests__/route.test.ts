@@ -1,3 +1,5 @@
+import { getProfilePictureRequirement } from "@/lib/settings";
+vi.mock("@/lib/settings", () => ({ getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -8,6 +10,7 @@ const {
   enrollmentFindUnique,
   enrollmentCreate,
   enrollmentDelete,
+  enrollmentUpdate,
   topicRequestUpdateMany,
   topicRequestFindMany,
   notificationCreate,
@@ -19,6 +22,7 @@ const {
   enrollmentFindUnique: vi.fn(),
   enrollmentCreate: vi.fn(),
   enrollmentDelete: vi.fn(),
+  enrollmentUpdate: vi.fn().mockResolvedValue({ id: "e1" }),
   topicRequestUpdateMany: vi.fn(),
   topicRequestFindMany: vi.fn(),
   notificationCreate: vi.fn(),
@@ -41,6 +45,7 @@ vi.mock("@/lib/prisma", () => ({
       findUnique: enrollmentFindUnique,
       create: enrollmentCreate,
       delete: enrollmentDelete,
+      update: enrollmentUpdate,
     },
     topicRequest: {
       updateMany: topicRequestUpdateMany,
@@ -51,7 +56,10 @@ vi.mock("@/lib/prisma", () => ({
     },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        classEnrollment: { create: enrollmentCreate, delete: enrollmentDelete },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
+        tutorClass: { findUnique: tutorClassFindUnique },
+        user: { findUnique: userFindUnique },
+        classEnrollment: { findUnique: enrollmentFindUnique, create: enrollmentCreate, update: enrollmentUpdate, delete: enrollmentDelete },
         topicRequest: { updateMany: topicRequestUpdateMany, findMany: topicRequestFindMany },
         notification: { create: notificationCreate },
       }),
@@ -90,10 +98,22 @@ const learner = { user: { id: "l1", role: "STUDENT_LEARNER", anonymousId: "STU-0
 describe("POST /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     topicRequestFindMany.mockResolvedValue([{ id: "r1" }]);
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestUpdateMany.mockResolvedValue({ count: 0 });
     userFindUnique.mockResolvedValue({ gradeLevel: "GRADE_9" });
+  });
+
+  it("blocks enrollment without an avatar only when learner pictures are required", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("ALL_USERS");
+    const response = await POST(makeRequest("POST"), makeParams());
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain("enroll in a class");
+    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {
@@ -238,14 +258,43 @@ describe("POST /api/classes/[classId]/enroll", () => {
     );
   });
 
-  it("allows enrollment with a tutor below the learner's grade", async () => {
+  it("reactivates the retained row instead of creating a new enrollment", async () => {
     getServerSessionMock.mockResolvedValue(learner);
-    tutorClassFindUnique.mockResolvedValue({ ...futureClass, gradeLevel: "GRADE_8",
-      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_8" } } });
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue({ id: "e1", withdrawnAt: new Date() });
+    const response = await POST(makeRequest("POST"), makeParams());
+    expect(response.status).toBe(201);
+    expect(enrollmentUpdate).toHaveBeenCalledWith({ where: { id: "e1" }, data: { withdrawnAt: null } });
+    expect(enrollmentCreate).not.toHaveBeenCalled();
+  });
+
+  it("allows enrollment when tutor grade level is lower than student grade level", async () => {
+    getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
+    tutorClassFindUnique.mockResolvedValue({
+      ...futureClass,
+      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_8" } },
+    });
+
     enrollmentFindUnique.mockResolvedValue(null);
     enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
     const res = await POST(makeRequest("POST"), makeParams());
     expect(res.status).toBe(201);
+    expect(enrollmentCreate).toHaveBeenCalled();
+  });
+
+  it("allows enrollment when class target grade level is lower than student grade level", async () => {
+    getServerSessionMock.mockResolvedValue(learner); // student is GRADE_9
+    tutorClassFindUnique.mockResolvedValue({
+      ...futureClass,
+      gradeLevel: "GRADE_8", // target grade is 8, lower than student's 9
+      tutorProfile: { userId: "tutorU1", user: { gradeLevel: "GRADE_10" } },
+    });
+
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1", classId: "c1", learnerId: "l1" });
+    const res = await POST(makeRequest("POST"), makeParams());
+    expect(res.status).toBe(201);
+    expect(enrollmentCreate).toHaveBeenCalled();
   });
 
   it("allows enrollment when class target grade level is null (open) and tutor grade >= student grade", async () => {
@@ -267,6 +316,7 @@ describe("POST /api/classes/[classId]/enroll", () => {
 describe("DELETE /api/classes/[classId]/enroll", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {
@@ -308,6 +358,15 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
     expect(enrollmentDelete).not.toHaveBeenCalled();
   });
 
+  it("rejects duplicate withdrawal without another notification", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue({ id: "e1", withdrawnAt: new Date() });
+    expect((await DELETE(makeRequest("DELETE"), makeParams())).status).toBe(404);
+    expect(enrollmentUpdate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
+  });
+
   it("returns 200 on successful unenrollment and notifies the tutor", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     tutorClassFindUnique.mockResolvedValue(futureClass);
@@ -316,7 +375,8 @@ describe("DELETE /api/classes/[classId]/enroll", () => {
 
     const res = await DELETE(makeRequest("DELETE"), makeParams());
     expect(res.status).toBe(200);
-    expect(enrollmentDelete).toHaveBeenCalledWith({ where: { id: "e1" } });
+    expect(enrollmentUpdate).toHaveBeenCalledWith({ where: { id: "e1" }, data: { withdrawnAt: expect.any(Date) } });
+    expect(enrollmentDelete).not.toHaveBeenCalled();
     expect(topicRequestUpdateMany).toHaveBeenCalledWith({
       where: { id: "r1" },
       data: { status: "ACCEPTED" },

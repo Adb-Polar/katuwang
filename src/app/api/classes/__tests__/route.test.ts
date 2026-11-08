@@ -122,11 +122,8 @@ describe("GET /api/classes", () => {
     expect(call.where).toEqual({
       status: "SCHEDULED",
       published: true,
-      sessions: {
-        some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } },
-        none: { scheduledAt: { lte: expect.any(Date) } },
-      },
-      enrollments: { none: { learnerId: "u1" } },
+      sessions: { some: { status: "SCHEDULED", scheduledAt: { gt: expect.any(Date) } }, none: { scheduledAt: { lte: expect.any(Date) } } },
+      enrollments: { none: { learnerId: "u1", withdrawnAt: null } },
     });
     expect(call.skip).toBeUndefined();
     expect(call.take).toBeUndefined();
@@ -252,7 +249,7 @@ describe("GET /api/classes", () => {
       expect.objectContaining({
         where: {
           AND: [
-            { enrollments: { some: { learnerId: "u1" } } },
+            { enrollments: { some: { learnerId: "u1", withdrawnAt: null } } },
             { status: { in: ["SCHEDULED", "SUSPENDED"] } },
           ],
         },
@@ -268,7 +265,7 @@ describe("GET /api/classes", () => {
       expect.objectContaining({
         where: {
           AND: [
-            { enrollments: { some: { learnerId: "u1" } } },
+            { enrollments: { some: { learnerId: "u1", withdrawnAt: null } } },
             { status: "COMPLETED" },
             { subject: "SCIENCE" },
           ],

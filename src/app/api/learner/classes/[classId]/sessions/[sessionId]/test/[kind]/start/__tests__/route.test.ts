@@ -161,8 +161,9 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect((await POST(req(), ctx())).status).toBe(409);
   });
 
-  it("200 resume — an in-progress attempt bypasses the gating table entirely", async () => {
-    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED" }); // would block a new PRE
+  it("200 resume — an existing PRE attempt has 15 minutes after closure", async () => {
+    classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED" });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", pretestClosedAt: new Date(Date.now() + 1000), questions: [] });
     sessionTestAttemptFindUnique.mockResolvedValue({
       id: "at1",
       kind: "PRE",

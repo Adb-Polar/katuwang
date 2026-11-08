@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, topicCertificationFindUnique, topicCertificationUpdate, topicCertificationDelete, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
+const { passingAttempts, getServerSessionMock, topicCertificationFindUnique, topicCertificationUpdate, topicCertificationDelete, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
+  passingAttempts: vi.fn(),
   getServerSessionMock: vi.fn(),
   topicCertificationFindUnique: vi.fn(),
   topicCertificationUpdate: vi.fn(),
@@ -23,7 +24,10 @@ vi.mock("@/lib/prisma", () => ({
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        topicCertification: { update: topicCertificationUpdate, delete: topicCertificationDelete },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
+        assessmentAttempt: { findMany: passingAttempts },
+        assessmentQuestion: { count: vi.fn().mockResolvedValue(1) },
+        topicCertification: { findUnique: topicCertificationFindUnique, update: topicCertificationUpdate, delete: topicCertificationDelete },
         auditLog: { create: auditLogCreate },
         notification: { create: notificationCreate },
       }),
@@ -47,6 +51,7 @@ function patch(body: unknown, certificationId = "c1") {
 describe("PATCH /api/admin/certifications/[certificationId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    passingAttempts.mockResolvedValue([{ id: "pass1", certificationEligible: true, subject: "MATH", topic: "Algebra", items: [{ questionId: "q1" }], questionCount: 1, scorePercent: 90, passPercent: 80 }]);
   });
 
   it("returns 401 when unauthenticated", async () => {
@@ -78,7 +83,7 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
 
   it("certifies a pending request and sets certifiedAt", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
-    topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
     topicCertificationUpdate.mockResolvedValue({ id: "c1", status: "CERTIFIED", certifiedAt: new Date().toISOString() });
 
     const res = await patch({ status: "CERTIFIED" });
@@ -108,7 +113,7 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
 
   it("rejects a pending request by setting status REJECTED with reviewedAt and note", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
-    topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
     topicCertificationUpdate.mockResolvedValue({ id: "c1", status: "REJECTED", reviewNote: "Re-take it" });
 
     const res = await patch({ status: "REJECTED", reviewNote: "Re-take it" });
@@ -141,7 +146,7 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
 
   it("rejects with a null note when none is supplied", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
-    topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
     topicCertificationUpdate.mockResolvedValue({ id: "c1", status: "REJECTED" });
 
     const res = await patch({ status: "REJECTED" });
@@ -150,4 +155,25 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
       expect.objectContaining({ data: expect.objectContaining({ status: "REJECTED", reviewNote: null }) })
     );
   });
+  it("blocks standard approval without a passing assessment before writes", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
+    passingAttempts.mockResolvedValue([{ id: "bad", scorePercent: 70, passPercent: 80 }]);
+    expect((await patch({ status: "CERTIFIED" })).status).toBe(409);
+    expect(topicCertificationUpdate).not.toHaveBeenCalled();expect(auditLogCreate).not.toHaveBeenCalled();
+  });
+  it.each([{ method: "MANUAL" }, { method: "MANUAL", reviewNote: "A meaningful reason" }, { method: "MANUAL", evidence: "A documented credential" }])("requires manual reason and evidence: %j", async (body) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", status: "PENDING" });
+    expect((await patch({ status: "CERTIFIED", ...body })).status).toBe(400);expect(topicCertificationUpdate).not.toHaveBeenCalled();
+  });
+  it("audits manual approval distinctly and preserves reason/evidence without a fake pass", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "MATH", topic: "Algebra", tutorProfile: { userId: "tutorU1" } });
+    const body = { status: "CERTIFIED", method: "MANUAL", reviewNote: "Reviewed topic competence", evidence: "Observed topic-specific work sample, reference QA-1" };
+    expect((await patch(body)).status).toBe(200);expect(passingAttempts).not.toHaveBeenCalled();
+    expect(topicCertificationUpdate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ approvalMethod: "MANUAL", approvalEvidence: body.evidence, reviewNote: body.reviewNote, qualifyingAttemptId: null }) }));
+    expect(auditLogCreate).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ action: "CERTIFICATION_MANUAL_APPROVED", reason: expect.stringContaining(body.evidence) }) }));
+  });
+
 });

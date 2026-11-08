@@ -10,6 +10,7 @@ export const optionInputSchema = z.object({
 
 export const createAssessmentQuestionSchema = z
   .object({
+    demoOnly: z.boolean().default(false),
     subject: z.string().trim().min(1, "Subject is required."),
     topic: z.string().trim().min(1, "Topic is required."),
     prompt: z

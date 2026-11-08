@@ -9,6 +9,7 @@ export { normalizeContactInfo } from "@/lib/contactInfo";
 // `contactInfo` is only length-checked here; call `normalizeContactInfo` in the
 // route for format validation + normalisation.
 export const updateProfileSchema = z.object({
+  currentPassword: z.string().optional(),
   contactInfo: z
     .string()
     .trim()

@@ -36,7 +36,7 @@ interface TopicRequest {
   topics: string[];
   slots: { date?: string | null; day: string; startTime: string; endTime: string }[];
   directedTo: { anonymousId: string } | null;
-  fulfilledClass: { id: string; subject: string; nextSessionAt: string | null; tutorAnonymousId: string } | null;
+  fulfilledClass: { id: string; subject: string; topics: string[]; nextSessionAt: string | null; tutorAnonymousId: string } | null;
 }
 
 const STATUS_TONE = {
@@ -380,6 +380,10 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
+
+                    {r.fulfilledClass && (
+                      <p className="text-2xs text-base-content/70">Class covers: {r.fulfilledClass.topics.join(", ")}</p>
+                    )}
 
                     {r.status === "ACCEPTED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">

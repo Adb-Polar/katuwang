@@ -14,6 +14,13 @@ import ClassScheduleFields from "@/components/tutor/ClassScheduleFields";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
+vi.mock("@/hooks/useSubjectCatalog", () => ({
+  useSubjectCatalog: () => ({
+    subjects: [{ slug: "MATH", name: "Mathematics", topics: ["Algebra"] }],
+    topicsFor: () => ["Algebra"], loading: false, error: null, retry: vi.fn(),
+  }),
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({push: vi.fn(), refresh: vi.fn()}),
   useSearchParams: () => new URLSearchParams(),
@@ -121,6 +128,7 @@ describe("inline form validation", () => {
     expect(row.querySelector('[role="alert"]')!.textContent).toBe("Third option is invalid.");
   });
   it("focuses the add-session action, then the missing date in a newly added session", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ subjects: [{ slug: "MATH", name: "Mathematics", topics: ["Algebra"] }] }) })));
     await act(async () => root.render(<ClassScheduleFields initial={{subject: "MATH", topics: ["Algebra"]}} onCancel={() => {}} onSubmit={vi.fn()} />));
     await submit();
     expect(document.activeElement?.textContent).toContain("Add Session");

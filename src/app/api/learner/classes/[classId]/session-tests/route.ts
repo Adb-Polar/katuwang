@@ -18,9 +18,9 @@ export async function GET(
 
     const enrollment = await prisma.classEnrollment.findUnique({
       where: { classId_learnerId: { classId, learnerId: session.user.id } },
-      select: { id: true },
+      select: { id: true, withdrawnAt: true },
     });
-    if (!enrollment) {
+    if (!enrollment || enrollment.withdrawnAt) {
       return NextResponse.json({ error: "You are not enrolled in this class." }, { status: 403 });
     }
 

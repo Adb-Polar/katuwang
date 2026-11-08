@@ -1,3 +1,5 @@
+import { isQuestionContentLocked } from "@/lib/questionLocks";
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
@@ -43,7 +45,7 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           options: { orderBy: { position: "asc" } },
-          _count: { select: { attemptItems: true } },
+          _count: { select: { attemptItems: true, sessionTestItems: true, sessionTestLinks: true, nextVersions: true } },
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
@@ -52,10 +54,15 @@ export async function GET(req: NextRequest) {
       prisma.assessmentQuestion.count({ where }),
     ]);
 
-    const questions = rows.map(({ _count, ...q }) => ({ ...q, inUse: _count.attemptItems > 0 }));
+    const questions = rows.map(({ _count, ...question }) => {
+      const inUse = isQuestionContentLocked({ ...question, _count });
+      return { ...question, inUse, canDelete: !inUse && !_count.sessionTestLinks && !_count.nextVersions && !question.previousVersionId, hasNewerVersion: Boolean(_count.nextVersions) };
+    });
 
     return NextResponse.json({ questions, total, page, pageSize });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing assessment questions:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -78,7 +85,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { subject, topic, prompt, explanation, options } = result.data;
+    const { subject, topic, prompt, explanation, options, demoOnly } = result.data;
 
     if (!(await topicExists(subject, topic))) {
       return NextResponse.json(
@@ -90,6 +97,7 @@ export async function POST(req: NextRequest) {
     const created = await prisma.$transaction(async (tx) => {
       const question = await tx.assessmentQuestion.create({
         data: {
+          reviewStatus: demoOnly ? "DEMO" : "UNREVIEWED",
           subject: subject,
           topic,
           prompt,
@@ -122,6 +130,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ...created, inUse: false }, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating assessment question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

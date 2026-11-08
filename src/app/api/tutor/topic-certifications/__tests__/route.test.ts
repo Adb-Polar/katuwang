@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { catalogFixture } from "@/test/fixtures/catalog";
 
 const {
   getServerSessionMock,
@@ -23,7 +22,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    subject: { findMany: vi.fn(async () => catalogFixture) },
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     topicCertification: {
       findMany: topicCertificationFindMany,
@@ -31,6 +30,7 @@ vi.mock("@/lib/prisma", () => ({
       upsert: topicCertificationUpsert,
     },
     tutorClass: { findMany: tutorClassFindMany },
+    $transaction: (fn: (tx: unknown) => unknown) => fn({ $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]), topicCertification: { findUnique: topicCertificationFindUnique, upsert: topicCertificationUpsert } }),
   },
 }));
 
@@ -66,7 +66,7 @@ describe("GET /api/tutor/topic-certifications", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     topicCertificationFindMany.mockResolvedValue([
-      { id: "c1", subject: "MATH", topic: "Quadratic Equations", status: "PENDING" },
+      { id: "c1", subject: "MATH", topic: "Algebraic Expressions & Factoring", status: "PENDING" },
     ]);
     tutorClassFindMany.mockResolvedValue([]);
 
@@ -80,14 +80,14 @@ describe("GET /api/tutor/topic-certifications", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     topicCertificationFindMany.mockResolvedValue([
-      { id: "c1", subject: "MATH", topic: "Quadratic Equations", status: "CERTIFIED" },
+      { id: "c1", subject: "MATH", topic: "Algebraic Expressions & Factoring", status: "CERTIFIED" },
     ]);
     tutorClassFindMany.mockResolvedValue([
       {
         id: "cls1",
         subject: "MATH",
         status: "SCHEDULED",
-        topics: [{ topic: "Quadratic Equations" }],
+        topics: [{ topic: "Algebraic Expressions & Factoring" }],
       },
     ]);
 
@@ -100,7 +100,7 @@ describe("GET /api/tutor/topic-certifications", () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     topicCertificationFindMany.mockResolvedValue([
-      { id: "c1", subject: "MATH", topic: "Quadratic Equations", status: "CERTIFIED" },
+      { id: "c1", subject: "MATH", topic: "Algebraic Expressions & Factoring", status: "CERTIFIED" },
     ]);
     tutorClassFindMany.mockResolvedValue([
       { id: "cls1", subject: "SCIENCE", scheduledAt: new Date(), status: "SCHEDULED", topics: [{ topic: "Cells" }] },
@@ -119,14 +119,14 @@ describe("POST /api/tutor/topic-certifications", () => {
 
   it("returns 401 when unauthenticated", async () => {
     getServerSessionMock.mockResolvedValue(null);
-    const res = await POST(makeRequest({ subject: "MATH", topic: "Quadratic Equations" }));
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions & Factoring" }));
     expect(res.status).toBe(401);
   });
 
   it("returns 404 when no tutor profile exists", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue(null);
-    const res = await POST(makeRequest({ subject: "MATH", topic: "Quadratic Equations" }));
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions & Factoring" }));
     expect(res.status).toBe(404);
   });
 
@@ -153,18 +153,18 @@ describe("POST /api/tutor/topic-certifications", () => {
       id: "c1",
       tutorProfileId: "tp1",
       subject: "MATH",
-      topic: "Quadratic Equations",
+      topic: "Algebraic Expressions & Factoring",
       status: "PENDING",
     });
 
-    const res = await POST(makeRequest({ subject: "MATH", topic: "Quadratic Equations" }));
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions & Factoring" }));
     expect(res.status).toBe(201);
     const json = await res.json();
     expect(json.status).toBe("PENDING");
     expect(topicCertificationUpsert).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          tutorProfileId_subject_topic: { tutorProfileId: "tp1", subject: "MATH", topic: "Quadratic Equations" },
+          tutorProfileId_subject_topic: { tutorProfileId: "tp1", subject: "MATH", topic: "Algebraic Expressions & Factoring" },
         },
         create: expect.objectContaining({ status: "PENDING" }),
         update: expect.objectContaining({ status: "PENDING", reviewedAt: null, reviewNote: null }),
@@ -178,7 +178,7 @@ describe("POST /api/tutor/topic-certifications", () => {
     topicCertificationFindUnique.mockResolvedValue({ status: "REJECTED" });
     topicCertificationUpsert.mockResolvedValue({ id: "c1", status: "PENDING" });
 
-    const res = await POST(makeRequest({ subject: "MATH", topic: "Quadratic Equations" }));
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions & Factoring" }));
     expect(res.status).toBe(201);
     expect(topicCertificationUpsert).toHaveBeenCalled();
   });
@@ -188,7 +188,7 @@ describe("POST /api/tutor/topic-certifications", () => {
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     topicCertificationFindUnique.mockResolvedValue({ status: "CERTIFIED" });
 
-    const res = await POST(makeRequest({ subject: "MATH", topic: "Quadratic Equations" }));
+    const res = await POST(makeRequest({ subject: "MATH", topic: "Algebraic Expressions & Factoring" }));
     expect(res.status).toBe(200);
     const json = await res.json();
     expect(json.status).toBe("CERTIFIED");

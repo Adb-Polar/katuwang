@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -52,6 +53,8 @@ export async function POST(req: NextRequest) {
       ...(process.env.NODE_ENV !== "production" ? { debugScore: score } : {}),
     });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error handling chatbot message:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },

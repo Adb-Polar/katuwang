@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { signOut } from "next-auth/react";
 import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation";
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { Eye, EyeOff } from "lucide-react";
@@ -44,10 +45,11 @@ export default function ChangePasswordForm({
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update password.");
-      setSuccess("Password updated.");
+      setSuccess("Password updated. Please sign in again.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      await signOut({ callbackUrl: "/login?passwordChanged=true" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update password.");
     } finally {

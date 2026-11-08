@@ -1,3 +1,4 @@
+import { lockSessionTestRow, lockQuestionRows, QuestionWriteError } from "@/lib/questionLocks";
 import { certifiedBankTopics, certifiedBankWhere } from "@/lib/teachingBankAccess";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -49,24 +50,22 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     // Every id must be an active bank question of this class's subject, OR a
     // custom question this tutor owns.
     const certifiedTopics = await certifiedBankTopics(session.user.id);
-    const allowed = await prisma.assessmentQuestion.findMany({
-      where: {
-        id: { in: questionIds },
-        OR: [
-          { origin: "BANK", active: true, subject: owned.tutorClass.subject, AND: [certifiedBankWhere(certifiedTopics)] },
-          { origin: "TUTOR", ownerTutorProfileId: owned.tutorProfile.id },
-        ],
-      },
-      select: { id: true },
-    });
-    if (allowed.length !== questionIds.length) {
-      return NextResponse.json(
-        { error: "One or more questions are not available for this test." },
-        { status: 400 },
-      );
-    }
-
     const test = await prisma.$transaction(async (tx) => {
+      await lockSessionTestRow(tx, owned.test!.id);
+      const current = await tx.sessionTest.findUniqueOrThrow({ where: { id: owned.test!.id }, include: { _count: { select: { attempts: true } } } });
+      if (current.status !== "DRAFT" || current._count.attempts > 0) throw new QuestionWriteError("The question set is locked once the test is published or attempted.");
+      await lockQuestionRows(tx, questionIds);
+      const allowed = await tx.assessmentQuestion.findMany({
+        where: {
+          id: { in: questionIds },
+          OR: [
+            { origin: "BANK", active: true, subject: owned.tutorClass.subject, AND: [certifiedBankWhere(certifiedTopics)] },
+            { origin: "TUTOR", active: true, ownerTutorProfileId: owned.tutorProfile.id },
+          ],
+        },
+        select: { id: true },
+      });
+      if (allowed.length !== questionIds.length) throw new QuestionWriteError("One or more questions are not available for this test.", 400);
       await tx.sessionTestQuestion.deleteMany({ where: { sessionTestId: owned.test!.id } });
       await tx.sessionTestQuestion.createMany({
         data: questionIds.map((questionId, position) => ({
@@ -84,10 +83,11 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
           },
         },
       });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(serializeSessionTest(test));
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error setting session test questions:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

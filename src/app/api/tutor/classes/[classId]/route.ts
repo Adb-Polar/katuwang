@@ -1,11 +1,15 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
+import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { updateTopicRequest } from "@/lib/updateTopicRequest";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { lockClassRow, ClassWriteError } from "@/lib/classLocks";
 
 import { classDetailsSchema, hasLocationOrMeetingLink } from "@/lib/validations/class";
-import { normalizeTopic } from "@/lib/subjectTopics";
-import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
+import { normalizeTopic } from "@/lib/normalizeTopic";
+import { classTeachingError } from "@/lib/classTeachingPolicy";
 import { notify, notifyMany } from "@/lib/notifications";
 
 
@@ -27,7 +31,7 @@ export async function PATCH(
         topics: { select: { topic: true } },
         sessions: { select: { topic: true } },
         _count: {
-          select: { enrollments: true },
+          select: { enrollments: { where: { withdrawnAt: null } } },
         },
       },
     });
@@ -38,7 +42,7 @@ export async function PATCH(
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
       where: { userId: session.user.id },
-      select: { id: true, user: { select: { gradeLevel: true } } },
+      select: { id: true, user: { select: { gradeLevel: true, image: true } } },
     });
 
     if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
@@ -68,15 +72,12 @@ export async function PATCH(
 
     const { topics: rawTopics, subject: rawSubject, ...updates } = result.data;
 
-    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
-    if (updates.gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(updates.gradeLevel, tutorGradeLevel)) {
-      return NextResponse.json(
-        { error: "Target grade cannot be higher than your current grade level." },
-        { status: 400 }
-      );
-    }
-
     const subjectUpdate = rawSubject !== undefined ? { subject: rawSubject } : {};
+
+    if (updates.published === true) {
+      const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
+      if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
+    }
 
     // Normalize + de-duplicate topics (case-insensitive); custom topics allowed.
     const topics = rawTopics
@@ -134,10 +135,56 @@ export async function PATCH(
       }
     }
 
+    // Always check the resulting scope, including retained fields. A description-only
+    // edit must not bypass a revoked certification or a changed tutor grade.
+    // Cancellation/completion remain available so tutors can stop an ineligible class.
+    const stoppingClass = body.status === "CANCELLED" || body.status === "COMPLETED";
+    const changesScope = rawSubject !== undefined || rawTopics !== undefined || "gradeLevel" in updates;
+    if (!stoppingClass || changesScope || updates.published === true) {
+      const teachingError = await classTeachingError({
+        tutorProfileId: tutorProfile.id,
+        tutorGradeLevel: tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null,
+        subject: rawSubject ?? existingClass.subject,
+        gradeLevel: "gradeLevel" in updates ? updates.gradeLevel ?? null : existingClass.gradeLevel,
+        topics: topics ?? existingClass.topics.map(({ topic }) => topic),
+      });
+      if (teachingError) return NextResponse.json({ error: teachingError }, { status: 400 });
+      const selectedTopics = new Set((topics ?? existingClass.topics.map(({ topic }) => topic))
+        .map((topic) => normalizeTopic(topic).toLowerCase()));
+      if (existingClass.sessions.some(({ topic }) => !selectedTopics.has(normalizeTopic(topic).toLowerCase()))) {
+        return NextResponse.json({ error: "Every session's topic must be one of the class's selected topics." }, { status: 400 });
+      }
+    }
+
     // Cancelling/completing the whole class cascades to every still-SCHEDULED session
     const newStatus = body.status as "SCHEDULED" | "COMPLETED" | "CANCELLED" | undefined;
 
     const updatedClass = await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      if (topics || rawSubject !== undefined) {
+        const requests = await tx.topicRequest.findMany({
+          where: { fulfilledClassId: classId, status: { in: ["ACCEPTED", "ENROLLED", "FULFILLED"] } },
+          select: { subject: true, topics: { select: { topic: true } } },
+        });
+        for (const request of requests) {
+          if ((rawSubject !== undefined && rawSubject !== request.subject) ||
+            (topics && missingRequestedTopics(request.topics.map(({ topic }) => topic), topics).length > 0)) {
+            throw new ClassWriteError("This class must keep the subject and every topic promised to its linked requests.", 400);
+          }
+        }
+      }
+      if (updates.maxStudents !== undefined) {
+        const enrollmentCount = await tx.classEnrollment.count({ where: { classId, withdrawnAt: null } });
+        if (updates.maxStudents < enrollmentCount) {
+          throw new ClassWriteError(`Cannot reduce capacity below the current enrollment count of ${enrollmentCount}.`, 400);
+        }
+      }
+      if (newStatus === "COMPLETED") {
+        await tx.sessionTest.updateMany({
+          where: { session: { classId, status: "SCHEDULED" }, pretestClosedAt: null }, data: { pretestClosedAt: new Date() },
+        });
+      }
+
       if (newStatus === "CANCELLED" || newStatus === "COMPLETED") {
         await tx.classSession.updateMany({
           where: { classId, status: "SCHEDULED" },
@@ -191,7 +238,7 @@ export async function PATCH(
         // via a topic request — the request-linked ones are covered just above).
         const linkedLearnerIds = new Set(linkedRequests.map((r) => r.learnerId));
         const enrolments = await tx.classEnrollment.findMany({
-          where: { classId },
+          where: { classId, withdrawnAt: null },
           select: { learnerId: true },
         });
         const targets = enrolments
@@ -217,6 +264,9 @@ export async function PATCH(
       topics: updatedClass.topics.map((t) => t.topic),
     });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
@@ -237,37 +287,20 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const existingClass = await prisma.tutorClass.findUnique({
-      where: { id: classId },
-      include: {
-        _count: {
-          select: { enrollments: true },
-        },
-      },
-    });
-
-    if (!existingClass) {
-      return NextResponse.json({ error: "Class not found." }, { status: 404 });
-    }
-
-    const tutorProfile = await prisma.tutorProfile.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (!tutorProfile || existingClass.tutorProfileId !== tutorProfile.id) {
-      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
-    }
-
-    // Restrict deletion if students are enrolled
-    if (existingClass._count.enrollments > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete a class that has enrolled learners. Please cancel the class instead." },
-        { status: 400 }
-      );
-    }
+    const tutorProfile = await prisma.tutorProfile.findUnique({ where: { userId: session.user.id }, select: { id: true } });
+    if (!tutorProfile) return NextResponse.json({ error: "Forbidden." }, { status: 403 });
 
     await prisma.$transaction(async (tx) => {
+      await lockClassRow(tx, classId);
+      const existingClass = await tx.tutorClass.findUnique({
+        where: { id: classId }, include: { _count: { select: { enrollments: true } } },
+      });
+      if (!existingClass) throw new ClassWriteError("Class not found.", 404);
+      if (existingClass.tutorProfileId !== tutorProfile.id) throw new ClassWriteError("Forbidden.", 403);
+      if (existingClass._count.enrollments > 0) throw new ClassWriteError("Cannot delete a class with enrollment history. Please cancel the class instead.", 400);
+      if (await tx.sessionTest.findFirst({ where: { session: { classId } }, select: { id: true } })) {
+        throw new ClassWriteError("This class has assessment records. Cancel it instead to preserve history.", 409);
+      }
       const linkedRequests = await tx.topicRequest.findMany({
         where: { fulfilledClassId: classId, status: "ACCEPTED" },
         select: { id: true, learnerId: true, subject: true },
@@ -285,10 +318,16 @@ export async function DELETE(
       }
 
       await tx.tutorClass.delete({ where: { id: classId } });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ message: "Class deleted successfully." });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "P2003") {
+      return NextResponse.json({ error: "This class has assessment records. Cancel it instead to preserve history." }, { status: 409 });
+    }
     console.error("Error deleting tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

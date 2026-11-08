@@ -1,3 +1,4 @@
+import { lockSessionTestRow, QuestionWriteError } from "@/lib/questionLocks";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -29,6 +30,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
       attemptCount: owned.test?._count.attempts ?? 0,
     });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error fetching session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -70,6 +72,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
     return NextResponse.json(test, { status: 201 });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error creating session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -104,16 +107,23 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
 
     const { title, instructions } = result.data;
-    const updated = await prisma.sessionTest.update({
-      where: { id: owned.test.id },
-      data: {
-        ...(title !== undefined ? { title } : {}),
-        ...(instructions !== undefined ? { instructions: instructions || null } : {}),
-      },
-    });
+    const updated = await prisma.$transaction(async tx => {
+      await lockSessionTestRow(tx, owned.test!.id);
+      const current = await tx.sessionTest.findUnique({ where: { id: owned.test!.id }, select: { status: true } });
+      if (!current) throw new QuestionWriteError("Test not found.", 404);
+      if (current.status !== "DRAFT") throw new QuestionWriteError("Only a draft test can be edited.");
+      return tx.sessionTest.update({
+        where: { id: owned.test!.id },
+        data: {
+          ...(title !== undefined ? { title } : {}),
+          ...(instructions !== undefined ? { instructions: instructions || null } : {}),
+        },
+      });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -143,9 +153,16 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
       );
     }
 
-    await prisma.sessionTest.delete({ where: { id: owned.test.id } });
+    await prisma.$transaction(async tx => {
+      await lockSessionTestRow(tx, owned.test!.id);
+      const current = await tx.sessionTest.findUnique({ where: { id: owned.test!.id }, include: { _count: { select: { attempts: true } } } });
+      if (!current) throw new QuestionWriteError("Test not found.", 404);
+      if (current.status !== "DRAFT" || current._count.attempts > 0) throw new QuestionWriteError("Only a draft test with no attempts can be deleted.");
+      await tx.sessionTest.delete({ where: { id: owned.test!.id } });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
     return NextResponse.json({ message: "Test deleted." });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error deleting session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

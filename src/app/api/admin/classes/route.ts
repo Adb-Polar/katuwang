@@ -59,7 +59,7 @@ export async function GET(req: NextRequest) {
               user: { select: { id: true, anonymousId: true, firstName: true, lastName: true } },
             },
           },
-          _count: { select: { enrollments: true } },
+          _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
         },
         orderBy: { [CLASS_SORT_COLUMN[sort]]: dir },
         skip: (page - 1) * pageSize,

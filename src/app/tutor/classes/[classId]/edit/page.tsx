@@ -32,7 +32,7 @@ export default async function EditClassPage({
     include: {
       topics: true,
       sessions: { orderBy: { scheduledAt: "asc" } },
-      enrollments: { select: { id: true } },
+      enrollments: { where: { withdrawnAt: null }, select: { id: true } },
     },
   });
 

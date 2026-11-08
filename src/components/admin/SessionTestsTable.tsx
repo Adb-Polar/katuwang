@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
@@ -37,7 +39,7 @@ const STATUS_TONE = {
 } as const;
 
 export default function SessionTestsTable() {
-  const { subjects } = useSubjectCatalog();
+  const { subjects, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subject, setSubject] = useState("");
   const [status, setStatus] = useState("");
   const [q, setQ] = useState("");
@@ -80,7 +82,8 @@ export default function SessionTestsTable() {
   if (openId) {
     return (
       <div className="space-y-4">
-        <button onClick={() => setOpenId(null)} className="btn btn-ghost btn-sm text-xs">
+
+              <button onClick={() => setOpenId(null)} className="btn btn-ghost btn-sm text-xs">
           ← Back to session tests
         </button>
         <SessionTestResults
@@ -93,6 +96,7 @@ export default function SessionTestsTable() {
 
   return (
     <div className="space-y-6">
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">

@@ -1,6 +1,9 @@
+import { isQualificationAttemptEligible } from "@/lib/qualificationBank";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { AssessmentSubmissionError, assertSubmissionClaim } from "@/lib/assessmentSubmission";
+import { lockTutorProfile, ClassWriteError } from "@/lib/classLocks";
 import { getSetting } from "@/lib/settings";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
@@ -53,13 +56,18 @@ export async function POST(
     const tutorProfileId = attempt.tutorProfile.id;
     const certKey = { tutorProfileId_subject_topic: { tutorProfileId, subject, topic } };
 
-    const existingCert = await prisma.topicCertification.findUnique({
-      where: certKey,
-      select: { status: true },
-    });
     const autoCertify = passed ? await getSetting("autoCertifyOnAssessmentPass") : false;
 
     const updated = await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      await lockTutorProfile(tx, tutorProfileId);
+      const certificationEligible = await isQualificationAttemptEligible(tx, attempt);
+      const claimed = await tx.assessmentAttempt.updateMany({
+        where: { id: attemptId, tutorProfileId, status: "IN_PROGRESS" },
+        data: { status: passed ? "PASSED" : "FAILED", correctCount, scorePercent, submittedAt: now, certificationEligible },
+      });
+      assertSubmissionClaim(claimed);
+      const existingCert = await tx.topicCertification.findUnique({ where: certKey, select: { status: true } });
       for (const g of graded) {
         await tx.assessmentAttemptItem.update({
           where: { id: g.id },
@@ -67,29 +75,24 @@ export async function POST(
         });
       }
 
-      const now = new Date();
-      const attemptRow = await tx.assessmentAttempt.update({
+      const attemptRow = await tx.assessmentAttempt.findUniqueOrThrow({
         where: { id: attemptId },
-        data: {
-          status: passed ? "PASSED" : "FAILED",
-          correctCount,
-          scorePercent,
-          submittedAt: now,
-        },
         include: { items: { include: { question: { include: { options: true } } } } },
       });
 
       // Never downgrade a badge the tutor already earned.
-      if (existingCert?.status !== "CERTIFIED") {
+      if (certificationEligible && existingCert?.status !== "CERTIFIED") {
         if (passed && autoCertify) {
           await tx.topicCertification.upsert({
             where: certKey,
-            update: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null },
+            update: { status: "CERTIFIED", certifiedAt: now, reviewedAt: now, reviewNote: null, approvalMethod: "ASSESSMENT", approvalEvidence: null, qualifyingAttemptId: attemptId },
             create: {
               tutorProfileId,
               subject,
               topic,
               status: "CERTIFIED",
+              approvalMethod: "ASSESSMENT",
+              qualifyingAttemptId: attemptId,
               certifiedAt: now,
               reviewedAt: now,
             },
@@ -100,12 +103,13 @@ export async function POST(
             where: certKey,
             update: {
               status: "PENDING",
+              approvalMethod: null, approvalEvidence: null, qualifyingAttemptId: attemptId,
               requestedAt: now,
               reviewedAt: null,
               certifiedAt: null,
               reviewNote: note,
             },
-            create: { tutorProfileId, subject, topic, status: "PENDING", reviewNote: note },
+            create: { tutorProfileId, subject, topic, status: "PENDING", reviewNote: note, qualifyingAttemptId: attemptId },
           });
         } else {
           const note = `Did not pass assessment (${scorePercent}%). You may retake.`;
@@ -113,6 +117,7 @@ export async function POST(
             where: certKey,
             update: {
               status: "REJECTED",
+              approvalMethod: null, approvalEvidence: null, qualifyingAttemptId: null,
               reviewedAt: now,
               certifiedAt: null,
               reviewNote: note,
@@ -123,10 +128,11 @@ export async function POST(
       }
 
       return attemptRow;
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(serializeAttempt(updated, { reveal: true, revealAnswers: false }));
   } catch (error) {
+    if (error instanceof AssessmentSubmissionError || error instanceof ClassWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error submitting assessment:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

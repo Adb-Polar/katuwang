@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     const [rows, total] = await Promise.all([
       prisma.assessmentQuestion.findMany({
         where,
-        include: { options: { orderBy: { position: "asc" } } },
+        select: { id: true, subject: true, topic: true, prompt: true, explanation: true, active: true, origin: true, version: true, reviewStatus: true, createdAt: true, options: { orderBy: { position: "asc" }, select: { id: true, text: true, isCorrect: true, position: true } } },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
         take: pageSize,

@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { findFirstMock, updateManyMock, createMock, transactionMock, sendMailMock } = vi.hoisted(
+const { findManyMock, updateManyMock, createMock, transactionMock, sendMailMock } = vi.hoisted(
   () => ({
-    findFirstMock: vi.fn(),
+    findManyMock: vi.fn(),
     updateManyMock: vi.fn(),
     createMock: vi.fn(),
     transactionMock: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
@@ -13,7 +13,7 @@ const { findFirstMock, updateManyMock, createMock, transactionMock, sendMailMock
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    user: { findFirst: findFirstMock },
+    user: { findMany: findManyMock },
     passwordResetToken: { updateMany: updateManyMock, create: createMock },
     $transaction: transactionMock,
   },
@@ -40,11 +40,11 @@ describe("POST /api/auth/forgot-password", () => {
   it("400 on an invalid email", async () => {
     const res = await POST(makeRequest({ email: "not-an-email" }));
     expect(res.status).toBe(400);
-    expect(findFirstMock).not.toHaveBeenCalled();
+    expect(findManyMock).not.toHaveBeenCalled();
   });
 
   it("issues a hashed single-use token for a matching active account", async () => {
-    findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
+    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
     const res = await POST(makeRequest({ email: "user@example.com" }));
     const json = await res.json();
 
@@ -63,7 +63,7 @@ describe("POST /api/auth/forgot-password", () => {
   });
 
   it("emails the reset link (with the raw token) to the submitted address", async () => {
-    findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
+    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
     await POST(makeRequest({ email: "user@example.com" }));
 
     expect(sendMailMock).toHaveBeenCalledTimes(1);
@@ -73,7 +73,7 @@ describe("POST /api/auth/forgot-password", () => {
   });
 
   it("reports a mail failure rather than claiming a link was sent", async () => {
-    findFirstMock.mockResolvedValue({ id: "U1", status: "ACTIVE" });
+    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }]);
     sendMailMock.mockRejectedValueOnce(new Error("smtp down"));
 
     const res = await POST(makeRequest({ email: "user@example.com" }));
@@ -83,17 +83,25 @@ describe("POST /api/auth/forgot-password", () => {
   });
 
   it("matches on the recovery email as well as the primary", async () => {
-    findFirstMock.mockResolvedValue({ id: "U2", status: "ACTIVE" });
+    findManyMock.mockResolvedValue([{ id: "U2", status: "ACTIVE" }]);
     await POST(makeRequest({ email: "backup@example.com" }));
-    expect(findFirstMock).toHaveBeenCalledWith(
+    expect(findManyMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        where: { OR: [{ email: "backup@example.com" }, { recoveryEmail: "backup@example.com" }] },
+        where: { OR: [{ email: "backup@example.com" }, { recoveryEmail: "backup@example.com", recoveryEmailVerifiedAt: { not: null } }] },
       })
     );
   });
 
+  it("rejects ambiguous primary/recovery matches without sending or issuing tokens", async () => {
+    findManyMock.mockResolvedValue([{ id: "U1", status: "ACTIVE" }, { id: "U2", status: "ACTIVE" }]);
+    const response = await POST(makeRequest({ email: "shared@example.com" }));
+    expect(response.status).toBe(409);
+    expect(createMock).not.toHaveBeenCalled();
+    expect(sendMailMock).not.toHaveBeenCalled();
+  });
+
   it("identifies a missing email without creating a token", async () => {
-    findFirstMock.mockResolvedValue(null);
+    findManyMock.mockResolvedValue([]);
     const res = await POST(makeRequest({ email: "ghost@example.com" }));
     const json = await res.json();
     expect(res.status).toBe(404);
@@ -102,7 +110,7 @@ describe("POST /api/auth/forgot-password", () => {
   });
 
   it("does not issue a token for a banned account", async () => {
-    findFirstMock.mockResolvedValue({ id: "U3", status: "BANNED" });
+    findManyMock.mockResolvedValue([{ id: "U3", status: "BANNED" }]);
     const res = await POST(makeRequest({ email: "banned@example.com" }));
     expect(res.status).toBe(403);
     expect((await res.json()).error).toMatch(/cannot reset/);
@@ -110,7 +118,7 @@ describe("POST /api/auth/forgot-password", () => {
   });
 
   it("500 when the lookup throws", async () => {
-    findFirstMock.mockRejectedValue(new Error("db down"));
+    findManyMock.mockRejectedValue(new Error("db down"));
     const res = await POST(makeRequest({ email: "user@example.com" }));
     expect(res.status).toBe(500);
   });

@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 
@@ -7,7 +9,8 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Modal from "@/components/ui/Modal";
+import ValidatedForm from "@/components/ui/ValidatedForm";
 import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
@@ -35,6 +38,9 @@ interface Certification {
   certifiedAt: string | null;
   reviewedAt: string | null;
   reviewNote: string | null;
+  approvalMethod?: "ASSESSMENT" | "MANUAL" | null;
+  approvalEvidence?: string | null;
+  qualifyingAttemptId?: string | null;
   tutor: Tutor;
 }
 
@@ -48,12 +54,15 @@ const TAB_STATUS: Record<Tab, string> = {
 export default function CertificationReviewTable() {
   const [tab, setTab] = useState<Tab>("pending");
   const [q, setQ] = useState("");
-  const { subjects: catalog } = useSubjectCatalog();
+  const { subjects: catalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subject, setSubject] = useState<string>("");
   const [sort, setSort] = useState("requested");
   const [success, setSuccess] = useState("");
   const [approveTarget, setApproveTarget] = useState<Certification | null>(null);
   const [rejectTarget, setRejectTarget] = useState<Certification | null>(null);
+  const [approvalMethod, setApprovalMethod] = useState<"ASSESSMENT" | "MANUAL">("ASSESSMENT");
+  const [manualReason, setManualReason] = useState("");
+  const [manualEvidence, setManualEvidence] = useState("");
   const [saving, setSaving] = useState(false);
 
   const {
@@ -91,7 +100,7 @@ export default function CertificationReviewTable() {
       const res = await fetch(`/api/admin/certifications/${certification.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status, ...(note?.trim() ? { reviewNote: note.trim() } : {}) }),
+        body: JSON.stringify({ status, ...(status === "CERTIFIED" ? { method: approvalMethod, ...(approvalMethod === "MANUAL" ? { evidence: manualEvidence.trim(), reviewNote: manualReason.trim() } : {}) } : {}), ...(note?.trim() ? { reviewNote: note.trim() } : {}) }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to review certification.");
@@ -116,7 +125,9 @@ export default function CertificationReviewTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="success" message={success || null} />
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={approveTarget || rejectTarget ? null : error || null} />
 
       <section className="card kt-card">
@@ -185,6 +196,7 @@ export default function CertificationReviewTable() {
                     <th>Topic</th>
                     <th>{dateLabel}</th>
                     {tab === "rejected" && <th>Note</th>}
+                    {tab === "certified" && <th>Qualification basis</th>}
                     {tab === "pending" && <th></th>}
                   </tr>
                 </thead>
@@ -215,14 +227,18 @@ export default function CertificationReviewTable() {
                           {c.reviewNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}
+                      {tab === "certified" && <td className="text-2xs whitespace-normal max-w-xs">
+                        {c.approvalMethod === "MANUAL" ? <>Manual review<p>{c.reviewNote}</p><p>{c.approvalEvidence}</p></> : c.approvalMethod === "ASSESSMENT" ? <>Passing assessment<p>{c.qualifyingAttemptId}</p></> : "Legacy record — provenance unavailable"}
+                      </td>}
                       {tab === "pending" && (
                         <td className="flex gap-2 justify-end">
                           <button
-                            onClick={() => setApproveTarget(c)}
+                            onClick={() => { setApprovalMethod("ASSESSMENT"); setError(""); setApproveTarget(c); }}
                             className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
                           >
-                            Approve
+                            Approve assessment
                           </button>
+                          <button onClick={() => { setApprovalMethod("MANUAL"); setManualReason(""); setManualEvidence(""); setError(""); setApproveTarget(c); }} className="btn btn-outline btn-warning btn-xs min-h-11 sm:min-h-0 text-2xs cursor-pointer">Manual certification</button>
                           <button
                             onClick={() => setRejectTarget(c)}
                             className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
@@ -257,20 +273,18 @@ export default function CertificationReviewTable() {
         </div>
       </section>
 
-      <ConfirmDialog
-        open={approveTarget !== null}
-        title="Approve this certification?"
-        description={
-          approveTarget
-            ? `${approveTarget.tutor.anonymousId} will be certified for "${approveTarget.topic}" (${subjectDisplayLabel(approveTarget.subject)}).`
-            : undefined
-        }
-        confirmLabel="Approve"
-        tone="default"
-        loading={saving}
-        onConfirm={() => approveTarget && review(approveTarget, "CERTIFIED")}
-        onCancel={() => setApproveTarget(null)}
-      />
+      <Modal open={approveTarget !== null} onClose={() => setApproveTarget(null)} title={approvalMethod === "MANUAL" ? "Manual certification" : "Approve passing assessment?"} size="md">
+        <ValidatedForm onSubmit={(event) => { event.preventDefault(); if (approveTarget) review(approveTarget, "CERTIFIED"); }}>
+          <p className="text-xs mb-3">{approveTarget?.tutor.anonymousId} · {approveTarget?.topic}</p>
+          <p className="text-xs mb-3">{approvalMethod === "MANUAL" ? "Use documented evidence of competence for this specific topic. This alternative does not record an assessment pass. Your reason and evidence will be audited." : "Requires a submitted passing assessment for this tutor and topic."}</p>
+          <FeedbackBanner variant="error" message={error || null} />
+          {approvalMethod === "MANUAL" && <div className="space-y-3">
+            <label className="form-control"><span className="label-text">Certification reason</span><textarea aria-label="Certification reason" required minLength={10} maxLength={500} value={manualReason} onChange={event => setManualReason(event.target.value)} className="textarea textarea-bordered w-full" /></label>
+            <label className="form-control"><span className="label-text">Qualification evidence</span><textarea aria-label="Qualification evidence" required minLength={10} maxLength={2000} value={manualEvidence} onChange={event => setManualEvidence(event.target.value)} placeholder="Describe or reference the reviewed credential, work sample or observed competency and its relevance to this topic." className="textarea textarea-bordered w-full" /></label>
+          </div>}
+          <div className="flex justify-end gap-2 mt-4"><button type="button" onClick={() => setApproveTarget(null)} className="btn btn-ghost btn-sm">Cancel</button><button type="submit" disabled={saving} className="btn btn-primary btn-sm">{approvalMethod === "MANUAL" ? "Certify with evidence" : "Approve assessment"}</button></div>
+        </ValidatedForm>
+      </Modal>
 
       <PromptDialog
         open={rejectTarget !== null}

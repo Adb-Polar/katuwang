@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
                   take: 1,
                   select: { scheduledAt: true },
                 },
-                _count: { select: { enrollments: true } },
+                _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
                 maxStudents: true,
               },
             },

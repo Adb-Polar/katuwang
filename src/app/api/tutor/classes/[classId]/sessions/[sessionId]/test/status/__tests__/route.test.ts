@@ -35,7 +35,9 @@ vi.mock("@/lib/prisma", () => ({
     platformSetting: { findUnique: vi.fn().mockResolvedValue(null) }, // sessionTestsEnabled defaults to true
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        sessionTest: { update: sessionTestUpdate },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "q1" }]),
+        assessmentQuestion: { findMany: vi.fn().mockResolvedValue([{ id: "q1" }]), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
+        sessionTest: { findUniqueOrThrow: sessionTestFindUnique, update: sessionTestUpdate },
         classEnrollment: { findMany: classEnrollmentFindMany },
         notification: { createMany: notificationCreateMany },
       }),
@@ -72,7 +74,7 @@ describe("PATCH /test/status", () => {
   });
 
   it("publishing notifies every enrolled learner with SESSION_PRETEST_OPEN", async () => {
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ questionId: "q1", position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED" });
     const res = await PATCH(patch({ status: "PUBLISHED" }), ctx());
     expect(res.status).toBe(200);
@@ -86,7 +88,7 @@ describe("PATCH /test/status", () => {
 
   it("publishes a test on a completed session without an unusable pre-test notification", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED", topic: "Fractions" });
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [{ questionId: "q1", position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "PUBLISHED" });
     const res = await PATCH(patch({ status: "PUBLISHED" }), ctx());
     expect(res.status).toBe(200);
@@ -117,7 +119,7 @@ describe("PATCH /test/status", () => {
 
   it("closes a published test", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "COMPLETED", topic: "Fractions" });
-    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", posttestOpenedAt: new Date(), questions: [{ position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", posttestOpenedAt: new Date(), questions: [{ questionId: "q1", position: 0, question: { origin: "TUTOR" } }], _count: { attempts: 0 } });
     sessionTestUpdate.mockResolvedValue({ id: "st1", status: "CLOSED" });
     const res = await PATCH(patch({ status: "CLOSED" }), ctx());
     expect(res.status).toBe(200);

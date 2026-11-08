@@ -1,12 +1,13 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { createClassSchema } from "@/lib/validations/class";
-import { normalizeTopic } from "@/lib/subjectTopics";
-import { subjectExists } from "@/lib/subjects";
-import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
-import { getSetting, getProfilePictureRequirement } from "@/lib/settings";
+import { normalizeTopic } from "@/lib/normalizeTopic";
+import { classTeachingError } from "@/lib/classTeachingPolicy";
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
@@ -41,6 +42,7 @@ export async function GET(req: NextRequest) {
         topics: true,
         sessions: { orderBy: { scheduledAt: "asc" } },
         enrollments: {
+          where: { withdrawnAt: null },
           include: {
             learner: {
               select: {
@@ -60,6 +62,8 @@ export async function GET(req: NextRequest) {
       classes.map((c) => ({ ...c, topics: c.topics.map((t) => t.topic) }))
     );
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error fetching tutor classes:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
@@ -86,19 +90,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const picReq = await getProfilePictureRequirement();
-    if (picReq === "TUTORS_ONLY" || picReq === "ALL_USERS") {
-      if (!tutorProfile.user?.image) {
-        return NextResponse.json(
-          {
-            error:
-              "A profile picture is required to create classes. Please upload one in your profile settings.",
-          },
-          { status: 400 }
-        );
-      }
-    }
-
     const body = await req.json();
     const result = createClassSchema.safeParse(body);
 
@@ -107,24 +98,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions } =
+    const { subject, gradeLevel, description, maxStudents, building, room, meetingLink, sessions, published = true } =
       result.data;
 
-    const tutorGradeLevel = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
-    if (gradeLevel && tutorGradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, tutorGradeLevel)) {
-      return NextResponse.json(
-        { error: "Target grade cannot be higher than your current grade level." },
-        { status: 400 }
-      );
+    if (published) {
+      const pictureError = await profilePictureActionError("PUBLISH_CLASS", tutorProfile.user?.image);
+      if (pictureError) return NextResponse.json({ error: pictureError }, { status: 400 });
     }
 
-    if (!(await subjectExists(subject))) {
-      return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
-    }
-
-    // Normalize + de-duplicate topics (case-insensitive). Custom topics that
-    // aren't in the curated SUBJECT_TOPICS list are allowed — a tutor can teach
-    // something the catalog doesn't list yet; they're stored verbatim.
+    // Normalize + de-duplicate topics. Custom class topics remain supported;
+    // subject validity and required certifications use database records.
     const canonicalByKey = new Map<string, string>();
     for (const raw of result.data.topics) {
       const t = normalizeTopic(raw);
@@ -146,23 +129,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // If enabled, only allow topics the tutor holds a CERTIFIED certification for
-    const requireCertification = await getSetting("requireCertificationForClassCreation");
-    if (requireCertification) {
-      const certifiedTopics = await prisma.topicCertification.findMany({
-        where: { tutorProfileId: tutorProfile.id, subject: subject, status: "CERTIFIED" },
-        select: { topic: true },
-      });
-      const certifiedTopicSet = new Set(certifiedTopics.map((c) => c.topic));
-      const uncertifiedTopics = topics.filter((t) => !certifiedTopicSet.has(t));
-
-      if (uncertifiedTopics.length > 0) {
-        return NextResponse.json(
-          { error: `You are not certified for: ${uncertifiedTopics.join(", ")}.` },
-          { status: 400 }
-        );
-      }
-    }
+    const teachingError = await classTeachingError({
+      tutorProfileId: tutorProfile.id,
+      tutorGradeLevel: tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null,
+      subject, gradeLevel: gradeLevel ?? null, topics,
+    });
+    if (teachingError) return NextResponse.json({ error: teachingError }, { status: 400 });
 
     const parsedSessions = sessions.map((s, i) => ({
       topic: sessionTopics[i] as string,
@@ -192,49 +164,51 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Each session must not overlap any of the tutor's existing sessions (any class)
-    for (const [index, s] of parsedSessions.entries()) {
-      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
-      const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
-      if (conflict) {
-        return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time.", fieldErrors: [{ path: ["sessions", index, "scheduledAt"], message: "You already have a session at this time. Choose another date or start time." }] },
-          { status: 409 }
-        );
-      }
-    }
-
     const code = await generateClassCode();
 
-    const newClass = await prisma.tutorClass.create({
-      data: {
-        tutorProfileId: tutorProfile.id,
-        code,
-        subject: subject,
-        gradeLevel: gradeLevel ?? null,
-        topics: { create: topics.map((topic) => ({ topic })) },
-        description: description || null,
-        maxStudents,
-        building: building || null,
-        room: room || null,
-        meetingLink: meetingLink || null,
-        status: "SCHEDULED",
-        sessions: {
-          create: parsedSessions.map((s) => ({
-            topic: s.topic,
-            scheduledAt: s.start,
-            duration: s.duration,
-          })),
+    const newClass = await prisma.$transaction(async (tx) => {
+      await lockTutorSchedule(tx, tutorProfile.id);
+      for (const [index, s] of parsedSessions.entries()) {
+        if (s.start.getTime() < Date.now()) throw new ClassWriteError("Cannot schedule a session in the past.", 400);
+        const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
+        if (await hasSessionOverlap(tutorProfile.id, s.start, end, undefined, tx)) {
+          throw new ClassWriteError("Time conflict detected: You already have a session scheduled during this time.", 409, [{ path: ["sessions", index, "scheduledAt"], message: "You already have a session at this time. Choose another date or start time." }]);
+        }
+      }
+      return tx.tutorClass.create({
+        data: {
+          tutorProfileId: tutorProfile.id,
+          code,
+          subject: subject,
+          gradeLevel: gradeLevel ?? null,
+          topics: { create: topics.map((topic) => ({ topic })) },
+          description: description || null,
+          maxStudents,
+          building: building || null,
+          room: room || null,
+          meetingLink: meetingLink || null,
+          status: "SCHEDULED",
+          published,
+          sessions: {
+            create: parsedSessions.map((s) => ({
+              topic: s.topic,
+              scheduledAt: s.start,
+              duration: s.duration,
+            })),
+          },
         },
-      },
-      include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
-    });
+        include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
+      });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(
       { ...newClass, topics: newClass.topics.map((t) => t.topic) },
       { status: 201 }
     );
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message, ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}) }, { status: error.status });
     console.error("Error creating tutor class:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

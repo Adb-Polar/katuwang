@@ -20,8 +20,8 @@ describe("Audit defect reproduction with isolated mocks", () => {
     expect(mocks.findMany).not.toHaveBeenCalled();
   });
   it("BUG-002: uncertified tutor receives no qualification-bank questions or keys", async () => {
-    mocks.session.mockResolvedValue({ user: { id: "qa-tutor", role: "STUDENT_TUTOR", status: "ACTIVE" } });
-    mocks.account.mockResolvedValue({ role: "STUDENT_TUTOR", status: "ACTIVE" });
+    mocks.session.mockResolvedValue({ user: { id: "qa-tutor", role: "STUDENT_TUTOR", sessionVersion: 0, status: "ACTIVE" } });
+    mocks.account.mockResolvedValue({ role: "STUDENT_TUTOR", sessionVersion: 0, status: "ACTIVE" });
     const response = await GET(new NextRequest("http://localhost/api/tutor/question-bank?subject=MATH"));
     expect((await response.json()).questions).toEqual([]);
     expect(mocks.findMany).not.toHaveBeenCalled();

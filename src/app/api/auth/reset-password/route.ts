@@ -7,6 +7,7 @@ import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/ra
 import { MINUTE_MS } from "@/lib/datetime";
 
 const INVALID = { error: "This reset link is invalid or has expired." };
+class InvalidResetLink extends Error {}
 
 // ─── POST: Complete a password reset ──────────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -37,19 +38,24 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await prisma.$transaction([
-      prisma.user.update({
+    await prisma.$transaction(async (tx) => {
+      // Take the lock before reading the clock, including after a competing reset.
+      await tx.$queryRaw`SELECT id FROM password_reset_tokens WHERE id = ${record.id} FOR UPDATE`;
+      const now = new Date();
+      const consumed = await tx.passwordResetToken.updateMany({
+        where: { id: record.id, userId: record.userId, usedAt: null, expiresAt: { gt: now } },
+        data: { usedAt: now },
+      });
+      if (consumed.count !== 1) throw new InvalidResetLink();
+      await tx.user.update({
         where: { id: record.userId },
-        data: { password: hashedPassword },
-      }),
-      prisma.passwordResetToken.update({
-        where: { id: record.id },
-        data: { usedAt: new Date() },
-      }),
-    ]);
+        data: { password: hashedPassword, sessionVersion: { increment: 1 } },
+      });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ message: "Your password has been reset. You can now sign in." });
   } catch (error) {
+    if (error instanceof InvalidResetLink) return NextResponse.json(INVALID, { status: 400 });
     console.error("Error handling reset-password:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },

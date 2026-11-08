@@ -1,3 +1,4 @@
+import { qualificationQuestionWhere } from "@/lib/qualificationBank";
 import { Prisma } from "@prisma/client";
 
 /** In-place Fisher–Yates shuffle. */
@@ -30,7 +31,7 @@ export async function pickQuestionIds(
 ): Promise<string[]> {
   const pool = await tx.assessmentQuestion.findMany({
     // origin: "BANK" — certification quizzes never serve tutor-authored questions.
-    where: { subject, topic, active: true, origin: "BANK" },
+    where: qualificationQuestionWhere({ subject, topic }),
     select: { id: true },
   });
   const poolIds = pool.map((q) => q.id);

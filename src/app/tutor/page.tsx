@@ -35,7 +35,7 @@ export default async function TutorDashboard() {
       tutorProfile: {
         include: {
           topicCertifications: true,
-          classes: { include: { topics: true, _count: { select: { enrollments: true } } } },
+          classes: { include: { topics: true, _count: { select: { enrollments: { where: { withdrawnAt: null } } } } } },
         },
       },
     },

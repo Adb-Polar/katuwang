@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -8,7 +9,6 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { reinstateExpiredClasses } from "@/lib/moderation";
-import { getEligibleTutorGradesForStudent } from "@/lib/gradeLevels";
 
 const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
 const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
@@ -24,17 +24,6 @@ export async function GET(req: NextRequest) {
     }
 
     await reinstateExpiredClasses();
-
-    const learnerGrade =
-      session.user.gradeLevel ??
-      (await prisma.user?.findUnique?.({
-        where: { id: session.user.id },
-        select: { gradeLevel: true },
-      }))?.gradeLevel ??
-      null;
-    const allowedTutorGrades = learnerGrade
-      ? getEligibleTutorGradesForStudent(learnerGrade)
-      : undefined;
 
     const { searchParams } = new URL(req.url);
     const q = searchParams.get("q")?.trim() || "";
@@ -70,7 +59,6 @@ export async function GET(req: NextRequest) {
     const where: Prisma.UserWhereInput = {
       role: "STUDENT_TUTOR",
       status: "ACTIVE",
-      ...(allowedTutorGrades ? { gradeLevel: { in: allowedTutorGrades } } : {}),
       // Multi-select is AND: the tutor must be CERTIFIED in every chosen subject.
       tutorProfile:
         subjectSlugs.length > 0
@@ -154,6 +142,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ tutors, total, page, pageSize });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error listing tutors:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

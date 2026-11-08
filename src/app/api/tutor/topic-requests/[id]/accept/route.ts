@@ -1,14 +1,20 @@
+import { subjectExists, topicExists } from "@/lib/subjects";
+import { catalogFailureResponse } from "@/lib/catalogError";
+import { profilePictureActionError } from "@/lib/profilePicturePolicy";
+import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
+import { lockTutorSchedule, ClassWriteError } from "@/lib/classLocks";
 import { getSetting } from "@/lib/settings";
 import { acceptTopicRequestSchema } from "@/lib/validations/match";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { hasInternalOverlap, hasSessionOverlap } from "@/lib/classSessions";
 import { MINUTE_MS } from "@/lib/datetime";
 import { generateClassCode } from "@/lib/idGenerator";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
-import { requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
+import { lockTopicRequestRow, requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
 import { isStudentEligibleForTutor, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
 
@@ -50,20 +56,20 @@ export async function POST(
 
     const request = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, expiresAt: true },
+      select: { id: true, status: true, subject: true, learnerId: true, gradeLevel: true, topics: { select: { topic: true } }, expiresAt: true, updatedAt: true },
     });
     if (!request) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
     }
     if (request.status !== "OPEN" || request.expiresAt <= new Date()) {
-      return NextResponse.json({ error: "This request is no longer open." }, { status: 400 });
+      return NextResponse.json({ error: "This request is no longer open." }, { status: 409 });
     }
 
     const tutorGrade = tutorProfile.user?.gradeLevel ?? session.user.gradeLevel ?? null;
 
     if (!isStudentEligibleForTutor(request.gradeLevel, tutorGrade)) {
       return NextResponse.json(
-        { error: "You cannot teach students in a higher grade level than your own." },
+        { error: "This request is not available for acceptance." },
         { status: 403 }
       );
     }
@@ -112,6 +118,15 @@ export async function POST(
     const topics = [...canonicalByKey.values()];
     if (topics.length === 0) {
       return NextResponse.json({ error: "Please select at least one topic." }, { status: 400 });
+    }
+
+    const missingTopics = missingRequestedTopics(request.topics.map(({ topic }) => topic), topics);
+    if (missingTopics.length > 0) {
+      return NextResponse.json({ error: `The class must cover every requested topic. Missing: ${missingTopics.join(", ")}.` }, { status: 400 });
+    }
+
+    if (!(await subjectExists(subject)) || (await Promise.all(topics.map(topic => topicExists(subject, topic)))).some(valid => !valid)) {
+      return NextResponse.json({ error: "The subject or selected topics are no longer active in the catalog. Refresh and try again." }, { status: 400 });
     }
 
     const sessionTopics = sessions.map((s) => canonicalByKey.get(normalizeTopic(s.topic).toLowerCase()));
@@ -163,24 +178,45 @@ export async function POST(
       );
     }
 
-    // Each session must not overlap any of the tutor's existing sessions (any class)
-    for (const [index, s] of parsedSessions.entries()) {
-      const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
-      const conflict = await hasSessionOverlap(tutorProfile.id, s.start, end);
-      if (conflict) {
-        return NextResponse.json(
-          { error: "Time conflict detected: You already have a session scheduled during this time.", fieldErrors: [{ path: ["sessions", index, "scheduledAt"], message: "You already have a session at this time. Choose another date or start time." }] },
-          { status: 409 }
-        );
-      }
-    }
-
-
     const code = await generateClassCode();
 
     const { newClass, updatedRequest } = await prisma.$transaction(async (tx) => {
-      const current = await tx.topicRequest.findUniqueOrThrow({ where: { id }, select: { status: true, expiresAt: true } });
-      if (current.status !== "OPEN" || current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
+      await lockTutorSchedule(tx, tutorProfile.id);
+      for (const [index, s] of parsedSessions.entries()) {
+        if (s.start.getTime() < Date.now()) throw new ClassWriteError("Cannot schedule a session in the past.", 400);
+        const end = new Date(s.start.getTime() + s.duration * MINUTE_MS);
+        if (await hasSessionOverlap(tutorProfile.id, s.start, end, undefined, tx)) {
+          throw new ClassWriteError("Time conflict detected: You already have a session scheduled during this time.", 409, [{ path: ["sessions", index, "scheduledAt"], message: "You already have a session at this time. Choose another date or start time." }]);
+        }
+      }
+      await lockTopicRequestRow(tx, id);
+      const liveTutor = await tx.tutorProfile.findUnique({
+        where: { id: tutorProfile.id }, select: { user: { select: { gradeLevel: true, image: true } } },
+      });
+      if (!liveTutor) throw new ClassWriteError("Tutor profile not found.", 404);
+      const pictureError = await profilePictureActionError("ACCEPT_REQUEST", liveTutor.user.image, tx);
+      if (pictureError) throw new ClassWriteError(pictureError, 400);
+      const liveCertified = await tx.topicCertification.findMany({
+        where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" }, select: { subject: true, topic: true },
+      });
+      const liveTopicKeys = new Set(liveCertified.filter((c) => c.subject === subject)
+        .map((c) => normalizeTopic(c.topic).toLowerCase()));
+      if (topics.some((topic) => !liveTopicKeys.has(normalizeTopic(topic).toLowerCase()))) {
+        throw new ClassWriteError("Your topic certifications changed. Refresh and try again.", 403);
+      }
+      if (gradeLevel && !isTargetGradeEligibleForTutor(gradeLevel, liveTutor.user.gradeLevel)) {
+        throw new ClassWriteError("Target grade cannot be higher than your current grade level.", 400);
+      }
+      const before = await requestSnapshot(tx, id);
+      if (missingRequestedTopics(before.topics, topics).length > 0) {
+        throw new ClassWriteError("The request topics changed. Refresh and include every requested topic.", 409);
+      }
+      const claimed = await tx.topicRequest.updateMany({
+        where: { id, ...tutorPoolWhere(tutorProfile.id, liveCertified, liveTutor.user.gradeLevel),
+          subject, updatedAt: request.updatedAt },
+        data: { status: "ACCEPTED" },
+      });
+      if (claimed.count !== 1) throw new ClassWriteError("This request is no longer open or has changed. Refresh and try again.", 409);
       const newClass = await tx.tutorClass.create({
         data: {
           tutorProfileId: tutorProfile.id,
@@ -205,8 +241,7 @@ export async function POST(
         },
       });
 
-      if (current.expiresAt <= new Date()) throw new Error("Request expired before acceptance.");
-      const before = await requestSnapshot(tx, id);
+      if (request.expiresAt <= new Date()) throw new ClassWriteError("This request has expired.", 409);
       const updatedRequest = await tx.topicRequest.update({
         where: { id },
         data: { status: "ACCEPTED", fulfilledClassId: newClass.id },
@@ -223,11 +258,14 @@ export async function POST(
       );
 
       return { newClass, updatedRequest };
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ request: updatedRequest, classId: newClass.id }, { status: 201 });
   } catch (error) {
-    if (error instanceof Error && error.message === "Request expired before acceptance.") return NextResponse.json({ error: "This request has expired." }, { status: 409 });
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
+    if (error instanceof ClassWriteError) return NextResponse.json({ error: error.message, ...(error.fieldErrors ? { fieldErrors: error.fieldErrors } : {}) }, { status: error.status });
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") return NextResponse.json({ error: "This request is no longer open or has changed." }, { status: 409 });
     console.error("Error accepting topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

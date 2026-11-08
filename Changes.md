@@ -4169,3 +4169,122 @@ Separated combined `datetime-local` input fields into distinct `<input type="dat
 
 
 
+
+
+## 2026-11-06 — Avatar moderation hierarchy
+
+The avatar moderation endpoint now uses the shared administrative role predicate: ADMIN and SUPER_ADMIN may moderate learner/tutor avatars, and both administrator roles are protected targets. Added role-matrix regressions and side-effect checks for protected accounts. Deployment and browser verification tracked in docs/plans/staged-security-integrity.md.
+
+
+## 2026-11-06 — Effective class-edit authorization
+
+Class creation and editing share the teaching-scope policy. Partial edits now validate the resulting subject, grade and topics against current tutor eligibility and certification requirements, including retained fields. Existing session topics must remain selected. Added regression coverage for subject-only changes, uncertified replacement topics, revoked certifications, invalid subjects, and retained grades above the tutor's current grade. Avatar moderation live verification passed on dev-test (4fc798a).
+
+
+## 2026-11-06 — Revoke sessions after password changes/resets
+
+Added an additive user sessionVersion migration, JWT/session claims, immediate live-version checks at the protected server boundary, and atomic version increments with password updates/resets. Legacy sessions require a new login. The password-change form signs out after success and the login page explains the change. Added revocation regressions and opt-in integration tests guarded to an isolated local verification database. Class-edit live verification passed on dev-test (3a09934), including certification rejection and successful browser save/restore.
+
+
+## 2026-11-06 — Current assessment access and bounded closure grace
+
+Direct learner attempt reads and submissions now enforce current enrollment, class moderation, testing enablement and cancellation restrictions. Ordinary test closure permits only existing attempts, for 15 minutes, with the earliest closure controlling the deadline. Session completion stamps PRE closure atomically with status changes. Added access, deadline, direct-read and no-write regression coverage; tutor closure copy states the grace policy. Session revocation live checks passed on dev-test (eb45a4f).
+
+
+## 2026-11-06 — Serialize enrollment and capacity edits
+
+Enrollment now acquires a class-row lock and validates current eligibility, publication, status, capacity, duplicate membership and the first-session cutoff within one transaction. Class edits use the same lock and recheck enrollment count before reducing capacity. Added focused regressions and guarded real-MariaDB concurrency tests. Assessment access/grace live verification passed on dev-test (b91a335), and disposable fixtures were cleaned.
+
+
+## 2026-11-06 — Serialize tutor schedule checks and writes
+
+Class creation, session additions/rescheduling and request acceptance now share a tutor-profile row lock. Overlap checks use the transaction client and current state, preventing competing writes from both passing an earlier check. Session edits/additions also lock the class. Moderated classes retain scheduled-time reservations so reinstatement cannot introduce overlaps. Added five guarded real-MariaDB scheduling tests; all pass. Enrollment capacity live verification passed on dev-test (334024e).
+
+
+## 2026-11-06 — Isolate scheduling modal forms
+
+Live scheduling QA exposed reschedule submissions reaching the enclosing class editor. The reschedule dialog now renders in a body portal, and scheduling modal submit events stop before reaching the parent form. Added UI regressions verifying that rescheduling makes one session PATCH and that rejected modal validation cannot submit the class.
+
+
+## 2026-11-06 — Atomically claim topic requests
+
+Acceptance now locks and conditionally claims an eligible open request before creating its class, with a version check against intervening request edits and a live certification/grade recheck. Class, history, fulfillment link and notification commit together; competitors receive 409. Learner lifecycle mutations share the lock and reject stale state. Four guarded real-MariaDB integration tests pass. Corrected a stale catalog fixture in the touched learner-edit tests. Corrected scheduling dialogs passed dev-test browser verification (d6ef4a5).
+
+
+## 2026-11-06 — Claim each assessment submission once
+
+Learner and tutor assessments now claim IN_PROGRESS attempts atomically before writing grades or side effects. Only the winning transaction finalizes the attempt. Learner access is rechecked on the transaction connection; changed restrictions roll the claim back. Qualification updates serialize and re-read certification state to preserve earned badges across competing attempts. Added five guarded real-MariaDB tests and focused loser/no-write regressions. Two-tutor acceptance passed dev-test verification (b029695).
+
+
+## 2026-11-06 — Consume reset tokens atomically
+
+Password reset locks and conditionally consumes an unused, unexpired token before updating the password and session version in the same transaction. Rechecks use the post-lock clock, so hashing/waiting cannot bypass expiry. Added losing-claim coverage and real-MariaDB reuse/expiry tests. Single-submission live verification passed on dev-test (d17e718) with one score and notification.
+
+
+## 2026-11-06 — Preserve session assessment history
+
+Completed sessions reject reopening and schedule/topic rewrites. Session and class deletion inspect current assessment records under class locks and direct tutors to cancellation. A restrictive foreign key also prevents cascading history loss during concurrent test creation. Added route regressions and two isolated MariaDB constraint/race checks. Reset fix 327b16e passed isolated positive/reuse/session browser QA and live invalid-link verification.
+
+
+## 2026-11-06 — Unify any-grade learner access
+
+Learners can discover tutors/classes, request tutoring and enroll across grades through the shared policy. Removed implicit grade query cutoffs from discovery, search and request pools. Auto Match uses grade for relevance, keeping all catalog topics available; explicit browse filters and tutor class target-grade validation remain. Added all-grade/missing-grade matrix coverage and updated endpoint regressions and stale canonical catalog fixtures. Session history c99df65 passed live browser checks.
+
+
+## 2026-11-06 — Require full requested-topic coverage
+
+Request acceptance checks every requested topic before claiming and against the locked snapshot. Linked classes also reject later subject/topic edits that break promised coverage. The tutor form explains missing certifications and requires full coverage; learner cards show actual linked class topics. Five MariaDB acceptance tests pass, including partial/no-side-effects and complete coverage. Any-grade fe7f1f4 passed Grade 12 browser enrollment with a Grade 10 tutor / Grade 9 class.
+
+
+## 2026-11-06 — Share profile-picture prerequisites
+
+The same action policy now protects tutor publishing/request acceptance and learner enrollment, honoring OPTIONAL, TUTORS_ONLY and ALL_USERS modes. Enrollment and acceptance read the requirement through their transaction connection. Setting labels name the protected actions. Added nine mode/action matrix tests and blocked-action endpoint regressions. Complete request coverage 959385e passed live API/browser verification.
+
+
+## 2026-11-06 — Persist and verify recovery email ownership
+
+Registration and learner/tutor profile updates persist normalized backup addresses. Changing them requires the current password and clears verified status. Added self-service recovery settings with expiring single-use emailed codes, conditional consumption and current-address checks. Password recovery accepts only verified backups and rejects ambiguous account matches before token/mail side effects. Six isolated MariaDB tests exercise persistence, verification, reuse/concurrency, expiry, address change, delivery failure and ambiguity. Picture policy 6e6040c passed live browser QA with the original setting restored.
+
+
+## 2026-11-07 — Preserve class publication input
+
+Class creation now persists published:false and explicitly defaults to true when omitted. The picture prerequisite applies when publishing, allowing unpublished drafts to be saved. Added false/true/omitted and mandatory-picture draft regressions. Recovery-email 1d96784 passed isolated SMTP/browser verification and live authenticated/invalid-input UI checks.
+
+
+## 2026-11-07 — Make the live catalog authoritative
+
+Removed static fallback validation and picker choices. Question-bank coverage/navigation, chatbot extraction and development sampling use active database entries. Catalog read failures return retryable 503 responses before writes; picker failures show a retry control with no seed choices. Request acceptance also rechecks active topics. Isolated normalization from seed data. Tests explicitly supply database catalog fixtures, correcting stale topic names and the old login-error fixture; all baseline failures are resolved. Publication cf10319 passed live browser privacy/publish verification.
+
+
+## 2026-11-07 — Retain withdrawn enrollment history
+
+Withdrawal timestamps the existing row under the class lock; re-enrollment reactivates it without losing its first enrollment date. Capacity, active rosters, notifications and assessment access exclude withdrawn relationships. Learner progress, tutor result cohorts and reporting eligibility retain history, with explicit current/historical counts and withdrawal labels. Four new MariaDB history tests and three existing capacity races pass. Catalog 5ce8ded passed live custom-topic, picker outage/retry and deactivation verification.
+
+
+## 2026-11-07 — Lock published questions and preserve correction versions
+
+Question rows lock when published or selected for qualification, including before the first answer. Edits, retirement and test question replacement serialize with publication/selection. Draft deletion rechecks lifecycle under the same test lock. Admins can create an audited corrected successor with a required reason; the original retires while existing links/options/scores stay unchanged. Ten MariaDB cases cover versions, stale edits/deletes, retirement races and preserved grading. Enrollment history 1675176 passed live browser withdrawal/re-enrollment checks.
+
+Fix 18 follow-up: a successor also freezes an unpublished original. The ten MariaDB version tests, six focused route tests, TypeScript and changed-file lint pass.
+
+Fix 18 live browser verification passed on 83d4d90: immutable publication, corrected-version modal, preserved original test content and retirement selection. QA history archived.
+
+## 2026-11-07 — Withhold PRE answer feedback until POST submission
+
+A shared learner policy unlocks answer keys only after the same learner submits the matching POST. Both BANK and TUTOR questions withhold per-item grades, option correctness and explanations on PRE submission/reload; aggregate scores remain visible. Selected answers use neutral styling and explain when feedback unlocks. Staff review retains answers. Full suite 1,155 passes, zero failures; eleven real-MariaDB version/feedback checks pass, including another learner and in-progress POST isolation. TypeScript, changed-file lint and production build pass.
+
+## 2026-11-07 — Require evidenced certification approval
+
+Standard approval requires a submitted passing assessment for the exact tutor/topic and records its source. A distinct manual action requires reason and evidence, persists them, and uses a separate audit action without inventing a quiz pass. Automatic certification records provenance; legacy records remain explicitly unknown. Approval, rejection, re-request and quiz writes share the profile lock and recheck current status to preserve concurrently earned badges. Admin forms expose both paths and their requirements. PRE feedback 7bbc713 passed local/live browser verification after retrying a stalled Render build.
+
+Fix 20 validation: 1,160 tests pass, 54 opt-in skipped; thirteen real-MariaDB checks pass. TypeScript, lint and build pass. Isolated browser verifies blocked standard approval, required manual evidence and positive audited manual certification without a quiz record.
+
+## 2026-11-07 — Gate real qualification on documented topic review
+
+Questions distinguish DEMO, UNREVIEWED and APPROVED review status. Only active approved BANK versions with recorded competency, qualified reviewer credentials and review evidence count toward readiness/selection. Approval locks content and audits an explicit attestation; revocation, retirement and correction rechecks protect submission/admin approval. Existing attempts remain practice/history and cannot be promoted by a later question review. Tutor/history/admin labels distinguish practice from qualification. Topic renames invalidate affected review/attempt eligibility. Seed scripts append demo questions without deleting or relinking history, and preserve assessment settings and existing credential decisions. Manual certification remains a distinct evidenced alternative; no human review is invented. Fix20 c02dce1 passed live guards with no live credentials granted.
+
+Fix 21 validation: 1,160 unit/route tests pass and all65 isolated database integration checks pass. Fresh database migration smoke applies all37 migrations. Final typecheck, lint and production build pass. Isolated browser verifies review/immutability, revocation, practice labeling and eligible qualification provenance with no page errors. Qualified review must be performed by an actual qualified reviewer before real qualification content becomes available.
+
+## 2026-11-07 — Record completed staged verification
+
+All21 fixes completed sequential commit/push/dev-test deployment and browser checks. Fix21 284ba6e passed live demo/unreviewed readiness and review-form guards without fabricating a qualified review. Marked the earlier recorded browser checks Good and added a concise verification report. Final documentation-only revision uses the same tested application code. Production and seeded demo passwords were not changed.

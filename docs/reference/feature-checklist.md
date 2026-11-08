@@ -81,7 +81,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Admin-authored question bank per subject/topic | ✅ | `AssessmentQuestion`/`AssessmentOption`, `/admin/assessment/question-bank`, `QuestionBankManager.tsx` (subject → topic → questions drill-down) |
 | Global assessment config (question count, pass %, min bank size) | ✅ | One platform-wide set on **Settings → Assessment**; stored as `PlatformSetting` rows, read via `getAssessmentConfig()`. Replaced per-`(subject, topic)` `TopicAssessmentConfig`, which was dropped entirely on 2026-09-03 — see `docs/plans/assessments.md`. |
 | Tutor can request more questions be added for a topic | ✅ | `QuestionRequest` model, `/api/admin/question-requests`, `/admin` review UI |
-| Admin certifies/rejects a tutor's topic request | ✅ | `TopicCertificationStatus`, `/api/admin/certifications` |
+| Admin certifies/rejects a tutor's topic request | ✅ | Passing assessment required; separate audited manual action requires reason/evidence; provenance stored. `/api/admin/certifications` |
 | **Learner pre-test (before a session)** | ✅ | `SessionTest`/`SessionTestQuestion`/`SessionTestAttempt(+Item)`, one test per `ClassSession` served twice (`kind: PRE\|POST` on the attempt). Tutor builder (`/tutor/classes/[classId]/sessions/[sessionId]/test`), learner take/resume/review (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`), admin read-only list + results (`/admin/session-tests`). Scoped per-session, not per-class — see `docs/reference/decisions.md`. |
 | **Learner post-test (after a session, to measure progress)** | ✅ | Same model as above — opens automatically when the tutor marks that session COMPLETED; pre→post score-gain reporting for tutor (charts + per-learner/per-question breakdown), learner (`/learner/progress`), and admin. Diagnostic only (no pass/fail), per thesis delimitation. `sessionTestsEnabled` platform-setting kill switch. |
 
@@ -140,3 +140,5 @@ expansion) landed the same day (Part 30).
 **Biggest gaps to close next:** grow the chatbot FAQ knowledge base further from `/admin/chatbot` + TRIS stakeholder interviews.
 
 **Note on roles:** the thesis reference document names a 4th "Teacher Moderator" role, but the team decided to ship with 3 roles only (Learner, Tutor, Admin). Treat the reference doc's mentions of Teacher Moderator / Moderator Portal as stale, not a missing feature.
+
+- Real qualification bank: documented qualified topic review required per immutable question version; demo/unreviewed and historical practice attempts excluded from new certification. Human review content remains an administrator responsibility.

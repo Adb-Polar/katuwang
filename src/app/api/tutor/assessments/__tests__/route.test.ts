@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { catalogFixture } from "@/test/fixtures/catalog";
 
 const {
   getServerSessionMock,
@@ -28,7 +27,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 vi.mock("@/lib/assessmentPicker", () => ({ pickQuestionIds: pickQuestionIdsMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    subject: { findMany: vi.fn(async () => catalogFixture) },
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     assessmentAttempt: { findFirst: attemptFindFirst, aggregate: attemptAggregate, create: attemptCreate },
     topicCertification: { findUnique: certFindUnique },
@@ -36,6 +35,8 @@ vi.mock("@/lib/prisma", () => ({
     assessmentQuestion: { count: questionCount },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "q1" }]),
+        assessmentQuestion: { count: questionCount, findMany: vi.fn(async ({ where }: { where: { id: { in: string[] } } }) => where.id.in.map(id => ({ id }))), updateMany: vi.fn().mockResolvedValue({ count: 1 }) },
         assessmentAttempt: { aggregate: attemptAggregate, create: attemptCreate },
       }),
   },
@@ -52,13 +53,13 @@ function post(body: unknown) {
     headers: { "content-type": "application/json" },
   });
 }
-const validBody = { subject: "MATH", topic: "Quadratic Equations" };
+const validBody = { subject: "MATH", topic: "Algebraic Expressions & Factoring" };
 
 function fakeAttempt(itemIds: string[]) {
   return {
     id: "at1",
     subject: "MATH",
-    topic: "Quadratic Equations",
+    topic: "Algebraic Expressions & Factoring",
     attemptNo: 1,
     status: "IN_PROGRESS",
     questionCount: itemIds.length,
@@ -118,7 +119,7 @@ describe("POST /api/tutor/assessments", () => {
 
     await POST(post(validBody));
     expect(questionCount).toHaveBeenCalledWith(
-      expect.objectContaining({ where: expect.objectContaining({ origin: "BANK" }) }),
+      expect.objectContaining({ where: expect.objectContaining({ AND: expect.arrayContaining([expect.objectContaining({ origin: "BANK", active: true, reviewStatus: "APPROVED" })]) }) }),
     );
   });
 
@@ -145,7 +146,7 @@ describe("POST /api/tutor/assessments", () => {
   it("201 creates an attempt with the picked questions when the bank is ready", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
-    questionCount.mockResolvedValue(12);
+    questionCount.mockResolvedValueOnce(12).mockResolvedValueOnce(5).mockResolvedValue(12);
     pickQuestionIdsMock.mockResolvedValue(["q1", "q2", "q3", "q4", "q5"]);
     attemptCreate.mockResolvedValue(fakeAttempt(["q1", "q2", "q3", "q4", "q5"]));
 

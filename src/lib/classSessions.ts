@@ -1,21 +1,24 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { MINUTE_MS } from "@/lib/datetime";
 
 /**
  * Checks a candidate session's time range against every SCHEDULED session in
- * every SCHEDULED class the tutor owns (excluding, optionally, one session —
+ * every non-cancelled/non-completed class the tutor owns (excluding, optionally, one session —
  * used when rescheduling that same session).
  */
 export async function hasSessionOverlap(
   tutorProfileId: string,
   start: Date,
   end: Date,
-  excludeSessionId?: string
+  excludeSessionId?: string,
+  db: Pick<Prisma.TransactionClient, "classSession"> = prisma,
 ): Promise<boolean> {
-  const otherSessions = await prisma.classSession.findMany({
+  const otherSessions = await db.classSession.findMany({
     where: {
       status: "SCHEDULED",
-      class: { tutorProfileId, status: "SCHEDULED" },
+      // Moderation keeps the reservation, so reinstatement cannot create overlaps.
+      class: { tutorProfileId, status: { notIn: ["CANCELLED", "COMPLETED"] } },
       ...(excludeSessionId ? { id: { not: excludeSessionId } } : {}),
     },
     select: { scheduledAt: true, duration: true },

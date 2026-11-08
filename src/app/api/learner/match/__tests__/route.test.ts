@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { catalogFixture } from "@/test/fixtures/catalog";
 
 const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
@@ -10,7 +9,8 @@ const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
-vi.mock("@/lib/prisma", () => ({ prisma: { subject: { findMany: vi.fn(async () => catalogFixture) }, tutorClass: { findMany: findManyMock } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));
 
@@ -24,7 +24,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const validBody = { subject: "MATH", topics: ["Quadratic Equations"] };
+const validBody = { subject: "MATH", topics: ["Algebraic Expressions & Factoring"], gradeLevel: "GRADE_12" };
 
 describe("POST /api/learner/match", () => {
   beforeEach(() => {
@@ -53,7 +53,7 @@ describe("POST /api/learner/match", () => {
     expect(res.status).toBe(400);
   });
 
-  it("returns ranked matches with reasons", async () => {
+  it("ranks matches across curriculum grades with reasons", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     findManyMock.mockResolvedValue([
       {
@@ -63,14 +63,14 @@ describe("POST /api/learner/match", () => {
         status: "SCHEDULED",
         published: true,
         maxStudents: 3,
-        topics: [{ topic: "Quadratic Equations" }],
+        topics: [{ topic: "Algebraic Expressions & Factoring" }],
         sessions: [
-          { id: "s1", topic: "Quadratic Equations", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
+          { id: "s1", topic: "Algebraic Expressions & Factoring", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
         ],
         tutorProfile: {
           id: "tp1",
           user: { id: "t1", anonymousId: "TUT-0001" },
-          topicCertifications: [{ subject: "MATH", topic: "Quadratic Equations" }],
+          topicCertifications: [{ subject: "MATH", topic: "Algebraic Expressions & Factoring" }],
         },
         _count: { enrollments: 0 },
         enrollments: [],
@@ -82,8 +82,8 @@ describe("POST /api/learner/match", () => {
     const json = await res.json();
     expect(json.matches).toHaveLength(1);
     expect(json.matches[0].class.id).toBe("c1");
-    expect(json.matches[0].reasons.matchedTopics).toEqual(["Quadratic Equations"]);
-    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Quadratic Equations"]);
+    expect(json.matches[0].reasons.matchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
+    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
     expect(json.matches[0].score).toBeGreaterThan(0);
   });
 

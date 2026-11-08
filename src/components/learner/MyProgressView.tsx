@@ -9,6 +9,7 @@ import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface ProgressRow {
   classCode: string;
+  withdrawnAt?: string | null;
   subject: string;
   topic: string;
   scheduledAt: string;
@@ -22,6 +23,7 @@ interface ProgressPayload {
 }
 
 export interface ClassOption {
+  withdrawnAt?: string | null;
   id: string;
   code: string;
   subject: string;
@@ -95,7 +97,7 @@ export default function MyProgressView({
               <option value="">All classes</option>
               {classOptions.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.code} · {subjectDisplayLabel(c.subject)}
+                  {c.code} · {subjectDisplayLabel(c.subject)}{c.withdrawnAt ? " · Withdrawn" : ""}
                 </option>
               ))}
             </select>
@@ -104,6 +106,7 @@ export default function MyProgressView({
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
+      {data?.series.some(row => row.withdrawnAt) && <p className="text-xs text-base-content/60">Includes retained learning records from classes you withdrew from.</p>}
       {error && <button type="button" onClick={() => { setLoading(true); setError(""); setData(null); setRetryCount((count) => count + 1); }} className="btn btn-outline btn-error min-h-11">Retry loading progress</button>}
 
       {loading && <p role="status" className="text-sm text-base-content/60">Loading progress…</p>}

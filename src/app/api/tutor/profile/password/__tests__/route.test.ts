@@ -76,7 +76,7 @@ describe("POST /api/tutor/profile/password", () => {
     expect(bcryptHashMock).toHaveBeenCalledWith("newpassword1", 12);
     expect(updateMock).toHaveBeenCalledWith({
       where: { id: "U1" },
-      data: { password: "new-hashed-pw" },
+      data: { password: "new-hashed-pw", sessionVersion: { increment: 1 } },
     });
   });
 

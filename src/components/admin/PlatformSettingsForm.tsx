@@ -277,7 +277,7 @@ export default function PlatformSettingsForm() {
                 <div>
                   <p className="text-sm font-semibold text-base-content">Profile picture requirement</p>
                   <p className="text-xs text-base-content/60 mt-0.5">
-                    Control whether profile pictures are optional, mandatory for tutors before creating classes, or mandatory for all users.
+                    Require tutors to upload before publishing classes or accepting requests. The learner option also requires a picture before enrollment. Profile access remains available.
                   </p>
                 </div>
                 <select
@@ -288,8 +288,8 @@ export default function PlatformSettingsForm() {
                   onChange={(e) => updateProfilePicRequirement(e.target.value)}
                 >
                   <option value="OPTIONAL">Fully optional</option>
-                  <option value="TUTORS_ONLY">Mandatory for tutors</option>
-                  <option value="ALL_USERS">Mandatory for all users</option>
+                  <option value="TUTORS_ONLY">Tutor publishing &amp; acceptance</option>
+                  <option value="ALL_USERS">Tutors + learner enrollment</option>
                 </select>
               </div>
             </div>

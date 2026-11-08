@@ -10,7 +10,8 @@ const { getServerSessionMock, findManyMock, countMock, getSettingMock, reinstate
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
-vi.mock("@/lib/prisma", () => ({ prisma: { user: { findMany: findManyMock, count: countMock } } }));
+vi.mock("@/lib/prisma", () => ({ prisma: {
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, user: { findMany: findManyMock, count: countMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));
 
@@ -116,14 +117,12 @@ describe("GET /api/learner/tutors", () => {
     expect(json.tutors[0].name).toBe("Ana Cruz");
   });
 
-  it("filters tutors by grade level when learner has a gradeLevel", async () => {
+  it("does not implicitly filter tutor grades for a learner", async () => {
     getServerSessionMock.mockResolvedValue({
       user: { id: "L1", role: "STUDENT_LEARNER", gradeLevel: "GRADE_10" },
     });
     await GET(req());
     const call = findManyMock.mock.calls[0][0];
-    expect(call.where.gradeLevel).toEqual({
-      in: ["GRADE_10", "GRADE_11", "GRADE_12"],
-    });
+    expect(call.where.gradeLevel).toBeUndefined();
   });
 });

@@ -447,7 +447,7 @@ async function ensureTutorProfile(userId: string, topicCertifications: TutorSeed
       where: {
         tutorProfileId_subject_topic: { tutorProfileId: profile.id, subject: tc.subject, topic: tc.topic },
       },
-      update: { status, certifiedAt, reviewedAt, reviewNote },
+      update: {},
       create: {
         tutorProfileId: profile.id,
         subject: tc.subject,
@@ -455,7 +455,7 @@ async function ensureTutorProfile(userId: string, topicCertifications: TutorSeed
         status,
         certifiedAt,
         reviewedAt,
-        reviewNote,
+        reviewNote: reviewNote ?? "[DEMO] Seeded demonstration record; not qualification evidence.",
       },
     });
     if (tc.certified) certCount++;
@@ -1407,7 +1407,7 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
     existingQuestions.map((q) => `${q.subject}::${q.topic}::${q.prompt}`)
   );
 
-  const pendingQuestions: { id: string; subject: string; topic: string; prompt: string; explanation: string | null; createdById: string }[] = [];
+  const pendingQuestions: { id: string; subject: string; topic: string; prompt: string; explanation: string | null; createdById: string; reviewStatus: "DEMO" }[] = [];
   const pendingOptions: { id: string; questionId: string; text: string; isCorrect: boolean; position: number }[] = [];
   let topicCounter = 0;
   const totalTopics = Object.keys(SUBJECT_TOPICS).reduce((acc, s) => acc + SUBJECT_TOPICS[s].length, 0);
@@ -1429,7 +1429,7 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
         const key = `${subject}::${topic}::${q.prompt}`;
         if (existingSet.has(key)) continue;
         const id = randomUUID();
-        newQuestions.push({ id, subject, topic, prompt: q.prompt, explanation: q.explanation ?? null, createdById: adminId });
+        newQuestions.push({ id, subject, topic, prompt: q.prompt, explanation: q.explanation ?? null, createdById: adminId, reviewStatus: "DEMO" as const });
         newOptions.push(...q.options.map(([text, isCorrect], position) => ({ id: randomUUID(), questionId: id, text, isCorrect, position })));
         existingSet.add(key);
       }
@@ -1454,15 +1454,15 @@ async function seedQuestionBank(adminId: string, demoTutorProfileId: string | nu
 
   for (const [key, value] of [
     ["assessmentQuestionCount", "5"],
-    ["assessmentPassPercent", "60"],
+    ["assessmentPassPercent", "80"],
     ["assessmentMinBankSize", "5"],
   ] as const) {
     await prisma.platformSetting.upsert({
       where: { key },
-      update: { value },
+      update: {},
       create: { key, value },
     });
-    log.info("PlatformSetting", `${key} = ${value}`);
+    log.info("PlatformSetting", `${key}: existing policy retained, default ${value} if absent`);
   }
 
   if (demoTutorProfileId) {
@@ -1787,8 +1787,8 @@ async function main() {
     for (const topic of coverageTopics) {
       await prisma.topicCertification.upsert({
         where: { tutorProfileId_subject_topic: { tutorProfileId: coverageTutor.id, subject: group.slug, topic: topic.name } },
-        update: { status: "CERTIFIED", certifiedAt: new Date() },
-        create: { tutorProfileId: coverageTutor.id, subject: group.slug, topic: topic.name, status: "CERTIFIED", certifiedAt: new Date() },
+        update: {},
+        create: { tutorProfileId: coverageTutor.id, subject: group.slug, topic: topic.name, status: "CERTIFIED", certifiedAt: new Date(), reviewNote: "[DEMO] Seeded demonstration record; not qualification evidence." },
       });
       const klass = await ensureTutorClass({ tutorProfileId: coverageTutor.id, subject: group.slug,
         gradeLevel: seedGrade(group.slug, [topic.name]), description: `[grouped-seed] ${group.name}: ${topic.name}`,

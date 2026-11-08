@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -34,10 +35,10 @@ export async function POST(req: NextRequest) {
 
     const { subject, topics, gradeLevel, preferredSlots, classFormat } = result.data;
 
-    if (!(await subjectExists(subject, { gradeLevel }))) {
+    if (!(await subjectExists(subject))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    const topicChecks = await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel })));
+    const topicChecks = await Promise.all(topics.map((t) => topicExists(subject, t)));
     if (topicChecks.some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
@@ -89,6 +90,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ matches });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error matching classes:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

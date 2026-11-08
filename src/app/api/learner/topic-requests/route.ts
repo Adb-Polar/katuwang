@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -20,6 +21,7 @@ const requestInclude = {
     select: {
       id: true,
       subject: true,
+      topics: { select: { topic: true } },
       sessions: {
         where: { status: "SCHEDULED" as const },
         orderBy: { scheduledAt: "asc" as const },
@@ -47,6 +49,7 @@ function serialize(r: {
     | {
         id: string;
         subject: string;
+        topics: { topic: string }[];
         sessions: { scheduledAt: Date }[];
         tutorProfile: { user: { anonymousId: string } };
       }
@@ -68,6 +71,7 @@ function serialize(r: {
       ? {
           id: r.fulfilledClass.id,
           subject: r.fulfilledClass.subject,
+          topics: r.fulfilledClass.topics.map(({ topic }) => topic),
           nextSessionAt: r.fulfilledClass.sessions[0]?.scheduledAt ?? null,
           tutorAnonymousId: r.fulfilledClass.tutorProfile.user.anonymousId,
         }
@@ -92,6 +96,8 @@ export async function GET() {
 
     return NextResponse.json(requests.map(serialize));
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error fetching topic requests:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },
@@ -157,7 +163,7 @@ export async function POST(req: NextRequest) {
       }
       if (!isStudentEligibleForTutor(studentGrade, directedTutor.gradeLevel)) {
         return NextResponse.json(
-          { error: "You cannot request tutoring from a tutor in a lower grade level." },
+          { error: "This tutor is not available for requests." },
           { status: 403 }
         );
       }
@@ -221,6 +227,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(serialize(created), { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

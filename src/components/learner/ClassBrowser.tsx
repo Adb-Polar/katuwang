@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 
@@ -61,7 +63,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
   const [subject, setSubject] = useState<string>("");
   const [gradeLevel, setGradeLevel] = useState("");
   const [topic, setTopic] = useState("");
-  const { subjects: catalog, topicsFor } = useSubjectCatalog(gradeLevel);
+  const { subjects: catalog, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(gradeLevel);
   const [mineTab, setMineTab] = useState<MineTab>("upcoming");
 
   const isBrowse = scope === "browse";
@@ -99,7 +101,9 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="error" message={error || null} />
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">

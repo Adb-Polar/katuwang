@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
-import { catalogFixture } from "@/test/fixtures/catalog";
 
 const {
   getServerSessionMock,
@@ -23,7 +22,7 @@ const {
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    subject: { findMany: vi.fn(async () => catalogFixture) },
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
     topicRequest: { findMany: findManyMock, count: countMock, create: createMock },
     user: { findFirst: userFindFirstMock },
     tutorProfile: { findUnique: vi.fn() },
@@ -135,14 +134,12 @@ describe("POST /api/learner/topic-requests", () => {
     expect(createMock).not.toHaveBeenCalled();
   });
 
-  it("403 when directed tutor is in a lower grade level than the learner", async () => {
+  it("allows a directed request when tutor is in a lower grade level than the learner", async () => {
     getServerSessionMock.mockResolvedValue(learner); // learner is GRADE_9
     userFindFirstMock.mockResolvedValue({ tutorProfile: { id: "tp1" }, gradeLevel: "GRADE_8" });
     const res = await POST(makeRequest({ ...validBody, directedTutorId: "T1" }));
-    expect(res.status).toBe(403);
-    const json = await res.json();
-    expect(json.error).toMatch(/cannot request tutoring from a tutor in a lower grade level/i);
-    expect(createMock).not.toHaveBeenCalled();
+    expect(res.status).toBe(201);
+    expect(createMock).toHaveBeenCalled();
   });
 
   it("directedTutorId path creates the request and notifies the tutor", async () => {

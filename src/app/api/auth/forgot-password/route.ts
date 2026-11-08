@@ -34,14 +34,19 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const user = await prisma.user.findFirst({
-      where: { OR: [{ email }, { recoveryEmail: email }] },
+    const users = await prisma.user.findMany({
+      where: { OR: [{ email }, { recoveryEmail: email, recoveryEmailVerifiedAt: { not: null } }] },
+      take: 2,
       select: { id: true, status: true },
     });
 
-    if (!user) {
+    if (users.length === 0) {
       return NextResponse.json({ error: "Email does not exist", fieldErrors: [{ path: ["email"], message: "Email does not exist" }] }, { status: 404 });
     }
+    if (users.length !== 1) {
+      return NextResponse.json({ error: "This address matches multiple accounts. Use your unique primary email or contact an administrator." }, { status: 409 });
+    }
+    const user = users[0];
     if (user.status === "BANNED") {
       return NextResponse.json({ error: "This account cannot reset its password. Contact an administrator." }, { status: 403 });
     }

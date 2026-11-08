@@ -939,3 +939,45 @@ Email verification OTP (codex/email-verification-otp)
  [] On the account-unverified screen, enter the original code or resend a new one; the old code fails, the new code succeeds, and a verified account can sign in.
  [] Check the code-entry screen at mobile width and confirm an expired code shows an error and can be replaced by a resend.
 
+
+[Good: SUPER_ADMIN browser / ADMIN regression tests] Avatar moderation hierarchy (fix/staged-security-integrity): verify ADMIN and SUPER_ADMIN can warn/lock/unlock learner and tutor avatars on dev-test, with notifications/audit records; direct requests targeting either administrator role must fail without changes.
+
+[Good: browser/API checks passed 3a09934] Effective class-edit scope: on dev-test, save and restore a valid class description through the editor; reject a nonexistent subject and a target grade above the tutor's grade; with certification enabled, subject/topic-only edits and retained uncertified topics must be rejected.
+
+[Good: isolated browser flow and live stale/fresh checks eb45a4f] Password session revocation: on dev-test, change a seeded test account password through the profile form; confirm a second existing browser session immediately loses API access, fresh login with the new password works, and restore the fixture password. Legacy pre-migration sessions must require sign-in. Reset version increment covered by isolated MariaDB integration.
+
+[Good: browser/API b91a335] Assessment current-access checks: on dev-test, resume an existing attempt during ordinary closure grace; withdraw and moderate its disposable class and confirm direct resume/submission are rejected. Use isolated tests for expired grace and platform-wide disabling.
+
+[Good: browser/API 334024e and real DB races] Enrollment capacity: on dev-test, race enrollment retries for a disposable one-seat class, confirm exactly one enrollment and one tutor notification, reject additional enrollment/full or duplicate, then withdraw and clean up. Real MariaDB tests also cover distinct learners and a concurrent capacity reduction.
+
+[Good: browser/API d6ef4a5 and real DB races] Tutor scheduling: on dev-test, race overlapping additions to a disposable class and confirm only one succeeds; reschedule through the browser and confirm persistence; reject a conflicting move; clean fixtures. Isolated real DB tests cover all writer combinations and moderated-class reservations.
+
+[Good: two-tutor browser/API b029695; history via DB integration] Request acceptance: on dev-test, accept a disposable request with duplicate competing calls; verify one class, accepted linkage, history and learner notification; repeat must return 409. Real DB tests cover two different tutors, expiry, rollback and stale learner edits.
+
+[Good: browser/API d17e718 and real DB races] Assessment submission: race browser and duplicate API submissions on a disposable learner test; verify one 200, remaining 409, one persisted score and one tutor notification. Qualification concurrency and access-change rollback use real isolated MariaDB tests.
+
+[Good: isolated reset/reuse/sign-in and live invalid-link 327b16e] Reset token: complete a valid reset through the isolated production app, verify reuse fails and new-password sign-in works; on dev-test verify a fabricated invalid link is rejected with a generic error. Keep demo credentials unchanged. Real DB races verify one password/version update and expiry after lookup.
+
+[Good: live 409/cancellation c99df65 and DB constraints] Session history: completed session reopening/topic/time changes return 409; deleting a scheduled session or class with test records returns 409; cancellation preserves tests and attempts. Database foreign key protects against direct/cascading deletion and test-creation races.
+
+[Good: live Grade12 cross-grade discovery/enrollment fe7f1f4 and policy tests] Any-grade policy: Grade 12 learner sees a lower-grade tutor and class in Browse/search/profile and Auto Match, can request/enroll, and receives chatbot recommendations. Explicit grade filters still apply; tutor cannot target above their own grade.
+
+[Good: live partial/full/edit checks 959385e and DB acceptance] Request coverage: rejecting a two-topic request with one class topic leaves it OPEN with no class/notification; accepting all topics succeeds; learner sees actual class coverage; later edits cannot remove promised topics or change the subject.
+
+[Good: live action guards and restored setting 6e6040c] Picture policy: TUTORS_ONLY blocks missing-avatar creation/publication and request acceptance; ALL_USERS also blocks learner enrollment with actionable copy; profile remains accessible; OPTIONAL allows enrollment. Restore the original dev-test setting after QA.
+
+[Good: local SMTP/browser positive and live guards 1d96784] Recovery email: registration and both profile APIs persist normalized addresses; current password required for changes; backup cannot reset until verified; code expiry/reuse/address change rejected; duplicate primary/backup or verified backup matches reject recovery with no token/mail; local SMTP browser flow verifies ownership without external mail; live UI and invalid-code checks preserve seeded account recovery addresses.
+
+[Good: live draft privacy/publish/default cf10319] Publication: create published:false, verify tutor persistence and absence from learner Browse/search/matching and direct class view/enrollment; publish and verify discoverability. Omitted flag defaults true. Avatar-required settings permit drafts while protecting publication.
+
+[Good: live DB-only/outage/retry/deactivation 5ce8ded] Live catalog: add a temporary subject/topic and verify picker, coverage, question authoring and chatbot use it; inactive topic disappears and rejects writes. Intercept a browser catalog failure: no static options appear, retry recovers. Server outage regression must return retryable 503 with no write. Remove QA catalog records afterward.
+
+[Good: live retained score/roster/re-enrollment 1675176] Withdrawal history: browser enroll/PRE/withdraw preserves score and withdrawn progress choice, removes active seat/roster access, retains report action and historical tutor result. Re-enroll returns the same ID; duplicate withdrawal emits one notification. Current vs historical admin counts remain distinct. Archive QA classes/assessments instead of deleting history.
+
+[Good: live 83d4d90, no page errors] Question versions: publish a BANK question without attempts; content edit/delete must 409 and UI Edit disabled. Create corrected version through the modal with reason; old prompt/options/test links remain, old version retires, new ID/version selects for future use. Retirement removes successor from selection. Race checks cover publication vs edit/set/delete and qualification selection vs retirement. Archive QA class and retire QA bank versions.
+
+[Good: local/live 7bbc713, no page errors] PRE feedback: both BANK and TUTOR keys, per-item correctness and explanations hidden on submit/reload until matching POST submitted by same learner. Selected answers stay neutral; POST and later PRE review reveal answers. Archive QA history.
+
+[Good: local positive and live guards c02dce1, no page errors] Certification approval: no-pass standard approval blocked; manual action requires reason and evidence; isolated positive manual approval persists provenance and audit; concurrent reviews yield one decision; live UI/guards without granting unsupported real credentials.
+
+[Good: isolated positive and live guards 284ba6e, no page errors] Reviewed bank: demo/unreviewed questions labeled and excluded from qualification readiness/start; correction requires new review. In isolated browser verify documented approval, immutability, eligible attempt, revocation and old practice attempt cannot certify. Live guards must not mark any content qualified without actual review evidence.

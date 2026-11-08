@@ -59,10 +59,10 @@ export default async function LearnerTutorProfilePage({
             include: {
               topics: { select: { topic: true } },
               sessions: { orderBy: { scheduledAt: "asc" } },
-              _count: { select: { enrollments: true } },
+              _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
               // Whether *this* learner is enrolled — gates visibility of
               // suspended/banned/completed classes.
-              enrollments: { where: { learnerId: meId ?? "__no_user__" }, select: { id: true } },
+              enrollments: { where: { learnerId: meId ?? "__no_user__", withdrawnAt: null }, select: { id: true } },
             },
           },
         },
@@ -81,7 +81,7 @@ export default async function LearnerTutorProfilePage({
   const allClasses = tutor.tutorProfile.classes;
 
   // A learner may only report a tutor whose class they have joined.
-  const canReport = allClasses.some((c) => c.enrollments.length > 0);
+  const canReport = Boolean(meId && await prisma.classEnrollment.findFirst({ where: { learnerId: meId, class: { tutorProfile: { userId: tutorId } } }, select: { id: true } }));
 
   const toDto = (c: (typeof allClasses)[number]): TutorProfileClass => ({
     id: c.id,

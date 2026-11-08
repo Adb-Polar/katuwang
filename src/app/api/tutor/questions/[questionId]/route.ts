@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+import { lockQuestionRows, isQuestionContentLocked, QuestionWriteError } from "@/lib/questionLocks";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -5,14 +7,14 @@ import { updateTutorQuestionSchema } from "@/lib/validations/sessionTest";
 
 type Ctx = { params: Promise<{ questionId: string }> };
 
-async function loadOwnQuestion(userId: string, questionId: string) {
-  const tutorProfile = await prisma.tutorProfile.findUnique({
+async function loadOwnQuestion(userId: string, questionId: string, db: Prisma.TransactionClient = prisma) {
+  const tutorProfile = await db.tutorProfile.findUnique({
     where: { userId },
     select: { id: true },
   });
   if (!tutorProfile) return null;
 
-  return prisma.assessmentQuestion.findFirst({
+  return db.assessmentQuestion.findFirst({
     where: { id: questionId, origin: "TUTOR", ownerTutorProfileId: tutorProfile.id },
     include: {
       options: { orderBy: { position: "asc" } },
@@ -24,10 +26,7 @@ async function loadOwnQuestion(userId: string, questionId: string) {
 
 /** True once the question is on a published/closed test or has been answered. */
 function isLocked(q: NonNullable<Awaited<ReturnType<typeof loadOwnQuestion>>>) {
-  return (
-    q._count.sessionTestItems > 0 ||
-    q.sessionTestLinks.some((l) => l.sessionTest.status !== "DRAFT")
-  );
+  return isQuestionContentLocked(q);
 }
 
 // ─── PATCH: Edit an Own Custom Question ──────────────────────────────────
@@ -61,6 +60,10 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const { topic, prompt, explanation, options } = result.data;
 
     const updated = await prisma.$transaction(async (tx) => {
+      await lockQuestionRows(tx, [questionId]);
+      const current = await loadOwnQuestion(session.user.id, questionId, tx);
+      if (!current) throw new QuestionWriteError("Question not found.", 404);
+      if (isLocked(current)) throw new QuestionWriteError("This question is on a published test and can no longer be edited.");
       if (options !== undefined) {
         await tx.assessmentOption.deleteMany({ where: { questionId } });
         await tx.assessmentOption.createMany({
@@ -76,10 +79,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         },
         include: { options: { orderBy: { position: "asc" } } },
       });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json(updated);
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error updating tutor question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -106,14 +110,19 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
       );
     }
 
-    // Detach from any draft tests, then delete (options cascade).
+    // Serialize with publication before detaching draft links.
     await prisma.$transaction(async (tx) => {
+      await lockQuestionRows(tx, [questionId]);
+      const current = await loadOwnQuestion(session.user.id, questionId, tx);
+      if (!current) throw new QuestionWriteError("Question not found.", 404);
+      if (isLocked(current)) throw new QuestionWriteError("This question is on a published test and can no longer be deleted.");
       await tx.sessionTestQuestion.deleteMany({ where: { questionId } });
       await tx.assessmentQuestion.delete({ where: { id: questionId } });
-    });
+    }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
 
     return NextResponse.json({ message: "Question deleted." });
   } catch (error) {
+    if (error instanceof QuestionWriteError) return NextResponse.json({ error: error.message }, { status: error.status });
     console.error("Error deleting tutor question:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

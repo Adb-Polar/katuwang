@@ -61,8 +61,8 @@ export default function AssessmentHistory({
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                 <StatusBadge
-                  tone={ATTEMPT_BADGE[a.status].tone}
-                  label={ATTEMPT_BADGE[a.status].label}
+                  tone={a.certificationEligible === false ? "neutral" : ATTEMPT_BADGE[a.status].tone}
+                  label={a.certificationEligible === false ? "Practice — not for certification" : ATTEMPT_BADGE[a.status].label}
                   size="xs"
                 />
                 <Link

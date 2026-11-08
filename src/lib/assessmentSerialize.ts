@@ -25,6 +25,7 @@ export interface SerializedAttempt {
   topic: string;
   attemptNo: number;
   status: string;
+  certificationEligible: boolean;
   questionCount: number;
   passPercent: number;
   correctCount?: number;
@@ -73,6 +74,7 @@ export function serializeAttempt(
     topic: attempt.topic,
     attemptNo: attempt.attemptNo,
     status: attempt.status,
+    certificationEligible: attempt.certificationEligible === true,
     questionCount: attempt.questionCount,
     passPercent: attempt.passPercent,
     ...(reveal ? { correctCount: attempt.correctCount, scorePercent: attempt.scorePercent } : {}),

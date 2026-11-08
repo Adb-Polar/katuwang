@@ -32,7 +32,8 @@ vi.mock("@/lib/prisma", () => ({
     auditLog: { create: auditLogCreate },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        assessmentQuestion: { update: updateMock, delete: deleteMock },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "q1" }]),
+        assessmentQuestion: { findFirst: findUniqueMock, update: updateMock, delete: deleteMock },
         assessmentOption: { deleteMany: optionDeleteMany, createMany: optionCreateMany },
         auditLog: { create: auditLogCreate },
       }),
@@ -67,6 +68,13 @@ const freshQuestion = { ...usedQuestion, _count: { attemptItems: 0, sessionTestI
 
 describe("PATCH /api/admin/assessment-questions/[questionId]", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("locks a published question even before its first attempt", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    findUniqueMock.mockResolvedValue({ ...freshQuestion, lockedAt: null, sessionTestLinks: [{ sessionTest: { status: "PUBLISHED" } }] });
+    const response = await PATCH(patchReq({ prompt: "changed published prompt" }), params());
+    expect(response.status).toBe(409);expect(updateMock).not.toHaveBeenCalled();expect(optionDeleteMany).not.toHaveBeenCalled();
+  });
 
   it("409 when trying to edit content of an in-use question", async () => {
     getServerSessionMock.mockResolvedValue(admin);

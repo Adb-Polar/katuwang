@@ -1,5 +1,7 @@
 "use client";
 
+import CatalogLoadState from "@/components/ui/CatalogLoadState";
+
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
@@ -50,7 +52,7 @@ interface AdminTopicRequest {
 export default function TopicRequestModerationTable() {
   const [success, setSuccess] = useState("");
   const [search, setSearch] = useState("");
-  const { subjects: subjectCatalog } = useSubjectCatalog();
+  const { subjects: subjectCatalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [subjectFilter, setSubjectFilter] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<RequestStatus | "EXPIRED" | "">("");
   const [scopeFilter, setScopeFilter] = useState<"" | "public" | "directed">("");
@@ -114,7 +116,9 @@ export default function TopicRequestModerationTable() {
 
   return (
     <div className="space-y-6">
-      <FeedbackBanner variant="success" message={success || null} />
+      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
+
+            <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={closeTarget ? null : error || null} />
 
       <section className="card kt-card">

@@ -1,3 +1,4 @@
+import { getProfilePictureRequirement } from "@/lib/settings";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
@@ -8,12 +9,17 @@ const {
   classUpdate,
   classFindMany,
   classDelete,
+  sessionTestFindFirst,
   sessionUpdateMany,
   topicRequestFindMany,
   topicRequestUpdate,
   notificationCreate,
   notificationCreateMany,
   enrollmentFindMany,
+  enrollmentCount,
+  getSettingMock,
+  subjectExistsMock,
+  topicCertificationFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   classFindUnique: vi.fn(),
@@ -21,12 +27,17 @@ const {
   classUpdate: vi.fn(),
   classFindMany: vi.fn(),
   classDelete: vi.fn(),
+  sessionTestFindFirst: vi.fn().mockResolvedValue(null),
   sessionUpdateMany: vi.fn(),
   topicRequestFindMany: vi.fn(),
   topicRequestUpdate: vi.fn(),
   notificationCreate: vi.fn(),
   notificationCreateMany: vi.fn(),
   enrollmentFindMany: vi.fn(),
+  enrollmentCount: vi.fn().mockResolvedValue(0),
+  getSettingMock: vi.fn(),
+  subjectExistsMock: vi.fn(),
+  topicCertificationFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
@@ -34,13 +45,19 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    tutorClass: { findUnique: classFindUnique, update: classUpdate, findMany: classFindMany },
+    tutorClass: { findUnique: async (...args: unknown[]) => {
+      const found = await classFindUnique(...args);
+      return found ? { subject: "MATH", gradeLevel: null, topics: [{ topic: "Algebraic Expressions" }], sessions: [], ...found } : found;
+    }, update: classUpdate, findMany: classFindMany },
     tutorProfile: { findUnique: tutorProfileFindUnique },
+    topicCertification: { findMany: topicCertificationFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        tutorClass: { update: classUpdate, delete: classDelete },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
+        tutorClass: { findUnique: classFindUnique, update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
-        classEnrollment: { findMany: enrollmentFindMany },
+        sessionTest: { findFirst: sessionTestFindFirst, updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
+        classEnrollment: { findMany: enrollmentFindMany, count: enrollmentCount },
         topicRequest: { findMany: topicRequestFindMany, update: topicRequestUpdate },
         notification: { create: notificationCreate, createMany: notificationCreateMany },
       }),
@@ -48,6 +65,9 @@ vi.mock("@/lib/prisma", () => ({
 }));
 
 vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (tx: { topicRequest: { update: (args: unknown) => unknown } }, id: string, data: Record<string, unknown>) => tx.topicRequest.update({ where: { id }, data }) }));
+
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
+vi.mock("@/lib/subjects", () => ({ subjectExists: subjectExistsMock }));
 
 import { PATCH, DELETE } from "@/app/api/tutor/classes/[classId]/route";
 
@@ -66,7 +86,11 @@ function patch(body: unknown, classId = "c1") {
 describe("PATCH /api/tutor/classes/[classId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
     sessionUpdateMany.mockResolvedValue({ count: 0 });
+    getSettingMock.mockResolvedValue(false);
+    subjectExistsMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue([]);
     topicRequestFindMany.mockResolvedValue([]);
     enrollmentFindMany.mockResolvedValue([]);
   });
@@ -132,6 +156,16 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
 
+    const res = await patch({ maxStudents: 2 });
+    expect(res.status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rechecks enrollment count after acquiring the capacity lock", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    enrollmentCount.mockResolvedValueOnce(3);
     const res = await patch({ maxStudents: 2 });
     expect(res.status).toBe(400);
     expect(classUpdate).not.toHaveBeenCalled();
@@ -210,6 +244,68 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     const res = await patch({ subject: "MATH", topics: ["Algebraic Expressions"], maxStudents: 2 });
     expect(res.status).toBe(200);
     expect(classUpdate).toHaveBeenCalled();
+  });
+
+  it.each([
+    { patch: { subject: "SCIENCE" }, certified: [], error: /not certified/i },
+    { patch: { description: "keep teaching" }, certified: [], error: /not certified/i },
+    { patch: { topics: ["Geometry"] }, certified: [{ topic: "Algebraic Expressions" }], error: /Geometry/ },
+  ])("validates effective certifications for $patch", async ({ patch: updates, certified, error }) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue(certified);
+    const res = await patch(updates);
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(error);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rechecks retained grade against the current tutor grade", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", gradeLevel: "GRADE_12", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { gradeLevel: "GRADE_9" } });
+    const res = await patch({ description: "keep teaching" });
+    expect(res.status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a nonexistent effective subject", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    subjectExistsMock.mockResolvedValue(false);
+    const res = await patch({ subject: "missing" });
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Invalid subject.");
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("permits cancellation after certification is revoked", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    classUpdate.mockResolvedValue({ id: "c1", status: "CANCELLED", topics: [], sessions: [] });
+    const res = await patch({ status: "CANCELLED" });
+    expect(res.status).toBe(200);
+    expect(topicCertificationFindMany).not.toHaveBeenCalled();
+  });
+
+  it("accepts certified retained topics with normalized whitespace and case", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    getSettingMock.mockResolvedValue(true);
+    topicCertificationFindMany.mockResolvedValue([{ topic: " algebraic   EXPRESSIONS " }]);
+    classUpdate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
+    const res = await patch({ description: "Updated" });
+    expect(res.status).toBe(200);
+    expect(topicCertificationFindMany).toHaveBeenCalledWith({
+      where: { tutorProfileId: "tp1", subject: "MATH", status: "CERTIFIED" },
+      select: { topic: true },
+    });
   });
 
   it("toggles published", async () => {
@@ -314,13 +410,33 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     );
   });
 
+  it("blocks publication without an avatar when required", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", published: false, _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1", user: { image: null } });
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("TUTORS_ONLY");
+    const response = await patch({ published: true });
+    expect(response.status).toBe(400);
+    expect((await response.json()).error).toContain("publish a class");
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
+  it("cannot remove coverage promised to a linked request", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "SCHEDULED", topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }], sessions: [], _count: { enrollments: 0 } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    topicRequestFindMany.mockResolvedValue([{ subject: "MATH", topics: [{ topic: "Algebraic Expressions" }, { topic: "Quadratic Equations" }] }]);
+    expect((await patch({ topics: ["Algebraic Expressions"] })).status).toBe(400);
+    expect(classUpdate).not.toHaveBeenCalled();
+  });
+
   it("rejects updating target grade higher than tutor grade level", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR", gradeLevel: "GRADE_9" } });
     classFindUnique.mockResolvedValue({
       id: "c1",
       tutorProfileId: "tp1",
       status: "SCHEDULED",
-      topics: [],
+      topics: [{ topic: "Algebraic Expressions" }],
       sessions: [],
       _count: { enrollments: 0 },
     });
@@ -339,7 +455,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
       id: "c1",
       tutorProfileId: "tp1",
       status: "SCHEDULED",
-      topics: [],
+      topics: [{ topic: "Algebraic Expressions" }],
       sessions: [],
       _count: { enrollments: 0 },
     });
@@ -363,6 +479,8 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
+    sessionTestFindFirst.mockResolvedValue(null);
     topicRequestFindMany.mockResolvedValue([]);
   });
 
@@ -383,5 +501,22 @@ describe("DELETE /api/tutor/classes/[classId]", () => {
       expect.objectContaining({ data: expect.objectContaining({ userId: "L1", type: "TOPIC_REQUEST_REOPENED" }) })
     );
     expect(classDelete).toHaveBeenCalledWith({ where: { id: "c1" } });
+  });
+});
+
+// A draft test is still a record; it must be removed explicitly before deleting its class.
+describe("class assessment retention", () => {
+  it("blocks class deletion before request or notification mutations", async () => {
+    vi.clearAllMocks();
+    vi.mocked(getProfilePictureRequirement).mockResolvedValue("OPTIONAL");
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", _count: { enrollments: 0 } });
+    sessionTestFindFirst.mockResolvedValue({ id: "test1" });
+    const response = await DELETE(new NextRequest("http://localhost/qa", { method: "DELETE" }), { params: Promise.resolve({ classId: "c1" }) });
+    expect(response.status).toBe(409);
+    expect(classDelete).not.toHaveBeenCalled();
+    expect(topicRequestUpdate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
   });
 });

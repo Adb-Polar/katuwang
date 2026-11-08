@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { getSubjects } from "@/lib/subjects";
@@ -24,6 +25,8 @@ export async function GET() {
       })),
     });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error fetching subjects:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

@@ -1,26 +1,9 @@
 import { Prisma, GradeLevel } from "@prisma/client";
-import {
-  getEligibleTutorGradesForStudent,
-  getEligibleClassTargetGradesForStudent,
-} from "@/lib/gradeLevels";
+import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 
-/**
- * Prisma where condition enforcing:
- * 1. Tutor grade >= student grade (studentGrade <= tutorGrade)
- * 2. Class target grade is null (open) OR target grade >= student grade (studentGrade <= targetGrade)
- */
-export function gradeEligibilityWhere(
-  studentGrade: GradeLevel | string
-): Prisma.TutorClassWhereInput {
-  const eligibleTutorGrades = getEligibleTutorGradesForStudent(studentGrade);
-  const eligibleTargetGrades = getEligibleClassTargetGradesForStudent(studentGrade);
-  return {
-    tutorProfile: { user: { gradeLevel: { in: eligibleTutorGrades } } },
-    OR: [
-      { gradeLevel: null },
-      { gradeLevel: { in: eligibleTargetGrades } },
-    ],
-  };
+/** The shared grade policy imposes no implicit discovery restriction. */
+export function gradeEligibilityWhere(studentGrade: GradeLevel | string): Prisma.TutorClassWhereInput {
+  return isStudentEligibleForClass(studentGrade) ? {} : { id: "__none__" };
 }
 
 /**
@@ -44,7 +27,7 @@ export function browsableOrEnrolledWhere(
   return {
     OR: [
       schedWhere,
-      { enrollments: { some: { learnerId } } },
+      { enrollments: { some: { learnerId, withdrawnAt: null } } },
     ],
   };
 }
@@ -63,18 +46,20 @@ export function hasClassStarted(sessions: { scheduledAt: Date | string }[], now 
 }
 
 /** The "Browse" tab: enrollable classes the learner is NOT already in. */
-export function browseClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
-  return {
+export function browseClassesWhere(learnerId: string, learnerGrade?: GradeLevel | string | null): Prisma.TutorClassWhereInput {
+  const base: Prisma.TutorClassWhereInput = {
     status: "SCHEDULED",
     published: true,
     sessions: enrollmentSessionsWhere(),
-    enrollments: { none: { learnerId } },
+    enrollments: { none: { learnerId, withdrawnAt: null } },
   };
+
+  return { ...base, ...(learnerGrade ? gradeEligibilityWhere(learnerGrade) : {}) };
 }
 
 /** The "My Classes" tab: every class the learner is enrolled in, any status. */
 export function myClassesWhere(learnerId: string): Prisma.TutorClassWhereInput {
-  return { enrollments: { some: { learnerId } } };
+  return { enrollments: { some: { learnerId, withdrawnAt: null } } };
 }
 
 /** Include shape for a learner-facing class listing (anonymized tutor, own enrollment only). */
@@ -92,8 +77,8 @@ export function learnerClassInclude(learnerId: string) {
         },
       },
     },
-    _count: { select: { enrollments: true } },
-    enrollments: { where: { learnerId }, select: { id: true } },
+    _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
+    enrollments: { where: { learnerId, withdrawnAt: null }, select: { id: true } },
   } satisfies Prisma.TutorClassInclude;
 }
 

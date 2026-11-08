@@ -9,6 +9,7 @@ const {
   sessionUpdate,
   sessionDelete,
   sessionTestFindUnique,
+  sessionTestUpdateMany,
   classEnrollmentFindMany,
   notificationCreateMany,
 } = vi.hoisted(() => ({
@@ -19,6 +20,7 @@ const {
   sessionUpdate: vi.fn(),
   sessionDelete: vi.fn(),
   sessionTestFindUnique: vi.fn(),
+  sessionTestUpdateMany: vi.fn().mockResolvedValue({ count: 0 }),
   classEnrollmentFindMany: vi.fn(),
   notificationCreateMany: vi.fn(),
 }));
@@ -31,12 +33,14 @@ vi.mock("@/lib/prisma", () => ({
     tutorProfile: { findUnique: tutorProfileFindUnique },
     tutorClass: { findUnique: classFindUnique },
     classSession: { findMany: sessionFindMany, update: sessionUpdate, delete: sessionDelete },
-    sessionTest: { findUnique: sessionTestFindUnique },
+    sessionTest: { findUnique: sessionTestFindUnique, updateMany: sessionTestUpdateMany },
     classEnrollment: { findMany: classEnrollmentFindMany },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
-        classSession: { update: sessionUpdate },
-        sessionTest: { findUnique: sessionTestFindUnique },
+        $queryRaw: vi.fn().mockResolvedValue([{ id: "locked" }]),
+        tutorClass: { findUnique: classFindUnique },
+        classSession: { update: sessionUpdate, findMany: sessionFindMany, delete: sessionDelete },
+        sessionTest: { findUnique: sessionTestFindUnique, updateMany: sessionTestUpdateMany },
         classEnrollment: { findMany: classEnrollmentFindMany },
         notification: { createMany: notificationCreateMany },
       }),
@@ -83,6 +87,25 @@ function makeClass(overrides: Record<string, unknown> = {}) {
     ...overrides,
   };
 }
+
+describe("completed session history", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classFindUnique.mockResolvedValue(makeClass({ sessions: [{ ...targetSession, status: "COMPLETED" }] }));
+  });
+  it.each([{ status: "SCHEDULED" }, { scheduledAt: new Date(Date.now() + 86400000).toISOString() }, { topic: "Fractions & Decimals" }, { duration: 90 }])("blocks rewriting completed history: %j", async (body) => {
+    expect((await patch(body)).status).toBe(409);
+    expect(sessionUpdate).not.toHaveBeenCalled();
+  });
+  it("blocks deletion when assessment records exist", async () => {
+    classFindUnique.mockResolvedValue(makeClass());
+    sessionTestFindUnique.mockResolvedValue({ id: "test1" });
+    expect((await del()).status).toBe(409);
+    expect(sessionDelete).not.toHaveBeenCalled();
+  });
+});
 
 describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
   beforeEach(() => {
@@ -185,6 +208,10 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
     sessionUpdate.mockResolvedValue({ ...targetSession, status: "COMPLETED" });
 
     const res = await patch({ status: "COMPLETED" });
+    expect(sessionTestUpdateMany).toHaveBeenCalledWith({
+      where: { sessionId: "s1", pretestClosedAt: null },
+      data: { pretestClosedAt: expect.any(Date) },
+    });
     expect(res.status).toBe(200);
     expect(sessionFindMany).not.toHaveBeenCalled();
   });
@@ -235,6 +262,7 @@ describe("PATCH /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
 describe("DELETE /api/tutor/classes/[classId]/sessions/[sessionId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sessionTestFindUnique.mockResolvedValue(null);
   });
 
   it("returns 401 for the wrong role", async () => {

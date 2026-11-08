@@ -1,12 +1,7 @@
 "use client";
 
-import { SUBJECT_NAMES } from "@/lib/subjectCatalog";
-import { curriculumFor } from "@/lib/curriculum";
-
-import { defaultSubjectGrades } from "@/lib/subjectGradeDefaults";
 import { subjectsInGrade, topicsInGrade } from "@/lib/catalogGrades";
-import { useEffect, useState } from "react";
-import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { useCallback, useEffect, useState } from "react";
 
 export interface CatalogSubject {
   slug: string;
@@ -18,49 +13,28 @@ export interface CatalogSubject {
   topicDetails?: { name: string; gradeLevels: unknown; curriculum?: unknown }[];
 }
 
-// Static SUBJECT_TOPICS as the instant, offline-safe seed; `/api/subjects`
-// (admin-managed) replaces it once fetched.
-const STATIC: CatalogSubject[] = SUBJECT_SLUGS.map((slug) => ({
-  slug,
-  name: SUBJECT_NAMES[slug] ?? slug,
-  gradeLevels: curriculumFor(slug).curriculum ? curriculumFor(slug).gradeLevels : defaultSubjectGrades(slug),
-  curriculum: curriculumFor(slug).curriculum,
-  topicGrades: Object.fromEntries(SUBJECT_TOPICS[slug].map((name) => [name, curriculumFor(slug, name).curriculum ? curriculumFor(slug, name).gradeLevels : null])),
-  topics: [...SUBJECT_TOPICS[slug as keyof typeof SUBJECT_TOPICS]],
-}));
-
-let cached: CatalogSubject[] | null = null;
-
-/**
- * The subject/topic catalogue for client dropdowns. Renders immediately from
- * the static map, then swaps to the live admin-managed list.
- */
-export function useSubjectCatalog(gradeLevel?: string): {
-  subjects: CatalogSubject[];
-  topicsFor: (slug: string) => string[];
-} {
-  const [subjects, setSubjects] = useState<CatalogSubject[]>(cached ?? STATIC);
-
+/** Fetch the live catalog. Failed reads expose no fallback choices and can be retried. */
+export function useSubjectCatalog(gradeLevel?: string) {
+  const [subjects, setSubjects] = useState<CatalogSubject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [version, setVersion] = useState(0);
+  const retry = useCallback(() => { setLoading(true); setError(null); setSubjects([]); setVersion(value => value + 1); }, []);
   useEffect(() => {
-    if (cached) return;
-    let cancelled = false;
+    const controller = new AbortController();
     (async () => {
       try {
-        const res = await fetch("/api/subjects");
-        if (!res.ok) return;
-        const json = await res.json();
-        if (cancelled || !Array.isArray(json.subjects)) return;
-        cached = json.subjects as CatalogSubject[];
-        setSubjects(cached);
+        const response = await fetch("/api/subjects", { signal: controller.signal });
+        if (!response.ok) throw new Error("The subject catalog is unavailable. Please retry.");
+        const json = await response.json();
+        if (!Array.isArray(json.subjects)) throw new Error("The subject catalog is unavailable. Please retry.");
+        if (!controller.signal.aborted) setSubjects(json.subjects);
       } catch {
-        // keep the static fallback
-      }
+        if (!controller.signal.aborted) setError("The subject catalog is unavailable. Please retry.");
+      } finally { if (!controller.signal.aborted) setLoading(false); }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const topicsFor = (slug: string) => topicsInGrade(subjects.find((s) => s.slug === slug), gradeLevel);
-  return { subjects: subjectsInGrade(subjects, gradeLevel), topicsFor };
+    return () => controller.abort();
+  }, [version]);
+  const topicsFor = (slug: string) => topicsInGrade(subjects.find(subject => subject.slug === slug), gradeLevel);
+  return { subjects: subjectsInGrade(subjects, gradeLevel), topicsFor, loading, error, retry };
 }

@@ -1,9 +1,11 @@
+import { qualificationQuestionWhere } from "@/lib/qualificationBank";
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 
 import { prisma } from "@/lib/prisma";
-import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { getSubjects } from "@/lib/subjects";
 import { getAssessmentConfig } from "@/lib/settings";
 
 const keyOf = (subject: string, topic: string) => `${subject}::${topic}`;
@@ -19,10 +21,10 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const [counts, config, openRequests] = await Promise.all([
+    const [counts, config, openRequests, catalog] = await Promise.all([
       prisma.assessmentQuestion.groupBy({
         by: ["subject", "topic"],
-        where: { active: true, origin: "BANK" },
+        where: qualificationQuestionWhere(),
         _count: { _all: true },
       }),
       getAssessmentConfig(),
@@ -31,13 +33,15 @@ export async function GET() {
         where: { status: "OPEN" },
         _count: { _all: true },
       }),
+      getSubjects(),
     ]);
 
     const countMap = new Map(counts.map((c) => [keyOf(c.subject, c.topic), c._count._all]));
     const requestMap = new Map(openRequests.map((r) => [keyOf(r.subject, r.topic), r._count._all]));
 
-    const coverage = SUBJECT_SLUGS.flatMap((subject) =>
-      SUBJECT_TOPICS[subject].map((topic) => {
+    const coverage = catalog.flatMap((entry) =>
+      entry.topics.map(({ name: topic }) => {
+        const subject = entry.slug;
         const k = keyOf(subject, topic);
         const activeCount = countMap.get(k) ?? 0;
         return {
@@ -53,6 +57,8 @@ export async function GET() {
 
     return NextResponse.json(coverage);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error computing question bank coverage:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

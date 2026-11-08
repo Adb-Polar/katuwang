@@ -28,6 +28,7 @@ export interface QuizAttempt {
   topic: string;
   attemptNo: number;
   status: "IN_PROGRESS" | "PASSED" | "FAILED";
+  certificationEligible?: boolean;
   questionCount: number;
   passPercent: number;
   correctCount?: number;
@@ -112,12 +113,13 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
 
           {submitted && (
             <FeedbackBanner
-              variant={passed ? "success" : "error"}
-              message={
-                passed
-                  ? `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). Your result has been recorded — check your topic status on the Assessments page.`
-                  : `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). You need ${attempt.passPercent}% to pass — you can retake this assessment.`
-              }
+              variant={attempt.certificationEligible === false ? "info" : passed ? "success" : "error"}
+              message={attempt.certificationEligible === false
+                ? `Practice result: ${attempt.scorePercent}%. This attempt uses demo or unreviewed content and cannot grant certification. A new reviewed assessment or documented manual review is required.`
+                : passed
+                ? `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). Your result has been recorded — check your topic status on the Assessments page.`
+                : `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). You need ${attempt.passPercent}% to pass — you can retake this assessment.`}
+
             />
           )}
 

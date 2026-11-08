@@ -31,6 +31,7 @@ export interface SerializedSessionTestAttempt {
   scorePercent?: number;
   startedAt: string;
   submittedAt: string | null;
+  answersRevealed: boolean;
   items: SerializedSessionTestItem[];
 }
 
@@ -41,15 +42,15 @@ export interface SerializedSessionTestAttempt {
  */
 export function serializeSessionTestAttempt(
   attempt: SessionTestAttemptWithItems,
-  { reveal, revealBankAnswers = true }: { reveal: boolean; revealBankAnswers?: boolean },
+  { reveal, revealAnswers = true }: { reveal: boolean; revealAnswers?: boolean },
 ): SerializedSessionTestAttempt {
   const items = [...attempt.items]
     .sort((a, b) => a.position - b.position)
     .map((item) => {
-      const revealAnswers = reveal && (revealBankAnswers || item.question.origin !== "BANK");
+      const showAnswers = reveal && revealAnswers;
       const options = [...item.question.options]
         .sort((a, b) => a.position - b.position)
-        .map((o) => ({ id: o.id, text: o.text, ...(revealAnswers ? { isCorrect: o.isCorrect } : {}) }));
+        .map((o) => ({ id: o.id, text: o.text, ...(showAnswers ? { isCorrect: o.isCorrect } : {}) }));
 
       return {
         position: item.position,
@@ -57,8 +58,8 @@ export function serializeSessionTestAttempt(
         prompt: item.question.prompt,
         options,
         selectedOptionId: item.selectedOptionId,
-        ...(reveal
-          ? { isCorrect: item.isCorrect, ...(revealAnswers ? { explanation: item.question.explanation } : {}) }
+        ...(showAnswers
+          ? { isCorrect: item.isCorrect, explanation: item.question.explanation }
           : {}),
       };
     });
@@ -76,6 +77,7 @@ export function serializeSessionTestAttempt(
       : {}),
     startedAt: attempt.startedAt.toISOString(),
     submittedAt: attempt.submittedAt ? attempt.submittedAt.toISOString() : null,
+    answersRevealed: reveal && revealAnswers,
     items,
   };
 }

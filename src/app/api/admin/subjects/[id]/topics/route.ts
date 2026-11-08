@@ -1,3 +1,4 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { isAdminRole } from "@/lib/permissions";
 import { adminCurriculumNote } from "@/lib/curriculum";
 import { NextRequest, NextResponse } from "next/server";
@@ -5,7 +6,7 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { invalidateSubjectCache } from "@/lib/subjects";
 import { createTopicSchema } from "@/lib/validations/subject";
-import { normalizeTopic } from "@/lib/subjectTopics";
+import { normalizeTopic } from "@/lib/normalizeTopic";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 
 // ─── POST: add a topic to a subject ──────────────────────────────────────
@@ -61,6 +62,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     invalidateSubjectCache();
     return NextResponse.json(topic, { status: 201 });
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Error creating topic:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }

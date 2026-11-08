@@ -1,3 +1,4 @@
+import { normalizeTopic } from "./normalizeTopic";
 import { SUBJECT_CATALOG } from "./subjectCatalog";
 
 
@@ -13,9 +14,7 @@ export const SUBJECT_SLUGS: string[] = Object.keys(SUBJECT_TOPICS);
  * Normalizes a user-typed topic: trims and collapses internal whitespace.
  * Custom topics are stored verbatim (after this pass), so keep it conservative.
  */
-export function normalizeTopic(raw: string): string {
-  return raw.trim().replace(/\s+/g, " ");
-}
+export { normalizeTopic } from "./normalizeTopic";
 
 /** True when `topic` is one of the curated topics for `subject` (case-insensitive). */
 export function isKnownTopic(subject: string, topic: string): boolean {

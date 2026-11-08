@@ -18,6 +18,7 @@ interface StudentEntry {
     subject: string;
     topics: string[];
     enrolledAt: Date;
+    withdrawnAt: Date | null;
   }[];
 }
 
@@ -69,6 +70,7 @@ export async function GET(req: NextRequest) {
       where,
       select: {
         enrolledAt: true,
+        withdrawnAt: true,
         class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
         learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
       },
@@ -84,6 +86,7 @@ export async function GET(req: NextRequest) {
         subject: enr.class.subject,
         topics: enr.class.topics.map((t) => t.topic),
         enrolledAt: enr.enrolledAt,
+        withdrawnAt: enr.withdrawnAt,
       };
       if (existing) {
         existing.enrollments.push(entry);

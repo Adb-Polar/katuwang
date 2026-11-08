@@ -93,7 +93,7 @@ export default async function AdminUserDetailPage({
           { label: "Topic requests", value: user._count.topicRequests },
         ]
       : [
-          { label: "Enrollments", value: user._count.enrollments },
+          { label: "Enrollment records", value: user._count.enrollments },
           { label: "Topic requests", value: user._count.topicRequests },
         ];
 

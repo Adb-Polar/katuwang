@@ -6,13 +6,13 @@ const { findUniqueMock, userUpdateMock, tokenUpdateMock, transactionMock, bcrypt
     findUniqueMock: vi.fn(),
     userUpdateMock: vi.fn(),
     tokenUpdateMock: vi.fn(),
-    transactionMock: vi.fn((ops: unknown[]) => Promise.all(ops as Promise<unknown>[])),
+    transactionMock: vi.fn(),
     bcryptHashMock: vi.fn(async () => "hashed-pw"),
   }));
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    passwordResetToken: { findUnique: findUniqueMock, update: tokenUpdateMock },
+    passwordResetToken: { findUnique: findUniqueMock },
     user: { update: userUpdateMock },
     $transaction: transactionMock,
   },
@@ -32,7 +32,15 @@ function makeRequest(body: unknown) {
 }
 
 describe("POST /api/auth/reset-password", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    tokenUpdateMock.mockResolvedValue({ count: 1 });
+    transactionMock.mockImplementation((fn) => fn({
+      $queryRaw: vi.fn().mockResolvedValue([{ id: "T1" }]),
+      passwordResetToken: { updateMany: tokenUpdateMock },
+      user: { update: userUpdateMock },
+    }));
+  });
 
   it("400 when the new password is too short", async () => {
     const res = await POST(makeRequest({ token: "abc", password: "short" }));
@@ -84,12 +92,21 @@ describe("POST /api/auth/reset-password", () => {
     expect(bcryptHashMock).toHaveBeenCalledWith("longenough", 12);
     expect(userUpdateMock).toHaveBeenCalledWith({
       where: { id: "U1" },
-      data: { password: "hashed-pw" },
+      data: { password: "hashed-pw", sessionVersion: { increment: 1 } },
     });
     expect(tokenUpdateMock).toHaveBeenCalledWith({
-      where: { id: "T1" },
+      where: { id: "T1", userId: "U1", usedAt: null, expiresAt: { gt: expect.any(Date) } },
       data: expect.objectContaining({ usedAt: expect.any(Date) }),
     });
+  });
+
+  it("rejects a token consumed or expired while hashing without changing the password", async () => {
+    findUniqueMock.mockResolvedValue({ id: "T1", userId: "U1", usedAt: null, expiresAt: new Date(Date.now() + 60_000) });
+    tokenUpdateMock.mockResolvedValue({ count: 0 });
+    const res = await POST(makeRequest({ token: "raced", password: "longenough" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe(INVALID_MSG);
+    expect(userUpdateMock).not.toHaveBeenCalled();
   });
 
   it("500 when the update throws", async () => {

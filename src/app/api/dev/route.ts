@@ -5,7 +5,8 @@ import { Role, GradeLevel, ClassStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateClassCode } from "@/lib/idGenerator";
 import { registerAccount } from "@/lib/registration";
-import { SUBJECT_TOPICS, SUBJECT_SLUGS } from "@/lib/subjectTopics";
+import { getSubjects } from "@/lib/subjects";
+import { catalogFailureResponse, CatalogUnavailableError } from "@/lib/catalogError";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Dev-only data factory. Spawns throwaway users / classes / enrolments / topic
@@ -30,7 +31,6 @@ const SECTIONS = ["Rizal", "Bonifacio", "Mabini", "Aguinaldo", "Luna", "Del Pila
 const GRADES: GradeLevel[] = [
   "GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10", "GRADE_11", "GRADE_12",
 ];
-const SUBJECTS = SUBJECT_SLUGS;
 
 const pick = <T,>(arr: readonly T[]): T => arr[Math.floor(Math.random() * arr.length)];
 const sample = <T,>(arr: readonly T[], n: number): T[] => {
@@ -86,7 +86,7 @@ export async function GET() {
         subject: true,
         status: true,
         maxStudents: true,
-        _count: { select: { enrollments: true } },
+        _count: { select: { enrollments: { where: { withdrawnAt: null } } } },
       },
       orderBy: { createdAt: "desc" },
       take: 100,
@@ -137,6 +137,8 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: `Unknown action: ${action || "(none)"}.` }, { status: 400 });
     }
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
     console.error("Dev factory error:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
@@ -220,6 +222,11 @@ async function createUsers(body: Record<string, unknown>) {
 }
 
 async function createClass(body: Record<string, unknown>) {
+  const catalog = (await getSubjects()).filter(subject => subject.topics.length > 0);
+  if (!catalog.length) throw new CatalogUnavailableError();
+  const subjectSlugs = catalog.map(subject => subject.slug);
+  const topicsBySubject = Object.fromEntries(catalog.map(subject => [subject.slug, subject.topics.map(topic => topic.name)]));
+
   let tutorProfileId: string;
   let tutorUserId = typeof body.tutorUserId === "string" ? body.tutorUserId : "";
 
@@ -234,8 +241,8 @@ async function createClass(body: Record<string, unknown>) {
     tutorUserId = profile.userId;
   }
 
-  const subject: string = SUBJECTS.includes(body.subject as string) ? (body.subject as string) : pick(SUBJECTS);
-  const topicCount = clampInt(body.topicCount, 1, Math.min(6, SUBJECT_TOPICS[subject].length), 2);
+  const subject: string = subjectSlugs.includes(body.subject as string) ? (body.subject as string) : pick(subjectSlugs);
+  const topicCount = clampInt(body.topicCount, 1, Math.min(6, topicsBySubject[subject].length), 2);
   const sessionCount = clampInt(body.sessionCount, 1, 10, 2);
   const maxStudents = clampInt(body.maxStudents, 1, 10, 3);
   const gradeLevel = GRADES.includes(body.gradeLevel as GradeLevel) ? (body.gradeLevel as GradeLevel) : null;
@@ -243,7 +250,7 @@ async function createClass(body: Record<string, unknown>) {
   const statusInput = body.status as ClassStatus;
   const status: ClassStatus = ["SCHEDULED", "COMPLETED", "CANCELLED"].includes(statusInput) ? statusInput : "SCHEDULED";
 
-  const topics = sample(SUBJECT_TOPICS[subject], topicCount);
+  const topics = sample(topicsBySubject[subject], topicCount);
   const past = status === "COMPLETED";
   const sessions = Array.from({ length: sessionCount }, (_, i) => ({
     topic: pick(topics),
@@ -284,7 +291,7 @@ async function enroll(body: Record<string, unknown>) {
 
   const cls = await prisma.tutorClass.findUnique({
     where: { id: classId },
-    select: { id: true, code: true, maxStudents: true, enrollments: { select: { learnerId: true } } },
+    select: { id: true, code: true, maxStudents: true, enrollments: { where: { withdrawnAt: null }, select: { learnerId: true } } },
   });
   if (!cls) return NextResponse.json({ error: "Class not found." }, { status: 404 });
 
@@ -308,7 +315,7 @@ async function enroll(body: Record<string, unknown>) {
   for (const learnerId of learnerIds) {
     if (enrolledIds.has(learnerId)) continue;
     if (enrolledIds.size >= cls.maxStudents) break;
-    await prisma.classEnrollment.create({ data: { classId: cls.id, learnerId } });
+    await prisma.classEnrollment.upsert({ where: { classId_learnerId: { classId: cls.id, learnerId } }, create: { classId: cls.id, learnerId }, update: { withdrawnAt: null } });
     enrolledIds.add(learnerId);
     results.push(learnerId);
   }
@@ -320,6 +327,11 @@ async function enroll(body: Record<string, unknown>) {
 }
 
 async function createTopicRequests(body: Record<string, unknown>) {
+  const catalog = (await getSubjects()).filter(subject => subject.topics.length > 0);
+  if (!catalog.length) throw new CatalogUnavailableError();
+  const subjectSlugs = catalog.map(subject => subject.slug);
+  const topicsBySubject = Object.fromEntries(catalog.map(subject => [subject.slug, subject.topics.map(topic => topic.name)]));
+
   const count = clampInt(body.count, 1, 40, 3);
   const learners = await prisma.user.findMany({
     where: { role: "STUDENT_LEARNER" },
@@ -332,8 +344,8 @@ async function createTopicRequests(body: Record<string, unknown>) {
   let made = 0;
   for (let i = 0; i < count; i++) {
     const learner = pick(learners);
-    const subject = pick(SUBJECTS);
-    const topics = sample(SUBJECT_TOPICS[subject], Math.floor(Math.random() * 2) + 1);
+    const subject = pick(subjectSlugs);
+    const topics = sample(topicsBySubject[subject], Math.floor(Math.random() * 2) + 1);
     await prisma.$transaction(async (tx) => {
       const request = await tx.topicRequest.create({
       data: {

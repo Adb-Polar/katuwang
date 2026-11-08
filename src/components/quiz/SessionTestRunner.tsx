@@ -30,6 +30,7 @@ export interface SessionTestRunnerAttempt {
   totalQuestions: number;
   correctCount?: number;
   scorePercent?: number;
+  answersRevealed?: boolean;
   items: SessionTestRunnerItem[];
 }
 
@@ -204,6 +205,10 @@ export default function SessionTestRunner({
             />
           )}
 
+          {submitted && attempt.answersRevealed === false && (
+            <FeedbackBanner variant="info" message="Answer feedback becomes available after you submit the post-test." />
+          )}
+
           <FeedbackBanner variant="error" message={error || null} />
 
           <ol className="space-y-4">
@@ -223,8 +228,10 @@ export default function SessionTestRunner({
                       const cls = submitted
                         ? optionIsCorrect
                           ? "border-success/40 bg-success/5"
-                          : isChosen
+                          : isChosen && optionIsCorrect === false
                           ? "border-error/40 bg-error/5"
+                          : isChosen
+                          ? "border-primary bg-primary/5"
                           : "border-base-200"
                         : isChosen
                         ? "border-primary bg-primary/5"

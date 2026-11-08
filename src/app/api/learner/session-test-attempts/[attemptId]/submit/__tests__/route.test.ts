@@ -5,27 +5,32 @@ const {
   getServerSessionMock,
   sessionTestAttemptFindUnique,
   sessionTestAttemptItemUpdate,
-  sessionTestAttemptUpdate,
+  sessionTestAttemptRead,
+  attemptClaim,
   sessionTestFindUnique,
   notifyMock,
+  accessMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   sessionTestAttemptFindUnique: vi.fn(),
   sessionTestAttemptItemUpdate: vi.fn(),
-  sessionTestAttemptUpdate: vi.fn(),
+  sessionTestAttemptRead: vi.fn(),
+  attemptClaim: vi.fn(),
   sessionTestFindUnique: vi.fn(),
   notifyMock: vi.fn(),
+  accessMock: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
+vi.mock("@/lib/sessionTestAccess", () => ({ checkLearnerAttemptAccess: accessMock }));
 vi.mock("@/lib/notifications", () => ({ notify: notifyMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    sessionTestAttempt: { findUnique: sessionTestAttemptFindUnique },
+    sessionTestAttempt: { findUnique: sessionTestAttemptFindUnique, findFirst: vi.fn().mockResolvedValue(null) },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         sessionTestAttemptItem: { update: sessionTestAttemptItemUpdate },
-        sessionTestAttempt: { update: sessionTestAttemptUpdate },
+        sessionTestAttempt: { updateMany: attemptClaim, findUniqueOrThrow: sessionTestAttemptRead },
         sessionTest: { findUnique: sessionTestFindUnique },
       }),
   },
@@ -72,20 +77,49 @@ const inProgressAttempt = {
 beforeEach(() => {
   vi.clearAllMocks();
   getServerSessionMock.mockResolvedValue(learner);
+  accessMock.mockResolvedValue(null);
+  attemptClaim.mockResolvedValue({ count: 1 });
   sessionTestAttemptFindUnique.mockResolvedValue(inProgressAttempt);
 });
 
 describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
   it("404 when it's not the caller's attempt (not 403 — don't confirm the id)", async () => {
     sessionTestAttemptFindUnique.mockResolvedValue({ ...inProgressAttempt, learnerId: "OTHER" });
-    const res = await POST(post({ answers: [] }), ctx());
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
     expect(res.status).toBe(404);
   });
 
   it("409 re-submitting an already-submitted attempt", async () => {
     sessionTestAttemptFindUnique.mockResolvedValue({ ...inProgressAttempt, status: "SUBMITTED" });
-    const res = await POST(post({ answers: [] }), ctx());
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
     expect(res.status).toBe(409);
+  });
+
+  it.each(["Enrollment withdrawn", "Class under moderation", "Tests disabled"])("blocks writes when access changed: %s", async (error) => {
+    accessMock.mockResolvedValue({ error, status: 403 });
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+    expect(res.status).toBe(403);
+    expect(sessionTestAttemptItemUpdate).not.toHaveBeenCalled();
+    expect(sessionTestAttemptRead).not.toHaveBeenCalled();
+  });
+
+  it("does not write items or notify when another submission wins", async () => {
+    attemptClaim.mockResolvedValue({ count: 0 });
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+    expect(res.status).toBe(409);
+    expect(sessionTestAttemptItemUpdate).not.toHaveBeenCalled();
+    expect(sessionTestAttemptRead).not.toHaveBeenCalled();
+    expect(notifyMock).not.toHaveBeenCalled();
+  });
+
+  it("rolls back before grading if access changes while waiting to claim", async () => {
+    accessMock.mockResolvedValueOnce(null).mockResolvedValueOnce({ error: "Enrollment withdrawn", status: 403 });
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+    expect(res.status).toBe(403);
+    expect(attemptClaim).toHaveBeenCalledOnce();
+    expect(sessionTestAttemptItemUpdate).not.toHaveBeenCalled();
+    expect(sessionTestAttemptRead).not.toHaveBeenCalled();
+    expect(notifyMock).not.toHaveBeenCalled();
   });
 
   it("400 on a malformed body", async () => {
@@ -93,8 +127,8 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     expect(res.status).toBe(400);
   });
 
-  it("200 grades, persists, and reveals the result", async () => {
-    sessionTestAttemptUpdate.mockResolvedValue({
+  it("200 grades and persists the aggregate result without PRE feedback", async () => {
+    sessionTestAttemptRead.mockResolvedValue({
       ...inProgressAttempt,
       status: "SUBMITTED",
       correctCount: 1,
@@ -108,8 +142,9 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     const json = await res.json();
     expect(res.status).toBe(200);
     expect(json.scorePercent).toBe(100);
-    expect(json.items[0].isCorrect).toBe(true);
-    expect(sessionTestAttemptUpdate).toHaveBeenCalledWith(
+    expect(json.items[0]).not.toHaveProperty("isCorrect");
+    expect(json.answersRevealed).toBe(false);
+    expect(attemptClaim).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ status: "SUBMITTED", correctCount: 1, scorePercent: 100 }),
       }),
@@ -117,7 +152,7 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
   });
 
   it("notifies the tutor once a PRE attempt is submitted", async () => {
-    sessionTestAttemptUpdate.mockResolvedValue({
+    sessionTestAttemptRead.mockResolvedValue({
       ...inProgressAttempt,
       kind: "PRE",
       sessionTestId: "st1",
@@ -149,7 +184,7 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
   });
 
   it("does not notify anyone for a POST attempt", async () => {
-    sessionTestAttemptUpdate.mockResolvedValue({
+    sessionTestAttemptRead.mockResolvedValue({
       ...inProgressAttempt,
       kind: "POST",
       sessionTestId: "st1",

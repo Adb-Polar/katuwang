@@ -76,4 +76,13 @@ describe("lib/subjects", () => {
     expect(await subjectExists("NOPE")).toBe(false);
     expect(await getSubjectSlugs()).toEqual(["MATH"]);
   });
+  it("fails closed on DB failure and retries successfully instead of caching the failure", async () => {
+    findManyMock.mockRejectedValueOnce(new Error("isolated catalog outage"));
+    await expect(topicExists("MATH", "Algebraic Expressions")).rejects.toThrow("temporarily unavailable");
+    findManyMock.mockResolvedValueOnce([subject({ slug: "CUSTOM", name: "School catalog", topics: [] })]);
+    expect(await getSubjectSlugs()).toEqual(["CUSTOM"]);
+    expect(await subjectExists("MATH")).toBe(false);
+    expect(findManyMock).toHaveBeenCalledTimes(2);
+  });
+
 });

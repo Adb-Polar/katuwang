@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { isAccessError, loadEnrolledSession } from "@/lib/sessionTestAccess";
 import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
 import { getSetting } from "@/lib/settings";
+import { attemptWindowError } from "@/lib/sessionTestWindow";
 import { Prisma } from "@prisma/client";
 import type { SessionStatus, SessionTestKind } from "@prisma/client";
 
@@ -16,8 +17,8 @@ const ATTEMPT_INCLUDE = {
 
 /**
  * Only NEW starts are gated by the session's status — an in-progress attempt
- * is always resumable, so a learner who opened the pre-test seconds before
- * the tutor marked the session complete never loses their work.
+ * may finish within the 15-minute grace period after ordinary closure.
+ * Enrollment, moderation and cancellation restrictions still apply immediately.
  */
 function newStartBlockReason(kind: SessionTestKind, sessionStatus: SessionStatus, pretestClosed: boolean, posttestOpen: boolean): string | null {
   if (sessionStatus === "CANCELLED") return "SESSION_CANCELLED";
@@ -56,9 +57,6 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
     if (!test || test.status === "DRAFT") {
       return NextResponse.json({ error: "Test not found." }, { status: 404 });
     }
-    if (test.status === "CLOSED") {
-      return NextResponse.json({ error: "This test is closed." }, { status: 409 });
-    }
 
     const existing = await prisma.sessionTestAttempt.findUnique({
       where: { sessionTestId_learnerId_kind: { sessionTestId: test.id, learnerId: session.user.id, kind } },
@@ -69,7 +67,19 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "You have already completed this test." }, { status: 409 });
     }
     if (existing) {
+      if (access.tutorClass.status === "CANCELLED") {
+        return NextResponse.json({ error: "This class was cancelled." }, { status: 403 });
+      }
+      const windowError = attemptWindowError(existing, test, access.session.status);
+      if (windowError) return NextResponse.json({ error: windowError }, { status: 409 });
       return NextResponse.json(serializeSessionTestAttempt(existing, { reveal: false }), { status: 200 });
+    }
+
+    if (test.status === "CLOSED") {
+      return NextResponse.json({ error: "This test is closed." }, { status: 409 });
+    }
+    if (access.tutorClass.status === "CANCELLED") {
+      return NextResponse.json({ error: "This class was cancelled." }, { status: 403 });
     }
 
     const blocked = newStartBlockReason(kind, access.session.status, Boolean(test.pretestClosedAt), Boolean(test.posttestOpenedAt));
@@ -107,6 +117,8 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
           include: ATTEMPT_INCLUDE,
         });
         if (raceWinner) {
+          const windowError = attemptWindowError(raceWinner, test, access.session.status);
+          if (windowError) return NextResponse.json({ error: windowError }, { status: 409 });
           return NextResponse.json(serializeSessionTestAttempt(raceWinner, { reveal: false }), { status: 200 });
         }
       }

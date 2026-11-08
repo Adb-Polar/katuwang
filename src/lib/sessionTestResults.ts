@@ -19,6 +19,7 @@ export interface SessionTestResults {
   };
   totals: {
     enrolled: number;
+    historicalEnrolled: number;
     preSubmitted: number;
     postSubmitted: number;
     /** Learners with BOTH a submitted PRE and POST attempt. */
@@ -137,7 +138,8 @@ export async function buildSessionTestResults(sessionTestId: string): Promise<Se
       sessionStatus: test.session.status,
     },
     totals: {
-      enrolled: test.session.class.enrollments.length,
+      enrolled: test.session.class.enrollments.filter(e => !e.withdrawnAt).length,
+      historicalEnrolled: test.session.class.enrollments.length,
       preSubmitted: preScores.length,
       postSubmitted: postScores.length,
       pairedCount: deltas.length,

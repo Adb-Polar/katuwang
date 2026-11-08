@@ -19,7 +19,9 @@ model User {
   lastName                 String
   email                    String                @unique
   password                 String
+  sessionVersion           Int                   @default(0)
   recoveryEmail            String?
+  recoveryEmailVerifiedAt  DateTime?
   role                     Role
   gradeLevel               GradeLevel
   section                  String
@@ -37,6 +39,7 @@ model User {
   profilePictureLocked     Boolean               @default(false)
   profilePictureUpdatedAt  DateTime?
   authoredQuestions        AssessmentQuestion[]  @relation("AuthoredQuestions")
+  qualificationReviews AssessmentQuestion[] @relation("QualificationReviewer")
   auditLogs                AuditLog[]
   chatbotMisses            ChatbotMiss[]
   reviewedClassAppeals     ClassAppeal[]         @relation("ReviewedClassAppeals")
@@ -52,6 +55,7 @@ model User {
   topicRequests            TopicRequest[]        @relation("LearnerTopicRequests")
   tutorProfile             TutorProfile?
   verificationTokens       VerificationToken[]
+  recoveryEmailTokens      RecoveryEmailToken[]
 
   @@map("users")
 }
@@ -82,6 +86,20 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
+model RecoveryEmailToken {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recovery_email_tokens")
+}
+
 model TutorProfile {
   id                    String               @id @default(cuid())
   userId                String               @unique
@@ -108,8 +126,13 @@ model TopicCertification {
   certifiedAt    DateTime?
   reviewedAt     DateTime?
   reviewNote     String?                  @db.Text
+  approvalMethod CertificationApprovalMethod?
+  approvalEvidence String? @db.Text
+  qualifyingAttemptId String?
+  qualifyingAttempt AssessmentAttempt? @relation("CertificationQualification", fields: [qualifyingAttemptId], references: [id], onDelete: Restrict, onUpdate: Restrict)
   tutorProfile   TutorProfile             @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
+  @@index([qualifyingAttemptId])
   @@unique([tutorProfileId, subject, topic])
   @@map("topic_certifications")
 }
@@ -213,6 +236,7 @@ model ClassEnrollment {
   classId    String
   learnerId  String
   enrolledAt DateTime   @default(now())
+  withdrawnAt DateTime?
   class      TutorClass @relation(fields: [classId], references: [id], onDelete: Cascade)
   learner    User       @relation("LearnerEnrollments", fields: [learnerId], references: [id], onDelete: Cascade)
 
@@ -335,6 +359,18 @@ model AssessmentQuestion {
   origin              QuestionOrigin           @default(BANK)
   createdById         String
   ownerTutorProfileId String?
+  lockedAt            DateTime?
+  version             Int                      @default(1)
+  reviewStatus QualificationReviewStatus @default(UNREVIEWED)
+  qualificationReviewedAt DateTime?
+  qualificationReviewerId String?
+  qualificationCompetency String? @db.Text
+  qualificationEvidence String? @db.Text
+  qualificationReviewerCredentials String? @db.Text
+  qualificationReviewer User? @relation("QualificationReviewer", fields: [qualificationReviewerId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  previousVersionId   String?
+  previousVersion     AssessmentQuestion?      @relation("QuestionVersions", fields: [previousVersionId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  nextVersions        AssessmentQuestion[]     @relation("QuestionVersions")
   createdAt           DateTime                 @default(now())
   updatedAt           DateTime                 @updatedAt
   attemptItems        AssessmentAttemptItem[]
@@ -344,6 +380,9 @@ model AssessmentQuestion {
   sessionTestItems    SessionTestAttemptItem[]
   sessionTestLinks    SessionTestQuestion[]
 
+  @@index([qualificationReviewerId])
+  @@index([subject, topic, active, origin, reviewStatus], map: "assessment_questions_qualification_pool_idx")
+  @@unique([previousVersionId, version])
   @@index([subject, topic, active, origin])
   @@index([ownerTutorProfileId])
   @@index([createdById], map: "assessment_questions_createdById_fkey")
@@ -371,12 +410,14 @@ model AssessmentAttempt {
   topic          String
   attemptNo      Int
   status         AssessmentAttemptStatus @default(IN_PROGRESS)
+  certificationEligible Boolean @default(false)
   questionCount  Int
   correctCount   Int                     @default(0)
   scorePercent   Int                     @default(0)
   passPercent    Int
   startedAt      DateTime                @default(now())
   submittedAt    DateTime?
+  certifications TopicCertification[] @relation("CertificationQualification")
   items          AssessmentAttemptItem[]
   tutorProfile   TutorProfile            @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
 
@@ -523,7 +564,7 @@ model SessionTest {
   updatedAt       DateTime              @updatedAt
   attempts        SessionTestAttempt[]
   questions       SessionTestQuestion[]
-  session         ClassSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session         ClassSession          @relation(fields: [sessionId], references: [id], onDelete: Restrict)
 
   @@index([status])
   @@map("session_tests")
@@ -604,6 +645,17 @@ enum GradeLevel {
   GRADE_10
   GRADE_11
   GRADE_12
+}
+
+enum QualificationReviewStatus {
+  UNREVIEWED
+  DEMO
+  APPROVED
+}
+
+enum CertificationApprovalMethod {
+  ASSESSMENT
+  MANUAL
 }
 
 enum TopicCertificationStatus {

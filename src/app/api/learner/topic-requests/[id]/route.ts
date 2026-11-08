@@ -1,6 +1,8 @@
+import { catalogFailureResponse } from "@/lib/catalogError";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import {
   cancelTopicRequestSchema,
   createTopicRequestSchema,
@@ -8,7 +10,7 @@ import {
 } from "@/lib/validations/match";
 
 import { subjectExists, topicExists } from "@/lib/subjects";
-import { requestDeadline, requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
+import { requestDeadline, lockTopicRequestRow, requestSnapshot, recordRequestHistory } from "@/lib/topicRequestHistory";
 import { z } from "zod";
 
 // ─── PATCH: Cancel or edit one's own topic request ───────────────────────────
@@ -42,7 +44,7 @@ export async function PATCH(
 
     const existing = await prisma.topicRequest.findUnique({
       where: { id },
-      select: { learnerId: true, status: true, expiresAt: true },
+      select: { learnerId: true, status: true, expiresAt: true, updatedAt: true },
     });
 
     if (!existing || existing.learnerId !== session.user.id) {
@@ -58,8 +60,9 @@ export async function PATCH(
         );
       }
       const updated = await prisma.$transaction(async (tx) => {
+        await lockTopicRequestRow(tx, id);
         const before = await requestSnapshot(tx, id);
-        const request = await tx.topicRequest.update({ where: { id }, data: { status: "CANCELLED", fulfilledClassId: null }, select: { id: true, status: true } });
+        const request = await tx.topicRequest.update({ where: { id, status: { in: ["OPEN", "ACCEPTED"] } }, data: { status: "CANCELLED", fulfilledClassId: null }, select: { id: true, status: true } });
         await recordRequestHistory(tx, id, session.user.id, "STATUS_CHANGED", before);
         return request;
       });
@@ -74,10 +77,11 @@ export async function PATCH(
       if (openCount >= 10) return NextResponse.json({ error: "You already have 10 active requests." }, { status: 409 });
       const slots = (parsed.data as { preferredSlots?: { day: string; startTime: string; endTime: string }[] }).preferredSlots;
       const updated = await prisma.$transaction(async (tx) => {
+        await lockTopicRequestRow(tx, id);
         const before = await requestSnapshot(tx, id);
         const now = new Date();
         const request = await tx.topicRequest.update({
-          where: { id },
+          where: { id, status: "OPEN", expiresAt: { lte: now }, updatedAt: existing.updatedAt },
           data: { lastSubmittedAt: now, expiresAt: requestDeadline(now), ...(slots ? { slots: { deleteMany: {}, create: slots } } : {}) },
           select: { id: true, status: true, expiresAt: true },
         });
@@ -109,9 +113,10 @@ export async function PATCH(
     }
 
     const updated = await prisma.$transaction(async (tx) => {
+      await lockTopicRequestRow(tx, id);
       const before = await requestSnapshot(tx, id);
       const request = await tx.topicRequest.update({
-      where: { id },
+      where: { id, status: "OPEN", updatedAt: existing.updatedAt },
       data: {
         subject: subject,
         gradeLevel,
@@ -142,6 +147,9 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error) {
+    const catalogFailure = catalogFailureResponse(error);
+    if (catalogFailure) return catalogFailure;
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") return NextResponse.json({ error: "This request changed. Refresh and try again." }, { status: 409 });
     console.error("Error updating topic request:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

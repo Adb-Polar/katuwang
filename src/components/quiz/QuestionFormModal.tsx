@@ -12,6 +12,7 @@ import Modal from "@/components/ui/Modal";
 export interface QuestionDraft {
   prompt: string;
   explanation?: string;
+  reason?: string;
   options: { text: string; isCorrect: boolean }[];
 }
 
@@ -31,10 +32,12 @@ export default function QuestionFormModal({
   initial = null,
   submitLabel,
   topicField,
+  requireReason = false,
   onSubmit,
   onClose,
 }: {
   title: string;
+  requireReason?: boolean;
   contextLabel?: string;
   initial?: (QuestionDraft & { topic?: string }) | null;
   submitLabel: string;
@@ -43,6 +46,7 @@ export default function QuestionFormModal({
   onSubmit: (draft: QuestionDraft) => Promise<void>;
   onClose: () => void;
 }) {
+  const [reason, setReason] = useState("");
   const [prompt, setPrompt] = useState(initial?.prompt ?? "");
   const [explanation, setExplanation] = useState(initial?.explanation ?? "");
   const [options, setOptions] = useState<DraftOption[]>(
@@ -78,6 +82,7 @@ export default function QuestionFormModal({
     try {
       await onSubmit({
         prompt,
+        ...(requireReason ? { reason } : {}),
         explanation: explanation.trim() || undefined,
         options: options.map((o) => ({ text: o.text, isCorrect: o.isCorrect })),
       });
@@ -181,6 +186,10 @@ export default function QuestionFormModal({
             className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
           />
         </FormField>
+
+        {requireReason && <FormField label="Correction reason" required hint="Explain why a new version is needed. Existing tests keep the original content.">
+          <textarea aria-label="Correction reason" value={reason} onChange={event => setReason(event.target.value)} required minLength={10} maxLength={1000} className="textarea textarea-bordered w-full text-xs" />
+        </FormField>}
 
         <div className="modal-action pt-1">
           <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving}>
