@@ -1,5 +1,7 @@
 "use client";
 
+import BrandMark from "@/components/ui/BrandMark";
+
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useEffect, useRef, useState } from "react";
@@ -106,9 +108,7 @@ export default function ChatWidget() {
           className="fixed bottom-20 right-4 z-30 flex w-[min(22rem,calc(100vw-2rem))] max-h-[min(30rem,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-2xl"
         >
           <header className="flex items-center gap-2 border-b border-base-200 bg-base-100 px-3 py-2.5">
-            <span className="grid h-6 w-6 place-items-center rounded-full bg-primary/10 text-primary">
-              <MessageCircle className="h-3.5 w-3.5" />
-            </span>
+            <BrandMark size="sm" />
             <div className="min-w-0">
               <p className="text-xs font-bold leading-tight">Assistant</p>
               <p className="text-2xs text-base-content/50 leading-tight">Navigation help &amp; FAQs</p>
