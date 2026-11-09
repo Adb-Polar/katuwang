@@ -26,6 +26,8 @@ model User {
   role                     Role
   gradeLevel               GradeLevel
   section                  String
+  studentIdNumber          String?
+  adviserTeacherName       String?
   contactInfo              String?
   consentGiven             Boolean               @default(false)
   status                   AccountStatus         @default(ACTIVE)

@@ -47,6 +47,8 @@ function makeRequest(body: unknown) {
 
 const validLearner = {
   type: "LEARNER",
+  studentIdNumber: "001-234",
+  adviserTeacherName: "Maria Santos",
   firstName: "Juan",
   lastName: "Dela Cruz",
   email: "juan@example.com",
@@ -57,6 +59,34 @@ const validLearner = {
 };
 
 describe("POST /api/register", () => {
+  it.each([
+    ["LEARNER", false], ["LEARNER", true], ["TUTOR", false], ["TUTOR", true],
+  ] as const)("persists student details for %s with approval=%s", async (type, requireApproval) => {
+    platformSettingFindUnique.mockImplementation(({ where }) =>
+      where.key === "requireRegistrationApproval" ? { value: String(requireApproval) } : null);
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({ id: "U1", anonymousId: "STU-0001", role: type === "TUTOR" ? "STUDENT_TUTOR" : "STUDENT_LEARNER" });
+    transactionMock.mockImplementation(async cb => cb({ user: { create: userCreate } }));
+    const res = await POST(makeRequest({ ...validLearner, type, studentIdNumber: " 001-234 ", adviserTeacherName: " Maria Santos " }));
+    expect(res.status).toBe(201);
+    expect((await res.json()).pendingApproval).toBe(requireApproval);
+    const data = userCreate.mock.calls[0][0].data;
+    expect(data.studentIdNumber).toBe("001-234");
+    expect(data.adviserTeacherName).toBe("Maria Santos");
+    expect(data.status).toBe(requireApproval ? "PENDING" : undefined);
+  });
+
+  it.each(["LEARNER", "TUTOR"])("rejects missing or blank student details for %s before database writes", async type => {
+    for (const field of ["studentIdNumber", "adviserTeacherName"]) {
+      for (const value of [undefined, "   "]) {
+        const res = await POST(makeRequest({ ...validLearner, type, [field]: value }));
+        expect(res.status).toBe(400);
+        expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: [field] })]));
+      }
+    }
+    expect(userCreate).not.toHaveBeenCalled();
+  });
+
   afterEach(() => vi.unstubAllEnvs());
   beforeEach(() => {
     vi.clearAllMocks();

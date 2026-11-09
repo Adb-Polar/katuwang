@@ -4,6 +4,8 @@ import { registerSchema } from "@/lib/validations/auth";
 function baseLearner(overrides: Record<string, unknown> = {}) {
   return {
     type: "LEARNER",
+    studentIdNumber: "001-234",
+    adviserTeacherName: "Maria Santos",
     firstName: "Juan",
     lastName: "Dela Cruz",
     email: "juan@example.com",
@@ -24,6 +26,17 @@ function baseTutor(overrides: Record<string, unknown> = {}) {
 }
 
 describe("registerSchema", () => {
+  it.each(["LEARNER", "TUTOR"])("requires text student details and trims them for %s", (type) => {
+    for (const field of ["studentIdNumber", "adviserTeacherName"]) {
+      for (const value of [undefined, null, "", "   ", 123, "a".repeat(192)]) {
+        expect(registerSchema.safeParse(baseLearner({ type, [field]: value })).success).toBe(false);
+      }
+    }
+    const parsed = registerSchema.parse(baseLearner({ type, studentIdNumber: "  001-234  ", adviserTeacherName: "  Maria Santos  " }));
+    expect(parsed.studentIdNumber).toBe("001-234");
+    expect(parsed.adviserTeacherName).toBe("Maria Santos");
+  });
+
   it("accepts a valid learner registration", () => {
     const result = registerSchema.safeParse(baseLearner());
     expect(result.success).toBe(true);

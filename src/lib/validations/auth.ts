@@ -32,6 +32,12 @@ export const commonRegisterSchema = z.object({
   gradeLevel: z.nativeEnum(GradeLevel, {
     message: "Invalid grade level.",
   }),
+  studentIdNumber: z.string().trim()
+    .min(1, "Student ID Number is required.")
+    .max(191, "Student ID Number cannot exceed 191 characters."),
+  adviserTeacherName: z.string().trim()
+    .min(1, "Adviser Teacher's Name is required.")
+    .max(191, "Adviser Teacher's Name cannot exceed 191 characters."),
   section: z.string().min(1, "Section is required.").trim(),
   contactInfo: z.string().trim().optional().or(z.literal("")),
   consentGiven: z.literal(true, {

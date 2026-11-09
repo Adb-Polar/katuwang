@@ -196,6 +196,8 @@ async function createUsers(body: Record<string, unknown>) {
       lastName,
       email,
       password: DEV_PASSWORD,
+      studentIdNumber: `DEV-${stamp}-${i}`,
+      adviserTeacherName: "Development Adviser",
       gradeLevel,
       section,
       consentGiven: true,
