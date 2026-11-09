@@ -62,12 +62,18 @@ export async function replaceDummyBank(db: PrismaClient, input: unknown, mode: R
       // Options cascade on question deletion after dependent references are gone.
       await tx.assessmentQuestion.deleteMany({where:{id:{in:oldIds},origin:'BANK'}});
     }
-    for (const q of bank.questions) {
-      await tx.assessmentQuestion.create({data:{
+    // Bound each statement's size and avoid thousands of nested-create round
+    // trips on remote databases and low-CPU service instances.
+    const batchSize=200;
+    for (let start=0;start<bank.questions.length;start+=batchSize) {
+      const batch=bank.questions.slice(start,start+batchSize);
+      await tx.assessmentQuestion.createMany({data:batch.map(q=>({
         id:q.id,subject:q.subject,topic:q.topic,prompt:q.prompt,explanation:q.explanation,
         origin:'BANK',active:true,createdById:author.id,
-        options:{create:q.options.map((o,position) => ({...o,position}))},
-      }});
+      }))});
+      await tx.assessmentOption.createMany({data:batch.flatMap(q=>q.options.map((o,position)=>({
+        ...o,position,questionId:q.id,
+      })))});
     }
     const inserted = await tx.assessmentQuestion.findMany({where:{origin:'BANK'},include:{options:true}});
     if (inserted.length!==bank.questions.length) throw new Error('Post-replacement total mismatch. Transaction will roll back.');

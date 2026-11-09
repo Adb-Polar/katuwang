@@ -16,6 +16,7 @@ function approvedFixture() {
 function mockDatabase() {
   const mutations:string[]=[];
   const created:Record<string,unknown>[]=[];
+  const options:Record<string,unknown>[]=[];
   const write=(name:string) => vi.fn(async()=>{mutations.push(name);return {count:1};});
   const tx={
     subject:{findMany:vi.fn(async()=>[{id:'s1',slug:'MATH',name:'Mathematics',topics:[{id:'t1',name:'Whole Numbers & Operations'}]}])},
@@ -24,12 +25,13 @@ function mockDatabase() {
     assessmentQuestion:{
       findMany:vi.fn(async()=>{
         if (!created.length) return [{id:'dummy-bank-1'},{id:'dummy-bank-2'}];
-        return created.map(q=>({...q,options:(q.options as {create:unknown[]}).create}));
+        return created.map(q=>({...q,options:options.filter(o=>o.questionId===q.id)}));
       }),
       deleteMany:write('questions'),
       updateMany:write('version-links'),
-      create:vi.fn(async({data}:{data:Record<string,unknown>})=>{mutations.push('insert');created.push(data);return data;}),
+      createMany:vi.fn(async({data}:{data:Record<string,unknown>[]})=>{mutations.push('insert');created.push(...data);return {count:data.length};}),
     },
+    assessmentOption:{createMany:vi.fn(async({data}:{data:Record<string,unknown>[]})=>{mutations.push('insert-options');options.push(...data);return {count:data.length};})},
     sessionTest:{findMany:vi.fn(async()=>[{id:'test1'}]),updateMany:write('tests')},
     assessmentAttempt:{deleteMany:write('certification-attempts')},
     sessionTestAttempt:{deleteMany:write('learner-attempts')},
@@ -39,7 +41,7 @@ function mockDatabase() {
   const db={$transaction:vi.fn(async(fn:(t:typeof tx)=>Promise<unknown>)=>{
     const result=await fn(tx);committed=true;return result;
   })};
-  return {db:db as unknown as PrismaClient,tx,mutations,created,committed:()=>committed};
+  return {db:db as unknown as PrismaClient,tx,mutations,created,options,committed:()=>committed};
 }
 
 describe('authorized direct dummy bank replacement',()=>{
@@ -55,6 +57,7 @@ describe('authorized direct dummy bank replacement',()=>{
     const result=await replaceDummyBank(m.db,draft,'apply');
     expect(result.databaseModified).toBe(true);
     expect(m.created).toHaveLength(20);
+    expect(m.options).toHaveLength(80);
     expect(draft).toEqual(before);
     expect(m.created.every(q=>q.reviewStatus === undefined && q.qualificationReviewerId === undefined)).toBe(true);
   });
@@ -76,9 +79,29 @@ describe('authorized direct dummy bank replacement',()=>{
     expect(result.databaseModified).toBe(true);expect(m.committed()).toBe(true);
   });
   it('does not commit when an insertion fails',async()=>{
-    const m=mockDatabase();m.tx.assessmentQuestion.create.mockRejectedValue(new Error('insertion failed'));
+    const m=mockDatabase();m.tx.assessmentQuestion.createMany.mockRejectedValue(new Error('insertion failed'));
     await expect(replaceDummyBank(m.db,approvedFixture(),'apply')).rejects.toThrow('insertion failed');
     expect(m.committed()).toBe(false);
+  });
+  it('does not commit when option insertion fails after questions are inserted',async()=>{
+    const m=mockDatabase();m.tx.assessmentOption.createMany.mockRejectedValue(new Error('option insertion failed'));
+    await expect(replaceDummyBank(m.db,draft,'apply')).rejects.toThrow('option insertion failed');
+    expect(m.committed()).toBe(false);
+  });
+  it('replaces the complete 2700-question bank with all 10800 linked options',async()=>{
+    const bank=JSON.parse(readFileSync('prisma/question-bank/questions.json','utf8')) as typeof draft;
+    const m=mockDatabase();
+    const subjects=[...new Set<string>(bank.questions.map((q:{subject:string})=>q.subject))];
+    m.tx.subject.findMany.mockResolvedValue(subjects.map((subject,index)=>({
+      id:`s${index}`,slug:subject,name:subject,
+      topics:[...new Set<string>(bank.questions.filter((q:{subject:string})=>q.subject===subject).map((q:{topic:string})=>q.topic))].map((name,i)=>({id:`t${index}-${i}`,name})),
+    })));
+    const result=await replaceDummyBank(m.db,bank,'apply');
+    expect(result).toMatchObject({insertBankQuestions:2700,topics:135,databaseModified:true});
+    expect(m.created).toHaveLength(2700);expect(m.options).toHaveLength(10800);
+    const inserted=new Set(m.created.map(q=>q.id));
+    expect(m.options.every(o=>inserted.has(o.questionId))).toBe(true);
+    expect(m.committed()).toBe(true);
   });
   it('requires successful post-insert validation before commit',async()=>{
     const m=mockDatabase();m.tx.assessmentQuestion.findMany.mockResolvedValue([{id:'dummy-bank-1'}]);
