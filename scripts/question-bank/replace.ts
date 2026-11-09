@@ -22,9 +22,10 @@ export async function replaceDummyBank(db: PrismaClient, input: unknown, mode: R
     if (!validation.valid) {
       throw new Error(`Replacement rejected before any writes: ${validation.errors.map(e => e.message).join('; ')}`);
     }
-    // User waived data preservation, not the academic approval requirement.
-    if (!validation.productionReady) {
-      throw new Error(`Replacement rejected before any writes: ${validation.requiringManualReview} question(s) still require academic review; ${validation.reviewFlags.length} unresolved review flags.`);
+    // The user authorized seeding without academic review. Do not invent review
+    // attestations or alter the application's separate qualification controls.
+    if (validation.reviewFlags.length) {
+      throw new Error(`Replacement rejected before any writes: ${validation.reviewFlags.length} unresolved content review flags.`);
     }
     const settings = await tx.platformSetting.findMany({where:{key:{in:['assessmentQuestionCount','assessmentMinBankSize']}}});
     if (settings.some(s => Number(s.value)>20)) throw new Error('Assessment settings require more than 20 questions per topic.');

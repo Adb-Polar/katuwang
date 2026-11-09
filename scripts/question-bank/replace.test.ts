@@ -49,9 +49,14 @@ describe('authorized direct dummy bank replacement',()=>{
     await expect(replaceDummyBank(m.db,approvedFixture(),'apply')).rejects.toThrow('Expected 20');
     expect(m.mutations).toEqual([]);expect(m.committed()).toBe(false);
   });
-  it('does not turn unreviewed draft content into academic approval',async()=>{
-    const m=mockDatabase();await expect(replaceDummyBank(m.db,draft,'apply')).rejects.toThrow('academic review');
-    expect(m.mutations).toEqual([]);
+  it('seeds without academic approval while preserving genuine review metadata',async()=>{
+    const before=structuredClone(draft);
+    const m=mockDatabase();
+    const result=await replaceDummyBank(m.db,draft,'apply');
+    expect(result.databaseModified).toBe(true);
+    expect(m.created).toHaveLength(20);
+    expect(draft).toEqual(before);
+    expect(m.created.every(q=>q.reviewStatus === undefined && q.qualificationReviewerId === undefined)).toBe(true);
   });
   it('previews deletions without making any writes or backup requirement',async()=>{
     const m=mockDatabase();const result=await replaceDummyBank(m.db,approvedFixture(),'preview');
