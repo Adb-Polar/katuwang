@@ -1,0 +1,1342 @@
+{
+  "add": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/1-2-add-whole-numbers",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a1e896f648f43e991ee9a6423289da7d0c1886a9c0dc8f15e952beaa24377096",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "algebra": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/2-2-evaluate-simplify-and-translate-expressions",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "77f88b2738af34774c147c6e034faef87e46ee6e444012e119ea0b8b3befcb71",
+    "topics": [
+      "Algebraic Expressions"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "antibiotic": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/antimicrobial-resistance",
+    "publisher": "World Health Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a0952975ee92be3e165e006282d4810a97561f64d9fd09c4f24011b77316abda",
+    "topics": [
+      "Human Body Systems",
+      "Health Education"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "art": {
+    "url": "https://www.getty.edu/education/teachers/building_lessons/elements_art.pdf",
+    "publisher": "J. Paul Getty Museum",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c633aefc20b8af4a189e7abf0c71ee26db7c6850e9cb39c8a848293c0f6fccc1",
+    "topics": [
+      "Visual Arts"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "astronomy": {
+    "url": "https://openstax.org/books/astronomy-2e/pages/4-2-the-seasons",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fc76eadc11a4a7087c8b506db926603c688e132e70bc262728772d4a447c9f2c",
+    "topics": [
+      "Earth & Space Science"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "atom": {
+    "url": "https://openstax.org/books/chemistry-2e/pages/2-3-atomic-structure-and-symbolism",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b9fb49012ed8c1ee9f0a464891834ffcd89afb953651d1b73bf926b062df1f5c",
+    "topics": [
+      "Chemical Reactions & Matter"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "body": {
+    "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-2-structural-organization-of-the-human-body",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "1a2583047e2d4515a7ba63ff5eacc6c17428b37b7e8e85cf4e137a73fada39b9",
+    "topics": [
+      "Human Body Systems"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "business": {
+    "url": "https://openstax.org/books/entrepreneurship/pages/11-3-conducting-a-feasibility-analysis",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "081b387c33261233f9b1d3b25ef72c5cbfbe6bcf7f61e1c27e9e000b12190840",
+    "topics": [
+      "Entrepreneurship"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "cell": {
+    "url": "https://openstax.org/books/biology-2e/pages/4-3-eukaryotic-cells",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "706499a351a4f016687bbc4aa4bd7a9a7bff8f44b85ba8fc17445e4b18179ab7",
+    "topics": [
+      "Cell Biology & Genetics"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "chemistry": {
+    "url": "https://openstax.org/books/chemistry-2e/pages/2-1-early-ideas-in-atomic-theory",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "717dd9faf291cab042d080c8094aabde6bb9d73bd99fdea964f511a37295e66b",
+    "topics": [
+      "Chemical Reactions & Matter"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "climate2025": {
+    "url": "https://public.wmo.int/publication-series/state-of-global-climate/state-of-global-climate-2025",
+    "publisher": "World Meteorological Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fef2865e71edc8705678b2ae5b26f7c59137b9316c9603cb41f48bcde2f27f55",
+    "topics": [
+      "Kasalukuyang Pangyayari (Current Events)"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "constitution": {
+    "url": "https://www.officialgazette.gov.ph/constitutions/1987-constitution/",
+    "publisher": "Official Gazette of the Republic of the Philippines",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c16ad040688459288b44ecabf065edc8c85b1156fd63e42ed6cc4caeff617ea4",
+    "topics": [
+      "Sibika at Pamahalaan"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "culture": {
+    "url": "https://openstax.org/books/introduction-sociology-3e/pages/3-1-what-is-culture",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "37e0d4ddc7d99722359ba68ba97d2686186d79fdb8262feb3d6403b2905b8768",
+    "topics": [
+      "Kultura at Lipunan"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "current-accounting": {
+    "url": "https://openstax.org/books/principles-financial-accounting/pages/3-1-describe-principles-assumptions-and-concepts-of-accounting-and-their-relationship-to-financial-statements",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "63d2f5ae6e953a4509794c50054a605a3a693e81c93d9f0bfe438d65928f6a24",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-accounts": {
+    "url": "https://openstax.org/books/principles-financial-accounting/pages/3-2-define-and-describe-the-expanded-accounting-equation-and-its-relationship-to-analyzing-transactions",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "07f8d6fb1d140275f6af94cfeba97c399e29faf6b3b8a2527fa1bf6ce84a3620",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-adarna-text": {
+    "url": "https://www.gutenberg.org/cache/epub/16157/pg16157-images.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "9e996016e4991b0399d29c44802b75c72edb2a3886fb9f9d44b2771dc52cf83a",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-adolescent": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/adolescent-health",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f3758f1e7aa6973647a60111488282ae924fca97a8f8fcfc1ef42dfd9e5625f0",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-angklung-museum": {
+    "url": "https://asia.si.edu/research/essays/hynson/",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b5fb78982674c6bfead595f75e73c8e6ec59c78d2fbca7048871465f082900c1",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-arts": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/4-G7-MAPEH.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0453f09ebcafc59a0739be78a928adba56c3de5851abe556f8e5bb6983fb9aaf",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-asean": {
+    "url": "https://www.britannica.com/topic/ASEAN",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "5e04420099502ece94d57b7c539a0c20d81bef92b7a03d1ec78638d98b584904",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-baking": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/2019/01/Bread-and-Pastry-NC-II-CG.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "cf17dad9190ad854d831ce0cb0d13ec8662400aa28b901e1368d0c2c325a702d",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-biotech": {
+    "url": "https://openstax.org/books/biology-2e/pages/17-1-biotechnology",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c6cd33158c52d91050b6f888a0629d842838495340c14aca18fb470b56ea275a",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-bonding": {
+    "url": "https://openstax.org/books/chemistry-2e/pages/7-1-ionic-bonding",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c49c6d3b424509c1ef07c1185d8fd491bca003909342e41e8c97695402cab86a",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-businessplan": {
+    "url": "https://openstax.org/books/entrepreneurship/pages/11-4-the-business-plan",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "aa7766d21fe938204b5e29da441a8c6f8fc61d1dbc1374e5b432d200b16f99bc",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-cells-micro": {
+    "url": "https://openstax.org/books/biology-2e/pages/4-1-studying-cells",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a17a081166cd601b25ce8c14710b035c3153282ad6af91bef791a1aad19ad0ba",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-classicalarts": {
+    "url": "https://www.metmuseum.org/essays/greek-art-in-the-archaic-period",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "dd0a54d8b852a0b6bcbdab70e84292754ebe5a9e0e954d129636eb3429ec7e10",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-computer": {
+    "url": "https://openstax.org/books/workplace-software-skills/pages/1-2-computer-hardware-and-networks",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "da9aec27bc979fdcf9369556beccb726a39a9adc9f4cb276fb8a79b5b87c6aa4",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-conics": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/10-1-the-ellipse",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "acf80aefc73b6c99c273a65c51ec8d07f3ff69e8f6a53f4a5b7873927e5b805b",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-continuity": {
+    "url": "https://csrc.nist.gov/pubs/sp/800/34/r1/upd1/final",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e5c9bb25b5fc6951e59e66196fb3420d404ad0cb7c1fdeae1d007840e8dbe156",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-covalent": {
+    "url": "https://openstax.org/books/chemistry-2e/pages/7-2-covalent-bonding",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a72684ad10f5437c565a31fc0f53206bd46527b99e9227c72aa7c4dcf092bc66",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-creative": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/MALIKHAING-PAGSULAT-1.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f4acb68425056870cfb69e0c5d9bfaf62d93460603852f69e57c2659c06034e5",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-crop": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/G7-TLE_-AFA-_-FCS-_-IA.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fd89ef7fd30414d3aa353ec18e491844813f61c627b853d914df0aa04197c00d",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-derivatives": {
+    "url": "https://openstax.org/books/calculus-volume-1/pages/3-3-differentiation-rules",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "603aa23a4f17bee6bb2c99c0b7f288ed6ca95713dc780a3961d5fb5ba3a086f1",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-earlyarts": {
+    "url": "https://www.metmuseum.org/essays/chinese-calligraphy",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "bc7ce568a1950fa4fd99ef15eede8e14042fe290368ac7523c37d65e1e4589a9",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-electric": {
+    "url": "https://openstax.org/books/college-physics-2e/pages/20-2-ohms-law-resistance-and-simple-circuits",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "cf98440d71ccd7c87fbc55e3e23a6102faef6fca7708ef70a993f094f6c48aab",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-electrical": {
+    "url": "https://www.osha.gov/electrical",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "eeb59c686859c7def26aaa71a4a49467718368f5864372675dc185a82fd023a0",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-ethics": {
+    "url": "https://openstax.org/books/introduction-philosophy/pages/9-1-requirements-of-a-normative-moral-theory",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f4a4a5142801d10109160c9d50793aa588e316fd151e52555e04e958fe3303ce",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-evolution": {
+    "url": "https://openstax.org/books/biology-2e/pages/18-1-understanding-evolution",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0c551e1c322e697b8eb531bb363a3854365051f72c9efe44a1ddb16d153b1c49",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-exp": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/4-1-exponential-functions",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e671606174fe096fbb4108aa8f7518276f37f560a83f365bbb66273936484f92",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-fili-text": {
+    "url": "https://www.gutenberg.org/cache/epub/10676/pg10676-images.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "d359859d68cb939f007f8f2813037fc3e99d5793f3b930229fe5fe2659d9afcb",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-filmyth": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/3-G7-Filipino.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c73cf446110114eff977614404efb598f6eb24c0c21bc7e87d152a636c3f11f2",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-finance": {
+    "url": "https://openstax.org/books/principles-finance/pages/1-1-what-is-finance",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "055bebcced15f3c077d41ccd67a4113b96c0341cf501b8d33b92e2b7f2bcf0db",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-firstaid": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e6c54c42a6444faecb92db9c0c3fb9e052484f0b163a0af851f9f9d7348b8be5",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-florante-text": {
+    "url": "https://www.gutenberg.org/cache/epub/15845/pg15845-images.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6e586e0aa9610683ef2b3e93adfb478b7538c47d116338f936c39304480f209c",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-food": {
+    "url": "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "bfff7c6e7785fa20bb773d67fae748c9374a4be1c9df0d533fdd2fe6d01a21cf",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-foodservice": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/Food-and-Beverage-Services.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "96a7c225b35a2ff1cc72dc8e274dfd06ec62b43e07f539a64fb7387995d32141",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-gamelan-museum": {
+    "url": "https://asia.si.edu/explore-art-culture/audio/javanese-gamelan-music/",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "cec3df572bca22213586db4225fbb8f39ff1dbb1add57cc9eda80a24b32e6b7a",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-geomorph": {
+    "url": "https://www.nps.gov/subjects/geology/plate-tectonics.htm",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "445211a97200986d907a5d82c681ec6d427afda0ecd8c634d340fd501d6e6d10",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-gitanjali": {
+    "url": "https://www.gutenberg.org/ebooks/7164",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "bdb13254308eac73692f31639f502f24d200dcf6dc5a69e02d0d7a4bfe392491",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-greek": {
+    "url": "https://www.metmuseum.org/essays/greek-art-in-the-archaic-period",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "dd0a54d8b852a0b6bcbdab70e84292754ebe5a9e0e954d129636eb3429ec7e10",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-hamlet": {
+    "url": "https://www.gutenberg.org/ebooks/1524",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "4cbbe57fe13519c096d99204fd666204007beab31c0ddb612c9892d6536fa528",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-ict": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/27-G9-_-G10-TLE_-ICT-Computer-Systems-Servicing.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "7f1cda9eac3fd3911ffdeffd905e4bf5223c598ceca0abea2b7cfcc0cedbb1bf",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-immersion": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/2019/01/SHS-Applied_Inquiries-Investigations-and-Immersions-CG.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "d3613b9a71b766913b38724b3ef7a48322073b4d586d9eba575e743ff46dd256",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-inference": {
+    "url": "https://openstax.org/books/introductory-statistics-2e/pages/9-1-null-and-alternative-hypotheses",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b5b01fda1740a2a31a2423f05938d06b500307fc1a5e4b2a8c0eea8823ae2501",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-instruments": {
+    "url": "https://www.metmuseum.org/perspectives/meet-musical-instruments-galleries-families",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b120d9b2de49b48340e7a66556bbd4338d6bda20dba4bbcb7152f7a7729a31a6",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-integrals": {
+    "url": "https://openstax.org/books/calculus-volume-1/pages/5-4-integration-formulas-and-the-net-change-theorem",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "642ba91fa4b7838d511723e3ad9de428f29e7f8ffe208d029ad7582f91e73ff3",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-ip": {
+    "url": "https://www.rfc-editor.org/rfc/rfc4632.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "cffb9d6a65ea8ee67ac63e6af32bd1589c28396a43ba2a4eecae977536ccf734",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-japan": {
+    "url": "https://www.metmuseum.org/essays/woodblock-prints-in-the-ukiyo-e-style",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fa47d15d162bdfc3d88f2140351ee2e0492e9c79f113d4722a9db8173459e8aa",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-khaen-museum": {
+    "url": "https://music.si.edu/node/1502",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "9dc4389e0d1fe20d4f75b150e86a03fba2ae3d53eb3c29e19d539eaded243002",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-kulintang": {
+    "url": "https://www.arts.gov/honors/heritage/danongan-kalanduyan",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ab9953012c181a5c3744eda86b35275555e1afe14f59e77250e7eb3896854de7",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-language": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/MABISANG-KOMUNIKASYON-1.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "1f9120efeaf6f9e1173195900477936ab2f3911c1da8a9ec3f1ff216932499e1",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-letters": {
+    "url": "https://owl.purdue.edu/owl/subject_specific_writing/professional_technical_writing/basic_business_letters/index.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "314beb2610419231ae9e5a2516b1eee6acd9b66db486246a2f33749af0c9ac95",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-limits": {
+    "url": "https://openstax.org/books/calculus-volume-1/pages/2-2-the-limit-of-a-function",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "bd5349bd94838745d1155834594325569313f2440bb3911ecddd0dd2e865f9ba",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-log": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/4-3-logarithmic-functions",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6dd59edd476e95dddf23147b9e82cf952ad36597f4874d76a544c3753e9a5412",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-logic": {
+    "url": "https://openstax.org/books/contemporary-mathematics/pages/2-4-truth-tables-for-the-conditional-and-biconditional",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0b0c56cb4b6ffe4e08c963a36d0fe6c557384e8e5701cc78985fc1add9f681e3",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-magnet": {
+    "url": "https://openstax.org/books/college-physics-2e/pages/22-1-magnets",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "483f9d9782aab086e1b2131d21454b92dbbd7dfc8f3947289e60ee3ee71bdfc1",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-marketing": {
+    "url": "https://openstax.org/books/principles-marketing/pages/1-2-the-marketing-mix-and-the-4ps-of-marketing",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "76a9a7bc407584ee1356de4c713d0f4a6ed43b4561e0e9477a9990a8153f31a0",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-merchandise": {
+    "url": "https://openstax.org/books/principles-financial-accounting/pages/6-1-compare-and-contrast-merchandising-versus-service-activities-and-transactions",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "cc75995f8ca6ea1359de84dc0f70a4b892087602b2aee2e483d2126717928c65",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-networks": {
+    "url": "https://www.rfc-editor.org/rfc/rfc1918.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6274a18cf7241f2a106dd7b937e5a729f5d3546b4df711028c6ad368618eabea",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-noli-text": {
+    "url": "https://www.gutenberg.org/cache/epub/6737/pg6737-images.html",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "827fb2381ffb8fe498314ca62af7d2d28b1ea0f0f368d84a844438f266c67a39",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-npv": {
+    "url": "https://openstax.org/books/principles-finance/pages/16-2-net-present-value-npv-method",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "184cdd65e36ffd0c3698603aff4fcd9ff64ac25a920d85a6c5d383125aec6ed0",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-optics": {
+    "url": "https://openstax.org/books/college-physics-2e/pages/25-2-the-law-of-reflection",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f794ff4e522d7be3463d17d734fcfadc96231553dd50d6fd8401b74874554434",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-percent": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/6-1-understand-percent",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a11f0db0da28205d747fc282e8c57f54f309deb4c4dc931c328bf0c1b8c72ffc",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-personal": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/LIFE-AND-CAREER-SKILLS-1.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f05a792b7c125c431e4c815fedea026c199bb761920ad144b403aabd55970370",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-philosophy": {
+    "url": "https://openstax.org/books/introduction-philosophy/pages/1-1-what-is-philosophy",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "910662260e77277735b602164b40cd7a0835d02470c0e03e0045c12897b309cb",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-poe": {
+    "url": "https://www.gutenberg.org/ebooks/2148",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "4ea9949bade26209dc552cc997dd7b5dc68343477560535d8939b9fb02bc06a6",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-polynomials": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/3-3-power-functions-and-polynomial-functions",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "44dc7b8700d5b09cbcca9b58f4fcdf4305b888a7525384cf7af6dbcb1e1ca76b",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-productivity": {
+    "url": "https://openstax.org/books/workplace-software-skills/pages/2-1-software-basics",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "43ddcb5a60ef4f8e11b35fabec3224597b6616e1950359bf25ed97781a053474",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-psych": {
+    "url": "https://openstax.org/books/psychology-2e/pages/9-3-stages-of-development",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c570bcf06110d0590744630a082ee698b30211de5c531898c42a2355f49fa2d8",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-psych-models": {
+    "url": "https://openstax.org/books/psychology-2e/pages/1-1-what-is-psychology",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "4eb5dd36ef3ab6852d810e5092a86b1536be755c9d838745cc94339c2ed0921e",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-quadratic": {
+    "url": "https://openstax.org/books/intermediate-algebra-2e/pages/9-3-solve-quadratic-equations-using-the-quadratic-formula",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fd09588c73e701f03accf64e783a4823e7ab03afece7d0596a40c9e4f2825b95",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-qualitative": {
+    "url": "https://openstax.org/books/introduction-sociology-3e/pages/2-2-research-methods",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "09a2fd50cb1af6f9dfafbb10f3d67fb958a814d320b076d60c99c0a77419180c",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-quantitative": {
+    "url": "https://openstax.org/books/introductory-statistics-2e/pages/1-2-data-sampling-and-variation-in-data-and-sampling",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "01b7ec620eb47130fc8ede0b260693a32e15c59564cd67a076f458fa09b60c96",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-research": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/Research-1.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b4f22b92c10576321609c0ddac8d448c041b9805d9a9022914218fe0c622dc5d",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-seasia": {
+    "url": "https://www.britannica.com/place/Southeast-Asia",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "d2a0159a8084cc81e179a539f6740cc04bcf03c88ecadbac7ef14d4f69d42a4e",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-security": {
+    "url": "https://openstax.org/books/workplace-software-skills/pages/1-4-safety-security-privacy-and-the-ethical-use-of-technology",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b836481ac8a2d872fb486a9b1a2ee4c74ad98c9573bfb395fb7fa5a3dfbee481",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-sequences": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/11-2-arithmetic-sequences",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ba86c48ce5d3ddd062a1050ff685ad580d3d41aa66127d430e3b4e2c5360933a",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-servers": {
+    "url": "https://csrc.nist.gov/pubs/sp/800/123/final",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "25e3be843babc889241436088d12a16da3a6526d7f77cb357641477b1f8581c6",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-siko": {
+    "url": "https://www.pssp.org.ph/wp-content/uploads/2014/11/Conference-2010.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "a308173ad7226274b7e71d52c9904c749d1c30ff0ac987843f24190a9326dab8",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-sociology": {
+    "url": "https://openstax.org/books/introduction-sociology-3e/pages/9-1-what-is-social-stratification",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "277a6c9c959680295b1798eccefc4e0d0b20956243b610270843ba6f855a94cc",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-sociotheory": {
+    "url": "https://openstax.org/books/introduction-sociology-3e/pages/1-3-theoretical-perspectives-in-sociology",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "2e41e1832abc988c796fd65b36bebce411bf874e1157142822feeae05c3b2825",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-sports": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/Sports-Officiating.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "480d688f9d1dd7e1dce24daee20f9a6e88ad2140bf0d7b3b93c19a9967246e17",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-statements": {
+    "url": "https://openstax.org/books/principles-financial-accounting/pages/2-1-describe-the-income-statement-statement-of-owners-equity-balance-sheet-and-statement-of-cash-flows-and-how-they-interrelate",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "25fe552a705af249bf8728a70206671e705ed0909feee472ba0abb51e1266ba4",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-systems": {
+    "url": "https://openstax.org/books/elementary-algebra-2e/pages/5-1-solve-systems-of-equations-by-graphing",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "aa01708ca0a8e1d9fb3b5d946529b6b4532a6650ee0968ad07e1f7a8837ed010",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-tvm": {
+    "url": "https://openstax.org/books/principles-finance/pages/7-4-applications-of-tvm-in-finance",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ea3c004a6028783b75025f538814d468687200cc3eb3416ec02b4da3056175aa",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-ve": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/9-G7-Values-Education.pdf",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e09ad05dcabe353952039506fbc3104dd9e47e472e85091025ad161e34d5820e",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-waves": {
+    "url": "https://openstax.org/books/college-physics-2e/pages/16-9-waves",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "9be82457699d45f1e8516866d694ebd68eba46697f9cbedb59d0d2580140ba87",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-web": {
+    "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Structuring_content/Basic_HTML_syntax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "13b92a640eb5b71ded5cf72ff6b51cd03c442861a49defcc591ca1c4253ad804",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-welding": {
+    "url": "https://www.osha.gov/welding-cutting-brazing",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ef4662be20e0a77a56de63fb7f48f79578a72c1aa88de70eb174fbda398bd60b",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-who-diet": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6ef5d76c3779e8f719b3f089bc73e66082ddfe38cdf43668e7a172aa8a09d2a9",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "current-worldhistory": {
+    "url": "https://openstax.org/books/world-history-volume-1/pages/3-1-early-civilizations",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e91c15d785b47addf45921c762cf8064e436b825d6421b5870672fee33d1f20c",
+    "reviewStatus": "Human academic review pending",
+    "researchUse": "Original item authoring from retrieved learning material; no copied examination bank."
+  },
+  "decimal": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/5-2-decimal-operations",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "7c40c980328247f707d512300ef8a907636e7b721f83a483c66746546a7d6be1",
+    "topics": [
+      "Fractions & Decimals"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "divide": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/1-5-divide-whole-numbers",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f174c747792eecdc590c32c511515fa7973cc6a6fc2b34f5d28b2c1fb50245cd",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "earth": {
+    "url": "https://www.usgs.gov/programs/earthquake-hazards/science-earthquakes",
+    "publisher": "USGS",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "d335e86349b3b49fb5411773f99674953936c7582d57aca3dac9df58ae8666ea",
+    "topics": [
+      "Earth & Space Science"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "ecology": {
+    "url": "https://openstax.org/books/biology-2e/pages/46-1-ecology-of-ecosystems",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "201d6cd9f3b11850f8d4d089514031629b1e39a686f16c3efdf1f167c35c2e8b",
+    "topics": [
+      "Ecosystems & the Environment"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "economics": {
+    "url": "https://openstax.org/books/principles-economics-3e/pages/3-1-demand-supply-and-equilibrium-in-markets-for-goods-and-services",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "8353b360b446a7f34f5369805d9b2845e02c605c6d2d04fb3e7dbbe4b4a4cbc1",
+    "topics": [
+      "Ekonomiks",
+      "Entrepreneurship"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "energy": {
+    "url": "https://openstax.org/books/physics/pages/9-2-mechanical-energy-and-conservation-of-energy",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e0e95cb83aba4080d0c39b97d2525247596ee81361f12ac5c04bfce49a1b7689",
+    "topics": [
+      "Force, Motion & Energy"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "english": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/2019/01/English-CG.pdf",
+    "publisher": "DepEd",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fb73f2b1dee7ec4ce14f669097ec793e8119585830b4a7fb534102dd26ab1772",
+    "topics": [
+      "Grammar & Sentence Structure",
+      "Reading Comprehension",
+      "Vocabulary Building",
+      "Essay & Paragraph Writing",
+      "Literature Analysis",
+      "Research Writing"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "equations": {
+    "url": "https://openstax.org/books/elementary-algebra-2e/pages/2-3-solve-equations-with-variables-and-constants-on-both-sides",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "4bd9561992f318cd4dc551873fb5c91bbd79a82502f196e8783775adaeaedde5",
+    "topics": [
+      "Linear Equations & Inequalities"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "filipino": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/2019/01/Filipino-CG.pdf",
+    "publisher": "DepEd",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "1900c7dcb8a593d848e0a95b00807370f0f975dc6c326303280b234e317b64df",
+    "topics": [
+      "Balarila (Gramatika)",
+      "Pagbasa at Pag-unawa",
+      "Panitikang Pilipino",
+      "Pagsulat ng Sanaysay",
+      "Pagsasalin",
+      "Retorika at Pampublikong Pagsasalita"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "fish": {
+    "url": "https://www.fao.org/fishery/static/FAO_Training/FAO_Training/General/x6709e/x6709e02.htm",
+    "publisher": "Food and Agriculture Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "eeed63c0a6d11dbdfeb4810f5fc61c77a7e8db8009ad936e3773267b0568def5",
+    "topics": [
+      "Agri-Fishery Arts"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "food": {
+    "url": "https://www.who.int/publications/i/item/9789241594639",
+    "publisher": "World Health Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "4283ffa42a180d7c1e3f45c8587162b3808bd614376cc74bafd55dfea443e90b",
+    "topics": [
+      "Home Economics"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "foodpractice": {
+    "url": "https://www.who.int/activities/promoting-safe-food-handling/five-key-to-safer-food",
+    "publisher": "World Health Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6ef63559cc3f592101549d703a19027457cd8215ef0abd14cd935a23e74f8461",
+    "topics": [
+      "Home Economics",
+      "Health Education"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "fraction": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/4-2-multiply-and-divide-fractions",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "917c495b14a481a519484785718416c44e623213573323920cf010454189c510",
+    "topics": [
+      "Fractions & Decimals"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "functions": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/1-1-functions-and-function-notation",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0fadc9b3c1405d523c034246ec4949c139c65be197552247af3c58e23224322a",
+    "topics": [
+      "Functions & Graphing"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "genetics": {
+    "url": "https://openstax.org/books/biology-2e/pages/12-1-mendels-experiments-and-the-laws-of-probability",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "eaffb8274d57dbc85d0af6ce39cd372348db27e2492716d2013298097f920f95",
+    "topics": [
+      "Cell Biology & Genetics"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "geography": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/ARALING-PANLIPUNAN-GRADES-4-7.pdf",
+    "publisher": "DepEd",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b449b13a02135517d17ac8218057851dd56ccc62fd5c377f6167f27c208a0856",
+    "topics": [
+      "Heograpiya"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "geometry": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/9-4-use-properties-of-rectangles-triangles-and-trapezoids",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "07232ebde0c36931d0454dde9786385ca3a8bf4d7f529a034462c5d4fe753aba",
+    "topics": [
+      "Geometry & Measurement"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "grammar": {
+    "url": "https://owl.purdue.edu/owl/general_writing/grammar/subject_verb_agreement.html",
+    "publisher": "Purdue University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "bdc3224fb64ce48f6447721b289af6c4e1054811969b7c957f976c0a8d57a73a",
+    "topics": [
+      "Grammar & Sentence Structure"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "health": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/healthy-diet",
+    "publisher": "World Health Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6ef5d76c3779e8f719b3f089bc73e66082ddfe38cdf43668e7a172aa8a09d2a9",
+    "topics": [
+      "Health Education"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "history": {
+    "url": "https://history.house.gov/Exhibitions-and-Publications/APA/Historical-essays/Exclusion-and-Empire/The-Philippines/",
+    "publisher": "US House of Representatives",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "84a0ae1a4c046596e53743a6aa2879c61f2262494556d3dc00124e4c1660b059",
+    "topics": [
+      "Kasaysayan ng Pilipinas"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "historyph": {
+    "url": "https://pvao.gov.ph/wp-content/uploads/2018/02/Philippine-History.pdf",
+    "publisher": "Philippine Veterans Affairs Office",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "49f6bdaa8ba2a4bafd0786d23537927726d0b9e58820027e77886ca6cff6ee8b",
+    "topics": [
+      "Kasaysayan ng Pilipinas"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "homeostasis": {
+    "url": "https://openstax.org/books/anatomy-and-physiology-2e/pages/1-5-homeostasis",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0af666d55f507e9f402caf2d4be006496cc93e78eddd99245c46e514a24a035c",
+    "topics": [
+      "Human Body Systems"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "ict": {
+    "url": "https://openstax.org/books/workplace-software-skills/pages/1-2-computer-hardware-and-networks",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "da9aec27bc979fdcf9369556beccb726a39a9adc9f4cb276fb8a79b5b87c6aa4",
+    "topics": [
+      "Computer Basics & ICT"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "ictsecurity": {
+    "url": "https://openstax.org/books/workplace-software-skills/pages/1-4-safety-security-privacy-and-the-ethical-use-of-technology",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b836481ac8a2d872fb486a9b1a2ee4c74ad98c9573bfb395fb7fa5a3dfbee481",
+    "topics": [
+      "Computer Basics & ICT"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "inequalities": {
+    "url": "https://openstax.org/books/elementary-algebra-2e/pages/2-7-solve-linear-inequalities",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "1130290116ff1b3caf628ea5ccacd5f4b4fd04c76eb811ec49f5e58f9953f527",
+    "topics": [
+      "Linear Equations & Inequalities"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "meiosis": {
+    "url": "https://openstax.org/books/biology-2e/pages/11-1-the-process-of-meiosis",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ce16aa0bc006df8806a8efc80130727aa06b46db68cb8d7c2a22aa5ff691ccaa",
+    "topics": [
+      "Cell Biology & Genetics"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "multiply": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/1-4-multiply-whole-numbers",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "27123a21cb5c2884caf0c29a0a104ad72507dd2abf505f5f1de46edc7a7fc450",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "music": {
+    "url": "https://viva.pressbooks.pub/openmusictheory/chapter/notation-of-notes-clefs-and-ledger-lines/",
+    "publisher": "Open Music Theory / VIVA",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "b68b93e2830859dddcbdbf0d5a1a273c91c5fb2fc3a5878e07dfd7d656f5983b",
+    "topics": [
+      "Music Theory & Appreciation"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "musicdynamics": {
+    "url": "https://viva.pressbooks.pub/openmusictheory/chapter/other-aspects-of-notation/",
+    "publisher": "Open Music Theory / VIVA",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "98e090f3031b2d953d6ee89ad1c1ff6522403c8920e0da4077502208a0295c2c",
+    "topics": [
+      "Music Theory & Appreciation"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "musicrhythm": {
+    "url": "https://viva.pressbooks.pub/openmusictheory/chapter/notating-rhythm/",
+    "publisher": "Open Music Theory / VIVA",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "38d5ca1b333962354f857a39f9fb98ff74d2eeee921770187a7a68a1bb7f41d1",
+    "topics": [
+      "Music Theory & Appreciation"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "musictexture": {
+    "url": "https://viva.pressbooks.pub/openmusictheory/chapter/texture/",
+    "publisher": "Open Music Theory / VIVA",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "0a5799e8e0bfea7c66c9f304da1f7f58bd48f32ea14e57a38ba81c4a0ae3f8ee",
+    "topics": [
+      "Music Theory & Appreciation"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "order": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/2-1-use-the-language-of-algebra",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "498e2a6b09750609d1ce8cc1d6bcb14dd17a814a52692c5fe0f8f5e4c54067eb",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "pe": {
+    "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+    "publisher": "World Health Organization",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "e6c54c42a6444faecb92db9c0c3fb9e052484f0b163a0af851f9f9d7348b8be5",
+    "topics": [
+      "Physical Education & Sports",
+      "Health Education"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "physics": {
+    "url": "https://openstax.org/books/physics/pages/4-3-newtons-second-law-of-motion",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c953c9654f2a4decbfb34cd1ae750d842b45e52f0d76bd48f16669743a708298",
+    "topics": [
+      "Force, Motion & Energy"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "probability": {
+    "url": "https://openstax.org/books/introductory-statistics-2e/pages/3-1-terminology",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "6428739612ee09154bcfe2083f4cdadae1b60a2eedf5cb569d19388b618c9234",
+    "topics": [
+      "Statistics & Probability"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "reactions": {
+    "url": "https://openstax.org/books/chemistry-2e/pages/4-1-writing-and-balancing-chemical-equations",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "915711677e5d3b6a7790b06b7730e07ed1684b7ce825767c488ab1951ca737fb",
+    "topics": [
+      "Chemical Reactions & Matter"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "research": {
+    "url": "https://owl.purdue.edu/owl/research_and_citation/conducting_research/evaluating_sources_of_information/general_guidelines.html",
+    "publisher": "Purdue University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "388f76167527773357363ada138788c245e4e77d5db205faf4503529c1b26113",
+    "topics": [
+      "Research Writing"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "rocks": {
+    "url": "https://www.nps.gov/subjects/geology/rocks-and-minerals.htm",
+    "publisher": "National Park Service",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "ba58eef6efd30bd4e63c90472e9dbbe4e42087654c57318277ced14a6b040210",
+    "topics": [
+      "Earth & Space Science"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "science": {
+    "url": "https://openstax.org/books/biology-2e/pages/1-1-the-science-of-biology",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "47eb19d5e191ddf2b745e182c6d171158c741dbb5f43d8b13f2ba39d76802f13",
+    "topics": [
+      "Scientific Method & Inquiry"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "sdg2026": {
+    "url": "https://unstats.un.org/sdgs/report/2026/",
+    "publisher": "United Nations Statistics Division",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "19f9a2600ac1d3a56cba3e70a21b369288784c6df5b3f359027864697cb6259d",
+    "topics": [
+      "Kasalukuyang Pangyayari (Current Events)"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "speech": {
+    "url": "https://open.lib.umn.edu/commpractice/chapter/the-introduction/",
+    "publisher": "University of Minnesota Libraries",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "73b4783d35865ed414a95f8dbcb2fb033483d7efa5e670dc6e4d60d02996e670",
+    "topics": [
+      "Public Speaking & Oral Communication",
+      "Retorika at Pampublikong Pagsasalita"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "statistics": {
+    "url": "https://openstax.org/books/introductory-statistics-2e/pages/2-5-measures-of-the-center-of-the-data",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "7bcf8c8159bdf1c4df347ba204fefccc5712e360b71bebdf06e5d17e82508679",
+    "topics": [
+      "Statistics & Probability"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "subtract": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/1-3-subtract-whole-numbers",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fa64b4725d7e6befb64002a8958289480b708127f0235fd8e547aebc2f1673e4",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "tle": {
+    "url": "https://www.deped.gov.ph/wp-content/uploads/2019/01/EPP-CG.pdf",
+    "publisher": "DepEd",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "c42350338e48efb8a19d08af8a03e4654d386d0753092201b80b9e585daf6c29",
+    "topics": [
+      "Computer Basics & ICT",
+      "Home Economics",
+      "Agri-Fishery Arts",
+      "Industrial Arts"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "tools": {
+    "url": "https://www.osha.gov/hand-power-tools",
+    "publisher": "Occupational Safety and Health Administration",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "2524a9a4f0d5e44b5d7ce12581c7fae0b35f13662b2ccf25338e236ba9ae33d7",
+    "topics": [
+      "Industrial Arts"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "trig": {
+    "url": "https://openstax.org/books/precalculus-2e/pages/5-4-right-triangle-trigonometry",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "617b8c68dcd3fcac376bc732b3dff13ec12be910d3f7a82b05226fe9c5f55b05",
+    "topics": [
+      "Trigonometry"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "volume": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/9-6-solve-geometry-applications-volume-and-surface-area",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "9fe93125c599f9f49fd2fb74637f649bcaf48721b23394724b751914992d5e49",
+    "topics": [
+      "Geometry & Measurement"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "watercycle": {
+    "url": "https://www.usgs.gov/water-science-school/water-cycle",
+    "publisher": "USGS",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "fb64a4aa66db842cee808bb8ef020e1ff36c5b005b30c908532ab07f006b4628",
+    "topics": [
+      "Earth & Space Science"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "whole": {
+    "url": "https://openstax.org/books/prealgebra-2e/pages/1-1-introduction-to-whole-numbers",
+    "publisher": "OpenStax, Rice University",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "303a7bf9ad0515330782df71b5cc588466a06129c95667c25a21d8747a96bb09",
+    "topics": [
+      "Whole Numbers & Operations"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "workshopsafety": {
+    "url": "https://www.osha.gov/sites/default/files/publications/OSHA3080.pdf",
+    "publisher": "Occupational Safety and Health Administration",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "f1cfa8f10e7603d0ffebf6548dd9d65ca9067c380f3643bdb9b0b964be0c1ae0",
+    "topics": [
+      "Industrial Arts"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  },
+  "writing": {
+    "url": "https://openstax.org/books/writing-guide/pages/9-1-breaking-the-whole-into-its-parts",
+    "publisher": "OpenStax",
+    "retrievedDate": "2026-11-08",
+    "retrievedSourceSha256": "5b0ba9357c1b9b77fcc0fd037f7eba6d006c8ecd1cbbf8b8d02345ff4385c034",
+    "topics": [
+      "Essay & Paragraph Writing",
+      "Public Speaking & Oral Communication",
+      "Retorika at Pampublikong Pagsasalita"
+    ],
+    "reviewStatus": "Human academic approval pending",
+    "researchUse": "Learning content and curriculum scope informed original authored questions; sources are not copied question banks."
+  }
+}

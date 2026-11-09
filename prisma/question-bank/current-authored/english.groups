@@ -1,0 +1,260 @@
+## Critical Reading
+@ Verifiable factual claim | Value judgment | Unsupported generalization | Qualified inference
+Classify 'The meeting began at 9:00 according to its recording.'|0|A recording can establish the time.
+Classify 'This is the most beautiful school building.'|1|Beauty involves evaluative criteria.
+Classify 'Two pupils disliked the meal, so every pupil disliked it.'|2|The conclusion exceeds the evidence.
+Classify 'These observations suggest a possible association.'|3|The claim states a limited inference.
+@ Author expertise | Publication currency | Evidence quality | Conflict of interest
+A specialist explains a topic within their training. Which credibility factor is relevant?|0|Relevant expertise supports competence.
+A technology guide describes an obsolete software version. Which factor needs attention?|1|The information may be outdated.
+A report's conclusion rests on poorly measured data. Which weakness is central?|2|The support itself is unreliable.
+A reviewer's income depends on sales of the product reviewed. Which issue is relevant?|3|Financial incentives may influence presentation.
+@ Cause and effect | Comparison | Problem and solution | Chronological account
+A passage explains how blocked drains produce street flooding. Identify its organizing relation.|0|It connects a condition with an outcome.
+A passage evaluates rail and bus travel using shared criteria. Identify its structure.|1|It compares alternatives.
+A passage describes food waste and proposes inventory controls. Identify its structure.|2|A response addresses a stated problem.
+A passage traces a town's development from 1900 onward. Identify its structure.|3|Events are ordered by time.
+@ Selective evidence | Misleading denominator | Unrepresentative sample | False certainty
+A summary includes only favorable trials although several failed. What weakens it?|0|Contrary evidence was excluded.
+A headline says cases doubled but omits the original count. What context is missing?|1|Relative change needs its numerical base.
+A citywide claim relies solely on club members. What problem matters?|2|The sample may not reflect the wider population.
+A source says a treatment may help; a summary says it always cures. What changed?|3|Possibility was inflated into certainty.
+@ Examine alternative explanations | Locate the original source | Preserve the author's qualification | Distinguish disagreement from unreliability
+Higher grades follow both tutoring and a revised test. What is needed before assigning one cause?|0|Several changes could explain the result.
+Three sites repeat one quotation without attribution. What is the best next step?|1|Repetition may trace to one mistaken source.
+A study applies only to adults. What must a school summary retain?|2|Its population limit affects applicability.
+Two experts disagree using different datasets. What should readers do first?|3|Methodological differences need evaluation before dismissal.
+## Informational & Expository Texts
+@ Definition | Classification | Process explanation | Description
+A text explains what a renewable resource means. Identify its main method.|0|It establishes a term's meaning.
+A text sorts rocks into igneous, sedimentary and metamorphic groups. Identify the method.|1|It groups examples by shared characteristics.
+A text explains the stages of water treatment. Identify the method.|2|It describes how a process works.
+A text lists a wetland's visible features. Identify the method.|3|It presents characteristics.
+@ Heading | Caption | Glossary | Index
+Which feature labels a section's focus?|0|A heading organizes the text.
+Which feature explains an accompanying photograph?|1|A caption relates information to an image.
+Which feature gives specialized word meanings?|2|A glossary defines terms.
+Which feature helps locate topics by page?|3|An index points to locations.
+@ Main idea | Supporting detail | Example | Transition
+'A wetland reduces flood peaks' controls the paragraph. What role does it have?|0|It states the paragraph's focus.
+A measured storage volume backs that claim. What role does it have?|1|It supplies evidence for the focus.
+A named restored marsh illustrates the general point. What role does it have?|2|A specific instance illustrates a broader idea.
+'In contrast' connects two sections. What role does it have?|3|It signals their relationship.
+@ Read the unit labels | Check the time period | Identify the population | Compare equivalent quantities
+A table's values could be grams or kilograms. What must be checked?|0|Units determine scale and meaning.
+Two rainfall charts summarize different years. What must be checked?|1|Their observation periods differ.
+An article says '40% agreed.' What context is essential?|2|Readers need to know who was counted.
+Packages contain different masses. How should their prices be compared?|3|Unit prices put them on a common basis.
+@ Explain assumptions | Separate mechanism from recommendation | Integrate text and graphic evidence | State limitations
+A report predicts costs using constant fuel prices. What must its explanation include?|0|The prediction depends on that condition.
+A text explains pollution formation, then urges a policy. What distinction should readers preserve?|1|Description and advocacy serve different functions.
+A chart appears to contradict the paragraph. What is the strongest reading strategy?|2|Both representations must be checked together.
+A survey excludes rural areas. What belongs in its informational summary?|3|Coverage limits constrain generalization.
+## Philippine Literature
+@ Local setting | Characterization | Conflict | Theme
+A story opens beside a Philippine coastal fish market. What is primarily established?|0|The detail situates the narrative.
+A vendor shares food despite low earnings. What does the action develop?|1|Actions reveal a character's values.
+A student must choose between duty and personal ambition. What narrative element appears?|2|Competing commitments create a struggle.
+Repeated acts of solidarity suggest a broader idea. What element is inferred?|3|Theme emerges across events.
+@ Jose Rizal | Francisco Balagtas | Anonymous tradition | Translator
+Who authored Noli Me Tangere?|0|Rizal wrote the novel.
+Who authored Florante at Laura?|1|Balagtas composed the awit.
+How is authorship commonly identified for Ibong Adarna?|2|It is traditionally attributed anonymously.
+Who renders a work into another language?|3|Translation mediates between languages.
+@ Social criticism | Oral transmission | Regional voice | Cultural context
+A colonial-era novel exposes abuses through fictional events. What function is emphasized?|0|Narrative can examine social power.
+A tale is retold by community storytellers. Which literary process is emphasized?|1|Stories circulate through speech.
+A text uses a particular locality's speech and experience. What is foregrounded?|2|Language and place shape narrative voice.
+A custom's meaning is unclear to an outsider. What aids interpretation?|3|Historical and social background informs meaning.
+@ Textual evidence | Perspective | Symbolism | Translation choices
+Which supports an interpretation of a Philippine story's ending?|0|Specific details justify interpretation.
+A rural narrator and urban visitor describe the same fiesta differently. What should be compared?|1|Their positions shape what they notice.
+A recurring boat connects departure and return. What device may be analyzed?|2|A concrete object can carry layered meaning.
+Two English versions render a Filipino honorific differently. What should be examined?|3|Language choices can change social nuance.
+@ Avoid treating one character as an entire people | Separate author from narrator | Examine historical conditions | Retain linguistic nuance
+A story depicts one dishonest official. What limit should an analysis respect?|0|A fictional individual does not represent everyone.
+A narrator endorses an injustice that the plot exposes. What distinction matters?|1|Narrative voice need not equal authorial approval.
+A novel challenges colonial authority. What strengthens analysis beyond plot summary?|2|Its institutions and period inform the critique.
+A translation removes every kinship term. What might be lost?|3|Kinship language can convey relationships and respect.
+## Afro-Asian Literature
+@ Rabindranath Tagore | Gitanjali | Haiku | Oral proverb
+Which Indian writer created Gitanjali?|0|Tagore wrote the collection.
+Which title names Tagore's collection of devotional poems?|1|Gitanjali is that collection.
+Which poetic form is strongly associated with Japan?|2|Haiku developed in Japanese literary tradition.
+Which concise traditional expression conveys communal wisdom?|3|A proverb condenses an observation or lesson.
+@ Imagery | Repetition | Symbolism | Address to a listener
+A poem evokes sunlight on river water. What device appeals to the senses?|0|Sensory details create imagery.
+A spoken tale repeats a key phrase after each episode. What device is used?|1|Repetition reinforces pattern and memory.
+A journey represents moral or spiritual growth. What device is involved?|2|The journey carries a meaning beyond travel.
+A poem speaks directly to a divine presence. What communicative stance appears?|3|The voice addresses an implied hearer.
+@ Community context | Translation context | Genre convention | Speaker's perspective
+Why examine how a proverb is used in a community?|0|Occasion and relationships affect its force.
+Why compare versions of a poem originally in another language?|1|Wording choices affect meaning and tone.
+Why read a traditional epic differently from a laboratory report?|2|Literary forms establish different expectations.
+Why distinguish a poem's voice from every member of its culture?|3|A speaker expresses a particular position.
+@ Human–nature relationship | Hospitality | Duty and desire | Transience
+A short poem centers on a seasonal change in a pond. Which thematic focus is most plausible?|0|The scene connects human attention with nature.
+A tale tests whether strangers are welcomed. Which theme fits?|1|Reception of guests is central.
+A hero struggles between an obligation and personal longing. Which theme fits?|2|The commitments pull in different directions.
+Falling blossoms repeatedly mark passing time. Which theme fits?|3|The image can suggest impermanence.
+@ Avoid cultural generalization | Support comparison with details | Recognize multiple valid contexts | Preserve ambiguity where supported
+Why cannot one African folktale establish every African community's values?|0|The continent contains diverse traditions.
+Two Asian poems treat departure differently. What makes their comparison convincing?|1|Specific images and voices support the contrast.
+A translated proverb seems contradictory outside its original setting. What should be done?|2|Its social use may clarify the apparent conflict.
+A poem sustains both spiritual and personal readings. What is responsible analysis?|3|Interpretation should match the available evidence.
+## Anglo-American Literature
+@ William Shakespeare | Edgar Allan Poe | Drama | Short story
+Who authored Hamlet?|0|Shakespeare wrote the play.
+Who authored The Tell-Tale Heart?|1|Poe wrote the story.
+Which genre presents action through performance and dialogue?|2|Drama is written for enactment.
+Which genre typically develops a concentrated prose narrative?|3|A short story has limited narrative scope.
+@ Soliloquy | Unreliable narrator | Tragedy | Suspense
+A character speaks private thoughts while alone on stage. What is this?|0|A soliloquy reveals inward thought.
+A storyteller's claims conflict with their own account. What should be considered?|1|The narration may be untrustworthy.
+A drama centers on grave conflict ending in catastrophe. Which genre fits?|2|Tragedy explores serious destructive conflict.
+A reader anticipates a threatened revelation. What effect is created?|3|Uncertainty and expectation create suspense.
+@ Motive | Point of view | Setting | Irony
+Why examine Hamlet's reasons for delaying action?|0|Motivation helps explain choices.
+Why does first-person narration limit access to other minds?|1|Events pass through one speaker's account.
+What is established by a castle's time and location?|2|These details define the dramatic environment.
+A narrator insists on perfect calm while describing panic. What contrast should be analyzed?|3|The account undercuts its own claim.
+@ Sound imagery | Internal conflict | Evidence from actions | Dramatic structure
+A story emphasizes an increasingly oppressive heartbeat. Which technique is prominent?|0|Auditory detail shapes the atmosphere.
+A character debates incompatible courses of action. What conflict is present?|1|The struggle occurs within the character.
+How can a claim about a character's honesty be tested?|2|Conduct can support or challenge self-description.
+How does a late revelation reshape an earlier scene's function?|3|Placement affects the audience's understanding.
+@ Do not diagnose a real author from a fictional voice | Distinguish historical context from endorsement | Evaluate competing readings | Preserve the narrator's limited knowledge
+Why is a fictional narrator's disturbance insufficient to establish the author's mental state?|0|Creator and narrative persona are distinct.
+A play portrays an unequal social order. What distinction should criticism retain?|1|Representation is not necessarily approval.
+Two interpretations of a character's hesitation are proposed. How should they be judged?|2|Compare their textual support.
+A first-person storyteller guesses another character's motive. What qualification is needed?|3|The guess is not direct access to another mind.
+## Argumentative Writing
+@ Claim | Evidence | Reasoning | Counterclaim
+What states the position an argument defends?|0|A claim asserts the position.
+What supplies relevant observations or credible findings?|1|Evidence supports the position.
+What explains why findings support the position?|2|Reasoning connects evidence and claim.
+What presents an opposing position?|3|A counterclaim challenges the argument.
+@ Logos | Ethos | Pathos | Concession
+An argument uses coherent calculations. Which appeal dominates?|0|Logos appeals to reason.
+A writer establishes relevant expertise. Which appeal is strengthened?|1|Ethos concerns credibility.
+A speech invokes compassion through a relevant personal account. Which appeal appears?|2|Pathos engages emotion.
+A writer acknowledges a valid objection before responding. What move is this?|3|Concession recognizes part of another position.
+@ Hasty generalization | False dilemma | Ad hominem | Straw man
+One unhappy customer is used to condemn all businesses in an industry. Identify the flaw.|0|The sample cannot support the scope.
+An argument allows only two choices while ignoring other feasible options. Identify the flaw.|1|The alternatives are artificially restricted.
+A speaker attacks an opponent's appearance rather than their evidence. Identify the flaw.|2|The personal attack does not answer the argument.
+A moderate proposal is distorted into an extreme claim before rebuttal. Identify the flaw.|3|The opponent's position is misrepresented.
+@ Narrow the claim | Add relevant evidence | Explain the inferential link | Answer the strongest objection
+A conclusion applies worldwide but observations cover one town. What revision is needed?|0|Scope should match the evidence.
+A thesis rests only on assertion. What is missing?|1|Support must be supplied.
+A paragraph lists statistics without interpreting them. What is needed?|2|Numbers need a connection to the thesis.
+An argument ignores a documented cost of its proposal. What strengthens it?|3|A serious objection merits engagement.
+@ Correlation alone does not establish causation | Relevant expertise matters | A qualified conclusion can be stronger | Emotional relevance does not replace factual support
+A policy and an outcome change together. What caution applies?|0|Alternative causes may account for the association.
+A famous athlete makes a specialized engineering claim. What credibility test applies?|1|Fame is not engineering expertise.
+Why might 'often under these conditions' be more defensible than 'always'?|2|The qualification can reflect evidence accurately.
+An argument moves listeners deeply but offers no evidence for its factual claim. What remains unresolved?|3|Persuasion still needs support for factual premises.
+## Speech Writing & Public Speaking
+@ General purpose | Specific purpose | Central idea | Audience analysis
+Deciding whether to inform or persuade establishes what?|0|General purpose sets the broad aim.
+Stating exactly what listeners should understand by the end establishes what?|1|Specific purpose defines a focused outcome.
+Condensing the speech's main message into one sentence produces what?|2|The central idea unifies the talk.
+Investigating listeners' knowledge and interests is what?|3|Audience analysis guides adaptation.
+@ Attention getter | Preview | Transition | Summary
+An opening relevant question draws listeners in. What role does it serve?|0|It attracts attention to the topic.
+A sentence announces the speech's three main points. What role does it serve?|1|A preview establishes the route.
+A sentence links the completed point to the next point. What role does it serve?|2|A transition marks a connection.
+A closing briefly restates the developed points. What role does it serve?|3|A summary reinforces the structure.
+@ Chronological order | Spatial order | Topical order | Problem–solution order
+A speech follows a device's development across decades. Which structure fits?|0|Time determines the sequence.
+A tour describes locations from the entrance to the rear. Which structure fits?|1|Physical location determines the sequence.
+A talk groups study strategies by distinct categories. Which structure fits?|2|Categories organize the content.
+A talk describes unsafe crossings and proposes improvements. Which structure fits?|3|The response addresses a defined problem.
+@ Signposting | Source attribution | Oral style | Timed rehearsal
+'First, consider the evidence' performs what function?|0|It marks the listener's progress through the argument.
+'According to the transport agency's 2026 report' provides what?|1|It identifies the source of a claim.
+Shorter speakable clauses adapted for listeners illustrate what?|2|Spoken language must be processed in real time.
+Practicing with a clock primarily checks what?|3|Rehearsal tests duration and pacing.
+@ Remove unsupported claims | Prioritize essential points | Adapt examples without distorting facts | Replace the weak inference
+A dramatic opening statistic cannot be traced to a source. What should happen?|0|An unverifiable factual claim should not anchor the speech.
+A six-minute talk has twelve fully developed main points. What is the best revision?|1|The available time requires focus.
+A technical talk must reach beginners. What change is justified?|2|Accessibility should preserve accuracy.
+A conclusion urges an action that the body never supports. What is needed?|3|The ending must follow from the argument.
+## Academic & Professional Writing
+@ Formal register | Objective wording | Hedging | Precision
+A report uses professional vocabulary appropriate to its audience. What quality is shown?|0|Register fits the communicative setting.
+A description reports observations without personal insults. What quality is shown?|1|Objective wording focuses on evidence.
+'The results may indicate' uses which academic strategy?|2|Hedging signals appropriate uncertainty.
+A report specifies 35 mL rather than 'some liquid.' What improves?|3|Precision makes the quantity explicit.
+@ Abstract | Introduction | Methods | Conclusion
+Which section concisely summarizes a study's purpose, approach and main findings?|0|An abstract presents the work in miniature.
+Which section establishes the problem and rationale?|1|The introduction frames the investigation.
+Which section explains how evidence was gathered?|2|Methods make procedures transparent.
+Which section synthesizes the implications within the evidence's limits?|3|The conclusion draws together the findings.
+@ Summary | Paraphrase | Direct quotation | Synthesis
+Condensing a long source to its central points is what?|0|A summary reduces detail while preserving the main ideas.
+Restating a source's point in new wording with acknowledgment is what?|1|A paraphrase preserves meaning.
+Reproducing exact wording with appropriate marking and attribution is what?|2|A quotation retains the source's words.
+Combining evidence from several sources into an integrated discussion is what?|3|Synthesis explains relationships across sources.
+@ Memo | Technical report | Proposal | Executive summary
+Which document normally conveys a focused internal workplace message?|0|A memo addresses an internal purpose and audience.
+Which document explains technical procedures or findings systematically?|1|A technical report supplies organized detail.
+Which document seeks support for a planned course of action?|2|A proposal justifies future work.
+Which condensed document helps decision-makers grasp a longer report's essentials?|3|An executive summary supports rapid informed review.
+@ Limit the scope of the conclusion | Keep cited meaning intact | Declare relevant limitations | Revise for the intended decision
+A study of one class claims a universal educational law. What correction is needed?|0|The evidence does not justify universality.
+A quotation omits a phrase that reverses the source's meaning. What principle was violated?|1|Omission must not distort a source.
+A report lacks measurements from several locations. What should be disclosed?|2|Missing coverage affects interpretation.
+A document is accurate but does not answer the client's question. What revision matters most?|3|Professional writing must meet its actual purpose.
+## Professional Correspondence
+@ Subject line | Salutation | Body | Complimentary close
+Which email feature briefly identifies the message's purpose?|0|The subject helps recipients triage messages.
+Which element appropriately addresses the recipient?|1|A salutation opens the correspondence.
+Which section develops the request or information?|2|The body carries the message.
+Which element politely ends a formal letter?|3|The closing precedes the signature.
+@ Request letter | Application letter | Complaint letter | Acknowledgment
+A writer asks permission to use a venue. Identify the document.|0|It requests a specific authorization.
+A candidate explains suitability for a position. Identify the document.|1|An application presents relevant qualifications.
+A customer reports a documented service problem and asks for a remedy. Identify the document.|2|A complaint seeks a reasonable response.
+A recipient confirms that documents arrived. Identify the response.|3|Acknowledgment confirms receipt.
+@ State the action clearly | Include a reasonable deadline | Attach the referenced file | Verify recipients
+'Please send the revised timetable' improves what?|0|The requested action is explicit.
+'Please reply by Friday afternoon' adds what?|1|The recipient knows the response time.
+An email says 'See the attached form.' What must be checked?|2|The promised attachment must be present.
+Before sharing confidential records, which check is essential?|3|Misaddressing can disclose sensitive information.
+@ Courteous specificity | Relevant concision | Accurate contact details | Documented follow-up
+Which improves 'Fix this awful service now' in a formal complaint?|0|Describe the problem and remedy respectfully.
+Which quality removes unrelated personal history from a short business request?|1|Only necessary context should remain.
+Which helps the recipient respond through the correct channel?|2|Working contact information enables action.
+Which preserves a clear record of an unresolved request?|3|A dated follow-up links the correspondence.
+@ Limit unnecessary personal data | Match tone to relationship and purpose | Correct the record promptly | Preserve meaning when forwarding
+A draft includes private data unrelated to its request. What should be done?|0|Only necessary sensitive information should be shared.
+Why should a job application differ in tone from a casual group chat?|1|Its audience and purpose are different.
+A sent message gives the wrong meeting date. What is the responsible next step?|2|An explicit correction prevents further confusion.
+A forwarded excerpt removes the original writer's conditions. What is needed?|3|Context must not be distorted.
+## Creative Writing
+@ Character | Setting | Plot | Theme
+Which element is developed by a protagonist's motives and choices?|0|These details characterize a participant.
+Which element locates a scene's time and place?|1|Setting establishes its environment.
+Which element organizes connected narrative events?|2|Plot shapes their sequence and relationships.
+Which element is a work's explored underlying idea?|3|Theme concerns its larger significance.
+@ First person | Second person | Third-person limited | Third-person omniscient
+A narrator tells their own experience using I. Which viewpoint?|0|The speaker participates in the narrative.
+A narrative addresses the main figure as you. Which viewpoint?|1|Second person directly addresses a participant.
+A narrator uses she but enters only one character's mind. Which viewpoint?|2|Access is limited to that consciousness.
+A narrator presents several characters' private thoughts. Which viewpoint?|3|Omniscient narration can range across minds.
+@ Sensory imagery | Dialogue | Metaphor | Concrete detail
+'Damp earth smelled sharp after the rain' emphasizes what?|0|The wording evokes sensory experience.
+Characters exchange spoken lines. Which technique is used?|1|Dialogue presents speech.
+'Her hope was a small lamp' uses what?|2|The comparison is direct rather than literal.
+'A chipped blue mug' replaces 'an object.' What has improved?|3|Specific description makes the object imaginable.
+@ Exposition | Rising action | Climax | Resolution
+Background information establishes a story's situation. What is this?|0|Exposition introduces necessary context.
+Complications intensify the central struggle. What stage is this?|1|Rising action develops tension.
+A decisive confrontation turns the struggle. What stage is this?|2|The climax concentrates the turning conflict.
+The aftermath shows consequences and remaining conditions. What stage is this?|3|Resolution follows the decisive events.
+@ Reveal through action | Maintain viewpoint consistency | Remove an unearned coincidence | Use selective implication
+A draft labels a character generous but shows no behavior. What revision helps?|0|Actions can make the quality credible.
+A limited narrator suddenly states everyone's hidden thoughts without transition. What needs review?|1|The narrative's access has changed without explanation.
+A central problem vanishes through an unexplained lucky event. What should be revised?|2|Resolution should arise credibly from the narrative.
+A scene explains every feeling several times after already showing it. What may strengthen it?|3|Readers can infer from well-chosen details.
