@@ -9,7 +9,7 @@ export default function LearnerUpdates() {
   const params = useSearchParams();
   const view = params.get("view") === "reports" ? "reports" : "notifications";
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col gap-5">
       <div role="tablist" aria-label="Notifications" className="tabs tabs-box w-fit">
         <button role="tab" type="button" aria-selected={view === "notifications"} className={`tab ${view === "notifications" ? "tab-active" : ""}`} onClick={() => router.push("/learner/notifications")}>Notifications</button>
         <button role="tab" type="button" aria-selected={view === "reports"} className={`tab ${view === "reports" ? "tab-active" : ""}`} onClick={() => router.push("/learner/notifications?view=reports")}>Report logs</button>

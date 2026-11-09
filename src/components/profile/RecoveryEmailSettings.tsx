@@ -14,6 +14,7 @@ export default function RecoveryEmailSettings() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [editing, setEditing] = useState(false);
   useEffect(() => {
     let active = true;
     fetch("/api/user/recovery-email").then(async response => {
@@ -32,7 +33,7 @@ export default function RecoveryEmailSettings() {
       });
       const data = await response.json();
       if (!response.ok) throw Error(data.error || "Please try again.");
-      if (action === "save") { setEmail(data.recoveryEmail ?? ""); setSavedEmail(data.recoveryEmail ?? ""); setVerified(Boolean(data.recoveryEmailVerifiedAt)); setPassword(""); setCode(""); setMessage(data.recoveryEmail ? data.recoveryEmailVerifiedAt ? "Recovery email saved." : "Recovery email saved. Verify ownership before using it for password recovery." : "Recovery email removed."); }
+      if (action === "save") { setEmail(data.recoveryEmail ?? ""); setSavedEmail(data.recoveryEmail ?? ""); setVerified(Boolean(data.recoveryEmailVerifiedAt)); setPassword(""); setCode(""); setEditing(false); setMessage(data.recoveryEmail ? data.recoveryEmailVerifiedAt ? "Recovery email saved." : "Recovery email saved. Verify ownership before using it for password recovery." : "Recovery email removed."); }
       else { setMessage(data.message); if (action === "verify") { setVerified(true); setCode(""); } }
     } catch (e) { setError(e instanceof Error ? e.message : "Please try again."); }
     finally { setBusy(false); }
@@ -42,15 +43,20 @@ export default function RecoveryEmailSettings() {
     <p className="text-xs text-base-content/60">Add a backup email to receive verification codes if you forget your password. Verify the address before using it for password recovery.</p>
     <FeedbackBanner variant="error" message={error || null} /><FeedbackBanner variant="success" message={message || null} />
     {loaded && <>
-      <FormField label="Recovery email address" hint="Use a different address from your Katuwang sign-in email. Leave blank to remove it." orientation="horizontal">
-        <input type="email" placeholder="backup@example.com" className="input input-bordered input-md text-sm w-full focus:input-primary" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" disabled={busy} />
+      <FormField label="Recovery email address" hint={editing ? "Use a different address from your Katuwang sign-in email. Leave blank to remove it." : "Choose Edit recovery email to change this address."} orientation="horizontal">
+        <input type="email" placeholder="backup@example.com" className="input input-bordered input-md text-sm w-full focus:input-primary" value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" readOnly={!editing} disabled={busy} />
       </FormField>
-      <FormField label="Current Katuwang password" hint="Enter the password you use to sign in to Katuwang to confirm this change." orientation="horizontal">
-        <input type="password" placeholder="Enter your sign-in password" className="input input-bordered input-md text-sm w-full focus:input-primary" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" disabled={busy} />
-      </FormField>
-      <button type="button" className="btn btn-sm btn-primary self-start" disabled={busy} onClick={() => act("save")}>Save recovery email</button>
+      {editing ? <>
+        <FormField label="Current Katuwang password" hint="Enter the password you use to sign in to Katuwang to confirm this change." orientation="horizontal">
+          <input type="password" placeholder="Enter your sign-in password" className="input input-bordered input-md text-sm w-full focus:input-primary" value={password} onChange={e => setPassword(e.target.value)} autoComplete="current-password" disabled={busy} />
+        </FormField>
+        <div className="flex flex-wrap gap-2">
+          <button type="button" className="btn btn-sm btn-primary" disabled={busy} onClick={() => act("save")}>{busy ? "Saving…" : "Save recovery email"}</button>
+          <button type="button" className="btn btn-sm btn-ghost" disabled={busy} onClick={() => { setEmail(savedEmail); setPassword(""); setCode(""); setError(""); setMessage(""); setEditing(false); }}>Cancel</button>
+        </div>
+      </> : <button type="button" className="btn btn-sm btn-outline self-start" disabled={busy} onClick={() => { setError(""); setMessage(""); setEditing(true); }}>Edit recovery email</button>}
       <div><StatusBadge tone={savedEmail ? verified ? "success" : "warning" : "neutral"} label={savedEmail ? verified ? "Recovery email verified" : "Verification needed" : "No recovery email saved"} /></div>
-      {savedEmail && !verified && <>
+      {!editing && savedEmail && !verified && <>
         <button type="button" className="btn btn-sm btn-outline self-start" disabled={busy || email !== savedEmail} onClick={() => act("send")}>Send recovery verification code</button>
         <FormField label="Email verification code" hint="Enter the 6-digit code sent to your recovery email." orientation="horizontal">
           <input inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6-digit code" className="input input-bordered input-md text-sm w-full focus:input-primary" value={code} onChange={e => setCode(e.target.value)} disabled={busy} />
