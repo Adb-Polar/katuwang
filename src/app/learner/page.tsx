@@ -1,3 +1,4 @@
+import CertificateList from "@/components/certificates/CertificateList";
 import { redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
@@ -148,6 +149,8 @@ export default async function LearnerDashboard() {
           </div>
         </section>
       </div>
+
+      <div className="order-4"><CertificateList preview /></div>
 
       <section className="order-3 card kt-card">
         <div className="card-body gap-2">

@@ -32,6 +32,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: { "/api/**": ["./assets/certificates/**/*", "./public/logos/green-logo-no-bg.svg"] },
   allowedDevOrigins: ["192.168.219.123"],
   images: {
     formats: ["image/avif", "image/webp"],

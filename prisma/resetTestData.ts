@@ -3,6 +3,8 @@ import type { PrismaClient } from "@prisma/client";
 /** Explicit --reset operation. Preserve administrator identities, credentials and platform configuration. */
 export async function resetTestData(prisma: PrismaClient) {
   await prisma.$transaction(async (tx) => {
+    // Explicit test reset also removes issued demo certificates before their protected owners/classes.
+    await tx.completionCertificate.deleteMany();
     await tx.sessionTestAttemptItem.deleteMany();
     await tx.sessionTestAttempt.deleteMany();
     await tx.sessionTestQuestion.deleteMany();

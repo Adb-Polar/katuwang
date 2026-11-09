@@ -64,6 +64,13 @@ describe("DELETE /api/account", () => {
     expect(transactionMock).not.toHaveBeenCalled();
   });
 
+  it("retains accounts referenced by issued certificates", async () => {
+    findUser.mockResolvedValue({ id: "learner-1", password: "hash", tutorProfile: null, _count: { learnerCompletionCertificates: 1, tutorCompletionCertificates: 0 } });
+    const response = await DELETE(request());
+    expect(response.status).toBe(409);
+    expect(transactionMock).not.toHaveBeenCalled();
+  });
+
   it("deletes only the authenticated account after confirmation", async () => {
     const response = await DELETE(request());
     expect(response.status).toBe(200);

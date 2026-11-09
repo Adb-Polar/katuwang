@@ -10,6 +10,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "certificates:process": "tsx scripts/process-certificates.ts",
     "db:local": "node scripts/switch-db.mjs local",
     "db:cloud": "node scripts/switch-db.mjs cloud",
     "db:target": "node scripts/switch-db.mjs target",
@@ -25,6 +26,7 @@
     "seed:questions:check": "tsx prisma/seed-question-bank.ts --check"
   },
   "dependencies": {
+    "@pdf-lib/fontkit": "^1.1.1",
     "@prisma/adapter-mariadb": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@uploadthing/react": "^7.3.3",
@@ -36,6 +38,7 @@
     "next": "16.2.12",
     "next-auth": "^4.24.15",
     "nodemailer": "^7.0.13",
+    "pdf-lib": "^1.17.1",
     "prisma": "^7.8.0",
     "prisma-client": "^0.0.0",
     "react": "19.2.4",

@@ -148,7 +148,9 @@ export default function ClassManageMenu({
         description={
           pendingAction === "delete"
             ? "This cannot be undone."
-            : "This will also cancel all remaining scheduled sessions in this class."
+            : pendingAction === "complete"
+              ? "Confirm that the class is finished for all currently enrolled learners. Remaining scheduled sessions will be marked completed and each eligible learner will receive a Certificate of Completion."
+              : "This will also cancel all remaining scheduled sessions in this class."
         }
         confirmLabel={pendingAction === "delete" ? "Delete" : "Confirm"}
         tone={pendingAction === "delete" || pendingAction === "cancel" ? "danger" : "default"}

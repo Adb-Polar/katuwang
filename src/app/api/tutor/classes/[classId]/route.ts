@@ -1,3 +1,5 @@
+import { issueClassCertificates } from "@/lib/certificates/issuance";
+import { scheduleCertificateJobs } from "@/lib/certificates/background";
 import { catalogFailureResponse } from "@/lib/catalogError";
 import { profilePictureActionError } from "@/lib/profilePicturePolicy";
 import { missingRequestedTopics } from "@/lib/requestTopicCoverage";
@@ -12,6 +14,8 @@ import { normalizeTopic } from "@/lib/normalizeTopic";
 import { classTeachingError } from "@/lib/classTeachingPolicy";
 import { notify, notifyMany } from "@/lib/notifications";
 
+
+export const maxDuration = 300;
 
 export async function PATCH(
   req: NextRequest,
@@ -161,6 +165,18 @@ export async function PATCH(
 
     const updatedClass = await prisma.$transaction(async (tx) => {
       await lockClassRow(tx, classId);
+      if (newStatus) {
+        const live = await tx.tutorClass.findUnique({ where: { id: classId }, include: { topics: true, sessions: true } });
+        if (!live || live.tutorProfileId !== tutorProfile.id) throw new ClassWriteError("Forbidden.", 403);
+        if (live.status === "COMPLETED") {
+          if (newStatus !== "COMPLETED") throw new ClassWriteError("A completed class cannot be reopened or cancelled.", 409);
+          return live;
+        }
+        if (live.status !== "SCHEDULED") throw new ClassWriteError("Only a scheduled class can be completed or cancelled.", 409);
+        if (newStatus === "COMPLETED" && !live.sessions.some(s => s.status !== "CANCELLED")) {
+          throw new ClassWriteError("A class needs at least one non-cancelled session before completion.", 400);
+        }
+      }
       if (topics || rawSubject !== undefined) {
         const requests = await tx.topicRequest.findMany({
           where: { fulfilledClassId: classId, status: { in: ["ACCEPTED", "ENROLLED", "FULFILLED"] } },
@@ -198,12 +214,15 @@ export async function PATCH(
           ...updates,
           ...subjectUpdate,
           ...(newStatus ? { status: newStatus } : {}),
+          ...(newStatus === "COMPLETED" ? { completedAt: new Date() } : {}),
           ...(topics
             ? { topics: { deleteMany: {}, create: topics.map((topic) => ({ topic })) } }
             : {}),
         },
         include: { topics: true, sessions: { orderBy: { scheduledAt: "asc" } } },
       });
+
+      if (newStatus === "COMPLETED") await issueClassCertificates(tx, classId);
 
       // Cascade to any topic request that was accepted into this class.
       if (newStatus === "COMPLETED" || newStatus === "CANCELLED") {
@@ -258,6 +277,8 @@ export async function PATCH(
 
       return result;
     });
+
+    if (newStatus === "COMPLETED") scheduleCertificateJobs(classId);
 
     return NextResponse.json({
       ...updatedClass,

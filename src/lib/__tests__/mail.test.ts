@@ -208,3 +208,20 @@ describe("Brevo HTTPS delivery", () => {
     expect(createTransportMock).not.toHaveBeenCalled();
   });
 });
+
+
+describe("certificate PDF attachments", () => {
+  const attachment = { filename: "KTW-test.pdf", content: new Uint8Array([37, 80, 68, 70]), contentType: "application/pdf" };
+  it.each(["brevo", "resend", "smtp"])("includes the same PDF bytes through %s without changing normal messages", async provider => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ id: "accepted", messageId: "accepted" }) });
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendMail } = await loadMail({ ...SMTP_ENV, EMAIL_PROVIDER: provider, BREVO_API_KEY: "test", BREVO_FROM_EMAIL: "verified@example.test", RESEND_API_KEY: "test", RESEND_FROM: "verified@example.test" });
+    await sendMail({ to: "learner@example.test", subject: "Certificate", text: "Congratulations", html: "<p>Congratulations</p>", attachments: [attachment] });
+    if (provider === "smtp") expect(sendMailMock.mock.calls[0][0].attachments[0].content).toEqual(Buffer.from(attachment.content));
+    else {
+      const payload = JSON.parse(fetchMock.mock.calls[0][1].body);
+      const files = provider === "brevo" ? payload.attachment : payload.attachments;
+      expect(Buffer.from(files[0].content, "base64")).toEqual(Buffer.from(attachment.content));
+    }
+  });
+});

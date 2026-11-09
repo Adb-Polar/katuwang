@@ -30,6 +30,7 @@ export default async function LearnerLayout({
     { label: "Browse Classes", href: "/learner/classes", icon: <BookOpen className="w-4 h-4" />, group: "Main menu" },
     { label: "Find Tutors", href: "/learner/tutors", icon: <Users className="w-4 h-4" />, group: "Main menu" },
     { label: "My Classes", href: "/learner/my-classes", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
+    { label: "My Certificates", href: "/learner/certificates", icon: <GraduationCap className="w-4 h-4" />, group: "Main menu" },
     { label: "My Progress", href: "/learner/progress", icon: <TrendingUp className="w-4 h-4" />, group: "Main menu" },
     { label: "Auto Match", href: "/learner/match", icon: <Sparkles className="w-4 h-4" />, group: "Tools" },
     { label: "Notifications", href: "/learner/notifications", icon: <Bell className="w-4 h-4" />, group: "Tools", badge: unreadCount },
