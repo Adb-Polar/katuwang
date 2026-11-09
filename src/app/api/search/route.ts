@@ -13,10 +13,8 @@ import { MINUTE_MS } from "@/lib/datetime";
 
 const PER_GROUP = 6;
 
-// The top-bar box lets the user scope the search. "all" is the blanket search;
-// the rest each pin it to one field so e.g. a class code isn't buried under
-// subject/topic hits.
-const SEARCH_SCOPES = ["all", "tutorCode", "subject", "topic", "classCode"] as const;
+// Learners choose an entity; admins can also narrow the search to one field.
+const SEARCH_SCOPES = ["all", "tutor", "class", "tutorCode", "subject", "topic", "classCode"] as const;
 type SearchScope = (typeof SEARCH_SCOPES)[number];
 
 /**
@@ -33,8 +31,11 @@ function classOrFor(
     ...(subjectSlugs.length ? [{ subject: { in: subjectSlugs } }] : []),
   ];
   switch (scope) {
+    case "tutor":
     case "tutorCode":
       return null;
+    case "class":
+      return [{ code: { contains: q } }, ...bySubject];
     case "classCode":
       return [{ code: { contains: q } }];
     case "subject":
@@ -85,10 +86,10 @@ export async function GET(req: NextRequest) {
     const scope: SearchScope =
       scopeParam && SEARCH_SCOPES.includes(scopeParam) ? scopeParam : "all";
 
-    const subjectSlugs = await resolveSubjectSlugs(q);
+    const subjectSlugs = scope === "tutor" || scope === "tutorCode" ? [] : await resolveSubjectSlugs(q);
     const classOr = classOrFor(scope, q, subjectSlugs);
     const wantTopics = scope === "all" || scope === "topic";
-    const wantTutorCode = scope === "all" || scope === "tutorCode";
+    const wantTutors = scope === "all" || scope === "tutor" || scope === "tutorCode";
 
     const role = session.user.role;
     const groups: SearchGroup[] = [];
@@ -116,15 +117,19 @@ export async function GET(req: NextRequest) {
       // When the platform reveals tutor names, learners can also search by name
       // and see the real name in results instead of just the anonymous ID.
       const showRealNames = await getSetting("showTutorRealNames");
-      // "tutorCode" scope matches the anonymous ID only; "all" also matches the
-      // real name where the platform reveals it.
+      // Names follow the platform visibility setting. Match each word against
+      // either name field so a full name works as well as a first/last name.
       const tutorOr: Prisma.UserWhereInput[] =
         scope === "tutorCode"
           ? [{ anonymousId: { contains: q } }]
           : [
               { anonymousId: { contains: q } },
               ...(showRealNames
-                ? [{ firstName: { contains: q } }, { lastName: { contains: q } }]
+                ? [{
+                    AND: q.split(/\s+/).map((word) => ({
+                      OR: [{ firstName: { contains: word } }, { lastName: { contains: word } }],
+                    })),
+                  }]
                 : []),
             ];
       const [classes, tutors] = await Promise.all([
@@ -146,7 +151,7 @@ export async function GET(req: NextRequest) {
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
-        wantTutorCode
+        wantTutors
           ? prisma.user.findMany({
               where: {
                 role: "STUDENT_TUTOR",
@@ -273,7 +278,7 @@ export async function GET(req: NextRequest) {
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
-        wantTutorCode
+        wantTutors
           ? prisma.user.findMany({
               where: {
                 role: { notIn: ["ADMIN", "SUPER_ADMIN"] },

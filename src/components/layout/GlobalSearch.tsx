@@ -22,22 +22,27 @@ const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
   topic: <Tag className="h-3.5 w-3.5 text-base-content/40" />,
 };
 
-const SCOPES = [
+const ADMIN_SCOPES = [
   { value: "all", label: "Everything", placeholder: "Search classes, tutors, topics…" },
   { value: "tutorCode", label: "Tutor code", placeholder: "Search by tutor code, e.g. TUT-0007" },
   { value: "subject", label: "Subject", placeholder: "Search by subject, e.g. Mathematics" },
   { value: "topic", label: "Topic", placeholder: "Search by topic, e.g. Fractions" },
   { value: "classCode", label: "Class code", placeholder: "Search by class code" },
 ] as const;
-type Scope = (typeof SCOPES)[number]["value"];
+const LEARNER_SCOPES = [
+  { value: "tutor", label: "Tutor", placeholder: "Search tutor name or code…" },
+  { value: "class", label: "Class", placeholder: "Search class subject or code…" },
+] as const;
+type Scope = (typeof ADMIN_SCOPES)[number]["value"] | (typeof LEARNER_SCOPES)[number]["value"];
 
-export default function GlobalSearch() {
+export default function GlobalSearch({ audience = "admin" }: { audience?: "learner" | "admin" }) {
   const router = useRouter();
+  const scopes = audience === "learner" ? LEARNER_SCOPES : ADMIN_SCOPES;
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [q, setQ] = useState("");
-  const [scope, setScope] = useState<Scope>("all");
+  const [scope, setScope] = useState<Scope>(scopes[0].value);
   const [groups, setGroups] = useState<SearchGroup[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -138,7 +143,7 @@ export default function GlobalSearch() {
   const term = q.trim();
   const showPanel = open && term.length >= 2;
   const scopePlaceholder =
-    SCOPES.find((s) => s.value === scope)?.placeholder ?? "Search…";
+    scopes.find((s) => s.value === scope)?.placeholder ?? "Search…";
 
   return (
     <div ref={rootRef} className="kt-search relative hidden sm:flex">
@@ -147,11 +152,14 @@ export default function GlobalSearch() {
         value={scope}
         onChange={(e) => {
           setScope(e.target.value as Scope);
+          setGroups([]);
+          setActive(0);
+          setLoading(q.trim().length >= 2);
           setOpen(true);
         }}
         className="shrink-0 border-r border-base-300 bg-transparent pr-1.5 text-2xs font-medium text-base-content/60 focus:outline-none"
       >
-        {SCOPES.map((s) => (
+        {scopes.map((s) => (
           <option key={s.value} value={s.value}>
             {s.label}
           </option>

@@ -259,9 +259,7 @@ export default function PortalLayout({
             <Menu className="w-5 h-5" />
           </button>
 
-          <BrandMark size="sm" />
-
-          <GlobalSearch />
+          {idRole !== "TUTOR" && <GlobalSearch audience={idRole === "LEARNER" ? "learner" : "admin"} />}
 
           <div className="flex-1" />
 

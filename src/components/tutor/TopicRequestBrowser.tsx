@@ -92,7 +92,18 @@ export default function TopicRequestBrowser() {
         active={tab}
         onChange={(k) => setTab(k as "directed" | "public" | "accepted")}
       />
-      <p className="text-xs text-base-content/60">Only requests that are still open appear here. Learners can renew an expired request from My Requests.</p>
+      {isOpenTab && <div className="rounded-xl border border-info/20 bg-info/5 p-4 space-y-1 text-xs">
+        <p className="font-semibold text-base-content">
+          {tab === "public" ? "Public requests match your certified topics" : "Private requests are sent directly to you"}
+        </p>
+        <p className="text-base-content/70">
+          {tab === "public"
+            ? "You only see public requests that include a topic you are certified to teach. You must be certified in every requested topic before accepting."
+            : "Learners sent these requests specifically to you. You must be certified in every requested topic before accepting."}
+          {" "}<Link href="/tutor/profile" className="link link-primary">View your certified topics</Link>
+        </p>
+        <p className="text-base-content/60">Only open requests appear here. Learners can renew an expired request from My Requests.</p>
+      </div>}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <FormField label="Subject">
