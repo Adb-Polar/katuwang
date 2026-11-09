@@ -55,7 +55,7 @@ describe("GET /api/search", () => {
     classFindMany.mockResolvedValue([
       { id: "c1", code: "C-0231", subject: "MATH", topics: [{ topic: "Linear equations" }], status: "SCHEDULED" },
     ]);
-    userFindMany.mockResolvedValue([{ id: "u1", anonymousId: "TUT-0148" }]);
+    userFindMany.mockResolvedValue([{ id: "u1", anonymousId: "TUT-0148", firstName: "Maria", lastName: "Santos" }]);
     tutorProfileFindUnique.mockResolvedValue({ id: "TP1", topicCertifications: [] });
     topicRequestFindMany.mockResolvedValue([]);
   });
@@ -137,5 +137,58 @@ describe("GET /api/search", () => {
       expect.arrayContaining([{ subject: { in: ["MATH"] } }]),
     );
     expect(userFindMany).not.toHaveBeenCalled();
+  });
+
+  it.each(["C-0231", "Mathematics"])("learner scope=class: searches code and subject for %s without tutor/topic results", async (query) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);
+
+    const json = await (await GET(req(query, "class"))).json();
+
+    expect(json.groups.map((g: { kind: string }) => g.kind)).toEqual(["class"]);
+    const { AND } = classFindMany.mock.calls[0][0].where;
+    expect(AND[0]).toMatchObject({ published: true, status: "SCHEDULED", enrollments: { none: { learnerId: "L1", withdrawnAt: null } } });
+    expect(AND[1].OR).toEqual([
+      { code: { contains: query } },
+      { subject: { contains: query } },
+      { subject: { in: ["MATH"] } },
+    ]);
+    expect(userFindMany).not.toHaveBeenCalled();
+    expect(getSubjectsMock).not.toHaveBeenCalled();
+  });
+
+  it.each(["Maria", "Maria Santos"])("learner scope=tutor: searches visible names and code for %s", async (query) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    getSettingMock.mockResolvedValue(true);
+
+    const json = await (await GET(req(query, "tutor"))).json();
+
+    expect(json.groups).toEqual([{ kind: "tutor", label: "Tutors", items: [{
+      id: "u1", title: "Maria Santos", subtitle: "TUT-0148", href: "/learner/tutors/u1",
+    }] }]);
+    expect(userFindMany.mock.calls[0][0].where).toMatchObject({
+      role: "STUDENT_TUTOR",
+      status: "ACTIVE",
+      tutorProfile: { topicCertifications: { some: { status: "CERTIFIED" } } },
+      OR: [
+        { anonymousId: { contains: query } },
+        { AND: query.split(" ").map((word) => ({ OR: [{ firstName: { contains: word } }, { lastName: { contains: word } }] })) },
+      ],
+    });
+    expect(classFindMany).not.toHaveBeenCalled();
+    expect(getSubjectsMock).not.toHaveBeenCalled();
+    expect(resolveSubjectSlugsMock).not.toHaveBeenCalled();
+  });
+
+  it("learner scope=tutor: preserves anonymous code search when tutor names are hidden", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+
+    const json = await (await GET(req("TUT-0148", "tutor"))).json();
+
+    expect(userFindMany.mock.calls[0][0].where.OR).toEqual([{ anonymousId: { contains: "TUT-0148" } }]);
+    expect(json.groups[0].items[0].title).toBe("TUT-0148");
+    expect(json.groups[0].items[0].subtitle).toBeUndefined();
+    expect(JSON.stringify(json)).not.toContain("Maria");
+    expect(classFindMany).not.toHaveBeenCalled();
   });
 });
