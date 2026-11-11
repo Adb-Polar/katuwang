@@ -1,0 +1,2454 @@
+[
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Kolonyalismo at Imperyalismo sa Timog at Kanlurang Asya",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "ap_colonialism"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Paghubog ng Sinaunang Kabihasnan sa Asya",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "ap_asian_civilizations"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Katangiang Pisikal ng Asya",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "ap_asia_geography"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Ang Unang Digmaang Pandaigdig",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "ap_ww1"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Ang Pagsisimula ng mga Kabihasnan sa Daigdig",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "ap_world_civilizations"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Paglakas ng Europa",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "ap_europe"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Heograpiya ng Daigdig",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "geography"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Paikot na Daloy ng Ekonomiya",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "economics_flow"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Kahulugan ng Ekonomiks",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "economics_basics"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Konsepto at Palatandaan ng Pambansang Kaunlaran",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "economics_development"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Demand",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "economics_demand"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Mga Isyung Politikal at Pangkapayapaan",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "civics_politics"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Mga Isyu sa Karapatang Pantao at Gender",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "civics_rights"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Kahalagahan ng Pagaaral ng mga Kontemporaryong Isyu",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "contemporary_issues"
+  },
+  {
+    "subject": "JHS_ARALING_PANLIPUNAN",
+    "topic": "Mga Isyung PangEdukasyon at Pansibiko at Pagkamamamayan Civics and Citizenship",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "civics_citizenship"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts and Crafts of Mindanao",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "art_mindanao+art_elements:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts and Crafts of Luzon Highlands and Lowlands",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "art_luzon+art_practice:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Festivals and Theatrical Forms",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "festivals+theater:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts and Crafts of MIMAROPA Mindoro Marinduque Romblon and Palawan and the Visayas",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "art_visayas_mimaropa+art_practice:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Festivals and Theatrical Forms of Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "asian_theater+theater:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts of East Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "art_east_asia+art_elements:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts of South West And Central Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "art_west_central_asia+art_practice:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts of Southeast Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "art_southeast_asia+art_practice:0:10"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Western Classical Plays and Operas",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "western_stage"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts of the Renaissance and Baroque Period",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "art_western_periods:6:15+art_elements:0:11"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Arts of the Neoclassic and Romantic Period",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "art_western_periods:15:20+art_elements:0:15"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Western and Classical Art Traditions",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "art_western_periods:0:6+art_elements:0:14"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Modern Art",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "art_modern_media:0:9+art_elements:0:11"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Original Performance with the Use of Media",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "creative_production"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Technologybased Art",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "art_modern_media:8:20+art_practice:0:8"
+  },
+  {
+    "subject": "ARTS",
+    "topic": "Mediabased Arts and Design in the Philippines",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "art_modern_media:8:20+art_practice:0:8"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Pagtatakda ng Mithiin at Pagpapasiya",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "values_goals"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Pagkatao ng Tao",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "values_person"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Pagpapahalaga at Birtud",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "values_ethics"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Pagkilala at Pamamahala sa mga Pagbabago sa Sarili",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "growth"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Pakikipagkapwa",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "values_relationships"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Mga Pagpapahalaga at Birtud sa Pakikipagkapwa",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "values_relationships"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Pamilya Bilang Ugat ng Pakikipagkapwa",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "values_family"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Mga Isyu sa Pakikipagkapwa",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "values_relationships"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Mapanagutang Pagpaplano ng Kursong Akademiko o TeknikalBokasyonal Negosyo o Hanapbuhay",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "career"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Tungkulin ng Tao sa Lipunan",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "civics_citizenship"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Mga Kaugnay na Pagpapahalaga sa Paggawa",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "work_values"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Papel ng Lipunan sa Tao",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "civics_politics"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Moral na Pagkatao",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "values_ethics"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Pagmamahal sa Bayan",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "national_identity"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Aking Posisyon sa mga Isyung Moral",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "values_ethics"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Ang Makataong Kilos",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "values_ethics"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Pangangalaga sa Kalikasan",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "environment"
+  },
+  {
+    "subject": "JHS_EDUKASYON_PAGPAPAKATAO",
+    "topic": "Mga Pangunahing Birtud at Pagpapahalagang Moral",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "values_person"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Philippine Literature",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "philippine_literature"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Grammar Awareness",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "grammar"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Writing and Composition",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "composition"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Vocabulary Development",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "vocabulary"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Listening Comprehension",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "listening"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Oral Language and Fluency",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "oral_communication"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Viewing Comprehension",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "media_viewing"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Reading Comprehension",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "reading"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Literature",
+    "gradeLevels": [
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "literary_analysis"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "Afro-Asian Literature",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "afro_asian_literature"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "British-American Literature",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "british_american_literature"
+  },
+  {
+    "subject": "ENGLISH",
+    "topic": "World Literature",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "world_literature"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pag-unawa sa Napakinggan",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_pakikinig"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Ibong Adarna: Isang Obra Maestra",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "fil_adarna"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikang Bisaya: Repleksiyon ng Kabisayaan",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "fil_visayas+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Estratehiya sa Pag-aaral",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_pagaaral"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pagsulat",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_pagsulat"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panonood",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_10"
+    ],
+    "content": "fil_panood"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pag-unawa sa Binasa",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_pagbasa"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikang Luzon: Larawan ng Pagkakakilanlan",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "fil_luzon+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Mga Akdang Pampanitikan: Salamin ng Mindanao",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "fil_mindanao+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Wika at Gramatika",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_balarila"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Pagsasalita",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_pagsasalita"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Paglinang ng Talasalitaan",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "fil_talasalitaan"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Kontemporaryong Panitikan Tungo sa Kultura at Panitikang Popular",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "fil_contemporary+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Salamin ng Kahapon...Bakasin Natin Ngayon",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "fil_pan_bayan"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Florante at Laura: Isang Obra Maestrang Pampanitikan ng Pilipinas",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "fil_florante"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Sandigan ng Lahi... Ikarangal Natin",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "fil_pan_bayan"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Mga Akdang Pampanitikan ng Kanlurang Asya",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "fil_west_asia+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Noli Me Tangere sa Puso ng mga Asyano",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "fil_noli"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Mga Akdang Pampanitikan ng Silangang Asya",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "fil_east_asia+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "El Filibusterismo sa Nagbabagong Daigdig",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "fil_fili"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikan ng mga Bansa sa Kanluran",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "fil_western_lit+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikan ng Africa at Persia",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "fil_africa_persia+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "FILIPINO",
+    "topic": "Panitikang Mediterranean",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "fil_mediterranean+fil_panunuring_panitikan:0:15"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Injury Prevention, Safety and First Aid",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "first_aid"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Nutrition",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "nutrition"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Prevention and Control of Diseases and Disorders (Non-communicable Diseases)",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8"
+    ],
+    "content": "noncommunicable"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Personal Health",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "personal_health"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Growth and Development",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "growth"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Prevention of Substance Use and Abuse (Gateway Drugs: Cigarette and Alcohol)",
+    "gradeLevels": [
+      "GRADE_8",
+      "GRADE_9"
+    ],
+    "content": "substances"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Prevention and Control of Diseases and Disorders Communicable",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "communicable"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Family Health I",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "family_health"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Family Health II",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "family_health"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Injury Prevention Safety and First Aid Unintentional",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "first_aid"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Injury Prevention, Safety and First Aid (Intentional)",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "injury_violence"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Prevention of Substance Use and Abuse Drug Scenario",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "substances"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Community and Environmental Health",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "community_health"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Health Trends Issues and Concerns Global Level",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "health_policy"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Consumer Health",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "consumer_health"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Planning for a Health Career",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "health_careers"
+  },
+  {
+    "subject": "HEALTH",
+    "topic": "Health Trends Issues and Concerns National Level",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "health_policy"
+  },
+  {
+    "subject": "MATH",
+    "topic": "Statistics and Probability",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_10"
+    ],
+    "content": "@stats_probability"
+  },
+  {
+    "subject": "MATH",
+    "topic": "Geometry",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "@geometry"
+  },
+  {
+    "subject": "MATH",
+    "topic": "Patterns and Algebra",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "@algebra"
+  },
+  {
+    "subject": "MATH",
+    "topic": "Measurement",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "@measurement"
+  },
+  {
+    "subject": "MATH",
+    "topic": "Numbers and Number Sense",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "@numbers"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of Mindanao",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "music_mindanao+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of Luzon Lowlands",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "music_luzon+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Philippine Festivals",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "festivals+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of Cordillera Mindoro Palawan and the Visayas",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "music_cordillera_visayas+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of South Asia and the Middle East",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "music_asia:13:20+music_elements:0:13"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of Southeast Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "music_asia:0:5+music_elements:0:15"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Traditional Asian Theater Music",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "asian_theater+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of East Asia",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "music_asia:5:13+music_elements:0:12"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of Medieval 7001400",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "music_western_history:0:5+music_elements:0:15"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Instrumental Music of the Romantic Period 18201900",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "romantic_instrumental+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Renaissance Period 14001600",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "music_western_history:5:10+music_elements:0:15"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Vocal Music of the Romantic Period",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "romantic_vocal+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Music of the Classical Period 17501820",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "music_western_history:10:16+music_elements:0:14"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "Contemporary Philippine Music",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "philippine_composers+music_elements:0:10"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "20th and 21st Century Multimedia Forms",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "music_modern:7:16+music_elements:0:11"
+  },
+  {
+    "subject": "MUSIC",
+    "topic": "AfroLatin and Popular Music",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "music_modern:0:7+music_elements:0:13"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Folk, Indigenous, Ethnic, Traditional and Festival Dance",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "dance"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Dual Sports",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "dual_sports+sports:0:10"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Individual Sports Dual Sports and Combative Sports",
+    "gradeLevels": [
+      "GRADE_7"
+    ],
+    "content": "individual_combative+sports:0:10"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Folk Dances with Asian Influence",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "asian_influenced_dance+dance:0:15"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Team Sports",
+    "gradeLevels": [
+      "GRADE_8"
+    ],
+    "content": "team_sports+sports:0:10"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Active Recreation",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "recreation"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Social and Ballroom Dances",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "social_dance+dance:0:10"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Lifestyle and Weight Management",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "fitness"
+  },
+  {
+    "subject": "PHYSICAL_EDUCATION",
+    "topic": "Other Dance Forms",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "dance"
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Earth and Space",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "earth_science"
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Living Things and Their Environment",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "ecology"
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Force Motion and Energy",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "physics_basics"
+  },
+  {
+    "subject": "SCIENCE",
+    "topic": "Matter",
+    "gradeLevels": [
+      "GRADE_7",
+      "GRADE_8",
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "matter"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Horticulture",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "horticulture+crop_production:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Bread and Pastry Production",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "bread_products+baking:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Animal Production",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "animal_production+workplace_safety:0:9+workplace_safety:17:18"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Organic Agriculture",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "organic_agriculture+crop_production#0,2,3,4,5,6,7,8,9,10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Industrial Arts Electrical",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "electrical_trade+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Handicraft",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "art_practice"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Dressmaking",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "sewing"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Information and Communications Technology Animation",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "animation+art_modern_media#9,10,11,12,13,14,15,17,18,19"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Information and Communications Technology Technical Drafting",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "technical_drawing"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Wellness Massage",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "massage+personal_services#4,5,6,7,10,11,12,13,14,16"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Information and communications Technology Computer hardware Servicing",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "computer_systems"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Hairdressing",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "hairdressing+personal_services:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Aquaculture",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "aquaculture+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Slaughtering Operations HogSwinePig",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "meat_inspection+food_safety#0,1,3,4,5,6,7,8,9,10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery Arts Agricultural Crop Production",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "crop_production"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Industrial Arts Shielded Metal Arc Welding",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "welding+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Industrial Arts Electronics",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "electronics+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Front Office",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "hospitality_front_office"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Cookery",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "kitchen_fundamentals"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Beauty Care Nail Care Services",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "nailcare+personal_services:4:14"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Tailoring",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "sewing"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Information and Communications Technology Contact Center Services",
+    "gradeLevels": [
+      "GRADE_9",
+      "GRADE_10"
+    ],
+    "content": "contact_center"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Housekeeping",
+    "gradeLevels": [
+      "GRADE_9"
+    ],
+    "content": "housekeeping"
+  },
+  {
+    "subject": "TLE",
+    "topic": "AgriFishery arts Food Fish Processing",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "food_processing+food_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Handicraft Needlecraft",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "needlecraft+sewing:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Industrial Arts Automotive Servicing",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "automotive+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Household Services",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "housekeeping"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Home Economics Front Office Services",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "hospitality_front_office"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Agri-Fishery Arts - Pest Management",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "pest_management+workplace_safety:0:10"
+  },
+  {
+    "subject": "TLE",
+    "topic": "Information and Communications Technology Illustration",
+    "gradeLevels": [
+      "GRADE_10"
+    ],
+    "content": "illustration+art_elements:0:10"
+  },
+  {
+    "subject": "SSHS_EFFECTIVE_COMMUNICATION",
+    "topic": "Effective Communication in Personal and Interpersonal Contexts",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "comm_personal+communication:0:14"
+  },
+  {
+    "subject": "SSHS_EFFECTIVE_COMMUNICATION",
+    "topic": "Effective Communication in Social and Cultural Contexts",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "comm_cultural+communication:0:12+communication:18:20"
+  },
+  {
+    "subject": "SSHS_EFFECTIVE_COMMUNICATION",
+    "topic": "Effective Communication in Academic and Training Contexts",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "comm_academic+communication:0:14"
+  },
+  {
+    "subject": "SSHS_EFFECTIVE_COMMUNICATION",
+    "topic": "Effective Communication in Professional and Work Contexts",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "comm_professional+communication:0:14"
+  },
+  {
+    "subject": "SSHS_GENERAL_MATHEMATICS",
+    "topic": "Numbers and Algebra",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@general_algebra"
+  },
+  {
+    "subject": "SSHS_GENERAL_MATHEMATICS",
+    "topic": "Measurement and Geometry",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@general_geometry"
+  },
+  {
+    "subject": "SSHS_GENERAL_MATHEMATICS",
+    "topic": "Data and Probability",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@stats_probability"
+  },
+  {
+    "subject": "SSHS_GENERAL_SCIENCE",
+    "topic": "Physics",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "physics_basics"
+  },
+  {
+    "subject": "SSHS_GENERAL_SCIENCE",
+    "topic": "Chemistry",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "matter"
+  },
+  {
+    "subject": "SSHS_GENERAL_SCIENCE",
+    "topic": "Biology",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "ecology"
+  },
+  {
+    "subject": "SSHS_GENERAL_SCIENCE",
+    "topic": "Earth and Space Science",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "earth_science"
+  },
+  {
+    "subject": "SSHS_LIFE_CAREER_SKILLS",
+    "topic": "Life Skills toward Personal Development",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "life_skills"
+  },
+  {
+    "subject": "SSHS_LIFE_CAREER_SKILLS",
+    "topic": "Life Skills toward Social Competence",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "communication"
+  },
+  {
+    "subject": "SSHS_LIFE_CAREER_SKILLS",
+    "topic": "Life Skills toward Career Competence",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "career"
+  },
+  {
+    "subject": "SSHS_LIFE_CAREER_SKILLS",
+    "topic": "Life Skills toward Career Readiness",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "work_values"
+  },
+  {
+    "subject": "SSHS_MABISANG_KOMUNIKASYON",
+    "topic": "Mabisang Komunikasyon sa Kontekstong Personal at Interpersonal",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "fil_comm_personal+fil_pagsasalita:0:14"
+  },
+  {
+    "subject": "SSHS_MABISANG_KOMUNIKASYON",
+    "topic": "Mabisang Komunikasyon sa Kontekstong Sosyal at Kultural",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "fil_comm_cultural+fil_pagsasalita:0:14"
+  },
+  {
+    "subject": "SSHS_MABISANG_KOMUNIKASYON",
+    "topic": "Mabisang Komunikasyon sa Kontekstong Akademiko at Pampagsasanay",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "fil_comm_academic+fil_pagsasalita:0:14"
+  },
+  {
+    "subject": "SSHS_MABISANG_KOMUNIKASYON",
+    "topic": "Mabisang Komunikasyon sa Kontekstong Propesyonal at Pantrabaho",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "fil_comm_professional+fil_pagsasalita:0:14"
+  },
+  {
+    "subject": "SSHS_KASAYSAYAN_LIPUNAN",
+    "topic": "Kamalayang Pangkasaysayan",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "contemporary_issues"
+  },
+  {
+    "subject": "SSHS_KASAYSAYAN_LIPUNAN",
+    "topic": "Kamalayang Pilipino",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "national_identity"
+  },
+  {
+    "subject": "SSHS_KASAYSAYAN_LIPUNAN",
+    "topic": "Kamalayang Panlikas-kayang Pag-unlad",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "environment"
+  },
+  {
+    "subject": "SSHS_KASAYSAYAN_LIPUNAN",
+    "topic": "Kamalayan sa Pagkamamamayang Pilipino at Global",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "civics_citizenship"
+  },
+  {
+    "subject": "SSHS_CREATIVE_PRODUCTION",
+    "topic": "Concept and Proposal Development",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "creative_production"
+  },
+  {
+    "subject": "SSHS_CREATIVE_PRODUCTION",
+    "topic": "Creative Execution and Iteration",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "creative_production"
+  },
+  {
+    "subject": "SSHS_CREATIVE_PRODUCTION",
+    "topic": "Public Presentation and Audience Engagement",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "creative_production"
+  },
+  {
+    "subject": "SSHS_ADVANCED_MATHEMATICS",
+    "topic": "Basic Mathematical Modeling",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@modeling"
+  },
+  {
+    "subject": "SSHS_ADVANCED_MATHEMATICS",
+    "topic": "Angles and Their Measures",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@angles"
+  },
+  {
+    "subject": "SSHS_ADVANCED_MATHEMATICS",
+    "topic": "Trigonometric Functions",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@trig_functions"
+  },
+  {
+    "subject": "SSHS_ADVANCED_MATHEMATICS",
+    "topic": "Trigonometric Identities",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@trig_identities"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Limits and Continuity",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@limits"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Derivatives and Tangents",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@derivatives"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Rules of Differentiation",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@differentiation"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Applications of Derivatives",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@derivative_applications"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Antiderivatives (Indefinite Integrals)",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@antiderivatives"
+  },
+  {
+    "subject": "SSHS_BASIC_CALCULUS",
+    "topic": "Definite Integrals and Area",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@definite_integrals"
+  },
+  {
+    "subject": "SSHS_BIOLOGY_3",
+    "topic": "Molecular Genetics and Inheritance",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "genetics"
+  },
+  {
+    "subject": "SSHS_BIOLOGY_3",
+    "topic": "Evolution and Biotechnology",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "evolution"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Strength and Concentration of Acids and Bases",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@ph"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Acid-Base Titrations",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@titration"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Buffer Systems",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@buffer"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Chemical Equilibrium",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@equilibrium"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Separation of Mixtures",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "separation"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Instrumental Analysis (Colorimetry)",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@colorimetry"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Redox Reactions",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "electrochemistry"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Galvanic Cells",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@cell_potential"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Electrochemical Potentials",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@cell_potential"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Electrolysis",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@electrolysis"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_3",
+    "topic": "Applications of Electrochemistry",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "electrochemistry"
+  },
+  {
+    "subject": "SSHS_DATABASE_MANAGEMENT",
+    "topic": "Introduction to Databases",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "database"
+  },
+  {
+    "subject": "SSHS_DATABASE_MANAGEMENT",
+    "topic": "Introduction to SQL",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "sql"
+  },
+  {
+    "subject": "SSHS_DATABASE_MANAGEMENT",
+    "topic": "SQL Commands",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@sql_results"
+  },
+  {
+    "subject": "SSHS_DATA_ANALYTICS",
+    "topic": "Data Privacy and Ethics",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "data_privacy"
+  },
+  {
+    "subject": "SSHS_DATA_ANALYTICS",
+    "topic": "Data Sources and Collection Methods",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "data_collection"
+  },
+  {
+    "subject": "SSHS_DATA_ANALYTICS",
+    "topic": "Data Processing",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "data_processing"
+  },
+  {
+    "subject": "SSHS_DATA_ANALYTICS",
+    "topic": "Data Storytelling",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "data_storytelling"
+  },
+  {
+    "subject": "SSHS_DATA_ANALYTICS",
+    "topic": "Data Analytics Project",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_foundations"
+  },
+  {
+    "subject": "SSHS_PHYSICS_3",
+    "topic": "Electrostatics",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@electrostatics"
+  },
+  {
+    "subject": "SSHS_PHYSICS_3",
+    "topic": "Current Electricity",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@current_electricity"
+  },
+  {
+    "subject": "SSHS_PHYSICS_3",
+    "topic": "Magnetism",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@magnetism"
+  },
+  {
+    "subject": "SSHS_PHYSICS_3",
+    "topic": "Electromagnetism",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@induction"
+  },
+  {
+    "subject": "SSHS_PRE_CALCULUS",
+    "topic": "Lines and Circles",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@lines_circles"
+  },
+  {
+    "subject": "SSHS_PRE_CALCULUS",
+    "topic": "Graph Transformations",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@graph_transforms"
+  },
+  {
+    "subject": "SSHS_PRE_CALCULUS",
+    "topic": "Polynomial Functions",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@polynomials"
+  },
+  {
+    "subject": "SSHS_PRE_CALCULUS",
+    "topic": "Rational Functions",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@rational_functions"
+  },
+  {
+    "subject": "SSHS_PRE_CALCULUS",
+    "topic": "Exponential and Logarithmic Functions",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "@exponential_logarithmic"
+  },
+  {
+    "subject": "SSHS_RESEARCH_1",
+    "topic": "Foundations of Research",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_foundations"
+  },
+  {
+    "subject": "SSHS_RESEARCH_1",
+    "topic": "Research Ethics",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_ethics"
+  },
+  {
+    "subject": "SSHS_RESEARCH_1",
+    "topic": "Review of Literature for Identifying Research Problems",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "literature_review"
+  },
+  {
+    "subject": "SSHS_RESEARCH_1",
+    "topic": "Research Design and Methodology",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_methods"
+  },
+  {
+    "subject": "SSHS_RESEARCH_1",
+    "topic": "Research Proposal Development",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_proposal+research_foundations#0,1,2,3,4,5,6,8,9,10"
+  },
+  {
+    "subject": "SSHS_RESEARCH_2",
+    "topic": "Instrument Development and Validation",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_instruments"
+  },
+  {
+    "subject": "SSHS_RESEARCH_2",
+    "topic": "Data Collection",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "data_collection"
+  },
+  {
+    "subject": "SSHS_RESEARCH_2",
+    "topic": "Data Analysis and Interpretation",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_analysis"
+  },
+  {
+    "subject": "SSHS_RESEARCH_2",
+    "topic": "Writing the Research Report",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_reporting"
+  },
+  {
+    "subject": "SSHS_RESEARCH_2",
+    "topic": "Research Presentation and Defense",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "research_defense+research_reporting:0:10"
+  },
+  {
+    "subject": "SSHS_CITIZENSHIP",
+    "topic": "Citizenship in Practice",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "civics_citizenship"
+  },
+  {
+    "subject": "SSHS_CITIZENSHIP",
+    "topic": "Civic Engagement and Community Involvement",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "civic_engagement+civics_citizenship:0:10"
+  },
+  {
+    "subject": "SSHS_CONTEMPORARY_LITERATURE_1",
+    "topic": "Literature as Mirror: Textual Reflections",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "contemporary_literature"
+  },
+  {
+    "subject": "SSHS_CONTEMPORARY_LITERATURE_1",
+    "topic": "Literature as Window: Textual Perspectives",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "literary_perspectives+contemporary_literature:0:10"
+  },
+  {
+    "subject": "SSHS_PHILOSOPHY",
+    "topic": "Introduction to Philosophy",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "philosophy"
+  },
+  {
+    "subject": "SSHS_PHILOSOPHY",
+    "topic": "Philosophy of the Human Person",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "philosophy_person"
+  },
+  {
+    "subject": "SSHS_PHILIPPINE_GOVERNANCE",
+    "topic": "Philippine Politics and Governance",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "civics_politics"
+  },
+  {
+    "subject": "SSHS_PHILIPPINE_GOVERNANCE",
+    "topic": "The Structure of Philippine Government",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "philippine_government"
+  },
+  {
+    "subject": "SSHS_BUSINESS_1",
+    "topic": "Introduction to Accounting for Service Business",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "business_accounting"
+  },
+  {
+    "subject": "SSHS_BUSINESS_1",
+    "topic": "Accounting Cycle for a Merchandising Business using the Perpetual and Periodic Methods",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "merchandising"
+  },
+  {
+    "subject": "SSHS_BUSINESS_2",
+    "topic": "Financial Management, Investment, and Money in the Business Environment",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "business_finance"
+  },
+  {
+    "subject": "SSHS_BUSINESS_2",
+    "topic": "Principles and Purpose of Income Taxation",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "taxation"
+  },
+  {
+    "subject": "SSHS_BUSINESS_3",
+    "topic": "Economics in the Business Environment",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "business_economics"
+  },
+  {
+    "subject": "SSHS_BUSINESS_3",
+    "topic": "Socio-Economic Issues in the Business Environment",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "macro_business_issues"
+  },
+  {
+    "subject": "SSHS_MARKETING",
+    "topic": "The Fundamentals of Marketing",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "marketing"
+  },
+  {
+    "subject": "SSHS_MARKETING",
+    "topic": "Marketing Mix, Analytics and Planning Process",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "marketing_planning+marketing:5:15"
+  },
+  {
+    "subject": "SSHS_ENTREPRENEURSHIP",
+    "topic": "Nature of Entrepreneurship and Business Planning",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "entrepreneurship"
+  },
+  {
+    "subject": "SSHS_ENTREPRENEURSHIP",
+    "topic": "Business Simulation and Evaluation",
+    "gradeLevels": [
+      "GRADE_12"
+    ],
+    "content": "entrepreneurship"
+  },
+  {
+    "subject": "SSHS_ORGANIZATION_MANAGEMENT",
+    "topic": "The Nature, Concept, and Function of Management",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "management"
+  },
+  {
+    "subject": "SSHS_ORGANIZATION_MANAGEMENT",
+    "topic": "The Nature of Controlling, Concepts and Social Responsibilities of Small and Medium Enterprises (SMEs)",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "management_control+management:0:10"
+  },
+  {
+    "subject": "SSHS_BIOLOGY_1",
+    "topic": "Cell Biology",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "cell_biology"
+  },
+  {
+    "subject": "SSHS_BIOLOGY_1",
+    "topic": "Cell Metabolism",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "metabolism"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_1",
+    "topic": "Scientific measurement",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@measurement_science"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_1",
+    "topic": "Electronic Structure of Atoms",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "chem_atomic"
+  },
+  {
+    "subject": "SSHS_CHEMISTRY_1",
+    "topic": "Chemical Bonds",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "chemical_bonds"
+  },
+  {
+    "subject": "SSHS_PHYSICS_1",
+    "topic": "Measurements and Translational Kinematics",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@kinematics"
+  },
+  {
+    "subject": "SSHS_PHYSICS_1",
+    "topic": "Dynamics",
+    "gradeLevels": [
+      "GRADE_11"
+    ],
+    "content": "@dynamics"
+  },
+  {
+    "subject": "SSHS_PE_1",
+    "topic": "Fitness",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "fitness"
+  },
+  {
+    "subject": "SSHS_PE_1",
+    "topic": "Recreation",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "recreation"
+  },
+  {
+    "subject": "SSHS_PE_2",
+    "topic": "Sports",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "sports"
+  },
+  {
+    "subject": "SSHS_PE_2",
+    "topic": "Dance",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "dance"
+  },
+  {
+    "subject": "SSHS_AGRICULTURAL_CROPS",
+    "topic": "Overview of Agricultural Crops Production",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "crop_production"
+  },
+  {
+    "subject": "SSHS_AGRICULTURAL_CROPS",
+    "topic": "Safety Standards in Agricultural Crops Production",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "workplace_safety"
+  },
+  {
+    "subject": "SSHS_AGRICULTURAL_CROPS",
+    "topic": "Farm Tools, Implements, and Equipment",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "farm_tools"
+  },
+  {
+    "subject": "SSHS_AGRICULTURAL_CROPS",
+    "topic": "Kinds of Planting Materials",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "planting_materials"
+  },
+  {
+    "subject": "SSHS_AGRICULTURAL_CROPS",
+    "topic": "Crop Requirements",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "crop_production"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Overview of Baking Industry",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "baking"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Baking Tools & Equipment",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "baking_equipment"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Baking Techniques",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "baking"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Bread Products",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "bread_products+baking:0:10"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Food Safety & Sanitation",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "food_safety"
+  },
+  {
+    "subject": "SSHS_BAKERY_OPERATIONS",
+    "topic": "Packaging and Marketing Bakery Products",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "food_packaging"
+  },
+  {
+    "subject": "SSHS_KITCHEN_OPERATIONS",
+    "topic": "Kitchen Math",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "@kitchen_math"
+  },
+  {
+    "subject": "SSHS_KITCHEN_OPERATIONS",
+    "topic": "Stocks, Soup, and Sauces",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "stocks_soups_sauces"
+  },
+  {
+    "subject": "SSHS_KITCHEN_OPERATIONS",
+    "topic": "Appetizers",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "appetizers"
+  },
+  {
+    "subject": "SSHS_KITCHEN_OPERATIONS",
+    "topic": "Salads and Salad Dressings",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "salads"
+  },
+  {
+    "subject": "SSHS_COMPUTER_SYSTEMS",
+    "topic": "Fundamental Concepts in Computer Systems Servicing",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "computer_systems"
+  },
+  {
+    "subject": "SSHS_COMPUTER_SYSTEMS",
+    "topic": "Computer System Elements",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "computer_systems"
+  },
+  {
+    "subject": "SSHS_COMPUTER_SYSTEMS",
+    "topic": "Computer Network Concepts",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "networks"
+  },
+  {
+    "subject": "SSHS_COMPUTER_SYSTEMS",
+    "topic": "Setting Up Computer Network",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "networks"
+  },
+  {
+    "subject": "SSHS_COMPUTER_SYSTEMS",
+    "topic": "Server Management",
+    "gradeLevels": [
+      "GRADE_11",
+      "GRADE_12"
+    ],
+    "content": "servers"
+  }
+]

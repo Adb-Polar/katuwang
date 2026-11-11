@@ -1,0 +1,2502 @@
+{
+  "checkedAt": "2026-11-11",
+  "method": "HTTPS GET with Mozilla/5.0 user agent; TLS verification enabled. SHS PDF text extracted with pdftotext and headings matched to PDF pages. Initial requests without browser user agent returned 403.",
+  "receipts": [
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/10",
+      "httpStatus": 200,
+      "sha256": "ec57ee9ab1c9b7831b1722233f71dbf741738c304d21ba63324f6b5a66499796",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": [
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Mga Isyung Politikal at Pangkapayapaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1271"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1237"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Mga Isyu sa Karapatang Pantao at Gender",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1272"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Kahalagahan ng Pagaaral ng mga Kontemporaryong Isyu",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1270"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Mga Isyung PangEdukasyon at Pansibiko at Pagkamamamayan Civics and Citizenship",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1273"
+        },
+        {
+          "subject": "Art",
+          "name": "Modern Art",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/749"
+        },
+        {
+          "subject": "Art",
+          "name": "Original Performance with the Use of Media",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/755"
+        },
+        {
+          "subject": "Art",
+          "name": "Technologybased Art",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/751"
+        },
+        {
+          "subject": "Art",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1238"
+        },
+        {
+          "subject": "Art",
+          "name": "Mediabased Arts and Design in the Philippines",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/754"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Moral na Pagkatao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/910"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Pagmamahal  sa Bayan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1714"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Aking Posisyon sa mga Isyung Moral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/915"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Makataong Kilos",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/912"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Pangangalaga sa Kalikasan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1715"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1239"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Mga Pangunahing Birtud at Pagpapahalagang Moral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/914"
+        },
+        {
+          "subject": "English",
+          "name": "Oral Language and Fluency",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1375"
+        },
+        {
+          "subject": "English",
+          "name": "Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1373"
+        },
+        {
+          "subject": "English",
+          "name": "Viewing Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1371"
+        },
+        {
+          "subject": "English",
+          "name": "Reading Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1369"
+        },
+        {
+          "subject": "English",
+          "name": "World Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1010"
+        },
+        {
+          "subject": "English",
+          "name": "Grammar Awareness",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1376"
+        },
+        {
+          "subject": "English",
+          "name": "Writing and Composition",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1374"
+        },
+        {
+          "subject": "English",
+          "name": "Vocabulary Development",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1372"
+        },
+        {
+          "subject": "English",
+          "name": "Listening Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1370"
+        },
+        {
+          "subject": "English",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1240"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Wika at Gramatika",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1429"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsasalita",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1427"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Paglinang ng Talasalitaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1425"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Napakinggan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1423"
+        },
+        {
+          "subject": "Filipino",
+          "name": "El Filibusterismo sa Nagbabagong Daigdig",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1103"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panitikan ng mga Bansa sa Kanluran",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1101"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Estratehiya sa Pag-aaral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1430"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsulat",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1428"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panonood",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1426"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Binasa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1424"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1241"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panitikan ng Africa at Persia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1102"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panitikang Mediterranean",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1100"
+        },
+        {
+          "subject": "Health",
+          "name": "Health Trends Issues and Concerns Global Level",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1299"
+        },
+        {
+          "subject": "Health",
+          "name": "Consumer Health",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1297"
+        },
+        {
+          "subject": "Health",
+          "name": "Planning for a Health Career",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1300"
+        },
+        {
+          "subject": "Health",
+          "name": "Health Trends Issues and Concerns National Level",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1298"
+        },
+        {
+          "subject": "Health",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1242"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Statistics and Probability",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/757"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Patterns and algebra",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/753"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1243"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Geometry",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/756"
+        },
+        {
+          "subject": "Music",
+          "name": "Contemporary Philippine Music",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1314"
+        },
+        {
+          "subject": "Music",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1250"
+        },
+        {
+          "subject": "Music",
+          "name": "20th and 21st Century Multimedia Forms",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1315"
+        },
+        {
+          "subject": "Music",
+          "name": "AfroLatin and Popular Music",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1313"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1244"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Active Recreation",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/811"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Other Dance Forms",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/814"
+        },
+        {
+          "subject": "Science",
+          "name": "Matter",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1344"
+        },
+        {
+          "subject": "Science",
+          "name": "Force Motion and Energy",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1342"
+        },
+        {
+          "subject": "Science",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1245"
+        },
+        {
+          "subject": "Science",
+          "name": "Living Things and Their Environment",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1343"
+        },
+        {
+          "subject": "Science",
+          "name": "Earth and Space",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1341"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery arts  Food Fish Processing",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/921"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Handicraft Needlecraft",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1535"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Animal Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/907"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Dressmaking",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1516"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Bread and Pastry Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1507"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Agri-Fishery Arts - Organic Agriculture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1484"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Industrial Arts  Automotive Servicing",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1449"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Technical Drafting",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/943"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Contact Center Services",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/934"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Household Services",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/929"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Animation",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1564"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Aquaculture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/917"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Front Office Services",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1521"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Agricultural Crop Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/901"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Cookery",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1513"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Agri-Fishery Arts - Pest Management",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1488"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Agri-Fishery Arts - Organic Agriculture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1480"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1246"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Illustration",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/938"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Computer Hardware Servicing",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/933"
+        },
+        {
+          "subject": "TLE- Industrial Arts - Masonry NC II",
+          "name": "Industrial Arts",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/350/2"
+        }
+      ]
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/11",
+      "httpStatus": 200,
+      "sha256": "7d20aba70da24a520d08dc4dfd54f2d0dbbec5d56e4ca1ced7e9eae235421af2",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": []
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/12",
+      "httpStatus": 200,
+      "sha256": "39988431ed8fb22384aad037b9f7ec4b3d9d4807569726f8ee9b91151ec9b0dd",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": []
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/7",
+      "httpStatus": 200,
+      "sha256": "bd7a40114067aedf1289a0855664ba7bc942b18287bae98edabfb138554cffc7",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": [
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Kolonyalismo at Imperyalismo sa Timog at Kanlurang Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1261"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Paghubog ng Sinaunang Kabihasnan sa Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1259"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1202"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Kolonyalismo at Imperyalismo sa Timog at Kanlurang Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1260"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Katangiang Pisikal ng Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1258"
+        },
+        {
+          "subject": "Arts",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1203"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts and Crafts of Mindanao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/699"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts and Crafts of Luzon Highlands and Lowlands",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/692"
+        },
+        {
+          "subject": "Arts",
+          "name": "Festivals and Theatrical Forms",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/701"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts and Crafts of MIMAROPA Mindoro Marinduque Romblon and Palawan and the Visayas",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/694"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Pagtatakda ng Mithiin at Pagpapasiya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/883"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Pagkatao ng Tao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/880"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1204"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Pagpapahalaga at Birtud",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/882"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Pagkilala at Pamamahala sa mga Pagbabago sa Sarili",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/874"
+        },
+        {
+          "subject": "English",
+          "name": "Philippine Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1007"
+        },
+        {
+          "subject": "English",
+          "name": "Grammar Awareness",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1352"
+        },
+        {
+          "subject": "English",
+          "name": "Writing and Composition",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1350"
+        },
+        {
+          "subject": "English",
+          "name": "Vocabulary Development",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1348"
+        },
+        {
+          "subject": "English",
+          "name": "Listening Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1346"
+        },
+        {
+          "subject": "English",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1206"
+        },
+        {
+          "subject": "English",
+          "name": "Oral Language and Fluency",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1351"
+        },
+        {
+          "subject": "English",
+          "name": "-",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1349"
+        },
+        {
+          "subject": "English",
+          "name": "Viewing Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1347"
+        },
+        {
+          "subject": "English",
+          "name": "Reading Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1345"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Napakinggan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1399"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Ibong Adarna: Isang Obra Maestra",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1091"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panitikang Bisaya: Repleksiyon ng Kabisayaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1089"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Estratehiya sa Pag-aaral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1406"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsulat",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1404"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panonood",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1402"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Binasa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1400"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1207"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panitikang Luzon: Larawan ng Pagkakakilanlan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1090"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Mga Akdang Pampanitikan: Salamin ng Mindanao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1088"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Wika at Gramatika",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1405"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsasalita",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1403"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Paglinang ng Talasalitaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1401"
+        },
+        {
+          "subject": "Health",
+          "name": "Injury Prevention, Safety and First Aid",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1288"
+        },
+        {
+          "subject": "Health",
+          "name": "Nutrition",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1286"
+        },
+        {
+          "subject": "Health",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1208"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention and Control of Diseases and Disorders (Non-communicable Diseases)",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1712"
+        },
+        {
+          "subject": "Health",
+          "name": "Personal Health",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1287"
+        },
+        {
+          "subject": "Health",
+          "name": "Growth and Development",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1285"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1209"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Statistics and Probability",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/247"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Geometry",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/245"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Patterns and Algebra",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/248"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Measurement",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/246"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Numbers and Number Sense",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/244"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of Mindanao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/526"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of Luzon Lowlands",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/521"
+        },
+        {
+          "subject": "Music",
+          "name": "Philippine Festivals",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/528"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of Cordillera Mindoro Palawan and the Visayas",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/524"
+        },
+        {
+          "subject": "Music",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1210"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Folk Indigenous Ethnic Traditional and Festival Dance",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1317"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1211"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Folk, Indigenous, Ethnic, Traditional and Festival Dance",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1318"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Dual Sports",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1316"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Individual Sports Dual Sports and Combative Sports",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/803"
+        },
+        {
+          "subject": "Science",
+          "name": "Earth and Space",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/627"
+        },
+        {
+          "subject": "Science",
+          "name": "Living Things and Their Environment",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/621"
+        },
+        {
+          "subject": "Science",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1212"
+        },
+        {
+          "subject": "Science",
+          "name": "Force Motion and Energy",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/622"
+        },
+        {
+          "subject": "Science",
+          "name": "Matter",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/422"
+        },
+        {
+          "subject": "TLE - Industrial Arts Technical Drafting",
+          "name": "Home Economics",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/175/1"
+        }
+      ]
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/8",
+      "httpStatus": 200,
+      "sha256": "1df0583b573c7f4527561ad07c581f8a4039ab8a1337fbe9210b1c4121f61890",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": [
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Ang Unang Digmaang Pandaigdig",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1265"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Ang Pagsisimula ng mga Kabihasnan sa Daigdig",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1263"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1214"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Paglakas ng Europa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1264"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Heograpiya ng Daigdig",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1262"
+        },
+        {
+          "subject": "Arts",
+          "name": "Festivals and Theatrical Forms of Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/723"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts of East Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/712"
+        },
+        {
+          "subject": "Arts",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1215"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts of South West And Central Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/722"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts of Southeast Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/711"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Pakikipagkapwa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/886"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1216"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Mga Pagpapahalaga at Birtud sa Pakikipagkapwa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/887"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Pamilya Bilang Ugat ng Pakikipagkapwa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/885"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Mga Isyu sa Pakikipagkapwa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/888"
+        },
+        {
+          "subject": "English",
+          "name": "Writing and Composition",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1358"
+        },
+        {
+          "subject": "English",
+          "name": "Vocabulary Development",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1356"
+        },
+        {
+          "subject": "English",
+          "name": "Listening Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1354"
+        },
+        {
+          "subject": "English",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1218"
+        },
+        {
+          "subject": "English",
+          "name": "Oral Language and Fluency",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1359"
+        },
+        {
+          "subject": "English",
+          "name": "Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1357"
+        },
+        {
+          "subject": "English",
+          "name": "Viewing Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1355"
+        },
+        {
+          "subject": "English",
+          "name": "Reading Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1353"
+        },
+        {
+          "subject": "English",
+          "name": "Afro-Asian Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1008"
+        },
+        {
+          "subject": "English",
+          "name": "Grammar Awareness",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1360"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Estratehiya sa Pag-aaral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1414"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsulat",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1412"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Panonood",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1410"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Binasa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1408"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1219"
+        },
+        {
+          "subject": "Filipino",
+          "name": "---Kontemporaryong Panitikan Tungo sa Kultura at Panitikang Popular",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1094"
+        },
+        {
+          "subject": "Filipino",
+          "name": "---Salamin ng Kahapon...Bakasin Natin Ngayon",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1092"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Wika at Gramatika",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1413"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsasalita",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1411"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Paglinang ng Talasalitaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1409"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Napakinggan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1407"
+        },
+        {
+          "subject": "Filipino",
+          "name": "---Florante at Laura: Isang Obra Maestrang Pampanitikan ng Pilipinas",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1095"
+        },
+        {
+          "subject": "Filipino",
+          "name": "---Sandigan ng Lahi... Ikarangal Natin",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1093"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention of Substance Use and Abuse (Gateway Drugs: Cigarette and Alcohol)",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1456"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention and Control of Diseases and Disorders Communicable",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1291"
+        },
+        {
+          "subject": "Health",
+          "name": "Family Health I",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1289"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention and Control of Diseases and Disorders (Non-communicable Diseases)",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1292"
+        },
+        {
+          "subject": "Health",
+          "name": "Family Health II",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1290"
+        },
+        {
+          "subject": "Health",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1220"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1221"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Geometry",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/251"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Statistics and probability",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/252"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Patterns and Algebra",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/249"
+        },
+        {
+          "subject": "Music",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1222"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of South Asia and the Middle East",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/543"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of Southeast Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/531"
+        },
+        {
+          "subject": "Music",
+          "name": "Traditional Asian Theater Music",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/546"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of East Asia",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/532"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Folk Dances with Asian Influence",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/809"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1223"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Team Sports",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/489"
+        },
+        {
+          "subject": "Science",
+          "name": "Living Things and Their Environment",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1336"
+        },
+        {
+          "subject": "Science",
+          "name": "Earth and Space",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1334"
+        },
+        {
+          "subject": "Science",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1224"
+        },
+        {
+          "subject": "Science",
+          "name": "Matter",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1335"
+        },
+        {
+          "subject": "Science",
+          "name": "Force Motion and Energy",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1333"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/187/1"
+        }
+      ]
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/grade/9",
+      "httpStatus": 200,
+      "sha256": "b3910582137b4267094eedf8bc7138f008e367ddf6a06cb1c41975f229a874a8",
+      "checkedAt": "2026-11-11",
+      "type": "grade-index",
+      "domainLinks": [
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1226"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Paikot na Daloy ng Ekonomiya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1268"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Kahulugan ng Ekonomiks",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1266"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Konsepto at Palatandaan ng Pambansang Kaunlaran",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1269"
+        },
+        {
+          "subject": "Araling Panlipunan",
+          "name": "Demand",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1267"
+        },
+        {
+          "subject": "Arts",
+          "name": "Western Classical Plays and Operas",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/745"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts of the Renaissance and Baroque Period",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/731"
+        },
+        {
+          "subject": "Arts",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1227"
+        },
+        {
+          "subject": "Arts",
+          "name": "Arts of the Neoclassic and Romantic Period",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/735"
+        },
+        {
+          "subject": "Arts",
+          "name": "Western and Classical Art Traditions",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/730"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Mapanagutang Pagpaplano ng Kursong Akademiko o TeknikalBokasyonal Negosyo o Hanapbuhay",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/909"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Tungkulin ng Tao sa Lipunan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/905"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1228"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Mga Kaugnay na Pagpapahalaga sa Paggawa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/908"
+        },
+        {
+          "subject": "Edukasyon sa Pagpapakatao",
+          "name": "Ang Papel ng Lipunan sa Tao",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/903"
+        },
+        {
+          "subject": "English",
+          "name": "Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1365"
+        },
+        {
+          "subject": "English",
+          "name": "Viewing Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1363"
+        },
+        {
+          "subject": "English",
+          "name": "Reading Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1361"
+        },
+        {
+          "subject": "English",
+          "name": "British-American Literature",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1009"
+        },
+        {
+          "subject": "English",
+          "name": "Grammar Awareness",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1368"
+        },
+        {
+          "subject": "English",
+          "name": "Writing and Composition",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1366"
+        },
+        {
+          "subject": "English",
+          "name": "Vocabulary Development",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1364"
+        },
+        {
+          "subject": "English",
+          "name": "Listening Comprehension",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1362"
+        },
+        {
+          "subject": "English",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1229"
+        },
+        {
+          "subject": "English",
+          "name": "Oral Language and Fluency",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1367"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Wika at Gramatika",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1421"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsasalita",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1419"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Binasa",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1416"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1230"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Mga Akdang Pampanitikan ng Kanlurang Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1098"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Estratehiya sa Pag-aaral",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1422"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pagsulat",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1420"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Paglinang ng Talasalitaan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1417"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Pag-unawa sa Napakinggan",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1415"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Noli Me Tangere sa Puso ng mga Asyano",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1099"
+        },
+        {
+          "subject": "Filipino",
+          "name": "Mga Akdang Pampanitikan ng Silangang Asya",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1097"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention of Substance Use and Abuse (Gateway Drugs: Cigarette and Alcohol)",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1296"
+        },
+        {
+          "subject": "Health",
+          "name": "Injury Prevention Safety and First Aid Unintentional",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1294"
+        },
+        {
+          "subject": "Health",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1231"
+        },
+        {
+          "subject": "Health",
+          "name": "Injury Prevention, Safety and First Aid (Intentional)",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1457"
+        },
+        {
+          "subject": "Health",
+          "name": "Prevention of Substance Use and Abuse Drug Scenario",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1295"
+        },
+        {
+          "subject": "Health",
+          "name": "Community and Environmental Health",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1293"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1232"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Patterns and Algebra",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/747"
+        },
+        {
+          "subject": "Mathematics",
+          "name": "Geometry",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/750"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of Medieval 7001400",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/549"
+        },
+        {
+          "subject": "Music",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1233"
+        },
+        {
+          "subject": "Music",
+          "name": "Instrumental Music of the Romantic Period 18201900",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/553"
+        },
+        {
+          "subject": "Music",
+          "name": "Renaissance Period 14001600",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/550"
+        },
+        {
+          "subject": "Music",
+          "name": "Vocal Music of the Romantic Period",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/554"
+        },
+        {
+          "subject": "Music",
+          "name": "Music of the Classical Period 17501820",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/552"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Active Recreation",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1321"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1234"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Social and Ballroom Dances",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1320"
+        },
+        {
+          "subject": "Physical Education",
+          "name": "Lifestyle and Weight Management",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/884"
+        },
+        {
+          "subject": "Science",
+          "name": "Earth and Space",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1339"
+        },
+        {
+          "subject": "Science",
+          "name": "Living Things and Their Environment",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1337"
+        },
+        {
+          "subject": "Science",
+          "name": "Force Motion and Energy",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1340"
+        },
+        {
+          "subject": "Science",
+          "name": "Matter",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1338"
+        },
+        {
+          "subject": "Science",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1235"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Horticulture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/922"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Bread and Pastry Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1506"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Animal Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/906"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Organic Agriculture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1483"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Industrial Arts  Electrical",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1390"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Handicraft",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1383"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Dressmaking",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1381"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Curriculum Guide",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1236"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Animation",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1563"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Technical Drafting",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/942"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Wellness Massage",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1546"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and communications Technology  Computer hardware Servicing",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/932"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Hairdressing",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1523"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Aquaculture",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/916"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Slaughtering Operations HogSwinePig",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1495"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "AgriFishery Arts  Agricultural Crop Production",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/899"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Industrial Arts  Shielded Metal Arc Welding",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1392"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Industrial Arts  Electronics",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1387"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Front Office",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1382"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Cookery",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1380"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Beauty Care Nail Care Services",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/997"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Tailoring",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1547"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Information and Communications Technology  Contact Center Services",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/937"
+        },
+        {
+          "subject": "Technology and Livelihood Education",
+          "name": "Home Economics  Housekeeping",
+          "url": "https://lrmds.deped.gov.ph/list/kto12/subject/1542"
+        },
+        {
+          "subject": "TLE- Industrial Arts - Masonry NC II",
+          "name": "Industrial Arts",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/351/2"
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Effective-Communication-1.pdf",
+      "httpStatus": 200,
+      "sha256": "a9a72252789579bee0a73efa1968b35cc0d66ab72df08bfc2a180b29a0f672c8",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Effective Communication in Personal and Interpersonal Contexts",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Effective Communication in Social and Cultural Contexts",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Effective Communication in Academic and Training Contexts",
+          "pdfPage": 6
+        },
+        {
+          "topic": "Effective Communication in Professional and Work Contexts",
+          "pdfPage": 8
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/GENERAL-MATHEMATICS-1.pdf",
+      "httpStatus": 200,
+      "sha256": "bc574279387d94de424cccfb451bd81a8b36fa878623de3b74d8138da9da41e4",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Numbers and Algebra",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Measurement and Geometry",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Data and Probability",
+          "pdfPage": 5
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/GENERAL-SCIENCE-1.pdf",
+      "httpStatus": 200,
+      "sha256": "80b5fffbe358518fc7b578833c14008412272e8899b09694bb1eef3724ca6610",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Physics",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Chemistry",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Biology",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Earth and Space Science",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/LIFE-AND-CAREER-SKILLS-1.pdf",
+      "httpStatus": 200,
+      "sha256": "f05a792b7c125c431e4c815fedea026c199bb761920ad144b403aabd55970370",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Life Skills toward Personal Development",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Life Skills toward Social Competence",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Life Skills toward Career Competence",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Life Skills toward Career Readiness",
+          "pdfPage": 6
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/MABISANG-KOMUNIKASYON-1.pdf",
+      "httpStatus": 200,
+      "sha256": "1f9120efeaf6f9e1173195900477936ab2f3911c1da8a9ec3f1ff216932499e1",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Mabisang Komunikasyon sa Kontekstong Personal at Interpersonal",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Mabisang Komunikasyon sa Kontekstong Sosyal at Kultural",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Mabisang Komunikasyon sa Kontekstong Akademiko at Pampagsasanay",
+          "pdfPage": 7
+        },
+        {
+          "topic": "Mabisang Komunikasyon sa Kontekstong Propesyonal at Pantrabaho",
+          "pdfPage": 9
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/PAG-AARAL-NG-KASAYSAYAN-AT-LIPUNANG-PILIPINO-1.pdf",
+      "httpStatus": 200,
+      "sha256": "1e81d5650bb00cb456b5a161d3444c6830543032b5fd0beaf960dc20e3ee9377",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Kamalayang Pangkasaysayan",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Kamalayang Pilipino",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Kamalayang Panlikas-kayang Pag-unlad",
+          "pdfPage": 6
+        },
+        {
+          "topic": "Kamalayan sa Pagkamamamayang Pilipino at Global",
+          "pdfPage": 7
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/CREATIVE-PRODUCTION-AND-PRESENTATION.pdf",
+      "httpStatus": 200,
+      "sha256": "80e76b134b22beac4bc8c6fd065d87259de7e4a22c3382cef3a537b1dbd75cd7",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Concept and Proposal Development",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Creative Execution and Iteration",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Public Presentation and Audience Engagement",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/1-Updated-as-of-05.29.26_Advanced-Mathematics.pdf",
+      "httpStatus": 200,
+      "sha256": "50081ba5971baf5b07d1893fa233989c3999c6e1c1dce241a806108e308513d4",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Basic Mathematical Modeling",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Angles and Their Measures",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Trigonometric Functions",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Trigonometric Identities",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/2-Updated-as-of-05.29.26_Basic-Calculus.pdf",
+      "httpStatus": 200,
+      "sha256": "1ddff539672b3b310ffae0bb6552b8476c8b2f6bf8c85a3f75cc355dac0f5181",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Limits and Continuity",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Derivatives and Tangents",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Rules of Differentiation",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Applications of Derivatives",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Antiderivatives (Indefinite Integrals)",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Definite Integrals and Area",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/BIOLOGY-3.pdf",
+      "httpStatus": 200,
+      "sha256": "f8bd87faf1aaae8b42c5ab63415aba5b93a03088445d64ccc69acb5f5913ad7f",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Molecular Genetics and Inheritance",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Evolution and Biotechnology",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/CHEMISTRY-3.pdf",
+      "httpStatus": 200,
+      "sha256": "85ca8109ef84d038c73a398b5a03de926164f5f47e56631c6960805e8de4c92e",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Strength and Concentration of Acids and Bases",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Acid-Base Titrations",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Buffer Systems",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Chemical Equilibrium",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Separation of Mixtures",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Instrumental Analysis (Colorimetry)",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Redox Reactions",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Galvanic Cells",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Electrochemical Potentials",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Electrolysis",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Applications of Electrochemistry",
+          "pdfPage": 6
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/5-Updated-as-of-05.29.26_Database-Management.pdf",
+      "httpStatus": 200,
+      "sha256": "05ce9739da44267f72c14754f6429d9da268f6b7d8933435964cb86e30d7f92b",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Introduction to Databases",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Introduction to SQL",
+          "pdfPage": 2
+        },
+        {
+          "topic": "SQL Commands",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/6-Updated-as-of-05.29.26_Fundamentals-of-Data-Analytics.pdf",
+      "httpStatus": 200,
+      "sha256": "b11bc1ac9325a09401aebf9ba7a1492a2ed6d3e363f936df55d6c81d44cd9f89",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Data Privacy and Ethics",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Data Sources and Collection Methods",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Data Processing",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Data Storytelling",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Data Analytics Project",
+          "pdfPage": 5
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/PHYSICS-3.pdf",
+      "httpStatus": 200,
+      "sha256": "b56f4424d82f3ffe372462965222e46f863be70f62b9527ba235f9e6f02ccb19",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Electrostatics",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Current Electricity",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Magnetism",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Electromagnetism",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Pre-Calculus.pdf",
+      "httpStatus": 200,
+      "sha256": "2da05c268ce1c2dd4f1ca48099f526528fb2ef705d0b25aff7a87de5b03988a0",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Lines and Circles",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Graph Transformations",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Polynomial Functions",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Rational Functions",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Exponential and Logarithmic Functions",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Research-1.pdf",
+      "httpStatus": 200,
+      "sha256": "b4f22b92c10576321609c0ddac8d448c041b9805d9a9022914218fe0c622dc5d",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Foundations of Research",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Research Ethics",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Review of Literature for Identifying Research Problems",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Research Design and Methodology",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Research Proposal Development",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Research-2.pdf",
+      "httpStatus": 200,
+      "sha256": "12220288373461171e4737a8d7e001e8f84a0d9592954b6ab43edce3f45b8a05",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Instrument Development and Validation",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Data Collection",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Data Analysis and Interpretation",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Writing the Research Report",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Research Presentation and Defense",
+          "pdfPage": 3
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Citizenship-and-Civic-Engagement-1.pdf",
+      "httpStatus": 200,
+      "sha256": "a268e555f7f6a4bf4fb4bd4d167b65f6b909c3c47729339e59ecc8ffc72e57e7",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Citizenship in Practice",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Civic Engagement and Community Involvement",
+          "pdfPage": 5
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Contemporary-Literature-1-1.pdf",
+      "httpStatus": 200,
+      "sha256": "79d293d6d796e8409ca11537c206bc5148ef6184cdf5dd6dc15c34187e623468",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Literature as Mirror: Textual Reflections",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Literature as Window: Textual Perspectives",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Introduction-to-Philosophy-1.pdf",
+      "httpStatus": 200,
+      "sha256": "615588d3d11ad4ab3de0c2b8c87d28fb205b93712f57a9ecf5f4ca1e885915fb",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Introduction to Philosophy",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Philosophy of the Human Person",
+          "pdfPage": 3
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Philippine-Governance-Philippine-Politics-and-Governance-1.pdf",
+      "httpStatus": 200,
+      "sha256": "94569a8e22bae115bfb1932e7baabaa6de9c0cc56b6df08a8018e8ed9b2c058c",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Philippine Politics and Governance",
+          "pdfPage": 2
+        },
+        {
+          "topic": "The Structure of Philippine Government",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Business-1-Basic-Accounting-1.pdf",
+      "httpStatus": 200,
+      "sha256": "17413049b491594614589f5f3eba43a986770f74211f3812122b73908c3ca240",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Introduction to Accounting for Service Business",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Accounting Cycle for a Merchandising Business using the Perpetual and Periodic Methods",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Business-2-Business-Finance-and-Income-Taxation-1.pdf",
+      "httpStatus": 200,
+      "sha256": "3c09bb19b355b3acfd93280a145258fc6761cd4e178660bf7eb5010732008cb6",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Financial Management, Investment, and Money in the Business Environment",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Principles and Purpose of Income Taxation",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Business-3-Business-Economics-1.pdf",
+      "httpStatus": 200,
+      "sha256": "6fc820f6e2e74a270d66b6f7f6b53bea615b6b03ba35a8e3328021125db159e8",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Economics in the Business Environment",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Socio-Economic Issues in the Business Environment",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Contemprary-Marketing-1.pdf",
+      "httpStatus": 200,
+      "sha256": "7b9436462abf65b769ffbb1a06981bcb85385f8b0cf3fe71432eebdc9b7c3904",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "The Fundamentals of Marketing",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Marketing Mix, Analytics and Planning Process",
+          "pdfPage": 3
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Entrepreneurship-1.pdf",
+      "httpStatus": 200,
+      "sha256": "ca70003c28a61ed8f7df1ac55c216bf8c62b5d37bf4c4a3c86e343af35ffbac2",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Nature of Entrepreneurship and Business Planning",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Business Simulation and Evaluation",
+          "pdfPage": 3
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Introduction-to-Organization-and-Management-1.pdf",
+      "httpStatus": 200,
+      "sha256": "6288fcba796da847df8015758b913397b15397256316fe16e919f0a02070d81f",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "The Nature, Concept, and Function of Management",
+          "pdfPage": 2
+        },
+        {
+          "topic": "The Nature of Controlling, Concepts and Social Responsibilities of Small and Medium Enterprises (SMEs)",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Biology-1-1.pdf",
+      "httpStatus": 200,
+      "sha256": "f82f53a57834c69fc9ad509bca266b7863d2e88a463fb47aadc7b2e6a1969bf1",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Cell Biology",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Cell Metabolism",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Chemistry-1.pdf",
+      "httpStatus": 200,
+      "sha256": "7af7a27c73e17ea275149940470fd750314a915121b8e65ab681a4fd7c37c19e",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Scientific measurement",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Electronic Structure of Atoms",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Chemical Bonds",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Physics-1-1.pdf",
+      "httpStatus": 200,
+      "sha256": "d1a4ce7818551728483950b64b6f2844ad6d16ea0ba134ef1101f527c06d2c3f",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Measurements and Translational Kinematics",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Dynamics",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Physical-Education-1-Fitness-and-Recreation-1.pdf",
+      "httpStatus": 200,
+      "sha256": "5628a1a7fea1d23d454af61af8004c5d4102ba82ee8161fb5b16ea11e88e82e9",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Fitness",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Recreation",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Physical-Education-2-Sports-and-Dance-1.pdf",
+      "httpStatus": 200,
+      "sha256": "172700acfae0bd6d1024823fb181c6163f8fba70e0e04d77f06f7acc28fa6026",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Sports",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Dance",
+          "pdfPage": 2
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Agricultural-Crops-Production-1.pdf",
+      "httpStatus": 200,
+      "sha256": "17ab596658ec981c76d4771a4e02ed8fd8c03f91cf16c446e65a9cf9d08cb6c0",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Overview of Agricultural Crops Production",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Safety Standards in Agricultural Crops Production",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Farm Tools, Implements, and Equipment",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Kinds of Planting Materials",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Crop Requirements",
+          "pdfPage": 5
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Bakery-Operations-1.pdf",
+      "httpStatus": 200,
+      "sha256": "3cddf915de3c1e29fe592d2a521456937dcade3fc7d1e73f785233ed8664a09a",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Overview of Baking Industry",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Baking Tools & Equipment",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Baking Techniques",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Bread Products",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Food Safety & Sanitation",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Packaging and Marketing Bakery Products",
+          "pdfPage": 4
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Kitchen-Operations-1.pdf",
+      "httpStatus": 200,
+      "sha256": "54f73e14f171e8232244f10a7db4965ecc62d0222852a5aa273077b6ab2a6982",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Kitchen Math",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Stocks, Soup, and Sauces",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Appetizers",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Salads and Salad Dressings",
+          "pdfPage": 6
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/wp-content/uploads/Computer-Systems-Servicing-1.pdf",
+      "httpStatus": 200,
+      "sha256": "983618a043067255bfa27bd0568415513e801a8f6e0ffa6dded1677f4c1c5b3a",
+      "checkedAt": "2026-11-11",
+      "type": "curriculum-guide",
+      "topicEvidence": [
+        {
+          "topic": "Fundamental Concepts in Computer Systems Servicing",
+          "pdfPage": 2
+        },
+        {
+          "topic": "Computer System Elements",
+          "pdfPage": 3
+        },
+        {
+          "topic": "Computer Network Concepts",
+          "pdfPage": 4
+        },
+        {
+          "topic": "Setting Up Computer Network",
+          "pdfPage": 5
+        },
+        {
+          "topic": "Server Management",
+          "pdfPage": 5
+        }
+      ]
+    },
+    {
+      "url": "https://www.deped.gov.ph/strengthened-shs-program/",
+      "httpStatus": 200,
+      "sha256": "65b0c1f656f98afacf97646086669a0152165de16692c6778c59905021c23ada",
+      "checkedAt": "2026-11-11",
+      "type": "official-curriculum-structure-page"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/shs/track/11/905",
+      "httpStatus": 200,
+      "sha256": "1e7bde5c4f04c75a21f10ea818f0dd3b9ca565cd0c3b218bca0bdfe4fb4da723",
+      "checkedAt": "2026-11-11",
+      "type": "official-curriculum-structure-page"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/shs/track/12/905",
+      "httpStatus": 200,
+      "sha256": "e760dd498200114bef0ee24ae8def03c1a713319ee1e39a161f58ab080334f15",
+      "checkedAt": "2026-11-11",
+      "type": "official-curriculum-structure-page"
+    },
+    {
+      "url": "https://www.deped.gov.ph/matatagcurriculumk147/",
+      "httpStatus": 200,
+      "sha256": "4116cac95bd8ed50526bb65e55d2fce11b9da391e5f0bb0a1db308a76f07ef65",
+      "checkedAt": "2026-11-11",
+      "type": "official-curriculum-structure-page"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5455",
+      "httpStatus": 200,
+      "sha256": "67117f87dce850a9e196c5fc959dc2f80d1d2b506182b80e56c5b1d7371ad6a1",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5459",
+      "httpStatus": 200,
+      "sha256": "f4c895bfd0fae0730712a9d247857740486a36631e2eaba4555d2701e19ec9bd",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5449",
+      "httpStatus": 200,
+      "sha256": "61e733accb4062745a4243e54e4bd39f423c43d6b2fe689fdce78732aa243d6a",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5447",
+      "httpStatus": 200,
+      "sha256": "e5a2ec75e52d38e076330b82eef942f51dc4150e577148edc572249be03f82c5",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5448",
+      "httpStatus": 200,
+      "sha256": "bd91ac7af46ff1b298c9814b03845026e0cf69b82de1575aeb167d7efb2fc297",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5457",
+      "httpStatus": 200,
+      "sha256": "24a66a739bb06762dd09f4d8bb26d1093bf471fa920e17806931e5857411e7c3",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5453",
+      "httpStatus": 200,
+      "sha256": "194bd2fdee606850fe8c815961e23c166f7030871edad4798a50ae3483304d86",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5458",
+      "httpStatus": 200,
+      "sha256": "7e6c29a1f118665452f8241f6e0fc5d47a12eed0f1eef5fa9182dc5f8ea9433f",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    },
+    {
+      "url": "https://lrmds.deped.gov.ph/detail/5451",
+      "httpStatus": 200,
+      "sha256": "a83fbd4ad24b31f7fef3b029024e3792ec51fdbdf92d87c510b907e588e1b0bf",
+      "checkedAt": "2026-11-11",
+      "type": "guide-metadata-only"
+    }
+  ],
+  "exclusions": [
+    {
+      "grade": 7,
+      "subject": "TLE - Industrial Arts Technical Drafting",
+      "reason": "Ambiguous learning-area/specialization label; not imported.",
+      "entries": [
+        {
+          "name": "Home Economics",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/175/1"
+        }
+      ]
+    },
+    {
+      "grade": 8,
+      "subject": "Technology and Livelihood Education",
+      "reason": "Generic Home Economics/Industrial Arts category has inconsistent learning-area placement; no grade-specific topic inferred.",
+      "entries": [
+        {
+          "name": "Home Economics",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/187/1"
+        }
+      ]
+    },
+    {
+      "grade": 9,
+      "subject": "TLE- Industrial Arts - Masonry NC II",
+      "reason": "Ambiguous learning-area/specialization label; not imported.",
+      "entries": [
+        {
+          "name": "Industrial Arts",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/351/2"
+        }
+      ]
+    },
+    {
+      "grade": 10,
+      "subject": "TLE- Industrial Arts - Masonry NC II",
+      "reason": "Ambiguous learning-area/specialization label; not imported.",
+      "entries": [
+        {
+          "name": "Industrial Arts",
+          "url": "https://lrmds.deped.gov.ph/jhs_subjects/350/2"
+        }
+      ]
+    }
+  ]
+}

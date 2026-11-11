@@ -14,6 +14,9 @@ const SUBJECT_KEYWORDS: Record<string, string[]> = {
   SCIENCE: ["science", "biology", "chemistry", "physics", "cell", "genetics", "chemical", "ecosystem", "environment", "energy", "motion", "space"],
   FILIPINO: ["filipino", "balarila", "gramatika", "panitikan", "sanaysay", "pagbasa", "pagsulat", "pagsasalin", "retorika", "wika"],
   ARALING_PANLIPUNAN: ["araling", "panlipunan", "history", "kasaysayan", "ekonomiks", "economics", "geography", "heograpiya", "civics", "pamahalaan"],
+  JHS_ARALING_PANLIPUNAN: ["araling", "panlipunan", "history", "kasaysayan", "ekonomiks", "economics", "geography", "heograpiya", "civics", "pamahalaan"],
+  JHS_EDUKASYON_PAGPAPAKATAO: ["values", "moral", "pakikipagkapwa", "edukasyon", "pagpapakatao"],
+  TLE: ["tle", "livelihood", "cooking", "cookery", "ict", "agriculture", "industrial", "home economics", "welding", "servicing"],
   MISCELLANEOUS: ["miscellaneous", "tle", "livelihood", "cooking", "cookery", "baking", "pastry", "ict", "agriculture", "industrial", "home economics", "welding", "servicing", "cabling"],
   BUSINESS_ENTREPRENEURSHIP: ["business", "entrepreneurship", "accounting", "accountancy", "payroll", "marketing", "finance"],
   RESEARCH_DIGITAL_LITERACY: ["research", "qualitative", "quantitative", "digital literacy", "fact-checking", "web design", "media literacy"],
@@ -37,7 +40,7 @@ export async function extractCriteria(message: string): Promise<ExtractedCriteri
   for (const entry of catalog) {
     const s = entry.slug;
     const keywords = [entry.name.toLowerCase(), s.toLowerCase().replace(/_/g, " "), ...(SUBJECT_KEYWORDS[s] ?? [])];
-    const hits = keywords.filter(keyword => text.includes(keyword)).length + entry.topics.filter(topic => text.includes(topic.name.toLowerCase())).length;
+    const hits = (text.includes(entry.name.toLowerCase()) ? 100 + entry.name.length : 0) + keywords.filter(keyword => text.includes(keyword)).length + entry.topics.filter(topic => text.includes(topic.name.toLowerCase())).length;
     if (hits > subjectHits) {
       subject = s;
       subjectHits = hits;

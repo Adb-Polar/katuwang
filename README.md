@@ -93,8 +93,20 @@ pnpm test                 # run tests once (Vitest)
 pnpm test:watch           # tests in watch mode
 pnpm build && pnpm start  # production build
 npx prisma studio         # DB GUI
-pnpm exec tsx prisma/seed.ts  # seed the database
+pnpm seed                 # import the researched Grade 7–12 subject/topic catalog
 ```
+
+The default seed imports **47 subjects, 292 topics, and 408 grade associations** from
+`src/lib/verifiedSubjectCatalog.json`. It preserves historical records and uses
+idempotent upserts. It does not create demo accounts or classes.
+Use `pnpm seed:curriculum` to preview the import without writing to the database.
+
+The question bank has **5,840 draft questions, 20 per topic**. Run
+`pnpm questions:validate` to check the files and `pnpm seed:questions --dry-run`
+to preview the database import. Use `pnpm seed:questions` to append the bank
+after the catalog and an administrator exist. Imported questions are
+`UNREVIEWED` and need administrator review before qualification use. See
+[QUESTION_BANK.md](QUESTION_BANK.md) for the data, answer-key CSV, and commands.
 
 ## Project Docs
 

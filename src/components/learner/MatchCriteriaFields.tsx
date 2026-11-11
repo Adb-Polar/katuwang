@@ -5,6 +5,7 @@ import CatalogLoadState from "@/components/ui/CatalogLoadState";
 import { Plus, Trash2 } from "lucide-react";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 
 export interface PreferredSlot {
@@ -49,7 +50,7 @@ export default function MatchCriteriaFields({
   showFormatFilter?: boolean;
   gradeLocked?: boolean;
 }) {
-  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(gradeRequired ? value.gradeLevel : undefined);
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(value.gradeLevel || undefined);
   const set = (patch: Partial<MatchCriteriaValue>) => onChange({ ...value, ...patch });
 
   const toggleTopic = (topic: string) =>
@@ -73,7 +74,7 @@ export default function MatchCriteriaFields({
             value={value.gradeLevel}
             required={gradeRequired}
             disabled={gradeLocked}
-            onChange={(e) => set({ gradeLevel: e.target.value, ...(gradeRequired ? { subject: "", topics: [] } : {}) })}
+            onChange={(e) => set({ gradeLevel: e.target.value, subject: "", topics: [] })}
           >
             <option value="">{gradeRequired ? "Select grade" : "Any grade"}</option>
             {GRADE_LEVELS.map((g) => (
@@ -114,6 +115,8 @@ export default function MatchCriteriaFields({
           </FormField>
         )}
       </div>
+
+      <CatalogCurriculumHint subject={subjects.find((subject) => subject.slug === value.subject)} />
 
       <FormField
         label={`Topics${value.topics.length > 0 ? ` (${value.topics.length} selected)` : ""}`}

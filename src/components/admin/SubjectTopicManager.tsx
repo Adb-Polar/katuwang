@@ -11,6 +11,7 @@ import CatalogGradePicker from "./CatalogGradePicker";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadErrorState from "@/components/ui/LoadErrorState";
+import { CURRICULUM_GRADES, readGradeLevels } from "@/lib/curriculum";
 
 interface TopicRow {
   id: string;
@@ -151,6 +152,8 @@ export default function SubjectTopicManager() {
   const [success, setSuccess] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [topicQuery, setTopicQuery] = useState("");
+  const [topicGrade, setTopicGrade] = useState("");
 
   const [newSubjectName, setNewSubjectName] = useState("");
   const [newSubjectSlug, setNewSubjectSlug] = useState("");
@@ -213,6 +216,9 @@ export default function SubjectTopicManager() {
   };
 
   const selected = subjects.find((s) => s.id === selectedId) ?? null;
+  const visibleTopics = (selected?.topics ?? []).filter((topic) =>
+    topic.name.toLocaleLowerCase().includes(topicQuery.trim().toLocaleLowerCase()) &&
+    (!topicGrade || readGradeLevels(topic.gradeLevels).includes(topicGrade as typeof CURRICULUM_GRADES[number])));
 
   const addSubject = async (validationForm: HTMLFormElement) => {
     if (!newSubjectName.trim() || !newSubjectSlug.trim()) return;
@@ -360,7 +366,7 @@ export default function SubjectTopicManager() {
                 <input
                   required
                   minLength={2}
-                  maxLength={80}
+                  maxLength={191}
                   name="name"
                   aria-label="Subject name"
                   value={newSubjectName}
@@ -406,10 +412,19 @@ export default function SubjectTopicManager() {
 
             {selected ? (
               <>
+                <div className="flex flex-wrap gap-2">
+                  <input type="search" aria-label="Search topics" placeholder="Search topics" value={topicQuery}
+                    onChange={(e) => setTopicQuery(e.target.value)} className="input input-bordered input-sm min-w-0 flex-1" />
+                  <select aria-label="Filter topics by grade" value={topicGrade} onChange={(e) => setTopicGrade(e.target.value)}
+                    className="select select-bordered select-sm">
+                    <option value="">All grades</option>
+                    {CURRICULUM_GRADES.map((grade) => <option key={grade} value={grade}>Grade {grade.replace("GRADE_", "")}</option>)}
+                  </select>
+                </div>
                 <CurriculumCoverage gradeLevels={selected.gradeLevels} curriculum={selected.curriculum} disabled={busy}
                   onSave={(gradeLevels, curriculumNote) => call(`/api/admin/subjects/${selected.id}`, "PATCH", { gradeLevels, curriculumNote })} />
                 <ul className="min-h-0 flex-1 divide-y divide-base-200 overflow-y-auto">
-                  {[...selected.topics]
+                  {[...visibleTopics]
                     .sort((a, b) => a.order - b.order)
                     .map((t, idx, arr) => (
                       <li key={t.id} className="flex items-center gap-1 py-1.5 text-xs">
@@ -419,7 +434,7 @@ export default function SubjectTopicManager() {
                               <input
                                 required
                                 minLength={2}
-                                maxLength={80}
+                                maxLength={191}
                                 name="name"
                                 aria-label="Topic name"
                                 value={editingTopicName}
@@ -504,8 +519,8 @@ export default function SubjectTopicManager() {
                         )}
                       </li>
                     ))}
-                  {selected.topics.length === 0 && (
-                    <li className="py-6 text-center text-2xs italic text-base-content/40">No topics yet.</li>
+                  {visibleTopics.length === 0 && (
+                    <li className="py-6 text-center text-2xs italic text-base-content/40">{selected.topics.length ? "No topics match your filters." : "No topics yet."}</li>
                   )}
                 </ul>
 
@@ -515,7 +530,7 @@ export default function SubjectTopicManager() {
                     <input
                       required
                       minLength={2}
-                      maxLength={80}
+                      maxLength={191}
                       name="name"
                       aria-label="Topic name"
                       value={newTopic}

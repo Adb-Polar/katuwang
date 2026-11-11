@@ -4,7 +4,7 @@ import { GradeLevel } from "@prisma/client";
 export const curriculumGradesSchema = z.array(z.nativeEnum(GradeLevel)).min(1, "Select at least one grade.").max(6).refine((v) => new Set(v).size === v.length, "Grades must be unique.");
 const curriculumNote = z.string().trim().max(2000).optional();
 
-const name = z.string().trim().min(2, "Name must be at least 2 characters.").max(80, "Name is too long.");
+const name = z.string().trim().min(2, "Name must be at least 2 characters.").max(191, "Name is too long.");
 
 // slug: uppercase snake, used as the stored `subject` value — immutable after creation.
 const slug = z

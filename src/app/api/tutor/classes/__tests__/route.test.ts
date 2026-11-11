@@ -26,7 +26,7 @@ vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSession
 
 vi.mock("@/lib/prisma", () => ({
   prisma: {
-    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) },
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).verifiedCatalogFixture()) },
     tutorProfile: { findUnique: tutorProfileFindUnique },
     tutorClass: { findMany: classFindMany, create: classCreate },
     classSession: { findMany: sessionFindMany },
@@ -58,12 +58,12 @@ function makeRequest(body: unknown) {
   });
 }
 
-const validSession = { topic: "Algebraic Expressions", scheduledAt: new Date(Date.now() + 86_400_000).toISOString(), duration: 60 };
+const validSession = { topic: "Patterns and Algebra", scheduledAt: new Date(Date.now() + 86_400_000).toISOString(), duration: 60 };
 
 function validBody(overrides: Record<string, unknown> = {}) {
   return {
     subject: "MATH",
-    topics: ["Algebraic Expressions"],
+    topics: ["Patterns and Algebra"],
     maxStudents: 2,
     sessions: [validSession],
     meetingLink: "https://meet.google.com/abc-defg-hij",
@@ -95,8 +95,8 @@ describe("GET /api/tutor/classes", () => {
     classFindMany.mockResolvedValue([
       {
         id: "c1",
-        topics: [{ topic: "Algebraic Expressions" }],
-        sessions: [{ id: "s1", topic: "Algebraic Expressions", status: "SCHEDULED" }],
+        topics: [{ topic: "Patterns and Algebra" }],
+        sessions: [{ id: "s1", topic: "Patterns and Algebra", status: "SCHEDULED" }],
         enrollments: [],
       },
     ]);
@@ -104,8 +104,8 @@ describe("GET /api/tutor/classes", () => {
     const res = await GET(new NextRequest("http://localhost/api/tutor/classes"));
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json[0].sessions).toEqual([{ id: "s1", topic: "Algebraic Expressions", status: "SCHEDULED" }]);
-    expect(json[0].topics).toEqual(["Algebraic Expressions"]);
+    expect(json[0].sessions).toEqual([{ id: "s1", topic: "Patterns and Algebra", status: "SCHEDULED" }]);
+    expect(json[0].topics).toEqual(["Patterns and Algebra"]);
   });
 });
 
@@ -186,7 +186,7 @@ describe("POST /api/tutor/classes", () => {
     expect(res.status).toBe(400);
   });
 
-  it("accepts a custom topic that isn't in the curated list", async () => {
+  it("rejects a custom topic outside the catalog", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     classCreate.mockResolvedValue({ id: "c1", topics: [], sessions: [] });
@@ -199,16 +199,8 @@ describe("POST /api/tutor/classes", () => {
         })
       )
     );
-    expect(res.status).toBe(201);
-    expect(classCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          topics: { create: [{ topic: "Competitive Math Olympiad Prep" }] },
-          // the session topic is normalized to the canonical class topic
-          sessions: { create: [expect.objectContaining({ topic: "Competitive Math Olympiad Prep" })] },
-        }),
-      })
-    );
+    expect(res.status).toBe(400);
+    expect(classCreate).not.toHaveBeenCalled();
   });
 
   it("returns 400 for a topic shorter than 2 characters", async () => {
@@ -232,7 +224,7 @@ describe("POST /api/tutor/classes", () => {
       )
     );
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toMatch(/not certified/i);
+    expect((await res.json()).error).toMatch(/active catalog topics/i);
   });
 
   it("returns 400 when a session's topic isn't one of the class's topics", async () => {
@@ -241,8 +233,8 @@ describe("POST /api/tutor/classes", () => {
     const res = await POST(
       makeRequest(
         validBody({
-          topics: ["Algebraic Expressions"],
-          sessions: [{ ...validSession, topic: "Fractions & Decimals" }],
+          topics: ["Patterns and Algebra"],
+          sessions: [{ ...validSession, topic: "Numbers and Number Sense" }],
         })
       )
     );
@@ -281,10 +273,10 @@ describe("POST /api/tutor/classes", () => {
     const res = await POST(
       makeRequest(
         validBody({
-          topics: ["Algebraic Expressions", "Fractions & Decimals"],
+          topics: ["Patterns and Algebra", "Numbers and Number Sense"],
           sessions: [
-            { topic: "Algebraic Expressions", scheduledAt: start, duration: 60 },
-            { topic: "Fractions & Decimals", scheduledAt: start, duration: 60 },
+            { topic: "Patterns and Algebra", scheduledAt: start, duration: 60 },
+            { topic: "Numbers and Number Sense", scheduledAt: start, duration: 60 },
           ],
         })
       )
@@ -313,21 +305,21 @@ describe("POST /api/tutor/classes", () => {
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
     classCreate.mockResolvedValue({
       id: "c1",
-      topics: [{ topic: "Algebraic Expressions" }],
-      sessions: [{ id: "s1", topic: "Algebraic Expressions", status: "SCHEDULED" }],
+      topics: [{ topic: "Patterns and Algebra" }],
+      sessions: [{ id: "s1", topic: "Patterns and Algebra", status: "SCHEDULED" }],
     });
 
     const res = await POST(makeRequest(validBody()));
     expect(res.status).toBe(201);
     const json = await res.json();
-    expect(json.topics).toEqual(["Algebraic Expressions"]);
+    expect(json.topics).toEqual(["Patterns and Algebra"]);
     expect(classCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
           tutorProfileId: "tp1",
           code: "C-0001",
           subject: "MATH",
-          sessions: { create: [expect.objectContaining({ topic: "Algebraic Expressions" })] },
+          sessions: { create: [expect.objectContaining({ topic: "Patterns and Algebra" })] },
         }),
       })
     );
@@ -388,10 +380,10 @@ describe("POST /api/tutor/classes", () => {
     const res = await POST(
       makeRequest(
         validBody({
-          topics: ["Algebraic Expressions", "Fractions & Decimals"],
+          topics: ["Patterns and Algebra", "Numbers and Number Sense"],
           sessions: [
             validSession,
-            { topic: "Fractions & Decimals", scheduledAt: new Date(Date.now() + 172_800_000).toISOString(), duration: 60 },
+            { topic: "Numbers and Number Sense", scheduledAt: new Date(Date.now() + 172_800_000).toISOString(), duration: 60 },
           ],
         })
       )

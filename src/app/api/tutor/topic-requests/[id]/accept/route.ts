@@ -125,7 +125,7 @@ export async function POST(
       return NextResponse.json({ error: `The class must cover every requested topic. Missing: ${missingTopics.join(", ")}.` }, { status: 400 });
     }
 
-    if (!(await subjectExists(subject)) || (await Promise.all(topics.map(topic => topicExists(subject, topic)))).some(valid => !valid)) {
+    if (!(await subjectExists(subject, { gradeLevel: gradeLevel ?? request.gradeLevel })) || (await Promise.all(topics.map(topic => topicExists(subject, topic, { gradeLevel: gradeLevel ?? request.gradeLevel })))).some(valid => !valid)) {
       return NextResponse.json({ error: "The subject or selected topics are no longer active in the catalog. Refresh and try again." }, { status: 400 });
     }
 

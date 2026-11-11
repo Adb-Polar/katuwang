@@ -1,7 +1,7 @@
 import type { GradeLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
-import { subjectExists } from "@/lib/subjects";
+import { subjectExists, topicExists } from "@/lib/subjects";
 import { normalizeTopic } from "@/lib/normalizeTopic";
 import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 
@@ -17,8 +17,11 @@ export async function classTeachingError(scope: {
       !isTargetGradeEligibleForTutor(scope.gradeLevel, scope.tutorGradeLevel)) {
     return "Target grade cannot be higher than your current grade level.";
   }
-  if (!(await subjectExists(scope.subject))) return "Invalid subject.";
+  const options = { gradeLevel: scope.gradeLevel ?? undefined };
+  if (!(await subjectExists(scope.subject, options))) return "Invalid subject for the selected grade.";
   if (scope.topics.length === 0) return "Please select at least one topic.";
+  const valid = await Promise.all(scope.topics.map((topic) => topicExists(scope.subject, topic, options)));
+  if (valid.some((ok) => !ok)) return "Select active catalog topics for the subject and grade.";
   if (await getSetting("requireCertificationForClassCreation")) {
     const certifications = await prisma.topicCertification.findMany({
       where: { tutorProfileId: scope.tutorProfileId, subject: scope.subject, status: "CERTIFIED" },

@@ -71,7 +71,7 @@ export default function AcceptRequestForm({
   tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
-  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
+  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(request.gradeLevel ?? undefined);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -146,7 +146,6 @@ export default function AcceptRequestForm({
           }}
           subjectLocked
           disabledTopics={disabledTopics}
-          allowCustomTopics={false}
           tutorGradeLevel={tutorGradeLevel}
           submitLabel="Accept & create class"
           submitting={submitting}

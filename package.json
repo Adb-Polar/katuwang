@@ -19,7 +19,11 @@
     "db:studio": "prisma studio",
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
     "seed": "tsx prisma/seed.ts",
-    "seed:reset": "tsx prisma/seed.ts --reset"
+    "seed:curriculum": "tsx prisma/seedCurriculum.ts",
+    "curriculum:docs": "node scripts/build-curriculum-docs.mjs",
+    "seed:questions": "tsx prisma/seedQuestionBank.ts",
+    "questions:validate": "tsx prisma/seedQuestionBank.ts --validate",
+    "questions:build": "python3 scripts/build-question-bank.py --csv"
   },
   "dependencies": {
     "@prisma/adapter-mariadb": "^7.8.0",

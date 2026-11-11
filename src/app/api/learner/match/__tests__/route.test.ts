@@ -10,7 +10,7 @@ const { getServerSessionMock, findManyMock, getSettingMock, reinstateMock } = vi
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock }));
 vi.mock("@/lib/prisma", () => ({ prisma: {
-    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).catalogFixture()) }, tutorClass: { findMany: findManyMock } } }));
+    subject: { findMany: vi.fn(async () => (await import("@/test/catalogFixture")).verifiedCatalogFixture()) }, tutorClass: { findMany: findManyMock } } }));
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
 vi.mock("@/lib/moderation", () => ({ reinstateExpiredClasses: reinstateMock }));
 
@@ -24,7 +24,7 @@ function makeRequest(body: unknown) {
   });
 }
 
-const validBody = { subject: "MATH", topics: ["Algebraic Expressions & Factoring"], gradeLevel: "GRADE_12" };
+const validBody = { subject: "MATH", topics: ["Patterns and Algebra"], gradeLevel: "GRADE_8" };
 
 describe("POST /api/learner/match", () => {
   beforeEach(() => {
@@ -63,14 +63,14 @@ describe("POST /api/learner/match", () => {
         status: "SCHEDULED",
         published: true,
         maxStudents: 3,
-        topics: [{ topic: "Algebraic Expressions & Factoring" }],
+        topics: [{ topic: "Patterns and Algebra" }],
         sessions: [
-          { id: "s1", topic: "Algebraic Expressions & Factoring", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
+          { id: "s1", topic: "Patterns and Algebra", scheduledAt: new Date(Date.now() + 3 * 86400_000), duration: 60, status: "SCHEDULED" },
         ],
         tutorProfile: {
           id: "tp1",
           user: { id: "t1", anonymousId: "TUT-0001" },
-          topicCertifications: [{ subject: "MATH", topic: "Algebraic Expressions & Factoring" }],
+          topicCertifications: [{ subject: "MATH", topic: "Patterns and Algebra" }],
         },
         _count: { enrollments: 0 },
         enrollments: [],
@@ -82,9 +82,16 @@ describe("POST /api/learner/match", () => {
     const json = await res.json();
     expect(json.matches).toHaveLength(1);
     expect(json.matches[0].class.id).toBe("c1");
-    expect(json.matches[0].reasons.matchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
-    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Algebraic Expressions & Factoring"]);
+    expect(json.matches[0].reasons.matchedTopics).toEqual(["Patterns and Algebra"]);
+    expect(json.matches[0].reasons.verifiedMatchedTopics).toEqual(["Patterns and Algebra"]);
     expect(json.matches[0].score).toBeGreaterThan(0);
+  });
+
+  it("rejects a topic from a different curriculum grade before matching", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
+    const res = await POST(makeRequest({ ...validBody, gradeLevel: "GRADE_12" }));
+    expect(res.status).toBe(400);
+    expect(findManyMock).not.toHaveBeenCalled();
   });
 
   it("returns 500 on unexpected error", async () => {

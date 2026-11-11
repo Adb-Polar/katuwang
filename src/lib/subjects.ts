@@ -70,7 +70,7 @@ export async function getTopics(
 ): Promise<Topic[]> {
   const all = await loadAll();
   const subject = all.find((s) => s.slug === subjectSlug);
-  if (!subject) return [];
+  if (!subject || (!opts.includeInactive && !subject.active)) return [];
   return opts.includeInactive ? subject.topics : subject.topics.filter((t) => t.active);
 }
 

@@ -1,25 +1,25 @@
 import { describe, it, expect } from "vitest";
 import { seedGrade, seedGrades, seedTopicsForGrade } from "../seedCatalogHelpers";
 
-describe("grouped seed fixtures", () => {
-  it("rejects removed names and topics assigned to the wrong group", () => {
-    expect(() => seedGrades("TLE", ["Cooking & Food Preparation"])).toThrow();
-    expect(() => seedGrades("MATH", ["Algebraic Expressions"])).toThrow();
+describe("source-backed seed fixtures", () => {
+  it("rejects broad historical labels instead of inventing official matches", () => {
+    expect(() => seedGrades("MATH", ["Algebraic Expressions & Factoring"])).toThrow();
     expect(() => seedGrades("MATH", ["Cooking & Food Preparation"])).toThrow();
     expect(() => seedGrades("MATH", [])).toThrow();
   });
-  it("prevents multi-topic classes spanning incompatible grade ranges", () => {
-    expect(() => seedGrades("MATH", ["Whole Numbers & Operations", "Integration"])).toThrow(/common grade/);
-    expect(seedGrades("MATH", ["Algebraic Expressions & Factoring", "Linear Equations & Inequalities"])).toEqual(["GRADE_7", "GRADE_8"]);
+  it("prevents topic combinations with no common grade", () => {
+    expect(() => seedGrades("MATH", ["Measurement", "Patterns and Algebra"])).not.toThrow();
+    expect(seedGrades("MATH", ["Measurement", "Patterns and Algebra"])).toEqual(["GRADE_7"]);
   });
-  it("keeps compatible requested grades and replaces incompatible demo grades", () => {
-    expect(seedGrade("MATH", ["Algebraic Expressions & Factoring"], "GRADE_8")).toBe("GRADE_8");
-    expect(seedGrade("MATH", ["Algebraic Expressions & Factoring"], "GRADE_12")).toBe("GRADE_7");
-    expect(seedGrade("MISCELLANEOUS", ["Baking & Pastry"], "GRADE_11")).toBe("GRADE_11");
+  it("keeps compatible requested grades and rejects cross-course assumptions", () => {
+    expect(seedGrade("MATH", ["Patterns and Algebra"], "GRADE_8")).toBe("GRADE_8");
+    expect(seedGrade("MATH", ["Patterns and Algebra"], "GRADE_12")).toBe("GRADE_7");
+    expect(seedGrade("SSHS_BAKERY_OPERATIONS", ["Bread Products"], "GRADE_11")).toBe("GRADE_11");
+    expect(() => seedGrade("MATH", ["Limits and Continuity"])).toThrow();
   });
-  it("samples additional topics only from the selected grade", () => {
-    expect(seedTopicsForGrade("MATH", "GRADE_7")).not.toContain("Integration");
-    expect(seedTopicsForGrade("MISCELLANEOUS", "GRADE_12")).toContain("Server Administration");
-    expect(seedTopicsForGrade("SHS_TVL_COOKERY", "GRADE_11")).toEqual([]);
+  it("samples only from a subject’s sourced grades", () => {
+    expect(seedTopicsForGrade("MATH", "GRADE_12")).toEqual([]);
+    expect(seedTopicsForGrade("SSHS_DATABASE_MANAGEMENT", "GRADE_12")).toContain("Introduction to SQL");
+    expect(seedTopicsForGrade("SSHS_DATABASE_MANAGEMENT", "GRADE_11")).toEqual([]);
   });
 });

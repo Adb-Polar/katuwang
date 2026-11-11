@@ -1,13 +1,18 @@
-# Seeded Dummy Accounts
+# Historical Demo Accounts
 
-Created by `pnpm exec tsx prisma/seed.ts` (see that file for the full class/enrollment data).
-New dummy accounts use the password below. Existing administrator passwords are preserved during a reset:
+These accounts describe the previous demo seed. The current `prisma/seed.ts`
+imports only the researched curriculum catalog: **47 subjects, 292 topics, and
+408 grade associations**. It does not create or reset these accounts, classes,
+certifications, or question banks. Existing records remain intact.
 
+```sh
+pnpm seed             # import the curriculum catalog
+pnpm seed:curriculum  # preview the import without writing
 ```
-password123
-```
 
-Use `pnpm seed` to populate the grouped demo fixtures. Use `pnpm seed:reset` for a clean test-data rebuild: learning records, tutor/learner accounts and the old catalog are removed, while admin accounts, their passwords, platform settings and ID counters are retained. The catalog is rebuilt with exactly 10 groups and 135 topics. Every group has a published demo class; Miscellaneous includes cooking and baking. Topic selections and class/request grade levels are validated against the approved catalog.
+The previous demo seed used `password123` for newly created test accounts.
+The historical accounts below may exist in older development databases; the
+current seed does not create them or change their passwords.
 
 ## Super Admin
 
@@ -36,7 +41,7 @@ Use `pnpm seed` to populate the grouped demo fixtures. Use `pnpm seed:reset` for
 | STU-0007     | kevin.bautista@katuwang.test      | Kevin Bautista     | Grade 8 / Luna       |
 | STU-0008     | sofia.villanueva@katuwang.test    | Sofia Villanueva   | Grade 10 / Rizal     |
 
-> Anonymous IDs are assigned sequentially by the shared `IdCounter` table, so exact numbers can shift if the seed script runs on a database that already has other users. Check the seed script's console output for the current values.
+> Anonymous IDs are assigned sequentially by the shared `IdCounter` table, so exact numbers can shift if the seed script runs on a database that already has other users. Inspect the existing development database for its current values.
 
 ## Suggested login for testing class browsing
 

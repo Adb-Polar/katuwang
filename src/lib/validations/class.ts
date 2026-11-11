@@ -29,7 +29,7 @@ export const classDetailsSchema = z.object({
         .string()
         .trim()
         .min(2, "A topic needs at least 2 characters.")
-        .max(60, "A topic cannot exceed 60 characters.")
+        .max(191, "A topic cannot exceed 191 characters.")
     )
     .min(1, "Please select at least one topic.")
     .max(10, "You can select up to 10 topics."),

@@ -90,12 +90,12 @@ describe.skipIf(!process.env.TEST_DATABASE_URL)("real MariaDB reviewed qualifica
   it("does not approve a prior pass after its question review is revoked", async () => {
     await review();const attempt = await (await begin()).json();await finish(attempt.id);const cert = await prisma.topicCertification.findFirstOrThrow({ where: { tutorProfileId: tutorId } });await review({ decision: "REVOKE", reason: "Synthetic revocation after passing score" });expect((await asUser(true, () => approveCertification(req({ status: "CERTIFIED" }), { params: Promise.resolve({ certificationId: cert.id }) }))).status).toBe(409);
   });
-  it("seeding appends demo questions, deduplicates and preserves published history/settings", async () => {
+  it("seeding rejects unknown topics without changing published history/settings", async () => {
     const cls = await prisma.tutorClass.create({ data: { code: `QA-R-${randomBytes(6).toString("hex")}`, tutorProfileId: tutorId, subject, topics: { create: { topic } }, sessions: { create: { topic, scheduledAt: new Date(), duration: 30, test: { create: { title: "Retained QA published test", status: "PUBLISHED", questions: { create: { questionId, position: 0 } } } } } } }, include: { sessions: { include: { test: true } } } });classId = cls.id;const testId = cls.sessions[0].test!.id;
     const existing = await prisma.sessionTestQuestion.findMany({ where: { sessionTestId: testId } });const settings = await prisma.platformSetting.findMany({ where: { key: { in: ["assessmentQuestionCount", "assessmentPassPercent", "assessmentMinBankSize"] } } });
-    const spy = vi.spyOn(prisma.subject, "findMany").mockResolvedValue([{ id: subjectId, slug: subject, name: subject, topics: [{ name: topic }] }] as never);
-    try { const first = await seedQuestionBankDatabase();expect(first.totalQuestions).toBe(15);const second = await seedQuestionBankDatabase();expect(second.totalQuestions).toBe(0); } finally { spy.mockRestore(); }
-    expect(await prisma.sessionTestQuestion.findMany({ where: { sessionTestId: testId } })).toEqual(existing);expect(await prisma.assessmentQuestion.count({ where: { subject, reviewStatus: "DEMO" } })).toBe(15);expect(await eligibleCount()).toBe(0);
+    await expect(seedQuestionBankDatabase({ db: prisma, authorId: adminId, subject, topic })).rejects.toThrow(/No question data/);
+    expect(await prisma.sessionTestQuestion.findMany({ where: { sessionTestId: testId } })).toEqual(existing);
+    expect(await eligibleCount()).toBe(0);
     for (const setting of settings) expect((await prisma.platformSetting.findUniqueOrThrow({ where: { key: setting.key } })).value).toBe(setting.value);
   });
 });

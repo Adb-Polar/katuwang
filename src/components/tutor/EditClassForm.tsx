@@ -21,7 +21,6 @@ import {
   EyeOff,
 } from "lucide-react";
 import { GradeLevel } from "@prisma/client";
-import { normalizeTopic } from "@/lib/normalizeTopic";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -83,10 +82,8 @@ export default function EditClassForm({
   suspendedUntil?: string | null;
 }) {
   const router = useRouter();
-  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
-  const [customTopic, setCustomTopic] = useState("");
   const [form, setForm] = useState({
     description: description ?? "",
     maxStudents,
@@ -95,6 +92,7 @@ export default function EditClassForm({
     room: room ?? "",
     meetingLink: meetingLink ?? "",
   });
+  const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(form.gradeLevel || undefined);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -105,13 +103,6 @@ export default function EditClassForm({
   const toggleTopic = (topic: string) => {
     if (usedTopics.includes(topic)) return;
     setTopics((prev) => (prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic]));
-  };
-
-  const addCustomTopic = () => {
-    const t = normalizeTopic(customTopic);
-    if (t.length < 2 || topics.length >= 10) return;
-    if (!topics.some((s) => s.toLowerCase() === t.toLowerCase())) setTopics((prev) => [...prev, t]);
-    setCustomTopic("");
   };
 
   // Curated topics for this subject, plus any custom topics already on the class.
@@ -273,33 +264,7 @@ export default function EditClassForm({
                         );
                       })}
                     </div>
-                    {!locked && (
-                      <div className="flex gap-2 mt-2">
-                        <input
-                          type="text"
-                          aria-label="Add a custom topic"
-                          value={customTopic}
-                          onChange={(e) => setCustomTopic(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              addCustomTopic();
-                            }
-                          }}
-                          placeholder="Add another topic not listed above…"
-                          maxLength={60}
-                          className="input input-bordered input-xs min-h-11 sm:min-h-0 flex-1 text-2xs focus:input-primary"
-                        />
-                        <button
-                          type="button"
-                          onClick={addCustomTopic}
-                          disabled={normalizeTopic(customTopic).length < 2 || topics.length >= 10}
-                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs"
-                        >
-                          Add
-                        </button>
-                      </div>
-                    )}
+
                   </FormField>
 
                   <FormField label="Target Grade" hint="Optional — used for class matching.">

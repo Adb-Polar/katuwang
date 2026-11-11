@@ -1,168 +1,91 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { prisma } from "../src/lib/prisma";
-import { generateQuestionsForTopic } from "./questionBankData";
+import { createHash } from "node:crypto";
+import type { PrismaClient } from "@prisma/client";
+import { loadQuestionBank } from "./questionBankData";
 
-let idCounter = 0;
-function generateCuid(): string {
-  idCounter++;
-  const timestamp = Date.now().toString(36);
-  const seq = idCounter.toString(36).padStart(6, "0");
-  const rand = Math.random().toString(36).slice(2, 8);
-  return `c${timestamp}${seq}${rand}`.slice(0, 25);
+export interface QuestionSeedOptions {
+  db?: PrismaClient;
+  authorId?: string;
+  subject?: string;
+  topic?: string;
+  dryRun?: boolean;
 }
+const contentKey = (q: { subject: string; topic: string; prompt: string }) => JSON.stringify([q.subject, q.topic, q.prompt.trim().toLowerCase()]);
+const topicKey = (subject: string, topic: string) => JSON.stringify([subject, topic]);
 
-export async function seedQuestionBankDatabase() {
-  console.log("=== Katuwang Philippine K-12 Assessment Question Bank Seed ===");
-
-  // 1. Resolve Admin Creator ID
-  const adminUser = await prisma.user.findFirst({
-    where: { role: { in: ["SUPER_ADMIN", "ADMIN"] } },
-    select: { id: true, email: true },
+/** Append validated drafts only. Never update/delete existing content, reviews or history. */
+export async function seedQuestionBankDatabase(options: QuestionSeedOptions = {}) {
+  const bank = loadQuestionBank();
+  const selected = bank.questions.filter(q => (!options.subject || q.subject === options.subject) && (!options.topic || q.topic === options.topic));
+  if (!selected.length) throw Error("No question data matches the requested subject/topic");
+  const db = options.db ?? (await import("../src/lib/prisma")).prisma;
+  const admin = await db.user.findFirst({
+    where: { ...(options.authorId ? { id: options.authorId } : {}), role: { in: ["SUPER_ADMIN", "ADMIN"] } },
+    orderBy: [{ role: "desc" }, { id: "asc" }], select: { id: true },
   });
-
-  if (!adminUser) {
-    throw new Error("No admin account found in database. Please run super-admin seed first.");
-  }
-  console.log("Using the configured admin author for demo content.");
-
-  // Append demo content only. Never delete attempts or replace published links.
-  const existing = await prisma.assessmentQuestion.findMany({ where: { origin: "BANK" }, select: { subject: true, topic: true, prompt: true } });
-  const existingKeys = new Set(existing.map(q => `${q.subject}::${q.topic}::${q.prompt}`));
-
-  // 3. Load active subjects and topics from database
-  console.log("[2/4] Fetching active subjects and topics from database...");
-  const subjects = await prisma.subject.findMany({
-    where: { active: true },
-    include: {
-      topics: {
-        where: { active: true },
-        orderBy: { order: "asc" },
-      },
-    },
-    orderBy: { order: "asc" },
-  });
-
-  const totalTopics = subjects.reduce((sum, s) => sum + s.topics.length, 0);
-  console.log(`Discovered ${subjects.length} subjects and ${totalTopics} topics to populate.`);
-
-  // Load curriculum dataset for competency hints if available
-  const datasetPath = path.resolve(__dirname, "data/curriculum/curriculum_dataset.json");
-  const competencyMap = new Map<string, string>();
-  if (fs.existsSync(datasetPath)) {
-    try {
-      const dataset = JSON.parse(fs.readFileSync(datasetPath, "utf-8"));
-      for (const item of dataset) {
-        const key = `${item.subjectSlug}::${item.topic}`;
-        if (!competencyMap.has(key) && item.learningCompetency) {
-          competencyMap.set(key, item.learningCompetency);
-        }
-      }
-    } catch (e) {
-      console.warn("Could not parse curriculum_dataset.json for competency hints:", e);
-    }
-  }
-
-  // 4. Generate 15 questions per topic
-  console.log("\n[3/4] Generating 15 assessment questions per topic...");
-  interface DbQuestion {
-    id: string;
-    subject: string;
-    topic: string;
-    prompt: string;
-    explanation: string | null;
-    active: boolean;
-    origin: "BANK";
-    reviewStatus: "DEMO";
-    createdById: string;
-  }
-
-  interface DbOption {
-    id: string;
-    questionId: string;
-    text: string;
-    isCorrect: boolean;
-    position: number;
-  }
-
-  const allQuestions: DbQuestion[] = [];
-  const allOptions: DbOption[] = [];
-
-  for (const s of subjects) {
-    for (const t of s.topics) {
-      const hint = competencyMap.get(`${s.slug}::${t.name}`);
-      const generated = generateQuestionsForTopic(s.slug, s.name, t.name, hint);
-
-      for (const q of generated) {
-        const key = `${s.slug}::${t.name}::${q.prompt}`;
-        if (existingKeys.has(key)) continue;
-        existingKeys.add(key);
-        const questionId = generateCuid();
-        allQuestions.push({
-          id: questionId,
-          subject: s.slug,
-          topic: t.name,
-          prompt: q.prompt,
-          explanation: q.explanation || null,
-          active: true,
-          origin: "BANK",
-          reviewStatus: "DEMO",
-          createdById: adminUser.id,
-        });
-
-        q.options.forEach((opt, pos) => {
-          allOptions.push({
-            id: generateCuid(),
-            questionId,
-            text: opt.text,
-            isCorrect: opt.isCorrect,
-            position: pos,
-          });
-        });
-      }
-    }
-    console.log(`  Prepared questions for [${s.slug}] ${s.name} (${s.topics.length} topics).`);
-  }
-
-  console.log(`\nGenerated a total of ${allQuestions.length} questions and ${allOptions.length} options.`);
-
-  // Insert each batch with its options atomically; retain all existing history.
-  console.log("Appending demonstration questions (not eligible for certification).");
-  for (let i = 0; i < allQuestions.length; i += 250) {
-    const chunk = allQuestions.slice(i, i + 250);
-    const ids = new Set(chunk.map(q => q.id));
-    await prisma.$transaction(async tx => {
-      await tx.assessmentQuestion.createMany({ data: chunk });
-      await tx.assessmentOption.createMany({ data: allOptions.filter(o => ids.has(o.questionId)) });
+  if (!admin) throw Error("An existing ADMIN or SUPER_ADMIN author is required. Run pnpm seed:super-admin first or supply --author-id.");
+  const result = await db.$transaction(async tx => {
+    // Check the catalog before making any writes, including disabled entries.
+    const subjects = await tx.subject.findMany({ where: { slug: { in: [...new Set(selected.map(q => q.subject))] } }, include: { topics: true } });
+    const available = new Set(subjects.flatMap(s => s.topics.map(t => topicKey(s.slug, t.name))));
+    const missing = selected.find(q => !available.has(topicKey(q.subject, q.topic)));
+    if (missing) throw Error(`Missing catalog topic ${missing.subject}: ${missing.topic}. Run pnpm seed first.`);
+    const existing = await tx.assessmentQuestion.findMany({
+      where: { OR: [{ subject: { in: [...new Set(selected.map(q => q.subject))] } }, { id: { in: selected.map(q => q.id) } }] },
+      select: { id: true, subject: true, topic: true, prompt: true, origin: true },
     });
-  }
-
-  // Assessment policy is managed separately; demo seeding must not change it.
-
-  console.log("\n=======================================================");
-  console.log("  Question Bank Seeding Completed Successfully");
-  console.log("=======================================================");
-  console.log(`  - Subjects Populated:       ${subjects.length}`);
-  console.log(`  - Topics Populated:         ${totalTopics}`);
-  console.log(`  - Questions per Topic:      15`);
-  console.log(`  - Total Questions in Bank:  ${allQuestions.length}`);
-  console.log(`  - Total Options Created:    ${allOptions.length}`);
-  console.log("=======================================================\n");
-
-  return {
-    totalSubjects: subjects.length,
-    totalTopics,
-    totalQuestions: allQuestions.length,
-    totalOptions: allOptions.length,
-  };
+    const existingIds = new Map(existing.map(q => [q.id, q]));
+    const existingContent = new Set(existing.filter(q => q.origin === "BANK").map(contentKey));
+    const pending = selected.filter(q => {
+      const old = existingIds.get(q.id);
+      if (old && (old.subject !== q.subject || old.topic !== q.topic || old.origin !== "BANK")) throw Error(`Question ID belongs to a different topic or owner: ${q.id}`);
+      return !old && !existingContent.has(contentKey(q));
+    });
+    if (!options.dryRun) {
+      for (let i = 0; i < pending.length; i += 100) {
+        const batch = pending.slice(i, i + 100);
+        await tx.assessmentQuestion.createMany({ data: batch.map(q => ({
+          id: q.id, subject: q.subject, topic: q.topic, prompt: q.prompt, explanation: q.explanation,
+          createdById: admin.id, origin: "BANK", reviewStatus: "UNREVIEWED", active: true,
+        })) });
+        await tx.assessmentOption.createMany({ data: batch.flatMap(q => q.options.map((o, position) => ({
+          id: "c" + createHash("sha256").update(`${q.id}\0option\0${position}`).digest("hex").slice(0, 24),
+          questionId: q.id, text: o.text, isCorrect: o.isCorrect, position,
+        }))) });
+      }
+    }
+    return {
+      revision: bank.revision, dryRun: Boolean(options.dryRun),
+      totalSubjects: new Set(selected.map(q => q.subject)).size,
+      totalTopics: new Set(selected.map(q => topicKey(q.subject, q.topic))).size,
+      selectedQuestions: selected.length, skippedQuestions: selected.length - pending.length,
+      totalQuestions: options.dryRun ? 0 : pending.length, totalOptions: options.dryRun ? 0 : pending.length * 4,
+      pendingQuestions: pending.length, reviewStatus: "UNREVIEWED" as const,
+    };
+  }, { timeout: 180000, isolationLevel: "Serializable" });
+  return result;
 }
 
-// Importable for isolated verification; execute only as the main script.
-if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) seedQuestionBankDatabase()
-  .catch((err) => {
-    console.error("Error seeding question bank:", err);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+async function main() {
+  const args = process.argv.slice(2);
+  const allowed = new Set(["--validate", "--dry-run", "--author-id", "--subject", "--topic"]);
+  const values: Record<string, string> = {};
+  const flags = new Set<string>();
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (!allowed.has(arg)) throw Error(`Unknown argument: ${arg}`);
+    if (["--author-id", "--subject", "--topic"].includes(arg)) {
+      if (!args[i + 1] || args[i + 1].startsWith("--")) throw Error(`Missing value for ${arg}`);
+      values[arg] = args[++i];
+    } else flags.add(arg);
+  }
+  if (flags.has("--validate")) {
+    const bank = loadQuestionBank();
+    console.log(`Validated ${bank.questions.length} draft questions, ${bank.questions.length / 20} topics, 20 per topic. No database connection.`);
+    return;
+  }
+  const { prisma } = await import("../src/lib/prisma");
+  try {
+    console.log(await seedQuestionBankDatabase({ db: prisma, authorId: values["--author-id"] ?? process.env.SEED_QUESTION_AUTHOR_ID, subject: values["--subject"], topic: values["--topic"], dryRun: flags.has("--dry-run") }));
+  } finally { await prisma.$disconnect(); }
+}
+if (typeof require !== "undefined" && typeof module !== "undefined" && require.main === module) main().catch(error => { console.error(error instanceof Error ? error.message : "Question seed failed"); process.exitCode = 1; });

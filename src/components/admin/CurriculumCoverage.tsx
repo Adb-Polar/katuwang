@@ -25,15 +25,25 @@ export default function CurriculumCoverage({ gradeLevels, curriculum, disabled, 
   const [note, setNote] = useState("");
   const evidence = curriculum && typeof curriculum === "object" ? curriculum as {
     status?: string; note?: string; reviewedAt?: string; sources?: { title: string; url: string }[];
+    track?: string; cluster?: string;
+    associations?: { gradeLevel: string; curriculumVersion: string; track?: string | null; strand?: string | null; cluster?: string | null; sourceUrl: string; pdfPage?: number }[];
   } : null;
   return <details className="mt-1 text-2xs text-base-content/60">
     <summary className="cursor-pointer">{gradeCoverageLabel(gradeLevels)}
       {evidence?.status === "foundation" && " · foundation review"}
       {evidence?.status === "legacy" && " · legacy coverage; review needed"}
+      {evidence?.status === "verified-index" && " · legacy LRMDS domains"}
+      {evidence?.status === "verified-guide" && " · Strengthened SHS guide"}
     </summary>
     <div className="space-y-2 py-2">
       {evidence?.note && <p>{evidence.note}</p>}
       {evidence?.reviewedAt && <p>Reviewed {evidence.reviewedAt}</p>}
+      {evidence?.track && <p>{evidence.track}{evidence.cluster ? ` · ${evidence.cluster}` : ""}</p>}
+      {evidence?.associations?.map((entry) => <p key={`${entry.gradeLevel}-${entry.sourceUrl}`}>
+        Grade {entry.gradeLevel.replace("GRADE_", "")}: {entry.curriculumVersion}
+        {entry.track ? ` · ${entry.track}` : ""}{entry.strand ? ` · ${entry.strand}` : ""}
+        {entry.cluster ? ` · ${entry.cluster}` : ""}{entry.pdfPage ? ` · PDF page ${entry.pdfPage}` : ""}
+      </p>)}
       {evidence?.sources?.map((source) => /^https:\/\//.test(source.url) &&
         <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer" className="block underline">{source.title}</a>)}
       {editing ? <>

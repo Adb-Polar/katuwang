@@ -4,7 +4,7 @@ import { GRADE_LEVELS } from "../gradeLevels";
 import { defaultSubjectGrades, SUBJECT_GRADE_DEFAULTS } from "../subjectGradeDefaults";
 import { subjectsInGrade, topicsInGrade } from "../catalogGrades";
 
-describe("Approved grouped subject grade defaults", () => {
+describe("Source-backed subject grade defaults", () => {
   it("covers every built-in subject with explicit valid grades", () => {
     expect(Object.keys(SUBJECT_GRADE_DEFAULTS).sort()).toEqual([...SUBJECT_SLUGS].sort());
     for (const slug of SUBJECT_SLUGS) {
@@ -15,8 +15,9 @@ describe("Approved grouped subject grade defaults", () => {
   });
   it("includes SHS only where the group has explicitly assigned SHS topics", () => {
     const catalog = SUBJECT_SLUGS.map((slug) => ({ slug, gradeLevels: defaultSubjectGrades(slug), topics: ["Example"] }));
-    for (const grade of ["GRADE_7", "GRADE_8", "GRADE_9", "GRADE_10"]) expect(subjectsInGrade(catalog, grade)).toHaveLength(10);
-    expect(subjectsInGrade(catalog, "GRADE_11").some((s) => s.slug === "MATH")).toBe(true);
+    for (const grade of ["GRADE_7", "GRADE_8"]) expect(subjectsInGrade(catalog, grade)).toHaveLength(10);
+    for (const grade of ["GRADE_9", "GRADE_10"]) expect(subjectsInGrade(catalog, grade)).toHaveLength(11);
+    expect(subjectsInGrade(catalog, "GRADE_11").some((s) => s.slug === "SSHS_GENERAL_MATHEMATICS")).toBe(true);
     expect(topicsInGrade(catalog[0], "GRADE_12")).toEqual([]);
   });
   it("leaves custom subjects to admin assignment and returns independent arrays", () => {

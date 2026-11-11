@@ -3,9 +3,8 @@
  *
  *   pnpm exec tsx prisma/seed-session-tests.ts
  *
- * Run this AFTER `pnpm exec tsx prisma/seed.ts` (it builds on the demo MATH
- * class owned by demo@tutor.test — "Algebraic Expressions & Factoring" /
- * "Linear Equations & Inequalities"). Re-running is safe: the script wipes and
+ * Requires the historical demo MATH class owned by demo@tutor.test, covering
+ * "Algebraic Expressions & Factoring" and "Linear Equations & Inequalities". Re-running is safe: the script wipes and
  * rebuilds this class's sessions, its session tests, and the `[seed-st]`
  * questions it owns; learner enrolments are only ever added.
  *
@@ -198,7 +197,7 @@ async function main() {
   if (!demoClass) {
     console.error(
       `Could not find the demo class (${DEMO_TUTOR_EMAIL}, ${SUBJECT} / "${TOPIC_A}").\n` +
-        "Run `pnpm exec tsx prisma/seed.ts` first, then re-run this script.",
+        "This optional fixture script requires existing demo classes. The curriculum seed does not create demo classes.",
     );
     process.exit(1);
   }

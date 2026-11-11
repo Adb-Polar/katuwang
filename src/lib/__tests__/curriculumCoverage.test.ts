@@ -21,11 +21,11 @@ describe("curriculum coverage integrity", () => {
     expect(Object.keys(CURRICULUM_SOURCES).length).toBeGreaterThanOrEqual(9);
   });
 
-  it("preserves legacy qualifications and explicit grouped grade coverage", () => {
+  it("keeps historical qualifications separate from current catalog coverage", () => {
     expect(curriculumFor("FILIPINO", "Pagsasalin").curriculum?.status).toBe("legacy");
     expect(curriculumFor("MATH", "Whole Numbers & Operations").curriculum?.status).toBe("foundation");
     expect(curriculumFor("SCIENCE", "Human Body Systems").gradeLevels).toEqual(["GRADE_8", "GRADE_10"]);
-    expect(curriculumFor("MATH", "Trigonometry").gradeLevels).toEqual(["GRADE_9", "GRADE_10", "GRADE_11"]);
+    expect(curriculumFor("SSHS_ADVANCED_MATHEMATICS", "Trigonometric Functions").gradeLevels).toEqual(["GRADE_12"]);
     expect(curriculumFor("MATH", "Fractions & Decimals").gradeLevels).not.toContain("GRADE_11");
   });
 
@@ -34,7 +34,7 @@ describe("curriculum coverage integrity", () => {
     expect(curriculumFor("MATH", "Custom topic").curriculum).toBeUndefined();
     const grades = curriculumFor("MATH").gradeLevels;
     grades.pop();
-    expect(curriculumFor("MATH").gradeLevels).toHaveLength(5);
+    expect(curriculumFor("MATH").gradeLevels).toHaveLength(4);
     expect(readGradeLevels(["GRADE_10", "GRADE_7", "GRADE_99", "GRADE_7"])).toEqual(["GRADE_7", "GRADE_10"]);
   });
 

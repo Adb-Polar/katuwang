@@ -8,8 +8,10 @@ import { reportServerFieldErrors } from "@/lib/formValidation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
+import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 /**
  * Lets a tutor take a topic's certification assessment even when they don't
@@ -19,7 +21,8 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
  */
 export default function OtherTopicAssessment() {
   const router = useRouter();
-  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
+  const [grade, setGrade] = useState("");
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(grade || undefined);
   const [subject, setSubject] = useState("");
   const [topic, setTopic] = useState("");
   const [busy, setBusy] = useState(false);
@@ -64,6 +67,14 @@ export default function OtherTopicAssessment() {
       </div>
       <FeedbackBanner variant="error" message={error || null} />
       <div className="grid gap-3 sm:grid-cols-2">
+        <FormField label="Grade level">
+          <select aria-label="Assessment topic grade" value={grade}
+            onChange={(e) => { setGrade(e.target.value); setSubject(""); setTopic(""); }}
+            className="select select-bordered select-sm w-full text-xs">
+            <option value="">All grades</option>
+            {GRADE_LEVELS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
+          </select>
+        </FormField>
         <FormField label="Subject" required>
           <select
             required
@@ -100,6 +111,7 @@ export default function OtherTopicAssessment() {
           </select>
         </FormField>
       </div>
+      <CatalogCurriculumHint subject={subjects.find((entry) => entry.slug === subject)} />
       <div className="flex justify-end">
         <button
           type="submit"

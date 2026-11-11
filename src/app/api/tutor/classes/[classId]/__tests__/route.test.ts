@@ -67,7 +67,7 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (tx: { topicRequest: { update: (args: unknown) => unknown } }, id: string, data: Record<string, unknown>) => tx.topicRequest.update({ where: { id }, data }) }));
 
 vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getProfilePictureRequirement: vi.fn().mockResolvedValue("OPTIONAL") }));
-vi.mock("@/lib/subjects", () => ({ subjectExists: subjectExistsMock }));
+vi.mock("@/lib/subjects", () => ({ subjectExists: subjectExistsMock, topicExists: vi.fn().mockResolvedValue(true) }));
 
 import { PATCH, DELETE } from "@/app/api/tutor/classes/[classId]/route";
 
@@ -278,7 +278,7 @@ describe("PATCH /api/tutor/classes/[classId]", () => {
     subjectExistsMock.mockResolvedValue(false);
     const res = await patch({ subject: "missing" });
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toBe("Invalid subject.");
+    expect((await res.json()).error).toBe("Invalid subject for the selected grade.");
     expect(classUpdate).not.toHaveBeenCalled();
   });
 

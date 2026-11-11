@@ -8,10 +8,10 @@ import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { normalizeTopic } from "@/lib/normalizeTopic";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
 import { parseLocalDateAndTime, combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
@@ -59,7 +59,6 @@ export default function ClassScheduleFields({
   subjectLocked = false,
   disabledTopics = [],
   allowedTopics,
-  allowCustomTopics = true,
   tutorGradeLevel,
   submitLabel = "Schedule",
   submitting = false,
@@ -80,7 +79,6 @@ export default function ClassScheduleFields({
   /** Topics in the subject's list that can't be checked (e.g. the tutor isn't CERTIFIED for them). */
   disabledTopics?: string[];
   /** When false, hides the "add another topic" custom-topic input (accept flow: only certified topics allowed). */
-  allowCustomTopics?: boolean;
   /** The tutor's authenticated grade level — restricts target grade options to tutorGrade and below. */
   tutorGradeLevel?: string | null;
   submitLabel?: string;
@@ -102,7 +100,6 @@ export default function ClassScheduleFields({
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
   const topicLabelCls = page ? "text-xs" : "text-2xs";
   const fieldSize = page ? "md" : "sm";
-  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
     gradeLevel: initial?.gradeLevel ?? "",
@@ -112,8 +109,8 @@ export default function ClassScheduleFields({
     room: initial?.room ?? "",
     meetingLink: initial?.meetingLink ?? "",
   });
+  const { subjects, topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(form.gradeLevel || undefined);
   const [selectedTopics, setSelectedTopics] = useState<string[]>(initial?.topics ?? []);
-  const [customTopic, setCustomTopic] = useState("");
   const [topicFilter, setTopicFilter] = useState("");
   const [sessionRows, setSessionRows] = useState<SessionRowValue[]>(() => {
     return (initial?.sessionRows ?? []).map((r) => {
@@ -132,13 +129,15 @@ export default function ClassScheduleFields({
     setForm((prev) => ({ ...prev, [name]: value }));
     if (name === "subject" && !subjectLocked) {
       setSelectedTopics([]);
-      setCustomTopic("");
+    }
+    if (name === "gradeLevel") {
+      setSelectedTopics([]);
+      if (!subjectLocked) setForm((prev) => ({ ...prev, subject: "" }));
     }
   };
 
   const disabledTopicSet = new Set(disabledTopics);
   const allowedTopicSet = allowedTopics ? new Set(allowedTopics.map((t) => t.toLowerCase())) : null;
-  const customAllowed = allowCustomTopics && !allowedTopicSet;
   const isTopicDisabled = (topic: string) =>
 
           disabledTopicSet.has(topic) || (allowedTopicSet ? !allowedTopicSet.has(topic.toLowerCase()) : false);
@@ -149,21 +148,6 @@ export default function ClassScheduleFields({
       const hit = prev.find((t) => t.toLowerCase() === topic.toLowerCase());
       return hit ? prev.filter((t) => t !== hit) : [...prev, topic];
     });
-  };
-
-  const addCustomTopic = () => {
-    const raw = normalizeTopic(customTopic);
-    if (raw.length < 2) return;
-    // Canonicalise against the catalogue so "algebra" resolves to "Algebra"
-    // rather than being added as a case-mismatched ghost entry that shows in
-    // the "N selected" count but matches no checkbox and no custom chip.
-    const catalogueMatch = form.subject
-      ? topicsFor(form.subject).find((k) => k.toLowerCase() === raw.toLowerCase())
-      : undefined;
-    const t = catalogueMatch ?? raw;
-    const exists = selectedTopics.some((s) => s.toLowerCase() === t.toLowerCase());
-    if (!exists && selectedTopics.length < 10) setSelectedTopics((prev) => [...prev, t]);
-    setCustomTopic("");
   };
 
   const customTopics = form.subject
@@ -262,6 +246,7 @@ export default function ClassScheduleFields({
     <ValidatedForm onSubmit={handleSubmit} className={page ? "space-y-8" : "space-y-3.5"}>
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
       <FeedbackBanner variant="error" message={formError || error || null} />
+      <CatalogCurriculumHint subject={subjects.find((entry) => entry.slug === form.subject)} />
       <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
       <div className="space-y-4">
@@ -383,33 +368,7 @@ export default function ClassScheduleFields({
               </p>
             )}
 
-            {customAllowed && (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  aria-label="Add a custom topic"
-                  value={customTopic}
-                  onChange={(e) => setCustomTopic(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addCustomTopic();
-                    }
-                  }}
-                  placeholder="Add another topic not listed above…"
-                  maxLength={60}
-                  className={`input input-bordered ${rowInputCls} flex-1 focus:input-primary`}
-                />
-                <button
-                  type="button"
-                  onClick={addCustomTopic}
-                  disabled={normalizeTopic(customTopic).length < 2 || selectedTopics.length >= 10}
-                  className={`btn btn-outline ${rowBtnCls} ${page ? "text-sm" : "text-2xs"}`}
-                >
-                  Add
-                </button>
-              </div>
-            )}
+
           </div>
         )}
       </FormField>
