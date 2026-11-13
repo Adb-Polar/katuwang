@@ -41,7 +41,20 @@ All questions enter as `origin=BANK`, `reviewStatus=UNREVIEWED`, `active=true`. 
 
 The importer runs in one serializable transaction, inserts questions and choices together, and rolls back on failure. Stable IDs prevent duplicate inserts on reruns. Existing BANK items with the same subject/topic/prompt also prevent duplicate content; tutor-owned copies do not substitute for BANK items. Existing edits, review decisions, disables, locked questions, attempts, published test links, and platform settings remain intact. Old demo content is retained, so an existing database can contain more than 20 total questions per topic. The static dataset itself contains exactly 20.
 
-The catalog and question seed are separate commands. Neither requires a live-database run during authoring. No production database was changed while creating this bank.
+To replace the active shared bank and synchronize the subject/topic catalog in one transaction:
+
+```bash
+pnpm seed:questions --replace --with-catalog --dry-run
+pnpm seed:questions --replace --with-catalog
+```
+
+Replacement sets superseded `BANK` questions to `active=false`, including legacy subjects. It retains their choices, reviews, attempt links, and published test links. Tutor-owned questions and existing edits/disables to current dataset questions remain intact. It never deletes assessment history or grants review approval. `--with-catalog` participates in the same transaction, so a question import failure also rolls back the catalog changes.
+
+`scripts/run-question-bank-replacement.ts OPERATION_ID` performs a preview, applies the unscoped catalog/bank replacement, and logs a count-only verification summary. It uses the database configured in that execution environment.
+
+For a one-time remote execution, `--operation-id` records completion atomically under a new `questionBankReplacement:<ID>` setting. Repeating that operation skips replacement, so later questions added by administrators are preserved. Operation IDs require an unscoped replacement and must be unique for each intended replacement. A preview never creates the completion record.
+
+The catalog and question seed are separate commands. Neither requires a live-database run during authoring. Creating the dataset itself does not modify a production database.
 
 ## Rebuild and verify
 

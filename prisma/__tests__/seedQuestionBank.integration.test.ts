@@ -12,11 +12,13 @@ describe.skipIf(!process.env.QUESTION_BANK_TEST_DATABASE_URL)("question seed aga
   const extraQuestionIds: string[] = [];
   let tutorId: string | undefined;
   let classId: string | undefined;
+  const operationId = `qa-replace-${randomUUID()}`;
   afterAll(async () => {
     if (ownsBank) {
       if (tutorId) await prisma.assessmentAttempt.deleteMany({ where: { tutorProfileId: tutorId } });
       if (classId) { await prisma.sessionTest.deleteMany({ where: { session: { classId } } }); await prisma.tutorClass.delete({ where: { id: classId } }); }
       await prisma.assessmentQuestion.deleteMany({ where: { id: { in: [...loadQuestionBank().questions.map(q => q.id), ...extraQuestionIds] } } });
+      await prisma.platformSetting.deleteMany({ where: { key: `questionBankReplacement:${operationId}` } });
       if (tutorId) await prisma.tutorProfile.delete({ where: { id: tutorId } });
       await prisma.user.deleteMany({ where: { id: { in: userIds } } });
     }
@@ -50,7 +52,9 @@ describe.skipIf(!process.env.QUESTION_BANK_TEST_DATABASE_URL)("question seed aga
     const tutorUser = await prisma.user.create({ data: { anonymousId: `QA-T-${tag}`, email: `qa-t-${tag}@example.test`, firstName: "QA", lastName: "History", password: "unused", role: "STUDENT_TUTOR", gradeLevel: "GRADE_12", section: "QA", tutorProfile: { create: {} } }, include: { tutorProfile: true } });
     userIds.push(tutorUser.id); tutorId = tutorUser.tutorProfile!.id;
     const attempt = await prisma.assessmentAttempt.create({ data: { tutorProfileId: tutorUser.tutorProfile!.id, subject: first.subject, topic: first.topic, attemptNo: 1, questionCount: 1, passPercent: 80, items: { create: { questionId: first.id, position: 0 } } }, include: { items: true } });
-    const klass = await prisma.tutorClass.create({ data: { code: `QA-Q-${tag}`, tutorProfileId: tutorId, subject: first.subject, topics: { create: { topic: first.topic } }, sessions: { create: { topic: first.topic, scheduledAt: new Date(), duration: 30, test: { create: { title: "Synthetic retained published test", status: "PUBLISHED", questions: { create: { questionId: first.id, position: 0 } } } } } } }, include: { sessions: { include: { test: { include: { questions: true } } } } } });
+    const legacy = await prisma.assessmentQuestion.create({ data: { subject: "OLD_LEGACY_SUBJECT", topic: "Legacy topic", prompt: "Synthetic old shared-bank question retained for published history", explanation: "Synthetic historical rationale", createdById: admin.id, origin: "BANK", options: { create: [{ text: "Old correct", isCorrect: true, position: 0 }, { text: "Old wrong", isCorrect: false, position: 1 }] } }, include: { options: true } });
+    extraQuestionIds.push(legacy.id);
+    const klass = await prisma.tutorClass.create({ data: { code: `QA-Q-${tag}`, tutorProfileId: tutorId, subject: first.subject, topics: { create: { topic: first.topic } }, sessions: { create: { topic: first.topic, scheduledAt: new Date(), duration: 30, test: { create: { title: "Synthetic retained published test", status: "PUBLISHED", questions: { create: [{ questionId: first.id, position: 0 }, { questionId: legacy.id, position: 1 }] } } } } } }, include: { sessions: { include: { test: { include: { questions: true } } } } } });
     classId = klass.id;
     const edited = await prisma.assessmentQuestion.update({ where: { id: first.id }, data: { prompt: "Synthetic independently edited QA question; preserved during reseeding", active: false, reviewStatus: "APPROVED", qualificationReviewedAt: new Date(), qualificationReviewerId: admin.id, qualificationCompetency: "Synthetic QA review", qualificationEvidence: "Synthetic QA evidence", qualificationReviewerCredentials: "Synthetic QA reviewer", lockedAt: new Date() }, include: { options: true } });
     const settings = await prisma.platformSetting.findMany();
@@ -66,10 +70,28 @@ describe.skipIf(!process.env.QUESTION_BANK_TEST_DATABASE_URL)("question seed aga
     const { createHash } = await import("node:crypto");
     const collision = "c" + createHash("sha256").update(`${sample.id}\0option\0${0}`).digest("hex").slice(0, 24);
     await prisma.assessmentOption.create({ data: { id: collision, questionId: first.id, position: 99, text: "Synthetic conflict option", isCorrect: false } });
-    await expect(seedQuestionBankDatabase({ db: prisma, authorId: admin.id })).rejects.toThrow();
+    const catalogBeforeFailure = await prisma.subject.findUniqueOrThrow({ where: { slug: "MATH" } });
+    await expect(seedQuestionBankDatabase({ db: prisma, authorId: admin.id, replace: true, syncCatalog: true, operationId })).rejects.toThrow();
+    expect(await prisma.subject.findUniqueOrThrow({ where: { slug: "MATH" } })).toEqual(catalogBeforeFailure);
+    expect((await prisma.assessmentQuestion.findUniqueOrThrow({ where: { id: legacy.id } })).active).toBe(true);
+    expect(await prisma.platformSetting.findUnique({ where: { key: `questionBankReplacement:${operationId}` } })).toBeNull();
     expect(await prisma.assessmentQuestion.findUnique({ where: { id: sample.id } })).toBeNull();
     await prisma.assessmentOption.delete({ where: { id: collision } });
     expect((await seedQuestionBankDatabase({ db: prisma, authorId: admin.id })).totalQuestions).toBe(1);
+    const replacementPlan = await seedQuestionBankDatabase({ db: prisma, authorId: admin.id, replace: true, syncCatalog: true, operationId, dryRun: true });
+    expect(replacementPlan.questionsToRetire).toBe(1); expect(replacementPlan.retiredQuestions).toBe(0);
+    expect((await prisma.assessmentQuestion.findUniqueOrThrow({ where: { id: legacy.id } })).active).toBe(true);
+    const replaced = await seedQuestionBankDatabase({ db: prisma, authorId: admin.id, replace: true, syncCatalog: true, operationId });
+    expect(replaced.retiredQuestions).toBe(1); expect(replaced.totalQuestions).toBe(0);
+    expect(await prisma.assessmentQuestion.findUnique({ where: { id: legacy.id }, include: { options: true } })).toEqual({ ...legacy, active: false, updatedAt: expect.any(Date) });
+    expect(await prisma.assessmentQuestion.findUnique({ where: { id: first.id }, include: { options: true } })).toEqual(edited);
+    expect((await prisma.assessmentQuestion.findUniqueOrThrow({ where: { id: tutorCopy.id } })).active).toBe(true);
+    expect(await prisma.tutorClass.findUnique({ where: { id: classId }, include: { sessions: { include: { test: { include: { questions: true } } } } } })).toEqual(klass);
+    const later = await prisma.assessmentQuestion.create({ data: { subject: first.subject, topic: first.topic, prompt: "Synthetic shared-bank item added by an administrator after replacement", createdById: admin.id, origin: "BANK" } });
+    extraQuestionIds.push(later.id);
+    expect((await seedQuestionBankDatabase({ db: prisma, authorId: admin.id, replace: true, syncCatalog: true, operationId })).alreadyApplied).toBe(true);
+    expect((await prisma.assessmentQuestion.findUniqueOrThrow({ where: { id: later.id } })).active).toBe(true);
+    expect((await seedQuestionBankDatabase({ db: prisma, authorId: admin.id, replace: true, subject: first.subject, topic: first.topic })).retiredQuestions).toBe(1);
     await expect(seedQuestionBankDatabase({ db: prisma, authorId: tutorUser.id })).rejects.toThrow(/ADMIN/);
     await expect(seedQuestionBankDatabase({ db: prisma, subject: "UNKNOWN" })).rejects.toThrow(/No question data/);
   }, 180000);
