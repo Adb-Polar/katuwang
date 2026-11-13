@@ -1,0 +1,3 @@
+These original authoring notes contain 1,880 new questions for the 94 topics added in the current catalogue expansion. Each `@` line is a four-choice pool; subsequent lines use `prompt|zero-based correct choice|explanation`. Canonical questions.json includes edited item-specific distractors and shuffled choices. It is the only seeder input; these notes are not parsed during seeding.
+
+An additional 820 previously researched replacement questions cover equivalent current topics. topic-reassignments.json records their explicit catalogue mappings; no subjects or topics were renamed. All 2,700 items remain pending genuine academic approval.

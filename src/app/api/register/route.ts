@@ -53,6 +53,8 @@ export async function POST(req: NextRequest) {
       password: data.password,
       gradeLevel: data.gradeLevel,
       section: data.section,
+      studentIdNumber: data.studentIdNumber,
+      adviserTeacherName: data.adviserTeacherName,
       contactInfo: data.contactInfo || null,
       recoveryEmail: data.recoveryEmail || null,
       consentGiven: data.consentGiven,

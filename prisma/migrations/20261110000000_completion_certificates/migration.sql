@@ -1,0 +1,33 @@
+ALTER TABLE `tutor_classes` ADD COLUMN `completedAt` DATETIME(3) NULL;
+
+CREATE TABLE `completion_certificates` (
+ `id` VARCHAR(191) NOT NULL,
+ `certificateNumber` VARCHAR(191) NOT NULL,
+ `learnerId` VARCHAR(191) NOT NULL,
+ `tutorId` VARCHAR(191) NOT NULL,
+ `classId` VARCHAR(191) NOT NULL,
+ `learnerName` VARCHAR(191) NOT NULL,
+ `tutorName` VARCHAR(191) NOT NULL,
+ `subjectName` VARCHAR(191) NOT NULL,
+ `classCode` VARCHAR(191) NOT NULL,
+ `completedAt` DATETIME(3) NOT NULL,
+ `issuedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+ `pdf` LONGBLOB NULL,
+ `emailStatus` ENUM('PENDING','PROCESSING','SENT','FAILED') NOT NULL DEFAULT 'PENDING',
+ `emailSentAt` DATETIME(3) NULL,
+ `attempts` INTEGER NOT NULL DEFAULT 0,
+ `nextAttemptAt` DATETIME(3) NULL DEFAULT CURRENT_TIMESTAMP(3),
+ `leaseToken` VARCHAR(191) NULL,
+ `leaseExpiresAt` DATETIME(3) NULL,
+ `lastError` VARCHAR(191) NULL,
+ `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+ `updatedAt` DATETIME(3) NOT NULL,
+ UNIQUE INDEX `completion_certificates_certificateNumber_key` (`certificateNumber`),
+ UNIQUE INDEX `completion_certificates_classId_learnerId_key` (`classId`,`learnerId`),
+ INDEX `completion_certificates_learnerId_issuedAt_idx` (`learnerId`,`issuedAt`),
+ INDEX `completion_certificates_emailStatus_nextAttemptAt_idx` (`emailStatus`,`nextAttemptAt`),
+ PRIMARY KEY (`id`),
+ CONSTRAINT `completion_certificates_learnerId_fkey` FOREIGN KEY (`learnerId`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+ CONSTRAINT `completion_certificates_tutorId_fkey` FOREIGN KEY (`tutorId`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+ CONSTRAINT `completion_certificates_classId_fkey` FOREIGN KEY (`classId`) REFERENCES `tutor_classes` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

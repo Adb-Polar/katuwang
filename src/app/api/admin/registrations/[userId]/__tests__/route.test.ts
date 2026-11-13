@@ -66,6 +66,24 @@ describe("PATCH /api/admin/registrations/[userId]", () => {
     expect(res.status).toBe(400);
   });
 
+  it.each(["STUDENT_TUTOR", "STUDENT_LEARNER"])("preserves %s school details on approval, including legacy nulls", async role => {
+    getServerSessionMock.mockResolvedValue(admin);
+    for (const details of [
+      { studentIdNumber: "001-234", adviserTeacherName: "Maria Santos" },
+      { studentIdNumber: null, adviserTeacherName: null },
+    ]) {
+      const stored = { id: "U1", anonymousId: "STU-0001", role, status: "PENDING", ...details };
+      findUniqueMock.mockResolvedValue(stored);
+      updateMock.mockImplementation(async ({ data }) => Object.assign(stored, data));
+      const res = await PATCH(makeRequest({ decision: "APPROVE" }), { params });
+      expect(res.status).toBe(200);
+      expect(stored).toMatchObject({ status: "ACTIVE", ...details });
+      const data = updateMock.mock.calls.at(-1)![0].data;
+      expect(data).not.toHaveProperty("studentIdNumber");
+      expect(data).not.toHaveProperty("adviserTeacherName");
+    }
+  });
+
   it("approves -> ACTIVE + USER_APPROVED audit entry", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     findUniqueMock.mockResolvedValue({ id: "U1", status: "PENDING" });

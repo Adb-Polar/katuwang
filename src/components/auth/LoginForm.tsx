@@ -107,7 +107,8 @@ export default function LoginForm() {
       <div className="card-body gap-6">
         {/* Card Header */}
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
-          <BrandMark />
+          {/* The asymmetric artwork needs a small optical offset to sit over the heading. */}
+          <BrandMark className="h-8 w-8 -translate-x-[3px]" />
           <h1 className="font-sans text-xl font-semibold text-base-content">Welcome Back</h1>
           <p className="text-xs text-base-content/60">Sign in to your account</p>
         </div>

@@ -11,6 +11,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Users", href: "/admin/users", icon: <Users className="w-4 h-4" />, group: "Main menu" },
   { label: "Registrations", href: "/admin/registrations", icon: <UserCheck className="w-4 h-4" />, group: "Main menu" },
   { label: "Classes", href: "/admin/classes", icon: <CalendarClock className="w-4 h-4" />, group: "Main menu" },
+  { label: "Certificate Management", href: "/admin/completion-certificates", icon: <BadgeCheck className="w-4 h-4" />, group: "Main menu" },
   { label: "Class Requests", href: "/admin/topic-requests", icon: <Inbox className="w-4 h-4" />, group: "Main menu" },
   { label: "Class Appeals", href: "/admin/class-appeals", icon: <Gavel className="w-4 h-4" />, group: "Review" },
   { label: "Abuse Reports", href: "/admin/abuse-reports", icon: <Flag className="w-4 h-4" />, group: "Review" },

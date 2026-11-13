@@ -2,6 +2,35 @@ import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { MINUTE_MS } from "@/lib/datetime";
 
+/** Call while holding the learner's account lock to serialize enrollment attempts. */
+export async function hasLearnerSessionOverlap(
+  learnerId: string,
+  classId: string,
+  sessions: { status: string; scheduledAt: Date; duration: number }[],
+  db: Pick<Prisma.TransactionClient, "classSession"> = prisma,
+): Promise<boolean> {
+  const enrolledSessions = await db.classSession.findMany({
+    where: {
+      status: "SCHEDULED",
+      class: {
+        id: { not: classId },
+        // Suspended classes keep their reservation until cancelled or completed.
+        status: { notIn: ["CANCELLED", "COMPLETED"] },
+        enrollments: { some: { learnerId, withdrawnAt: null } },
+      },
+    },
+    select: { scheduledAt: true, duration: true },
+  });
+  return sessions.filter(s => s.status === "SCHEDULED").some(candidate => {
+    const start = candidate.scheduledAt.getTime();
+    const end = start + candidate.duration * MINUTE_MS;
+    return enrolledSessions.some(other => {
+      const otherStart = other.scheduledAt.getTime();
+      return start < otherStart + other.duration * MINUTE_MS && end > otherStart;
+    });
+  });
+}
+
 /**
  * Checks a candidate session's time range against every SCHEDULED session in
  * every non-cancelled/non-completed class the tutor owns (excluding, optionally, one session —

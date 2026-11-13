@@ -7,7 +7,7 @@ ADMIN ADMIN
 STUDENT_TUTOR STUDENT_TUTOR
 STUDENT_LEARNER STUDENT_LEARNER
         }
-    
+
 
 
         AccountStatus {
@@ -17,7 +17,7 @@ BANNED BANNED
 PENDING PENDING
 DECLINED DECLINED
         }
-    
+
 
 
         GradeLevel {
@@ -28,7 +28,22 @@ GRADE_10 GRADE_10
 GRADE_11 GRADE_11
 GRADE_12 GRADE_12
         }
-    
+
+
+
+        QualificationReviewStatus {
+            UNREVIEWED UNREVIEWED
+DEMO DEMO
+APPROVED APPROVED
+        }
+
+
+
+        CertificationApprovalMethod {
+            ASSESSMENT ASSESSMENT
+MANUAL MANUAL
+        }
+
 
 
         TopicCertificationStatus {
@@ -36,7 +51,7 @@ GRADE_12 GRADE_12
 CERTIFIED CERTIFIED
 REJECTED REJECTED
         }
-    
+
 
 
         ClassStatus {
@@ -46,7 +61,7 @@ CANCELLED CANCELLED
 SUSPENDED SUSPENDED
 BANNED BANNED
         }
-    
+
 
 
         ClassAppealStatus {
@@ -54,14 +69,14 @@ BANNED BANNED
 APPROVED APPROVED
 REJECTED REJECTED
         }
-    
+
 
 
         ReportTargetType {
             TUTOR TUTOR
 CLASS CLASS
         }
-    
+
 
 
         ReportStatus {
@@ -69,7 +84,7 @@ CLASS CLASS
 RESOLVED RESOLVED
 DISMISSED DISMISSED
         }
-    
+
 
 
         ReportViolationType {
@@ -87,7 +102,7 @@ SCHEDULE_ABUSE SCHEDULE_ABUSE
 INAPPROPRIATE_CONTENT INAPPROPRIATE_CONTENT
 OTHER OTHER
         }
-    
+
 
 
         SessionStatus {
@@ -95,7 +110,7 @@ OTHER OTHER
 COMPLETED COMPLETED
 CANCELLED CANCELLED
         }
-    
+
 
 
         TopicRequestStatus {
@@ -105,7 +120,7 @@ ENROLLED ENROLLED
 FULFILLED FULFILLED
 CANCELLED CANCELLED
         }
-    
+
 
 
         AssessmentAttemptStatus {
@@ -113,7 +128,7 @@ CANCELLED CANCELLED
 PASSED PASSED
 FAILED FAILED
         }
-    
+
 
 
         QuestionRequestStatus {
@@ -121,14 +136,14 @@ FAILED FAILED
 RESOLVED RESOLVED
 DISMISSED DISMISSED
         }
-    
+
 
 
         QuestionOrigin {
             BANK BANK
 TUTOR TUTOR
         }
-    
+
 
 
         SessionTestStatus {
@@ -136,391 +151,493 @@ TUTOR TUTOR
 PUBLISHED PUBLISHED
 CLOSED CLOSED
         }
-    
+
 
 
         SessionTestKind {
             PRE PRE
 POST POST
         }
-    
+
 
 
         SessionTestAttemptStatus {
             IN_PROGRESS IN_PROGRESS
 SUBMITTED SUBMITTED
         }
-    
+
+
+
+        CertificateEmailStatus {
+            PENDING PENDING
+PROCESSING PROCESSING
+SENT SENT
+FAILED FAILED
+        }
+
   "users" {
     String id "🗝️"
-    String anonymousId 
-    String firstName 
-    String lastName 
-    String email 
-    String password 
+    String anonymousId
+    String firstName
+    String lastName
+    String email
+    String password
+    Int sessionVersion
     String recoveryEmail "❓"
-    Role role 
-    GradeLevel gradeLevel 
-    String section 
+    DateTime recoveryEmailVerifiedAt "❓"
+    Role role
+    GradeLevel gradeLevel
+    String section
+    String studentIdNumber "❓"
+    String adviserTeacherName "❓"
     String contactInfo "❓"
-    Boolean consentGiven 
-    AccountStatus status 
+    Boolean consentGiven
+    AccountStatus status
     String statusReason "❓"
     DateTime statusUpdatedAt "❓"
     DateTime statusExpiresAt "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime createdAt
+    DateTime updatedAt
     DateTime emailVerifiedAt "❓"
     String image "❓"
     String imageKey "❓"
-    Boolean profilePictureLocked 
+    Boolean profilePictureLocked
     DateTime profilePictureUpdatedAt "❓"
     }
-  
+
 
   "password_reset_tokens" {
     String id "🗝️"
-    String userId 
-    String tokenHash 
-    DateTime expiresAt 
+    String userId
+    String tokenHash
+    DateTime expiresAt
     DateTime usedAt "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "verification_tokens" {
     String id "🗝️"
-    String userId 
-    String tokenHash 
-    DateTime expiresAt 
+    String userId
+    String tokenHash
+    DateTime expiresAt
     DateTime usedAt "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
+
+  "recovery_email_tokens" {
+    String id "🗝️"
+    String userId
+    String email
+    String tokenHash
+    DateTime expiresAt
+    DateTime usedAt "❓"
+    DateTime createdAt
+    }
+
 
   "tutor_profiles" {
     String id "🗝️"
-    String userId 
+    String userId
     }
-  
+
 
   "topic_certifications" {
     String id "🗝️"
-    String tutorProfileId 
-    String subject 
-    String topic 
-    TopicCertificationStatus status 
-    DateTime requestedAt 
+    String tutorProfileId
+    String subject
+    String topic
+    TopicCertificationStatus status
+    DateTime requestedAt
     DateTime certifiedAt "❓"
     DateTime reviewedAt "❓"
     String reviewNote "❓"
+    CertificationApprovalMethod approvalMethod "❓"
+    String approvalEvidence "❓"
+    String qualifyingAttemptId "❓"
     }
-  
+
 
   "id_counters" {
     String role "🗝️"
-    Int count 
+    Int count
     }
-  
+
 
   "subjects" {
+    Json gradeLevels "❓"
     String id "🗝️"
-    String slug 
-    String name 
-    Int order 
-    Boolean active 
-    DateTime createdAt 
-    DateTime updatedAt 
+    String slug
+    String name
+    Int order
+    Boolean active
+    DateTime createdAt
+    DateTime updatedAt
+    Json curriculum "❓"
     }
-  
+
 
   "topics" {
+    Json gradeLevels "❓"
     String id "🗝️"
-    String subjectId 
-    String name 
-    Int order 
-    Boolean active 
-    DateTime createdAt 
+    String subjectId
+    String name
+    Int order
+    Boolean active
+    DateTime createdAt
+    Json curriculum "❓"
     }
-  
+
 
   "tutor_classes" {
+    DateTime completedAt "❓"
     String id "🗝️"
-    String code 
-    String tutorProfileId 
-    String subject 
+    String code
+    String tutorProfileId
+    String subject
     GradeLevel gradeLevel "❓"
     String description "❓"
-    Int maxStudents 
+    Int maxStudents
     String building "❓"
     String room "❓"
     String meetingLink "❓"
-    Boolean published 
-    ClassStatus status 
+    Boolean published
+    ClassStatus status
     String suspendedReason "❓"
     DateTime suspendedUntil "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "class_topics" {
     String id "🗝️"
-    String classId 
-    String topic 
+    String classId
+    String topic
     }
-  
+
 
   "class_sessions" {
     String id "🗝️"
-    String classId 
-    String topic 
-    DateTime scheduledAt 
-    Int duration 
-    SessionStatus status 
-    DateTime createdAt 
-    DateTime updatedAt 
+    String classId
+    String topic
+    DateTime scheduledAt
+    Int duration
+    SessionStatus status
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "class_enrollments" {
     String id "🗝️"
-    String classId 
-    String learnerId 
-    DateTime enrolledAt 
+    String classId
+    String learnerId
+    DateTime enrolledAt
+    DateTime withdrawnAt "❓"
     }
-  
+
 
   "topic_requests" {
     String id "🗝️"
-    String learnerId 
-    String subject 
-    GradeLevel gradeLevel 
+    String learnerId
+    String subject
+    GradeLevel gradeLevel
     String note "❓"
-    TopicRequestStatus status 
+    TopicRequestStatus status
     String fulfilledClassId "❓"
     String directedTutorProfileId "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime createdAt
+    DateTime updatedAt
+    DateTime expiresAt
+    DateTime lastSubmittedAt
     }
-  
+
+
+  "topic_request_history" {
+    String id "🗝️"
+    String requestId
+    String actorId "❓"
+    String eventType
+    DateTime createdAt
+    Json before "❓"
+    Json after
+    }
+
 
   "topic_request_topics" {
     String id "🗝️"
-    String requestId 
-    String topic 
+    String requestId
+    String topic
     }
-  
+
 
   "topic_request_slots" {
+    String date "❓"
     String id "🗝️"
-    String requestId 
-    String day 
-    String startTime 
-    String endTime 
+    String requestId
+    String day
+    String startTime
+    String endTime
     }
-  
+
 
   "class_recommendations" {
     String id "🗝️"
-    String classId 
-    String learnerId 
-    String adminId 
+    String classId
+    String learnerId
+    String adminId
     String note "❓"
-    DateTime createdAt 
+    DateTime createdAt
     DateTime dismissedAt "❓"
     }
-  
+
 
   "audit_logs" {
     String id "🗝️"
-    String adminId 
-    String action 
-    String targetType 
-    String targetId 
+    String adminId
+    String action
+    String targetType
+    String targetId
     String reason "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "platform_settings" {
     String key "🗝️"
-    String value 
-    DateTime updatedAt 
+    String value
+    DateTime updatedAt
     }
-  
+
 
   "assessment_questions" {
     String id "🗝️"
-    String subject 
-    String topic 
-    String prompt 
+    String subject
+    String topic
+    String prompt
     String explanation "❓"
-    Boolean active 
-    QuestionOrigin origin 
-    String createdById 
+    Boolean active
+    QuestionOrigin origin
+    String createdById
     String ownerTutorProfileId "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime lockedAt "❓"
+    Int version
+    QualificationReviewStatus reviewStatus
+    DateTime qualificationReviewedAt "❓"
+    String qualificationReviewerId "❓"
+    String qualificationCompetency "❓"
+    String qualificationEvidence "❓"
+    String qualificationReviewerCredentials "❓"
+    String previousVersionId "❓"
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "assessment_options" {
     String id "🗝️"
-    String questionId 
-    String text 
-    Boolean isCorrect 
-    Int position 
+    String questionId
+    String text
+    Boolean isCorrect
+    Int position
     }
-  
+
 
   "assessment_attempts" {
     String id "🗝️"
-    String tutorProfileId 
-    String subject 
-    String topic 
-    Int attemptNo 
-    AssessmentAttemptStatus status 
-    Int questionCount 
-    Int correctCount 
-    Int scorePercent 
-    Int passPercent 
-    DateTime startedAt 
+    String tutorProfileId
+    String subject
+    String topic
+    Int attemptNo
+    AssessmentAttemptStatus status
+    Boolean certificationEligible
+    Int questionCount
+    Int correctCount
+    Int scorePercent
+    Int passPercent
+    DateTime startedAt
     DateTime submittedAt "❓"
     }
-  
+
 
   "assessment_attempt_items" {
     String id "🗝️"
-    String attemptId 
-    String questionId 
-    Int position 
+    String attemptId
+    String questionId
+    Int position
     String selectedOptionId "❓"
     Boolean isCorrect "❓"
     }
-  
+
 
   "question_requests" {
     String id "🗝️"
-    String tutorProfileId 
-    String subject 
-    String topic 
+    String tutorProfileId
+    String subject
+    String topic
     String note "❓"
-    QuestionRequestStatus status 
+    QuestionRequestStatus status
     String resolvedById "❓"
     DateTime resolvedAt "❓"
     String resolutionNote "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "notifications" {
     String id "🗝️"
-    String userId 
-    String type 
-    String message 
+    String userId
+    String type
+    String message
     String link "❓"
     DateTime readAt "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "chatbot_misses" {
     String id "🗝️"
-    String message 
-    Role role 
+    String message
+    Role role
     String userId "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "class_appeals" {
     String id "🗝️"
-    String classId 
-    String tutorProfileId 
-    String reason 
-    ClassAppealStatus status 
+    String classId
+    String tutorProfileId
+    String reason
+    ClassAppealStatus status
     String reviewNote "❓"
     String reviewedById "❓"
     DateTime reviewedAt "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "reports" {
     String id "🗝️"
-    String reporterId 
-    ReportTargetType targetType 
+    String reporterId
+    ReportTargetType targetType
     String reportedTutorProfileId "❓"
     String classId "❓"
     String details "❓"
-    ReportStatus status 
+    ReportStatus status
     String resolutionNote "❓"
     String reviewedById "❓"
     DateTime reviewedAt "❓"
-    DateTime createdAt 
+    DateTime createdAt
     }
-  
+
 
   "report_violations" {
     String id "🗝️"
-    String reportId 
-    ReportViolationType type 
+    String reportId
+    ReportViolationType type
     }
-  
+
 
   "session_tests" {
     String id "🗝️"
-    String sessionId 
-    String title 
+    String sessionId
+    String title
     String instructions "❓"
-    SessionTestStatus status 
+    SessionTestStatus status
     DateTime publishedAt "❓"
+    DateTime pretestClosedAt "❓"
+    DateTime posttestOpenedAt "❓"
     DateTime closedAt "❓"
-    DateTime createdAt 
-    DateTime updatedAt 
+    DateTime createdAt
+    DateTime updatedAt
     }
-  
+
 
   "session_test_questions" {
     String id "🗝️"
-    String sessionTestId 
-    String questionId 
-    Int position 
+    String sessionTestId
+    String questionId
+    Int position
     }
-  
+
 
   "session_test_attempts" {
     String id "🗝️"
-    String sessionTestId 
-    String learnerId 
-    SessionTestKind kind 
-    SessionTestAttemptStatus status 
-    Int totalQuestions 
-    Int correctCount 
-    Int scorePercent 
-    DateTime startedAt 
+    String sessionTestId
+    String learnerId
+    SessionTestKind kind
+    SessionTestAttemptStatus status
+    Int totalQuestions
+    Int correctCount
+    Int scorePercent
+    DateTime startedAt
     DateTime submittedAt "❓"
     }
-  
+
 
   "session_test_attempt_items" {
     String id "🗝️"
-    String attemptId 
-    String questionId 
-    Int position 
+    String attemptId
+    String questionId
+    Int position
     String selectedOptionId "❓"
     Boolean isCorrect "❓"
     }
-  
+
+
+  "recovery_challenges" {
+    String id "🗝️"
+    String userId
+    String tokenHash
+    String purpose
+    String email
+    String codeHash "❓"
+    Int attempts
+    DateTime verifiedAt "❓"
+    DateTime usedAt "❓"
+    DateTime expiresAt
+    DateTime createdAt
+    }
+
+
+  "completion_certificates" {
+    String id "🗝️"
+    String certificateNumber
+    String learnerId
+    String tutorId
+    String classId
+    String learnerName
+    String tutorName
+    String subjectName
+    String classCode
+    DateTime completedAt
+    DateTime issuedAt
+    Bytes pdf "❓"
+    CertificateEmailStatus emailStatus
+    DateTime emailSentAt "❓"
+    Int attempts
+    DateTime nextAttemptAt "❓"
+    String leaseToken "❓"
+    DateTime leaseExpiresAt "❓"
+    String lastError "❓"
+    DateTime createdAt
+    DateTime updatedAt
+    }
+
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
     "password_reset_tokens" }o--|| "users" : "user"
     "verification_tokens" }o--|| "users" : "user"
+    "recovery_email_tokens" }o--|| "users" : "user"
     "tutor_profiles" |o--|| "users" : "user"
     "topic_certifications" |o--|| "TopicCertificationStatus" : "enum:status"
+    "topic_certifications" |o--|o "CertificationApprovalMethod" : "enum:approvalMethod"
+    "topic_certifications" }o--|o "assessment_attempts" : "qualifyingAttempt"
     "topic_certifications" }o--|| "tutor_profiles" : "tutorProfile"
     "topics" }o--|| "subjects" : "subject"
     "tutor_classes" |o--|o "GradeLevel" : "enum:gradeLevel"
@@ -536,6 +653,7 @@ SUBMITTED SUBMITTED
     "topic_requests" }o--|o "tutor_profiles" : "directedTutor"
     "topic_requests" }o--|o "tutor_classes" : "fulfilledClass"
     "topic_requests" }o--|| "users" : "learner"
+    "topic_request_history" }o--|| "topic_requests" : "request"
     "topic_request_topics" }o--|| "topic_requests" : "request"
     "topic_request_slots" }o--|| "topic_requests" : "request"
     "class_recommendations" }o--|| "users" : "admin"
@@ -543,6 +661,9 @@ SUBMITTED SUBMITTED
     "class_recommendations" }o--|| "users" : "learner"
     "audit_logs" }o--|| "users" : "admin"
     "assessment_questions" |o--|| "QuestionOrigin" : "enum:origin"
+    "assessment_questions" |o--|| "QualificationReviewStatus" : "enum:reviewStatus"
+    "assessment_questions" }o--|o "users" : "qualificationReviewer"
+    "assessment_questions" |o--|o "assessment_questions" : "previousVersion"
     "assessment_questions" }o--|| "users" : "createdBy"
     "assessment_questions" }o--|o "tutor_profiles" : "ownerTutorProfile"
     "assessment_options" }o--|| "assessment_questions" : "question"
@@ -580,4 +701,9 @@ SUBMITTED SUBMITTED
     "session_test_attempt_items" }o--|| "session_test_attempts" : "attempt"
     "session_test_attempt_items" }o--|| "assessment_questions" : "question"
     "session_test_attempt_items" }o--|o "assessment_options" : "selectedOption"
+    "recovery_challenges" }o--|| "users" : "user"
+    "completion_certificates" |o--|| "CertificateEmailStatus" : "enum:emailStatus"
+    "completion_certificates" }o--|| "users" : "learner"
+    "completion_certificates" }o--|| "users" : "tutor"
+    "completion_certificates" }o--|| "tutor_classes" : "class"
 ```

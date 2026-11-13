@@ -1,0 +1,147 @@
+## Scientific Method & Inquiry
+A testable proposed explanation is a what?|Hypothesis.|Conclusion.|Measurement.|Publication.|A hypothesis can be tested against evidence.
+Which tool measures mass?|Balance.|Thermometer.|Stopwatch.|Ruler.|A balance measures mass.
+Which quantity is measured in seconds?|Time.|Length.|Mass.|Temperature.|Seconds are units of time.
+What is an observation?|Information obtained using senses or instruments.|An unsupported prediction.|An untested belief.|A preferred outcome.|Observations record evidence.
+What is a controlled variable?|A factor kept constant.|The measured response.|The deliberately changed factor.|A final conclusion.|Constants help make comparisons fair.
+Which statement is quantitative?|The seedling is 12 cm tall.|The seedling looks healthy.|The leaves feel smooth.|The flower smells sweet.|Quantitative observations contain measurements.
+Testing fertilizer, a pupil changes fertilizer amount. Which variable is independent?|Fertilizer amount.|Plant height afterward.|Leaf color afterward.|Final root length.|The independent variable is deliberately changed.
+In the same fertilizer test, plant height is measured. What is it?|Dependent variable.|Control variable.|Research instrument.|Experimental constant.|The measured response is dependent.
+Why repeat measurements?|To assess variability and improve reliability.|To guarantee a preferred result.|To remove every source of error.|To avoid recording data.|Repeated measurements reveal consistency and variation.
+Why give test plants equal light?|To reduce a competing explanation.|To ensure identical final heights.|To increase every variable.|To eliminate photosynthesis.|Light differences could confound fertilizer effects.
+Which control helps test a fertilizer?|Comparable plants receiving no added fertilizer.|Different species grown in darkness.|Only the tallest treated plant.|An empty measuring cylinder.|The control provides a relevant untreated comparison.
+A ruler starts at a chipped edge. What should be checked?|Its zero reference.|The plant's name only.|The notebook's cover.|The room number.|An incorrect zero produces measurement error.
+A graph shows time horizontally and height vertically. What does its slope describe?|Height change per unit time.|Total leaf number.|Soil mass alone.|The initial fertilizer label.|Slope compares changes in the two quantities.
+Results conflict with a hypothesis. What should happen?|Reassess the hypothesis using the evidence.|Discard disagreeing results automatically.|Change measurements silently.|Announce proof regardless.|Explanations must respond to evidence.
+Which is an appropriate research question?|How does light duration affect seedling growth?|Which plant is nicest forever?|Why is nature always perfect?|Can every mystery be solved today?|The question defines testable variables.
+Why describe procedures precisely?|Others can evaluate and repeat the work.|To guarantee identical weather.|To replace data collection.|To prevent criticism.|Transparent procedures support reproducibility.
+Plants differ in species and fertilizer treatment. Why is causal inference weak?|Species and fertilizer effects are confounded.|Fertilizer can never affect plants.|Species cannot influence growth.|All comparisons are invalid.|More than one relevant factor changed.
+One treated plant grows taller than one control. What is the strongest next step?|Repeat with more comparable plants.|Declare universal proof.|Remove the control from the report.|Assume measurement is unnecessary.|More replicates help separate effects from variation.
+Ice-cream sales and drowning both rise in summer. What conclusion is warranted?|A shared seasonal factor may explain the association.|Ice cream necessarily causes drowning.|Drowning necessarily increases sales.|Correlation proves a mechanism.|A third variable can create correlation.
+A survey asks 'Why is our excellent policy successful?' What is wrong?|Its wording presupposes success.|It uses too few adjectives.|It contains no numbers.|It cannot receive any response.|The leading wording biases responses.
+## Cell Biology & Genetics
+Which structure controls most entry and exit from a cell?|Cell membrane.|Ribosome.|Chromosome.|Nucleolus.|The membrane regulates exchange.
+Which organelle is a major site of aerobic ATP production?|Mitochondrion.|Vacuole.|Cell wall.|Golgi apparatus.|Mitochondria carry out aerobic respiration stages.
+Where does photosynthesis occur in plant cells?|Chloroplasts.|Lysosomes.|Ribosomes.|Centrioles.|Chloroplasts contain the photosynthetic machinery.
+What molecule carries hereditary information?|DNA.|Starch.|Cellulose.|Triglyceride.|DNA stores genetic information.
+What is a gene?|A DNA sequence contributing to a functional product.|An entire organism.|A cell wall layer.|A food molecule only.|Genes encode functional RNA or protein products.
+What is an allele?|An alternative form of a gene.|A whole ecosystem.|A kind of organ.|A cell membrane pore.|Alleles are variant gene forms.
+Which structure is present in typical plant cells but absent in animal cells?|Cell wall.|Cell membrane.|Mitochondrion.|Ribosome.|Plant cells have cellulose-containing walls.
+Why do muscle cells often contain many mitochondria?|Their activities require substantial ATP.|They never use energy.|They perform photosynthesis.|Their DNA is absent.|Energy-demanding cells need ATP production.
+Which process produces two genetically similar daughter cells for growth?|Mitosis.|Fertilization.|Meiosis.|Pollination.|Mitosis maintains chromosome number in ordinary growth.
+Which process normally halves chromosome number in gamete formation?|Meiosis.|Mitosis.|Diffusion.|Respiration.|Meiosis produces haploid cells.
+A plant cell loses water in a concentrated solution. What explains this?|Osmosis.|Protein synthesis.|DNA replication.|Active photosynthesis.|Water moves across a selectively permeable membrane.
+In a simple dominant-recessive model, Aa is what?|Heterozygous.|Homozygous dominant.|Homozygous recessive.|Without alleles.|Its two alleles differ.
+In a simple diploid dominant-recessive model, a recessive phenotype appears with which allele combination?|Two recessive alleles.|Two dominant alleles.|One dominant and one recessive allele.|Only one allele in total.|A recessive phenotype requires both copies to be recessive in this model.
+For Aa × Aa, what fraction of offspring is expected to be aa?|1/4.|1/2.|3/4.|1.|The cross gives AA, Aa, Aa and aa.
+What distinguishes genotype from phenotype?|Genotype is genetic constitution; phenotype is observable expression.|Both mean appearance only.|Genotype means habitat.|Phenotype means chromosome count only.|Genetic constitution and expressed traits are different concepts.
+Why can siblings differ genetically?|Meiosis and fertilization combine alleles differently.|All siblings have identical gametes.|Genes disappear after birth.|Each sibling lacks chromosomes.|Sexual reproduction generates genetic variation.
+A dominant trait is common in a family. Does dominance prove it is most common in the population?|No; dominance describes expression, not frequency.|Yes; dominant always means most frequent.|Yes; recessive alleles cannot persist.|No; dominant alleles are never inherited.|Dominance and population frequency are distinct.
+Four offspring from Aa × Aa are all dominant in phenotype. Does this disprove the 3:1 expectation?|No; small samples can depart from expected ratios.|Yes; every group of four must match exactly.|Yes; inheritance stops in small families.|No; aa always shows dominance.|Ratios describe probabilities, not guaranteed small-sample counts.
+A mutation changes DNA but produces no observable trait change. Is this possible?|Yes; not every DNA change alters phenotype.|No; every mutation is lethal.|No; DNA never changes.|Yes; mutations remove all genes.|Some mutations are silent or have context-dependent effects.
+Identical genotypes grow differently under different nutrition. What does this show?|Environment can influence phenotype.|Nutrition rewrites every allele.|Genes have no role in traits.|Phenotype is always environment-independent.|Traits can reflect genetic and environmental influences.
+## Chemical Reactions & Matter
+Which particle has a positive charge?|Proton.|Neutron.|Electron.|Photon.|Protons carry positive charge.
+An element contains atoms with the same number of what?|Protons.|Neutrons necessarily.|Electron shells necessarily.|Chemical bonds.|Proton number defines an element.
+Which is a compound?|Water.|Oxygen gas.|Iron.|Helium.|Water contains chemically combined hydrogen and oxygen.
+Which is a physical change?|Melting ice.|Rusting iron.|Burning paper.|Souring milk.|Melting changes state without changing chemical identity.
+Which state has fixed volume but no fixed shape?|Liquid.|Gas.|Plasma.|Vapor.|A liquid takes its container's shape.
+What is a reactant?|A starting substance in a reaction.|Only a final product.|A laboratory balance.|A measurement unit.|Reactants undergo chemical change.
+Which observation most directly indicates formation of a new substance?|A solid precipitate forms from two clear solutions.|A beaker is moved.|A liquid is poured.|A metal is cut.|Precipitation indicates a new insoluble substance.
+Why balance chemical equations?|To conserve the number of atoms of each element.|To change element identities.|To make every coefficient equal.|To eliminate all products.|Atoms are conserved in ordinary chemical reactions.
+Balance H2 + O2 → H2O. Which coefficients are correct?|2, 1, 2.|1, 1, 1.|1, 2, 1.|2, 2, 1.|Two water molecules require four H and two O atoms.
+A sealed reaction container has mass 150 g before reaction. What total mass is expected afterward?|150 g.|0 g.|75 g.|300 g.|Mass is conserved in the closed system.
+Which separates sand from water most directly?|Filtration.|Magnetism.|Melting.|Chemical combustion.|A filter retains insoluble sand.
+Which separates dissolved salt from water while collecting salt?|Evaporation.|Ordinary paper filtration.|Magnetic attraction.|Sieving.|Removing solvent leaves dissolved salt behind.
+Two atoms have equal protons but different neutrons. They are what?|Isotopes.|Different elements necessarily.|Oppositely charged ions necessarily.|Compounds.|Isotopes differ in neutron number.
+A neutral atom gains one electron. What forms?|A negatively charged ion.|A positive ion.|A new proton.|A different element.|An extra electron gives net negative charge.
+Which increases many reaction rates?|Raising temperature within a suitable range.|Removing all reactants.|Preventing collisions.|Keeping particles motionless.|Higher temperature can increase effective collisions.
+An exothermic reaction does what?|Transfers heat to its surroundings.|Always absorbs surrounding heat.|Destroys energy.|Creates atoms from nothing.|Exothermic processes release heat.
+A student balances an equation by changing H2O to H2O2. Why is this invalid?|Changing subscripts changes the substance.|Products may never have coefficients.|Hydrogen cannot react.|Subscripts have no chemical meaning.|Balancing changes coefficients, not chemical formulas.
+A bubbling reaction loses mass in an open flask. What best explains it?|Gas escaped the measured system.|Atoms vanished.|Conservation of mass stopped.|The balance must always be broken.|An open system can lose material to its surroundings.
+A substance has constant composition and cannot be separated physically into components. Which classification fits if it contains two elements?|Compound.|Solution.|Suspension.|Mechanical mixture.|A compound has chemically combined elements in fixed proportions.
+Crushing a tablet speeds its reaction with water. What is the best explanation?|Greater exposed surface allows more contact.|Crushing changes every atom's identity.|Smaller pieces always lower temperature.|The tablet loses all its mass before reacting.|Surface area influences reaction rate.
+## Force, Motion & Energy
+The SI unit of force is what?|Newton.|Joule.|Watt.|Meter.|Force is measured in newtons.
+Speed equals distance divided by what?|Time.|Mass.|Force.|Area.|Speed measures distance per unit time.
+What is acceleration?|Rate of change of velocity.|Distance alone.|Mass per unit volume.|Stored chemical energy.|Acceleration describes velocity change over time.
+Which force opposes relative sliding?|Friction.|Gravity only.|Buoyancy only.|Magnetism always.|Sliding friction resists relative motion.
+Energy due to motion is what?|Kinetic energy.|Gravitational potential energy.|Chemical energy only.|Elastic potential energy only.|Moving objects possess kinetic energy.
+Which unit measures energy?|Joule.|Newton.|Second.|Kilogram.|The joule is the SI energy unit.
+A cyclist covers 120 m in 20 s. Average speed?|6 m/s.|0.17 m/s.|100 m/s.|2400 m/s.|Divide 120 by 20.
+A 2 kg object has net force 10 N. Acceleration?|5 m/s².|20 m/s².|8 m/s².|12 m/s².|Newton's second law gives acceleration = force/mass.
+Two opposite forces of 8 N and 3 N act. Net force magnitude?|5 N.|11 N.|24 N.|0 N.|Opposite forces subtract.
+A book rests on a table. Which balances its weight?|The table's upward normal force.|A downward friction force.|The book's mass.|The air temperature.|The normal force balances gravity vertically.
+Why does a passenger lurch forward when a bus brakes?|The passenger's body tends to maintain its motion.|Gravity suddenly points forward.|The passenger gains mass.|The seat creates forward gravity.|Inertia resists a change in motion.
+A force of 5 N moves an object 4 m in the force direction. Work?|20 J.|1.25 J.|9 J.|0.8 J.|Work equals force times displacement in its direction.
+Lifting a mass higher increases which energy?|Gravitational potential energy.|Kinetic energy necessarily.|Nuclear energy.|Sound energy necessarily.|Height raises gravitational potential energy.
+A ball rolls downhill without significant friction. What conversion occurs?|Gravitational potential to kinetic energy.|Kinetic energy to mass.|Chemical to nuclear energy.|Heat to gravitational mass.|The loss in potential energy increases motion energy.
+A wall does not move when pushed. Mechanical work on the wall's displacement?|Zero.|Equal to the pushing force.|Infinite.|Always negative.|Work on translational displacement requires displacement.
+Which describes Newton's third-law pair when walking?|Foot pushes ground backward; ground pushes foot forward.|Weight and normal force on the same person.|Two forces both acting only on the foot.|Speed and acceleration.|Third-law forces act on different interacting bodies.
+Speed doubles while mass stays fixed. What happens to kinetic energy?|It becomes four times as large.|It doubles.|It halves.|It stays unchanged.|Kinetic energy depends on speed squared.
+A car turns at constant speed. Is it accelerating?|Yes; its velocity direction changes.|No; acceleration requires greater speed only.|No; mass is constant.|Yes; distance itself is acceleration.|Velocity includes direction.
+Balanced forces act on a moving cart. What follows ideally?|Its velocity remains constant.|It must stop immediately.|Its mass becomes zero.|Its speed must increase.|Zero net force means zero acceleration.
+A machine's useful output is 60 J from 100 J input. What explains the other 40 J?|Energy was transferred into less useful forms such as heat.|Energy was destroyed.|The machine created negative energy.|Conservation applies only to perfect machines.|Total energy is conserved despite reduced useful output.
+## Ecosystems & the Environment
+Which organism is a producer?|Grass.|Grasshopper.|Frog.|Hawk.|Grass produces organic matter by photosynthesis.
+What is a population?|Members of one species in an area.|Every ecosystem worldwide.|Only nonliving factors.|All species everywhere.|A population is species-specific within an area.
+Which is abiotic?|Sunlight.|Fungus.|Bacterium.|Tree.|Sunlight is nonliving.
+What do decomposers do?|Break down dead organic matter.|Create sunlight.|Remove every nutrient permanently.|Stop all food webs.|Decomposition recycles nutrients.
+What is a habitat?|The place an organism lives.|Its chromosome number.|Its total mass.|Only its predators.|Habitat describes its living environment.
+Which is a consumer?|A rabbit eating grass.|A photosynthetic grass plant.|Sunlight.|Soil water.|Consumers obtain organic matter from other organisms.
+In grass → rabbit → fox, arrows show what?|Transfer of energy through feeding.|The direction animals walk.|Only body size.|Water flowing uphill.|Food-chain arrows point toward the consumer receiving energy.
+Why is less energy available at higher trophic levels?|Organisms use energy and release heat.|Energy cycles perfectly without loss.|Predators create no heat.|Producers absorb all animal mass.|Not all consumed energy becomes biomass available to the next level.
+Many rabbits lose their grass habitat. What is a likely initial effect?|Less food is available to them.|Their food supply must increase.|All foxes instantly disappear.|Sunlight stops reaching Earth.|Habitat loss can reduce resources.
+Bees obtain nectar while pollinating flowers. Which interaction is this?|Mutualism.|Predation.|Parasitism.|Competition only.|Both participants benefit.
+Two plant species need the same limited light. What interaction occurs?|Competition.|Mutualism necessarily.|Parasitism necessarily.|Decomposition.|They compete for a limiting resource.
+Why can excessive fertilizer harm a lake?|Nutrient enrichment can promote blooms and oxygen depletion.|It removes every organism immediately.|It prevents all plant growth.|It increases oxygen indefinitely.|Decomposition of blooms can consume dissolved oxygen.
+Which action best reduces erosion on a bare slope?|Establish suitable vegetation.|Remove remaining roots.|Leave soil exposed.|Increase uncontrolled runoff.|Roots and ground cover stabilize soil.
+What does biodiversity include?|Variation among genes, species and ecosystems.|Only the number of people.|Only large mammals.|Only forest area.|Biodiversity spans several levels of biological variation.
+Which material is generally best diverted to controlled composting?|Vegetable scraps.|Batteries.|Broken glass.|Plastic wrappers.|Plant food scraps can decompose into compost.
+Why can removing a top predator affect several species?|Food-web interactions link populations.|Each species is completely isolated.|Predators only affect sunlight.|All populations respond identically.|Indirect effects can spread through a food web.
+An invasive species grows rapidly without local predators. What risk follows?|It may outcompete native species.|It must increase every native population.|It cannot change habitats.|It guarantees stable biodiversity.|Rapid invader growth can displace native organisms.
+A restored wetland reduces flood peaks. What service is illustrated?|Water storage and flow regulation.|Creation of rainfall from nothing.|Elimination of all storms.|Production of fossil fuels.|Wetlands can store water and slow runoff.
+Why is planting one fast-growing species not always equivalent to restoring a diverse forest?|Species diversity and habitat functions may remain limited.|All trees support identical organisms.|Fast growth proves complete recovery.|Forest recovery depends only on height.|Restoration involves ecosystem composition and function.
+A lake improves after both sewage treatment and reduced fertilizer use. Which conclusion is defensible?|Both changes may have contributed; their separate effects need evaluation.|Only one change must explain all improvement.|Water quality cannot change.|The improvement proves fertilizer is harmless.|Multiple interventions complicate assigning a single cause.
+## Earth & Space Science
+Earth's daily rotation mainly causes what?|Day and night.|Annual seasons alone.|Ocean salinity.|Lunar craters.|Rotation alternates locations between sunlight and darkness.
+Earth orbits which star?|The Sun.|Polaris.|Sirius.|Betelgeuse.|The Sun is the solar system's central star.
+The point inside Earth where rupture starts is the what?|Focus or hypocenter.|Epicenter.|Equator.|Mantle boundary always.|The focus is the initial rupture location.
+The surface point directly above the focus is the what?|Epicenter.|Core.|Axis.|Orbit.|Epicenter refers to the surface location.
+Which process changes water vapor to liquid?|Condensation.|Evaporation.|Sublimation.|Melting.|Condensation forms liquid from gas.
+Which rock forms from cooled magma or lava?|Igneous.|Sedimentary.|Metamorphic only.|Fossilized wood necessarily.|Igneous rocks form by solidification.
+Why do seasons occur?|Earth's axial tilt changes sunlight angle and day length during its orbit.|Earth approaches the Sun every summer in both hemispheres.|Earth stops rotating in winter.|The Moon blocks sunlight for months.|Tilt and revolution produce seasonal sunlight differences.
+When the Northern Hemisphere tilts toward the Sun, what season occurs there?|Summer.|Winter.|Autumn everywhere.|Spring everywhere.|It receives longer daylight and more direct sunlight.
+Why does the Moon appear to change shape?|We see different portions of its sunlit half.|Earth's shadow causes every phase.|The Moon changes its physical size.|Clouds carve its edges.|Orbital geometry changes the illuminated portion visible from Earth.
+Most earthquakes are associated with what?|Sudden fault movement releasing stored strain energy.|Daily evaporation.|Cloud collisions.|Earth stopping its orbit.|Fault slip releases energy as seismic waves.
+What is weathering?|Breakdown of rock at or near the surface.|Transport of sediment only.|Deep melting of all rock.|Planetary rotation.|Weathering breaks material down; erosion transports it.
+Moving sediment by a river illustrates what?|Erosion and transport.|Condensation.|Nuclear fusion.|Crystallization only.|Flowing water can move weathered particles.
+Why are locations near a rupture often strongly shaken?|Seismic energy travels outward from the source.|Gravity disappears there.|Their rocks always weigh more.|The Moon stops over them.|Distance from the source affects shaking alongside other factors.
+What distinguishes climate from weather?|Climate describes long-term patterns; weather describes shorter-term conditions.|Climate changes every minute only.|Weather is always global.|The terms mean exactly the same thing.|The distinction concerns time scale and statistical patterns.
+What is subduction?|One tectonic plate descends beneath another.|A river turns to ice.|The Moon enters an eclipse.|All continents stop moving.|Subduction occurs at convergent plate boundaries.
+Which contributes to flood risk?|Heavy rainfall combined with limited drainage.|Every sunny afternoon.|Low humidity alone.|The Moon's phase alone.|Rainfall and drainage capacity jointly influence flooding.
+Two places have the same earthquake magnitude but different damage. Why?|Local ground conditions and building vulnerability differ.|Magnitude changes for every observer.|Earthquakes cannot affect buildings.|Damage depends only on clock time.|Damage also depends on exposure and vulnerability.
+A hot day is cited as proof of a century-long climate trend. What is the main problem?|One day's weather cannot establish a long-term trend.|Temperature cannot be measured.|Climate has no connection with temperature.|Long records are less useful than one observation.|Trend assessment requires sustained, representative observations.
+During a lunar eclipse, what alignment occurs?|Earth lies between the Sun and Moon.|The Moon lies between Earth and Sun.|The Sun lies between Earth and Moon.|Earth and Moon exchange orbits.|Earth's shadow falls on the Moon.
+A steep deforested slope receives prolonged rain. Which combined hazard is especially relevant?|Slope failure as soil becomes saturated and less supported.|An automatic volcanic eruption.|A guaranteed solar eclipse.|Permanent loss of gravity.|Saturation and reduced root support can increase landslide risk.
+## Human Body Systems
+Which organ pumps blood?|Heart.|Lung.|Stomach.|Kidney.|The heart drives blood circulation.
+Where does most gas exchange occur in the lungs?|Alveoli.|Trachea.|Nasal hairs.|Larynx.|Alveoli provide thin exchange surfaces.
+Which system coordinates rapid signals?|Nervous system.|Digestive system.|Skeletal system alone.|Urinary system alone.|Neurons transmit rapid signals.
+Which organs filter blood to form urine?|Kidneys.|Lungs.|Pancreas.|Esophagus.|Kidneys regulate waste and fluid removal.
+Where is most nutrient absorption completed?|Small intestine.|Esophagus.|Mouth.|Large intestine mainly.|The small intestine has specialized absorptive surfaces.
+What is homeostasis?|Regulation of internal conditions within functional ranges.|The absence of all change.|Only muscular movement.|A type of food.|Homeostasis maintains suitable internal conditions.
+Why does breathing often increase during exercise?|Working tissues need more oxygen and carbon dioxide removal.|Bones stop using blood.|The stomach produces oxygen.|The body no longer needs energy.|Greater metabolism raises gas-exchange demands.
+Which blood component mainly transports oxygen?|Red blood cells.|Platelets.|Plasma proteins only.|White blood cells mainly.|Hemoglobin in red cells binds oxygen.
+What is the main function of platelets?|Help blood clot.|Produce urine.|Digest starch.|Transmit nerve impulses.|Platelets contribute to clot formation.
+Why do intestinal villi help absorption?|They increase surface area.|They eliminate all bacteria.|They stop digestion.|They pump blood around the body.|Larger absorptive area improves nutrient uptake.
+What connects muscle to bone?|Tendon.|Ligament.|Cartilage only.|Neuron.|Tendons transmit muscle force to bone.
+Which hormone lowers blood glucose by promoting uptake and storage?|Insulin.|Adrenaline mainly.|Thyroxine exclusively.|Melatonin.|Insulin helps regulate blood glucose downward.
+Sweating in hot conditions illustrates what?|A cooling response supporting temperature regulation.|A complete stop in metabolism.|Food absorption.|Bone growth.|Evaporating sweat removes heat.
+How do lungs and circulation cooperate?|Blood carries gases exchanged at the lungs to and from tissues.|Lungs directly pump all blood.|Blood creates oxygen in tissues.|The systems never interact.|Circulation links lung gas exchange with tissue needs.
+Why is the skeleton more than a support framework?|It also protects organs and enables movement with muscles.|It digests all proteins.|It produces every hormone.|It performs all gas exchange.|Bones provide protection and mechanical leverage.
+Why are antibiotics not a general treatment for viral colds?|Antibiotics target bacteria, not the cold viruses.|Viruses are always larger than humans.|All medicines act identically.|Bacteria and viruses are the same.|The biological targets differ.
+A blocked artery reduces oxygen delivery despite normal breathing. What does this show?|Healthy gas exchange alone cannot ensure tissue oxygen supply.|Lungs are unnecessary.|Arteries normally carry air.|Tissues never require circulation.|Respiration and circulation must both function.
+Blood glucose rises, insulin acts, and glucose returns toward its range. What mechanism is illustrated?|Negative feedback.|Positive feedback only.|A permanent shutdown.|Random inheritance.|The response counteracts the initial deviation.
+A person dehydrates after heavy sweating. Which systems must coordinate fluid conservation?|Urinary and endocrine systems.|Only the skeletal system.|Only the reproductive system.|Only the auditory system.|Hormonal signals adjust kidney water handling.
+Why can damage to a nerve impair movement even when muscle and bone are intact?|Muscles require appropriate neural activation.|Bones generate all motor commands.|Nerves carry urine.|Muscles never respond to signals.|Motor nerve pathways activate skeletal muscles.

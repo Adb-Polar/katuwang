@@ -32,7 +32,7 @@ describe("Audit defect reproduction with isolated mocks", () => {
     expect((await requireAdminSession()).authorized).toBe(false);
   });
   it("BUG-005: whitespace-only names and section pass registration schema", () => {
-    const result = commonRegisterSchema.safeParse({ firstName: "   ", lastName: "   ", email: "qa@example.test", password: "AuditOnly!2026", gradeLevel: "GRADE_9", section: "   ", consentGiven: true });
+    const result = commonRegisterSchema.safeParse({ studentIdNumber: "001-234", adviserTeacherName: "Maria Santos", firstName: "   ", lastName: "   ", email: "qa@example.test", password: "AuditOnly!2026", gradeLevel: "GRADE_9", section: "   ", consentGiven: true });
     expect(result.success).toBe(true);
     if (result.success) expect([result.data.firstName, result.data.lastName, result.data.section]).toEqual(["", "", ""]);
   });

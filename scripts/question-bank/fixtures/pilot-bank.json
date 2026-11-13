@@ -1,0 +1,748 @@
+{
+  "version": 1,
+  "bankId": "katuwang-research-draft-20261108",
+  "sources": [
+    {
+      "id": "whole",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/1-1-introduction-to-whole-numbers",
+      "title": "Introduction to Whole Numbers",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "303a7bf9ad0515330782df71b5cc588466a06129c95667c25a21d8747a96bb09",
+      "evidenceFile": "evidence/whole.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    },
+    {
+      "id": "add",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/1-2-add-whole-numbers",
+      "title": "Add Whole Numbers",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "a1e896f648f43e991ee9a6423289da7d0c1886a9c0dc8f15e952beaa24377096",
+      "evidenceFile": "evidence/add.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    },
+    {
+      "id": "subtract",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/1-3-subtract-whole-numbers",
+      "title": "Subtract Whole Numbers",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "fa64b4725d7e6befb64002a8958289480b708127f0235fd8e547aebc2f1673e4",
+      "evidenceFile": "evidence/subtract.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    },
+    {
+      "id": "multiply",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/1-4-multiply-whole-numbers",
+      "title": "Multiply Whole Numbers",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "27123a21cb5c2884caf0c29a0a104ad72507dd2abf505f5f1de46edc7a7fc450",
+      "evidenceFile": "evidence/multiply.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    },
+    {
+      "id": "divide",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/1-5-divide-whole-numbers",
+      "title": "Divide Whole Numbers",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "f174c747792eecdc590c32c511515fa7973cc6a6fc2b34f5d28b2c1fb50245cd",
+      "evidenceFile": "evidence/divide.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    },
+    {
+      "id": "order",
+      "url": "https://openstax.org/books/prealgebra-2e/pages/2-1-use-the-language-of-algebra",
+      "title": "Use the Language of Algebra",
+      "publisher": "OpenStax, Rice University",
+      "accessedDate": "2026-11-08",
+      "evidenceSha256": "498e2a6b09750609d1ce8cc1d6bcb14dd17a814a52692c5fe0f8f5e4c54067eb",
+      "evidenceFile": "evidence/order.html",
+      "notes": "Retrieved full learning page. Original questions are authored separately; human academic review pending."
+    }
+  ],
+  "questions": [
+    {
+      "id": "MATH-WHOLE-01",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "What is the smallest whole number?",
+      "explanation": "Whole numbers begin at zero and continue with 1, 2, 3, and so on.",
+      "options": [
+        {
+          "text": "1",
+          "isCorrect": false
+        },
+        {
+          "text": "0",
+          "isCorrect": true
+        },
+        {
+          "text": "-1",
+          "isCorrect": false
+        },
+        {
+          "text": "10",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "remember",
+      "learningObjective": "Identify the least whole number.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "whole"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-02",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "What is the value of the digit 6 in 46,820?",
+      "explanation": "The digit 6 is in the thousands place, so its value is 6 × 1,000.",
+      "options": [
+        {
+          "text": "600",
+          "isCorrect": false
+        },
+        {
+          "text": "60",
+          "isCorrect": false
+        },
+        {
+          "text": "60,000",
+          "isCorrect": false
+        },
+        {
+          "text": "6,000",
+          "isCorrect": true
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "understand",
+      "learningObjective": "Use base-ten place value.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "whole"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-03",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Compute 387 + 246.",
+      "explanation": "Adding by place value and regrouping gives 633.",
+      "options": [
+        {
+          "text": "633",
+          "isCorrect": true
+        },
+        {
+          "text": "523",
+          "isCorrect": false
+        },
+        {
+          "text": "623",
+          "isCorrect": false
+        },
+        {
+          "text": "643",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Add whole numbers with regrouping.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "add"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-04",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Compute 900 - 458.",
+      "explanation": "Regrouping across the zeros gives 442; checking, 458 + 442 = 900.",
+      "options": [
+        {
+          "text": "452",
+          "isCorrect": false
+        },
+        {
+          "text": "542",
+          "isCorrect": false
+        },
+        {
+          "text": "442",
+          "isCorrect": true
+        },
+        {
+          "text": "558",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Subtract across zeros.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "subtract"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-05",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "What is the product of 24 and 7?",
+      "explanation": "Split 24 into 20 + 4: 140 + 28 = 168.",
+      "options": [
+        {
+          "text": "168",
+          "isCorrect": true
+        },
+        {
+          "text": "148",
+          "isCorrect": false
+        },
+        {
+          "text": "158",
+          "isCorrect": false
+        },
+        {
+          "text": "178",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Multiply a two-digit whole number by one digit.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "multiply"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-06",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Compute 936 ÷ 9.",
+      "explanation": "Nine fits into 93 ten times with 3 remaining; bringing down 6 gives 36, or four more groups of nine.",
+      "options": [
+        {
+          "text": "14",
+          "isCorrect": false
+        },
+        {
+          "text": "104",
+          "isCorrect": true
+        },
+        {
+          "text": "103",
+          "isCorrect": false
+        },
+        {
+          "text": "114",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "easy",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Divide a whole number with a zero in the quotient.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-07",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Evaluate 18 + 6 × 4.",
+      "explanation": "Multiply 6 by 4 first, then add 18: 18 + 24 = 42.",
+      "options": [
+        {
+          "text": "96",
+          "isCorrect": false
+        },
+        {
+          "text": "48",
+          "isCorrect": false
+        },
+        {
+          "text": "72",
+          "isCorrect": false
+        },
+        {
+          "text": "42",
+          "isCorrect": true
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Apply multiplication before addition.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "order"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-08",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A town reports a population of 28,649. Rounded to the nearest thousand, what is this number?",
+      "explanation": "The hundreds digit is 6, so round the thousands digit up: 29,000.",
+      "options": [
+        {
+          "text": "28,000",
+          "isCorrect": false
+        },
+        {
+          "text": "28,600",
+          "isCorrect": false
+        },
+        {
+          "text": "29,000",
+          "isCorrect": true
+        },
+        {
+          "text": "30,000",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "understand",
+      "learningObjective": "Round whole numbers to a specified place.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "whole"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-09",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "When 173 is divided by 14, what are the quotient and remainder?",
+      "explanation": "14 × 12 = 168 and 173 - 168 = 5; the remainder is less than 14.",
+      "options": [
+        {
+          "text": "12 remainder 3",
+          "isCorrect": false
+        },
+        {
+          "text": "12 remainder 5",
+          "isCorrect": true
+        },
+        {
+          "text": "13 remainder 5",
+          "isCorrect": false
+        },
+        {
+          "text": "11 remainder 19",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Express whole-number division using quotient and remainder.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-10",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A teacher must pack 157 workbooks into boxes that hold at most 12 each. What is the fewest boxes needed?",
+      "explanation": "Thirteen boxes hold only 156 workbooks, so one additional box is needed.",
+      "options": [
+        {
+          "text": "14",
+          "isCorrect": true
+        },
+        {
+          "text": "12",
+          "isCorrect": false
+        },
+        {
+          "text": "13",
+          "isCorrect": false
+        },
+        {
+          "text": "15",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Interpret a nonzero remainder when counting containers.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-11",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Which expression correctly uses 40 × 25 to calculate 39 × 25?",
+      "explanation": "There is one fewer group of 25, so subtract 25 from the product for 40 groups.",
+      "options": [
+        {
+          "text": "(40 × 25) - 1",
+          "isCorrect": false
+        },
+        {
+          "text": "(40 × 25) + 25",
+          "isCorrect": false
+        },
+        {
+          "text": "(40 × 25) - 25",
+          "isCorrect": true
+        },
+        {
+          "text": "40 × (25 - 1)",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "analyze",
+      "learningObjective": "Use compensation to calculate a product.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "multiply"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-12",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A learner claims that 84 × 0 = 84 because multiplying by zero leaves a number unchanged. Which correction is valid?",
+      "explanation": "Any number multiplied by zero is zero. One, rather than zero, is the multiplicative identity.",
+      "options": [
+        {
+          "text": "84 × 0 = 1; multiplying by 1 gives 0.",
+          "isCorrect": false
+        },
+        {
+          "text": "84 × 0 = 84; multiplying by 1 gives 85.",
+          "isCorrect": false
+        },
+        {
+          "text": "84 × 0 is undefined; multiplying by 1 gives 84.",
+          "isCorrect": false
+        },
+        {
+          "text": "84 × 0 = 0; multiplying by 1 leaves 84 unchanged.",
+          "isCorrect": true
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "understand",
+      "learningObjective": "Distinguish the zero and identity properties of multiplication.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "multiply"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-13",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A school receives 8 packs of 24 pencils and gives out 37 pencils. How many of the received pencils remain?",
+      "explanation": "The school receives 8 × 24 = 192 pencils; 192 - 37 = 155 remain.",
+      "options": [
+        {
+          "text": "155",
+          "isCorrect": true
+        },
+        {
+          "text": "145",
+          "isCorrect": false
+        },
+        {
+          "text": "165",
+          "isCorrect": false
+        },
+        {
+          "text": "229",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Translate stock changes into a multistep calculation.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "order"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-14",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "How does 49 × 51 compare with 50 × 50?",
+      "explanation": "49 × 51 = 2,499, while 50 × 50 = 2,500.",
+      "options": [
+        {
+          "text": "It is larger by 1.",
+          "isCorrect": false
+        },
+        {
+          "text": "The products are equal.",
+          "isCorrect": false
+        },
+        {
+          "text": "It is smaller by 1.",
+          "isCorrect": true
+        },
+        {
+          "text": "It is smaller by 50.",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "analyze",
+      "learningObjective": "Compare products using nearby convenient values.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "multiply"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-15",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Six identical notebooks and a pen costing ₱18 cost ₱90 altogether. What is the cost of one notebook?",
+      "explanation": "Subtract the pen cost first: 90 - 18 = 72. Then divide 72 by 6 to get ₱12.",
+      "options": [
+        {
+          "text": "₱15",
+          "isCorrect": false
+        },
+        {
+          "text": "₱18",
+          "isCorrect": false
+        },
+        {
+          "text": "₱72",
+          "isCorrect": false
+        },
+        {
+          "text": "₱12",
+          "isCorrect": true
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Work backward through addition and multiplication.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "subtract"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-16",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A division gives quotient 23 and remainder 7 when dividing a whole number by 16. What was the original number?",
+      "explanation": "The dividend is 16 × 23 + 7 = 375; 7 is a valid remainder because it is less than 16.",
+      "options": [
+        {
+          "text": "368",
+          "isCorrect": false
+        },
+        {
+          "text": "375",
+          "isCorrect": true
+        },
+        {
+          "text": "361",
+          "isCorrect": false
+        },
+        {
+          "text": "391",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "medium",
+      "cognitiveSkill": "understand",
+      "learningObjective": "Check division using dividend equals divisor times quotient plus remainder.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-17",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "Lia evaluates 120 ÷ 5 × 2 as 12 because she multiplies 5 by 2 first. Which response correctly explains the error?",
+      "explanation": "With no grouping symbols, perform division and multiplication from left to right: 120 ÷ 5 = 24, then 24 × 2 = 48.",
+      "options": [
+        {
+          "text": "Multiplication always comes first, so 12 is correct.",
+          "isCorrect": false
+        },
+        {
+          "text": "Division always comes last, so the result is 24.",
+          "isCorrect": false
+        },
+        {
+          "text": "Division and multiplication have equal priority; work left to right to obtain 48.",
+          "isCorrect": true
+        },
+        {
+          "text": "The expression is undefined without parentheses.",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "hard",
+      "cognitiveSkill": "analyze",
+      "learningObjective": "Diagnose an error involving equally ranked operations.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "order"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-18",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "There are 286 students and each bus has 48 student seats. If the fewest possible buses are hired and every student has a seat, how many student seats will be empty?",
+      "explanation": "Five buses hold 240 students, so six are needed. They provide 288 student seats, leaving 2 empty.",
+      "options": [
+        {
+          "text": "0",
+          "isCorrect": false
+        },
+        {
+          "text": "2",
+          "isCorrect": true
+        },
+        {
+          "text": "46",
+          "isCorrect": false
+        },
+        {
+          "text": "48",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "hard",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Use division and capacity to solve a two-step allocation problem.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-19",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A club buys 5 identical kits for ₱28 each and then pays a ₱35 delivery charge. It has ₱85 left. How much money did it have before these purchases?",
+      "explanation": "The kits cost ₱140. Adding the delivery charge and remaining money gives 140 + 35 + 85 = ₱260.",
+      "options": [
+        {
+          "text": "₱260",
+          "isCorrect": true
+        },
+        {
+          "text": "₱225",
+          "isCorrect": false
+        },
+        {
+          "text": "₱190",
+          "isCorrect": false
+        },
+        {
+          "text": "₱175",
+          "isCorrect": false
+        }
+      ],
+      "difficulty": "hard",
+      "cognitiveSkill": "apply",
+      "learningObjective": "Reverse a sequence of spending operations.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "order"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    },
+    {
+      "id": "MATH-WHOLE-20",
+      "subject": "MATH",
+      "topic": "Whole Numbers & Operations",
+      "prompt": "A whole number is less than 100, is divisible by 9, and leaves remainder 3 when divided by 8. What is the largest possible number?",
+      "explanation": "99 is divisible by 9, and 99 = 8 × 12 + 3. No larger whole number is below 100.",
+      "options": [
+        {
+          "text": "91",
+          "isCorrect": false
+        },
+        {
+          "text": "96",
+          "isCorrect": false
+        },
+        {
+          "text": "90",
+          "isCorrect": false
+        },
+        {
+          "text": "99",
+          "isCorrect": true
+        }
+      ],
+      "difficulty": "hard",
+      "cognitiveSkill": "analyze",
+      "learningObjective": "Combine remainder and divisibility conditions.",
+      "educationalLevel": "Provisional Grade 7 prerequisite review; topic-level audience requires confirmation",
+      "sourceIds": [
+        "divide"
+      ],
+      "researchDate": "2026-11-08",
+      "verificationStatus": "needs-review"
+    }
+  ]
+}

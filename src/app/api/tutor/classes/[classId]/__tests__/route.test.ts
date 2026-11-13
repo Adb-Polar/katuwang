@@ -1,3 +1,5 @@
+vi.mock("@/lib/certificates/issuance", () => ({ issueClassCertificates: vi.fn() }));
+vi.mock("@/lib/certificates/background", () => ({ scheduleCertificateJobs: vi.fn() }));
 import { getProfilePictureRequirement } from "@/lib/settings";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
@@ -54,7 +56,7 @@ vi.mock("@/lib/prisma", () => ({
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
-        tutorClass: { findUnique: classFindUnique, update: classUpdate, delete: classDelete },
+        tutorClass: { findUnique: async (...args: unknown[]) => { const found = await classFindUnique(...args); return found ? { topics: [], sessions: [{ status: "SCHEDULED" }], ...found } : found; }, update: classUpdate, delete: classDelete },
         classSession: { updateMany: sessionUpdateMany },
         sessionTest: { findFirst: sessionTestFindFirst, updateMany: vi.fn().mockResolvedValue({ count: 0 }) },
         classEnrollment: { findMany: enrollmentFindMany, count: enrollmentCount },

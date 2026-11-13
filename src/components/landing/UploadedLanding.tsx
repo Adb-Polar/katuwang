@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Logo from "./Logo";
 import "./uploaded-landing.css";
 
 const privacyData = {
@@ -48,15 +49,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
       <Link href="/" className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-brand-teal rounded-md p-1">
-        <div className="w-8 h-8 rounded-lg bg-brand-teal/10 flex items-center justify-center text-brand-teal transition-transform group-hover:scale-105">
-
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="9" cy="7" r="3"/>
-            <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/>
-            <circle cx="17" cy="9" r="2.5"/>
-            <path d="M14 21v-1.5a3 3 0 0 1 3-3h2a3 3 0 0 1 3 3V21"/>
-          </svg>
-        </div>
+        <Logo className="w-10 h-10 transition-transform group-hover:scale-105" />
         <div>
           <span className="text-lg font-bold tracking-tight text-text-main group-hover:text-brand-teal transition-colors">Katuwang</span>
           <span className="font-mono-ui text-[10px] text-brand-teal bg-brand-teal-light px-1.5 py-0.5 rounded border border-brand-teal/20 ml-1.5">sa TRIS</span>
@@ -575,9 +568,7 @@ export default function UploadedLanding({ signedIn }: { signedIn: boolean }) {
 
       <div className="md:col-span-5 space-y-3">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded bg-brand-teal flex items-center justify-center text-white">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-          </div>
+          <Logo variant="white" className="w-8 h-8" />
           <span className="text-base font-bold text-white tracking-tight">Katuwang</span>
         </div>
         <p className="text-[11px] text-white/60 leading-relaxed font-sans max-w-sm">

@@ -55,6 +55,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
     confirmPassword: "",
     gradeLevel: "",
     section: "",
+    studentIdNumber: "",
+    adviserTeacherName: "",
     contactInfo: "",
     consentGiven: false,
   });
@@ -86,7 +88,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, ...form }),
+        body: JSON.stringify({ type, ...form, studentIdNumber: form.studentIdNumber.trim(), adviserTeacherName: form.adviserTeacherName.trim() }),
       });
 
       const data = await res.json();
@@ -153,6 +155,32 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               />
             </FormField>
           </div>
+
+          <FormField label="Student ID Number" required>
+            <input
+              type="text"
+              name="studentIdNumber"
+              value={form.studentIdNumber}
+              onChange={handleChange}
+              required
+              maxLength={191}
+              placeholder="Enter your Student ID Number"
+              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+            />
+          </FormField>
+
+          <FormField label="Adviser Teacher's Name" required>
+            <input
+              type="text"
+              name="adviserTeacherName"
+              value={form.adviserTeacherName}
+              onChange={handleChange}
+              required
+              maxLength={191}
+              placeholder="Enter your adviser's full name"
+              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+            />
+          </FormField>
 
           <FormField label="Email Address" required>
             <input

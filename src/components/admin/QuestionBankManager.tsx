@@ -5,7 +5,7 @@ import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidati
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
-import { ChevronRight, CornerUpLeft } from "lucide-react";
+import { Archive, ArchiveRestore, BadgeCheck, ChevronRight, CopyPlus, CornerUpLeft, Pencil, Trash2 } from "lucide-react";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useFetchList } from "@/hooks/useFetchList";
@@ -25,6 +25,7 @@ import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import Modal from "@/components/ui/Modal";
+import ActionMenu from "@/components/ui/ActionMenu";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -444,32 +445,35 @@ function QuestionsTab({
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
-        <div className="overflow-x-auto border border-base-200 rounded-xl">
-          <table className="table table-sm">
-            <thead>
-              <tr className="text-xs">
-                <th>Prompt</th>
-                <th>Answer</th>
-                <th>Status</th>
-                <th></th>
+        <div className="border border-base-200 rounded-xl">
+          <table role="table" aria-label={`Questions for ${topic}`} className="table table-sm block w-full xl:table xl:table-fixed">
+            <thead role="rowgroup" className="hidden xl:table-header-group">
+              <tr role="row" className="text-xs">
+                <th role="columnheader" scope="col" className="w-[44%]">Prompt</th>
+                <th role="columnheader" scope="col" className="w-[28%]">Answer</th>
+                <th role="columnheader" scope="col">Status</th>
+                <th role="columnheader" scope="col" className="w-20 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody role="rowgroup" className="block xl:table-row-group">
               {questions.map((q) => {
                 const correct = q.options.find((o) => o.isCorrect);
                 return (
-                  <tr key={q.id} className="text-sm align-top">
-                    <td className="max-w-sm whitespace-normal text-base-content/80">
+                  <tr role="row" key={q.id} className="grid grid-cols-1 text-sm sm:grid-cols-2 xl:table-row">
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top text-base-content/80 [overflow-wrap:anywhere] sm:col-span-2 xl:table-cell">
+                      <span className="mb-1 block text-2xs font-semibold text-base-content/50 xl:hidden">Prompt</span>
                       {q.prompt}
                       <div className="text-2xs text-base-content/40 mt-0.5">
                         v{q.version ?? 1} · {q.options.length} options · added {fmt(q.createdAt)}
                       </div>
                     </td>
-                    <td className="text-2xs text-base-content/60 max-w-[12rem] whitespace-normal">
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top text-2xs text-base-content/60 [overflow-wrap:anywhere] xl:table-cell">
+                      <span className="mb-1 block font-semibold text-base-content/50 xl:hidden">Answer</span>
                       {correct?.text || <span className="italic text-error/60">none marked</span>}
                     </td>
-                    <td>
-                      <div className="flex flex-col gap-1">
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top xl:table-cell">
+                      <span className="mb-1 block text-2xs font-semibold text-base-content/50 xl:hidden">Status</span>
+                      <div className="flex flex-col items-start gap-1.5 [&>.kt-badge]:max-w-full [&>.kt-badge]:whitespace-normal [&>.kt-badge]:leading-relaxed [&>.kt-badge]:[overflow-wrap:anywhere]">
                         <StatusBadge
                           tone={q.active ? "success" : "neutral"}
                           label={q.active ? "Active" : "Retired"}
@@ -481,39 +485,49 @@ function QuestionsTab({
                         )}
                       </div>
                     </td>
-                    <td>
-                      <div className="flex gap-2 justify-end">
-                        <button
-                          onClick={() => {
-                            setError("");
-                            setEditTarget(q);
-                          }}
-                          disabled={q.inUse || busyId === q.id}
-                          title={q.inUse ? "Content is locked — create a corrected version" : undefined}
-                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
-                        >
-                          Edit
-                        </button>
-                        <button onClick={() => setReviewTarget(q)} disabled={q.reviewStatus !== "APPROVED" && (!q.active || q.hasNewerVersion || q.reviewStatus === "DEMO")} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs">{q.reviewStatus === "APPROVED" ? "Revoke qualification review" : "Record qualified review"}</button>
-                        <button onClick={() => { setError(""); setEditTarget(null); setVersionTarget(q); }} disabled={q.hasNewerVersion || busyId === q.id} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs" title={q.hasNewerVersion ? "Open the latest version to make another correction" : undefined}>Create corrected version</button>
-                        <button
-                          onClick={() => toggleActive(q)}
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top sm:col-span-2 xl:table-cell">
+                      <span className="mb-1 block text-2xs font-semibold text-base-content/50 xl:hidden">Actions</span>
+                      <div className="flex xl:justify-end">
+                        <ActionMenu
+                          label="Question actions"
                           disabled={busyId === q.id}
-                          className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
-                        >
-                          {q.active ? "Retire" : "Reactivate"}
-                        </button>
-                        <button
-                          onClick={() => {
-                            setError("");
-                            setDeleteTarget(q);
-                          }}
-                          disabled={q.canDelete === false || q.inUse || busyId === q.id}
-                          title={q.canDelete === false || q.inUse ? "History is retained — retire instead" : undefined}
-                          className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
-                        >
-                          Delete
-                        </button>
+                          actions={[
+                            {
+                              label: "Edit",
+                              icon: <Pencil className="h-4 w-4" />,
+                              onSelect: () => { setError(""); setEditTarget(q); },
+                              disabled: q.inUse || busyId === q.id,
+                              title: q.inUse ? "Content is locked — create a corrected version" : undefined,
+                            },
+                            {
+                              label: q.reviewStatus === "APPROVED" ? "Revoke qualification review" : "Record qualified review",
+                              icon: <BadgeCheck className="h-4 w-4" />,
+                              onSelect: () => setReviewTarget(q),
+                              disabled: q.reviewStatus !== "APPROVED" && (!q.active || q.hasNewerVersion || q.reviewStatus === "DEMO"),
+                            },
+                            {
+                              label: "Create corrected version",
+                              icon: <CopyPlus className="h-4 w-4" />,
+                              onSelect: () => { setError(""); setEditTarget(null); setVersionTarget(q); },
+                              disabled: q.hasNewerVersion || busyId === q.id,
+                              title: q.hasNewerVersion ? "Open the latest version to make another correction" : undefined,
+                            },
+                            {
+                              label: q.active ? "Retire" : "Reactivate",
+                              icon: q.active ? <Archive className="h-4 w-4" /> : <ArchiveRestore className="h-4 w-4" />,
+                              onSelect: () => toggleActive(q),
+                              disabled: busyId === q.id,
+                            },
+                            {
+                              label: "Delete",
+                              icon: <Trash2 className="h-4 w-4" />,
+                              onSelect: () => { setError(""); setDeleteTarget(q); },
+                              disabled: q.canDelete === false || q.inUse || busyId === q.id,
+                              title: q.canDelete === false || q.inUse ? "History is retained — retire instead" : undefined,
+                              danger: true,
+                            },
+                          ]}
+                        />
                       </div>
                     </td>
                   </tr>

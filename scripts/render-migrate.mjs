@@ -39,6 +39,11 @@ try {
   process.exitCode = result.status ?? 1;
   // Verify this catalog replacement when applied, without blocking later legitimate admin edits on restart.
   if (process.exitCode === 0 && result.stdout?.includes("20261028010000_general_subject_grouping")) {
+    // The historical migration creates its original catalog. Bootstrap the current
+    // catalog only on that first application, before checking current evidence.
+    const catalogSeed = spawnSync(process.execPath, [createRequire(import.meta.url).resolve("tsx/cli"), join(process.cwd(), "prisma/seed.ts")], { stdio: "inherit", env: process.env });
+    if (catalogSeed.error) throw catalogSeed.error;
+    if (catalogSeed.status !== 0) throw new Error("Initial curriculum catalog import failed.");
     const verified = spawnSync(process.execPath, [join(process.cwd(), "scripts/verify-curriculum.mjs")], { stdio: "inherit", env: process.env });
     if (verified.error) throw verified.error;
     process.exitCode = verified.status ?? 1;

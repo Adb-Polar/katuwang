@@ -70,7 +70,7 @@ export default function NotificationList() {
   const unreadCount = notifications.filter((n) => !n.readAt).length;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <FeedbackBanner variant="error" message={error || null} />
 
       <section className="card kt-card">
@@ -98,7 +98,7 @@ export default function NotificationList() {
               No notifications yet.
             </div>
           ) : (
-            <ul className="divide-y divide-base-200">
+            <ul className="flex flex-col gap-2">
               {notifications.map((n) => (
                 <li key={n.id}>
                   <button

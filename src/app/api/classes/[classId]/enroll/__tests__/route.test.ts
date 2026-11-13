@@ -15,6 +15,7 @@ const {
   topicRequestFindMany,
   notificationCreate,
   userFindUnique,
+  classSessionFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorClassFindUnique: vi.fn(),
@@ -27,6 +28,7 @@ const {
   topicRequestFindMany: vi.fn(),
   notificationCreate: vi.fn(),
   userFindUnique: vi.fn(),
+  classSessionFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
@@ -59,6 +61,7 @@ vi.mock("@/lib/prisma", () => ({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "c1" }]),
         tutorClass: { findUnique: tutorClassFindUnique },
         user: { findUnique: userFindUnique },
+        classSession: { findMany: classSessionFindMany },
         classEnrollment: { findUnique: enrollmentFindUnique, create: enrollmentCreate, update: enrollmentUpdate, delete: enrollmentDelete },
         topicRequest: { updateMany: topicRequestUpdateMany, findMany: topicRequestFindMany },
         notification: { create: notificationCreate },
@@ -103,6 +106,7 @@ describe("POST /api/classes/[classId]/enroll", () => {
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestUpdateMany.mockResolvedValue({ count: 0 });
     userFindUnique.mockResolvedValue({ gradeLevel: "GRADE_9" });
+    classSessionFindMany.mockResolvedValue([]);
   });
 
   it("blocks enrollment without an avatar only when learner pictures are required", async () => {
@@ -256,6 +260,20 @@ describe("POST /api/classes/[classId]/enroll", () => {
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "tutorU1", type: "CLASS_ENROLLMENT_NEW" }) })
     );
+  });
+
+  it("rejects enrollment when an existing class has the same session schedule", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue(null);
+    classSessionFindMany.mockResolvedValue(futureClass.sessions);
+    enrollmentCreate.mockResolvedValue({ id: "unexpected-enrollment" });
+    const res = await POST(makeRequest("POST"), makeParams());
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toMatch(/schedule conflict/i);
+    expect(enrollmentCreate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
+    expect(topicRequestUpdateMany).not.toHaveBeenCalled();
   });
 
   it("reactivates the retained row instead of creating a new enrollment", async () => {

@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       prisma.assessmentQuestion.findMany({
         where,
         select: { id: true, subject: true, topic: true, prompt: true, explanation: true, active: true, origin: true, version: true, reviewStatus: true, createdAt: true, options: { orderBy: { position: "asc" }, select: { id: true, text: true, isCorrect: true, position: true } } },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

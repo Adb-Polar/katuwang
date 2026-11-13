@@ -13,6 +13,8 @@ datasource db {
 }
 
 model User {
+  learnerCompletionCertificates CompletionCertificate[] @relation("LearnerCompletionCertificates")
+  tutorCompletionCertificates CompletionCertificate[] @relation("TutorCompletionCertificates")
   recoveryChallenges RecoveryChallenge[]
   id                       String                @id @default(cuid())
   anonymousId              String                @unique
@@ -26,6 +28,8 @@ model User {
   role                     Role
   gradeLevel               GradeLevel
   section                  String
+  studentIdNumber          String?
+  adviserTeacherName       String?
   contactInfo              String?
   consentGiven             Boolean               @default(false)
   status                   AccountStatus         @default(ACTIVE)
@@ -177,6 +181,8 @@ model Topic {
 }
 
 model TutorClass {
+  completedAt DateTime?
+  completionCertificates CompletionCertificate[]
   id                String                @id @default(cuid())
   code              String                @unique
   tutorProfileId    String
@@ -770,4 +776,45 @@ model RecoveryChallenge {
 
   @@index([userId])
   @@map("recovery_challenges")
+}
+
+
+// Issued snapshots and PDF bytes are retained independently of later profile/class edits.
+model CompletionCertificate {
+  id                String @id @default(cuid())
+  certificateNumber String @unique
+  learnerId         String
+  tutorId           String
+  classId           String
+  learnerName       String
+  tutorName         String
+  subjectName       String
+  classCode         String
+  completedAt       DateTime
+  issuedAt          DateTime @default(now())
+  pdf               Bytes? @db.LongBlob
+  emailStatus       CertificateEmailStatus @default(PENDING)
+  emailSentAt       DateTime?
+  attempts          Int @default(0)
+  nextAttemptAt     DateTime? @default(now())
+  leaseToken        String?
+  leaseExpiresAt    DateTime?
+  lastError         String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  learner           User @relation("LearnerCompletionCertificates", fields: [learnerId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  tutor             User @relation("TutorCompletionCertificates", fields: [tutorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  class             TutorClass @relation(fields: [classId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@unique([classId, learnerId])
+  @@index([learnerId, issuedAt])
+  @@index([emailStatus, nextAttemptAt])
+  @@map("completion_certificates")
+}
+
+enum CertificateEmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
 }

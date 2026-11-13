@@ -20,6 +20,8 @@ export type RegisterAccountInput = {
   password: string;
   gradeLevel: GradeLevel;
   section: string;
+  studentIdNumber: string;
+  adviserTeacherName: string;
   contactInfo?: string | null;
   recoveryEmail?: string | null;
   consentGiven: boolean;
@@ -49,6 +51,8 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     password,
     gradeLevel,
     section,
+    studentIdNumber,
+    adviserTeacherName,
     contactInfo,
     recoveryEmail,
     consentGiven,
@@ -74,6 +78,8 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     role: isTutor ? Role.STUDENT_TUTOR : Role.STUDENT_LEARNER,
     gradeLevel,
     section,
+    studentIdNumber,
+    adviserTeacherName,
     contactInfo: contactInfo || null,
     recoveryEmail: recoveryEmail?.trim().toLowerCase() || null,
     consentGiven,

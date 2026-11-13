@@ -38,7 +38,18 @@ interface PendingUser {
   role: Role;
   gradeLevel: GradeLevel;
   section: string;
+  studentIdNumber: string | null;
+  adviserTeacherName: string | null;
   createdAt: string;
+}
+
+function StudentRegistrationDetails({ user }: { user: PendingUser }) {
+  return (
+    <dl className="mt-2 space-y-1 text-xs text-base-content/65 whitespace-normal break-words">
+      <div><dt className="inline font-semibold">Student ID Number: </dt><dd className="inline">{user.studentIdNumber?.trim() || "Not provided"}</dd></div>
+      <div><dt className="inline font-semibold">Adviser Teacher: </dt><dd className="inline">{user.adviserTeacherName?.trim() || "Not provided"}</dd></div>
+    </dl>
+  );
 }
 
 export default function RegistrationApprovalTable() {
@@ -174,6 +185,7 @@ export default function RegistrationApprovalTable() {
                     <p className="break-all text-xs text-base-content/60">{u.email}</p>
                   </div>
                   <div className="space-y-1 text-xs text-base-content/65">
+                    <StudentRegistrationDetails user={u} />
                     <p>{gradeSection(u.gradeLevel, u.section)}</p>
                     <p>Requested {formatDateTime(u.createdAt)}</p>
                   </div>
@@ -208,6 +220,7 @@ export default function RegistrationApprovalTable() {
                       </td>
                       <td className="text-base-content/70">
                         {u.firstName} {u.lastName}
+                        <StudentRegistrationDetails user={u} />
                       </td>
                       <td className="text-base-content/60">{u.email}</td>
                       <td className="text-base-content/60">

@@ -40,6 +40,7 @@ function getTransporter(): Transporter {
       host: SMTP_HOST,
       port: SMTP_PORT,
       secure: SMTP_SECURE,
+      connectionTimeout: 15_000, greetingTimeout: 15_000, socketTimeout: 30_000,
       auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
     });
   }
@@ -57,7 +58,8 @@ export interface MailContent {
  * Sends one email. No-ops with a log line when the mailer is unconfigured.
  * Throws on transport failure — the caller decides whether that is fatal.
  */
-export async function sendMail(opts: { to: string } & MailContent): Promise<void> {
+export type MailAttachment = { filename: string; content: Uint8Array; contentType: string };
+export async function sendMail(opts: { to: string; attachments?: MailAttachment[] } & MailContent): Promise<void> {
   if (EMAIL_PROVIDER === "brevo") {
     if (!BREVO_API_KEY || !BREVO_FROM_EMAIL) {
       throw new Error("Brevo requires BREVO_API_KEY and BREVO_FROM_EMAIL");
@@ -75,6 +77,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
         subject: opts.subject,
         htmlContent: opts.html,
         textContent: opts.text,
+        ...(opts.attachments?.length ? { attachment: opts.attachments.map(a => ({ name: a.filename, content: Buffer.from(a.content).toString("base64") })) } : {}),
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
@@ -99,6 +102,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
         subject: opts.subject,
         html: opts.html,
         text: opts.text,
+        ...(opts.attachments?.length ? { attachments: opts.attachments.map(a => ({ filename: a.filename, content: Buffer.from(a.content).toString("base64"), content_type: a.contentType })) } : {}),
       }),
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
@@ -120,6 +124,7 @@ export async function sendMail(opts: { to: string } & MailContent): Promise<void
     subject: opts.subject,
     html: opts.html,
     text: opts.text,
+    ...(opts.attachments?.length ? { attachments: opts.attachments.map(a => ({ filename: a.filename, content: Buffer.from(a.content), contentType: a.contentType })) } : {}),
   });
 }
 

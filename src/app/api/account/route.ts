@@ -35,9 +35,13 @@ export async function DELETE(req: NextRequest) {
     if (body?.confirm !== "DELETE" || typeof body.password !== "string" || !body.password) {
       return NextResponse.json({ error: "Enter your password and type DELETE to confirm." }, { status: 400 });
     }
-    const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { id: true, password: true, tutorProfile: { select: { id: true } } } });
+    const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { id: true, password: true, tutorProfile: { select: { id: true } }, _count: { select: { learnerCompletionCertificates: true, tutorCompletionCertificates: true } } } });
     if (!user || !(await bcrypt.compare(body.password, user.password))) {
       return NextResponse.json({ error: "Incorrect password." }, { status: 400 });
+    }
+
+    if (user._count?.learnerCompletionCertificates || user._count?.tutorCompletionCertificates) {
+      return NextResponse.json({ error: "Your account has issued completion certificates. Contact an administrator to arrange deletion while retaining certificate history." }, { status: 409 });
     }
 
     if (user.tutorProfile) {

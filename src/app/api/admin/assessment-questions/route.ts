@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
           options: { orderBy: { position: "asc" } },
           _count: { select: { attemptItems: true, sessionTestItems: true, sessionTestLinks: true, nextVersions: true } },
         },
-        orderBy: { createdAt: "desc" },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),

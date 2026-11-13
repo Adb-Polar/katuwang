@@ -8,6 +8,7 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { hasClassStarted } from "@/lib/classQueries";
 import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
+import { hasLearnerSessionOverlap } from "@/lib/classSessions";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
 export async function POST(
@@ -26,6 +27,9 @@ export async function POST(
 
     return await prisma.$transaction(async (tx) => {
       await lockClassRow(tx, classId);
+      // A class lock protects capacity; the account lock also serializes this
+      // learner's simultaneous enrollments into different classes.
+      await tx.$queryRaw`SELECT id FROM users WHERE id = ${session.user.id} FOR UPDATE`;
       const existingClass = await tx.tutorClass.findUnique({
         where: { id: classId },
         include: {
@@ -91,6 +95,12 @@ export async function POST(
       if (existingEnrollment && !existingEnrollment.withdrawnAt) {
         return NextResponse.json(
           { error: "You are already enrolled in this class." },
+          { status: 409 }
+        );
+      }
+      if (await hasLearnerSessionOverlap(session.user.id, classId, existingClass.sessions, tx)) {
+        return NextResponse.json(
+          { error: "Schedule conflict: a session in this class overlaps a session in a class you are already enrolled in." },
           { status: 409 }
         );
       }

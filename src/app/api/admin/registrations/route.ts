@@ -63,6 +63,8 @@ export async function GET(req: NextRequest) {
           role: true,
           gradeLevel: true,
           section: true,
+          studentIdNumber: true,
+          adviserTeacherName: true,
           createdAt: true,
         },
         orderBy: { [REG_SORT_COLUMN[sort]]: dir },
