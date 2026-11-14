@@ -10,7 +10,11 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session || session.user.role !== "SUPER_ADMIN") return NextResponse.json({ error: "An active super administrator is required." }, { status: 403 });
-    if (req.headers.get("origin") !== new URL(req.url).origin) return NextResponse.json({ error: "Use the signed-in site to migrate certifications." }, { status: 403 });
+    // Render can supply an internal URL to Next.js. The browser's Host header
+    // remains the public authority and cannot be overridden by a cross-site form.
+    const origin = req.headers.get("origin");
+    const publicHost = req.headers.get("host") ?? new URL(req.url).host;
+    if (!origin || new URL(origin).host !== publicHost) return NextResponse.json({ error: "Use the signed-in site to migrate certifications." }, { status: 403 });
     const input = schema.safeParse(await req.json());
     if (!input.success || (!input.data.dryRun && (!input.data.confirmReplacement || !input.data.expectedFingerprint))) return NextResponse.json({ error: "Provide a reason, operation ID and preview fingerprint; explicitly confirm replacement to apply." }, { status: 400 });
     return NextResponse.json(await migrateCertificationCatalog(prisma, { ...input.data, adminId: session.user.id }));

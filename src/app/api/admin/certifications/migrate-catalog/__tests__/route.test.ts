@@ -11,6 +11,12 @@ beforeEach(() => { vi.resetAllMocks(); mock.session.mockResolvedValue({ user: { 
 describe("protected certification catalog migration", () => {
   it.each([null, { user: { role: "ADMIN" } }, { user: { role: "STUDENT_TUTOR" } }])("requires a super administrator", async session => { mock.session.mockResolvedValue(session); expect((await POST(request(body))).status).toBe(403); expect(mock.migrate).not.toHaveBeenCalled(); });
   it("rejects cross-origin requests", async () => { expect((await POST(request(body, "https://elsewhere.example"))).status).toBe(403); expect(mock.migrate).not.toHaveBeenCalled(); });
+  it("accepts the real public host behind a reverse proxy without trusting arbitrary forwarded hosts", async () => {
+    const req = new NextRequest("http://localhost:10000/api/admin/certifications/migrate-catalog", { method: "POST", headers: { host: "katuwang.me", origin: "https://katuwang.me" }, body: JSON.stringify(body) });
+    expect((await POST(req)).status).toBe(200);
+    const attack = new NextRequest("http://localhost:10000/api/admin/certifications/migrate-catalog", { method: "POST", headers: { host: "katuwang.me", origin: "https://elsewhere.example", "x-forwarded-host": "elsewhere.example" }, body: JSON.stringify(body) });
+    expect((await POST(attack)).status).toBe(403);
+  });
   it("defaults to a read-only preview using the signed-in actor", async () => { expect((await POST(request(body))).status).toBe(200); expect(mock.migrate).toHaveBeenCalledWith({}, { ...body, dryRun: true, adminId: "super" }); });
   it.each([{ ...body, dryRun: false }, { ...body, dryRun: false, confirmReplacement: true }])("requires confirmation and an inventory fingerprint to apply", async data => { expect((await POST(request(data))).status).toBe(400); expect(mock.migrate).not.toHaveBeenCalled(); });
   it("applies the explicit previewed operation", async () => { const input = { ...body, dryRun: false, confirmReplacement: true, expectedFingerprint: "a".repeat(64) }; expect((await POST(request(input))).status).toBe(200); expect(mock.migrate).toHaveBeenCalledWith({}, { ...input, adminId: "super" }); });
