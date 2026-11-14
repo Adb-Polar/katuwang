@@ -356,6 +356,21 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+// Transactional recovery archive for explicitly requested seeded-data rebuilds.
+// Accounts and authentication secrets are never included in the snapshot.
+model SeedDataRebuild {
+  id           String   @id
+  revision     String
+  adminId      String
+  reason       String   @db.Text
+  backup       Bytes    @db.LongBlob
+  backupSha256 String
+  summary      Json
+  createdAt    DateTime @default(now())
+
+  @@map("seed_data_rebuilds")
+}
+
 model AssessmentQuestion {
   id                  String                   @id @default(cuid())
   subject             String

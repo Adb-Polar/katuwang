@@ -21,6 +21,7 @@
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
     "seed": "tsx prisma/seed.ts",
     "seed:curriculum": "tsx prisma/seedCurriculum.ts",
+    "seed:rebuild": "tsx scripts/run-curriculum-rebuild.ts",
     "curriculum:docs": "node scripts/build-curriculum-docs.mjs",
     "seed:questions": "tsx prisma/seedQuestionBank.ts",
     "questions:validate": "tsx prisma/seedQuestionBank.ts --validate",

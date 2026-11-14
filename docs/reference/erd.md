@@ -419,6 +419,18 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     }
 
 
+  "seed_data_rebuilds" {
+    String id "🗝️"
+    String revision
+    String adminId
+    String reason
+    Bytes backup
+    String backupSha256
+    Json summary
+    DateTime createdAt
+    }
+
+
   "assessment_questions" {
     String id "🗝️"
     String subject

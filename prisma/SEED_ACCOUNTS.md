@@ -1,9 +1,16 @@
-# Historical Demo Accounts
+# Demo Accounts and Curriculum Data
 
 These accounts describe the previous demo seed. The current `prisma/seed.ts`
 imports only the researched curriculum catalog: **47 subjects, 292 topics, and
 408 grade associations**. It does not create or reset these accounts, classes,
-certifications, or question banks. Existing records remain intact.
+certifications, or question banks. Existing records remain intact unless the separate, explicit connected-data rebuild is run.
+
+The current connected-data rebuild and recovery procedure is documented in
+[CURRICULUM_SEED_REBUILD.md](../docs/CURRICULUM_SEED_REBUILD.md). It recreates
+414 demo classes and tests and 408 grade-matched requests from the new catalog,
+while preserving existing account logins and approved bank questions. The
+old subject/topic assignments below are historical and are replaced by the
+current catalog during that rebuild.
 
 ```sh
 pnpm seed             # import the curriculum catalog
