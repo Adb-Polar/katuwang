@@ -6,6 +6,7 @@ import { TaughtTopic } from "@/components/tutor/TopicCertificationList";
 import { CertificationDetail } from "@/components/tutor/AssessmentHistory";
 import AssessmentsTabs from "@/components/tutor/AssessmentsTabs";
 import { getTopicAssessmentStatus, TopicAssessmentStatus } from "@/lib/assessmentStatus";
+import { getSubjects } from "@/lib/subjects";
 
 export const metadata = {
   title: "Assessments | Katuwang",
@@ -45,11 +46,14 @@ export default async function TutorAssessmentsPage() {
   const tutorProfile = user?.tutorProfile;
   const classes = tutorProfile?.classes ?? [];
   const certifications = tutorProfile?.topicCertifications ?? [];
+  const catalog = await getSubjects();
+  const activeTopicKeys = new Set(catalog.flatMap(s => s.topics.map(t => `${s.slug}::${t.name}`)));
 
   const taughtTopics: TaughtTopic[] = Array.from(
     new Map(
       classes.flatMap((c) =>
-        c.topics.map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }])
+        c.topics.filter(t => activeTopicKeys.has(`${c.subject}::${t.topic}`))
+          .map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }])
       )
     ).values()
   );

@@ -94,7 +94,7 @@ export default function TopicCertificationList({
   if (taughtTopics.length === 0) {
     return (
       <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-        Schedule your first class to see topics you can be assessed on.
+        No current teaching topics to show. You can choose a topic below to take an assessment.
       </p>
     );
   }

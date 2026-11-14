@@ -154,7 +154,7 @@ export default function ProfileView({
             <div>
               <h2 className="card-title text-sm font-bold">Verified Topics</h2>
               <p className="text-2xs text-base-content/60 mt-1">
-                Topics you&apos;ve passed the assessment for. Learners see these on your profile.
+                Topics you&apos;re certified to teach. Learners see these on your profile.
               </p>
             </div>
             {topicsBySubject.size === 0 ? (
