@@ -27,6 +27,6 @@ describe("assessment readiness feedback", () => {
   it("still explains review when an older endpoint omits its error text", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, json: async () => ({ code: "BANK_NOT_READY" }) }));
     await act(async () => host.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
-    expect(host.textContent).toContain("qualified question review");
+    expect(host.textContent).toContain("question approval");
   });
 });

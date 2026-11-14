@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     if (activeCount < config.minBankSize) {
       return NextResponse.json(
         {
-          error: "This topic does not have enough reviewed qualification questions. Ask an admin to arrange qualified topic review. Demo and unreviewed questions cannot grant certification.",
+          error: "This topic does not have enough approved assessment questions. Ask an admin to approve the bank for assessments or record qualified topic review. Demo and unapproved questions cannot grant certification.",
           code: "BANK_NOT_READY",
         },
         { status: 409 }

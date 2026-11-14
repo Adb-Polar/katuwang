@@ -36,11 +36,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ que
       } else if (current.reviewStatus !== "APPROVED") throw new QuestionWriteError("Only an approved review can be revoked.");
       const now = new Date();
       const updated = await tx.assessmentQuestion.update({ where: { id: questionId }, data: input.decision === "APPROVE" ? {
-        reviewStatus: "APPROVED", qualificationReviewedAt: now, qualificationReviewerId: session.user.id,
+        reviewStatus: "APPROVED", qualificationApprovalMethod: "QUALIFIED_REVIEW", qualificationReviewedAt: now, qualificationReviewerId: session.user.id,
         qualificationCompetency: input.competency, qualificationEvidence: input.evidence, qualificationReviewerCredentials: input.reviewerCredentials,
         lockedAt: current.lockedAt ?? now,
-      } : { reviewStatus: "UNREVIEWED", qualificationReviewedAt: null } });
-      await tx.auditLog.create({ data: { adminId: session.user.id, action: input.decision === "APPROVE" ? AUDIT_ACTIONS.QUESTION_QUALIFICATION_APPROVED : AUDIT_ACTIONS.QUESTION_QUALIFICATION_REVOKED, targetType: AUDIT_TARGET_TYPES.QUESTION, targetId: questionId, reason: JSON.stringify({ subject: current.subject, topic: current.topic, version: current.version, ...input }) } });
+      } : { reviewStatus: "UNREVIEWED", qualificationApprovalMethod: null, qualificationReviewedAt: null } });
+      await tx.auditLog.create({ data: { adminId: session.user.id, action: input.decision === "APPROVE" ? AUDIT_ACTIONS.QUESTION_QUALIFICATION_APPROVED : (current.qualificationApprovalMethod === "ADMIN_APPROVAL" ? AUDIT_ACTIONS.QUESTION_ASSESSMENT_ADMIN_REVOKED : AUDIT_ACTIONS.QUESTION_QUALIFICATION_REVOKED), targetType: AUDIT_TARGET_TYPES.QUESTION, targetId: questionId, reason: JSON.stringify({ subject: current.subject, topic: current.topic, version: current.version, ...input }) } });
       return updated;
     }, { isolationLevel: "ReadCommitted", timeout: 15_000 });
     return NextResponse.json(question);

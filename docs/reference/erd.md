@@ -175,6 +175,13 @@ SENT SENT
 FAILED FAILED
         }
 
+
+
+        QualificationApprovalMethod {
+            QUALIFIED_REVIEW QUALIFIED_REVIEW
+ADMIN_APPROVAL ADMIN_APPROVAL
+        }
+
   "users" {
     String id "🗝️"
     String anonymousId
@@ -425,6 +432,7 @@ FAILED FAILED
     DateTime lockedAt "❓"
     Int version
     QualificationReviewStatus reviewStatus
+    QualificationApprovalMethod qualificationApprovalMethod "❓"
     DateTime qualificationReviewedAt "❓"
     String qualificationReviewerId "❓"
     String qualificationCompetency "❓"
@@ -662,6 +670,7 @@ FAILED FAILED
     "audit_logs" }o--|| "users" : "admin"
     "assessment_questions" |o--|| "QuestionOrigin" : "enum:origin"
     "assessment_questions" |o--|| "QualificationReviewStatus" : "enum:reviewStatus"
+    "assessment_questions" |o--|o "QualificationApprovalMethod" : "enum:qualificationApprovalMethod"
     "assessment_questions" }o--|o "users" : "qualificationReviewer"
     "assessment_questions" |o--|o "assessment_questions" : "previousVersion"
     "assessment_questions" }o--|| "users" : "createdBy"

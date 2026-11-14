@@ -369,6 +369,7 @@ model AssessmentQuestion {
   lockedAt            DateTime?
   version             Int                      @default(1)
   reviewStatus QualificationReviewStatus @default(UNREVIEWED)
+  qualificationApprovalMethod QualificationApprovalMethod?
   qualificationReviewedAt DateTime?
   qualificationReviewerId String?
   qualificationCompetency String? @db.Text
@@ -817,4 +818,10 @@ enum CertificateEmailStatus {
   PROCESSING
   SENT
   FAILED
+}
+
+// Approval provenance is distinct from academic reviewer credentials.
+enum QualificationApprovalMethod {
+  QUALIFIED_REVIEW
+  ADMIN_APPROVAL
 }

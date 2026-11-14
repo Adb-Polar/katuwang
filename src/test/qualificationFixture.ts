@@ -2,6 +2,7 @@
 export function qualificationFixture(adminId: string) {
   return {
     reviewStatus: "APPROVED" as const,
+    qualificationApprovalMethod: "QUALIFIED_REVIEW" as const,
     qualificationReviewedAt: new Date(), qualificationReviewerId: adminId,
     qualificationCompetency: "Isolated QA topic competency fixture",
     qualificationEvidence: "Isolated QA review evidence; not a real qualification review",

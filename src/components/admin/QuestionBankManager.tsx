@@ -14,6 +14,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AdministrativeBankApproval from "@/components/admin/AdministrativeBankApproval";
 import QualificationReviewModal from "@/components/admin/QualificationReviewModal";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
@@ -45,6 +46,7 @@ interface Question {
   explanation: string | null;
   active: boolean;
   reviewStatus?: "UNREVIEWED" | "DEMO" | "APPROVED";
+  qualificationApprovalMethod?: "QUALIFIED_REVIEW" | "ADMIN_APPROVAL" | null;
   inUse: boolean;
   canDelete?: boolean;
   version?: number;
@@ -337,6 +339,7 @@ function QuestionsTab({
     return (
       <div className="space-y-4">
         <FeedbackBanner variant="success" message={success || null} />
+        <AdministrativeBankApproval onApproved={count => afterWrite(`${count} questions approved for assessments.`)} />
         <p className="text-2xs text-base-content/50">
           Pick a subject to drill into its topics and questions.
         </p>
@@ -356,7 +359,7 @@ function QuestionsTab({
                 <span className="min-w-0">
                   <span className="block text-sm font-semibold text-base-content/90">{s}</span>
                   <span className="block text-2xs text-base-content/50">
-                    {totalTopics} topics · {activeQ} reviewed qualification question{activeQ === 1 ? "" : "s"}
+                    {totalTopics} topics · {activeQ} approved assessment question{activeQ === 1 ? "" : "s"}
                   </span>
                 </span>
                 <span className="flex items-center gap-2 shrink-0">
@@ -420,7 +423,7 @@ function QuestionsTab({
   // ─── Level 3: questions for subject + topic ───────────────────────────────
   return (
     <div className="space-y-4">
-      <FeedbackBanner variant="info" message="Only questions with documented qualified topic review count toward certification. Demo and unreviewed content is for practice. Corrections require a new review." />
+      <FeedbackBanner variant="info" message="Questions need documented administrator approval or qualified topic review for tutor assessments. Approval provenance is shown separately. Demo and unapproved content is for practice; corrected versions need new approval." />
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={editTarget || showAdd || deleteTarget || loadError ? null : error || null} />
 
@@ -479,7 +482,7 @@ function QuestionsTab({
                           label={q.active ? "Active" : "Retired"}
                           size="xs"
                         />
-                        <StatusBadge tone={q.reviewStatus === "APPROVED" ? "success" : "warning"} label={q.reviewStatus === "APPROVED" ? "Reviewed for certification" : q.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"} size="xs" />
+                        <StatusBadge tone={q.reviewStatus === "APPROVED" ? "success" : "warning"} label={q.reviewStatus === "APPROVED" ? (q.qualificationApprovalMethod === "ADMIN_APPROVAL" ? "Admin approved for assessments" : "Qualified review approved") : q.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"} size="xs" />
                         {q.inUse && (
                           <span className="text-2xs text-base-content/40">in use</span>
                         )}
@@ -500,7 +503,7 @@ function QuestionsTab({
                               title: q.inUse ? "Content is locked — create a corrected version" : undefined,
                             },
                             {
-                              label: q.reviewStatus === "APPROVED" ? "Revoke qualification review" : "Record qualified review",
+                              label: q.reviewStatus === "APPROVED" ? "Revoke assessment approval" : "Record qualified review",
                               icon: <BadgeCheck className="h-4 w-4" />,
                               onSelect: () => setReviewTarget(q),
                               disabled: q.reviewStatus !== "APPROVED" && (!q.active || q.hasNewerVersion || q.reviewStatus === "DEMO"),
@@ -549,7 +552,7 @@ function QuestionsTab({
         onPageSizeChange={setPageSize}
       />
 
-      {reviewTarget && <QualificationReviewModal key={reviewTarget.id} question={reviewTarget} revoke={reviewTarget.reviewStatus === "APPROVED"} onClose={() => setReviewTarget(null)} onSaved={() => afterWrite("Qualification review recorded.")} />}
+      {reviewTarget && <QualificationReviewModal key={reviewTarget.id} question={reviewTarget} revoke={reviewTarget.reviewStatus === "APPROVED"} onClose={() => setReviewTarget(null)} onSaved={() => afterWrite("Assessment approval updated.")} />}
 
       {(showAdd || editTarget || versionTarget) && (
         <QuestionFormModal
@@ -629,7 +632,7 @@ function CoveragePanel({ row }: { row: CoverageRow }) {
     <div className="border border-base-200 bg-base-200/20 rounded-xl p-3 space-y-2 text-xs">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <span className="font-semibold text-base-content/80">
-          {row.activeCount} reviewed qualification question{row.activeCount === 1 ? "" : "s"}
+          {row.activeCount} approved assessment question{row.activeCount === 1 ? "" : "s"}
         </span>
         {row.ready ? (
           <StatusBadge tone="success" label={`Ready · needs ≥ ${row.config.minBankSize}`} size="xs" />

@@ -123,7 +123,7 @@ export default function TopicCertificationList({
                   {subjectDisplayLabel(subject)}
                   {st && !st.bankReady && (
                     <span className="ml-2 text-base-content/40">
-                      · {st.activeQuestionCount}/{st.minBankSize} reviewed qualification questions
+                      · {st.activeQuestionCount}/{st.minBankSize} approved assessment questions
                     </span>
                   )}
                 </div>

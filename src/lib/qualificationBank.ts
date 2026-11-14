@@ -1,9 +1,18 @@
 import type { Prisma } from "@prisma/client";
 import { lockQuestionRows } from "@/lib/questionLocks";
 
-/** A seed/demo label or missing review evidence can never qualify a real tutor. */
+/** Eligibility requires documented qualified review or explicit administrative approval. */
 export function qualificationQuestionWhere(scope: Prisma.AssessmentQuestionWhereInput = {}): Prisma.AssessmentQuestionWhereInput {
-  return { AND: [scope, { active: true, origin: "BANK", reviewStatus: "APPROVED", qualificationReviewedAt: { not: null }, qualificationReviewerId: { not: null }, qualificationCompetency: { not: null }, qualificationEvidence: { not: null }, qualificationReviewerCredentials: { not: null } }] };
+  return { AND: [scope, {
+    active: true, origin: "BANK", reviewStatus: "APPROVED",
+    qualificationReviewedAt: { not: null }, qualificationReviewerId: { not: null },
+    qualificationCompetency: { not: null }, qualificationEvidence: { not: null },
+    OR: [
+      { qualificationApprovalMethod: "ADMIN_APPROVAL" },
+      { qualificationApprovalMethod: "QUALIFIED_REVIEW", qualificationReviewerCredentials: { not: null } },
+      { qualificationApprovalMethod: null, qualificationReviewerCredentials: { not: null } },
+    ],
+  }] };
 }
 
 export async function isQualificationAttemptEligible(

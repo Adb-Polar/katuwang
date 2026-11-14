@@ -37,7 +37,7 @@ pnpm seed:questions --subject MATH --topic 'Geometry' --dry-run
 pnpm seed:questions --subject MATH --topic 'Geometry'
 ```
 
-All questions enter as `origin=BANK`, `reviewStatus=UNREVIEWED`, `active=true`. They have no fabricated reviewer, competency attestation, or approval evidence. They are available to the existing administrator review workflow and **cannot enter the reviewed qualification pool until approved through that workflow**. Review subject fit, age appropriateness, factual accuracy, wording, distractors, and answer keys before approving items.
+All questions enter as `origin=BANK`, `reviewStatus=UNREVIEWED`, `active=true`. They have no fabricated reviewer, competency attestation, or approval evidence. They are available to the existing administrator review workflow and **cannot enter the assessment pool until approved through documented qualified topic review or explicit administrator authorization**. Review subject fit, age appropriateness, factual accuracy, wording, distractors, and answer keys before approving items.
 
 The importer runs in one serializable transaction, inserts questions and choices together, and rolls back on failure. Stable IDs prevent duplicate inserts on reruns. Existing BANK items with the same subject/topic/prompt also prevent duplicate content; tutor-owned copies do not substitute for BANK items. Existing edits, review decisions, disables, locked questions, attempts, published test links, and platform settings remain intact. Old demo content is retained, so an existing database can contain more than 20 total questions per topic. The static dataset itself contains exactly 20.
 
@@ -68,3 +68,11 @@ pnpm exec vitest run prisma/__tests__/questionBankData.test.ts
 Author corrections in the concept cards, blueprints, or exercise modules, then rebuild the JSON and CSV together. Correct already imported or reviewed content through the application's version/review workflow; reseeding deliberately does not overwrite it.
 
 The optional MariaDB integration test is gated by `QUESTION_BANK_TEST_DATABASE_URL`. It requires an empty disposable local database named `question_bank_verification` and a matching `DATABASE_URL`. It checks all 5,840 question inserts, 23,360 option inserts, dry runs, repeated runs, retained edits/reviews and published history, rejected authors, tutor-copy handling, and transaction rollback. It cleans its question/user fixtures afterward. It never accepts a remote host.
+
+## Administrator authorization for assessment use
+
+Administrators can use **Approve bank for assessments** on the Question Bank subject list. Supply the administrative reason and explicitly authorize assessment use. This checks every active, latest, non-demo item before saving any approval, preserves existing valid reviews, locks approved content, and writes an audit entry with the actor, reason, version, and content hash. Retired and tutor-owned questions are excluded. Invalid items roll the entire operation back.
+
+The database records `reviewStatus=APPROVED` and `qualificationApprovalMethod=ADMIN_APPROVAL`; the reviewer-credentials field stays empty. Administrative evidence explicitly records `academicReviewAttested=false`. The UI labels these items **Admin approved for assessments**. This makes the items eligible for tutor assessments under the administrator's policy without asserting independent academic review. Genuine reviews use `QUALIFIED_REVIEW` and retain their reviewer credentials.
+
+Approvals can be revoked through the existing review action; corrected versions require their own approval. Ordinary seeding still creates unapproved drafts and does not fabricate either approval type. Passing an assessment continues to follow the platform's existing tutor-certification settings.

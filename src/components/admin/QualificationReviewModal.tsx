@@ -7,7 +7,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 
 export default function QualificationReviewModal({ question, revoke, onClose, onSaved }: {
-  question: { id: string; subject: string; topic: string; prompt: string; explanation: string | null; options: { id: string; text: string; isCorrect: boolean }[] };
+  question: { qualificationApprovalMethod?: "ADMIN_APPROVAL" | "QUALIFIED_REVIEW" | null; id: string; subject: string; topic: string; prompt: string; explanation: string | null; options: { id: string; text: string; isCorrect: boolean }[] };
   revoke: boolean; onClose: () => void; onSaved: () => void;
 }) {
   const [competency, setCompetency] = useState("");
@@ -19,7 +19,7 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
   const textareaClass = "textarea textarea-bordered min-h-20 w-full resize-y text-sm focus:textarea-primary";
 
   return (
-    <Modal open onClose={onClose} title={revoke ? "Revoke qualification review" : "Record qualified topic review"} size="lg">
+    <Modal open onClose={onClose} title={revoke ? "Revoke assessment approval" : "Record qualified topic review"} size="lg">
       <ValidatedForm className="flex flex-col gap-4" onSubmit={async event => {
         event.preventDefault();
         setSaving(true);
@@ -77,7 +77,7 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
 
         <div className="flex flex-wrap justify-end gap-2 border-t border-base-200 pt-4">
           <button type="button" onClick={onClose} className="btn btn-ghost btn-sm">Cancel</button>
-          <button type="submit" disabled={saving} className="btn btn-primary btn-sm">{saving ? "Saving…" : revoke ? "Revoke review" : "Record review"}</button>
+          <button type="submit" disabled={saving} className="btn btn-primary btn-sm">{saving ? "Saving…" : revoke ? "Revoke approval" : "Record review"}</button>
         </div>
       </ValidatedForm>
     </Modal>

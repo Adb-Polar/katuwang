@@ -42,7 +42,7 @@ export default function OtherTopicAssessment() {
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) {
         if (data.code === "BANK_NOT_READY") {
-          setError(data.error || "This topic needs qualified question review before an assessment can start. Ask an admin to arrange review.");
+          setError(data.error || "This topic needs question approval before an assessment can start. Ask an admin to approve the bank or record qualified topic review.");
           return;
         }
         throw new Error(data.error || "Failed to start assessment.");
