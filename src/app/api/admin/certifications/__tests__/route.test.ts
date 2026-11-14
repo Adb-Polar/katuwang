@@ -81,7 +81,7 @@ describe("GET /api/admin/certifications", () => {
     expect(topicCertificationFindMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({ status: "REJECTED" }),
-        orderBy: { reviewedAt: "desc" },
+        orderBy: [{ reviewedAt: "desc" }, { id: "asc" }],
       })
     );
   });

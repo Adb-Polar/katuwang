@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        orderBy,
+        orderBy: [orderBy, { id: "asc" }],
         skip: (page - 1) * pageSize,
         take: pageSize,
       }),
