@@ -58,6 +58,9 @@ export async function PATCH(
       const current = await tx.topicCertification.findUnique({ where: { id: certificationId }, include: { tutorProfile: { select: { userId: true } } } });
       if (!current) throw new ClassWriteError("Certification request not found.", 404);
       if (current.status !== "PENDING") throw new ClassWriteError("This certification has already been reviewed or earned. Reload before continuing.", 409);
+      if (status === "CERTIFIED" && !await tx.topic.findFirst({ where: { name: current.topic, active: true, subject: { slug: current.subject, active: true } }, select: { id: true } })) {
+        throw new ClassWriteError("This subject or topic was retired. Use a current catalog topic for certification.", 400);
+      }
       let qualifyingAttemptId: string | null = null;
       if (status === "CERTIFIED" && method === "ASSESSMENT") {
         const passing = await findPassingQualification(tx, current);

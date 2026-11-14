@@ -1,0 +1,67 @@
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
+import { afterAll, describe, expect, it } from "vitest";
+import { prisma } from "../prisma";
+import { migrateCertificationCatalog } from "../certificationCatalogMigration";
+import { seedSubjectCatalog } from "../../../prisma/seedSubjectCatalog";
+
+describe.skipIf(!process.env.CERTIFICATION_CATALOG_TEST_DATABASE_URL)("certification catalog replacement in real MariaDB", () => {
+  afterAll(() => prisma.$disconnect());
+  it("replaces, merges, archives and preserves provenance atomically, without transferring old assessment evidence", async () => {
+    const target = new URL(process.env.CERTIFICATION_CATALOG_TEST_DATABASE_URL!);
+    if (process.env.DATABASE_URL !== process.env.CERTIFICATION_CATALOG_TEST_DATABASE_URL || target.hostname !== "127.0.0.1" || target.pathname !== "/certification_catalog_verification") throw Error("Use isolated disposable certification_catalog_verification database");
+    if (await prisma.user.count()) throw Error("Use an empty disposable database");
+    await seedSubjectCatalog(prisma);
+    const user = { firstName: "QA", lastName: "Synthetic migration", password: "unused", gradeLevel: "GRADE_10" as const, section: "QA" };
+    const admin = await prisma.user.create({ data: { ...user, email: "qa-admin@example.test", anonymousId: "QA-A", role: "SUPER_ADMIN" } });
+    const tutor = await prisma.user.create({ data: { ...user, email: "qa-tutor@example.test", anonymousId: "QA-T", role: "STUDENT_TUTOR", tutorProfile: { create: {} } }, include: { tutorProfile: true } });
+    const tutorProfileId = tutor.tutorProfile!.id;
+    const old = async (subject: string, topic: string, extra = {}) => prisma.topicCertification.create({ data: { tutorProfileId, subject, topic, status: "CERTIFIED", certifiedAt: new Date("2026-10-01T00:00:00Z"), ...extra } });
+    const algebra = await old("MATH", "Algebraic Expressions & Factoring");
+    const linear = await old("MATH", "Linear Equations & Inequalities");
+    const both = await old("MATH", "Geometry & Measurement");
+    const manual = await old("FILIPINO", "Pagsulat ng Sanaysay", { approvalMethod: "MANUAL", approvalEvidence: "Synthetic original administrative work-sample evidence", reviewNote: "Synthetic original review" });
+    const unmapped = await old("MAPEH", "Music Theory & Appreciation");
+    const assessedAttempt = await prisma.assessmentAttempt.create({ data: { tutorProfileId, subject: "MAPEH", topic: "Adolescent Health", attemptNo: 1, status: "PASSED", certificationEligible: true, questionCount: 5, scorePercent: 100, correctCount: 5, passPercent: 80, submittedAt: new Date() } });
+    const assessed = await old("MAPEH", "Adolescent Health", { approvalMethod: "ASSESSMENT", qualifyingAttemptId: assessedAttempt.id });
+    await old("ENGLISH", "Grammar & Sentence Structure");
+    const valid = await old("ENGLISH", "Grammar Awareness", { status: "REJECTED", certifiedAt: null, reviewNote: "Synthetic recent current-topic result wins" });
+    const untouched = await old("MATH", "Numbers and Number Sense", { approvalMethod: "MANUAL", approvalEvidence: "Synthetic current approval" });
+    const args = { adminId: admin.id, operationId: "qa-cert-catalog", reason: "Synthetic owner authorization to migrate retired catalog certifications." };
+    const plan = await migrateCertificationCatalog(prisma, args);
+    expect(plan).toMatchObject({ outdatedRecords: 7, archivedWithoutReplacement: 1, mergedSourceGroups: 1, existingTargetsPreserved: 1, pendingReplacements: 1 });
+    expect(await prisma.seedDataRebuild.count()).toBe(0);
+    await expect(migrateCertificationCatalog(prisma, { ...args, adminId: tutor.id, dryRun: false })).rejects.toThrow("super administrator");
+    await expect(migrateCertificationCatalog(prisma, { ...args, dryRun: false, expectedFingerprint: "stale" })).rejects.toThrow("changed since the preview");
+    const before = await prisma.topicCertification.findMany({ orderBy: { id: "asc" } });
+    // Force a late deterministic-ID collision. Even creations made earlier in
+    // the transaction and its archive must roll back along with deletion.
+    const replacementKey = JSON.stringify([tutorProfileId, "MATH", "Geometry"]);
+    const id = "c" + createHash("sha256").update(JSON.stringify(["certification-catalog-2026-11-14-v1", replacementKey])).digest("hex").slice(0, 24);
+    const collision = await prisma.topicCertification.create({ data: { id, tutorProfileId, subject: "MATH", topic: "Statistics and Probability" } });
+    const collisionPlan = await migrateCertificationCatalog(prisma, args);
+    await expect(migrateCertificationCatalog(prisma, { ...args, dryRun: false, expectedFingerprint: "fingerprint" in collisionPlan ? collisionPlan.fingerprint : "" })).rejects.toThrow();
+    expect(await prisma.seedDataRebuild.count()).toBe(0);
+    expect(await prisma.topicCertification.findMany({ where: { id: { not: id } }, orderBy: { id: "asc" } })).toEqual(before);
+    await prisma.topicCertification.delete({ where: { id: collision.id } });
+    const current = await migrateCertificationCatalog(prisma, args);
+    const result = await migrateCertificationCatalog(prisma, { ...args, dryRun: false, expectedFingerprint: "fingerprint" in current ? current.fingerprint : "" });
+    expect(result).toMatchObject({ archivedRecords: 7, createdRecords: 5, remainingOutdatedRecords: 0 });
+    for (const source of [algebra, linear, both, manual, unmapped, assessed]) expect(await prisma.topicCertification.findUnique({ where: { id: source.id } })).toBeNull();
+    const records = await prisma.topicCertification.findMany({ where: { tutorProfileId } });
+    expect(records.find(r => r.topic === "Patterns and Algebra")).toMatchObject({ status: "CERTIFIED", certifiedAt: algebra.certifiedAt, qualifyingAttemptId: null, approvalMethod: null });
+    for (const topic of ["Geometry", "Measurement"]) expect(records.find(r => r.topic === topic)).toMatchObject({ status: "CERTIFIED", qualifyingAttemptId: null });
+    expect(records.find(r => r.topic === "Pagsulat")).toMatchObject({ status: "CERTIFIED", approvalMethod: "MANUAL", approvalEvidence: manual.approvalEvidence, reviewNote: expect.stringContaining(manual.reviewNote!) });
+    expect(records.find(r => r.topic === "Growth and Development")).toMatchObject({ status: "PENDING", certifiedAt: null, approvalMethod: null, qualifyingAttemptId: null });
+    expect(await prisma.assessmentAttempt.findUnique({ where: { id: assessedAttempt.id } })).toEqual(assessedAttempt);
+    for (const row of [valid, untouched]) expect(await prisma.topicCertification.findUnique({ where: { id: row.id } })).toEqual(row);
+    const archive = await prisma.seedDataRebuild.findUniqueOrThrow({ where: { id: args.operationId } });
+    const bytes = gunzipSync(archive.backup);
+    expect(createHash("sha256").update(bytes).digest("hex")).toBe(archive.backupSha256);
+    expect(JSON.parse(bytes.toString()).tables.topic_certifications).toHaveLength(7);
+    expect(await prisma.auditLog.count({ where: { action: "CERTIFICATION_CATALOG_REPLACED" } })).toBe(7);
+    expect(await migrateCertificationCatalog(prisma, { ...args, dryRun: false })).toMatchObject({ alreadyApplied: true });
+    expect(await prisma.topicCertification.count()).toBe(records.length);
+    expect(await prisma.notification.count()).toBe(0);
+  }, 120000);
+});

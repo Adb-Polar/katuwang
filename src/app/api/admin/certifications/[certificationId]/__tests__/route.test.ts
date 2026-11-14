@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { passingAttempts, getServerSessionMock, topicCertificationFindUnique, topicCertificationUpdate, topicCertificationDelete, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
+const { activeTopic, passingAttempts, getServerSessionMock, topicCertificationFindUnique, topicCertificationUpdate, topicCertificationDelete, auditLogCreate, notificationCreate } = vi.hoisted(() => ({
+  activeTopic: vi.fn(),
   passingAttempts: vi.fn(),
   getServerSessionMock: vi.fn(),
   topicCertificationFindUnique: vi.fn(),
@@ -27,6 +28,7 @@ vi.mock("@/lib/prisma", () => ({
         $queryRaw: vi.fn().mockResolvedValue([{ id: "tp1" }]),
         assessmentAttempt: { findMany: passingAttempts },
         assessmentQuestion: { count: vi.fn().mockResolvedValue(1) },
+        topic: { findFirst: activeTopic },
         topicCertification: { findUnique: topicCertificationFindUnique, update: topicCertificationUpdate, delete: topicCertificationDelete },
         auditLog: { create: auditLogCreate },
         notification: { create: notificationCreate },
@@ -51,6 +53,7 @@ function patch(body: unknown, certificationId = "c1") {
 describe("PATCH /api/admin/certifications/[certificationId]", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    activeTopic.mockResolvedValue({ id: "active-topic" });
     passingAttempts.mockResolvedValue([{ id: "pass1", certificationEligible: true, subject: "MATH", topic: "Algebra", items: [{ questionId: "q1" }], questionCount: 1, scorePercent: 90, passPercent: 80 }]);
   });
 
@@ -109,6 +112,17 @@ describe("PATCH /api/admin/certifications/[certificationId]", () => {
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ userId: "tutorU1", type: "CERTIFICATION_CERTIFIED" }) })
     );
+  });
+
+  it("rejects certification of a retired topic without writing a badge or notification", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    topicCertificationFindUnique.mockResolvedValue({ id: "c1", tutorProfileId: "tp1", status: "PENDING", subject: "OLD", topic: "Retired", tutorProfile: { userId: "tutorU1" } });
+    activeTopic.mockResolvedValue(null);
+    const res = await patch({ status: "CERTIFIED" });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toMatchObject({ error: expect.stringContaining("retired") });
+    expect(topicCertificationUpdate).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
   });
 
   it("rejects a pending request by setting status REJECTED with reviewedAt and note", async () => {
