@@ -79,6 +79,7 @@ export default function TutorBrowser() {
 
   const {
     data: tutors,
+    meta,
     total,
     page,
     setPage,
@@ -112,8 +113,9 @@ export default function TutorBrowser() {
               label="Search tutors"
               value={q}
               onChange={setQ}
-              placeholder="Search a tutor by ID (e.g. TUT-0148)…"
-              transform="upper"
+              placeholder={meta.showTutorRealNames === true
+                ? "Search by tutor name or ID…"
+                : "Search a tutor by ID (e.g. TUT-0148)…"}
             />
             <div className="flex flex-wrap items-start gap-3">
               <select aria-label="Grade level" className="select select-bordered select-sm" value={gradeLevel}

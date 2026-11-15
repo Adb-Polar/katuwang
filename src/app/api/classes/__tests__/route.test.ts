@@ -223,6 +223,23 @@ describe("GET /api/classes", () => {
     );
   });
 
+  it.each([true, false])("searches tutor names only when visibility is %s", async visible => {
+    getServerSessionMock.mockResolvedValue(learner);
+    getSettingMock.mockResolvedValue(visible);
+    const json = await (await GET(makeRequest("?q=Maria%20Santos&subject=MATH"))).json();
+    const filters = findManyMock.mock.calls[0][0].where.AND[1];
+    expect(filters.subject).toBe("MATH");
+    const encoded = JSON.stringify(filters);
+    expect(encoded.includes('"firstName"')).toBe(visible);
+    expect(encoded.includes('"lastName"')).toBe(visible);
+    expect(encoded).toContain('"anonymousId"');
+    if (visible) expect(filters.OR).toContainEqual({ tutorProfile: { user: { AND: [
+      { OR: [{ firstName: { contains: "Maria" } }, { lastName: { contains: "Maria" } }] },
+      { OR: [{ firstName: { contains: "Santos" } }, { lastName: { contains: "Santos" } }] },
+    ] } } });
+    expect(json.showTutorRealNames).toBe(visible);
+  });
+
   it("search by subject display name resolves to slugs in the OR filter", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);

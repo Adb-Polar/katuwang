@@ -31,7 +31,7 @@ export default async function LearnerTutorsPage({
         title="Find tutors"
         subtitle={requestTab
           ? "Ask for help on a topic when no open class fits, and track your requests here."
-          : "Verified Student Tutors, by anonymous ID and the subjects they're certified to teach. Open one to see their topics, schedule, and published classes."}
+          : "Find verified Student Tutors and the subjects they're certified to teach. Open one to see their topics, schedule, and published classes."}
         actions={
           <Link href="/learner/match" className="btn btn-ghost btn-sm text-xs">
             Auto Match →

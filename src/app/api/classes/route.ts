@@ -9,6 +9,7 @@ import { getSetting } from "@/lib/settings";
 import { browseClassesWhere, myClassesWhere, learnerClassInclude, toLearnerClassDTO } from "@/lib/classQueries";
 import { rankBrowseClasses, BrowseRankContext } from "@/lib/browseRanking";
 import { resolveSubjectSlugs } from "@/lib/subjects";
+import { tutorSearchClauses } from "@/lib/tutorSearch";
 
 const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
 
@@ -70,8 +71,8 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE)
     );
 
-    // Search/subject/grade filters (privacy-safe: subject/topic text + anonymised
-    // tutor ID only). Applied to both scopes.
+    // Tutor names are searchable only while their visibility setting is on.
+    // These filters apply to both browse and enrolled classes.
     const q = searchParams.get("q")?.trim() || "";
     const subjectParam = searchParams.get("subject");
     const gradeParam = searchParams.get("gradeLevel");
@@ -80,6 +81,7 @@ export async function GET(req: NextRequest) {
     // `TutorClass.subject` stores the slug, so free-text "Mathematics" only
     // reaches those rows once resolved to slugs against the subject catalog.
     const qSubjectSlugs = q ? await resolveSubjectSlugs(q) : [];
+    const showRealNames = await getSetting("showTutorRealNames");
 
     const listFilters: Prisma.TutorClassWhereInput = {
       ...(subjectParam ? { subject: subjectParam } : {}),
@@ -92,7 +94,7 @@ export async function GET(req: NextRequest) {
               { subject: { contains: q } },
               ...(qSubjectSlugs.length ? [{ subject: { in: qSubjectSlugs } }] : []),
               { topics: { some: { topic: { contains: q } } } },
-              { tutorProfile: { user: { anonymousId: { contains: q } } } },
+              ...tutorSearchClauses(q, showRealNames).map(user => ({ tutorProfile: { user } })),
             ],
           }
         : {}),
@@ -142,7 +144,6 @@ export async function GET(req: NextRequest) {
       mineCancelled,
       scopeTotal,
       rows,
-      showRealNames,
       rankContext,
     ] = await Promise.all([
       prisma.tutorClass.count({ where: browseWhere }),
@@ -159,7 +160,6 @@ export async function GET(req: NextRequest) {
         // Personalized browse ranks in JS, so it needs the full result set.
         ...(personalize ? {} : { skip: (page - 1) * pageSize, take: pageSize }),
       }),
-      getSetting("showTutorRealNames"),
       personalize ? loadRankContext(session.user.id, learnerGrade) : Promise.resolve(null),
     ]);
 
@@ -172,6 +172,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       classes: dtos,
+      showTutorRealNames: showRealNames,
       page,
       pageSize,
       total: scope === "mine" ? scopeTotal : filteredBrowse ? scopeTotal : browseCount,

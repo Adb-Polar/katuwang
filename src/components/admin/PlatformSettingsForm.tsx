@@ -33,7 +33,7 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
   showTutorRealNames: {
     label: "Show tutor real names to learners",
     description:
-      "When enabled, learners see a tutor's real name and section on the tutor profile page. Leave OFF to keep the double-blind anonymity required by RA 10173 (Data Privacy Act).",
+      "When enabled, learners can see tutor names and search by name in Find Tutors and class search. When disabled, tutor discovery uses anonymous IDs.",
     group: "General",
   },
   requireRegistrationApproval: {

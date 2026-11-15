@@ -10,6 +10,7 @@ import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { portalPath } from "@/lib/portalPaths";
 import { rateLimit, rateLimitEnabled, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
+import { tutorSearchClauses } from "@/lib/tutorSearch";
 
 const PER_GROUP = 6;
 
@@ -119,19 +120,7 @@ export async function GET(req: NextRequest) {
       const showRealNames = await getSetting("showTutorRealNames");
       // Names follow the platform visibility setting. Match each word against
       // either name field so a full name works as well as a first/last name.
-      const tutorOr: Prisma.UserWhereInput[] =
-        scope === "tutorCode"
-          ? [{ anonymousId: { contains: q } }]
-          : [
-              { anonymousId: { contains: q } },
-              ...(showRealNames
-                ? [{
-                    AND: q.split(/\s+/).map((word) => ({
-                      OR: [{ firstName: { contains: word } }, { lastName: { contains: word } }],
-                    })),
-                  }]
-                : []),
-            ];
+      const tutorOr = tutorSearchClauses(q, scope !== "tutorCode" && showRealNames);
       const [classes, tutors] = await Promise.all([
         classOr
           ? prisma.tutorClass.findMany({

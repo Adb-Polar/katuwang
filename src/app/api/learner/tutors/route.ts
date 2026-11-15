@@ -9,6 +9,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { reinstateExpiredClasses } from "@/lib/moderation";
+import { tutorSearchClauses } from "@/lib/tutorSearch";
 
 const DEFAULT_PAGE_SIZE = BROWSE_PAGE_SIZE;
 const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
@@ -68,7 +69,7 @@ export async function GET(req: NextRequest) {
               })),
             }
           : { topicCertifications: { some: { status: "CERTIFIED", ...gradeCertification } } },
-      ...(q ? { anonymousId: { contains: q } } : {}),
+      ...(q ? { OR: tutorSearchClauses(q, showRealNames) } : {}),
     };
 
     const [rows, total] = await Promise.all([
@@ -140,7 +141,7 @@ export async function GET(req: NextRequest) {
       };
     });
 
-    return NextResponse.json({ tutors, total, page, pageSize });
+    return NextResponse.json({ tutors, total, page, pageSize, showTutorRealNames: showRealNames });
   } catch (error) {
     const catalogFailure = catalogFailureResponse(error);
     if (catalogFailure) return catalogFailure;

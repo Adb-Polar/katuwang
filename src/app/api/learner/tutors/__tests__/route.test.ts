@@ -125,4 +125,26 @@ describe("GET /api/learner/tutors", () => {
     const call = findManyMock.mock.calls[0][0];
     expect(call.where.gradeLevel).toBeUndefined();
   });
+
+  it.each(["Maria", "Santos", "Maria Luisa Santos", "  Maria   Santos  "])("searches visible tutor names for %s and retains verification filters", async q => {
+    getServerSessionMock.mockResolvedValue(learner);
+    getSettingMock.mockResolvedValue(true);
+    const json = await (await GET(req(`http://localhost/api/learner/tutors?q=${encodeURIComponent(q)}&subject=MATH`))).json();
+    const args = findManyMock.mock.calls[0][0];
+    expect(args.where).toMatchObject({ role: "STUDENT_TUTOR", status: "ACTIVE", tutorProfile: { AND: [{ topicCertifications: { some: { status: "CERTIFIED", subject: "MATH" } } }] },
+      OR: [{ anonymousId: { contains: q.trim() } }, { AND: q.trim().split(/\s+/).map(word => ({ OR: [{ firstName: { contains: word } }, { lastName: { contains: word } }] })) }] });
+    expect(countMock.mock.calls[0][0].where).toEqual(args.where);
+    expect(json.showTutorRealNames).toBe(true);
+  });
+
+  it("does not query or select real names while name visibility is off", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    const json = await (await GET(req("http://localhost/api/learner/tutors?q=Maria%20Santos"))).json();
+    const args = findManyMock.mock.calls[0][0];
+    expect(args.where.OR).toEqual([{ anonymousId: { contains: "Maria Santos" } }]);
+    expect(args.select).not.toHaveProperty("firstName");
+    expect(args.select).not.toHaveProperty("lastName");
+    expect(json.showTutorRealNames).toBe(false);
+    expect(json.tutors[0]).not.toHaveProperty("name");
+  });
 });

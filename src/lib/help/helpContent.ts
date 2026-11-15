@@ -369,7 +369,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Users",
         question: "What is the showTutorRealNames setting?",
         answer:
-          "An explicit, admin-gated override that lets tutor real names show in some admin-facing views. It is off by default and does not affect what learners see.",
+          "An administrator-controlled setting that shows tutor names to learners and allows name searches in Find Tutors, class search, and the top bar. It is off by default; when disabled, tutor discovery uses anonymous IDs.",
       },
       {
         category: "Assessment",

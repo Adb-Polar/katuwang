@@ -128,7 +128,9 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               label="Search classes"
               value={q}
               onChange={setQ}
-              placeholder="Search code, subject, or topic..."
+              placeholder={meta.showTutorRealNames === true
+                ? "Search tutor name, code, subject, or topic..."
+                : "Search code, subject, or topic..."}
             />
             <select
               className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
