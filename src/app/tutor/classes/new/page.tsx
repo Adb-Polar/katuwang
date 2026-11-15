@@ -34,7 +34,7 @@ export default async function NewClassPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Schedule a tutoring class"
-        subtitle="Pick a subject and topics, add your sessions, and publish it for tutees to discover and enroll."
+        subtitle="Select a grade, choose its subject and topics, then add your sessions and publish the class."
       />
       <NewClassForm allowedTopics={allowedTopics} tutorGradeLevel={tutorGradeLevel} />
     </div>

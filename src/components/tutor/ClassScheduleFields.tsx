@@ -126,13 +126,13 @@ export default function ClassScheduleFields({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === "subject" && !subjectLocked) {
+    if (name === "subject" && subjectLocked) return;
+    setForm((prev) => ({ ...prev, [name]: value, ...(name === "gradeLevel" && !subjectLocked ? { subject: "" } : {}) }));
+    if (name === "subject" || name === "gradeLevel") {
       setSelectedTopics([]);
-    }
-    if (name === "gradeLevel") {
-      setSelectedTopics([]);
-      if (!subjectLocked) setForm((prev) => ({ ...prev, subject: "" }));
+      setTopicFilter("");
+      setSessionRows(prev => prev.map(row => ({ ...row, topic: "" })));
+      setFormError("");
     }
   };
 
@@ -144,6 +144,9 @@ export default function ClassScheduleFields({
 
   const toggleTopic = (topic: string) => {
     if (isTopicDisabled(topic)) return;
+    if (selectedTopics.some(t => t.toLowerCase() === topic.toLowerCase())) {
+      setSessionRows(prev => prev.map(row => row.topic.toLowerCase() === topic.toLowerCase() ? { ...row, topic: "" } : row));
+    }
     setSelectedTopics((prev) => {
       const hit = prev.find((t) => t.toLowerCase() === topic.toLowerCase());
       return hit ? prev.filter((t) => t !== hit) : [...prev, topic];
@@ -154,7 +157,8 @@ export default function ClassScheduleFields({
     ? selectedTopics.filter((t) => !topicsFor(form.subject).some((k) => k.toLowerCase() === t.toLowerCase()))
     : selectedTopics;
 
-  const subjectTopics = form.subject ? topicsFor(form.subject) : [];
+  const availableSubjects = form.gradeLevel ? subjects.filter(subject => topicsFor(subject.slug).length > 0) : [];
+  const subjectTopics = form.gradeLevel && form.subject ? topicsFor(form.subject) : [];
   const q = topicFilter.trim().toLowerCase();
   const shownTopicOptions = q
     ? subjectTopics.filter((t) => t.toLowerCase().includes(q))
@@ -202,8 +206,12 @@ export default function ClassScheduleFields({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    if (!form.gradeLevel) return reportFieldError(e.currentTarget, "Grade level", "Please select a grade.");
+    if (catalogLoading || catalogLoadError) return setFormError("Load the subject catalog before scheduling a class.");
     if (!form.subject) return reportFieldError(e.currentTarget, "Subject Area", "Please select a subject.");
+    if (!availableSubjects.some(subject => subject.slug === form.subject)) return reportFieldError(e.currentTarget, "Subject Area", "Select a subject available for this grade.");
     if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topic(s)", "Please select at least one topic.");
+    if (selectedTopics.some(topic => !subjectTopics.includes(topic) || isTopicDisabled(topic))) return reportFieldError(e.currentTarget, "Topic(s)", "Select topics available for this grade and subject.");
     if (sessionRows.length === 0) return reportFieldError(e.currentTarget, "Sessions", "Please add at least one session.");
     const invalidSession = sessionRows.findIndex((r) => {
       const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
@@ -252,20 +260,34 @@ export default function ClassScheduleFields({
       <div className="space-y-4">
         <div>
           <h2 className="font-bold text-base">Class details</h2>
-          <p className="text-sm text-base-content/60">Choose what you’ll teach and the grade level of the material.</p>
+          <p className="text-sm text-base-content/60">Select a grade, then choose its subject and topics.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
+          <FormField size={fieldSize} label="Grade level" required hint="The level of the material. Learners from any grade can enroll.">
+            <select
+              name="gradeLevel"
+              value={form.gradeLevel}
+              onChange={handleInputChange}
+              required
+              className={`select select-bordered ${selectCls} w-full focus:select-primary`}
+            >
+              <option value="">Select grade</option>
+              {availableGrades.map((g) => (
+                <option key={g.value} value={g.value}>{g.label}</option>
+              ))}
+            </select>
+          </FormField>
           <FormField size={fieldSize} label="Subject Area" required>
             <select
               name="subject"
               value={form.subject}
               onChange={handleInputChange}
               required
-              disabled={subjectLocked}
+              disabled={subjectLocked || !form.gradeLevel || catalogLoading || Boolean(catalogLoadError)}
               className={`select select-bordered ${selectCls} w-full focus:select-primary disabled:opacity-70`}
             >
-              <option value="">Select subject</option>
-              {subjects.map((sub) => (
+              <option value="">{form.gradeLevel ? "Select subject" : "Select a grade first"}</option>
+              {availableSubjects.map((sub) => (
                 <option key={sub.slug} value={sub.slug}>
                   {sub.name}
                 </option>
@@ -273,29 +295,13 @@ export default function ClassScheduleFields({
             </select>
           </FormField>
 
-      <FormField size={fieldSize} label="Target Grade" hint="The level of the material. Learners from any grade can enroll.">
-        <select
-          name="gradeLevel"
-          value={form.gradeLevel}
-          onChange={handleInputChange}
-          className={`select select-bordered ${selectCls} w-full focus:select-primary`}
-        >
-          <option value="">Any grade</option>
-          {availableGrades.map((g) => (
-            <option key={g.value} value={g.value}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-      </FormField>
-
         </div>
       </div>
 
       <FormField size={fieldSize} label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
-        {!form.subject ? (
+        {!form.gradeLevel || !form.subject ? (
           <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
-            Select a subject to see available topics.
+            {form.gradeLevel ? "Select a subject to see available topics." : "Select a grade and subject to see available topics."}
           </div>
         ) : (
           <div className="space-y-2">
@@ -316,7 +322,7 @@ export default function ClassScheduleFields({
             >
               {shownTopicOptions.length === 0 && (
                 <p className="col-span-full text-2xs text-base-content/50 italic py-2 text-center">
-                  No topics match “{topicFilter}”.
+                  {subjectTopics.length === 0 ? "No topics are available for this subject and grade." : `No topics match “${topicFilter}”.`}
                 </p>
               )}
               {shownTopicOptions.map((topic) => {
@@ -364,7 +370,7 @@ export default function ClassScheduleFields({
             {allowedTopicSet && (
               <p className="text-2xs text-base-content/50">
                 Your school requires certification to teach a topic — only topics you&apos;ve
-                passed the assessment for can be picked.
+                been certified for can be picked.
               </p>
             )}
 
