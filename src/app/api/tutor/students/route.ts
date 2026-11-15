@@ -66,16 +66,25 @@ export async function GET(req: NextRequest) {
         : {}),
     };
 
-    const enrollments = await prisma.classEnrollment.findMany({
-      where,
-      select: {
-        enrolledAt: true,
-        withdrawnAt: true,
-        class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
-        learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
-      },
-      orderBy: { enrolledAt: "desc" },
-    });
+    // Keep class choices independent of roster filters and pagination. Only
+    // include this tutor's classes with enrollment records (including history).
+    const [classes, enrollments] = await Promise.all([
+      prisma.tutorClass.findMany({
+        where: { tutorProfileId: tutorProfile.id, enrollments: { some: {} } },
+        select: { id: true, code: true, subject: true },
+        orderBy: { code: "asc" },
+      }),
+      prisma.classEnrollment.findMany({
+        where,
+        select: {
+          enrolledAt: true,
+          withdrawnAt: true,
+          class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
+          learner: { select: { id: true, anonymousId: true, image: true, gradeLevel: true, section: true } },
+        },
+        orderBy: { enrolledAt: "desc" },
+      }),
+    ]);
 
     const byLearner = new Map<string, StudentEntry>();
     for (const enr of enrollments) {
@@ -106,7 +115,7 @@ export async function GET(req: NextRequest) {
     const total = students.length;
     const paged = students.slice((page - 1) * pageSize, page * pageSize);
 
-    return NextResponse.json({ students: paged, total, page, pageSize });
+    return NextResponse.json({ students: paged, total, page, pageSize, classes });
   } catch (error) {
     console.error("Error fetching tutor student roster:", error);
     return NextResponse.json(

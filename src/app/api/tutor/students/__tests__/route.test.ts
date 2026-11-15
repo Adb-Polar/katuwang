@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
-const { getServerSessionMock, tutorProfileFindUnique, classEnrollmentFindMany } = vi.hoisted(() => ({
+const { getServerSessionMock, tutorProfileFindUnique, classEnrollmentFindMany, tutorClassFindMany } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorProfileFindUnique: vi.fn(),
   classEnrollmentFindMany: vi.fn(),
+  tutorClassFindMany: vi.fn(),
 }));
 
 vi.mock("@/lib/serverSession", () => ({ getActiveServerSession: getServerSessionMock,
@@ -14,6 +15,7 @@ vi.mock("@/lib/prisma", () => ({
   prisma: {
     tutorProfile: { findUnique: tutorProfileFindUnique },
     classEnrollment: { findMany: classEnrollmentFindMany },
+    tutorClass: { findMany: tutorClassFindMany },
   },
 }));
 
@@ -26,12 +28,14 @@ function makeRequest(query = "") {
 describe("GET /api/tutor/students", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    tutorClassFindMany.mockResolvedValue([]);
   });
 
   it("returns 401 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await GET(makeRequest());
     expect(res.status).toBe(401);
+    expect(tutorClassFindMany).not.toHaveBeenCalled();
   });
 
   it("returns 404 when no tutor profile exists", async () => {
@@ -48,7 +52,7 @@ describe("GET /api/tutor/students", () => {
     const res = await GET(makeRequest());
     expect(res.status).toBe(200);
     const json = await res.json();
-    expect(json).toEqual({ students: [], total: 0, page: 1, pageSize: 10 });
+    expect(json).toEqual({ students: [], total: 0, page: 1, pageSize: 10, classes: [] });
   });
 
   it("groups multiple enrollments for the same learner into one entry", async () => {
@@ -131,6 +135,30 @@ describe("GET /api/tutor/students", () => {
         }),
       })
     );
+  });
+
+  it("returns enrolled class choices for this tutor independently of roster filters and pagination", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    classEnrollmentFindMany.mockResolvedValue([]);
+    const classes = [
+      { id: "c1", code: "C-0001", subject: "MATH" },
+      { id: "c2", code: "C-0002", subject: "MATH" },
+    ];
+    tutorClassFindMany.mockResolvedValue(classes);
+
+    const res = await GET(makeRequest("?classId=c1&gradeLevel=GRADE_9&section=A&q=no-match&page=2&pageSize=1"));
+    const json = await res.json();
+    expect(json.students).toEqual([]);
+    expect(json.classes).toEqual(classes);
+    expect(tutorClassFindMany).toHaveBeenCalledWith({
+      where: { tutorProfileId: "tp1", enrollments: { some: {} } },
+      select: { id: true, code: true, subject: true },
+      orderBy: { code: "asc" },
+    });
+    expect(classEnrollmentFindMany).toHaveBeenCalledWith(expect.objectContaining({
+      where: expect.objectContaining({ class: { tutorProfileId: "tp1", id: "c1" } }),
+    }));
   });
 
   it("paginates the grouped, distinct-learner list", async () => {

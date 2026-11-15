@@ -1,7 +1,5 @@
 "use client";
 
-import CatalogLoadState from "@/components/ui/CatalogLoadState";
-
 import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
@@ -9,7 +7,6 @@ import { GradeLevel } from "@prisma/client";
 import { gradeLabel, gradeSection } from "@/lib/gradeLevels";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
@@ -37,6 +34,12 @@ interface Student {
   enrollments: StudentEnrollment[];
 }
 
+interface EnrolledClass {
+  id: string;
+  code: string;
+  subject: string;
+}
+
 const GRADE_LEVELS: GradeLevel[] = [
   "GRADE_7",
   "GRADE_8",
@@ -50,12 +53,12 @@ export default function StudentRoster() {
   const [q, setQ] = useState("");
   const [gradeLevel, setGradeLevel] = useState<GradeLevel | "">("");
   const [section, setSection] = useState("");
-  const { subjects: catalog, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog();
-  const [subject, setSubject] = useState<string>("");
+  const [classId, setClassId] = useState("");
 
   const {
     data: students,
     total,
+    meta,
     page,
     setPage,
     loading,
@@ -68,17 +71,15 @@ export default function StudentRoster() {
       ...(q.trim() ? { q: q.trim() } : {}),
       ...(gradeLevel ? { gradeLevel } : {}),
       ...(section.trim() ? { section: section.trim() } : {}),
-      ...(subject ? { subject } : {}),
+      ...(classId ? { classId } : {}),
     },
     PAGE_SIZE,
     "Could not retrieve your students."
   );
+  const classes = (meta.classes ?? []) as EnrolledClass[];
 
   return (
     <div className="space-y-4">
-      <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
-
-
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <FormField label="Search">
           <input
@@ -112,16 +113,16 @@ export default function StudentRoster() {
             onChange={(e) => setSection(e.target.value)}
           />
         </FormField>
-        <FormField label="Subject">
+        <FormField label="Class">
           <select
             className="select select-bordered select-sm text-xs"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            value={classId}
+            onChange={(e) => setClassId(e.target.value)}
           >
-            <option value="">All subjects</option>
-            {catalog.map((s) => (
-              <option key={s.slug} value={s.slug}>
-                {s.name}
+            <option value="">All classes</option>
+            {classes.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.code} — {subjectDisplayLabel(item.subject)}
               </option>
             ))}
           </select>
