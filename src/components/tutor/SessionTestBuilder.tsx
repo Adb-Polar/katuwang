@@ -599,6 +599,7 @@ function AddFromBankModal({
   const [filters, setFilters] = useState({ topic: "", q: "", page: 1 });
   const [rows, setRows] = useState<BankQuestion[]>([]);
   const [total, setTotal] = useState(0);
+  const [requiresCertification, setRequiresCertification] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [picked, setPicked] = useState<Map<string, BankQuestion>>(new Map());
@@ -624,6 +625,7 @@ function AddFromBankModal({
         if (!cancelled) {
           setRows(data.questions);
           setTotal(data.total);
+          setRequiresCertification(data.requiresCertification === true);
         }
       } catch (err) {
         if (!cancelled) {
@@ -661,7 +663,8 @@ function AddFromBankModal({
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
         <p className="text-xs text-base-content/60">
-          Showing active bank questions for {subject} in topics you are already certified in.
+          Showing active bank questions for {subject}.
+          {requiresCertification && " Bank access is limited to topics you are certified in."}
           Search by question text or topic, or write your own questions for this session.
         </p>
         <form
@@ -708,7 +711,9 @@ function AddFromBankModal({
               No active bank questions found for {subject}.
               {filters.q || filters.topic
                 ? " Try another search or choose All topics."
-                : " Check your topic certifications, or ask an admin to add or activate questions for this subject."}
+                : requiresCertification
+                  ? " Check your topic certifications, or ask an admin to add or activate questions for this subject."
+                  : " Ask an admin to add or activate questions for this subject."}
             </p>
           ) : (
             rows.map((r) => {

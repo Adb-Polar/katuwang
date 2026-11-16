@@ -135,6 +135,12 @@ describe("loadEnrolledSession", () => {
 import { certifiedBankTopics } from "@/lib/teachingBankAccess";
 describe("linked qualification-bank confidentiality", () => {
   const linked = { id: "st1", questions: [{ question: { origin: "BANK", subject: "SCIENCE", topic: "Cells" } }] };
+  it("opens an owned test with bank questions when certification is disabled", async () => {
+    getSettingMock.mockResolvedValue(false);
+    sessionTestFindUnique.mockResolvedValue(linked);
+    expect(isAccessError(await loadOwnedSession("U1", "c1", "s1"))).toBe(false);
+    expect(certifiedBankTopics).not.toHaveBeenCalled();
+  });
   it("blocks legacy linked questions outside exact certified subject/topic", async () => {
     sessionTestFindUnique.mockResolvedValue(linked);
     const result = await loadOwnedSession("U1", "c1", "s1");

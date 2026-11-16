@@ -1,3 +1,5 @@
+vi.mock("@/lib/settings", () => ({ getSetting: vi.fn().mockResolvedValue(true) }));
+import { getSetting } from "@/lib/settings";
 vi.mock("@/lib/teachingBankAccess", () => ({
   certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
   certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
@@ -22,6 +24,7 @@ const tutor = { user: { id: "U1", role: "STUDENT_TUTOR" } };
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(getSetting).mockResolvedValue(true);
   getServerSessionMock.mockResolvedValue(tutor);
   findManyMock.mockResolvedValue([]);
   countMock.mockResolvedValue(0);
@@ -50,7 +53,7 @@ describe("GET /api/tutor/question-bank", () => {
     const res = await GET(new NextRequest("http://localhost/api/tutor/question-bank?subject=MATH"));
 
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ questions: [question], total: 1, page: 1, pageSize: 10 });
+    expect(await res.json()).toEqual({ questions: [question], total: 1, page: 1, pageSize: 10, requiresCertification: true });
     expect(findManyMock.mock.calls[0][0].where).toEqual({ AND: [{ OR: [{ subject: "MATH", topic: "Fractions" }] }], origin: "BANK", active: true, subject: "MATH" });
   });
 
@@ -82,7 +85,7 @@ describe("GET /api/tutor/question-bank", () => {
       take: 50,
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
     }));
-    expect(await res.json()).toEqual({ questions: [], total: 0, page: 2, pageSize: 50 });
+    expect(await res.json()).toEqual({ questions: [], total: 0, page: 2, pageSize: 50, requiresCertification: true });
   });
 
   it("treats a whitespace-only search as browsing the bank", async () => {
@@ -94,6 +97,18 @@ describe("GET /api/tutor/question-bank", () => {
 
 import { certifiedBankTopics } from "@/lib/teachingBankAccess";
 describe("certified teaching bank policy", () => {
+  it("allows active bank questions without certification when the administrator disables the requirement", async () => {
+    vi.mocked(getSetting).mockResolvedValue(false);
+    findManyMock.mockResolvedValue([{ id: "Q1", subject: "JHS_ARALING_PANLIPUNAN" }]);
+    countMock.mockResolvedValue(1);
+    const res = await GET(new NextRequest("http://localhost/api/tutor/question-bank?subject=JHS_ARALING_PANLIPUNAN&topic=Kolonyalismo"));
+    expect(await res.json()).toMatchObject({ total: 1, requiresCertification: false });
+    expect(certifiedBankTopics).not.toHaveBeenCalled();
+    expect(findManyMock.mock.calls[0][0].where).toEqual({
+      origin: "BANK", active: true, subject: "JHS_ARALING_PANLIPUNAN", topic: "Kolonyalismo",
+    });
+    expect(getSetting).toHaveBeenCalledWith("requireCertificationForClassCreation");
+  });
   it("does not query any bank material for an uncertified tutor", async () => {
     vi.mocked(certifiedBankTopics).mockResolvedValueOnce([]);
     const res = await GET(new NextRequest("http://localhost/api/tutor/question-bank"));

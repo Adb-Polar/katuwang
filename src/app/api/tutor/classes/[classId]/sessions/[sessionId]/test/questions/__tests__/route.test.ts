@@ -1,3 +1,5 @@
+vi.mock("@/lib/settings", () => ({ getSetting: vi.fn().mockResolvedValue(true) }));
+import { getSetting } from "@/lib/settings";
 vi.mock("@/lib/teachingBankAccess", () => ({
   certifiedBankTopics: vi.fn().mockResolvedValue([{ subject: "MATH", topic: "Fractions" }]),
   certifiedBankWhere: (topics: { subject: string; topic: string }[]) => ({ OR: topics }),
@@ -60,6 +62,7 @@ function put(body: unknown) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(getSetting).mockResolvedValue(true);
   getServerSessionMock.mockResolvedValue(tutor);
   tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
   tutorClassFindUnique.mockResolvedValue({
@@ -90,6 +93,15 @@ beforeEach(() => {
 });
 
 describe("PUT /test/questions", () => {
+  it("saves active same-subject bank questions without certification when the requirement is disabled", async () => {
+    vi.mocked(getSetting).mockResolvedValue(false);
+    const res = await PUT(put({ questionIds: ["q1", "q2"] }), ctx());
+    expect(res.status).toBe(200);
+    expect(assessmentQuestionFindMany.mock.calls[0][0].where.OR).toEqual([
+      { origin: "BANK", active: true, subject: "MATH" },
+      { origin: "TUTOR", active: true, ownerTutorProfileId: "tp1" },
+    ]);
+  });
   it("409 once the test is published", async () => {
     sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", questions: [], _count: { attempts: 0 } });
     const res = await PUT(put({ questionIds: ["q1"] }), ctx());

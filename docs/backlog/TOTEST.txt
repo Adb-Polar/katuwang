@@ -1,3 +1,11 @@
+Certification setting and session bank (2026-11-16)
+ [] With Require certification for class creation OFF, an uncertified tutor
+    opens Add from bank for the reported JHS_ARALING_PANLIPUNAN class, finds
+    active questions, adds them, saves and reloads the test successfully.
+    The picker does not claim certification is required.
+ [] Turn the requirement ON: uncertified topics are blocked again for browse,
+    save and linked-test access. Certified topics remain accessible.
+
 Tutor question-bank search (2026-11-16)
  [Good] Chromium sample-response checks: picker loads on opening; Enter and
     Search submit; topic changes refresh; >50 results have pagination; selected

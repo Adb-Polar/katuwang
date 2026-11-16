@@ -142,3 +142,7 @@ expansion) landed the same day (Part 30).
 **Note on roles:** the thesis reference document names a 4th "Teacher Moderator" role, but the team decided to ship with 3 roles only (Learner, Tutor, Admin). Treat the reference doc's mentions of Teacher Moderator / Moderator Portal as stale, not a missing feature.
 
 - Real qualification bank: documented qualified topic review required per immutable question version; demo/unreviewed and historical practice attempts excluded from new certification. Human review content remains an administrator responsibility.
+
+- Session-test bank access honors `requireCertificationForClassCreation` for
+  browsing, saving and reopening: certified-topic restrictions apply when on;
+  active same-subject bank questions are available without certification when off.

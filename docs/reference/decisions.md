@@ -397,3 +397,13 @@ Standard administrator approval requires a submitted passing assessment for the 
 ## Real certification uses a reviewed bank
 
 Demo and unreviewed questions may support practice/diagnostic teaching tests but cannot count toward qualification readiness or grant a real tutor credential. Each approved question version needs a recorded topic competency, qualified reviewer credentials, evidence and attestation; approval freezes its content. Corrections require independent review; revocation or retirement prevents affected attempts from granting new credentials. Existing attempts default to practice eligibility and cannot be retroactively promoted by reviewing their questions. Standard admin approval checks the attempt and current bank review; the audited manual evidence alternative remains available. Seed scripts append DEMO questions, deduplicate and retain existing attempts/test links and assessment settings. Legacy credential records keep their known/unknown provenance; this gate does not fabricate past reviews. No qualified review is claimed for generic seed content.
+
+## Session bank follows the admin certification requirement (2026-11-16)
+
+The `requireCertificationForClassCreation` setting also governs tutor access to
+shared bank material for session tests. When disabled, an owner can build and
+reopen class tests with active bank questions in the class subject without a
+certification. When enabled, exact certified subject/topic checks apply to
+browsing, saving and reopening linked tests. This aligns the bank with the
+owner-authorized class-creation mode; it does not grant certifications or change
+the separate approved-content/evidence requirements for qualification quizzes.

@@ -4321,3 +4321,23 @@ IDs, error recovery and stale-request cancellation. Full suite: 1,373 passed,
 107 skipped, 1 existing unrelated failure in the add-session focus test
 (`ValidatedForm.test.tsx:134`); reproduced on unchanged develop `d455a03` in a
 separate worktree. Live database verification remains in `docs/backlog/TOTEST.txt`.
+
+## Honor the certification setting in the session question bank (2026-11-16)
+
+The reported class was created while `requireCertificationForClassCreation` was
+disabled, but bank browsing, saving bank questions and reopening linked tests
+still required certification. Those three paths now honor the same setting as
+class creation. Enabling the setting restores exact certified-topic checks;
+disabling it retains active bank questions, class-subject and ownership checks.
+The picker receives the effective requirement and shows certification guidance
+only when it applies. No certification records or question approvals are changed.
+
+Regression checks cover bank browsing without certification, saving the ordered
+question set and reopening an owned linked test while the requirement is off,
+plus the existing guards when it is on. Live verification remains on the checklist.
+
+Verification: 39 focused tests, TypeScript, changed-file ESLint and Chromium
+checks pass, including conditional certification guidance. A broader run passed
+1,352 other tests and found an audit probe missing its settings mock; all four
+audit probes pass after supplying the enabled-setting fixture. The previously
+confirmed unrelated `ValidatedForm.test.tsx` failure was excluded from that run.

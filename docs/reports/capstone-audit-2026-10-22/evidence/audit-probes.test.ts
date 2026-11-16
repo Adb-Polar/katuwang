@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ session: vi.fn(), findMany: vi.fn(), count: vi.fn(), account: vi.fn(), certifications: vi.fn() }));
 vi.mock("next-auth", () => ({ getServerSession: mocks.session }));
 vi.mock("@/lib/auth", () => ({ authOptions: {} }));
+vi.mock("@/lib/settings", () => ({ getSetting: vi.fn().mockResolvedValue(true) }));
 vi.mock("@/lib/prisma", () => ({ prisma: { user: { findUnique: mocks.account }, topicCertification: { findMany: mocks.certifications }, assessmentQuestion: { findMany: mocks.findMany, count: mocks.count } } }));
 import { GET } from "@/app/api/tutor/question-bank/route";
 import { requireAdminSession } from "@/lib/permissions";
@@ -19,7 +20,7 @@ describe("Audit defect reproduction with isolated mocks", () => {
     expect(response.status).toBe(401);
     expect(mocks.findMany).not.toHaveBeenCalled();
   });
-  it("BUG-002: uncertified tutor receives no qualification-bank questions or keys", async () => {
+  it("BUG-002: uncertified tutor receives no bank questions or keys when certification is required", async () => {
     mocks.session.mockResolvedValue({ user: { id: "qa-tutor", role: "STUDENT_TUTOR", sessionVersion: 0, status: "ACTIVE" } });
     mocks.account.mockResolvedValue({ role: "STUDENT_TUTOR", sessionVersion: 0, status: "ACTIVE" });
     const response = await GET(new NextRequest("http://localhost/api/tutor/question-bank?subject=MATH"));

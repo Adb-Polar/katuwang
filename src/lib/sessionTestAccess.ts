@@ -71,7 +71,7 @@ export async function loadOwnedSession(userId: string, classId: string, sessionI
   // Also protect legacy linked questions, result drill-downs and server pages:
   // restricting only the browse/PUT APIs would leave an alternate answer leak.
   const bankQuestions = test?.questions.filter(({ question }) => question.origin === "BANK") ?? [];
-  if (bankQuestions.length > 0) {
+  if (bankQuestions.length > 0 && await getSetting("requireCertificationForClassCreation")) {
     const certified = await certifiedBankTopics(userId);
     if (bankQuestions.some(({ question }) => !certified.some(
       (topic) => topic.subject === question.subject && topic.topic === question.topic,

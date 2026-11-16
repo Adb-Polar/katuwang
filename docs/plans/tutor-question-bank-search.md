@@ -16,3 +16,11 @@ Subject scoping and active/BANK restrictions continue to match the test-save API
 
 Integration on current develop preserves certified-topic authorization, review
 status labels, mobile control sizes, active-session checks and safe response fields.
+
+## Certification-setting follow-up
+
+The admin disabled `requireCertificationForClassCreation` for the reported class.
+Apply that same setting to bank browsing, test question saving and reopening
+linked tests. When enabled, retain the exact certified-topic restrictions; when
+disabled, retain active/BANK, class-subject and class-ownership checks without
+requiring a certification. Return the effective requirement for accurate UI copy.

@@ -2,6 +2,7 @@ import { lockSessionTestRow, lockQuestionRows, QuestionWriteError } from "@/lib/
 import { certifiedBankTopics, certifiedBankWhere } from "@/lib/teachingBankAccess";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
+import { getSetting } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 import { setSessionTestQuestionsSchema } from "@/lib/validations/sessionTest";
 import { isAccessError, loadOwnedSession } from "@/lib/sessionTestAccess";
@@ -49,7 +50,8 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 
     // Every id must be an active bank question of this class's subject, OR a
     // custom question this tutor owns.
-    const certifiedTopics = await certifiedBankTopics(session.user.id);
+    const requiresCertification = await getSetting("requireCertificationForClassCreation");
+    const certifiedTopics = requiresCertification ? await certifiedBankTopics(session.user.id) : [];
     const test = await prisma.$transaction(async (tx) => {
       await lockSessionTestRow(tx, owned.test!.id);
       const current = await tx.sessionTest.findUniqueOrThrow({ where: { id: owned.test!.id }, include: { _count: { select: { attempts: true } } } });
@@ -59,7 +61,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
         where: {
           id: { in: questionIds },
           OR: [
-            { origin: "BANK", active: true, subject: owned.tutorClass.subject, AND: [certifiedBankWhere(certifiedTopics)] },
+            { origin: "BANK", active: true, subject: owned.tutorClass.subject, ...(requiresCertification ? { AND: [certifiedBankWhere(certifiedTopics)] } : {}) },
             { origin: "TUTOR", active: true, ownerTutorProfileId: owned.tutorProfile.id },
           ],
         },

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
+import { getSetting } from "@/lib/settings";
 import { prisma } from "@/lib/prisma";
 
 const DEFAULT_PAGE_SIZE = ADMIN_PAGE_SIZE;
@@ -26,12 +27,13 @@ export async function GET(req: NextRequest) {
       Math.max(1, Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE),
     );
 
-    const certifiedTopics = await certifiedBankTopics(session.user.id);
-    if (certifiedTopics.length === 0) {
-      return NextResponse.json({ questions: [], total: 0, page, pageSize });
+    const requiresCertification = await getSetting("requireCertificationForClassCreation");
+    const certifiedTopics = requiresCertification ? await certifiedBankTopics(session.user.id) : [];
+    if (requiresCertification && certifiedTopics.length === 0) {
+      return NextResponse.json({ questions: [], total: 0, page, pageSize, requiresCertification });
     }
     const where: Prisma.AssessmentQuestionWhereInput = {
-      AND: [certifiedBankWhere(certifiedTopics)],
+      ...(requiresCertification ? { AND: [certifiedBankWhere(certifiedTopics)] } : {}),
       origin: "BANK",
       active: true,
       ...(subject ? { subject } : {}),
@@ -50,7 +52,7 @@ export async function GET(req: NextRequest) {
       prisma.assessmentQuestion.count({ where }),
     ]);
 
-    return NextResponse.json({ questions: rows, total, page, pageSize });
+    return NextResponse.json({ questions: rows, total, page, pageSize, requiresCertification });
   } catch (error) {
     console.error("Error browsing question bank:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
