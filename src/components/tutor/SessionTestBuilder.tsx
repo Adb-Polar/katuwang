@@ -13,6 +13,7 @@ import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Pagination from "@/components/ui/Pagination";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 
 interface BuilderQuestion {
@@ -572,6 +573,15 @@ function BuilderBody({
 
 // ─── Add-from-bank modal ───────────────────────────────────────────────────
 
+interface BankQuestion {
+  reviewStatus?: string;
+  id: string;
+  prompt: string;
+  topic: string;
+}
+
+const BANK_PAGE_SIZE = 50;
+
 function AddFromBankModal({
   subject,
   topics,
@@ -585,44 +595,65 @@ function AddFromBankModal({
   onAdd: (rows: BuilderQuestion[]) => void;
   onClose: () => void;
 }) {
-  const [topic, setTopic] = useState("");
   const [q, setQ] = useState("");
-  const [rows, setRows] = useState<
-    { id: string; prompt: string; topic: string; reviewStatus?: string; options: { text: string; isCorrect: boolean }[] }[]
-  >([]);
-  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({ topic: "", q: "", page: 1 });
+  const [rows, setRows] = useState<BankQuestion[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [picked, setPicked] = useState<Map<string, BankQuestion>>(new Map());
 
-  const search = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const params = new URLSearchParams({ subject, pageSize: "50" });
-      if (topic) params.set("topic", topic);
-      if (q.trim()) params.set("q", q.trim());
-      const res = await fetch(`/api/tutor/question-bank?${params}`);
-      const data = await res.json();
-      if (!res.ok) throw new FormValidationError(data, "Failed to load questions.");
-      setRows(data.questions);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load questions.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    let cancelled = false;
+    const controller = new AbortController();
+
+    async function load() {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams({
+          subject,
+          pageSize: String(BANK_PAGE_SIZE),
+          page: String(filters.page),
+        });
+        if (filters.topic) params.set("topic", filters.topic);
+        if (filters.q) params.set("q", filters.q);
+        const res = await fetch(`/api/tutor/question-bank?${params}`, { signal: controller.signal });
+        const data = await res.json();
+        if (!res.ok) throw new FormValidationError(data, "Failed to load questions.");
+        if (!cancelled) {
+          setRows(data.questions);
+          setTotal(data.total);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setRows([]);
+          setTotal(0);
+          setError(err instanceof Error ? err.message : "Failed to load questions.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
-  };
 
-  const toggle = (id: string) =>
+    load();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [subject, filters]);
+
+  const toggle = (question: BankQuestion) =>
     setPicked((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      const next = new Map(prev);
+      if (next.has(question.id)) next.delete(question.id);
+      else next.set(question.id, question);
       return next;
     });
 
   const commit = () =>
     onAdd(
-      rows.filter((r) => picked.has(r.id)).map((r) => ({ questionId: r.id, prompt: r.prompt, origin: "BANK", topic: r.topic })),
+      Array.from(picked.values()).map((r) => ({ questionId: r.id, prompt: r.prompt, origin: "BANK", topic: r.topic })),
     );
 
   return (
@@ -630,11 +661,22 @@ function AddFromBankModal({
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
         <p className="text-xs text-base-content/60">
-          Bank questions are available for topics you are already certified in.
-          You can also write your own questions for this session.
+          Showing active bank questions for {subject} in topics you are already certified in.
+          Search by question text or topic, or write your own questions for this session.
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          <select aria-label="Filter question bank by topic" value={topic} onChange={(e) => setTopic(e.target.value)} className="select select-bordered select-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1 truncate">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setFilters((prev) => ({ ...prev, q: q.trim(), page: 1 }));
+          }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+        >
+          <select
+            aria-label="Filter by topic"
+            value={filters.topic}
+            onChange={(e) => setFilters((prev) => ({ ...prev, topic: e.target.value, page: 1 }))}
+            className="select select-bordered select-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1 truncate"
+          >
             <option value="">All topics</option>
             {topics.map((t) => (
               <option key={t} value={t}>
@@ -643,23 +685,30 @@ function AddFromBankModal({
             ))}
           </select>
           <input
-            aria-label="Search question prompts"
+            aria-label="Search bank questions"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search prompt..."
+            placeholder="Search questions or topics..."
             className="input input-bordered input-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1"
           />
-          <button onClick={search} disabled={loading} className="btn btn-neutral btn-xs min-h-11 sm:min-h-0 text-2xs sm:col-span-1">
+          <button type="submit" disabled={loading} className="btn btn-neutral btn-xs min-h-11 sm:min-h-0 text-2xs sm:col-span-1">
             {loading ? <span className="loading loading-spinner loading-xs" /> : "Search"}
           </button>
-        </div>
+        </form>
 
         <FeedbackBanner variant="error" message={error || null} />
 
         <div className="max-h-[45vh] overflow-y-auto space-y-1.5 pr-1">
-          {rows.length === 0 ? (
+          {loading ? (
+            <div role="status" className="flex justify-center py-6">
+              <span className="loading loading-spinner loading-md text-primary" aria-label="Loading questions" />
+            </div>
+          ) : error ? null : rows.length === 0 ? (
             <p className="text-2xs text-base-content/40 italic text-center py-6">
-              Run a search to list bank questions for {subject}.
+              No active bank questions found for {subject}.
+              {filters.q || filters.topic
+                ? " Try another search or choose All topics."
+                : " Check your topic certifications, or ask an admin to add or activate questions for this subject."}
             </p>
           ) : (
             rows.map((r) => {
@@ -676,7 +725,7 @@ function AddFromBankModal({
                     className="checkbox checkbox-xs checkbox-primary mt-0.5"
                     disabled={already}
                     checked={picked.has(r.id)}
-                    onChange={() => toggle(r.id)}
+                    onChange={() => toggle(r)}
                   />
                   <span>
                     <span className="text-base-content/80">{r.prompt}</span>
@@ -691,11 +740,20 @@ function AddFromBankModal({
           )}
         </div>
 
+        {!loading && !error && (
+          <Pagination
+            page={filters.page}
+            pageSize={BANK_PAGE_SIZE}
+            total={total}
+            onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+          />
+        )}
+
         <div className="modal-action pt-1">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
             Cancel
           </button>
-          <button className="btn btn-primary btn-sm" onClick={commit} disabled={picked.size === 0}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={commit} disabled={loading || picked.size === 0}>
             Add {picked.size || ""} selected
           </button>
         </div>

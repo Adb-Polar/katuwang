@@ -1,3 +1,14 @@
+Tutor question-bank search (2026-11-16)
+ [Good] Chromium sample-response checks: picker loads on opening; Enter and
+    Search submit; topic changes refresh; >50 results have pagination; selected
+    questions persist across pages/searches and all IDs reach the save request.
+    Existing questions remain disabled, errors/no matches are distinct, retry
+    recovers, and stale requests cannot overwrite newer results. No page errors.
+ [] Live admin-to-tutor check: active bank questions in the class subject and
+    tutor's certified topics appear; inactive/other-subject/uncertified topics
+    stay unavailable. Add questions across pages, save, reload, and verify the
+    complete set appears once. Verify review-status labels on bank questions.
+
 Separate Date & Time Form Inputs (fix/separate-time-date-inputs, Changes.md Part 88)
  [] /tutor/classes/new (Class creation):
     - Session rows display distinct Date (<input type="date">) and Time (<input type="time">) fields side by side.

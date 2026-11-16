@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
       active: true,
       ...(subject ? { subject } : {}),
       ...(topic ? { topic } : {}),
-      ...(q ? { prompt: { contains: q } } : {}),
+      ...(q ? { OR: [{ prompt: { contains: q } }, { topic: { contains: q } }] } : {}),
     };
 
     const [rows, total] = await Promise.all([

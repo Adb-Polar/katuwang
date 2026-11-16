@@ -503,7 +503,7 @@ via `loadOwnedSession`/`loadOwnedClass` in `src/lib/sessionTestAccess.ts`).
 - `GET .../test/results` → `{ test, totals, learners: [...], questions: [...] }` — no learner `id`, only `anonymousId`.
 - `GET .../test/attempts/[attemptId]` → one learner's full attempt with answers revealed, `{ ...attempt, learner: { anonymousId } }`.
 - `GET /api/tutor/classes/[classId]/test-results` → per-session pre/post roll-up for the whole class, for the progress chart.
-- `GET /api/tutor/question-bank?subject=&topic=&q=` → browse `BANK` questions to add.
+- `GET /api/tutor/question-bank?subject=&topic=&q=&page=&pageSize=` → browse active `BANK` questions in certified topics; `q` matches question text or topic name. The builder loads the class subject's questions on opening, supports Enter/Search and immediate topic filtering, and retains selections across pages and searches.
 - `GET`/`POST /api/tutor/questions`, `PATCH`/`DELETE /api/tutor/questions/[questionId]` → the tutor's own `TUTOR`-origin questions; a question already used by a non-`DRAFT` test or with any attempt is locked (edit/delete `409`).
 
 ## What Tutors Cannot Do

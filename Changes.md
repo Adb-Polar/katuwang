@@ -4300,3 +4300,24 @@ Verification: 1,213 tests passed / 65 skipped (144 files passed / 12 skipped), T
 ## Readable admin activity summaries (2026-11-16)
 
 The admin dashboard and full audit log now format serialized audit reasons as readable summaries. Certification catalog changes show previous and replacement topics, retained certification status, and reassessment requirements without internal identifiers or backup hashes. Plain-text reasons stay readable; unknown metadata uses a safe fallback. Dashboard entries wrap on small screens. Existing audit records are unchanged. Seven formatter regression tests cover replacements, archival, malformed data, and plain-text reasons.
+
+## Tutor question-bank search and browsing (2026-11-16)
+
+The session-test builder now loads bank questions when the picker opens,
+submits searches with Enter or Search, matches question text or topic names,
+and refreshes immediately when the topic changes. Pagination exposes questions
+beyond the first 50, with selections retained across pages and searches so
+every selected question reaches the test's save request. Loading, error and
+no-match states are distinct; superseded/unmounted requests are cancelled.
+
+Integrated on current develop with certified-topic authorization, active/BANK
+and class-subject restrictions, safe response fields, review-status labels and
+mobile control sizes preserved. The picker explains certification restrictions.
+No database changes. Plan: `docs/plans/tutor-question-bank-search.md`.
+
+Verification: all 8 question-bank route tests, TypeScript, targeted ESLint and
+Chromium sample-response checks pass, including search, pagination, selection/save
+IDs, error recovery and stale-request cancellation. Full suite: 1,373 passed,
+107 skipped, 1 existing unrelated failure in the add-session focus test
+(`ValidatedForm.test.tsx:134`); reproduced on unchanged develop `d455a03` in a
+separate worktree. Live database verification remains in `docs/backlog/TOTEST.txt`.
