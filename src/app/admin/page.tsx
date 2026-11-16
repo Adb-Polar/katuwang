@@ -7,6 +7,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import { formatDateTime } from "@/lib/datetime";
+import { formatAuditReason } from "@/lib/auditLogDisplay";
 import { Metadata } from "next";
 import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
@@ -89,7 +90,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="order-2 lg:order-1 lg:col-span-2 card kt-card">
+        <section className="order-2 lg:order-1 lg:col-span-2 min-w-0 card kt-card">
           <div className="card-body gap-3">
             <h2 className="card-title text-sm font-bold flex items-center gap-2">
               <ScrollText className="h-4 w-4 text-primary" />
@@ -101,21 +102,26 @@ export default async function AdminDashboard() {
               </p>
             ) : (
               <ul className="divide-y divide-base-200">
-                {recentLogs.map((log) => (
-                  <li key={log.id} className="py-2.5 text-xs">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold text-base-content/80">
-                        {auditActionDisplayLabel(log.action)}
-                        <span className="font-normal text-base-content/50"> · {statusDisplayLabel(log.targetType)}</span>
-                      </span>
-                      <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
-                    </div>
-                    <div className="text-2xs text-base-content/50 mt-0.5">
-                      by {log.admin.anonymousId}
-                      {log.reason ? ` — ${log.reason}` : ""}
-                    </div>
-                  </li>
-                ))}
+                {recentLogs.map((log) => {
+                  const summary = formatAuditReason(log.reason);
+                  return (
+                    <li key={log.id} className="py-2.5 text-xs">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                        <span className="min-w-0 break-words font-semibold text-base-content/80">
+                          {auditActionDisplayLabel(log.action)}
+                          <span className="font-normal text-base-content/50"> · {statusDisplayLabel(log.targetType)}</span>
+                        </span>
+                        <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
+                      </div>
+                      {summary && (
+                        <p className="mt-1 break-words text-xs leading-relaxed text-base-content/70">
+                          {summary}
+                        </p>
+                      )}
+                      <p className="text-2xs text-base-content/50 mt-1">By {log.admin.anonymousId}</p>
+                    </li>
+                  );
+                })}
               </ul>
             )}
             <Link href="/admin/audit-log" className="text-xs text-primary font-medium hover:underline mt-1">

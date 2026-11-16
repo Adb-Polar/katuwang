@@ -6,6 +6,7 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
 import { formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { formatAuditReason } from "@/lib/auditLogDisplay";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
@@ -134,7 +135,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                       <td className="text-base-content/60">
                         {log.admin.anonymousId} ({log.admin.firstName} {log.admin.lastName})
                       </td>
-                      <td className="text-base-content/60">{log.reason || "—"}</td>
+                      <td className="min-w-48 max-w-md whitespace-normal break-words text-base-content/60">{formatAuditReason(log.reason) || "—"}</td>
                       <td className="text-base-content/50">
                         {formatDateTime(log.createdAt)}
                       </td>

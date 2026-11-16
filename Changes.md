@@ -4296,3 +4296,7 @@ The original 860-question file could not seed develop's current catalogue. The r
 The standalone seed check now passes with zero structural errors or duplicate flags. Missing/unmatched catalogues produce concise diagnostics. Replacement handles active catalogue rows, SUPER_ADMIN authors and Restrict version links. It retains academic approval and application qualification-review gates; all items await genuine human review. No database connection, write or deployment occurred.
 
 Verification: 1,213 tests passed / 65 skipped (144 files passed / 12 skipped), TypeScript and targeted ESLint passed. 278 independent numerical checks passed, with algebra identities and Mendelian checks. Live seed/browser verification and academic approval remain outstanding. The branch is based on develop 75488fb and targets develop through PR #3.
+
+## Readable admin activity summaries (2026-11-16)
+
+The admin dashboard and full audit log now format serialized audit reasons as readable summaries. Certification catalog changes show previous and replacement topics, retained certification status, and reassessment requirements without internal identifiers or backup hashes. Plain-text reasons stay readable; unknown metadata uses a safe fallback. Dashboard entries wrap on small screens. Existing audit records are unchanged. Seven formatter regression tests cover replacements, archival, malformed data, and plain-text reasons.
