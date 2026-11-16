@@ -4341,3 +4341,17 @@ checks pass, including conditional certification guidance. A broader run passed
 1,352 other tests and found an audit probe missing its settings mock; all four
 audit probes pass after supplying the enabled-setting fixture. The previously
 confirmed unrelated `ValidatedForm.test.tsx` failure was excluded from that run.
+
+## Certified topic badges on learner tutor cards (2026-11-16)
+
+The tutor-list API previously returned certification counts without topic names;
+cards rendered subject and verified-class badges only. The response now includes
+the already-selected CERTIFIED subject/topic pairs. Cards render up to three
+verified TopicChip badges, with a remaining count and full topic title on hover.
+Subject/class badges and privacy rules remain intact. Cards retain their minimum
+height and grow as needed instead of clipping added content.
+
+Verification: 13 API/component tests, TypeScript and targeted ESLint pass. Tests
+cover badges without verified classes and overflow counts. Live/mobile visual
+checks remain in `docs/backlog/TOTEST.txt`. No database changes.
+Plan: `docs/plans/tutor-card-certified-topics.md`.

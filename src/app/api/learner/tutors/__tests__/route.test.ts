@@ -70,6 +70,11 @@ describe("GET /api/learner/tutors", () => {
       id: "u1",
       anonymousId: "TUT-0148",
       verifiedTopicCount: 3,
+      verifiedTopics: [
+        { subject: "MATH", topic: "Linear equations" },
+        { subject: "MATH", topic: "Fractions" },
+        { subject: "SCIENCE", topic: "Forces" },
+      ],
       subjects: ["MATH", "SCIENCE"],
       verifiedClasses: [
         { code: "C-0001", subject: "MATH" },
@@ -79,6 +84,7 @@ describe("GET /api/learner/tutors", () => {
       nextSessionAt: "2999-01-01T08:00:00.000Z",
     });
     expect(json.tutors[0].name).toBeUndefined();
+    expect(findManyMock.mock.calls[0][0].select.tutorProfile.select.topicCertifications.where).toEqual({ status: "CERTIFIED" });
   });
 
   it("legacy single ?subject= filters to a CERTIFIED cert in that subject", async () => {

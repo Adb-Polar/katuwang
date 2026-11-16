@@ -13,6 +13,7 @@ import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import Pagination from "@/components/ui/Pagination";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import TopicChip from "@/components/ui/TopicChip";
 import { formatDayMonth, formatTime, formatWeekday } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 
@@ -21,6 +22,7 @@ import UserAvatar from "@/components/profile/UserAvatar";
 const PAGE_SIZE = BROWSE_PAGE_SIZE;
 const MAX_VISIBLE_SUBJECTS = 2;
 const MAX_VISIBLE_CLASSES = 3;
+const MAX_VISIBLE_TOPICS = 3;
 const SUBJECT_GROUPS = [
   { label: "STEM", slugs: ["MATH", "SCIENCE", "RESEARCH_DIGITAL_LITERACY"] },
   { label: "Humanities & social sciences", slugs: ["ENGLISH", "FILIPINO", "ARALING_PANLIPUNAN", "VALUES_EDUCATION"] },
@@ -35,6 +37,7 @@ interface TutorRow {
   name?: string;
   section?: string;
   verifiedTopicCount: number;
+  verifiedTopics: { subject: string; topic: string }[];
   subjects: string[];
   verifiedClasses: { code: string; subject: string }[];
   publishedClassCount: number;
@@ -165,7 +168,7 @@ export default function TutorBrowser() {
                 <Link
                   key={t.id}
                   href={`/learner/tutors/${t.id}`}
-                  className="flex h-64 max-h-64 min-w-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
+                  className="flex min-h-64 min-w-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -196,6 +199,27 @@ export default function TutorBrowser() {
                       {t.subjects.length > MAX_VISIBLE_SUBJECTS && (
                         <span className="shrink-0 text-2xs text-base-content/55">+{t.subjects.length - MAX_VISIBLE_SUBJECTS} more</span>
                       )}
+                    </div>
+                  )}
+
+                  {t.verifiedTopics?.length > 0 && (
+                    <div className="min-w-0 space-y-1" aria-label="Certified topics">
+                      <p className="text-2xs text-base-content/55">Certified topics</p>
+                      <div className="flex min-w-0 flex-wrap gap-1">
+                        {t.verifiedTopics.slice(0, MAX_VISIBLE_TOPICS).map((cert) => (
+                          <TopicChip
+                            key={`${cert.subject}::${cert.topic}`}
+                            topic={cert.topic}
+                            verified
+                            className="min-w-0 max-w-full"
+                          />
+                        ))}
+                        {t.verifiedTopics.length > MAX_VISIBLE_TOPICS && (
+                          <span className="self-center text-2xs text-base-content/55">
+                            +{t.verifiedTopics.length - MAX_VISIBLE_TOPICS} more
+                          </span>
+                        )}
+                      </div>
                     </div>
                   )}
 

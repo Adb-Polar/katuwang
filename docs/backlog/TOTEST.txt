@@ -1,3 +1,9 @@
+Tutor card certified topic badges (2026-11-16)
+ [] Learner -> Find Tutors: cards show checked green topic badges even without
+    a verified class. Up to three certified topics appear with +N more for the
+    remainder. Open the tutor profile to see all certified topics. Check long
+    names on mobile: badges stay within the card and footer metadata is visible.
+
 Certification setting and session bank (2026-11-16)
  [] With Require certification for class creation OFF, an uncertified tutor
     opens Add from bank for the reported JHS_ARALING_PANLIPUNAN class, finds

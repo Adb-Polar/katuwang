@@ -134,6 +134,7 @@ export async function GET(req: NextRequest) {
           ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(), section: u.section }
           : {}),
         verifiedTopicCount: certs.length,
+        verifiedTopics: certs,
         subjects,
         verifiedClasses,
         publishedClassCount: u.tutorProfile?._count.classes ?? 0,
