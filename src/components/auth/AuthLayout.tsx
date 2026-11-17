@@ -1,13 +1,25 @@
 import React from "react";
+import PublicShell from "@/components/public/PublicShell";
 import AuthBackButton from "./AuthBackButton";
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+/**
+ * Shell for every sign-in, sign-up, recovery and account-status page: the public header and
+ * footer (same as the landing page) around one centred column. `width="wide"` is for the
+ * sign-up form.
+ */
+export default function AuthLayout({
+  children,
+  width = "narrow",
+}: {
+  children: React.ReactNode;
+  width?: "narrow" | "wide";
+}) {
   return (
-    <main className="min-h-screen w-full flex items-center justify-center bg-base-200 font-sans p-4 sm:p-6 md:p-8">
-      <div className="w-full max-w-md">
+    <PublicShell>
+      <main className={`lp-auth lp-auth--${width}`}>
         <AuthBackButton />
         {children}
-      </div>
-    </main>
+      </main>
+    </PublicShell>
   );
 }

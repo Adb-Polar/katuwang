@@ -3,19 +3,14 @@ import LoginForm from "@/components/auth/LoginForm";
 import AuthLayout from "@/components/auth/AuthLayout";
 
 export const metadata = {
-  title: "Sign In | Katuwang Portal",
+  title: "Log in | Katuwang",
   description: "Sign in to Katuwang to manage matches, lessons, and schedules.",
 };
 
 export default function LoginPage() {
   return (
     <AuthLayout>
-      <Suspense fallback={
-        <div className="card kt-card w-full max-w-md text-center p-8">
-          <span className="loading loading-spinner loading-md text-primary mx-auto"></span>
-          <p className="mt-4 text-xs text-(--kt-muted)">Loading form...</p>
-        </div>
-      }>
+      <Suspense fallback={<p className="lp-muted" role="status">Loading…</p>}>
         <LoginForm />
       </Suspense>
     </AuthLayout>

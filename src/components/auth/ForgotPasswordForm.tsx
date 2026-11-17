@@ -4,7 +4,7 @@ import ValidatedForm from "@/components/ui/ValidatedForm";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import BrandMark from "@/components/ui/BrandMark";
+import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 
 type Step = "email" | "verify";
@@ -45,41 +45,39 @@ export default function ForgotPasswordForm() {
   function back() { setCodeMethod("primary"); setStep("email"); setCode(""); setError(""); setMessage(""); }
 
   return (
-    <div className="card kt-card w-full max-w-md">
-      <div className="card-body gap-6">
-        <div className="flex flex-col items-center gap-2 mb-2 text-center">
-          <BrandMark />
-          <h1 className="font-sans text-xl font-semibold text-base-content">Forgot password</h1>
-          <p className="text-xs text-(--kt-muted)">{step === "email" ? "Enter your primary registered email address." : "Enter your verification code to set a new password. Codes expire in 15 minutes."}</p>
-        </div>
-        <div aria-live="polite">
-          <FeedbackBanner variant="success" message={message || null} />
-          <FeedbackBanner variant="error" message={error || null} />
-        </div>
-        {(step === "email" || step === "verify") && (
-          <ValidatedForm onSubmit={e => { e.preventDefault(); void request(step === "email" ? "lookup" : "verify"); }} className="flex flex-col gap-4">
-            <label className="form-control flex flex-col w-full gap-2 text-xs font-semibold">
-              {step === "email" ? "Primary Email Address" : "Verification code"}
-              {step === "email" ? <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered input-sm w-full" required disabled={loading} /> :
-                <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" minLength={8} maxLength={8} className="input input-bordered input-sm w-full" required disabled={loading} />}
-            </label>
-            <button disabled={loading} className="btn btn-primary btn-sm w-full">{loading ? "Please wait…" : step === "email" ? "Continue" : "Verify code"}</button>
-          </ValidatedForm>
-        )}
-        {step === "verify" && (
-          <div className="space-y-2 text-center">
-            <button type="button" disabled={loading || (codeMethod === "recovery" && cooldown > 0)} onClick={() => void request("lookup", "recovery")} className="btn btn-outline btn-primary btn-sm w-full">
-              Send code to backup email
-            </button>
-            <p className="text-xs text-(--kt-muted)">Your backup email must be saved and verified in your profile.</p>
-          </div>
-        )}
-        {step === "verify" && <button disabled={loading || cooldown > 0} onClick={() => void request("lookup")} className="btn btn-ghost btn-sm">{cooldown > 0 ? `Resend available in ${cooldown}s` : "Resend code"}</button>}
-        {step !== "email" && <button disabled={loading} onClick={back} className="btn btn-ghost btn-sm">Back</button>}
-        <div className="text-center text-xs text-(--kt-faint) border-t border-base-200 pt-4">
-          <Link className="text-primary font-bold hover:underline" href="/login">Back to Login</Link>
-        </div>
+    <div>
+      <AuthHeading kicker="Nakalimutan?" title="Forgot password">
+        {step === "email" ? "Enter your primary registered email address." : "Enter your verification code to set a new password. Codes expire in 15 minutes."}
+      </AuthHeading>
+      <div aria-live="polite" className="space-y-3 mb-6 empty:mb-0">
+        <FeedbackBanner variant="success" message={message || null} />
+        <FeedbackBanner variant="error" message={error || null} />
       </div>
+      {(step === "email" || step === "verify") && (
+        <ValidatedForm onSubmit={e => { e.preventDefault(); void request(step === "email" ? "lookup" : "verify"); }} className="lp-form">
+          <label className="form-control flex flex-col w-full gap-2 text-sm font-medium">
+            {step === "email" ? "Primary Email Address" : "Verification code"}
+            {step === "email" ? <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required disabled={loading} /> :
+              <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" minLength={8} maxLength={8} className="input input-bordered w-full tracking-[0.2em]" required disabled={loading} />}
+          </label>
+          <button disabled={loading} className="btn btn-primary w-full">{loading ? "Please wait…" : step === "email" ? "Continue" : "Verify code"}</button>
+        </ValidatedForm>
+      )}
+      {step === "verify" && (
+        <div className="mt-6 flex flex-col gap-3">
+          <button type="button" disabled={loading || (codeMethod === "recovery" && cooldown > 0)} onClick={() => void request("lookup", "recovery")} className="btn btn-outline btn-primary w-full">
+            Send code to backup email
+          </button>
+          <p className="text-sm text-(--lp-muted)">Your backup email must be saved and verified in your profile.</p>
+          <div className="flex gap-4">
+            <button disabled={loading || cooldown > 0} onClick={() => void request("lookup")} className="lp-link disabled:text-(--lp-muted) disabled:no-underline">{cooldown > 0 ? `Resend available in ${cooldown}s` : "Resend code"}</button>
+            <button disabled={loading} onClick={back} className="lp-link">Use a different email</button>
+          </div>
+        </div>
+      )}
+      <p className="lp-form-foot">
+        Remembered it? <Link className="lp-link" href="/login">Back to log in</Link>
+      </p>
     </div>
   );
 }

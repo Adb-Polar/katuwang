@@ -1,82 +1,21 @@
 /*
-  Landing page only. Everything is scoped under .kt-landing and prefixed lp-
-  because DaisyUI already owns .btn, .hero, .steps, .join and .link.
-  Two fonts: IBM Plex Serif (headings, IDs) and IBM Plex Sans (everything else).
-  Palette: Dagat — sea blue-teal, coral learners, citrus tutors.
+  Landing-only sections. Tokens, type, buttons, links, header and footer live in
+  components/public/public.css (scoped to .kt-public, which wraps this page).
   Design source: design/round-3/landing-base/2-decluttered.html (local, untracked).
 */
-.kt-landing {
-  --lp-page: oklch(100% 0 0);
-  --lp-tint: oklch(97.5% 0.006 222);
-  --lp-ink: oklch(24% 0.02 230);
-  --lp-muted: oklch(46% 0.02 230);
-  --lp-border: oklch(90% 0.01 225);
-  --lp-primary: oklch(42% 0.09 222);
-  --lp-primary-hover: oklch(36% 0.09 222);
-  --lp-primary-ink: oklch(98% 0.01 222);
-  --lp-learner: oklch(52% 0.16 30);
-  --lp-tutor: oklch(46% 0.1 105);
-  --lp-band: oklch(97% 0.016 222);
-  --lp-radius: 0.25rem;
+.kt-public {
   /* illustration */
-  --lp-tutor-fill: oklch(82% 0.14 105);
-  --lp-tutor-arm: oklch(68% 0.14 105);
+  --lp-tutor-fill: oklch(80% 0.15 300);
+  --lp-tutor-arm: oklch(66% 0.16 300);
   --lp-learner-arm: oklch(45% 0.15 30);
   --lp-table: oklch(85% 0.03 222);
   --lp-book-line: oklch(81% 0.03 222);
   --lp-skin-a: oklch(80% 0.06 60);
   --lp-skin-b: oklch(66% 0.07 55);
-  --lp-font-serif: var(--lp-serif), Georgia, serif;
-  --lp-font-sans: var(--lp-sans), Arial, sans-serif;
-
-  flex: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--lp-page);
-  color: var(--lp-ink);
-  font: 400 1rem/1.6 var(--lp-font-sans);
-  -webkit-font-smoothing: antialiased;
 }
-:root:has(.kt-landing) { scroll-behavior: smooth; }
-.kt-landing :focus-visible { outline: 2px solid var(--lp-primary); outline-offset: 3px; }
-.kt-landing :is(h1, h2, h3) { font-family: var(--lp-font-serif); font-weight: 500; letter-spacing: -0.02em; margin: 0; }
-.kt-landing h1 { font-size: clamp(2.4rem, 5vw, 3.5rem); line-height: 1.08; text-wrap: balance; }
-.kt-landing h2 { font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.2; }
-.kt-landing h3 { font-size: 1.2rem; line-height: 1.3; }
-.kt-landing p { margin: 0; }
 
-.lp-wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.5rem; width: 100%; }
-.lp-muted { color: var(--lp-muted); }
-
-.lp-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 0.75rem 1.25rem; border-radius: var(--lp-radius);
-  border: 1px solid var(--lp-border); background: var(--lp-page); color: var(--lp-ink);
-  font: 500 0.95rem/1 var(--lp-font-sans); text-decoration: none;
-}
-.lp-btn:hover { border-color: var(--lp-muted); }
-.lp-btn-primary { background: var(--lp-primary); border-color: var(--lp-primary); color: var(--lp-primary-ink); }
-.lp-btn-primary:hover { background: var(--lp-primary-hover); border-color: var(--lp-primary-hover); }
-.lp-link { color: var(--lp-primary); font-weight: 500; text-decoration: none; }
-.lp-link:hover { text-decoration: underline; }
-
-/* Personality, kept small: italic accent line, Tagalog kickers, one tinted band, role-coloured join links. */
-.lp-accent { font-style: italic; color: var(--lp-primary); }
-.lp-kicker { font: italic 400 1.05rem/1 var(--lp-font-serif); color: var(--lp-primary); margin-bottom: 0.25rem; }
 .lp-tagline { font: italic 400 1rem var(--lp-font-serif); color: var(--lp-muted); }
 .lp-tagline span { font: 400 0.85rem var(--lp-font-sans); }
-
-/* Header */
-.lp-header { border-bottom: 1px solid var(--lp-border); }
-.lp-header .lp-wrap { height: 4rem; display: flex; align-items: center; gap: 2rem; }
-.lp-brand { display: flex; align-items: center; gap: 0.6rem; font: 500 1.15rem var(--lp-font-serif); text-decoration: none; margin-right: auto; }
-.lp-logo { width: 2rem; height: 2rem; flex: none; fill: var(--lp-primary); stroke: var(--lp-primary); stroke-width: 1.4; }
-.lp-nav { display: flex; gap: 1.5rem; font-size: 0.95rem; }
-.lp-nav a { text-decoration: none; color: var(--lp-muted); }
-.lp-nav a:hover { color: var(--lp-ink); }
-.lp-actions { display: flex; gap: 0.5rem; }
-.lp-actions .lp-btn { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
 
 /* Hero */
 .lp-hero { padding-block: 7rem; display: grid; grid-template-columns: 3fr 2fr; gap: 4rem; align-items: center; }
@@ -121,9 +60,6 @@
 .lp-sees .lp-as { font-size: 0.85rem; color: var(--lp-muted); }
 .lp-sees p { font-size: 1.05rem; }
 .lp-sees .lp-aside { font-size: 0.85rem; color: var(--lp-muted); }
-.lp-id { font: 500 1.3rem var(--lp-font-serif); font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: 0.15rem; }
-.lp-id-learner { color: var(--lp-learner); }
-.lp-id-tutor { color: var(--lp-tutor); }
 
 /* Joining: two columns with a divider */
 .lp-join { display: grid; grid-template-columns: 1fr 1fr; }
@@ -142,13 +78,7 @@
 .lp-faq details[open] summary::after { content: "−"; }
 .lp-faq details p { padding-bottom: 1.25rem; color: var(--lp-muted); max-width: 48rem; }
 
-/* Footer */
-.lp-footer { margin-top: auto; border-top: 1px solid var(--lp-border); background: var(--lp-tint); }
-.lp-footer .lp-wrap { padding-block: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-size: 0.9rem; color: var(--lp-muted); }
-.lp-footer a { color: var(--lp-ink); text-decoration: underline; }
-
 @media (max-width: 860px) {
-  .lp-nav { display: none; }
   .lp-hero { padding-block: 4rem; grid-template-columns: 1fr; gap: 3rem; }
   .lp-art { max-width: 24rem; }
   .lp-section { padding-block: 4rem; }
@@ -159,8 +89,6 @@
   .lp-join-tutor { padding: 2.5rem 0 0; border-left: 0; border-top: 1px solid var(--lp-border); }
 }
 @media (max-width: 520px) {
-  /* the hero already has the sign-up button; returning students need Log in */
-  .lp-actions .lp-signup { display: none; }
   .lp-steps { grid-template-columns: 1fr; }
   .lp-ctas .lp-btn { flex: 1 1 100%; }
 }

@@ -1,17 +1,7 @@
 import Link from "next/link";
-import { IBM_Plex_Sans, IBM_Plex_Serif } from "next/font/google";
+import PublicShell from "@/components/public/PublicShell";
 import HeroIllustration from "./HeroIllustration";
 import "./landing.css";
-
-// The landing page has its own type and palette (see landing.css); the portals keep the app theme.
-const plexSerif = IBM_Plex_Serif({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
-  variable: "--lp-serif",
-  display: "swap",
-});
-const plexSans = IBM_Plex_Sans({ subsets: ["latin"], variable: "--lp-sans", display: "swap" });
 
 const STEPS = [
   { title: "Pick a topic", body: "Choose a subject and topic from Grades 7–12, or request one." },
@@ -28,13 +18,9 @@ const FAQS = [
 
 export default function LandingPage({ signedIn }: { signedIn: boolean }) {
   return (
-    <div className={`kt-landing ${plexSerif.variable} ${plexSans.variable}`}>
-      <header className="lp-header">
-        <div className="lp-wrap">
-          <Link href="/" className="lp-brand">
-            <LandingLogo />
-            Katuwang
-          </Link>
+    <PublicShell
+      headerEnd={
+        <>
           <nav className="lp-nav" aria-label="Primary">
             <a href="#how">How it works</a>
             <a href="#privacy">Privacy</a>
@@ -55,9 +41,9 @@ export default function LandingPage({ signedIn }: { signedIn: boolean }) {
               </>
             )}
           </div>
-        </div>
-      </header>
-
+        </>
+      }
+    >
       <main>
         <section className="lp-wrap lp-hero">
           <div className="lp-hero-copy">
@@ -177,23 +163,7 @@ export default function LandingPage({ signedIn }: { signedIn: boolean }) {
           </div>
         </section>
       </main>
-
-      <footer className="lp-footer">
-        <div className="lp-wrap">
-          <span>Katuwang · Taysan Resettlement Integrated School, Legazpi City, Albay</span>
-          <Link href="/privacy-policy">Privacy policy</Link>
-        </div>
-      </footer>
-    </div>
+    </PublicShell>
   );
 }
 
-/** The Katuwang mark, drawn inline so it takes the landing page's main colour. */
-function LandingLogo() {
-  return (
-    <svg className="lp-logo" viewBox="0 0 560 525" aria-hidden="true">
-      <path d="M486.65 56.5554H277.884C277.884 158.117 193.249 242.752 73.3501 262.5C150.932 262.5 221.461 262.5 299.043 262.5C348.799 262.5 396.518 240.802 431.701 202.18C466.884 163.558 486.65 111.175 486.65 56.5554Z" />
-      <path d="M486.65 468.445H277.884C277.884 366.883 193.249 282.248 73.3501 262.5C150.932 262.5 221.461 262.5 299.043 262.5C348.799 262.5 396.518 284.198 431.701 322.82C466.884 361.442 486.65 413.825 486.65 468.445Z" />
-    </svg>
-  );
-}

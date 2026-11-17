@@ -8,7 +8,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Eye, EyeOff } from "lucide-react";
-import BrandMark from "@/components/ui/BrandMark";
+import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 
 export default function ResetPasswordForm() {
@@ -82,103 +82,96 @@ export default function ResetPasswordForm() {
   };
 
   return (
-    <div className="card kt-card w-full max-w-md">
-      <div className="card-body gap-6">
-        <div className="flex flex-col items-center gap-2 mb-2 text-center">
-          <BrandMark />
-          <h1 className="font-sans text-xl font-semibold text-base-content">Choose a new password</h1>
-          <p className="text-xs text-(--kt-muted)">Enter and confirm your new password below.</p>
-        </div>
+    <div>
+      <AuthHeading kicker="Bagong password" title="Choose a new password">
+        Enter and confirm your new password below.
+      </AuthHeading>
 
+      <div className="mb-6 empty:hidden">
         <FeedbackBanner variant="error" message={error || null} />
+      </div>
 
-        {done ? (
-          <div className="flex flex-col items-center justify-center p-6 space-y-4 text-center">
-            <div className="w-12 h-12 rounded-full bg-success/20 text-success flex items-center justify-center">
-              <Check className="w-6 h-6" strokeWidth={3} />
-            </div>
-            <h3 className="font-sans text-base font-semibold">Password updated</h3>
-            <p className="text-xs text-(--kt-muted)">Redirecting you to sign in...</p>
-          </div>
-        ) : validating ? (
-          <p className="text-xs text-(--kt-muted)" role="status">Checking password reset authorization…</p>
-        ) : !authorized ? (
-          <FeedbackBanner
-            variant="error"
-            message="This password reset authorization is invalid or has expired. Request a new code from the Forgot Password page."
-          />
-        ) : (
-          <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
-            <div data-form-field="New Password" className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-(--kt-muted)">New Password</span>
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="At least 8 characters"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (error) setError("");
-                  }}
-                  className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
-                  disabled={loading}
-                  minLength={8}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div data-form-field="Confirm Password" className="form-control w-full">
-              <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-(--kt-muted)">Confirm Password</span>
-              </label>
+      {done ? (
+        <div className="flex items-center gap-3" role="status">
+          <span className="lp-status-icon bg-success/15 text-success mb-0">
+            <Check className="w-5 h-5" aria-hidden="true" />
+          </span>
+          <p>Password updated. Taking you to log in…</p>
+        </div>
+      ) : validating ? (
+        <p className="text-(--lp-muted)" role="status">Checking password reset authorization…</p>
+      ) : !authorized ? (
+        <FeedbackBanner
+          variant="error"
+          message="This password reset authorization is invalid or has expired. Request a new code from the Forgot Password page."
+        />
+      ) : (
+        <ValidatedForm onSubmit={handleSubmit} className="lp-form">
+          <div data-form-field="New Password" className="form-control w-full">
+            <label className="label py-1">
+              <span className="label-text">New Password</span>
+            </label>
+            <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Repeat your new password"
-                value={confirm}
+                placeholder="At least 8 characters"
+                value={password}
                 onChange={(e) => {
-                  setConfirm(e.target.value);
+                  setPassword(e.target.value);
                   if (error) setError("");
                 }}
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered w-full pr-10"
                 disabled={loading}
+                minLength={8}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-muted) hover:text-base-content cursor-pointer"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
+          </div>
 
-            <button
-              type="submit"
+          <div data-form-field="Confirm Password" className="form-control w-full">
+            <label className="label py-1">
+              <span className="label-text">Confirm Password</span>
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Repeat your new password"
+              value={confirm}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                if (error) setError("");
+              }}
+              className="input input-bordered w-full"
               disabled={loading}
-              className="btn btn-primary btn-sm w-full mt-2 cursor-pointer text-xs"
-            >
-              {loading ? (
-                <>
-                  <span className="loading loading-spinner loading-xs"></span>
-                  <span>Updating...</span>
-                </>
-              ) : (
-                <span>Reset password</span>
-              )}
-            </button>
-          </ValidatedForm>
-        )}
+              required
+            />
+          </div>
 
-        <div className="text-center text-xs text-(--kt-faint) border-t border-base-200 pt-4">
-          <Link className="text-primary font-bold hover:underline" href="/login">
-            Back to sign in
-          </Link>
-        </div>
-      </div>
+          <button type="submit" disabled={loading} className="btn btn-primary w-full mt-2">
+            {loading ? (
+              <>
+                <span className="loading loading-spinner loading-xs"></span>
+                <span>Updating...</span>
+              </>
+            ) : (
+              <span>Reset password</span>
+            )}
+          </button>
+        </ValidatedForm>
+      )}
+
+      <p className="lp-form-foot">
+        <Link className="lp-link" href="/login">
+          Back to log in
+        </Link>
+      </p>
     </div>
   );
 }

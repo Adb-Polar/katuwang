@@ -20,8 +20,8 @@ export default function AuthBackButton() {
   };
 
   return (
-    <button type="button" onClick={goBack} className="btn btn-ghost btn-sm mb-3 gap-1.5 text-xs">
-      <ArrowLeft className="h-4 w-4" /> Back
+    <button type="button" onClick={goBack} className="lp-back">
+      <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
     </button>
   );
 }

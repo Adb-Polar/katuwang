@@ -1,0 +1,141 @@
+/*
+  Shared look for the public pages: landing, sign-in/sign-up/recovery (AuthLayout) and the
+  privacy policy. Everything is scoped under .kt-public and prefixed lp- because DaisyUI
+  already owns .btn, .hero, .steps, .join and .link.
+  Two fonts: IBM Plex Serif (headings, IDs) and IBM Plex Sans (everything else).
+  Palette: Dagat — sea blue-teal, coral learners, ube tutors. The matching DaisyUI theme
+  is "katuwang-public" in app/globals.css, applied on the same wrapper.
+*/
+.kt-public {
+  --lp-page: oklch(100% 0 0);
+  --lp-tint: oklch(97.5% 0.006 222);
+  --lp-ink: oklch(24% 0.02 230);
+  --lp-muted: oklch(46% 0.02 230);
+  --lp-border: oklch(90% 0.01 225);
+  --lp-primary: oklch(42% 0.09 222);
+  --lp-primary-hover: oklch(36% 0.09 222);
+  --lp-primary-ink: oklch(98% 0.01 222);
+  --lp-learner: oklch(52% 0.16 30);
+  --lp-tutor: oklch(55% 0.16 300); /* ube; 55% keeps 4.5:1 on the tinted notes too */
+  --lp-band: oklch(97% 0.016 222);
+  --lp-radius: 0.25rem;
+  --lp-font-serif: var(--lp-serif), Georgia, serif;
+  --lp-font-sans: var(--lp-sans), Arial, sans-serif;
+
+  /* Bridges: shared app components (FormField, FeedbackBanner, kt-card, font-sans/font-mono
+     utilities, .btn) read these app variables, so re-point them at the public palette and type. */
+  --kt-muted: var(--lp-muted);
+  --kt-faint: var(--lp-muted);
+  --kt-border: var(--lp-border);
+  --kt-radius-box: var(--lp-radius);
+  --kt-radius-field: var(--lp-radius);
+  --kt-shadow-card: none;
+  --font-apfel: var(--lp-sans);
+  --font-fragment-mono: var(--lp-sans);
+  --font-sans: var(--lp-font-sans);
+  --font-mono: var(--lp-font-sans);
+
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--lp-page);
+  color: var(--lp-ink);
+  font: 400 1rem/1.6 var(--lp-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+/* Element defaults sit in the base layer so Tailwind utilities (mt-6, text-sm, …) still win. */
+@layer base {
+  :root:has(.kt-public) { scroll-behavior: smooth; }
+  .kt-public :focus-visible { outline: 2px solid var(--lp-primary); outline-offset: 3px; }
+  .kt-public :is(h1, h2, h3) { font-family: var(--lp-font-serif); font-weight: 500; letter-spacing: -0.02em; margin: 0; }
+  .kt-public h1 { font-size: clamp(2.4rem, 5vw, 3.5rem); line-height: 1.08; text-wrap: balance; }
+  .kt-public h2 { font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.2; }
+  .kt-public h3 { font-size: 1.2rem; line-height: 1.3; }
+  .kt-public p { margin: 0; }
+}
+.kt-public .card { box-shadow: none; }
+
+.lp-wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.5rem; width: 100%; }
+.lp-muted { color: var(--lp-muted); }
+
+.lp-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.75rem 1.25rem; border-radius: var(--lp-radius);
+  border: 1px solid var(--lp-border); background: var(--lp-page); color: var(--lp-ink);
+  font: 500 0.95rem/1 var(--lp-font-sans); text-decoration: none;
+}
+.lp-btn:hover { border-color: var(--lp-muted); }
+.lp-btn-primary { background: var(--lp-primary); border-color: var(--lp-primary); color: var(--lp-primary-ink); }
+.lp-btn-primary:hover { background: var(--lp-primary-hover); border-color: var(--lp-primary-hover); }
+.lp-link { color: var(--lp-primary); font-weight: 500; text-decoration: none; }
+.lp-link:hover { text-decoration: underline; }
+
+/* Personality, kept small: italic accent, Tagalog kickers */
+.lp-accent { font-style: italic; color: var(--lp-primary); }
+.lp-kicker { font: italic 400 1.05rem/1 var(--lp-font-serif); color: var(--lp-primary); margin-bottom: 0.25rem; }
+
+/* Anonymous IDs, coloured by whose ID it is */
+.lp-id { font: 500 1.3rem var(--lp-font-serif); font-variant-numeric: tabular-nums; white-space: nowrap; margin-left: 0.15rem; }
+.lp-id-learner { color: var(--lp-learner); }
+.lp-id-tutor { color: var(--lp-tutor); }
+
+/* Header */
+.lp-header { border-bottom: 1px solid var(--lp-border); }
+.lp-header .lp-wrap { height: 4rem; display: flex; align-items: center; gap: 2rem; }
+.lp-brand { display: flex; align-items: center; gap: 0.6rem; font: 500 1.15rem var(--lp-font-serif); text-decoration: none; margin-right: auto; }
+.lp-logo { width: 2rem; height: 2rem; flex: none; fill: var(--lp-primary); stroke: var(--lp-primary); stroke-width: 1.4; }
+.lp-nav { display: flex; gap: 1.5rem; font-size: 0.95rem; }
+.lp-nav a { text-decoration: none; color: var(--lp-muted); }
+.lp-nav a:hover { color: var(--lp-ink); }
+.lp-actions { display: flex; gap: 0.5rem; }
+.lp-actions .lp-btn { padding: 0.55rem 0.9rem; font-size: 0.9rem; }
+
+/* Footer */
+.lp-footer { margin-top: auto; border-top: 1px solid var(--lp-border); background: var(--lp-tint); }
+.lp-footer .lp-wrap { padding-block: 2rem; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; font-size: 0.9rem; color: var(--lp-muted); }
+.lp-footer a { color: var(--lp-ink); text-decoration: underline; }
+
+/* ---- Auth pages (AuthLayout) ---- */
+.lp-auth { flex: 1; width: 100%; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+.lp-auth--narrow { max-width: 28rem; }
+.lp-auth--wide { max-width: 36rem; }
+.lp-back {
+  display: inline-flex; align-items: center; gap: 0.35rem; margin-bottom: 2rem;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: 500 0.9rem var(--lp-font-sans); color: var(--lp-muted);
+}
+.lp-back:hover { color: var(--lp-ink); }
+
+/* Page heading: kicker, serif title, one line of help */
+.lp-auth-head { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+.lp-auth-head h1 { font-size: clamp(1.9rem, 4vw, 2.25rem); line-height: 1.15; }
+.lp-auth-head p { color: var(--lp-muted); }
+
+/* Status pages: icon + heading + text, no card chrome */
+@layer components {
+  .lp-status-icon { width: 2.75rem; height: 2.75rem; border-radius: 999px; display: grid; place-items: center; margin-bottom: 1.25rem; }
+}
+
+/* Form rhythm: labels at body size, inputs at md, one primary action */
+.lp-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.lp-form .label-text { font-size: 0.9rem; }
+.kt-public .lp-section-title { font: 500 1.2rem/1.3 var(--lp-font-serif); padding-top: 1.5rem; border-top: 1px solid var(--lp-border); }
+.kt-public .lp-section-title:first-child { padding-top: 0; border-top: 0; }
+.lp-form-foot { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--lp-border); font-size: 0.95rem; color: var(--lp-muted); }
+
+/* Bordered note (consent, info) — a plain box, not an alert */
+.lp-note { border: 1px solid var(--lp-border); border-radius: var(--lp-radius); padding: 1rem; background: var(--lp-tint); }
+
+@media (max-width: 860px) {
+  .lp-nav { display: none; }
+}
+@media (max-width: 520px) {
+  /* returning students need Log in; sign-up is one tap away on every page */
+  .lp-actions .lp-signup { display: none; }
+  .lp-auth { padding-top: 2rem; }
+}
+
+/* Long-form documents (privacy policy): body in ink, modest section headings, inline IDs at text size */
+.kt-public .lp-doc h2 { font-size: 1.35rem; }
+.lp-doc .lp-id { font-size: 1.05rem; margin-left: 0; }

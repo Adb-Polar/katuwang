@@ -4382,7 +4382,7 @@ Type and colour are scoped to the landing page (`.kt-landing`, `lp-` classes,
 because DaisyUI owns `.btn`, `.hero`, `.steps`, `.join`, `.link`, `.table`):
 IBM Plex Serif for headings and IDs, IBM Plex Sans for everything else (loaded
 with `next/font/google`, so builds fetch them from Google Fonts), and the
-"Dagat" palette: sea blue-teal primary `#005770`, coral learners, citrus tutors.
+"Dagat" palette: sea blue-teal primary `#005770`, coral learners, ube tutors.
 Every text pairing passes WCAG AA. The logo is drawn inline in the primary
 colour; the logo files in `public/logos/` and the portal theme are unchanged.
 The page is now a Server Component (no client state).
@@ -4408,3 +4408,46 @@ families load, every link returns 200, FAQ items open, no horizontal scroll, no
 console or server errors. The signed-in variant was not checked in the browser. Portal pages were
 not checked in the browser. No database changes.
 Plan: `docs/plans/landing-unslop.md`.
+
+## Public pages match the landing page (2026-11-17)
+
+Every page the landing page links to — and every other page sharing their wrapper — now uses
+the landing page's look: IBM Plex Serif + Plex Sans, the Dagat palette, a white page, flat
+0.25rem shapes, the same header and footer, and a small Tagalog kicker over each title.
+Pages: `/login`, `/register`, `/register/learner`, `/register/tutor`, `/privacy-policy`,
+`/forgot-password`, `/reset-password`, `/verify-email`, `/verify-email/check-email`,
+`/account-unverified`, `/pending-approval`, `/account-declined`, `/unauthorized`, `/logout`.
+The portals are unchanged.
+
+How: a shared `components/public/` (PublicShell with header and footer, `fonts.ts`,
+`public.css`) used by the landing page, `AuthLayout` and the privacy page. A second DaisyUI
+theme, `katuwang-public`, is applied on that wrapper, so existing `btn`, `input`, `select`,
+`checkbox` and `kt-alert` classes recolour without rewriting them; the wrapper also points the
+app's `--kt-muted`, `--kt-border`, `font-sans`/`font-mono` at the public palette and fonts, so
+`FormField` and `FeedbackBanner` match without being edited. New `AuthHeading` (kicker, serif
+title, one help line). `AuthLayout` gains `width="wide"` for the sign-up form.
+
+Unslop fixes per page: removed the card-on-grey wrapper and the duplicate in-card logo
+everywhere; raised 12px labels/inputs/buttons to readable sizes; login drops the
+"Keep me signed in" checkbox, which was never wired to anything, and gets labelled inputs;
+the role chooser loses its nested, mismatched tiles for two equal rows using the landing
+page's wording; sign-up groups its 12 fields under About you / Contact / Password and shows
+consent as a plain note instead of an info alert; the privacy policy is a plain document in
+ink instead of grey text in a card; status pages are icon + heading + text. All field names,
+placeholders, `data-form-field` labels, handlers, redirects and tested strings are unchanged.
+
+Verification: TypeScript and ESLint pass; 1,378 tests pass, the only failure is the known
+`ValidatedForm.test.tsx` add-session case. In the browser all 15 public routes load only the
+two Plex families inside the public theme, primary buttons are #005770, no horizontal scroll
+at desktop or 375px, no server errors; login with an unknown email shows the inline error and
+the `?registered=true` banner renders. Signed-in pages, a real sign-up and the password-reset
+flow were not run (they write to the database). Plan: `docs/plans/public-pages-redesign.md`.
+
+Privacy policy wording updated to match the `showTutorRealNames` setting: tutors never see learner
+names; learners see tutors by ID unless an admin turns tutor names on (off by default). "Last
+updated" is now 2026-11-17.
+
+Tutor colour on public pages changed from the dark olive (`oklch(46% 0.1 105)`) to ube:
+text `oklch(55% 0.16 300)` (5.2:1 on white, 4.85:1 on the tinted notes), fill
+`oklch(80% 0.15 300)` for the sign-up stripe, illustration and the `katuwang-public` accent.
+Portal colours are unchanged.

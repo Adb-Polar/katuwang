@@ -1,3 +1,14 @@
+Public pages match the landing page (2026-11-17)
+ [Good] All 15 public routes: IBM Plex only, Dagat buttons, no horizontal scroll at
+    desktop and 375px; unknown-email login shows the inline error; ?registered banner shows.
+ [ ] Register a learner and a tutor with test accounts: grouped fields, consent required,
+    field errors inline, redirect to /login with the right banner (or to check-email).
+ [ ] Forgot password -> code -> reset -> /login?reset=true banner, in the new style.
+ [ ] Log in with a real account: success line shows, then the portal opens. The portal still
+    uses the old theme (Apfel, teal) - only public pages changed.
+ [ ] /logout while signed in: Sign Out works, Cancel returns to the portal.
+ [Good] Privacy policy wording now matches the "show tutor real names" setting.
+
 Landing and theme unslop pass (2026-11-17)
  [Good] New landing page at desktop and 375px: two IBM Plex fonts only,
     every link returns 200, FAQ items open, no horizontal scroll, no errors.

@@ -8,33 +8,31 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
-import BrandMark from "@/components/ui/BrandMark";
+import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 type RegisterType = "LEARNER" | "TUTOR";
 
-const ROLE_COPY: Record<RegisterType, { heading: React.ReactNode; subheading: string; buttonLabel: string; border: string }> = {
+const ROLE_COPY: Record<RegisterType, { heading: React.ReactNode; subheading: string; buttonLabel: string }> = {
   LEARNER: {
     heading: (
       <>
-        Sign Up to find <span className="text-primary">Katuwang</span>
+        Sign up as a <span className="text-secondary">learner</span>
       </>
     ),
-    subheading: "Create your Student Learner account",
+    subheading: "Open to every student in Grades 7–12.",
     buttonLabel: "Create Learner Account",
-    border: "border-secondary/20",
   },
   TUTOR: {
     heading: (
       <>
-        Sign Up to be a <span className="text-primary">Katuwang</span>
+        Sign up as a <span className="text-(--lp-tutor)">tutor</span>
       </>
     ),
-    subheading: "Apply as a Peer Tutor mentor on Katuwang",
+    subheading: "Grades 9–12 can apply. You’ll pass a topic test before teaching it.",
     buttonLabel: "Create Tutor Account",
-    border: "border-accent/30",
   },
 };
 
@@ -117,220 +115,225 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
   };
 
   return (
-    <div className={`card kt-card w-full`}>
-      <div className="card-body gap-5 p-6 md:p-8">
-        {/* Card Header */}
-        <div className="flex flex-col items-center gap-2 mb-2 text-center">
-          <BrandMark />
-          <h1 className="font-sans text-xl font-semibold [word-spacing:-0.2em]">{copy.heading}</h1>
-          <p className="text-xs text-(--kt-muted)">{copy.subheading}</p>
+    <div>
+      <AuthHeading kicker="Mag-sign up" title={copy.heading}>
+        {copy.subheading}
+      </AuthHeading>
+
+      <div className="mb-6 empty:hidden">
+        <FeedbackBanner variant="error" message={error || null} />
+      </div>
+
+      <ValidatedForm onSubmit={handleSubmit} className="lp-form">
+        <h2 className="lp-section-title">About you</h2>
+        {/* First Name & Last Name */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField size="md" label="First Name" required>
+            <input
+              type="text"
+              name="firstName"
+              value={form.firstName}
+              onChange={handleChange}
+              required
+              placeholder="First name"
+              className="input input-bordered w-full"
+            />
+          </FormField>
+
+          <FormField size="md" label="Last Name" required>
+            <input
+              type="text"
+              name="lastName"
+              value={form.lastName}
+              onChange={handleChange}
+              required
+              placeholder="Last name"
+              className="input input-bordered w-full"
+            />
+          </FormField>
         </div>
 
-        <FeedbackBanner variant="error" message={error || null} />
+        <FormField size="md" label="Student ID Number" required>
+          <input
+            type="text"
+            name="studentIdNumber"
+            value={form.studentIdNumber}
+            onChange={handleChange}
+            required
+            maxLength={191}
+            placeholder="Enter your Student ID Number"
+            className="input input-bordered w-full"
+          />
+        </FormField>
 
-        <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
-          {/* First Name & Last Name */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField label="First Name" required>
-              <input
-                type="text"
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                required
-                placeholder="First name"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
-              />
-            </FormField>
+        <FormField size="md" label="Adviser Teacher's Name" required>
+          <input
+            type="text"
+            name="adviserTeacherName"
+            value={form.adviserTeacherName}
+            onChange={handleChange}
+            required
+            maxLength={191}
+            placeholder="Enter your adviser's full name"
+            className="input input-bordered w-full"
+          />
+        </FormField>
 
-            <FormField label="Last Name" required>
-              <input
-                type="text"
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                required
-                placeholder="Last name"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
-              />
-            </FormField>
-          </div>
+        {/* Grade Level & Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <FormField size="md" label="Grade Level" required>
+            <select
+              name="gradeLevel"
+              value={form.gradeLevel}
+              onChange={handleChange}
+              required
+              className="select select-bordered w-full"
+            >
+              <option value="">Select grade</option>
+              {GRADE_LEVELS.map((g) => (
+                <option key={g.value} value={g.value}>
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
 
-          <FormField label="Student ID Number" required>
+          <FormField size="md" label="Section" required>
             <input
               type="text"
-              name="studentIdNumber"
-              value={form.studentIdNumber}
+              name="section"
+              value={form.section}
               onChange={handleChange}
               required
-              maxLength={191}
-              placeholder="Enter your Student ID Number"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              placeholder="e.g., Rizal"
+              className="input input-bordered w-full"
             />
           </FormField>
+        </div>
 
-          <FormField label="Adviser Teacher's Name" required>
+        <h2 className="lp-section-title">Contact</h2>
+
+        <FormField size="md" label="Email Address" required>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            required
+            placeholder="you@example.com"
+            className="input input-bordered w-full"
+          />
+        </FormField>
+
+        <FormField size="md" label="Recovery Email (optional)" hint="Verify this backup address from your profile after signing in before using it for password recovery.">
+          <input type="email" name="recoveryEmail" value={form.recoveryEmail} onChange={handleChange} placeholder="backup@example.com" className="input input-bordered w-full" />
+        </FormField>
+
+        <FormField size="md" label="Contact Info" hint="Optional — phone or guardian contact">
+          <input
+            type="text"
+            name="contactInfo"
+            value={form.contactInfo}
+            onChange={handleChange}
+            placeholder="Phone or guardian contact"
+            className="input input-bordered w-full"
+          />
+        </FormField>
+
+        <h2 className="lp-section-title">Password</h2>
+
+        <FormField size="md" label="Password" required>
+          <div className="relative">
             <input
-              type="text"
-              name="adviserTeacherName"
-              value={form.adviserTeacherName}
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={form.password}
               onChange={handleChange}
               required
-              maxLength={191}
-              placeholder="Enter your adviser's full name"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
+              minLength={8}
+              placeholder="At least 8 characters"
+              className="input input-bordered w-full pr-10"
             />
-          </FormField>
-
-          <FormField label="Email Address" required>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="you@example.com"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
-            />
-          </FormField>
-
-          <FormField label="Recovery Email (optional)" hint="Verify this backup address from your profile after signing in before using it for password recovery.">
-            <input type="email" name="recoveryEmail" value={form.recoveryEmail} onChange={handleChange} placeholder="backup@example.com" className="input input-bordered input-sm w-full focus:input-primary text-xs" />
-          </FormField>
-
-          {/* Grade Level & Section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField label="Grade Level" required>
-              <select
-                name="gradeLevel"
-                value={form.gradeLevel}
-                onChange={handleChange}
-                required
-                className="select select-bordered select-sm w-full focus:select-primary text-xs"
-              >
-                <option value="">Select grade</option>
-                {GRADE_LEVELS.map((g) => (
-                  <option key={g.value} value={g.value}>
-                    {g.label}
-                  </option>
-                ))}
-              </select>
-            </FormField>
-
-            <FormField label="Section" required>
-              <input
-                type="text"
-                name="section"
-                value={form.section}
-                onChange={handleChange}
-                required
-                placeholder="e.g., Rizal"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
-              />
-            </FormField>
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-muted) hover:text-base-content cursor-pointer"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+        </FormField>
 
-          <FormField label="Contact Info" hint="Optional — phone or guardian contact">
+        <FormField size="md" label="Confirm Password" required>
+          <div className="relative">
             <input
-              type="text"
-              name="contactInfo"
-              value={form.contactInfo}
-              onChange={handleChange}
-              placeholder="Phone or guardian contact"
-              className="input input-bordered input-sm w-full focus:input-primary text-xs"
-            />
-          </FormField>
-
-          <FormField label="Password" required>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                minLength={8}
-                placeholder="At least 8 characters"
-                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </FormField>
-
-          <FormField label="Confirm Password" required>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                required
-                placeholder="Repeat your password"
-                className="input input-bordered input-sm w-full pr-10 focus:input-primary text-xs"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
-                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-              >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </FormField>
-
-          {/* Consent Checkbox */}
-          <div data-form-field="Consent" className="space-y-1">
-          <div className="alert alert-info bg-info/10 border-info/20 text-base-content text-xs p-4 flex gap-3 items-start">
-            <input
-              type="checkbox"
-              name="consentGiven"
-              id="consent"
-              checked={form.consentGiven}
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              value={form.confirmPassword}
               onChange={handleChange}
               required
-              className="checkbox checkbox-primary checkbox-xs mt-0.5"
+              placeholder="Repeat your password"
+              className="input input-bordered w-full pr-10"
             />
-            <label htmlFor="consent" className="cursor-pointer select-none leading-relaxed">
-              I confirm that a parent or guardian has consented to this registration. Personal information collected is
-              used solely for academic support purposes in accordance with RA 10173 (Data Privacy Act of 2012) and our{" "}
-              <Link
-                href="/privacy-policy"
-                target="_blank"
-                className="link link-primary font-semibold"
-                onClick={(e) => e.stopPropagation()}
-              >
-                Privacy Policy
-              </Link>
-              . <span className="text-error">*</span>
-            </label>
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((v) => !v)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-muted) hover:text-base-content cursor-pointer"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
-          <div data-field-feedback />
-          </div>
+        </FormField>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary btn-sm w-full mt-2 cursor-pointer text-xs"
-          >
-            {loading ? (
-              <>
-                <span className="loading loading-spinner loading-xs"></span>
-                <span>Creating account...</span>
-              </>
-            ) : (
-              <span>{copy.buttonLabel}</span>
-            )}
-          </button>
-        </ValidatedForm>
-      </div>
+        {/* Consent Checkbox */}
+        <div data-form-field="Consent" className="space-y-1">
+        <div className="lp-note flex gap-3 items-start text-sm">
+          <input
+            type="checkbox"
+            name="consentGiven"
+            id="consent"
+            checked={form.consentGiven}
+            onChange={handleChange}
+            required
+            className="checkbox checkbox-primary checkbox-sm mt-0.5"
+          />
+          <label htmlFor="consent" className="cursor-pointer select-none leading-relaxed">
+            I confirm that a parent or guardian has consented to this registration. Personal information collected is
+            used solely for academic support purposes in accordance with RA 10173 (Data Privacy Act of 2012) and our{" "}
+            <Link
+              href="/privacy-policy"
+              target="_blank"
+              className="lp-link underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Privacy Policy
+            </Link>
+            . <span className="text-error">*</span>
+          </label>
+        </div>
+        <div data-field-feedback />
+        </div>
+
+        <button type="submit" disabled={loading} className="btn btn-primary w-full mt-2">
+          {loading ? (
+            <>
+              <span className="loading loading-spinner loading-xs"></span>
+              <span>Creating account...</span>
+            </>
+          ) : (
+            <span>{copy.buttonLabel}</span>
+          )}
+        </button>
+      </ValidatedForm>
+
+      <p className="lp-form-foot">
+        Already have an account?{" "}
+        <Link href="/login" className="lp-link">
+          Log in
+        </Link>
+      </p>
     </div>
   );
 }

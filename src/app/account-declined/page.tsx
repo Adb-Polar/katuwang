@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { XCircle, ArrowLeft } from "lucide-react";
+import { XCircle } from "lucide-react";
 import AuthLayout from "@/components/auth/AuthLayout";
-import BrandMark from "@/components/ui/BrandMark";
+import AuthHeading from "@/components/auth/AuthHeading";
 
 export const metadata = {
   title: "Registration Declined | Katuwang",
@@ -17,53 +17,34 @@ export default async function AccountDeclinedPage({
 
   return (
     <AuthLayout>
-      <div className="card kt-card w-full max-w-md">
-        <div className="card-body gap-6 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <BrandMark />
-            <h1 className="font-sans text-xl font-semibold text-base-content">
-              Registration declined
-            </h1>
-          </div>
+      <span className="lp-status-icon bg-error/10 text-error">
+        <XCircle className="h-5 w-5" aria-hidden="true" />
+      </span>
+      <AuthHeading kicker="Paumanhin" title="Registration declined">
+        An administrator reviewed your registration and did not approve it, so you can&apos;t sign in with this
+        account.
+      </AuthHeading>
 
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-error/15 text-error flex items-center justify-center">
-              <XCircle className="w-6 h-6" strokeWidth={2.25} />
-            </div>
-            <p className="text-xs text-(--kt-muted) leading-relaxed">
-              An administrator reviewed your registration and did not approve it,
-              so you can&apos;t sign in with this account.
-            </p>
-
-            {reason && (
-              <div className="w-full rounded-xl border border-error/20 bg-error/5 px-4 py-3 text-left">
-                <p className="text-2xs font-semibold uppercase tracking-wide text-error/70">
-                  Reason given
-                </p>
-                <p className="mt-1 text-xs text-(--kt-muted) whitespace-pre-wrap">{reason}</p>
-              </div>
-            )}
-
-            <p className="text-xs text-(--kt-muted) leading-relaxed">
-              If you think this was a mistake, contact your school administrator.
-              You may register again with corrected details.
-            </p>
-          </div>
-
-          <div className="border-t border-base-200 pt-4 flex items-center justify-center gap-4">
-            <Link
-              href="/login"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              Back to sign in
-            </Link>
-            <Link href="/register" className="text-xs font-bold text-(--kt-muted) hover:text-primary hover:underline">
-              Register again
-            </Link>
-          </div>
+      {reason && (
+        <div className="lp-note mb-6">
+          <p className="text-sm font-medium text-(--lp-muted)">Reason given</p>
+          <p className="mt-1 whitespace-pre-wrap">{reason}</p>
         </div>
-      </div>
+      )}
+
+      <p className="text-(--lp-muted)">
+        If you think this was a mistake, contact your school administrator. You may register again with corrected
+        details.
+      </p>
+
+      <p className="lp-form-foot flex flex-wrap gap-x-6 gap-y-2">
+        <Link href="/register" className="lp-link">
+          Register again
+        </Link>
+        <Link href="/login" className="lp-link">
+          Back to log in
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

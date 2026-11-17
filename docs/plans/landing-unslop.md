@@ -43,7 +43,7 @@ After the audit, the landing page was redesigned from local prototypes in
 - Personality, kept small: italic accent line, Tagalog kickers (Paano?,
   Pribado, Mga tanong), one tinted band, role colours on the join links.
 - Palette "Dagat": primary `oklch(42% 0.09 222)` (#005770), learner coral,
-  tutor citrus; logo drawn in the primary colour. All text pairings pass AA.
+  tutor ube (changed from citrus 2026-11-17); logo drawn in the primary colour. All text pairings pass AA.
 - No mention of RA 10173 on the page.
 
 Scope: landing page only (`.kt-landing`). Applying Plex and Dagat to the

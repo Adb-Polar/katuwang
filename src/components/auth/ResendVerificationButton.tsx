@@ -38,7 +38,7 @@ export default function ResendVerificationButton({ email }: { email: string }) {
         type="button"
         onClick={handleResend}
         disabled={sending || !email}
-        className="btn btn-primary btn-sm w-full cursor-pointer text-xs"
+        className="btn btn-outline btn-primary w-full"
       >
         {sending ? <span className="loading loading-spinner loading-xs"></span> : "Send a new code"}
       </button>

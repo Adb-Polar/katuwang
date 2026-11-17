@@ -1,5 +1,4 @@
 import RegisterForm from "@/components/auth/RegisterForm";
-import Link from "next/link";
 import AuthLayout from "@/components/auth/AuthLayout";
 
 export const metadata = {
@@ -9,16 +8,8 @@ export const metadata = {
 
 export default function TutorRegisterPage() {
   return (
-    <AuthLayout>
-      <div className="w-full space-y-4">
-        <RegisterForm type="TUTOR" />
-        <div className="text-center text-xs text-(--kt-muted)">
-          Already have an account?{" "}
-          <Link href="/login" className="link link-primary font-semibold">
-            Log in here
-          </Link>
-        </div>
-      </div>
+    <AuthLayout width="wide">
+      <RegisterForm type="TUTOR" />
     </AuthLayout>
   );
 }
