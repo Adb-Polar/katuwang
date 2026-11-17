@@ -22,8 +22,8 @@ export default async function LearnerDashboard() {
   const weekAhead = addDays(now, 7);
 
   const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
-    prisma.classEnrollment.count({ where: { learnerId } }),
-    prisma.topicRequest.count({ where: { learnerId, status: "OPEN", expiresAt: { gt: new Date() } } }),
+    prisma.classEnrollment.count({ where: { learnerId, withdrawnAt: null } }),
+    prisma.topicRequest.count({ where: { learnerId, status: "OPEN", expiresAt: { gt: now } } }),
     prisma.classSession.findMany({
       where: {
         status: "SCHEDULED",
@@ -92,67 +92,63 @@ export default async function LearnerDashboard() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="order-2 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
+      <section className="card kt-card">
+        <div className="card-body gap-3">
+          <h2 className="card-title text-sm font-bold flex items-center gap-2">
+            <CalendarClock className="h-4 w-4 text-primary" />
+            Upcoming sessions
+          </h2>
+          <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+          {upcomingSessions.length === 0 ? (
+            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+              No scheduled sessions yet. Browse classes to enroll.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {upcomingSessions.map((s) => {
+                const d = new Date(s.scheduledAt);
+                return (
+                  <li key={s.id}>
+                    <Link
+                      href={`/learner/classes/${s.class.id}?from=browse`}
+                      className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
+                    >
+                      <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
+                        <span className="text-2xs font-bold uppercase leading-none">
+                          {formatWeekday(d)}
+                        </span>
+                        <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
+                            {subjectDisplayLabel(s.class.subject)}
+                          </span>
+                          <span className="text-sm font-semibold text-base-content/85 truncate">
+                            {s.topic}
+                          </span>
+                        </div>
+                        <p className="text-2xs text-(--kt-faint) mt-0.5">
+                          {formatTime(d)} ·{" "}
+                          {s.duration} min
+                        </p>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </section>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
         {stats.map((s) => (
           <div key={s.label} className="last:col-span-2 sm:last:col-span-1"><StatCard {...s} /></div>
         ))}
       </div>
 
-      <div className="order-1">
-        <section className="card kt-card">
-          <div className="card-body gap-3">
-            <h2 className="card-title text-sm font-bold flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-primary" />
-              Upcoming sessions
-            </h2>
-            <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
-            {upcomingSessions.length === 0 ? (
-              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-                No scheduled sessions yet. Browse classes to enroll.
-              </p>
-            ) : (
-              <ul className="space-y-2">
-                {upcomingSessions.map((s) => {
-                  const d = new Date(s.scheduledAt);
-                  return (
-                    <li key={s.id}>
-                      <Link
-                        href={`/learner/classes/${s.class.id}?from=browse`}
-                        className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
-                      >
-                        <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
-                          <span className="text-2xs font-bold uppercase leading-none">
-                            {formatWeekday(d)}
-                          </span>
-                          <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                              {subjectDisplayLabel(s.class.subject)}
-                            </span>
-                            <span className="text-sm font-semibold text-base-content/85 truncate">
-                              {s.topic}
-                            </span>
-                          </div>
-                          <p className="text-2xs text-(--kt-faint) mt-0.5">
-                            {formatTime(d)} ·{" "}
-                            {s.duration} min
-                          </p>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        </section>
-      </div>
-
-      <div className="order-4"><CertificateList preview /></div>
-
-      <section className="order-3 card kt-card">
+      <section className="card kt-card">
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold flex items-center gap-2">
             <CalendarClock className="h-4 w-4 text-primary" />
@@ -168,6 +164,8 @@ export default async function LearnerDashboard() {
           />
         </div>
       </section>
+
+      <CertificateList preview />
     </div>
   );
 }
