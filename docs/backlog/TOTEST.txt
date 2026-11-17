@@ -62,7 +62,7 @@ Portals on the landing theme (2026-11-17)
     hydration error after reload; saved sidebar group state still applies.
  [Good] Notifications flat list with sample data (fetch stubbed in the browser, 5 items over 3 days,
     2 unread; 1280px and 375px): "Test · 03:47 PM · New", "Request · Yesterday · 02:47 PM",
-    "Class · Sat, Nov 14 · 08:47 AM"; kind tiles (hidden on phone); "2 new" band.
+    "Class · Sat, Nov 14 · 08:47 AM"; no icon tiles; "2 new" band.
  [ ] Notifications with unread items: left rule + "· New", "N new" + Mark all as read clears them and the
     bell count; clicking a row marks it read and opens its link (writes to DB — needs go-ahead).
  [ ] /tutor/notifications and /admin/notifications with real data: day groups, icons per kind.

@@ -4707,3 +4707,6 @@ topic chips, "Class Info" and "At a Glance" cards, the seat progress bar, fact i
   each message is "Kind · when · New", where "when" is the time for today and "Yesterday · 02:40 PM" or
   "Sat, Nov 14 · 08:40 AM" for older ones (new `notificationWhen()` replaces `groupByDay()`, with tests).
   Unread rows keep the primary left rule and light wash; kind tiles stay (hidden on phones).
+- Fourth pass (user: the tinted icon tiles read as AI slop): removed the tiles; the kind is just the first
+  word of the muted line ("Test · 03:50 PM · New"). `notificationKind()` now returns that word. The top-bar
+  bell keeps its small muted icons.

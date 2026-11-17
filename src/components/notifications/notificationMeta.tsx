@@ -25,24 +25,16 @@ const ACCOUNT = icon(UserRound);
 
 export const FALLBACK_ICON: ReactNode = icon(Bell);
 
-/** What a notification is about, for the full-page list: a label plus a tinted icon tile. */
-export interface NotificationKind { label: string; icon: ReactNode; tile: string }
-const KINDS: Record<string, NotificationKind> = {
-  class: { label: "Class", icon: CLASS, tile: "bg-(--kt-tint-primary) text-primary" },
-  test: { label: "Test", icon: TEST, tile: "bg-(--kt-tint-success) text-success" },
-  request: { label: "Request", icon: REQUEST, tile: "bg-(--kt-tint-info) text-info" },
-  moderation: { label: "Report", icon: MODERATION, tile: "bg-(--kt-tint-warning) text-warning-content" },
-  account: { label: "Account", icon: ACCOUNT, tile: "bg-(--kt-tint-neutral) text-(--kt-muted)" },
-  other: { label: "Update", icon: icon(Bell), tile: "bg-(--kt-tint-neutral) text-(--kt-muted)" },
-};
+/** What a notification is about, shown as a plain word before its time in the full-page list. */
+export type NotificationKind = "Class" | "Test" | "Request" | "Report" | "Account" | "Update";
 
 export function notificationKind(type: string): NotificationKind {
-  if (type.startsWith("CLASS_APPEAL") || type.startsWith("REPORT_")) return KINDS.moderation;
-  if (type.startsWith("CLASS_")) return KINDS.class;
-  if (type.startsWith("SESSION_") || type.startsWith("QUESTION_REQUEST")) return KINDS.test;
-  if (type.startsWith("TOPIC_REQUEST")) return KINDS.request;
-  if (type.startsWith("REGISTRATION_") || type.startsWith("CERTIFICATION_") || type.startsWith("PROFILE_PICTURE")) return KINDS.account;
-  return KINDS.other;
+  if (type.startsWith("CLASS_APPEAL") || type.startsWith("REPORT_")) return "Report";
+  if (type.startsWith("CLASS_")) return "Class";
+  if (type.startsWith("SESSION_") || type.startsWith("QUESTION_REQUEST")) return "Test";
+  if (type.startsWith("TOPIC_REQUEST")) return "Request";
+  if (type.startsWith("REGISTRATION_") || type.startsWith("CERTIFICATION_") || type.startsWith("PROFILE_PICTURE")) return "Account";
+  return "Update";
 }
 
 export const TYPE_ICON: Record<string, ReactNode> = {

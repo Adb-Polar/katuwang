@@ -106,16 +106,13 @@ export default function NotificationList() {
                       markOneRead(n.id);
                       if (n.link) router.push(n.link);
                     }}
-                    className={`w-full flex items-start gap-3 px-5 py-4 text-left border-l-2 transition-colors ${
+                    className={`w-full block px-5 py-4 text-left border-l-2 transition-colors ${
                       unread ? "border-l-primary bg-primary/5 hover:bg-primary/10" : "border-l-transparent hover:bg-base-200"
                     }`}
                   >
-                    <span aria-hidden="true" className={`size-8 shrink-0 hidden sm:grid place-items-center rounded ${kind.tile}`}>
-                      {kind.icon}
-                    </span>
-                    <span className="min-w-0 flex-1">
+                    <span className="block min-w-0">
                       <span className="block text-sm text-(--kt-muted)">
-                        {kind.label} · {notificationWhen(n.createdAt)}
+                        {kind} · {notificationWhen(n.createdAt)}
                         {unread && <span className="text-primary font-medium"> · New</span>}
                       </span>
                       <span className={`block break-words ${unread ? "font-medium" : ""}`}>{n.message}</span>
