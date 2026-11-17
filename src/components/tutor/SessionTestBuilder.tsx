@@ -419,7 +419,7 @@ function BuilderBody({
                     <div className="text-(--kt-muted)">{q.prompt}</div>
                     <div className="text-2xs text-(--kt-faint) mt-0.5">
                       {q.topic} ·{" "}
-                      <span className={q.origin === "TUTOR" ? "text-accent" : "text-primary"}>
+                      <span className={q.origin === "TUTOR" ? "text-(--kt-tutor-text)" : "text-primary"}>
                         {q.origin === "TUTOR" ? "Custom" : "Bank"}
                       </span>
                     </div>

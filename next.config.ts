@@ -32,6 +32,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Pin the workspace root to this project. Without it Next.js picks up a stray lockfile in a
+  // parent folder, treats that as the root, and the dev watcher misses edits here.
+  turbopack: { root: __dirname },
   outputFileTracingIncludes: { "/api/**": ["./assets/certificates/**/*", "./public/logos/green-logo-no-bg.svg"] },
   allowedDevOrigins: ["192.168.219.123"],
   images: {

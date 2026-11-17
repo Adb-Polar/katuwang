@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, GraduationCap, UserRound, Tag, CornerDownLeft, X } from "lucide-react";
+import { Search, GraduationCap, UserRound, Tag, CornerDownLeft, X, ChevronDown } from "lucide-react";
 
 interface SearchItem {
   id: string;
@@ -18,20 +18,20 @@ interface SearchGroup {
 
 const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
   class: <GraduationCap className="h-3.5 w-3.5 text-primary" />,
-  tutor: <UserRound className="h-3.5 w-3.5 text-accent" />,
+  tutor: <UserRound className="h-3.5 w-3.5 text-(--kt-tutor-text)" />,
   topic: <Tag className="h-3.5 w-3.5 text-(--kt-faint)" />,
 };
 
 const ADMIN_SCOPES = [
-  { value: "all", label: "Everything", placeholder: "Search classes, tutors, topics…" },
-  { value: "tutorCode", label: "Tutor code", placeholder: "Search by tutor code, e.g. TUT-0007" },
-  { value: "subject", label: "Subject", placeholder: "Search by subject, e.g. Mathematics" },
-  { value: "topic", label: "Topic", placeholder: "Search by topic, e.g. Fractions" },
-  { value: "classCode", label: "Class code", placeholder: "Search by class code" },
+  { value: "all", label: "Everything", placeholder: "Classes, tutors, topics…" },
+  { value: "tutorCode", label: "Tutor code", placeholder: "e.g. TUT-0007" },
+  { value: "subject", label: "Subject", placeholder: "e.g. Mathematics" },
+  { value: "topic", label: "Topic", placeholder: "e.g. Fractions" },
+  { value: "classCode", label: "Class code", placeholder: "e.g. CUR-0086" },
 ] as const;
 const LEARNER_SCOPES = [
-  { value: "tutor", label: "Tutor", placeholder: "Search tutor name or code…" },
-  { value: "class", label: "Class", placeholder: "Search class subject or code…" },
+  { value: "tutor", label: "Tutor", placeholder: "Name or TUT code…" },
+  { value: "class", label: "Class", placeholder: "Subject or class code…" },
 ] as const;
 type Scope = (typeof ADMIN_SCOPES)[number]["value"] | (typeof LEARNER_SCOPES)[number]["value"];
 
@@ -147,6 +147,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
 
   return (
     <div ref={rootRef} className="kt-search relative hidden sm:flex">
+      <span className="relative shrink-0 self-stretch flex items-center border-r border-base-300 -ml-0.75 mr-1">
       <select
         aria-label="Search scope"
         value={scope}
@@ -157,7 +158,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           setLoading(q.trim().length >= 2);
           setOpen(true);
         }}
-        className="shrink-0 border-r border-base-300 bg-transparent pr-1.5 text-2xs font-medium text-(--kt-muted) focus:outline-none"
+        className="h-full appearance-none bg-transparent pl-0.75 pr-7 text-sm text-base-content cursor-pointer focus:outline-none"
       >
         {scopes.map((s) => (
           <option key={s.value} value={s.value}>
@@ -165,6 +166,8 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           </option>
         ))}
       </select>
+      <ChevronDown className="pointer-events-none absolute right-2 h-4 w-4 text-(--kt-muted)" aria-hidden="true" />
+      </span>
       <Search className="h-4 w-4 shrink-0" />
       <input
         ref={inputRef}
@@ -199,25 +202,25 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           <X className="h-3.5 w-3.5" />
         </button>
       ) : (
-        <kbd className="hidden rounded border border-base-300 px-1 py-0.5 font-mono text-2xs md:inline">⌘K</kbd>
+        <kbd className="hidden rounded border border-base-300 px-1.5 text-xs text-(--kt-muted) md:inline">⌘K</kbd>
       )}
 
       {showPanel && (
         <div
           id="global-search-results"
           role="listbox"
-          className="absolute left-0 right-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto rounded-box border border-base-300 bg-base-100 py-1.5 shadow-lg"
+          className="absolute left-0 right-0 top-full z-30 mt-1 max-h-[70vh] overflow-y-auto rounded-field border border-base-300 bg-base-100 py-1.5 shadow-md"
         >
           {loading && flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-2xs text-(--kt-faint)">Searching…</p>
+            <p className="px-3 py-3 text-center text-sm text-(--kt-muted)">Searching…</p>
           ) : flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-2xs italic text-(--kt-faint)">
+            <p className="px-3 py-3 text-center text-sm text-(--kt-muted)">
               No matches for “{term}”.
             </p>
           ) : (
             groups.map((g) => (
               <div key={g.kind + g.label}>
-                <p className="px-3 pb-1 pt-2 text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
+                <p className="px-3 pb-1 pt-2 text-xs font-medium text-(--kt-muted)">
                   {g.label}
                 </p>
                 {g.items.map((item) => {
@@ -230,7 +233,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
                       aria-selected={idx === active}
                       onMouseEnter={() => setActive(idx)}
                       onClick={() => go(item)}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs ${
+                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm ${
                         idx === active ? "bg-base-200/70" : ""
                       }`}
                     >
@@ -238,7 +241,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">{item.title}</span>
                         {item.subtitle && (
-                          <span className="block truncate text-2xs text-(--kt-faint)">{item.subtitle}</span>
+                          <span className="block truncate text-xs text-(--kt-muted)">{item.subtitle}</span>
                         )}
                       </span>
                       {idx === active && <CornerDownLeft className="h-3 w-3 shrink-0 text-base-content/30" />}

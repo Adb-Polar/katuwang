@@ -8,7 +8,7 @@ export type StatCardTint = "primary" | "secondary" | "accent" | "success" | "err
 const TINT: Record<StatCardTint, string> = {
   primary: "bg-primary/10 text-primary",
   secondary: "bg-secondary/10 text-secondary",
-  accent: "bg-accent/10 text-accent",
+  accent: "bg-accent/15 text-(--kt-tutor-text)",
   success: "bg-success/10 text-success",
   error: "bg-error/10 text-error",
 };

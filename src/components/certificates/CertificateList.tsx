@@ -47,7 +47,7 @@ export default function CertificateList({ admin = false, preview = false }: { ad
     ? <a className="btn btn-outline btn-sm min-h-11" href={`/api/certificates/${c.id}/download`} download>Download PDF</a>
     : <span className="text-xs text-(--kt-muted)">PDF being prepared</span>;
   return <section className="card kt-card"><div className="card-body gap-4">
-    {preview && <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="card-title text-sm">My Certificates</h2><Link href="/learner/certificates" className="link link-primary text-sm">View all certificates</Link></div>}
+    {preview && <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="font-serif text-xl font-medium">My certificates</h2><Link href="/learner/certificates" className="link link-primary text-sm">View all certificates</Link></div>}
     <FeedbackBanner variant="success" message={message || null} />
     <FeedbackBanner variant="error" message={loadError ? null : error || null} />
     {admin && <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -57,7 +57,7 @@ export default function CertificateList({ admin = false, preview = false }: { ad
       <FormField label="Issued from"><input type="date" className="input input-bordered w-full" value={issuedFrom} onChange={e => setIssuedFrom(e.target.value)} /></FormField>
       <FormField label="Issued through"><input type="date" className="input input-bordered w-full" value={issuedTo} min={issuedFrom || undefined} onChange={e => setIssuedTo(e.target.value)} /></FormField>
     </div>}
-    <button type="button" className="btn btn-ghost btn-sm self-end" onClick={refetch}>Refresh certificates</button>
+    {!preview && <button type="button" className="btn btn-ghost btn-sm self-end" onClick={refetch}>Refresh certificates</button>}
     {loading ? <LoadingRow /> : loadError ? <LoadErrorState message={loadError} onRetry={refetch} /> : certificates.length === 0 ? <p className="text-sm text-(--kt-muted) py-6">
       {admin ? "No certificates match these filters." : "You haven't earned any certificates yet. Complete a tutoring class to receive your first certificate!"}
     </p> : <div className="grid gap-3">
@@ -67,7 +67,7 @@ export default function CertificateList({ admin = false, preview = false }: { ad
           {admin && <p className="text-sm">{c.learnerName}</p>}
           <p className="text-sm text-(--kt-muted)">Tutor: {c.tutorName}</p>
           <p className="text-xs text-(--kt-muted)">Completed {formatDate(c.completedAt)}</p>
-          <p className="text-xs text-(--kt-muted)">{delivery[c.emailStatus]}</p>
+          {!preview && <p className="text-xs text-(--kt-muted)">{delivery[c.emailStatus]}</p>}
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button type="button" className="btn btn-ghost btn-sm min-h-11" onClick={() => setSelected(c)}>Details</button>

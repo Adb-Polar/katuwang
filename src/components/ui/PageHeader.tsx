@@ -15,11 +15,9 @@ export default function PageHeader({
     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
       <div className="flex flex-col gap-1">
         {eyebrow && (
-          <p className="text-2xs font-semibold uppercase tracking-wider text-(--kt-faint)">
-            {eyebrow}
-          </p>
+          <p className="font-serif italic text-base leading-none text-primary">{eyebrow}</p>
         )}
-        <h1 className="font-sans text-2xl sm:text-[1.75rem] font-heavy tracking-tight text-base-content leading-tight">
+        <h1 className="font-serif text-3xl sm:text-4xl font-medium tracking-tight text-base-content leading-tight">
           {title}
         </h1>
         {subtitle && <p className="text-sm text-(--kt-muted)">{subtitle}</p>}

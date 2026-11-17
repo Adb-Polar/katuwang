@@ -4478,3 +4478,112 @@ of the theme tokens/classes/shared components, and `scripts/contrast.py` (WCAG c
 OKLCH/hex, including translucent tints). A report-only trial on `/learner` shaped the portal
 guidance: portal pages are only moved to the public theme together, because the two themes
 use opposite role colours (portal learner = violet; public tutor = ube/violet).
+
+## Portals on the landing-page theme + learner dashboard redesign (2026-11-17)
+
+The landing theme is now the app's only theme. `app/layout.tsx` sets
+`data-theme="katuwang-public"` and loads IBM Plex at the root; the old `katuwang theme`
+(Apfel Grotezk, Fragment Mono, teal) is removed. Root tokens follow: no monospace
+(`font-mono` maps to Plex Sans), `font-serif` = Plex Serif, `--kt-tutor-text` is ube,
+muted/faint greys match the landing page, anonymous IDs (`.kt-id`) are set in the serif.
+Done at the root, not nested in `PortalLayout`, because the `--kt-tint-*` tokens and the
+charts read colours from `<html>`; charts on `/admin/reports` now draw in brand blue and coral.
+
+Role colours across all three portals are now learner = coral, tutor = ube (previously
+learner = violet, tutor = marigold). The four places that used the light accent as text now
+use `--kt-tutor-text` (StatCard accent tint, GlobalSearch tutor icon, SessionTestBuilder
+origin label, tutor profile role label).
+
+Portal chrome: `BrandMark` draws the logo inline in the theme blue (it was a green image);
+`PageHeader` titles are Plex Serif with the eyebrow as an italic kicker; sidebar labels are
+sentence case instead of uppercase spaced text.
+
+Learner dashboard (`/learner`), from the public-page-restyle audit: a real `h1` ("Your week");
+one line of linked numbers instead of three tinted stat tiles (the "Open requests" icon was
+2.03:1); one list of this week's sessions grouped by day instead of an "Upcoming" list plus
+a 7-column timetable of the same sessions, so topics are no longer truncated and nothing is
+11px or uppercase; subject as plain text instead of a dark pill; the time-zone note once; the
+empty state links to Browse classes and falls back to the next sessions. The dashboard's
+certificate preview hides "Refresh" and the email-delivery wording (full lists unchanged).
+
+Found in passing, not changed: certificates store and show the tutor's real name to the
+learner (`lib/certificates/issuance.ts`), regardless of `showTutorRealNames`. Needs a decision.
+
+Verification: TypeScript, ESLint, 1,382 tests (only the known `ValidatedForm` add-session
+failure). Browser with the demo learner, tutor and super-admin accounts: `/learner` at desktop
+and 375px, `/learner/classes`, `/tutor`, `/admin`, `/admin/reports` — only Plex renders, no
+horizontal scroll, charts recoloured. Other portal pages only got the theme switch.
+Plan: `docs/plans/portal-landing-theme.md`.
+
+Learner dashboard "This week" is now a calendar rail instead of a plain list: each day has a
+date column (weekday or Today/Tomorrow, the day number large in Plex Serif, the month), Today
+is tinted and in brand blue, sessions hang off a thin timeline with dots, and the very next
+session gets a filled dot, a tinted row and a "Next · in 2 h" pill. The empty-week fallback
+uses the same rail for the next sessions. On phones the portal's touch-target rule
+(`.kt-portal main a` → centred `inline-flex`) is overridden for these rows so they stack.
+
+`next.config.ts`: `turbopack: { root: __dirname }`. A stray `package-lock.json` in the home
+folder made Next.js treat the home folder as the workspace root; the dev watcher then missed
+edits (stale CSS and stale page markup until `.next/dev` was cleared). This also clears the
+"inferred your workspace root" warning.
+
+Browse classes and My classes (`/learner/classes`, `/learner/my-classes`), from an unslop
+audit pinned to the landing design: the 2-column grid of identical 12px cards (inside an outer
+card, four primary-coloured icons each, an avatar, an "• Open" pill on every card, the year in
+every date) is now a grid of flat catalog cards (`ClassCatalogCard`, new in `components/classes/`;
+1/2/3 columns by width, equal heights). Each card leads with its next session as a small calendar date (serif day number, as on the
+dashboard), beside subject · grade and the topics in full (✓ for verified ones); a footer line holds time
+and length, "with TUT-xxxx" in ube, and on the right "N seats left" / "Full" (Browse) or
+Completed / Cancelled (My classes). The duplicate intro sentence is gone, the
+four filters sit in one row on desktop, the count is readable, and both headers use a text
+link instead of a tiny ghost button. Descriptions now live only on the class page.
+`ClassCard` is unchanged for the tutor, Auto Match and tutor-profile lists.
+
+Browse classes header no longer has the "My classes →" link (the sidebar already has it). The
+portal top-bar search (`.kt-search`, `GlobalSearch`) now matches the page's form fields instead
+of a 999px pill: 44px tall, field radius, the DaisyUI field border, 14px text, a blue focus
+outline; the scope picker and results are readable (14px, sentence-case group labels, no
+monospace ⌘K badge).
+
+Follow-up polish: the top-bar search's scope picker has a styled chevron with room before the
+divider (the browser's native arrow was jammed against the label), and its placeholders are
+short hints ("Name or TUT code…", "e.g. Mathematics") since the picker already names the
+scope. Browse/My classes filters: "All grades" instead of "All grade levels (7–12)", "Search
+classes" placeholder, and the search field gets a little more width than the three dropdowns.
+
+Find Tutors (`/learner/tutors`) cards now match the class catalog: new
+`components/learner/TutorCatalogCard.tsx` — a flat card with the anonymous ID in serif ube as
+the title (name only when the school
+shows tutor names), subjects as plain text (two, then "+N more"), certified topics one per
+line with a green check (three, then "+N more"), and a footer with the verified-topic count,
+the next session ("Wed, Nov 18 · 09:00 AM") and "N classes". No date block on tutor cards. Removed from the card: the "TU" avatar, the pill ID badge,
+dark subject pills, outlined topic chips and class-code badges. The filter bar matches Browse
+classes (no outer box, one row of four 44px controls, "Any subject" picker styled like the
+selects, sentence-case groups), with a tutor count above the grid. `TutorBrowser.test.tsx`
+passes unchanged.
+
+Class catalog card hierarchy: the topic is now the card's serif title (students choose by
+topic), with "Subject · Grade N" as a small muted label above it; the date number is one step
+smaller so it balances the title; in the footer the start time is ink/medium while duration,
+session count and tutor stay muted. `ClassCatalogCard.tsx` only.
+My classes header no longer has the "Browse more →" link (the sidebar already links to Browse classes).
+
+## Learner certificates page restyle (2026-11-17)
+
+`/learner/certificates` now uses a learner-only `components/certificates/LearnerCertificateList.tsx`:
+one flat `kt-card` list, each row led by a calendar-style completion date (serif day number, month
+and year below, Manila time, "Completed <date>" for screen readers), the subject as a serif title,
+"Class · Tutor" and the certificate number on muted lines, and a full-size "Download PDF" button
+(or "Your PDF is still being made…" while the PDF is pending). The empty state says how
+certificates appear and links to My classes. Header: kicker "Mga natapos mo", title "My
+certificates", subtitle "One for each class your tutor marked complete."
+
+Removed on the learner page: the "Details" modal (it repeated the row), the floating ghost
+"Refresh certificates" button, the email-delivery status strings ("Email accepted by provider",
+etc. — admin information the learner can't act on), `rounded-xl` row boxes inside the card,
+`text-xs`/`btn-sm` text and buttons, and pagination when everything fits on one page.
+
+`CertificateList.tsx` is unchanged, so `/admin/completion-certificates` and the `/learner`
+dashboard preview look the same as before. New test `components/certificates/__tests__/LearnerCertificateList.test.tsx`
+(Manila date, download link, pending PDF, empty-state link, pagination hidden on one page).
+The tutor-real-name issue noted above is not changed here.

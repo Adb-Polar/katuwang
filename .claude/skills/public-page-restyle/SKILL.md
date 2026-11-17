@@ -24,18 +24,12 @@ Read `references/unslop-rubric.md` for step 1.
   `src/components/**`. Grep for who else imports that component: shared wrappers (`AuthLayout`
   wraps 13 routes; `FormField`, `FeedbackBanner`, `BrandMark` are used all over the portals).
   Tell the user when a change will ripple to pages they didn't name, and ask which set they want.
-- **Public vs. portal.** Public pages (anything a signed-out visitor sees) get the full landing
-  look via `PublicShell` / `AuthLayout`. Portal pages (`/learner`, `/tutor`, `/admin`, everything
-  inside `PortalLayout`) still run the original app theme (Apfel Grotezk, teal). Restyling one
-  portal page alone would make the portal inconsistent, so for portal pages do the audit and
-  fixes, then *ask* whether they want the whole portal moved to the public theme before applying
-  Plex/Dagat there. Don't quietly mix the two themes on one screen.
-- **Role colours mean different things in the two themes.** Portal: learner = violet
-  (`--color-secondary`, `kt-id--learner`), tutor = marigold (`--kt-tutor-text`). Public: learner =
-  coral, tutor = ube (violet). Moving any portal page to the public theme turns learner IDs from
-  violet to coral and makes violet mean *tutor* — on a platform built on anonymous IDs that's a
-  real confusion risk, so it has to happen across all three portals at once, and the user must
-  hear about it before agreeing.
+- **Public vs. portal.** Since 2026-11-17 the whole app runs on the landing theme
+  (`katuwang-public` on `<html>`, IBM Plex at the root), portals included, with learner = coral
+  and tutor = ube everywhere. Public pages (anything a signed-out visitor sees) also use
+  `PublicShell` / `AuthLayout` for the landing header, footer and white page. Portal pages keep
+  `PortalLayout` (sidebar, white cards on the tinted page) — restyle them with portal pieces
+  (`PageHeader`, `kt-card`, `--kt-*` tokens) rather than wrapping them in `PublicShell`.
 - **Tests that pin the markup.** Look in `__tests__` next to the component. Note any text,
   placeholder, `name`, `data-form-field` label, role or DOM order a test asserts on — the restyle
   must keep those. If nothing covers the page, say so: the restyle is then only checked by eye,
@@ -83,13 +77,10 @@ Use what already exists; don't fork the theme.
 - Wrap public pages in `AuthLayout` (column pages; `width="wide"` for long forms) or `PublicShell`
   (full-width pages like the privacy policy). Both give the header, footer, Plex fonts, the
   `.kt-public` tokens and `data-theme="katuwang-public"`.
-- **Portal pages, only after the user chose to move the portal:** don't use `PublicShell` (its
-  header/footer are for signed-out visitors). Put `data-theme="katuwang-public"`, the `kt-public`
-  class and `publicFontVariables` on `PortalLayout`'s root instead, and re-check every portal
-  page, not just the one asked about — the `public.css` base rules (heading sizes, `p` margins)
-  and the `--kt-*` bridges will reach all of them. Decide role colours and kickers for the portal
-  with the user first. If they'd rather keep the portal theme, apply the de-clutter fixes with
-  the existing `kt-` tokens and stop there.
+- **Portal pages** are already on the landing theme through the root. Keep them inside
+  `PortalLayout`: use `PageHeader` for the `h1` (serif title, italic kicker), `kt-card` sections,
+  the `--kt-*` tokens and DaisyUI classes. The `/learner` dashboard is the worked example: one
+  `h1`, one line of linked numbers, one day-grouped list, no nested boxes.
 - Inside that wrapper, DaisyUI classes (`btn btn-primary`, `input input-bordered`, `select`,
   `checkbox`, `loading`) already render in the Dagat palette, and the shared components that read
   `--kt-muted`, `--kt-border`, `font-sans`/`font-mono` are bridged — so most fixes are deletions
@@ -127,6 +118,19 @@ Use what already exists; don't fork the theme.
   checks return no document — load each route directly. `.env` points at the shared Aiven
   database: flows that write (sign-up, password reset, login with a real account) need the user's
   go-ahead first; unknown-email login is a safe read-only probe.
+- **Stale dev output.** If a CSS or markup change doesn't show up, check the element's actual
+  `className` first. `next.config.ts` pins `turbopack.root` because a stray lockfile in a parent
+  folder once made the watcher miss edits. Edits to `src/app/globals.css` in particular may not
+  reach the browser until a restart: stop the dev server, delete `.next/dev`, start it — one
+  after the other, not in parallel. Confirm by reading the rule in `document.styleSheets`.
+- **Portal links on phones.** `globals.css` turns every `.kt-portal main a` into a centred
+  `inline-flex` 44px touch target below 48rem. A link that wraps a multi-line block needs
+  `flex! flex-col! items-stretch!` (and a width) to stay stacked.
+- **Seeing a signed-in page.** Portal pages need a session. Use the demo test accounts listed
+  under "Test accounts" in the main checkout's `CLAUDE.md` (`/home/hikaru/Capstone/katuwang/
+  CLAUDE.md` — a worktree's copy may not have them): demo learner, demo tutor, super admin. Sign
+  in through `/login` on the local server only. Never use `/dev/login` to act as a real student,
+  and don't repeat the passwords in replies. If no test account fits, audit from code and say so.
 
 ## Step 4 — Verify and record
 

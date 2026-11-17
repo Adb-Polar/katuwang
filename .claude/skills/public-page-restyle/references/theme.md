@@ -11,7 +11,7 @@ trust the code and update this file.
 | `src/components/public/PublicShell.tsx` | `PublicShell` (theme wrapper + header + footer), `PublicHeader`, `PublicFooter`, inline logo in brand blue |
 | `src/components/public/fonts.ts` | `publicFontVariables` — IBM Plex Serif (400/500, italic) as `--lp-serif`, IBM Plex Sans (variable) as `--lp-sans` |
 | `src/components/public/public.css` | `.kt-public` tokens, bridges to app variables, base type, `lp-` classes, auth-page classes |
-| `src/app/globals.css` | DaisyUI theme `katuwang-public` (the portal theme `katuwang theme` sits above it) |
+| `src/app/globals.css` | DaisyUI theme `katuwang-public` (the only theme, default) and the portal `kt-` layer |
 | `src/components/auth/AuthLayout.tsx` | Public shell + centred column + back link; `width="narrow" \| "wide"` |
 | `src/components/auth/AuthHeading.tsx` | Kicker (Tagalog, italic serif) + serif `h1` + one line of help |
 | `src/components/auth/AuthBackButton.tsx` | Quiet "← Back" link (`lp-back`) |
@@ -82,12 +82,14 @@ Mag-log in · Sumali · Mag-sign up · Nakalimutan? · Bagong password · I-veri
 Hintay muna · Paumanhin · Bawal dito · Pribado · Paano? · Mga tanong. Keep new ones short and
 plain; check meaning with the user if unsure.
 
-## Portal theme, for comparison (`katuwang theme` in globals.css)
+## One theme everywhere
 
-Apfel Grotezk + Fragment Mono, teal primary `oklch(40% 0.09 174)`, grey `base-200` page,
-learner = violet (`--color-secondary`, `kt-id--learner`), tutor = marigold (`--color-accent`,
-`--kt-tutor-text`). Note the clash: in the public theme violet (ube) means *tutor*. Moving a
-portal to the public theme swaps role colours, so it's all three portals or none.
+Since 2026-11-17 `katuwang-public` is set on `<html>` (app/layout.tsx) and IBM Plex loads at the
+root, so the portals use the same palette and fonts; the old `katuwang theme` (Apfel, teal,
+learner violet, tutor marigold) is gone. Root tokens that portal components read:
+`--kt-tutor-text` (ube text), `--kt-tint-learner`/`--kt-tint-tutor` (derived from secondary/
+accent), `--kt-muted`, `--kt-faint`, `--kt-border`. Use `--kt-tutor-text`, not `text-accent`,
+for tutor text and icons — the accent is a light fill.
 
 ## Shared components — where a change ripples
 
@@ -106,4 +108,4 @@ before editing: `grep -rl "import.*\bName\b" src --include=*.tsx`.
 | `WeeklyTimetable` | 3 | `/learner`, `/tutor`, tutor profile |
 | `CertificateList` | 3 | dashboard preview + full lists |
 | `PortalLayout` | 3 | the three portal shells |
-| `BrandMark` | 3 | `<img>` logo in the old green |
+| `BrandMark` | 3 | inline logo in the theme primary (blue) |
