@@ -4710,3 +4710,118 @@ topic chips, "Class Info" and "At a Glance" cards, the seat progress bar, fact i
 - Fourth pass (user: the tinted icon tiles read as AI slop): removed the tiles; the kind is just the first
   word of the muted line ("Test · 03:50 PM · New"). `notificationKind()` now returns that word. The top-bar
   bell keeps its small muted icons.
+
+## Profile page restyle — learner and tutor (2026-11-17)
+
+`components/profile/ProfileView.tsx` (used by `/learner/profile` and `/tutor/profile`):
+- Kicker "Iyong account"; under the header, the avatar with the serif full name and "Tutors and classmates see
+  you as STU-…" / "Learners see you as TUT-…" — the only place the anonymous ID appears (it was a header pill, an
+  identity row and the sidebar footer).
+- One account card with two groups instead of two side-by-side cards: "Set by your school" (real name, email —
+  only an administrator can change these) and "You can change" (grade, section, contact info) with a full-size
+  "Edit details" button. Labels are muted sentence-case at 14px (were 11px uppercase tracked eyebrows); values
+  sit beside them on wider screens. Removed the "Role" row, the shield/pencil icons and the header ID pill.
+- Copy fix: "keep these current so tutors and admins can reach you" was wrong — tutors never receive contact
+  info. It now says "Only you and administrators see these."
+- Tutor: removed the duplicate "Grade and section" strip (it's in "You can change"); "Topics you're certified in"
+  lists subjects as serif headings with checked topics in two columns (was dark subject pills and boxed groups),
+  and the empty state links to Assessments. `roleLabel` / `roleLabelClass` props removed.
+- `RecoveryEmailSettings`: one line ("address · Verified") with a "Change" / "Add a recovery email" button; the
+  edit form (email, password, Save/Cancel) and the verify steps (Send a code, 6-digit code, Verify) use
+  full-size controls and `FormField size="md"`. Same API calls as before.
+- `AccountControls`: a plain "Delete your account" section at the bottom (outlined red "Delete account…") with
+  the password + DELETE form inline, no red box inside a red card.
+
+- Second pass (user: fix text hierarchy, too bland): the page opens with one role-tinted band (coral 10% for
+  learners, ube 15% for tutors) holding an xl avatar, the "Iyong account" kicker, the full name as the serif h1,
+  "Grade N · Section X" and the ID line. Clear levels below it: section titles serif 2xl ("Your details",
+  "Topics you're certified in", "Recovery email", "Delete your account"); group titles sans semibold 16px with a
+  muted note; row labels muted 14px; values 16px medium, "Not set" muted. Tutor subjects are sans semibold.
+  Contrast: tutor ID on the ube band 4.74:1, learner ID on the coral band 5.12:1.
+- Third pass (user annotation: declutter the certified topics): "Topics you're certified in" now has a summary on
+  the right ("9 topics in 7 subjects", serif numbers, topic count in tutor ube, 5.21:1) and one ruled row per
+  subject — subject (semibold) on the left, its topics as one wrapped line separated by "·" on the right
+  (stacked on phones). Removed the per-topic checkmarks and the uneven two-column blocks.
+  Then (user: topics ran together like one long name): each topic is its own line in the right column, with
+  extra space between topics and tighter line height inside a wrapped topic.
+
+Found, not changed (data): the shared demo learner account has a verified recovery email set to a personal Gmail
+address, so password-reset codes for the demo account go to that inbox.
+
+## Help & FAQs restyle — all portals, with copy fixes (2026-11-17)
+
+`components/help/HelpCenter.tsx` (used by `/learner/help`, `/tutor/help`, `/admin/help`):
+- One full-size search at the top ("Search help") that filters the how-to guides *and* the questions and opens
+  the matches (was a 32px FAQ-only search below all the guides). "Nothing matches" message when both are empty.
+- "How to…" guides are one card of rows that open in place; steps are a numbered rail (serif primary numbers on a
+  thin line, "Step N:" for screen readers) instead of a two-column grid of identical cards with muted steps.
+- "Questions" grouped under serif category headings in one card of rows (no box per question).
+- Removed: the 11px uppercase tracked section labels, the "Jump to" pills (they repeated the sidebar; the
+  `quickLinks` field is gone from `helpContent`), opacity-coloured markers and icon.
+- The "Still stuck?" line mentions the chat helper only when the Chatbot assistant setting is on (`chatAvailable`
+  passed from each page via `getSetting("chatbotEnabled")`). Kicker "Tulong" on all three pages.
+- New `components/help/__tests__/HelpCenter.test.tsx`.
+
+Copy in `lib/help/helpContent.ts` (approved by the user):
+- Status codes in capitals replaced with plain words (pending, certified, rejected, open, accepted, enrolled,
+  fulfilled, active, suspended, banned, declined; "reinstated" instead of "reinstated to SCHEDULED");
+  "BANK_NOT_READY response" → "told the topic isn't ready".
+- Privacy: the shared note promised learners and tutors "never" see each other's real names, and the tutor answer
+  then added "An admin can enable a showTutorRealNames override". Now the learner answer says tutors never see
+  the learner's name, email or contact info; the tutor answer says learners see the tutor's name only if the school
+  turns on showing tutor names (off by default); the admin RA 10173 answer says the same without API terms.
+- Setting names use the labels admins see in Settings ("Show tutor real names to learners", "Auto-certify tutors
+  who pass an assessment", "Chatbot assistant") instead of code keys (`showTutorRealNames`, `chatbotEnabled`).
+- "Fulfil" → "Fulfill" to match the app's American spelling; STU-XXXX → STU-….
+
+## My reports — text hierarchy (2026-11-17)
+
+`components/learner/MyReportsList.tsx` (user annotation: improve hierarchy, declutter). Each report now reads top
+to bottom: a muted "Class report · Nov 14, 2026" line, the target as a serif title ("Araling Panlipunan · CUR-H1",
+or the tutor's TUT-… ID in ube) with the status at the right, the reason in medium weight followed by the learner's
+details, then the admin's answer set off by a left rule ("Closed without action · Nov 14, 2026" and the note).
+Removed the repeated "Class" prefix, the separate "Filed …" line, the "Admin note:" label and the form-only
+"(describe below)" suffix on "Other". Pending reports show "Waiting for an admin to review it." instead.
+
+## Dropdown panels get a visible edge (2026-11-17)
+
+`src/app/globals.css`: every open DaisyUI select panel (`.select::picker(select)`, `.select select::picker(select)`)
+now has a 1px `oklch(80% 0.012 225)` border, the field radius and one soft shadow. DaisyUI's default edge is
+`base-200` with a shadow scaled by `--depth`, which is 0 in this flat theme, so open dropdowns (grade, subject,
+topic filters, form selects) had no visible edge against white cards. Needed a dev-server restart + `.next/dev`
+clear to show up (the known globals.css hot-reload gotcha).
+
+## Learner class-request card (2026-11-17)
+
+`components/learner/TopicRequestManager.tsx`, one request (user annotation: unslop this card). Was a rounded box of
+pills: dark caps subject pill, faint "GRADE 7", status pill, "Directed to TUT-…" pill, topic pills under a "View
+history" link, a clock icon with "Friday (2026-12-11) 15:00–16:00", an italic quoted note and 10.5–12px text with
+`btn-xs` actions. Now each request is a divider row in the card:
+- muted "Music · Grade 7" line, the topic(s) as the serif title, status as coloured text at the right;
+- a small label/value list: Tutor (TUT-… in serif ube, or "Any certified tutor"), When you're free
+  ("Fri, Dec 11 · 3:00–4:00 PM" / "Every Saturday · 11:30 AM–1:00 PM", new `slotLabel()` + tests), Open until;
+- the note as plain text; when a tutor made a class, one sentence ("TUT-… made a class for this, first session …")
+  and a full-size "Review & enroll" button; "View class" when enrolled;
+- full-size Edit / "Cancel request" / renew buttons, with "Posted … · History" at the end of the row.
+The card uses `kt-card-body` padding.
+
+Second pass (user: fix the rest, declutter, add style):
+- Rows: a calendar block on the left for the first free time (serif day number with weekday/month, or "Every Fri"
+  for a weekly time, "Any time" with none), subject · grade and status on one muted line, the topic as serif
+  title, and one muted meta line — "3:00–4:00 PM · +1 more time · for TUT-… · until Nov 17, 11:30 PM" — instead
+  of a label/value list. Edit and Cancel are quiet ghost buttons; "Posted … · History" sits at the right.
+- Header: serif "Your requests" with the helper text at 14px and an inline Auto match link; full-size "New request".
+- Active / Expired / Past are real underline tabs with counts (they were DaisyUI 4 `tabs-boxed`, unstyled in v5).
+- Empty states say what to do per tab. Loading is text, not a spinner.
+- New / edit / renew forms sit in the card under the heading ("Ask for a class", "Edit your request", "Renew your
+  request") without nested grey boxes; full-size textarea, buttons and renew-time rows (Day / From / To / Remove,
+  same pattern as "When you're free"); removed the X icons and the dark subject pill in edit.
+- `/learner/tutors`: kicker "Hanapin ang tutor"; removed the small "Auto Match →" header link; page tabs at 14px.
+
+Third pass (user: still cluttered, make it simple and readable): each row is now the date block, the topic as a serif
+title that links to the request's history, and one short line — "Music · 3:00–4:00 PM +1 · TUT-…" — with Edit and
+Cancel as ghost buttons on the same row (below on phones). Dropped from every row: the repeated "Waiting for a tutor"
+status, the grade (always the learner's own), the "until Nov 17, 11:30 PM" deadline (now "closes in 6 h" only when it
+closes within a day, via `closesSoon()`), the note, and "Posted … · History" (the title is the history link). Status
+lines appear only when something happened: "TUT-… made a class for this" + Review & enroll, enrolled, expired
+(+ Renew / Change times), or the outcome on the Past tab.

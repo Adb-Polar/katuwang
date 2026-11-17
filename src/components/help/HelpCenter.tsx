@@ -1,126 +1,121 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { Search } from "lucide-react";
+import { ChevronDown, Search } from "lucide-react";
 import { HELP_CONTENT, type HelpRole } from "@/lib/help/helpContent";
 
-const SECTION_LABEL = "text-2xs font-medium uppercase tracking-wider text-(--kt-faint)";
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";
+const rowSummary =
+  "flex items-center justify-between gap-3 px-5 py-4 cursor-pointer list-none font-medium hover:bg-base-200 [&::-webkit-details-marker]:hidden";
+
+function Chevron() {
+  return <ChevronDown aria-hidden="true" className="h-4 w-4 shrink-0 text-(--kt-muted) transition-transform group-open:rotate-180" />;
+}
 
 /**
- * In-app Help & FAQ view. Rendered by each portal's `/help` page with its own
- * role — the content shown is scoped to that role only.
+ * In-app Help: one search over the how-to guides and the FAQs, then both as flat lists of rows that open in
+ * place. Rendered by each portal's `/help` page with its own role — only that role's content is shown.
  */
-export default function HelpCenter({ role }: { role: HelpRole }) {
+export default function HelpCenter({ role, chatAvailable = false }: { role: HelpRole; chatAvailable?: boolean }) {
   const entry = HELP_CONTENT[role];
   const [query, setQuery] = useState("");
-
   const q = query.trim().toLowerCase();
-  const filteredFaqs = useMemo(() => {
-    if (!q) return entry.faqs;
-    return entry.faqs.filter(
-      (f) =>
-        f.question.toLowerCase().includes(q) ||
-        f.answer.toLowerCase().includes(q) ||
-        f.category.toLowerCase().includes(q),
-    );
-  }, [entry.faqs, q]);
 
-  const groupedFaqs = useMemo(() => {
-    const groups: { category: string; items: typeof filteredFaqs }[] = [];
-    for (const faq of filteredFaqs) {
+  const guides = useMemo(
+    () => (q ? entry.guides.filter((g) => [g.title, ...g.steps].some((t) => t.toLowerCase().includes(q))) : entry.guides),
+    [entry.guides, q],
+  );
+
+  const faqGroups = useMemo(() => {
+    const matches = q
+      ? entry.faqs.filter((f) => [f.question, f.answer, f.category].some((t) => t.toLowerCase().includes(q)))
+      : entry.faqs;
+    const groups: { category: string; items: typeof matches }[] = [];
+    for (const faq of matches) {
       let g = groups.find((x) => x.category === faq.category);
-      if (!g) {
-        g = { category: faq.category, items: [] };
-        groups.push(g);
-      }
+      if (!g) groups.push((g = { category: faq.category, items: [] }));
       g.items.push(faq);
     }
     return groups;
-  }, [filteredFaqs]);
+  }, [entry.faqs, q]);
+
+  const nothing = guides.length === 0 && faqGroups.length === 0;
 
   return (
-    <div className="space-y-10">
-      {/* quick links */}
-      <section className="space-y-3">
-        <p className={SECTION_LABEL}>Jump to</p>
-        <div className="flex flex-wrap gap-2">
-          {entry.quickLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="btn btn-sm btn-ghost border border-base-300 font-normal">
-              {link.label}
-            </Link>
-          ))}
-        </div>
-      </section>
+    <div className="space-y-10 max-w-3xl">
+      <label className="input input-bordered flex items-center gap-2 w-full sm:max-w-md">
+        <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-(--kt-muted)" />
+        <input
+          type="search"
+          className="grow"
+          placeholder="Search help"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search guides and questions"
+        />
+      </label>
 
-      {/* step-by-step guides */}
-      <section className="space-y-3">
-        <p className={SECTION_LABEL}>Step-by-step guides</p>
-        <div className="grid gap-4 md:grid-cols-2">
-          {entry.guides.map((guide) => (
-            <div key={guide.title} className="kt-card">
-              <div className="kt-card-body gap-2.5">
-                <h2 className="text-sm font-medium text-base-content">{guide.title}</h2>
-                <ol className="list-decimal space-y-1.5 pl-5 text-sm text-(--kt-muted) marker:text-base-content/35">
+      {nothing && (
+        <p className="text-(--kt-muted)">
+          Nothing matches “{query}”. Try a shorter word{chatAvailable ? ", or ask the chat helper in the corner" : ""}.
+        </p>
+      )}
+
+      {guides.length > 0 && (
+        <section aria-labelledby="help-guides" className="space-y-3">
+          <h2 id="help-guides" className={sectionTitle}>How to…</h2>
+          <div className="card kt-card">
+            {guides.map((guide) => (
+              <details key={guide.title} open={!!q || undefined} className="group border-b border-(--kt-border) last:border-b-0">
+                <summary className={rowSummary}>
+                  {guide.title}
+                  <Chevron />
+                </summary>
+                {/* Steps as a numbered rail: serif numbers on a thin line. */}
+                <ol className="mx-5 mb-5 ml-8 border-l border-(--kt-border) space-y-3">
                   {guide.steps.map((step, i) => (
-                    <li key={i}>{step}</li>
+                    <li key={i} className="relative pl-6">
+                      <span
+                        aria-hidden="true"
+                        className="absolute -left-3 top-0 w-6 bg-base-100 text-center font-serif text-lg leading-6 text-primary"
+                      >
+                        {i + 1}
+                      </span>
+                      <span className="sr-only">Step {i + 1}: </span>
+                      {step}
+                    </li>
                   ))}
                 </ol>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
-      {/* FAQs */}
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className={SECTION_LABEL}>Frequently asked questions</p>
-          <label className="input input-sm input-bordered flex w-full max-w-xs items-center gap-2 font-normal">
-            <Search className="w-4 h-4 shrink-0 opacity-50" />
-            <input
-              type="search"
-              className="grow"
-              placeholder="Search FAQs…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              aria-label="Search FAQs"
-            />
-          </label>
-        </div>
-
-        {groupedFaqs.length === 0 ? (
-          <p className="text-sm text-(--kt-muted)">No FAQs match “{query}”.</p>
-        ) : (
-          <div className="space-y-6">
-            {groupedFaqs.map((group) => (
-              <div key={group.category} className="space-y-1.5">
-                <p className="text-2xs font-medium uppercase tracking-wider text-(--kt-faint)">
-                  {group.category}
-                </p>
+      {faqGroups.length > 0 && (
+        <section aria-labelledby="help-faqs" className="space-y-3">
+          <h2 id="help-faqs" className={sectionTitle}>Questions</h2>
+          <div className="card kt-card">
+            {faqGroups.map((group) => (
+              <div key={group.category} className="border-b border-(--kt-border) last:border-b-0">
+                <h3 className="px-5 pt-4 font-serif text-lg text-(--kt-muted)">{group.category}</h3>
                 {group.items.map((faq) => (
-                  <details
-                    open={!!q || undefined}
-                    key={faq.question}
-                    className="collapse collapse-arrow border border-base-300 bg-base-100 rounded-box"
-                  >
-                    <summary className="collapse-title text-sm font-medium min-h-0 py-3">
+                  <details key={faq.question} open={!!q || undefined} className="group">
+                    <summary className={rowSummary}>
                       {faq.question}
+                      <Chevron />
                     </summary>
-                    <div className="collapse-content text-sm text-(--kt-muted)">
-                      <p className="pb-1">{faq.answer}</p>
-                    </div>
+                    <p className="px-5 pb-4 max-w-prose">{faq.answer}</p>
                   </details>
                 ))}
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
-      <p className="text-sm text-(--kt-faint)">
-        Still stuck? Reach out to a Katuwang administrator or your school
-        coordinator for help.
+      <p className="border-t border-(--kt-border) pt-6 text-(--kt-muted)">
+        Still stuck? {chatAvailable ? "Ask the chat helper in the bottom corner, or talk" : "Talk"} to a Katuwang administrator or your school coordinator.
       </p>
     </div>
   );

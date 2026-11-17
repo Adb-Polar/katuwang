@@ -9,11 +9,6 @@
 
 export type HelpRole = "LEARNER" | "TUTOR" | "ADMIN";
 
-export interface HelpLink {
-  label: string;
-  href: string;
-}
-
 export interface HelpGuide {
   title: string;
   steps: string[];
@@ -28,29 +23,23 @@ export interface HelpFaq {
 export interface HelpEntry {
   /** short sentence under the page title */
   intro: string;
-  /** jump-off points into the portal */
-  quickLinks: HelpLink[];
   /** numbered walkthroughs of the common tasks */
   guides: HelpGuide[];
   /** searchable question/answer list */
   faqs: HelpFaq[];
 }
 
-const PRIVACY_NOTE =
-  "Katuwang is double-blind by law (RA 10173, the Data Privacy Act). Learners and tutors never see each other's real name, email, or contact details — only the sequential anonymous ID (STU-XXXX for learners, TUT-XXXX for tutors) and non-identifying info such as grade level.";
+// Learners' names are never shown to tutors. Tutors' names reach learners only when an admin turns on
+// "Show tutor real names to learners" (off by default), so the copy must not promise "never" for tutors.
+const LEARNER_PRIVACY =
+  "No. Under the Data Privacy Act (RA 10173), tutors see you only by your anonymous ID (STU-…) and non-identifying details such as your grade level — never your name, email or contact info.";
+const TUTOR_PRIVACY =
+  "You never see learners' names, emails or contact info — only their anonymous IDs (STU-…) and details such as grade level. Learners see you by your TUT-… ID; your name is shown to them only if the school turns on showing tutor names, which is off by default. Your email and contact info always stay private.";
 
 export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
   LEARNER: {
     intro:
       "How to find a tutor, join classes, and get help with a specific topic.",
-    quickLinks: [
-      { label: "Browse Classes", href: "/learner/classes" },
-      { label: "My Classes", href: "/learner/my-classes" },
-      { label: "Auto Match", href: "/learner/match" },
-      { label: "Request Tutor", href: "/learner/tutors?tab=requests" },
-      { label: "Notifications", href: "/learner/notifications" },
-      { label: "Profile", href: "/learner/profile" },
-    ],
     guides: [
       {
         title: "Find and join a class",
@@ -77,7 +66,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
           "Describe the topic, your availability, and your preferred setup (1-on-1 or group).",
           "Choose public (any certified tutor can pick it up) or directed to one specific tutor.",
           "Wait for a tutor to accept. Accepting auto-creates a class — you then enroll in it to confirm.",
-          "Track the status: OPEN → ACCEPTED → ENROLLED → FULFILLED.",
+          "Follow its status: open (waiting for a tutor), accepted, enrolled, then fulfilled.",
         ],
       },
       {
@@ -111,13 +100,13 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       {
         category: "Privacy",
         question: "Can my tutor see my real name?",
-        answer: PRIVACY_NOTE,
+        answer: LEARNER_PRIVACY,
       },
       {
         category: "Privacy",
         question: "What is my anonymous ID and can I change it?",
         answer:
-          "It is your STU-XXXX identifier, assigned once at registration and shown to tutors in place of your name. It cannot be changed.",
+          "It is your STU-… identifier, assigned once at registration and shown to tutors in place of your name. It cannot be changed.",
       },
       {
         category: "Classes",
@@ -139,9 +128,9 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       },
       {
         category: "Requests",
-        question: "What do OPEN, ACCEPTED, ENROLLED, and FULFILLED mean?",
+        question: "What do the request statuses mean?",
         answer:
-          "OPEN — waiting for a tutor. ACCEPTED — a tutor accepted and a class was created for you. ENROLLED — you have joined that class. FULFILLED — the tutoring for the request is done.",
+          "Open — waiting for a tutor. Accepted — a tutor accepted and a class was created for you. Enrolled — you have joined that class. Fulfilled — the tutoring for the request is done.",
       },
       {
         category: "Matching",
@@ -166,15 +155,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
 
   TUTOR: {
     intro:
-      "How to get certified, run classes and sessions, and fulfil learner class requests.",
-    quickLinks: [
-      { label: "Classes", href: "/tutor/classes" },
-      { label: "Students", href: "/tutor/students" },
-      { label: "Requests", href: "/tutor/requests" },
-      { label: "Assessments", href: "/tutor/assessments" },
-      { label: "Notifications", href: "/tutor/notifications" },
-      { label: "Profile", href: "/tutor/profile" },
-    ],
+      "How to get certified, run classes and sessions, and fulfill learner class requests.",
     guides: [
       {
         title: "Get certified for a topic",
@@ -182,26 +163,26 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
           "Open Assessments.",
           "Pick the subject and topic you want to teach.",
           "Take the qualifying quiz — questions come from an admin-maintained bank.",
-          "Pass to earn certification for that topic. Depending on a platform setting you are either certified automatically or left PENDING for an admin to confirm.",
+          "Pass to earn certification for that topic. Depending on a school setting, you are either certified right away or wait for an admin to confirm it.",
         ],
       },
       {
         title: "Create a class",
         steps: [
           "Open Classes and choose New class.",
-          "Pick a subject and its topics — only topics you are CERTIFIED for are selectable.",
+          "Pick a subject and its topics — you can only choose topics you are certified for.",
           "Set the capacity (1 for a 1-on-1 class, more for a group).",
           "Add one or more sessions with their schedule.",
           "Publish. The class becomes visible to learners browsing and to Auto Match.",
         ],
       },
       {
-        title: "Fulfil a class request",
+        title: "Fulfill a class request",
         steps: [
           "Open Requests to see public requests plus any directed to you.",
           "Open one whose topic you are certified for.",
           "Click Accept — a class is auto-created for the request and the learner is prompted to enroll.",
-          "The request moves OPEN → ACCEPTED, then ENROLLED once the learner joins.",
+          "The request becomes accepted, then enrolled once the learner joins the class.",
         ],
       },
       {
@@ -217,7 +198,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         steps: [
           "If a class of yours is suspended or banned, open it from Classes.",
           "File an appeal from the class page (one open appeal per class).",
-          "An admin reviews it; if approved, the class is reinstated to SCHEDULED and you are notified.",
+          "An admin reviews it; if approved, the class is reinstated and you are notified.",
         ],
       },
     ],
@@ -232,13 +213,13 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Certification",
         question: "Can I create a class for a topic I am not certified for?",
         answer:
-          "No. The topic picker when creating a class only shows topics you are CERTIFIED for. Take that topic's assessment first.",
+          "No. When you create a class, the topic picker only shows topics you are certified for. Take that topic's assessment first.",
       },
       {
         category: "Certification",
-        question: "What do PENDING, CERTIFIED, and REJECTED mean?",
+        question: "What do the certification statuses mean?",
         answer:
-          "PENDING — you passed but an admin still needs to confirm (only when auto-certify is off). CERTIFIED — you can teach the topic. REJECTED — an admin declined the certification; you cannot teach it.",
+          "Pending — you passed, but an admin still needs to confirm it (only when the school doesn't certify automatically). Certified — you can teach the topic. Rejected — an admin declined the certification, so you can't teach it.",
       },
       {
         category: "Certification",
@@ -267,9 +248,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       {
         category: "Privacy",
         question: "Can I see my learners' real names? Can they see mine?",
-        answer:
-          PRIVACY_NOTE +
-          " An admin can enable a showTutorRealNames override, but it is off by default.",
+        answer: TUTOR_PRIVACY,
       },
       {
         category: "Moderation",
@@ -289,19 +268,6 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
   ADMIN: {
     intro:
       "How to run approvals, certifications, the question bank, moderation, and platform settings.",
-    quickLinks: [
-      { label: "Users", href: "/admin/users" },
-      { label: "Registrations", href: "/admin/registrations" },
-      { label: "Classes", href: "/admin/classes" },
-      { label: "Class Requests", href: "/admin/topic-requests" },
-      { label: "Certifications", href: "/admin/assessment/certifications" },
-      { label: "Class Appeals", href: "/admin/class-appeals" },
-      { label: "Question Bank", href: "/admin/assessment/question-bank" },
-      { label: "Analytics", href: "/admin/reports" },
-      { label: "Audit Log", href: "/admin/audit-log" },
-      { label: "Subjects & Topics", href: "/admin/subjects" },
-      { label: "Settings", href: "/admin/settings" },
-    ],
     guides: [
       {
         title: "Approve or decline registrations",
@@ -314,8 +280,8 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       {
         title: "Review tutor certifications",
         steps: [
-          "Open Certifications (only needed when auto-certify on pass is off).",
-          "Each PENDING row is a tutor who passed a topic quiz.",
+          "Open Certifications (only needed when “Auto-certify tutors who pass an assessment” is off).",
+          "Each pending row is a tutor who passed a topic quiz.",
           "Confirm to certify them for that topic, or Reject with a note.",
         ],
       },
@@ -332,7 +298,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         steps: [
           "Open Settings → Assessment.",
           "Set questions per attempt, pass percentage, and minimum bank size (values save on blur).",
-          "Toggle auto-certify on pass depending on whether you want manual confirmation.",
+          "Turn “Auto-certify tutors who pass an assessment” off if you want to confirm each certification yourself.",
         ],
       },
       {
@@ -340,7 +306,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         steps: [
           "Open Classes to suspend or ban a class that breaks the rules.",
           "Suspended/banned tutors can file one appeal per class.",
-          "Open Class Appeals to review; approving reinstates the class to SCHEDULED and notifies the tutor.",
+          "Open Class Appeals to review; approving reinstates the class and notifies the tutor.",
         ],
       },
       {
@@ -363,25 +329,25 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Users",
         question: "What do the account statuses mean?",
         answer:
-          "PENDING — awaiting approval. ACTIVE — normal access. SUSPENDED — temporarily blocked. BANNED — permanently blocked (policy). DECLINED — registration was rejected; the applicant sees the reason on a dedicated screen.",
+          "Pending — awaiting approval. Active — normal access. Suspended — temporarily blocked. Banned — permanently blocked. Declined — the registration was rejected; the applicant sees the reason on a dedicated screen.",
       },
       {
         category: "Users",
-        question: "What is the showTutorRealNames setting?",
+        question: "What does “Show tutor real names to learners” do?",
         answer:
-          "An administrator-controlled setting that shows tutor names to learners and allows name searches in Find Tutors, class search, and the top bar. It is off by default; when disabled, tutor discovery uses anonymous IDs.",
+          "When on, learners see tutors' real names and can search for tutors by name in Find Tutors, class search and the top bar. It is off by default; when off, learners find tutors by their TUT-… IDs. Learners' names are never shown to tutors either way.",
       },
       {
         category: "Assessment",
-        question: "What does “auto-certify on pass” do?",
+        question: "What does “Auto-certify tutors who pass an assessment” do?",
         answer:
-          "When on, a tutor who passes a topic quiz is certified immediately. When off, passing creates a PENDING certification that you confirm on the Certifications page.",
+          "When on, a tutor who passes a topic quiz is certified immediately. When off, passing creates a pending certification that you confirm on the Certifications page.",
       },
       {
         category: "Assessment",
         question: "What happens if a topic's question bank is below the minimum?",
         answer:
-          "Tutors get a BANK_NOT_READY response and cannot start that topic's assessment until enough questions exist. The Question Bank readiness strip flags which topics are short.",
+          "Tutors are told the topic isn't ready and can't start its assessment until enough questions exist. The Question Bank readiness strip flags which topics are short.",
       },
       {
         category: "Moderation",
@@ -397,9 +363,9 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       },
       {
         category: "Settings",
-        question: "What is the chatbot setting?",
+        question: "What does the “Chatbot assistant” setting do?",
         answer:
-          "chatbotEnabled toggles the floating intent-based help assistant in every portal. It handles navigation help, FAQs, and (for learners) class recommendations — it is not free-form chat.",
+          "It turns the floating help assistant on or off in every portal. The assistant handles navigation help, FAQs and (for learners) class recommendations — it is not free-form chat.",
       },
       {
         category: "Analytics",
@@ -411,7 +377,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Privacy",
         question: "What are our RA 10173 obligations in the app?",
         answer:
-          "Keep the learner–tutor boundary double-blind: peer-facing views and API responses expose only id/anonymousId plus non-identifying data. Anonymous IDs are generated atomically at registration and never reused.",
+          "Keep learners and tutors anonymous to each other: anything one peer sees about another shows only the anonymous ID and non-identifying details. Learners' names are never shown to tutors; tutors' names reach learners only if you turn on “Show tutor real names to learners”. Anonymous IDs are assigned at registration and never reused.",
       },
     ],
   },

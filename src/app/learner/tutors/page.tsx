@@ -27,22 +27,17 @@ export default async function LearnerTutorsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Learner Portal"
+        eyebrow="Hanapin ang tutor"
         title="Find tutors"
         subtitle={requestTab
           ? "Ask for help on a topic when no open class fits, and track your requests here."
           : "Find verified Student Tutors and the subjects they're certified to teach. Open one to see their topics, schedule, and published classes."}
-        actions={
-          <Link href="/learner/match" className="btn btn-ghost btn-sm text-xs">
-            Auto Match →
-          </Link>
-        }
       />
       <div role="tablist" aria-label="Find tutors" className="kt-tabs flex-wrap">
-        <Link href="/learner/tutors" role="tab" aria-selected={!requestTab} data-active={!requestTab} className="kt-tab inline-flex min-h-11 items-center md:min-h-0">
+        <Link href="/learner/tutors" role="tab" aria-selected={!requestTab} data-active={!requestTab} className="kt-tab inline-flex min-h-11 items-center text-sm md:min-h-0">
           Find Tutors
         </Link>
-        <Link href="/learner/tutors?tab=requests" role="tab" aria-selected={requestTab} data-active={requestTab} className="kt-tab inline-flex min-h-11 items-center md:min-h-0">
+        <Link href="/learner/tutors?tab=requests" role="tab" aria-selected={requestTab} data-active={requestTab} className="kt-tab inline-flex min-h-11 items-center text-sm md:min-h-0">
           Request Tutor
         </Link>
       </div>

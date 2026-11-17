@@ -25,19 +25,22 @@ const STATUS_TONE: Record<MyReport["status"], string> = {
 };
 
 const OUTCOME: Record<MyReport["status"], string> = {
-  PENDING: "Waiting for an admin to review",
+  PENDING: "Waiting for an admin to review it.",
   RESOLVED: "An admin acted on this report",
   DISMISSED: "Closed without action",
 };
 
+/** The report form's option labels ("Other (describe below)") read oddly out of context. */
+const reasonLabel = (v: string) => violationLabel(v).replace(/\s*\(describe below\)$/i, "");
+
 function ReportTarget({ r }: { r: MyReport }) {
   if (r.targetType === "TUTOR") {
-    return <>Tutor <span className="kt-id kt-id--tutor">{r.target.anonymousId ?? "unknown"}</span></>;
+    return <span className="kt-id kt-id--tutor">{r.target.anonymousId ?? "Unknown tutor"}</span>;
   }
   return (
     <>
-      Class <span className="font-serif">{r.target.code ?? ""}</span>
-      {r.target.subject && <span className="text-(--kt-muted)"> · {subjectDisplayLabel(r.target.subject)}</span>}
+      {r.target.subject ? subjectDisplayLabel(r.target.subject) : "Class"}
+      {r.target.code && <span className="font-serif text-(--kt-muted)"> · {r.target.code}</span>}
     </>
   );
 }
@@ -86,21 +89,32 @@ export default function MyReportsList() {
         <section className="card kt-card" aria-label="My reports">
           <ul>
             {reports.map((r) => (
-              <li key={r.id} className="px-5 py-4 border-b border-(--kt-border) last:border-b-0 space-y-1">
-                <p className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <span className="font-medium"><ReportTarget r={r} /></span>
+              <li key={r.id} className="px-5 py-5 border-b border-(--kt-border) last:border-b-0 space-y-3">
+                <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
+                  <div className="min-w-0">
+                    <p className="text-sm text-(--kt-muted)">
+                      {r.targetType === "TUTOR" ? "Tutor" : "Class"} report · {formatDate(r.createdAt)}
+                    </p>
+                    <h3 className="font-serif text-xl font-medium leading-snug break-words"><ReportTarget r={r} /></h3>
+                  </div>
                   <span className={`text-sm font-medium ${STATUS_TONE[r.status]}`}>{statusDisplayLabel(r.status)}</span>
+                </div>
+
+                <p className="break-words whitespace-pre-wrap">
+                  <span className="font-medium">{r.violations.map(reasonLabel).join(", ")}</span>
+                  {r.details && <span className="text-(--kt-muted)">: {r.details}</span>}
                 </p>
-                <p className="text-sm break-words whitespace-pre-wrap">
-                  {r.violations.map(violationLabel).join(", ")}
-                  {r.details && <span className="text-(--kt-muted)"> — {r.details}</span>}
-                </p>
-                <p className="text-sm text-(--kt-muted)">
-                  Filed {formatDate(r.createdAt)} · {OUTCOME[r.status]}
-                  {r.reviewedAt && r.status !== "PENDING" ? ` on ${formatDate(r.reviewedAt)}` : ""}
-                </p>
-                {r.resolutionNote && (
-                  <p className="text-sm text-(--kt-muted) break-words">Admin note: {r.resolutionNote}</p>
+
+                {r.status === "PENDING" ? (
+                  <p className="text-sm text-(--kt-muted)">{OUTCOME.PENDING}</p>
+                ) : (
+                  <div className="border-l-2 border-(--kt-border) pl-4 space-y-0.5">
+                    <p className="text-sm font-medium">
+                      {OUTCOME[r.status]}
+                      {r.reviewedAt && <span className="font-normal text-(--kt-muted)"> · {formatDate(r.reviewedAt)}</span>}
+                    </p>
+                    {r.resolutionNote && <p className="text-sm text-(--kt-muted) break-words">{r.resolutionNote}</p>}
+                  </div>
                 )}
               </li>
             ))}

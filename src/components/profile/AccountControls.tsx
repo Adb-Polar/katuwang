@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import FormField from "@/components/ui/FormField";
 
 export default function AccountControls() {
   const [open, setOpen] = useState(false);
@@ -35,27 +36,27 @@ export default function AccountControls() {
   };
 
   return (
-    <section className="card kt-card border border-error/25">
-      <div className="card-body gap-3 p-6">
-        <h2 className="card-title text-sm font-bold">Account controls</h2>
-        <p className="text-xs text-(--kt-muted)">You can update your details above. Deleting your account permanently removes your profile and associated records. This cannot be undone.</p>
-        <button type="button" className="btn btn-outline btn-error btn-sm w-fit text-xs" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
-          {open ? "Cancel deletion" : "Delete account"}
-        </button>
-        {open && (
-          <form onSubmit={deleteAccount} className="mt-2 max-w-sm space-y-3 rounded-lg border border-error/25 bg-error/5 p-4">
-            <p className="text-xs">Confirm with your password, then type <strong>DELETE</strong>. Your account and its class or request history will be removed.</p>
-            <FeedbackBanner variant="error" message={error || null} />
-            <label className="block text-xs font-semibold">Password
-              <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="input input-bordered mt-1 w-full" required />
-            </label>
-            <label className="block text-xs font-semibold">Type DELETE
-              <input type="text" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="input input-bordered mt-1 w-full" required />
-            </label>
-            <button type="submit" className="btn btn-error btn-sm" disabled={busy || confirm !== "DELETE" || !password}>{busy ? "Deleting…" : "Permanently delete account"}</button>
-          </form>
-        )}
-      </div>
+    <section aria-labelledby="delete-account" className="space-y-3 border-t border-(--kt-border) pt-6">
+      <h2 id="delete-account" className="font-serif text-2xl font-medium leading-tight">Delete your account</h2>
+      <p className="text-sm text-(--kt-muted)">
+        This permanently removes your profile and its class and request history. It can&apos;t be undone.
+      </p>
+      <button type="button" className="btn btn-outline btn-error" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
+        {open ? "Keep my account" : "Delete account…"}
+      </button>
+      {open && (
+        <form onSubmit={deleteAccount} className="max-w-sm space-y-4 pt-2">
+          <p className="text-sm">Confirm with your password, then type <strong>DELETE</strong>.</p>
+          <FeedbackBanner variant="error" message={error || null} />
+          <FormField size="md" label="Password">
+            <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="input input-bordered w-full" required />
+          </FormField>
+          <FormField size="md" label="Type DELETE">
+            <input type="text" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="input input-bordered w-full" required />
+          </FormField>
+          <button type="submit" className="btn btn-error" disabled={busy || confirm !== "DELETE" || !password}>{busy ? "Deleting…" : "Permanently delete my account"}</button>
+        </form>
+      )}
     </section>
   );
 }

@@ -6,15 +6,13 @@ import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Clock, X, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useFetchList } from "@/hooks/useFetchList";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
-import { formatDate, formatDateTime } from "@/lib/datetime";
-import { gradeLabel } from "@/lib/gradeLevels";
+import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
-import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import MatchCriteriaFields, {
@@ -40,12 +38,67 @@ interface TopicRequest {
 }
 
 const STATUS_TONE = {
-  OPEN: { tone: "info", label: "Waiting for a tutor" },
-  ACCEPTED: { tone: "success", label: "Class created" },
-  ENROLLED: { tone: "success", label: "Enrolled" },
-  FULFILLED: { tone: "neutral", label: "Completed" },
-  CANCELLED: { tone: "neutral", label: "Cancelled" },
+  OPEN: { text: "text-(--kt-muted)", label: "Waiting for a tutor" },
+  ACCEPTED: { text: "text-success", label: "Class created" },
+  ENROLLED: { text: "text-success", label: "Enrolled" },
+  FULFILLED: { text: "text-(--kt-muted)", label: "Completed" },
+  CANCELLED: { text: "text-(--kt-muted)", label: "Cancelled" },
 } as const;
+
+/** "15:00" → "3:00 PM". */
+function clock(hhmm: string): { time: string; meridiem: string } {
+  const [h, m] = hhmm.split(":").map(Number);
+  return { time: `${h % 12 || 12}:${String(m).padStart(2, "0")}`, meridiem: h < 12 ? "AM" : "PM" };
+}
+
+type Slot = { date?: string | null; day: string; startTime: string; endTime: string };
+
+function slotRange(slot: Slot): string {
+  const a = clock(slot.startTime);
+  const b = clock(slot.endTime);
+  return a.meridiem === b.meridiem ? `${a.time}–${b.time} ${b.meridiem}` : `${a.time} ${a.meridiem}–${b.time} ${b.meridiem}`;
+}
+
+/** Calendar-style block for a request's first free time: a dated day, or "Every Fri" for a weekly time. */
+function SlotDate({ slot }: { slot?: Slot }) {
+  const box = "w-14 shrink-0 flex flex-col items-center text-center";
+  if (!slot) {
+    return <div className={box}><span className="text-sm text-(--kt-muted) pt-1">Any time</span></div>;
+  }
+  if (!slot.date) {
+    return (
+      <div className={box} aria-hidden="true">
+        <span className="text-sm text-(--kt-muted)">Every</span>
+        <span className="font-serif text-2xl leading-tight">{slot.day[0]}{slot.day.slice(1, 3).toLowerCase()}</span>
+      </div>
+    );
+  }
+  const d = new Date(`${slot.date}T12:00:00+08:00`);
+  const part = (o: Intl.DateTimeFormatOptions) => d.toLocaleDateString("en-PH", { timeZone: "Asia/Manila", ...o });
+  return (
+    <div className={box} aria-hidden="true">
+      <span className="text-sm text-(--kt-muted)">{part({ weekday: "short" })}</span>
+      <span className="font-serif text-3xl leading-tight">{part({ day: "numeric" })}</span>
+      <span className="text-sm text-(--kt-muted)">{part({ month: "short" })}</span>
+    </div>
+  );
+}
+
+/** "in 6 h" when an open request closes within a day; otherwise null (the deadline is the same 3-day window for all). */
+function closesSoon(r: { status: string; expiresAt: string }): string | null {
+  if (r.status !== "OPEN") return null;
+  const hours = (new Date(r.expiresAt).getTime() - Date.now()) / 3_600_000;
+  if (hours <= 0 || hours > 24) return null;
+  return hours < 1 ? "within the hour" : `in ${Math.round(hours)} h`;
+}
+
+/** A preferred slot as a learner would say it: "Fri, Dec 11 · 3:00–4:00 PM" or "Every Friday · 3:00–4:00 PM". */
+export function slotLabel(slot: Slot): string {
+  const day = slot.date
+    ? new Date(`${slot.date}T12:00:00+08:00`).toLocaleDateString("en-PH", { timeZone: "Asia/Manila", weekday: "short", month: "short", day: "numeric" })
+    : `Every ${slot.day[0]}${slot.day.slice(1).toLowerCase()}`;
+  return `${day} · ${slotRange(slot)}`;
+}
 
 export default function TopicRequestManager({ defaultGrade }: { defaultGrade: string }) {
   const { data: requests, loading, error, loadError, setError, refetch } = useFetchList<TopicRequest>(
@@ -190,53 +243,61 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
     }
   };
 
+  const tabCount = (name: "Active" | "Expired" | "Past") =>
+    requests.filter((r) => name === "Past" ? r.status !== "OPEN" :
+      r.status === "OPEN" && (name === "Expired" ? new Date(r.expiresAt) <= new Date() : new Date(r.expiresAt) > new Date())).length;
+  const textarea = "textarea textarea-bordered w-full min-h-24";
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={loadError ? null : error || null} />
 
       <section className="card kt-card">
-        <div className="card-body gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="card-title text-sm font-bold">
-              {editId ? "Edit request" : showForm ? "New request" : "Your class requests"}
-            </h2>
-            {!formMode && (
+        <div className="kt-card-body gap-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="max-w-xl">
+              <h2 className="font-serif text-2xl font-medium leading-tight">
+                {editId ? "Edit your request" : showForm ? "Ask for a class" : renewId ? "Renew your request" : "Your requests"}
+              </h2>
+              {!formMode && !renewId && (
+                <p className="text-sm text-(--kt-muted)">
+                  Say what you want to learn and when you&apos;re free. A tutor can make a class for it, then you review and enroll.
+                  Need something now? Try <Link href="/learner/match" className="link link-primary">Auto match</Link>.
+                </p>
+              )}
+            </div>
+            {!formMode && !renewId && (
               <button
                 onClick={() => {
                   setShowForm(true);
                   setError("");
                 }}
-                className="btn btn-primary btn-sm text-xs gap-1"
+                className="btn btn-primary gap-1.5"
               >
-                <Plus className="h-4 w-4" />
+                <Plus aria-hidden="true" className="h-4 w-4" />
                 New request
               </button>
             )}
           </div>
 
-          {!formMode && (
-            <p className="text-xs text-(--kt-muted)">
-              Post what you want to learn and when you&apos;re free. A tutor can attach a class, then you review and enroll.
-            </p>
-          )}
-
           {showForm && (
-            <ValidatedForm onSubmit={submit} className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20">
+            <ValidatedForm onSubmit={submit} className="space-y-6">
               <MatchCriteriaFields gradeLocked gradeRequired value={criteria} onChange={setCriteria} />
-              <FormField label="Note" hint="Optional — anything a tutor should know.">
+              <FormField size="md" label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   maxLength={500}
-                  className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                  className={textarea}
                   placeholder="e.g. I struggle with word problems the most."
                 />
                 <CharCount value={note} max={500} />
               </FormField>
-              <div className="flex items-center gap-2">
-                <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
-                  {submitting ? <span className="loading loading-spinner loading-xs" /> : "Post request"}
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="submit" disabled={submitting} className="btn btn-primary">
+                  {submitting && <span className="loading loading-spinner loading-sm" />}
+                  Post request
                 </button>
                 <button
                   type="button"
@@ -245,9 +306,8 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     resetForm();
                     setError("");
                   }}
-                  className="btn btn-ghost btn-sm text-xs gap-1"
+                  className="btn btn-ghost"
                 >
-                  <X className="h-4 w-4" />
                   Back to requests
                 </button>
               </div>
@@ -255,28 +315,23 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
           )}
 
           {editingRequest && (
-            <ValidatedForm
-              onSubmit={saveEdit}
-              className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20"
-            >
-              <div className="flex items-center gap-2 text-2xs text-(--kt-faint)">
-                <span className="badge badge-neutral text-2xs font-bold uppercase">
-                  {subjectDisplayLabel(editingRequest.subject)}
-                </span>
-                Editing your open request
-              </div>
+            <ValidatedForm onSubmit={saveEdit} className="space-y-6">
+              <p className="text-sm text-(--kt-muted)">
+                {subjectDisplayLabel(editingRequest.subject)} · still open, so you can change it.
+              </p>
               <MatchCriteriaFields gradeLocked gradeRequired value={editCriteria} onChange={setEditCriteria} />
-              <FormField label="Note" hint="Optional — anything a tutor should know.">
+              <FormField size="md" label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={editNote}
                   onChange={(e) => setEditNote(e.target.value)}
-                  className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                  className={textarea}
                   placeholder="e.g. I struggle with word problems the most."
                 />
               </FormField>
-              <div className="flex items-center gap-2">
-                <button type="submit" disabled={savingEdit} className="btn btn-primary btn-sm text-xs">
-                  {savingEdit ? <span className="loading loading-spinner loading-xs" /> : "Save changes"}
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="submit" disabled={savingEdit} className="btn btn-primary">
+                  {savingEdit && <span className="loading loading-spinner loading-sm" />}
+                  Save changes
                 </button>
                 <button
                   type="button"
@@ -284,149 +339,129 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     setEditId(null);
                     setError("");
                   }}
-                  className="btn btn-ghost btn-sm text-xs gap-1"
+                  className="btn btn-ghost"
                 >
-                  <X className="h-4 w-4" />
                   Back to requests
                 </button>
               </div>
             </ValidatedForm>
           )}
 
-          {renewId && <div className="border border-base-200 rounded-xl p-4 space-y-3 text-xs">
-            <h3 className="font-semibold">Renew request · preferred times</h3>
-            <p>Adjust your weekly availability, then renew this request for 3 days.</p>
-            {renewSlots.map((slot, i) => <div key={i} className="flex flex-wrap gap-2">
-              <select aria-label={`Preferred day ${i + 1}`} className="select select-bordered select-sm" value={slot.day} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, day: e.target.value } : s))}>
-                {["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => <option key={d} value={d}>{d.charAt(0) + d.slice(1).toLowerCase()}</option>)}
-              </select>
-              <input type="time" aria-label={`Preferred start time ${i + 1}`} className="input input-bordered input-sm" value={slot.startTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, startTime: e.target.value } : s))} />
-              <input type="time" aria-label={`Preferred end time ${i + 1}`} className="input input-bordered input-sm" value={slot.endTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, endTime: e.target.value } : s))} />
-              <button className="btn btn-ghost btn-sm" onClick={() => setRenewSlots(renewSlots.filter((_, j) => j !== i))}>Remove</button>
-            </div>)}
-            <div className="flex gap-2"><button className="btn btn-outline btn-sm" onClick={() => setRenewSlots([...renewSlots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }])}>Add time</button>
-              <button className="btn btn-primary btn-sm" onClick={() => renew(renewId, renewSlots)}>Renew for 3 days</button>
-              <button className="btn btn-ghost btn-sm" onClick={() => setRenewId(null)}>Back</button></div>
-          </div>}
-          {!formMode && <div role="tablist" className="tabs tabs-boxed">{(["Active", "Expired", "Past"] as const).map((name) => <button key={name} role="tab" aria-selected={tab === name} className={`tab ${tab === name ? "tab-active" : ""}`} onClick={() => setTab(name)}>{name}</button>)}</div>}
-          {formMode ? null : loading ? (
-            <div className="flex justify-center py-10">
-              <span className="loading loading-spinner loading-md text-primary" />
+          {renewId && (
+            <div className="space-y-4">
+              <p className="text-sm text-(--kt-muted)">Adjust the weekly times you&apos;re free, then renew the request for 3 more days.</p>
+              <ul className="border-t border-(--kt-border)">
+                {renewSlots.map((slot, i) => (
+                  <li key={i} className="grid grid-cols-2 sm:grid-cols-[3fr_2fr_2fr_auto] items-end gap-3 py-3 border-b border-(--kt-border)">
+                    <label className="col-span-2 sm:col-span-1 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">Day</span>
+                      <select className="select select-bordered w-full" value={slot.day} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, day: e.target.value } : s))}>
+                        {["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"].map((d) => <option key={d} value={d}>Every {d.charAt(0) + d.slice(1).toLowerCase()}</option>)}
+                      </select>
+                    </label>
+                    <label className="min-w-0 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">From</span>
+                      <input type="time" className="input input-bordered w-full" value={slot.startTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, startTime: e.target.value } : s))} />
+                    </label>
+                    <label className="min-w-0 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">To</span>
+                      <input type="time" className="input input-bordered w-full" value={slot.endTime} onChange={(e) => setRenewSlots(renewSlots.map((s, j) => j === i ? { ...s, endTime: e.target.value } : s))} />
+                    </label>
+                    <button type="button" className="btn btn-ghost text-error col-span-2 sm:col-span-1 justify-self-start" onClick={() => setRenewSlots(renewSlots.filter((_, j) => j !== i))}>Remove</button>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" className="btn btn-outline gap-1.5" onClick={() => setRenewSlots([...renewSlots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }])}>
+                  <Plus aria-hidden="true" className="h-4 w-4" /> Add a time
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => renew(renewId, renewSlots)}>Renew for 3 days</button>
+                <button type="button" className="btn btn-ghost" onClick={() => setRenewId(null)}>Back to requests</button>
+              </div>
             </div>
+          )}
+
+          {!formMode && !renewId && (
+            <div role="tablist" aria-label="Your requests" className="flex gap-6 border-b border-(--kt-border)">
+              {(["Active", "Expired", "Past"] as const).map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  role="tab"
+                  aria-selected={tab === name}
+                  onClick={() => setTab(name)}
+                  className={`-mb-px border-b-2 py-2 font-medium transition-colors ${tab === name ? "border-primary text-base-content" : "border-transparent text-(--kt-muted) hover:text-base-content"}`}
+                >
+                  {name} <span className="text-sm font-normal text-(--kt-muted)">{tabCount(name)}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {formMode || renewId ? null : loading ? (
+            <p role="status" className="text-sm text-(--kt-muted)">Loading your requests…</p>
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : visibleRequests.length === 0 ? (
-            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
-              No {tab.toLowerCase()} requests.
-            </div>
+            <p className="text-(--kt-muted)">
+              {tab === "Active" ? "No open requests. Use New request to ask for a class on a topic." : tab === "Expired" ? "No expired requests." : "Nothing here yet — finished and cancelled requests show up here."}
+            </p>
           ) : (
-            <div className="space-y-3">
+            <ul className="-mx-5 -mt-5">
               {visibleRequests.map((r) => {
                 const meta = STATUS_TONE[r.status];
+                const [first, ...more] = r.slots;
                 return (
-                  <div key={r.id} className="border border-base-200 rounded-xl p-4 space-y-2 text-xs">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
+                  <li key={r.id} className="flex gap-4 px-5 py-4 border-b border-(--kt-border) last:border-b-0">
+                    <SlotDate slot={first} />
+                    <div className="min-w-0 flex-1 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                      <div className="min-w-0 space-y-0.5">
+                        <h3 className="font-serif text-xl font-medium leading-snug break-words">
+                          <Link href={`/learner/requests/${r.id}`} className="link link-hover">{r.topics.join(" · ")}</Link>
+                        </h3>
+                        <p className="text-sm text-(--kt-muted)">
                           {subjectDisplayLabel(r.subject)}
-                        </span>
-                        <span className="text-(--kt-faint)">{gradeLabel(r.gradeLevel)}</span>
-                        <StatusBadge tone={tab === "Expired" ? "neutral" : meta.tone} label={tab === "Expired" ? "Expired" : meta.label} size="xs" />
-                        <span className="badge badge-outline badge-sm text-2xs">
-                          {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}
-                        </span>
+                          {first && <> · {slotRange(first)}</>}
+                          {more.length > 0 && <span title={more.map(slotLabel).join("\n")}> +{more.length}</span>}
+                          {r.directedTo && <> · <span className="kt-id kt-id--tutor">{r.directedTo.anonymousId}</span></>}
+                          {closesSoon(r) && <span className="text-warning-content"> · closes {closesSoon(r)}</span>}
+                        </p>
+                        {tab === "Expired" && <p className="text-sm text-warning-content">Expired — renew it to keep looking for a tutor.</p>}
+                        {r.status === "ACCEPTED" && r.fulfilledClass && (
+                          <p className="text-sm text-success font-medium">
+                            {r.fulfilledClass.tutorAnonymousId} made a class for this
+                            {r.fulfilledClass.nextSessionAt ? <span className="font-normal">, first session {formatDateTime(r.fulfilledClass.nextSessionAt)}</span> : ""}.
+                          </p>
+                        )}
+                        {r.status === "ENROLLED" && <p className="text-sm text-success font-medium">You&apos;re enrolled in the class for this.</p>}
+                        {tab === "Past" && r.status !== "ENROLLED" && <p className="text-sm text-(--kt-muted)">{meta.label}</p>}
                       </div>
-                      {(r.status === "OPEN" || r.status === "ACCEPTED") && (
-                        <div className="flex items-center gap-1 shrink-0">
-                          {r.status === "OPEN" && tab === "Active" && (
-                            <button
-                              onClick={() => startEdit(r)}
-                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs gap-1"
-                            >
-                              <Pencil className="h-3 w-3" />
-                              Edit
-                            </button>
-                          )}
-                          <button
-                            onClick={() => setCancelId(r.id)}
-                            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error text-2xs"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      )}
+
+                      <div className="flex shrink-0 flex-wrap items-center gap-1 -ml-4 sm:ml-0">
+                        {r.status === "ACCEPTED" && r.fulfilledClass && (
+                          <Link href={`/learner/classes/${r.fulfilledClass.id}`} className="btn btn-primary ml-4 sm:ml-0">Review &amp; enroll</Link>
+                        )}
+                        {r.status === "ENROLLED" && r.fulfilledClass && (
+                          <Link href={`/learner/classes/${r.fulfilledClass.id}`} className="btn btn-ghost">View class</Link>
+                        )}
+                        {tab === "Expired" && (
+                          <>
+                            <button className="btn btn-ghost" onClick={() => renew(r.id)}>Renew</button>
+                            <button className="btn btn-ghost" onClick={() => { setRenewId(r.id); setRenewSlots(r.slots); }}>Change times</button>
+                          </>
+                        )}
+                        {r.status === "OPEN" && tab === "Active" && (
+                          <button onClick={() => startEdit(r)} className="btn btn-ghost">Edit</button>
+                        )}
+                        {(r.status === "OPEN" || r.status === "ACCEPTED") && (
+                          <button onClick={() => setCancelId(r.id)} className="btn btn-ghost text-error">Cancel</button>
+                        )}
+                      </div>
                     </div>
-
-                    {tab === "Expired" && <><button className="btn btn-primary btn-xs min-h-11 sm:min-h-0" onClick={() => renew(r.id)}>Renew as is</button><button className="btn btn-outline btn-xs min-h-11 sm:min-h-0 ml-2" onClick={() => { setRenewId(r.id); setRenewSlots(r.slots); }}>Change times and renew</button></>}
-                    <Link className="link link-primary text-2xs" href={`/learner/requests/${r.id}`}>View history</Link>
-                    <div className="flex flex-wrap gap-1">
-                      {r.topics.map((t) => (
-                        <span key={t} className="badge badge-outline badge-sm text-2xs py-2.5">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-
-                    {r.slots.length > 0 && (
-                      <div className="flex items-center gap-1.5 text-2xs text-(--kt-muted) flex-wrap">
-                        <Clock className="h-3 w-3 shrink-0" />
-                        {r.slots.map((s, i) => (
-                          <span key={i}>
-                            {s.day[0] + s.day.slice(1).toLowerCase()} {s.date ? `(${s.date}) ` : ""}{s.startTime}–{s.endTime}
-                            {i < r.slots.length - 1 ? "," : ""}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {r.note && <p className="text-(--kt-muted) italic">“{r.note}”</p>}
-
-                    {r.fulfilledClass && (
-                      <p className="text-2xs text-(--kt-muted)">Class covers: {r.fulfilledClass.topics.join(", ")}</p>
-                    )}
-
-                    {r.status === "ACCEPTED" && r.fulfilledClass && (
-                      <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
-                        <span className="text-2xs text-(--kt-muted)">
-                          {r.fulfilledClass.tutorAnonymousId} created a class
-                          {r.fulfilledClass.nextSessionAt
-                            ? ` · next ${formatDateTime(r.fulfilledClass.nextSessionAt)}`
-                            : ""}
-                        </span>
-                        <Link
-                          href={`/learner/classes/${r.fulfilledClass.id}`}
-                          className="btn btn-success btn-xs min-h-11 sm:min-h-0 text-2xs"
-                        >
-                          Review &amp; enroll
-                        </Link>
-                      </div>
-                    )}
-
-                    {r.status === "ENROLLED" && r.fulfilledClass && (
-                      <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
-                        <span className="text-2xs text-(--kt-muted)">
-                          Enrolled with {r.fulfilledClass.tutorAnonymousId} — class in progress.
-                        </span>
-                        <Link
-                          href={`/learner/classes/${r.fulfilledClass.id}`}
-                          className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-2xs"
-                        >
-                          View class
-                        </Link>
-                      </div>
-                    )}
-
-                    {r.status === "FULFILLED" && (
-                      <p className="text-2xs text-(--kt-faint) italic">Completed ✓</p>
-                    )}
-
-                    <p className="text-2xs text-(--kt-faint)">
-                      Posted {formatDate(r.createdAt)}{r.status === "OPEN" && ` · Deadline ${formatDateTime(r.expiresAt)}`}
-                    </p>
-                  </div>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           )}
         </div>
       </section>

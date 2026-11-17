@@ -32,9 +32,7 @@ export default async function TutorProfilePage() {
 
   return (
     <ProfileView
-      eyebrow="Tutor Portal"
-      roleLabel="Student Tutor"
-      roleLabelClass="text-(--kt-tutor-text)"
+      eyebrow="Iyong account"
       idRole="TUTOR"
       editHref="/tutor/profile/edit"
       fullName={session!.user.fullName}

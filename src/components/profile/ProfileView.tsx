@@ -1,23 +1,44 @@
-import RecoveryEmailSettings from "@/components/profile/RecoveryEmailSettings";
+import type { ReactNode } from "react";
 import Link from "next/link";
-import { ShieldCheck, Pencil } from "lucide-react";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import PageHeader from "@/components/ui/PageHeader";
-import TopicChip from "@/components/ui/TopicChip";
+import RecoveryEmailSettings from "@/components/profile/RecoveryEmailSettings";
 import UserAvatar from "@/components/profile/UserAvatar";
 import AccountControls from "@/components/profile/AccountControls";
 import { GRADE_LEVELS, gradeLabel } from "@/lib/gradeLevels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
+
+function Row({ label, children, empty = false }: { label: string; children: ReactNode; empty?: boolean }) {
+  return (
+    <div className="grid gap-x-6 gap-y-0.5 py-3 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[9rem_1fr] sm:items-baseline">
+      <dt className="text-sm text-(--kt-muted)">{label}</dt>
+      <dd className={`break-words ${empty ? "text-(--kt-muted)" : "text-base font-medium"}`}>{children}</dd>
+    </div>
+  );
+}
+
+function Group({ title, note, action, children }: { title: string; note: string; action?: ReactNode; children: ReactNode }) {
+  return (
+    <section className="space-y-1">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h3 className="text-base font-semibold">{title}</h3>
+          <p className="text-sm text-(--kt-muted)">{note}</p>
+        </div>
+        {action}
+      </div>
+      <dl>{children}</dl>
+    </section>
+  );
+}
+
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";
 
 /**
- * Read-only account page for learners and tutors — identity fields only an
- * admin can change, a read-only summary of the self-service fields (grade
- * level, section, contact info) with an "Edit details" link to
- * `{role}/profile/edit`, and (tutors) a verified-topics card.
+ * The account page for learners and tutors: who you are (and the anonymous ID peers see), the fields an
+ * administrator manages, the self-service fields with an "Edit details" link to `{role}/profile/edit`,
+ * (tutors) certified topics, then recovery email and account deletion.
  */
 export default function ProfileView({
   eyebrow,
-  roleLabel,
-  roleLabelClass,
   idRole,
   editHref,
   fullName,
@@ -30,8 +51,6 @@ export default function ProfileView({
   image,
 }: {
   eyebrow: string;
-  roleLabel: string;
-  roleLabelClass: string;
   idRole: "LEARNER" | "TUTOR";
   editHref: string;
   fullName: string;
@@ -40,147 +59,116 @@ export default function ProfileView({
   gradeLevel?: string | null;
   section: string;
   contactInfo: string;
-  /** Tutor only: their CERTIFIED topics, grouped and shown as a card. */
+  /** Tutor only: their CERTIFIED topics, grouped by subject. */
   certifiedTopics?: { subject: string; topic: string }[];
   image?: string | null;
 }) {
   const gradeText =
-    GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ??
-    (gradeLevel ? gradeLabel(gradeLevel) : undefined) ??
-    "—";
-  const editableRows: { label: string; value: string }[] = [
-    { label: "Grade level", value: gradeText },
-    { label: "Section", value: section || "—" },
-    { label: "Contact info", value: contactInfo || "Not set" },
-  ];
+    GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ?? (gradeLevel ? gradeLabel(gradeLevel) : "Not set");
   const topicsBySubject = new Map<string, string[]>();
   for (const c of certifiedTopics ?? []) {
     topicsBySubject.set(c.subject, [...(topicsBySubject.get(c.subject) ?? []), c.topic]);
   }
-  const identityRows: { label: string; value: React.ReactNode }[] = [
-    { label: "Real name", value: <span className="font-semibold">{fullName}</span> },
-    { label: "Email", value: <span className="font-semibold break-all">{email}</span> },
-    {
-      label: "Anonymous ID",
-      value: <AnonymousIdBadge id={anonymousId} role={idRole} />,
-    },
-    { label: "Role", value: <span className={`font-semibold ${roleLabelClass}`}>{roleLabel}</span> },
-  ];
+  const peers = idRole === "TUTOR" ? "Learners" : "Tutors and classmates";
+
+  const isTutor = idRole === "TUTOR";
+  const gradeSection = [gradeLevel ? gradeText : null, section ? `Section ${section}` : null].filter(Boolean).join(" · ");
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow={eyebrow}
-        title="Your account"
-        subtitle="Only you and administrators can see your real name, email, and contact info."
-        actions={<AnonymousIdBadge id={anonymousId} role={idRole} size="md" showIcon />}
-      />
+    <div className="space-y-8 max-w-3xl">
+      {/* The page is about you: your name is the h1, on the one tinted band (in your role's colour). */}
+      <section
+        aria-labelledby="account-name"
+        className={`rounded-(--kt-radius-box) px-5 py-6 sm:px-7 flex flex-col sm:flex-row sm:items-center gap-5 ${isTutor ? "bg-accent/15" : "bg-secondary/10"}`}
+      >
+        <UserAvatar
+          src={image}
+          name={fullName}
+          anonymousId={anonymousId}
+          size="xl"
+          role={idRole}
+          modalTitle={`${fullName} - Profile Picture`}
+        />
+        <div className="min-w-0 space-y-1">
+          <p className="font-serif italic text-base leading-none text-primary">{eyebrow}</p>
+          <h1 id="account-name" className="font-serif text-3xl sm:text-4xl font-medium tracking-tight leading-tight break-words">
+            {fullName}
+          </h1>
+          {gradeSection && <p className="text-base">{gradeSection}</p>}
+          <p className="text-sm text-(--kt-muted)">
+            {peers} see you only as{" "}
+            <span className={`kt-id text-base ${isTutor ? "kt-id--tutor" : "kt-id--learner"}`}>{anonymousId}</span>
+          </p>
+        </div>
+      </section>
 
-      {idRole === "TUTOR" && (
-        <section aria-label="Tutor grade and section" className="rounded-xl border border-base-300 bg-base-100 p-5">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="text-sm font-bold">Grade and section</h2>
-              <p className="mt-1 text-sm text-(--kt-muted)">
-                {gradeText === "—" ? "Grade not set" : gradeText} · {section || "Section not set"}
-              </p>
-            </div>
-            <Link href={editHref} className="btn btn-outline btn-primary btn-sm">Update details</Link>
+      <section className="card kt-card" aria-labelledby="your-details">
+        <div className="kt-card-body gap-6">
+          <div>
+            <h2 id="your-details" className={sectionTitle}>Your details</h2>
+            <p className="text-sm text-(--kt-muted)">Only you and administrators can see your real name, email and contact info.</p>
           </div>
-        </section>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Read-only identity */}
-        <section className="card kt-card lg:col-span-2">
-          <div className="card-body gap-4 p-6">
-            <div className="flex items-center gap-4">
-              <UserAvatar
-                src={image}
-                name={fullName}
-                anonymousId={anonymousId}
-                size="lg"
-                role={idRole}
-                modalTitle={`${fullName} - Profile Picture`}
-              />
-              <div>
-                <h2 className="card-title text-sm font-bold">Identity</h2>
-                <p className="text-2xs text-(--kt-muted) mt-0.5 flex items-start gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 shrink-0 mt-px text-success" />
-                  Name and email are managed by an administrator.
-                </p>
-              </div>
-            </div>
-            <dl className="divide-y divide-base-200">
-              {identityRows.map((r) => (
-                <div key={r.label} className="grid gap-0.5 py-3 text-sm">
-                  <dt className="text-2xs uppercase tracking-wide text-(--kt-faint)">{r.label}</dt>
-                  <dd>{r.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
-
-        {/* Self-service fields (read-only summary; edit on its own page) */}
-        <section className="card kt-card lg:col-span-3">
-          <div className="card-body gap-4 p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="card-title text-sm font-bold">Your details</h2>
-                <p className="text-2xs text-(--kt-muted) mt-1">
-                  Grade level, section, and contact info — keep these current so tutors and admins can reach you.
-                </p>
-              </div>
-              <Link href={editHref} className="btn btn-outline btn-primary btn-sm text-xs gap-1 shrink-0">
-                <Pencil className="h-3.5 w-3.5" />
-                Edit details
-              </Link>
-            </div>
-            <dl className="divide-y divide-base-200">
-              {editableRows.map((r) => (
-                <div key={r.label} className="grid gap-0.5 py-3 text-sm">
-                  <dt className="text-2xs uppercase tracking-wide text-(--kt-faint)">{r.label}</dt>
-                  <dd className="font-semibold break-words">{r.value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </section>
-      </div>
+          <Group title="Set by your school" note="Only an administrator can change these.">
+            <Row label="Real name">{fullName}</Row>
+            <Row label="Email">{email}</Row>
+          </Group>
+          <Group
+            title="You can change"
+            note="Keep these up to date."
+            action={<Link href={editHref} className="btn btn-outline">Edit details</Link>}
+          >
+            <Row label="Grade level" empty={!gradeLevel}>{gradeText}</Row>
+            <Row label="Section" empty={!section}>{section || "Not set"}</Row>
+            <Row label="Contact info" empty={!contactInfo}>{contactInfo || "Not set"}</Row>
+          </Group>
+        </div>
+      </section>
 
       {certifiedTopics && (
         <section className="card kt-card">
-          <div className="card-body gap-3 p-6">
-            <div>
-              <h2 className="card-title text-sm font-bold">Verified Topics</h2>
-              <p className="text-2xs text-(--kt-muted) mt-1">
-                Topics you&apos;re certified to teach. Learners see these on your profile.
-              </p>
+          <div className="kt-card-body gap-4">
+            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+              <div>
+                <h2 className={sectionTitle}>Topics you&apos;re certified in</h2>
+                <p className="text-sm text-(--kt-muted)">Learners see these on your profile.</p>
+              </div>
+              {topicsBySubject.size > 0 && (
+                <p className="flex items-baseline gap-x-1.5 text-sm text-(--kt-muted)">
+                  <span className="font-serif text-3xl leading-none text-(--kt-tutor-text)">{certifiedTopics.length}</span>
+                  topic{certifiedTopics.length === 1 ? "" : "s"} in
+                  <span className="font-serif text-3xl leading-none text-base-content">{topicsBySubject.size}</span>
+                  subject{topicsBySubject.size === 1 ? "" : "s"}
+                </p>
+              )}
             </div>
             {topicsBySubject.size === 0 ? (
-              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-                No verified topics yet — take an assessment from the Assessments page.
+              <p className="text-(--kt-muted)">
+                None yet. Pass a topic assessment from the{" "}
+                <Link href="/tutor/assessments" className="link link-primary">Assessments page</Link> to add one.
               </p>
             ) : (
-              <div className="space-y-2">
+              <dl className="border-t border-(--kt-border)">
                 {Array.from(topicsBySubject.entries()).map(([subject, topics]) => (
                   <div
                     key={subject}
-                    className="border border-base-200 bg-base-200/20 rounded-lg p-3 space-y-1.5"
+                    className="grid gap-x-6 gap-y-1 py-3 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[13rem_1fr] sm:items-baseline"
                   >
-                    <span className="badge badge-neutral badge-sm text-2xs font-bold">{subject}</span>
-                    <div className="flex flex-wrap gap-1">
-                      {topics.map((t) => (
-                        <TopicChip key={t} topic={t} verified />
-                      ))}
-                    </div>
+                    <dt className="font-semibold">{subjectDisplayLabel(subject)}</dt>
+                    <dd>
+                      <ul className="space-y-2 leading-snug">
+                        {topics.map((t) => (
+                          <li key={t}>{t}</li>
+                        ))}
+                      </ul>
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             )}
           </div>
         </section>
       )}
+
       <RecoveryEmailSettings />
       <AccountControls />
     </div>

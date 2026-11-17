@@ -67,6 +67,25 @@ Portals on the landing theme (2026-11-17)
     bell count; clicking a row marks it read and opens its link (writes to DB — needs go-ahead).
  [ ] /tutor/notifications and /admin/notifications with real data: day groups, icons per kind.
  [ ] Sidebar groups: collapse/expand a group, reload — the choice persists on all three portals.
+ [Good] /learner/profile and /tutor/profile (demo learner + demo tutor, 1280px and 375px): avatar + serif name +
+    ID line, one account card with two groups, tutor certified topics, recovery row, delete section; Change and
+    Delete account… open their forms; nothing under 14px; only Plex Serif/Sans.
+ [ ] Recovery email end to end (writes to DB — needs go-ahead): change address with password, send code,
+    verify, remove by saving blank.
+ [ ] Decide: clear the personal Gmail recovery address on the shared demo learner account.
+ [Good] /learner/help (demo learner, 1280px and 375px): search "enroll" opens matching guides and questions,
+    numbered step rail, questions under serif categories, chat-helper footer; only Plex Serif/Sans, nothing <14px.
+ [ ] /tutor/help and /admin/help in the browser after the HelpCenter restyle and copy changes (checked in tests
+    only): privacy answer, plain status words, admin setting names.
+ [ ] Help footer with the Chatbot assistant setting off: no mention of the chat helper.
+ [Good] Open select dropdowns have a border + soft shadow (/learner/my-classes grade filter, Chrome).
+ [ ] Same dropdowns in Firefox/Safari (no customizable select there — the native list should be unchanged).
+ [Good] Request Tutor tab (demo learner, 1280px and 375px): calendar block + serif topic rows, meta line,
+    underline tabs with counts (Active 37 / Expired 0 / Past 15), "Ask for a class" form opens without nested
+    boxes; nothing under 14px; no horizontal scroll.
+ [ ] Post, edit, cancel and renew a request end to end (writes to DB — needs go-ahead).
+ [ ] Request rows in other states: Class created (Review & enroll), Enrolled (View class), Expired (renew buttons),
+    Past; a public request shows "Any certified tutor".
  [Good] /learner/tutors catalog cards (demo learner, desktop and 375px): no date block, serif
     ube tutor ID, capped subjects/topics, footer counts, no horizontal scroll.
  [ ] /learner/tutors with "show tutor real names" ON: card title shows the name with the ID and

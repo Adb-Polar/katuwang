@@ -18,9 +18,7 @@ export default async function LearnerProfilePage() {
 
   return (
     <ProfileView
-      eyebrow="Learner Portal"
-      roleLabel="Student Learner"
-      roleLabelClass="text-secondary"
+      eyebrow="Iyong account"
       idRole="LEARNER"
       editHref="/learner/profile/edit"
       fullName={session!.user.fullName}

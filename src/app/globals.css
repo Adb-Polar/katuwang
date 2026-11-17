@@ -353,3 +353,15 @@ input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="
   border-color: var(--color-error);
   outline-color: var(--color-error);
 }
+
+/* Open dropdown panels (DaisyUI's customizable select). Its default edge is base-200 plus a shadow scaled by
+   --depth, which is 0 in this flat theme, so the panel had no visible edge on white. Give it the field's border
+   colour and one soft shadow so it reads as a layer above the page. */
+.select::picker(select),
+.select select::picker(select) {
+  border-width: 1px;
+  border-style: solid;
+  border-color: oklch(80% 0.012 225);
+  border-radius: var(--radius-field);
+  box-shadow: 0 10px 24px -12px oklch(24% 0.02 230 / 0.25);
+}
