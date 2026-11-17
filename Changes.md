@@ -4451,3 +4451,18 @@ Tutor colour on public pages changed from the dark olive (`oklch(46% 0.1 105)`) 
 text `oklch(55% 0.16 300)` (5.2:1 on white, 4.85:1 on the tinted notes), fill
 `oklch(80% 0.15 300)` for the sign-up stripe, illustration and the `katuwang-public` accent.
 Portal colours are unchanged.
+
+Root layout: `<html data-scroll-behavior="smooth">`, so Next.js 16 disables the public pages'
+smooth scrolling during route changes (navigations jump to the top; in-page anchors still glide).
+Clears the dev-console "missing-data-scroll-behavior" warning.
+
+## Project skill: public-page-restyle (2026-11-17)
+
+New Claude Code skill at `.claude/skills/public-page-restyle/` that repeats this redesign on
+other pages: scope (shared components, public vs. portal, tests), an unslop audit with
+evidence and severity, proposed fixes, then a restyle onto `PublicShell`/`AuthLayout` and the
+`katuwang-public` theme, with verification and logging steps. Includes the unslop rubric, a map
+of the theme tokens/classes/shared components, and `scripts/contrast.py` (WCAG contrast for
+OKLCH/hex, including translucent tints). A report-only trial on `/learner` shaped the portal
+guidance: portal pages are only moved to the public theme together, because the two themes
+use opposite role colours (portal learner = violet; public tutor = ube/violet).

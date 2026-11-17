@@ -35,6 +35,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html
       lang="en"
       data-theme="katuwang theme"
+      // Public pages set smooth scrolling on <html>; this tells Next.js to switch it off
+      // during route changes so navigations jump straight to the top.
+      data-scroll-behavior="smooth"
       className={`${apfel.variable} ${fragmentMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-base-200">
