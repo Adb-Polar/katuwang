@@ -30,7 +30,7 @@ export default async function AccountDeclinedPage({
             <div className="w-12 h-12 rounded-full bg-error/15 text-error flex items-center justify-center">
               <XCircle className="w-6 h-6" strokeWidth={2.25} />
             </div>
-            <p className="text-xs text-base-content/70 leading-relaxed">
+            <p className="text-xs text-(--kt-muted) leading-relaxed">
               An administrator reviewed your registration and did not approve it,
               so you can&apos;t sign in with this account.
             </p>
@@ -40,11 +40,11 @@ export default async function AccountDeclinedPage({
                 <p className="text-2xs font-semibold uppercase tracking-wide text-error/70">
                   Reason given
                 </p>
-                <p className="mt-1 text-xs text-base-content/80 whitespace-pre-wrap">{reason}</p>
+                <p className="mt-1 text-xs text-(--kt-muted) whitespace-pre-wrap">{reason}</p>
               </div>
             )}
 
-            <p className="text-xs text-base-content/60 leading-relaxed">
+            <p className="text-xs text-(--kt-muted) leading-relaxed">
               If you think this was a mistake, contact your school administrator.
               You may register again with corrected details.
             </p>
@@ -58,7 +58,7 @@ export default async function AccountDeclinedPage({
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to sign in
             </Link>
-            <Link href="/register" className="text-xs font-bold text-base-content/60 hover:text-primary hover:underline">
+            <Link href="/register" className="text-xs font-bold text-(--kt-muted) hover:text-primary hover:underline">
               Register again
             </Link>
           </div>

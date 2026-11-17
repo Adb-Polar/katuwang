@@ -63,7 +63,7 @@ export default function ChatbotMissesTable() {
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Unanswered Questions</h2>
-          <p className="text-xs text-base-content/50 -mt-2">
+          <p className="text-xs text-(--kt-faint) -mt-2">
             Messages the assistant couldn&apos;t match to a nav intent or FAQ, grouped by
             normalised wording. Use these to grow the FAQ knowledge base.
           </p>
@@ -109,15 +109,15 @@ export default function ChatbotMissesTable() {
                 <tbody>
                   {groups.map((g) => (
                     <tr key={`${g.role}:${g.normalized}`} className="text-sm">
-                      <td className="text-base-content/80 max-w-md truncate" title={g.normalized}>
+                      <td className="text-(--kt-muted) max-w-md truncate" title={g.normalized}>
                         {g.sample}
                       </td>
                       <td>
                         <span className="badge badge-ghost badge-sm">{ROLE_LABELS[g.role]}</span>
                       </td>
-                      <td className="text-base-content/60">{g.count}</td>
-                      <td className="text-base-content/50">{formatDateTime(g.firstSeen)}</td>
-                      <td className="text-base-content/50">{formatDateTime(g.lastSeen)}</td>
+                      <td className="text-(--kt-muted)">{g.count}</td>
+                      <td className="text-(--kt-faint)">{formatDateTime(g.firstSeen)}</td>
+                      <td className="text-(--kt-faint)">{formatDateTime(g.lastSeen)}</td>
                     </tr>
                   ))}
                 </tbody>

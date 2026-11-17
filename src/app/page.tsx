@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getActiveServerSession } from "@/lib/serverSession";
-import UploadedLanding from "@/components/landing/UploadedLanding";
+import LandingPage from "@/components/landing/LandingPage";
 
 export const metadata: Metadata = {
   title: "Katuwang — free peer tutoring for Grades 7–12",
@@ -12,5 +12,5 @@ export default async function Home() {
   const session = await getActiveServerSession();
   const signedIn = Boolean(session);
 
-  return <UploadedLanding signedIn={signedIn} />;
+  return <LandingPage signedIn={signedIn} />;
 }

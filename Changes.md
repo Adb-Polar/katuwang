@@ -4355,3 +4355,56 @@ Verification: 13 API/component tests, TypeScript and targeted ESLint pass. Tests
 cover badges without verified classes and overflow counts. Live/mobile visual
 checks remain in `docs/backlog/TOTEST.txt`. No database changes.
 Plan: `docs/plans/tutor-card-certified-topics.md`.
+
+## Landing page and theme unslop pass (2026-11-17)
+
+An audit of the landing page found generic AI-template defaults: a cream
+`#FAF8F5` page background, a pulsing status dot, uppercase spaced eyebrows
+("Editorial Sequence"), a STEP 01–04 grid of identical cards each holding a
+second card, privacy content nested three boxes deep, five hand-copied FAQ
+blocks, monospace used for every label and button, and faded `/50`–`/60` text
+that failed contrast. `text-tutor-gold-text` (step 3) was an undefined colour.
+
+The landing page is replaced by a new design (`LandingPage.tsx`,
+`HeroIllustration.tsx`, `landing.css`; `UploadedLanding.tsx` and
+`uploaded-landing.css` are removed, as is the landing-only palette in
+`globals.css`). It was chosen from local prototypes (font pairings, then colour
+palettes) and is deliberately small: a header with two links; a hero with one
+sentence, two buttons, the Tagalog tagline and a flat vector illustration of a
+tutor helping a learner; four numbered steps on a light tinted band; a
+who-sees-what list written from each role's point of view; two join columns;
+three FAQs using native `<details>`; a one-line footer. RA 10173 is not named
+on the page; the privacy policy link carries the detail. Copy reflects the
+`showTutorRealNames` setting: learner names are never shown to tutors, and
+learners see tutor names only if the school turns that on.
+
+Type and colour are scoped to the landing page (`.kt-landing`, `lp-` classes,
+because DaisyUI owns `.btn`, `.hero`, `.steps`, `.join`, `.link`, `.table`):
+IBM Plex Serif for headings and IDs, IBM Plex Sans for everything else (loaded
+with `next/font/google`, so builds fetch them from Google Fonts), and the
+"Dagat" palette: sea blue-teal primary `#005770`, coral learners, citrus tutors.
+Every text pairing passes WCAG AA. The logo is drawn inline in the primary
+colour; the logo files in `public/logos/` and the portal theme are unchanged.
+The page is now a Server Component (no client state).
+
+Theme (`globals.css`): base colours move from warm hue 80 to a cool neutral;
+`--kt-muted` / `--kt-faint` become solid colours (~6.5:1 and ~5:1); buttons and
+sidebar nav use Apfel Grotezk, leaving Fragment Mono for IDs, codes, scores and
+dates; the badge dot shows only on status badges; the portal topbar is solid
+instead of blurred.
+
+App-wide: 501 `text-base-content/40–80` classes across 121 files now use
+`text-(--kt-faint)` (40–55) or `text-(--kt-muted)` (60–80); `/25–/35` was left
+alone because it mostly marks disabled states and decorative icons. Hover lift
+and scale were removed from ClassCard, TutorBrowser cards, the register role
+cards and UserAvatar. The `Sparkles` icon (which implied AI) is replaced with
+`ListChecks` for Auto Match, `BookOpenCheck` for topic coverage and
+`BookmarkPlus` for admin class recommendations.
+
+Verification: TypeScript and ESLint pass. 1,378 tests pass; the one failure is
+the known unrelated `ValidatedForm.test.tsx` case, which also fails on unmodified
+develop. Landing page checked in Chromium at desktop and 375px: only the two IBM Plex
+families load, every link returns 200, FAQ items open, no horizontal scroll, no
+console or server errors. The signed-in variant was not checked in the browser. Portal pages were
+not checked in the browser. No database changes.
+Plan: `docs/plans/landing-unslop.md`.

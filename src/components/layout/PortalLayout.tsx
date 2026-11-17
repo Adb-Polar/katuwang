@@ -235,7 +235,7 @@ export default function PortalLayout({
         <div className="flex-1">{navTree}</div>
         <div className="flex flex-col gap-3 px-2 pb-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/45">
+            <span className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
               Anonymous ID
             </span>
             {idNode}
@@ -347,7 +347,7 @@ export default function PortalLayout({
           <div className="flex-1">{navTree}</div>
           <div className="flex flex-col gap-3 px-2 pb-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-2xs font-semibold uppercase tracking-wide text-base-content/45">
+              <span className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
                 Anonymous ID
               </span>
               {idNode}

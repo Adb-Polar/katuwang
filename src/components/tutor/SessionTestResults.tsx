@@ -32,7 +32,7 @@ function deltaClass(d: number | null) {
   if (d == null) return "text-base-content/30";
   if (d > 0) return "text-success";
   if (d < 0) return "text-error";
-  return "text-base-content/50";
+  return "text-(--kt-faint)";
 }
 function fmtDelta(d: number | null) {
   if (d == null) return "—";
@@ -137,7 +137,7 @@ export default function SessionTestResults({
         <h1 className="text-lg font-sans">{data.test.title}</h1>
       </div>
 
-      <p className="text-xs text-base-content/60">{data.totals.enrolled} currently enrolled · {data.totals.historicalEnrolled ?? data.totals.enrolled} historical participants. Submitted results include withdrawn learners.</p>
+      <p className="text-xs text-(--kt-muted)">{data.totals.enrolled} currently enrolled · {data.totals.historicalEnrolled ?? data.totals.enrolled} historical participants. Submitted results include withdrawn learners.</p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card kt-card kt-stat p-4">
           <span className="kt-stat-title">Pre-test submitted</span>
@@ -195,8 +195,8 @@ export default function SessionTestResults({
                     <td>
                       <AnonymousIdBadge id={l.anonymousId} role="LEARNER" />
                     </td>
-                    <td className="text-base-content/70">{l.pre != null ? `${l.pre}%` : "—"}</td>
-                    <td className="text-base-content/70">{l.post != null ? `${l.post}%` : "—"}</td>
+                    <td className="text-(--kt-muted)">{l.pre != null ? `${l.pre}%` : "—"}</td>
+                    <td className="text-(--kt-muted)">{l.post != null ? `${l.post}%` : "—"}</td>
                     <td className={`font-semibold ${deltaClass(l.delta)}`}>{fmtDelta(l.delta)}</td>
                     <td className="text-right flex gap-1 justify-end">
                       {l.preAttemptId && (
@@ -238,7 +238,7 @@ export default function SessionTestResults({
                     <h3 className="font-bold text-sm text-base-content">
                       {detail.learner.anonymousId} · {KIND_LABEL[detail.kind] ?? detail.kind}
                     </h3>
-                    <p className="text-2xs text-base-content/50 mt-0.5">
+                    <p className="text-2xs text-(--kt-faint) mt-0.5">
                       {detail.scorePercent}% ({detail.correctCount}/{detail.totalQuestions})
                     </p>
                   </div>
@@ -250,8 +250,8 @@ export default function SessionTestResults({
                   {detail.items.map((item) => (
                     <div key={item.questionId} className="border border-base-200 rounded-xl p-3 space-y-2">
                       <div className="flex items-start gap-2">
-                        <span className="text-2xs text-base-content/40 shrink-0">Q{item.position + 1}</span>
-                        <p className="text-xs font-semibold text-base-content/80">{item.prompt}</p>
+                        <span className="text-2xs text-(--kt-faint) shrink-0">Q{item.position + 1}</span>
+                        <p className="text-xs font-semibold text-(--kt-muted)">{item.prompt}</p>
                         {item.isCorrect != null && (
                           <span className={`text-2xs shrink-0 ${item.isCorrect ? "text-success" : "text-error"}`}>
                             {item.isCorrect ? "✓" : "✗"}
@@ -269,7 +269,7 @@ export default function SessionTestResults({
                                   ? "border-success/30 bg-success/5 text-success"
                                   : chosen
                                   ? "border-error/30 bg-error/5 text-error"
-                                  : "border-base-200 text-base-content/60"
+                                  : "border-base-200 text-(--kt-muted)"
                               }`}
                             >
                               {o.text}
@@ -279,7 +279,7 @@ export default function SessionTestResults({
                           );
                         })}
                       </ul>
-                      {item.explanation && <p className="text-2xs text-base-content/50 italic">{item.explanation}</p>}
+                      {item.explanation && <p className="text-2xs text-(--kt-faint) italic">{item.explanation}</p>}
                     </div>
                   ))}
                 </div>

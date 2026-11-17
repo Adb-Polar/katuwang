@@ -60,8 +60,8 @@ export default function OtherTopicAssessment() {
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
             <div>
-        <h3 className="text-xs font-bold text-base-content/80">Take an assessment for any topic</h3>
-        <p className="text-2xs text-base-content/55 mt-0.5">
+        <h3 className="text-xs font-bold text-(--kt-muted)">Take an assessment for any topic</h3>
+        <p className="text-2xs text-(--kt-faint) mt-0.5">
           You don&apos;t need a class for it — pass now and you&apos;ll be verified when you do teach it.
         </p>
       </div>

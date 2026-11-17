@@ -48,12 +48,12 @@ export default function WeeklyTimetable({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
-      {sessions.length === 0 && <p className="text-xs text-base-content/50 italic">{emptyMessage}</p>}
+      <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+      {sessions.length === 0 && <p className="text-xs text-(--kt-faint) italic">{emptyMessage}</p>}
     <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
       {days.map(({ date, day, label }) => (
         <div key={date} className="rounded-lg border border-base-200 bg-base-200/20 p-2 min-h-[5rem]">
-          <div className="text-2xs font-bold uppercase tracking-wide text-base-content/50 mb-1.5">
+          <div className="text-2xs font-bold uppercase tracking-wide text-(--kt-faint) mb-1.5">
             <span>{day}</span> <time dateTime={date}>{label}</time>
           </div>
           <div className="space-y-1">
@@ -69,7 +69,7 @@ export default function WeeklyTimetable({
                   <div className="font-bold text-primary/90">
                     {scheduleTime(s.scheduledAt)}
                   </div>
-                  <div className="truncate text-base-content/70" title={`${subjectDisplayLabel(s.subject)} — ${s.topic}`}>
+                  <div className="truncate text-(--kt-muted)" title={`${subjectDisplayLabel(s.subject)} — ${s.topic}`}>
                     {s.topic}
                   </div>
                 </Link>

@@ -106,10 +106,10 @@ export default function MyProgressView({
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
-      {data?.series.some(row => row.withdrawnAt) && <p className="text-xs text-base-content/60">Includes retained learning records from classes you withdrew from.</p>}
+      {data?.series.some(row => row.withdrawnAt) && <p className="text-xs text-(--kt-muted)">Includes retained learning records from classes you withdrew from.</p>}
       {error && <button type="button" onClick={() => { setLoading(true); setError(""); setData(null); setRetryCount((count) => count + 1); }} className="btn btn-outline btn-error min-h-11">Retry loading progress</button>}
 
-      {loading && <p role="status" className="text-sm text-base-content/60">Loading progress…</p>}
+      {loading && <p role="status" className="text-sm text-(--kt-muted)">Loading progress…</p>}
       {!loading && !error && data?.summary.sessionsWithTest === 0 && (
         <div className="rounded-xl border border-base-300 p-4 text-sm space-y-2">
           <p>No session tests have been recorded for this selection yet. Open a class to check upcoming sessions and tests.</p>
@@ -145,7 +145,7 @@ export default function MyProgressView({
                 ? `+${data.summary.avgDelta}`
                 : data.summary.avgDelta}
             </span>
-            <span className="text-xs text-base-content/60">percentage points · paired tests only</span>
+            <span className="text-xs text-(--kt-muted)">percentage points · paired tests only</span>
           </div>
         </div>
       )}
@@ -159,7 +159,7 @@ export default function MyProgressView({
         yDomain={[0, 100]}
         minChartWidth={Math.max(320, chartData.length * 90)}
         missingLabel="Not taken yet"
-        footer={<p className="text-xs text-base-content/60">Compare the two scores within each session. Topics and assessment difficulty may differ between sessions. Missing attempts are not zero scores. Scroll horizontally to view more sessions.</p>}
+        footer={<p className="text-xs text-(--kt-muted)">Compare the two scores within each session. Topics and assessment difficulty may differ between sessions. Missing attempts are not zero scores. Scroll horizontally to view more sessions.</p>}
         tableColumns={[
           { header: "Session", cell: (r) => String(r.session) },
           { header: "Class", cell: (r) => String(r.classCode) },

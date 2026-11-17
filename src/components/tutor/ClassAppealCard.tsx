@@ -68,8 +68,8 @@ export default function ClassAppealCard({
           <Gavel className="h-4 w-4 shrink-0" />
           Appeal submitted — awaiting admin review
         </div>
-        <p className="text-base-content/70">Filed {formatDate(appeal.createdAt)}.</p>
-        <p className="text-base-content/80">
+        <p className="text-(--kt-muted)">Filed {formatDate(appeal.createdAt)}.</p>
+        <p className="text-(--kt-muted)">
           <span className="font-semibold">Your reason:</span> {appeal.reason}
         </p>
       </div>
@@ -84,7 +84,7 @@ export default function ClassAppealCard({
         <div className="space-y-1">
           <p className="font-bold text-error">Your last appeal was not approved</p>
           {appeal?.reviewNote && (
-            <p className="text-base-content/80">
+            <p className="text-(--kt-muted)">
               <span className="font-semibold">Admin note:</span> {appeal.reviewNote}
             </p>
           )}
@@ -125,7 +125,7 @@ export default function ClassAppealCard({
         </ValidatedForm>
       ) : (
         <div className="flex items-center justify-between gap-3">
-          <p className="text-base-content/70">
+          <p className="text-(--kt-muted)">
             Think this was a mistake? You can appeal it to an administrator.
           </p>
           <button

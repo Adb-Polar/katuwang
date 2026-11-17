@@ -110,7 +110,7 @@ export default function LoginForm() {
           {/* The asymmetric artwork needs a small optical offset to sit over the heading. */}
           <BrandMark className="h-8 w-8 -translate-x-[3px]" />
           <h1 className="font-sans text-xl font-semibold text-base-content">Welcome Back</h1>
-          <p className="text-xs text-base-content/60">Sign in to your account</p>
+          <p className="text-xs text-(--kt-muted)">Sign in to your account</p>
         </div>
 
         <FeedbackBanner variant="success" message={successMsg || null} />
@@ -123,7 +123,7 @@ export default function LoginForm() {
               <Check className="w-6 h-6" strokeWidth={3} />
             </div>
             <h3 className="font-sans text-base font-semibold">Verification Successful</h3>
-            <p className="text-xs text-base-content/60">Preparing your portal dashboard. Redirecting...</p>
+            <p className="text-xs text-(--kt-muted)">Preparing your portal dashboard. Redirecting...</p>
             <span className="loading loading-ring loading-md text-success"></span>
           </div>
         ) : (
@@ -132,7 +132,7 @@ export default function LoginForm() {
             {/* Email Input */}
             <div data-form-field="Email Address" className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">Email Address</span>
+                <span className="label-text font-semibold text-xs text-(--kt-muted)">Email Address</span>
               </label>
               <input
                 type="email"
@@ -152,7 +152,7 @@ export default function LoginForm() {
             <div data-form-field="Password" className="form-control w-full">
               <div className="flex items-center justify-between">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-xs text-base-content/75">Password</span>
+                  <span className="label-text font-semibold text-xs text-(--kt-muted)">Password</span>
                 </label>
               </div>
               <div className="relative">
@@ -172,7 +172,7 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -182,7 +182,7 @@ export default function LoginForm() {
             <div className="flex justify-end text-2xs">
               <Link
                 href="/forgot-password"
-                className="text-base-content/50 hover:text-primary hover:underline transition-colors"
+                className="text-(--kt-faint) hover:text-primary hover:underline transition-colors"
               >
                 Forgot password?
               </Link>
@@ -192,7 +192,7 @@ export default function LoginForm() {
             <div className="form-control">
               <label className="label justify-start gap-2 cursor-pointer py-1">
                 <input type="checkbox" className="checkbox checkbox-primary checkbox-xs" disabled={loading} />
-                <span className="label-text text-xs text-base-content/60 select-none">Keep me signed in</span>
+                <span className="label-text text-xs text-(--kt-muted) select-none">Keep me signed in</span>
               </label>
             </div>
 
@@ -215,7 +215,7 @@ export default function LoginForm() {
         )}
 
         {/* Registration Redirection Links */}
-        <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">
+        <div className="text-center text-xs text-(--kt-faint) border-t border-base-200 pt-4">
           <span>New to Katuwang? </span>
           <Link className="text-primary font-bold hover:underline" href={"/register"}>
             Register

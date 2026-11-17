@@ -17,7 +17,7 @@ export default function AssessmentsSummaryCard({
             View all <ArrowRight className="h-3 w-3" />
           </Link>
         </div>
-        <p className="text-xs text-base-content/60">
+        <p className="text-xs text-(--kt-muted)">
           {certifiedCount} verified topic{certifiedCount === 1 ? "" : "s"}, {pendingCount} pending request
           {pendingCount === 1 ? "" : "s"}.
         </p>

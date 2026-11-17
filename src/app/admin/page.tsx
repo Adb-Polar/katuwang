@@ -97,7 +97,7 @@ export default async function AdminDashboard() {
               Recent activity
             </h2>
             {recentLogs.length === 0 ? (
-              <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
                 No audit-log entries yet.
               </p>
             ) : (
@@ -107,18 +107,18 @@ export default async function AdminDashboard() {
                   return (
                     <li key={log.id} className="py-2.5 text-xs">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                        <span className="min-w-0 break-words font-semibold text-base-content/80">
+                        <span className="min-w-0 break-words font-semibold text-(--kt-muted)">
                           {auditActionDisplayLabel(log.action)}
-                          <span className="font-normal text-base-content/50"> · {statusDisplayLabel(log.targetType)}</span>
+                          <span className="font-normal text-(--kt-faint)"> · {statusDisplayLabel(log.targetType)}</span>
                         </span>
-                        <span className="text-base-content/50 shrink-0">{formatDateTime(log.createdAt)} PHT</span>
+                        <span className="text-(--kt-faint) shrink-0">{formatDateTime(log.createdAt)} PHT</span>
                       </div>
                       {summary && (
-                        <p className="mt-1 break-words text-xs leading-relaxed text-base-content/70">
+                        <p className="mt-1 break-words text-xs leading-relaxed text-(--kt-muted)">
                           {summary}
                         </p>
                       )}
-                      <p className="text-2xs text-base-content/50 mt-1">By {log.admin.anonymousId}</p>
+                      <p className="text-2xs text-(--kt-faint) mt-1">By {log.admin.anonymousId}</p>
                     </li>
                   );
                 })}
@@ -137,7 +137,7 @@ export default async function AdminDashboard() {
               <Link
                 key={a.href}
                 href={a.href}
-                className="flex items-center justify-between gap-2 py-2 text-xs font-medium text-base-content/80 hover:text-primary"
+                className="flex items-center justify-between gap-2 py-2 text-xs font-medium text-(--kt-muted) hover:text-primary"
               >
                 <span>{a.label}</span>
                 <span className="flex items-center gap-1.5">
@@ -150,7 +150,7 @@ export default async function AdminDashboard() {
                 </span>
               </Link>
             ))}
-            <p className="text-2xs text-base-content/40 mt-1">
+            <p className="text-2xs text-(--kt-faint) mt-1">
               Signed in as {session!.user.fullName}.
             </p>
           </div>

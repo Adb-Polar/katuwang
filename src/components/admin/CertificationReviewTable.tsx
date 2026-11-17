@@ -205,13 +205,13 @@ export default function CertificationReviewTable() {
                     <tr key={c.id} className="text-sm">
                       <td>
                         <AnonymousIdBadge id={c.tutor.anonymousId} role="TUTOR" />
-                        <div className="text-2xs text-base-content/50 mt-1">
+                        <div className="text-2xs text-(--kt-faint) mt-1">
                           {c.tutor.firstName} {c.tutor.lastName}
                         </div>
                       </td>
-                      <td className="text-base-content/70">{subjectDisplayLabel(c.subject)}</td>
-                      <td className="text-base-content/70">{c.topic}</td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">{subjectDisplayLabel(c.subject)}</td>
+                      <td className="text-(--kt-muted)">{c.topic}</td>
+                      <td className="text-(--kt-muted)">
                         {tab === "certified"
                           ? c.certifiedAt
                             ? formatDateTime(c.certifiedAt)
@@ -223,7 +223,7 @@ export default function CertificationReviewTable() {
                           : formatDateTime(c.requestedAt)}
                       </td>
                       {tab === "rejected" && (
-                        <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
+                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
                           {c.reviewNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}

@@ -255,12 +255,12 @@ export default function ClassScheduleFields({
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
       <FeedbackBanner variant="error" message={formError || error || null} />
       <CatalogCurriculumHint subject={subjects.find((entry) => entry.slug === form.subject)} />
-      <p className="text-xs text-base-content/60">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
+      <p className="text-xs text-(--kt-muted)">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
       <div className="space-y-4">
         <div>
           <h2 className="font-bold text-base">Class details</h2>
-          <p className="text-sm text-base-content/60">Select a grade, then choose its subject and topics.</p>
+          <p className="text-sm text-(--kt-muted)">Select a grade, then choose its subject and topics.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <FormField size={fieldSize} label="Grade level" required hint="The level of the material. Learners from any grade can enroll.">
@@ -300,7 +300,7 @@ export default function ClassScheduleFields({
 
       <FormField size={fieldSize} label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
         {!form.gradeLevel || !form.subject ? (
-          <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
+          <div className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-3 text-center">
             {form.gradeLevel ? "Select a subject to see available topics." : "Select a grade and subject to see available topics."}
           </div>
         ) : (
@@ -321,7 +321,7 @@ export default function ClassScheduleFields({
               } overflow-y-auto border border-base-200 rounded-lg p-2`}
             >
               {shownTopicOptions.length === 0 && (
-                <p className="col-span-full text-2xs text-base-content/50 italic py-2 text-center">
+                <p className="col-span-full text-2xs text-(--kt-faint) italic py-2 text-center">
                   {subjectTopics.length === 0 ? "No topics are available for this subject and grade." : `No topics match “${topicFilter}”.`}
                 </p>
               )}
@@ -368,7 +368,7 @@ export default function ClassScheduleFields({
             )}
 
             {allowedTopicSet && (
-              <p className="text-2xs text-base-content/50">
+              <p className="text-2xs text-(--kt-faint)">
                 Your school requires certification to teach a topic — only topics you&apos;ve
                 been certified for can be picked.
               </p>
@@ -398,7 +398,7 @@ export default function ClassScheduleFields({
         hint="Each session covers one topic from the ones selected above."
       >
         {!form.subject || selectedTopics.length === 0 ? (
-          <div className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-3 text-center">
+          <div className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-3 text-center">
             Select a subject and at least one topic first.
           </div>
         ) : (
@@ -411,7 +411,7 @@ export default function ClassScheduleFields({
               >
                 <legend className="px-2 text-sm font-bold">Session {i + 1}</legend>
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-xs text-base-content/60">Set the topic, start time, and length.</p>
+                  <p className="text-xs text-(--kt-muted)">Set the topic, start time, and length.</p>
                   <button
                     type="button"
                     data-validation-change
@@ -480,7 +480,7 @@ export default function ClassScheduleFields({
               </fieldset>
             ))}
             {sessionRows.length === 0 && (
-              <p className="rounded-lg border border-dashed border-base-300 p-5 text-center text-sm text-base-content/60">
+              <p className="rounded-lg border border-dashed border-base-300 p-5 text-center text-sm text-(--kt-muted)">
                 No sessions yet. Add your first session to set a date and time.
               </p>
             )}
@@ -500,7 +500,7 @@ export default function ClassScheduleFields({
       <div className="space-y-4 border-t border-base-200 pt-6">
         <div>
           <h2 className="font-bold text-base">Attendance details</h2>
-          <p className="text-sm text-base-content/60">Add a room or an online meeting link, then set the class capacity.</p>
+          <p className="text-sm text-(--kt-muted)">Add a room or an online meeting link, then set the class capacity.</p>
         </div>
         <FormField size={fieldSize} label="Location" hint="A location or a meeting link is required — for an in-person class">
           <div className="flex flex-wrap items-center gap-1.5">

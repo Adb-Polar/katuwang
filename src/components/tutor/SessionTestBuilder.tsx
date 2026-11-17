@@ -125,7 +125,7 @@ function CreateTestPanel({
       <section className="card kt-card max-w-xl">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Create this session&apos;s test</h2>
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             One question set — learners take it before the session (pre-test) and again
             when you post the post-test, so you can see the gain.
           </p>
@@ -336,7 +336,7 @@ function BuilderBody({
         {classSubject} · pre/post test
       </p>
       {status === "PUBLISHED" && (
-        <p className="text-xs text-base-content/65">
+        <p className="text-xs text-(--kt-muted)">
           {sessionStatus === "CANCELLED" ? "This session was cancelled; no new test attempts can start." : posttestOpen ? "Post-test available to enrolled learners." : pretestClosed || sessionStatus === "COMPLETED" ? "Pre-test closed. Post the post-test when it is ready." : "Pre-test open to enrolled learners. Post the post-test when it is ready."}
         </p>
       )}
@@ -407,17 +407,17 @@ function BuilderBody({
           </div>
 
           {items.length === 0 ? (
-            <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+            <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
               No questions yet. Add some from the bank or write your own.
             </p>
           ) : (
             <ul className="space-y-2">
               {items.map((q, idx) => (
                 <li key={q.questionId} className="flex items-start gap-2 p-3 border border-base-200 rounded-xl text-xs">
-                  <span className="text-2xs text-base-content/40 pt-0.5 shrink-0">Q{idx + 1}</span>
+                  <span className="text-2xs text-(--kt-faint) pt-0.5 shrink-0">Q{idx + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="text-base-content/80">{q.prompt}</div>
-                    <div className="text-2xs text-base-content/40 mt-0.5">
+                    <div className="text-(--kt-muted)">{q.prompt}</div>
+                    <div className="text-2xs text-(--kt-faint) mt-0.5">
                       {q.topic} ·{" "}
                       <span className={q.origin === "TUTOR" ? "text-accent" : "text-primary"}>
                         {q.origin === "TUTOR" ? "Custom" : "Bank"}
@@ -662,7 +662,7 @@ function AddFromBankModal({
     <div className="modal modal-open">
       <div className="modal-box max-w-lg p-6 kt-card space-y-4">
         <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
-        <p className="text-xs text-base-content/60">
+        <p className="text-xs text-(--kt-muted)">
           Showing active bank questions for {subject}.
           {requiresCertification && " Bank access is limited to topics you are certified in."}
           Search by question text or topic, or write your own questions for this session.
@@ -707,7 +707,7 @@ function AddFromBankModal({
               <span className="loading loading-spinner loading-md text-primary" aria-label="Loading questions" />
             </div>
           ) : error ? null : rows.length === 0 ? (
-            <p className="text-2xs text-base-content/40 italic text-center py-6">
+            <p className="text-2xs text-(--kt-faint) italic text-center py-6">
               No active bank questions found for {subject}.
               {filters.q || filters.topic
                 ? " Try another search or choose All topics."
@@ -733,8 +733,8 @@ function AddFromBankModal({
                     onChange={() => toggle(r)}
                   />
                   <span>
-                    <span className="text-base-content/80">{r.prompt}</span>
-                    <span className="block text-2xs text-base-content/40">
+                    <span className="text-(--kt-muted)">{r.prompt}</span>
+                    <span className="block text-2xs text-(--kt-faint)">
                       {r.topic} · {r.reviewStatus === "APPROVED" ? "Reviewed for qualification" : r.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"}
                       {already && " · already on this test"}
                     </span>
@@ -827,7 +827,7 @@ function MyQuestionsModal({
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
           ) : rows.length === 0 ? (
-            <p className="text-2xs text-base-content/40 italic text-center py-6">
+            <p className="text-2xs text-(--kt-faint) italic text-center py-6">
               You haven&apos;t written any custom questions yet.
             </p>
           ) : (
@@ -848,8 +848,8 @@ function MyQuestionsModal({
                     onChange={() => toggle(r.id)}
                   />
                   <span>
-                    <span className="text-base-content/80">{r.prompt}</span>
-                    <span className="block text-2xs text-base-content/40">
+                    <span className="text-(--kt-muted)">{r.prompt}</span>
+                    <span className="block text-2xs text-(--kt-faint)">
                       {r.topic}
                       {already && " · already on this test"}
                     </span>

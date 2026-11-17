@@ -139,11 +139,11 @@ export default async function TutorDashboard() {
             Your account is {user?.status === "BANNED" ? "banned" : "suspended"}
           </div>
           {user?.statusReason && (
-            <p className="text-xs text-base-content/80">
+            <p className="text-xs text-(--kt-muted)">
               <span className="font-semibold">Reason:</span> {user.statusReason}
             </p>
           )}
-          <p className="text-xs text-base-content/70">
+          <p className="text-xs text-(--kt-muted)">
             {user?.statusExpiresAt
               ? `In effect until ${formatDateTime(user.statusExpiresAt)}.`
               : "In effect indefinitely. Contact an administrator for details."}
@@ -176,9 +176,9 @@ export default async function TutorDashboard() {
             <CalendarClock className="h-4 w-4 text-primary" />
             Upcoming sessions
           </h2>
-          <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+          <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
           {upcomingSessions.length === 0 ? (
-            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
               No scheduled sessions across your classes.
             </p>
           ) : (
@@ -206,7 +206,7 @@ export default async function TutorDashboard() {
                             {s.topic}
                           </span>
                         </div>
-                        <p className="text-2xs text-base-content/55 mt-0.5">
+                        <p className="text-2xs text-(--kt-faint) mt-0.5">
                           {formatTime(d)} ·{" "}
                           {s.duration} min
                         </p>
@@ -226,7 +226,7 @@ export default async function TutorDashboard() {
             <CalendarClock className="h-4 w-4 text-primary" />
             This week
           </h2>
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             Your scheduled sessions over the next 7 days.
           </p>
           <WeeklyTimetable sessions={timetableSessions} />
@@ -240,13 +240,13 @@ export default async function TutorDashboard() {
           <h2 className="card-title text-sm font-bold">Getting Started</h2>
           <ul className="space-y-2">
             {steps.map((step) => (
-              <li key={step.label} className="flex items-center gap-2 text-xs text-base-content/80">
+              <li key={step.label} className="flex items-center gap-2 text-xs text-(--kt-muted)">
                 {step.done ? (
                   <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                 ) : (
                   <Circle className="h-4 w-4 text-base-content/30 shrink-0" />
                 )}
-                <span className={step.done ? "" : "text-base-content/50"}>{step.label}</span>
+                <span className={step.done ? "" : "text-(--kt-faint)"}>{step.label}</span>
               </li>
             ))}
           </ul>

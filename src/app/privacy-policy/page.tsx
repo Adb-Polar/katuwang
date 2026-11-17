@@ -14,11 +14,11 @@ export default function PrivacyPolicyPage() {
         <div className="flex flex-col items-center gap-2 text-center">
           <BrandMark />
           <h1 className="font-sans text-2xl font-semibold text-base-content">Privacy Policy</h1>
-          <p className="text-xs text-base-content/60">Last updated 2026-09-14</p>
+          <p className="text-xs text-(--kt-muted)">Last updated 2026-09-14</p>
         </div>
 
         <section className="card kt-card">
-          <div className="card-body gap-6 p-6 md:p-8 text-sm leading-relaxed text-base-content/80">
+          <div className="card-body gap-6 p-6 md:p-8 text-sm leading-relaxed text-(--kt-muted)">
             <div className="flex items-start gap-3 rounded-xl bg-info/10 border border-info/20 p-4 text-xs">
               <ShieldCheck className="h-4 w-4 shrink-0 mt-0.5 text-info" />
               <p>

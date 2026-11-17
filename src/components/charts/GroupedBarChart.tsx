@@ -44,10 +44,10 @@ function renderTooltip(
       {rows.map((r) => (
         <p key={r.key} className="flex items-center gap-1.5 leading-5">
           <span className="inline-block h-2 w-2 shrink-0 rounded-sm" style={{ background: r.color }} />
-          <span className="text-base-content/60">{r.name}:</span>
+          <span className="text-(--kt-muted)">{r.name}:</span>
           <span
             className={
-              r.value == null ? "italic text-base-content/40" : "font-medium text-base-content"
+              r.value == null ? "italic text-(--kt-faint)" : "font-medium text-base-content"
             }
           >
             {r.text}
@@ -119,7 +119,7 @@ export default function GroupedBarChart({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">{title}</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">{title}</h3>
         {hasData ? (
           <div className="w-full overflow-x-auto" tabIndex={minChartWidth ? 0 : undefined} aria-label={minChartWidth ? "Session comparison chart; scroll horizontally for more sessions" : undefined}>
             <div className="h-56 w-full" style={{ minWidth: minChartWidth }}>
@@ -161,7 +161,7 @@ export default function GroupedBarChart({
             </div>
           </div>
         ) : (
-          <p className="py-8 text-center text-xs italic text-base-content/40">{emptyHint}</p>
+          <p className="py-8 text-center text-xs italic text-(--kt-faint)">{emptyHint}</p>
         )}
         {footer}
         <div className="overflow-x-auto"><DataTable rows={data} columns={columns} /></div>

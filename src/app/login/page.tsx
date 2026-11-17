@@ -13,7 +13,7 @@ export default function LoginPage() {
       <Suspense fallback={
         <div className="card kt-card w-full max-w-md text-center p-8">
           <span className="loading loading-spinner loading-md text-primary mx-auto"></span>
-          <p className="mt-4 text-xs text-base-content/60">Loading form...</p>
+          <p className="mt-4 text-xs text-(--kt-muted)">Loading form...</p>
         </div>
       }>
         <LoginForm />

@@ -123,7 +123,7 @@ export default function UserAvatarModerationCard({
             <p className="text-xs font-semibold text-base-content">
               {image ? "Active Cloud Avatar" : "No Profile Picture Set"}
             </p>
-            <p className="text-2xs text-base-content/60">
+            <p className="text-2xs text-(--kt-muted)">
               {image
                 ? updatedAt
                   ? `Uploaded on ${formatDateTime(updatedAt)}`
@@ -186,7 +186,7 @@ export default function UserAvatarModerationCard({
         onClose={() => { if (!loadingAction) setModalOpen(false); }}
         title={pendingAction ? ACTION_TITLES[pendingAction] : "Profile picture moderation"}
       >
-            <p className="text-xs text-base-content/70 mt-2">
+            <p className="text-xs text-(--kt-muted) mt-2">
               {pendingAction === "WARN" &&
                 "The user will receive an in-app warning notification prompting them to update their photo."}
               {pendingAction === "REMOVE" &&

@@ -12,6 +12,6 @@ export default function CatalogGradePicker({ value, onChange, disabled = false, 
           onChange={() => onChange(grades.includes(g.value) ? grades.filter((v) => v !== g.value) : [...grades, g.value])} />{g.label}
       </label>)}
     </div>
-    <p className="text-base-content/50">No selection means all grades. Topics also follow their subject’s grades.</p>
+    <p className="text-(--kt-faint)">No selection means all grades. Topics also follow their subject’s grades.</p>
   </details>;
 }

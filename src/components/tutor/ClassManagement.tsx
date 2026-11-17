@@ -90,7 +90,7 @@ export default function ClassManagement() {
             </Link>
           </div>
 
-          <p className="text-xs text-base-content/60">
+          <p className="text-xs text-(--kt-muted)">
             Schedule 1-on-1 sessions or small group classes for any subject. Tutees will be able to discover and enroll in your scheduled classes.
           </p>
 

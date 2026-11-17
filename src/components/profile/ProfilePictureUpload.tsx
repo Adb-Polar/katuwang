@@ -161,7 +161,7 @@ export default function ProfilePictureUpload({
         <div className="flex-1 text-center sm:text-left space-y-2">
           <div>
             <h3 className="text-sm font-bold text-base-content">Profile Photo</h3>
-            <p className="text-xs text-base-content/60">
+            <p className="text-xs text-(--kt-muted)">
               Upload a PNG, JPG, or WebP photo up to 2MB.
             </p>
           </div>

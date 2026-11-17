@@ -43,7 +43,7 @@ export default function VerifyEmailForm({ initialEmail = "" }: { initialEmail?: 
           <div className="mt-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/15 text-info">
             {verified ? <CheckCircle className="h-6 w-6" /> : <MailCheck className="h-6 w-6" />}
           </div>
-          <p className="text-xs leading-relaxed text-base-content/70">
+          <p className="text-xs leading-relaxed text-(--kt-muted)">
             {verified
               ? "Your email address has been verified. You can now sign in."
               : "Enter the six-digit code we sent to your email. It expires in 10 minutes."}
@@ -86,7 +86,7 @@ export default function VerifyEmailForm({ initialEmail = "" }: { initialEmail?: 
                 {submitting ? <span className="loading loading-spinner loading-xs" /> : "Verify email"}
               </button>
             </form>
-            <p className="text-center text-xs text-base-content/60">Didn&apos;t get the code? Check your spam folder or request another one.</p>
+            <p className="text-center text-xs text-(--kt-muted)">Didn&apos;t get the code? Check your spam folder or request another one.</p>
             <ResendVerificationButton email={email} />
           </>
         )}

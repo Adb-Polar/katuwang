@@ -95,7 +95,7 @@ export default async function LearnerClassDetailPage({
           <EyeOff className="h-6 w-6" />
         </div>
         <h1 className="text-lg font-bold text-base-content">This class isn&apos;t published yet</h1>
-        <p className="text-sm text-base-content/60">
+        <p className="text-sm text-(--kt-muted)">
           You&apos;re still enrolled. Your tutor has temporarily hidden the class details —
           check back once it&apos;s published again.
         </p>
@@ -135,7 +135,7 @@ export default async function LearnerClassDetailPage({
         <div className="flex items-center gap-1.5">
           <Users className="h-4 w-4 text-primary shrink-0" />
           <div>
-            <div className="font-semibold text-2xs text-base-content/50">TUTOR</div>
+            <div className="font-semibold text-2xs text-(--kt-faint)">TUTOR</div>
             <TutorInfoTrigger
               tutorId={tutorUser.id}
               anonymousId={tutorUser.anonymousId}

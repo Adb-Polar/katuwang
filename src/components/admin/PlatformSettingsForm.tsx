@@ -233,7 +233,7 @@ export default function PlatformSettingsForm() {
       <div key={setting.key} className="flex items-center justify-between gap-4 py-4">
         <div>
           <p className="text-sm font-semibold text-base-content">{meta?.label || setting.key}</p>
-          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-base-content/60 mt-0.5">{meta.description}</p>}
+          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-(--kt-muted) mt-0.5">{meta.description}</p>}
         </div>
         <label className="inline-flex min-h-11 shrink-0 items-center px-2 -mx-2">
           <input
@@ -276,7 +276,7 @@ export default function PlatformSettingsForm() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
                 <div>
                   <p className="text-sm font-semibold text-base-content">Profile picture requirement</p>
-                  <p className="text-xs text-base-content/60 mt-0.5">
+                  <p className="text-xs text-(--kt-muted) mt-0.5">
                     Require tutors to upload before publishing classes or accepting requests. The learner option also requires a picture before enrollment. Profile access remains available.
                   </p>
                 </div>
@@ -300,7 +300,7 @@ export default function PlatformSettingsForm() {
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Assessment</h2>
-          <p className="text-xs text-base-content/60 -mt-1">
+          <p className="text-xs text-(--kt-muted) -mt-1">
             One set of assessment settings, applied to every subject and topic.
           </p>
 
@@ -326,12 +326,12 @@ export default function PlatformSettingsForm() {
                   className="input input-bordered input-sm text-xs focus:input-primary"
                 />
                 {fieldErrors[f.key] && <span id={`setting-${f.key}-error`} role="alert" className="text-xs text-error">{fieldErrors[f.key]}</span>}
-                <span className="text-2xs text-base-content/50">{f.description}</span>
+                <span className="text-2xs text-(--kt-faint)">{f.description}</span>
               </label>
             ))}
           </div>}
           {config === null && !configError && (
-            <p className="text-2xs text-base-content/40">Loading assessment settings…</p>
+            <p className="text-2xs text-(--kt-faint)">Loading assessment settings…</p>
           )}
         </div>
       </section>

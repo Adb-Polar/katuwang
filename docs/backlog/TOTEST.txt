@@ -1,3 +1,20 @@
+Landing and theme unslop pass (2026-11-17)
+ [Good] New landing page at desktop and 375px: two IBM Plex fonts only,
+    every link returns 200, FAQ items open, no horizontal scroll, no errors.
+ [ ] Landing page while signed in: header shows "Your portal" and the hero
+    shows "Go to your portal" (both to /dashboard), on desktop and phone.
+ [ ] Production build (`pnpm build`) succeeds where it will be deployed;
+    the IBM Plex fonts are fetched from Google Fonts at build time.
+ [ ] Each portal (learner, tutor, admin): secondary text is readable but still
+    clearly lighter than body text; buttons and sidebar nav now use the sans
+    face and labels don't wrap or overflow; the topbar stays solid on scroll.
+ [ ] Disabled controls and placeholders still look disabled (only /40–/80 text
+    was darkened).
+ [ ] Class cards, tutor cards, register role cards and the profile avatar no
+    longer lift or grow on hover; the border highlight still shows.
+ [ ] Learner sidebar "Auto Match", the Auto Match button and admin
+    "Recommend to a learner" show their new icons.
+
 Tutor card certified topic badges (2026-11-16)
  [] Learner -> Find Tutors: cards show checked green topic badges even without
     a verified class. Up to three certified topics appear with +N more for the

@@ -22,7 +22,7 @@ export default function SessionsList({
 }) {
   if (sessions.length === 0) {
     return (
-      <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
         No sessions scheduled yet.
       </p>
     );
@@ -38,8 +38,8 @@ export default function SessionsList({
             className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
           >
             <div className="min-w-0 max-w-full space-y-1">
-              <div className="font-semibold text-base-content/80 break-words">{s.topic}</div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-base-content/50">
+              <div className="font-semibold text-(--kt-muted) break-words">{s.topic}</div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-(--kt-faint)">
                 <span className="flex min-w-0 items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   {formatDateTime(s.scheduledAt)}

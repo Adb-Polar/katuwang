@@ -96,13 +96,13 @@ export default function TopicRequestBrowser() {
         <p className="font-semibold text-base-content">
           {tab === "public" ? "Public requests match your certified topics" : "Private requests are sent directly to you"}
         </p>
-        <p className="text-base-content/70">
+        <p className="text-(--kt-muted)">
           {tab === "public"
             ? "You only see public requests that include a topic you are certified to teach. You must be certified in every requested topic before accepting."
             : "Learners sent these requests specifically to you. You must be certified in every requested topic before accepting."}
           {" "}<Link href="/tutor/profile" className="link link-primary">View your certified topics</Link>
         </p>
-        <p className="text-base-content/60">Only open requests appear here. Learners can renew an expired request from My Requests.</p>
+        <p className="text-(--kt-muted)">Only open requests appear here. Learners can renew an expired request from My Requests.</p>
       </div>}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -130,7 +130,7 @@ export default function TopicRequestBrowser() {
         <LoadErrorState message={active.loadError} onRetry={active.refetch} />
       ) : isOpenTab ? (
         openList.data.length === 0 ? (
-          <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
+          <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
             {tab === "directed"
               ? "No active private requests were sent directly to you."
               : "No public requests match these filters."}
@@ -161,7 +161,7 @@ export default function TopicRequestBrowser() {
                       />
                       <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
                     </div>
-                    <span className="text-base-content/50">
+                    <span className="text-(--kt-faint)">
                       {gradeSection(r.learner.gradeLevel, r.learner.section)}
                     </span>
                   </div>
@@ -182,7 +182,7 @@ export default function TopicRequestBrowser() {
                 </div>
 
                 {r.slots.length > 0 && (
-                  <p className="text-2xs text-base-content/60">
+                  <p className="text-2xs text-(--kt-muted)">
                     Prefers:{" "}
                     {r.slots
                       .map((s) => `${s.day[0] + s.day.slice(1).toLowerCase()} ${s.date ? `(${s.date}) ` : ""}${s.startTime}–${s.endTime}`)
@@ -190,9 +190,9 @@ export default function TopicRequestBrowser() {
                   </p>
                 )}
 
-                {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
+                {r.note && <p className="text-(--kt-muted) italic">“{r.note}”</p>}
 
-                <p className="text-2xs text-base-content/40">
+                <p className="text-2xs text-(--kt-faint)">
                   Requested {formatDate(r.createdAt)}
                 </p>
               </div>
@@ -200,7 +200,7 @@ export default function TopicRequestBrowser() {
           </div>
         )
       ) : acceptedList.data.length === 0 ? (
-        <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
+        <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
           You haven&apos;t accepted any requests yet.
         </div>
       ) : (
@@ -245,7 +245,7 @@ export default function TopicRequestBrowser() {
               </div>
 
               {r.class && (
-                <p className="text-2xs text-base-content/60">
+                <p className="text-2xs text-(--kt-muted)">
                   {r.class.enrolledCount}/{r.class.maxStudents} enrolled
                   {r.class.nextSessionAt ? ` · next ${formatDateTime(r.class.nextSessionAt)}` : ""}
                 </p>

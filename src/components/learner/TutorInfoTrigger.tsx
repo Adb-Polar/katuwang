@@ -38,7 +38,7 @@ export default function TutorInfoTrigger({
         {name ? (
           <span className="min-w-0">
             <span className="font-medium text-xs">{name}</span>
-            <span className="block text-2xs text-base-content/50">
+            <span className="block text-2xs text-(--kt-faint)">
               {anonymousId}
               {section ? ` · Section ${section}` : ""}
             </span>
@@ -46,7 +46,7 @@ export default function TutorInfoTrigger({
         ) : (
           <AnonymousIdBadge id={anonymousId} role="TUTOR" size="sm" />
         )}
-        <ChevronRight className="h-3.5 w-3.5 text-base-content/40 shrink-0" />
+        <ChevronRight className="h-3.5 w-3.5 text-(--kt-faint) shrink-0" />
       </Link>
     </div>
   );

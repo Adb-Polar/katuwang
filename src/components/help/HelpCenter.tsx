@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { HELP_CONTENT, type HelpRole } from "@/lib/help/helpContent";
 
-const SECTION_LABEL = "text-2xs font-medium uppercase tracking-wider text-base-content/40";
+const SECTION_LABEL = "text-2xs font-medium uppercase tracking-wider text-(--kt-faint)";
 
 /**
  * In-app Help & FAQ view. Rendered by each portal's `/help` page with its own
@@ -61,7 +61,7 @@ export default function HelpCenter({ role }: { role: HelpRole }) {
             <div key={guide.title} className="kt-card">
               <div className="kt-card-body gap-2.5">
                 <h2 className="text-sm font-medium text-base-content">{guide.title}</h2>
-                <ol className="list-decimal space-y-1.5 pl-5 text-sm text-base-content/70 marker:text-base-content/35">
+                <ol className="list-decimal space-y-1.5 pl-5 text-sm text-(--kt-muted) marker:text-base-content/35">
                   {guide.steps.map((step, i) => (
                     <li key={i}>{step}</li>
                   ))}
@@ -90,12 +90,12 @@ export default function HelpCenter({ role }: { role: HelpRole }) {
         </div>
 
         {groupedFaqs.length === 0 ? (
-          <p className="text-sm text-base-content/60">No FAQs match “{query}”.</p>
+          <p className="text-sm text-(--kt-muted)">No FAQs match “{query}”.</p>
         ) : (
           <div className="space-y-6">
             {groupedFaqs.map((group) => (
               <div key={group.category} className="space-y-1.5">
-                <p className="text-2xs font-medium uppercase tracking-wider text-base-content/40">
+                <p className="text-2xs font-medium uppercase tracking-wider text-(--kt-faint)">
                   {group.category}
                 </p>
                 {group.items.map((faq) => (
@@ -107,7 +107,7 @@ export default function HelpCenter({ role }: { role: HelpRole }) {
                     <summary className="collapse-title text-sm font-medium min-h-0 py-3">
                       {faq.question}
                     </summary>
-                    <div className="collapse-content text-sm text-base-content/70">
+                    <div className="collapse-content text-sm text-(--kt-muted)">
                       <p className="pb-1">{faq.answer}</p>
                     </div>
                   </details>
@@ -118,7 +118,7 @@ export default function HelpCenter({ role }: { role: HelpRole }) {
         )}
       </section>
 
-      <p className="text-sm text-base-content/50">
+      <p className="text-sm text-(--kt-faint)">
         Still stuck? Reach out to a Katuwang administrator or your school
         coordinator for help.
       </p>

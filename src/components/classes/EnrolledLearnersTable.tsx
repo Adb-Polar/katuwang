@@ -34,7 +34,7 @@ export default function EnrolledLearnersTable({
       </h2>
 
       {enrollments.length === 0 ? (
-        <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-base-content/40 italic text-xs">
+        <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-(--kt-faint) italic text-xs">
           No learners have enrolled in this class yet.
         </div>
       ) : (
@@ -64,7 +64,7 @@ export default function EnrolledLearnersTable({
                       </Link>
                     </div>
                   </td>
-                  <td className="text-base-content/60">
+                  <td className="text-(--kt-muted)">
                     {gradeSection(enr.learner.gradeLevel, enr.learner.section)}
                   </td>
                   <td className="text-right">

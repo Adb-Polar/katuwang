@@ -29,9 +29,9 @@ export default function DeltaBar({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">{title}</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">{title}</h3>
         {rows.length === 0 ? (
-          <p className="py-8 text-center text-xs italic text-base-content/40">{emptyHint}</p>
+          <p className="py-8 text-center text-xs italic text-(--kt-faint)">{emptyHint}</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
             {rows.map((r, i) => {
@@ -40,7 +40,7 @@ export default function DeltaBar({
               const down = d != null && d < 0;
               return (
                 <li key={`${r.label}::${i}`} className="flex items-center gap-3 text-xs">
-                  <span className="w-20 shrink-0 font-mono text-base-content/70">{r.label}</span>
+                  <span className="w-20 shrink-0 font-mono text-(--kt-muted)">{r.label}</span>
                   <div className="relative h-4 flex-1 rounded bg-base-200">
                     <span className="absolute inset-y-0 left-1/2 w-px bg-base-300" />
                     {d != null && d !== 0 && (
@@ -56,7 +56,7 @@ export default function DeltaBar({
                   </div>
                   <span className="w-24 shrink-0 text-right">
                     {d == null ? (
-                      <span className="text-base-content/40">—</span>
+                      <span className="text-(--kt-faint)">—</span>
                     ) : (
                       <span className="kt-delta" data-dir={down ? "down" : "up"}>
                         {d > 0 ? "+" : ""}
@@ -71,7 +71,7 @@ export default function DeltaBar({
           </ul>
         )}
         <details className="mt-2">
-          <summary className="text-2xs text-base-content/50 cursor-pointer hover:text-base-content/70">
+          <summary className="text-2xs text-(--kt-faint) cursor-pointer hover:text-(--kt-muted)">
             Show data table
           </summary>
           <table className="table table-xs mt-2">
@@ -86,7 +86,7 @@ export default function DeltaBar({
             <tbody>
               {rows.map((r, i) => (
                 <tr key={`${r.label}::${i}`}>
-                  <td className="text-base-content/70 font-mono">{r.label}</td>
+                  <td className="text-(--kt-muted) font-mono">{r.label}</td>
                   <td className="text-right">{r.pre == null ? "—" : `${r.pre}${unit}`}</td>
                   <td className="text-right">{r.post == null ? "—" : `${r.post}${unit}`}</td>
                   <td className="text-right font-semibold">
@@ -96,7 +96,7 @@ export default function DeltaBar({
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center py-3 text-base-content/40 italic text-xs">
+                  <td colSpan={4} className="text-center py-3 text-(--kt-faint) italic text-xs">
                     No data yet.
                   </td>
                 </tr>

@@ -167,7 +167,7 @@ export default function SessionTestRunner({
           <ArrowLeft className="w-3.5 h-3.5" />
           Class
         </Link>
-        <span className="text-2xs text-base-content/50">{KIND_LABEL[attempt.kind] ?? attempt.kind}</span>
+        <span className="text-2xs text-(--kt-faint)">{KIND_LABEL[attempt.kind] ?? attempt.kind}</span>
       </div>
 
       <section className="card kt-card">
@@ -175,19 +175,19 @@ export default function SessionTestRunner({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="card-title text-sm font-bold">{attempt.title}</h2>
-              <p className="text-2xs text-base-content/50 mt-0.5">{attempt.totalQuestions} questions</p>
+              <p className="text-2xs text-(--kt-faint) mt-0.5">{attempt.totalQuestions} questions</p>
             </div>
             {submitted ? (
               <StatusBadge tone="info" label={`${attempt.scorePercent}%`} size="sm" />
             ) : (
-              <span className="text-2xs text-base-content/50">
+              <span className="text-2xs text-(--kt-faint)">
                 {answeredCount} / {attempt.items.length} answered
               </span>
             )}
           </div>
 
           {attempt.instructions && !submitted && (
-            <p className="text-xs text-base-content/70 leading-relaxed border border-base-200 rounded-lg p-3">
+            <p className="text-xs text-(--kt-muted) leading-relaxed border border-base-200 rounded-lg p-3">
               {attempt.instructions}
             </p>
           )}
@@ -217,7 +217,7 @@ export default function SessionTestRunner({
               return (
                 <li key={item.questionId} className="border border-base-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-start gap-2">
-                    <span className="text-2xs text-base-content/40 shrink-0 pt-0.5">Q{item.position + 1}</span>
+                    <span className="text-2xs text-(--kt-faint) shrink-0 pt-0.5">Q{item.position + 1}</span>
                     <p className="text-sm font-semibold text-base-content/85">{item.prompt}</p>
                   </div>
 
@@ -251,7 +251,7 @@ export default function SessionTestRunner({
                             disabled={submitted}
                             onChange={() => setAnswers((prev) => ({ ...prev, [item.questionId]: o.id }))}
                           />
-                          <span className="text-base-content/80">{o.text}</span>
+                          <span className="text-(--kt-muted)">{o.text}</span>
                           {submitted && optionIsCorrect === true && <span className="text-2xs text-success ml-auto">correct</span>}
                           {submitted && isChosen && optionIsCorrect === false && (
                             <span className="text-2xs text-error ml-auto">your answer</span>
@@ -262,7 +262,7 @@ export default function SessionTestRunner({
                   </div>
 
                   {submitted && item.explanation && (
-                    <p className="text-2xs text-base-content/55 italic pl-6">{item.explanation}</p>
+                    <p className="text-2xs text-(--kt-faint) italic pl-6">{item.explanation}</p>
                   )}
                 </li>
               );

@@ -99,7 +99,7 @@ export default function QuestionFormModal({
       <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void submit(e.currentTarget); }}>
         <div>
           <h3 className="font-bold text-sm text-base-content">{title}</h3>
-          {contextLabel && <p className="text-2xs text-base-content/50 mt-0.5">{contextLabel}</p>}
+          {contextLabel && <p className="text-2xs text-(--kt-faint) mt-0.5">{contextLabel}</p>}
         </div>
 
         <FeedbackBanner variant="error" message={error || null} />

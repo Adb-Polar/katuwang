@@ -93,7 +93,7 @@ export default function NotificationList() {
               <span className="loading loading-spinner loading-md text-primary" />
             </div>
           ) : notifications.length === 0 ? (
-            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs flex flex-col items-center gap-2">
+            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs flex flex-col items-center gap-2">
               <Inbox className="h-5 w-5" />
               No notifications yet.
             </div>
@@ -116,8 +116,8 @@ export default function NotificationList() {
                     >
                       <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? FALLBACK_ICON}</span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-base-content/80">{n.message}</p>
-                        <p className="text-2xs text-base-content/40 mt-0.5">{relativeTime(n.createdAt)}</p>
+                        <p className="text-(--kt-muted)">{n.message}</p>
+                        <p className="text-2xs text-(--kt-faint) mt-0.5">{relativeTime(n.createdAt)}</p>
                       </div>
                       {!n.readAt && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" aria-hidden="true" />}
                     </div>

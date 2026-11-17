@@ -22,7 +22,7 @@ export default function Pagination({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 pt-2 font-mono">
-      <span className="text-xs text-base-content/60">
+      <span className="text-xs text-(--kt-muted)">
         Page {page} of {pageCount} · {total} total
       </span>
       <div className="flex items-center gap-2">

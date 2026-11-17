@@ -38,9 +38,9 @@ export default function MatchResultSample() {
       </div>
       <div className="flex items-center gap-1.5 px-1">
         <span className="badge badge-primary badge-sm text-2xs font-bold">Match 92</span>
-        <span className="text-2xs text-base-content/40">ranked by fit</span>
+        <span className="text-2xs text-(--kt-faint)">ranked by fit</span>
       </div>
-      <ul className="text-2xs text-base-content/60 space-y-0.5 px-1">
+      <ul className="text-2xs text-(--kt-muted) space-y-0.5 px-1">
         {REASONS.map(({ icon: Icon, text }) => (
           <li key={text} className="flex items-center gap-1">
             <Icon className="h-3 w-3 text-primary shrink-0" />

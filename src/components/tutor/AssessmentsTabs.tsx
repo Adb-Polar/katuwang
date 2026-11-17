@@ -44,7 +44,7 @@ export default function AssessmentsTabs({
 
         {activeTab === "topics" ? (
           <>
-            <p className="text-xs text-base-content/60">
+            <p className="text-xs text-(--kt-muted)">
               Once you&apos;re teaching a topic, take its assessment to earn a verified badge learners can
               see. If a topic has no assessment yet, you can ask an admin to add questions for it.
             </p>

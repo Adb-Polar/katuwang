@@ -61,7 +61,7 @@ export default function SampleMatchForm() {
               </select>
               <div className="flex items-center gap-2 sm:flex-[2]">
                 <input type="time" defaultValue="16:00" className={SLOT_CONTROL_CLASS} />
-                <span className="text-xs text-base-content/50 shrink-0">to</span>
+                <span className="text-xs text-(--kt-faint) shrink-0">to</span>
                 <input type="time" defaultValue="18:00" className={SLOT_CONTROL_CLASS} />
               </div>
             </div>

@@ -19,7 +19,7 @@ interface SearchGroup {
 const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
   class: <GraduationCap className="h-3.5 w-3.5 text-primary" />,
   tutor: <UserRound className="h-3.5 w-3.5 text-accent" />,
-  topic: <Tag className="h-3.5 w-3.5 text-base-content/40" />,
+  topic: <Tag className="h-3.5 w-3.5 text-(--kt-faint)" />,
 };
 
 const ADMIN_SCOPES = [
@@ -157,7 +157,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           setLoading(q.trim().length >= 2);
           setOpen(true);
         }}
-        className="shrink-0 border-r border-base-300 bg-transparent pr-1.5 text-2xs font-medium text-base-content/60 focus:outline-none"
+        className="shrink-0 border-r border-base-300 bg-transparent pr-1.5 text-2xs font-medium text-(--kt-muted) focus:outline-none"
       >
         {scopes.map((s) => (
           <option key={s.value} value={s.value}>
@@ -194,7 +194,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
             setGroups([]);
             inputRef.current?.focus();
           }}
-          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-base-content/40 hover:text-base-content"
+          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-(--kt-faint) hover:text-base-content"
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -209,15 +209,15 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           className="absolute left-0 right-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto rounded-box border border-base-300 bg-base-100 py-1.5 shadow-lg"
         >
           {loading && flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-2xs text-base-content/50">Searching…</p>
+            <p className="px-3 py-3 text-center text-2xs text-(--kt-faint)">Searching…</p>
           ) : flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-2xs italic text-base-content/40">
+            <p className="px-3 py-3 text-center text-2xs italic text-(--kt-faint)">
               No matches for “{term}”.
             </p>
           ) : (
             groups.map((g) => (
               <div key={g.kind + g.label}>
-                <p className="px-3 pb-1 pt-2 text-2xs font-semibold uppercase tracking-wide text-base-content/40">
+                <p className="px-3 pb-1 pt-2 text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
                   {g.label}
                 </p>
                 {g.items.map((item) => {
@@ -238,7 +238,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">{item.title}</span>
                         {item.subtitle && (
-                          <span className="block truncate text-2xs text-base-content/50">{item.subtitle}</span>
+                          <span className="block truncate text-2xs text-(--kt-faint)">{item.subtitle}</span>
                         )}
                       </span>
                       {idx === active && <CornerDownLeft className="h-3 w-3 shrink-0 text-base-content/30" />}

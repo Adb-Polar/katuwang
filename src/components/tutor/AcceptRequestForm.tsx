@@ -125,7 +125,7 @@ export default function AcceptRequestForm({
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
             <div className="card-body gap-4 p-6 sm:p-8">
-        <p className="text-xs text-base-content/60">
+        <p className="text-xs text-(--kt-muted)">
           This creates a full class from the {subjectDisplayLabel(request.subject)} request. Include every requested topic. You must be certified for all selected topics.
         </p>
 

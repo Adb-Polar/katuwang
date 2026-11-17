@@ -82,12 +82,12 @@ export default function RequestTopicButton({
               ✕
             </button>
             <h3 className="font-sans text-base font-semibold mb-1">Request a topic from {tutorAnonymousId}</h3>
-            <p className="text-xs text-base-content/60 mb-4">
+            <p className="text-xs text-(--kt-muted) mb-4">
               Only this tutor will see this request. They can accept it and create a class for you.
             </p>
 
             {verifiedTopicsHint && verifiedTopicsHint.length > 0 && (
-              <p className="text-2xs text-base-content/50 mb-3 italic">
+              <p className="text-2xs text-(--kt-faint) mb-3 italic">
                 This tutor is verified in: {verifiedTopicsHint.join(", ")}.
               </p>
             )}

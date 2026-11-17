@@ -157,20 +157,20 @@ export default function SessionTestsTable() {
                 <tbody>
                   {sorted.map((t) => (
                     <tr key={t.id} className="text-sm">
-                      <td className="text-base-content/70">
+                      <td className="text-(--kt-muted)">
                         <span className="font-mono text-2xs">{t.classCode}</span>
-                        <div className="text-2xs text-base-content/40">{subjectDisplayLabel(t.subject)}</div>
+                        <div className="text-2xs text-(--kt-faint)">{subjectDisplayLabel(t.subject)}</div>
                       </td>
                       <td>
                         <AnonymousIdBadge id={t.tutor.anonymousId} role="TUTOR" />
                       </td>
-                      <td className="text-base-content/70">{t.sessionTopic}</td>
-                      <td className="text-base-content/70 max-w-[12rem] whitespace-normal">{t.title}</td>
+                      <td className="text-(--kt-muted)">{t.sessionTopic}</td>
+                      <td className="text-(--kt-muted) max-w-[12rem] whitespace-normal">{t.title}</td>
                       <td>
                         <StatusBadge tone={STATUS_TONE[t.status]} label={t.status.toLowerCase()} size="xs" />
                       </td>
-                      <td className="text-base-content/60">{t.questionCount}</td>
-                      <td className="text-base-content/60">{t.attemptCount}</td>
+                      <td className="text-(--kt-muted)">{t.questionCount}</td>
+                      <td className="text-(--kt-muted)">{t.attemptCount}</td>
                       <td className="text-right">
                         <button onClick={() => setOpenId(t.id)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
                           Results

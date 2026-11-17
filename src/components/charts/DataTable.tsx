@@ -33,7 +33,7 @@ export default function DataTable<Row extends Record<string, unknown>>(
 
   return (
     <details className="mt-2">
-      <summary className="text-2xs text-base-content/50 cursor-pointer hover:text-base-content/70">
+      <summary className="text-2xs text-(--kt-faint) cursor-pointer hover:text-(--kt-muted)">
         Show data table
       </summary>
       <table className="table table-xs mt-2">
@@ -55,7 +55,7 @@ export default function DataTable<Row extends Record<string, unknown>>(
                 <td
                   key={j}
                   className={
-                    c.align === "right" ? "text-right font-semibold" : "text-base-content/70"
+                    c.align === "right" ? "text-right font-semibold" : "text-(--kt-muted)"
                   }
                 >
                   {c.cell(r)}
@@ -67,7 +67,7 @@ export default function DataTable<Row extends Record<string, unknown>>(
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-3 text-base-content/40 italic text-xs"
+                className="text-center py-3 text-(--kt-faint) italic text-xs"
               >
                 No data yet.
               </td>

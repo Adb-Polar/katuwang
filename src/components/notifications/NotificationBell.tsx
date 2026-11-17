@@ -148,7 +148,7 @@ export default function NotificationBell({ unreadCount, notificationsHref }: Not
           ) : error ? (
             <p className="px-3 py-6 text-center text-2xs text-error">{error}</p>
           ) : items.length === 0 ? (
-            <p className="px-3 py-8 text-center text-2xs italic text-base-content/40">No notifications yet.</p>
+            <p className="px-3 py-8 text-center text-2xs italic text-(--kt-faint)">No notifications yet.</p>
           ) : (
             <ul className="divide-y divide-base-200">
               {items.map((n) => (
@@ -163,8 +163,8 @@ export default function NotificationBell({ unreadCount, notificationsHref }: Not
                   >
                     <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? FALLBACK_ICON}</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-base-content/80">{n.message}</span>
-                      <span className="block text-2xs text-base-content/40 mt-0.5">{relativeTime(n.createdAt)}</span>
+                      <span className="block text-(--kt-muted)">{n.message}</span>
+                      <span className="block text-2xs text-(--kt-faint) mt-0.5">{relativeTime(n.createdAt)}</span>
                     </span>
                     {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
                   </button>

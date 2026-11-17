@@ -198,9 +198,9 @@ export default function ClassModerationTable() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{subjectDisplayLabel(c.subject)}</p>
-                      <p className="break-words text-xs text-base-content/60">{c.topics.join(", ")}</p>
+                      <p className="break-words text-xs text-(--kt-muted)">{c.topics.join(", ")}</p>
                     </div>
-                    <div className="grid gap-2 text-xs text-base-content/65">
+                    <div className="grid gap-2 text-xs text-(--kt-muted)">
                       <p>Tutor: <AnonymousIdBadge id={c.tutor.anonymousId} role="TUTOR" /> {c.tutor.firstName} {c.tutor.lastName}</p>
                       <p>Next session: {c.nextSessionAt ? formatDateTime(c.nextSessionAt) : "None scheduled"}</p>
                       <p>Enrolled: {c._count.enrollments}</p>
@@ -238,23 +238,23 @@ export default function ClassModerationTable() {
                           {c.code}
                         </td>
                         <td>
-                          <div className="font-semibold text-base-content/80">{subjectDisplayLabel(c.subject)}</div>
-                          <div className="text-2xs text-base-content/50">{c.topics.join(", ")}</div>
+                          <div className="font-semibold text-(--kt-muted)">{subjectDisplayLabel(c.subject)}</div>
+                          <div className="text-2xs text-(--kt-faint)">{c.topics.join(", ")}</div>
                         </td>
                         <td>
                           <AnonymousIdBadge id={c.tutor.anonymousId} role="TUTOR" />
-                          <div className="text-2xs text-base-content/50 mt-1">
+                          <div className="text-2xs text-(--kt-faint) mt-1">
                             {c.tutor.firstName} {c.tutor.lastName}
                           </div>
                         </td>
-                        <td className="text-base-content/60">
+                        <td className="text-(--kt-muted)">
                           {c.nextSessionAt ? formatDateTime(c.nextSessionAt) : "—"}
                         </td>
-                        <td className="text-base-content/60">{c._count.enrollments}</td>
+                        <td className="text-(--kt-muted)">{c._count.enrollments}</td>
                         <td>
                           <StatusBadge tone={tone} label={label} size="xs" />
                           {c.status === "SUSPENDED" && c.suspendedUntil && (
-                            <div className="text-2xs text-base-content/50 mt-1">
+                            <div className="text-2xs text-(--kt-faint) mt-1">
                               Until {formatDateTime(c.suspendedUntil)}
                             </div>
                           )}
@@ -300,7 +300,7 @@ export default function ClassModerationTable() {
               </table>
             </div>
             {classes.length === 0 && (
-              <div className="text-center py-8 text-base-content/40 italic text-xs">No classes found.</div>
+              <div className="text-center py-8 text-(--kt-faint) italic text-xs">No classes found.</div>
             )}
             </>
           )}
@@ -321,7 +321,7 @@ export default function ClassModerationTable() {
         title={moderateTarget?.action === "SUSPENDED" ? "Suspend Class" : "Ban Class"}
       >
         {moderateTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void updateStatus(moderateTarget.class.id, moderateTarget.action, { reason, ...(moderateTarget.action === "SUSPENDED" && durationDays ? { durationDays: Number(durationDays) } : {}) }, e.currentTarget); }}>
-            <p className="text-2xs text-base-content/50 mb-4">
+            <p className="text-2xs text-(--kt-faint) mb-4">
               {subjectDisplayLabel(moderateTarget.class.subject)} · {moderateTarget.class.topics.join(", ")}
             </p>
 

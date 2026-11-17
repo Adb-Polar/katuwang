@@ -72,11 +72,11 @@ export default async function TutorStudentProfilePage({
             </h2>
             <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="sm" showIcon />
-              <span className="text-xs text-base-content/60">
+              <span className="text-xs text-(--kt-muted)">
                 {gradeSection(learner.gradeLevel, learner.section)}
               </span>
             </div>
-            <p className="text-2xs text-base-content/50 pt-1">
+            <p className="text-2xs text-(--kt-faint) pt-1">
               {learner.image
                 ? "Click profile picture to view full size."
                 : "Student is using their anonymous monogram."}
@@ -97,7 +97,7 @@ export default async function TutorStudentProfilePage({
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="badge badge-neutral badge-sm text-2xs font-bold">{subjectDisplayLabel(enr.class.subject)}</span>
-                  <span className="flex items-center gap-1 text-2xs text-base-content/50">
+                  <span className="flex items-center gap-1 text-2xs text-(--kt-faint)">
                     <Calendar className="h-3 w-3" />
                     {formatDate(enr.enrolledAt)}{enr.withdrawnAt ? ` · Withdrawn ${formatDate(enr.withdrawnAt)}` : ""}
                   </span>

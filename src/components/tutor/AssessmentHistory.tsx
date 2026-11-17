@@ -37,7 +37,7 @@ export default function AssessmentHistory({
 }) {
   if (certifications.length === 0 && attempts.length === 0) {
     return (
-      <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
         You haven&apos;t taken any topic assessments yet.
       </p>
     );
@@ -47,12 +47,12 @@ export default function AssessmentHistory({
     <div className="space-y-6">
       {attempts.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-base-content/70">Attempts</h3>
+          <h3 className="text-xs font-bold text-(--kt-muted)">Attempts</h3>
           {attempts.map((a) => (
             <div key={a.id} className="border border-base-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-semibold text-sm text-base-content/80 break-words">{a.topic}</div>
-                <div className="text-2xs text-base-content/50">
+                <div className="font-semibold text-sm text-(--kt-muted) break-words">{a.topic}</div>
+                <div className="text-2xs text-(--kt-faint)">
                   {subjectDisplayLabel(a.subject)} · attempt #{a.attemptNo} · {formatDate(a.startedAt)}
                   {a.status !== "IN_PROGRESS" && (
                     <> · {a.scorePercent}% ({a.correctCount}/{a.questionCount})</>
@@ -79,13 +79,13 @@ export default function AssessmentHistory({
 
       {certifications.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-base-content/70">Topic status</h3>
+          <h3 className="text-xs font-bold text-(--kt-muted)">Topic status</h3>
           {certifications.map((c) => (
             <div key={c.id} className="border border-base-200 rounded-xl p-3 space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="font-semibold text-sm text-base-content/80 break-words">{c.topic}</div>
-                  <div className="text-2xs text-base-content/50">{subjectDisplayLabel(c.subject)}</div>
+                  <div className="font-semibold text-sm text-(--kt-muted) break-words">{c.topic}</div>
+                  <div className="text-2xs text-(--kt-faint)">{subjectDisplayLabel(c.subject)}</div>
                 </div>
                 <StatusBadge
                   tone={STATUS_BADGE[c.status].tone}
@@ -94,7 +94,7 @@ export default function AssessmentHistory({
                 />
               </div>
 
-              <div className="text-2xs text-base-content/50 flex flex-wrap gap-x-4 gap-y-1">
+              <div className="text-2xs text-(--kt-faint) flex flex-wrap gap-x-4 gap-y-1">
                 {c.certifiedAt && <span>Certified {formatDate(c.certifiedAt)}</span>}
                 {c.status === "REJECTED" && c.reviewedAt && <span>Reviewed {formatDate(c.reviewedAt)}</span>}
               </div>

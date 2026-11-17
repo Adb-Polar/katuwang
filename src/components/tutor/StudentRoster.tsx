@@ -136,7 +136,7 @@ export default function StudentRoster() {
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : students.length === 0 ? (
-        <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
+        <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
           No students match these filters yet.
         </div>
       ) : (
@@ -166,7 +166,7 @@ export default function StudentRoster() {
                       </Link>
                     </div>
                   </td>
-                  <td className="text-xs text-base-content/70">
+                  <td className="text-xs text-(--kt-muted)">
                     {gradeSection(student.gradeLevel, student.section)}
                   </td>
                   <td>

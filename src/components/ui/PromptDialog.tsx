@@ -64,12 +64,12 @@ export default function PromptDialog({
           )}
           <div className="space-y-1">
             <h3 className="font-bold text-sm text-base-content">{title}</h3>
-            {description && <p className="text-xs text-base-content/60">{description}</p>}
+            {description && <p className="text-xs text-(--kt-muted)">{description}</p>}
           </div>
         </div>
 
         <label className="form-control mt-3">
-          <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
+          <span className="label-text text-2xs font-semibold text-(--kt-muted) pb-1">
             {noteLabel}
           </span>
           <textarea

@@ -50,7 +50,7 @@ export default function ForgotPasswordForm() {
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
           <h1 className="font-sans text-xl font-semibold text-base-content">Forgot password</h1>
-          <p className="text-xs text-base-content/60">{step === "email" ? "Enter your primary registered email address." : "Enter your verification code to set a new password. Codes expire in 15 minutes."}</p>
+          <p className="text-xs text-(--kt-muted)">{step === "email" ? "Enter your primary registered email address." : "Enter your verification code to set a new password. Codes expire in 15 minutes."}</p>
         </div>
         <div aria-live="polite">
           <FeedbackBanner variant="success" message={message || null} />
@@ -71,12 +71,12 @@ export default function ForgotPasswordForm() {
             <button type="button" disabled={loading || (codeMethod === "recovery" && cooldown > 0)} onClick={() => void request("lookup", "recovery")} className="btn btn-outline btn-primary btn-sm w-full">
               Send code to backup email
             </button>
-            <p className="text-xs text-base-content/60">Your backup email must be saved and verified in your profile.</p>
+            <p className="text-xs text-(--kt-muted)">Your backup email must be saved and verified in your profile.</p>
           </div>
         )}
         {step === "verify" && <button disabled={loading || cooldown > 0} onClick={() => void request("lookup")} className="btn btn-ghost btn-sm">{cooldown > 0 ? `Resend available in ${cooldown}s` : "Resend code"}</button>}
         {step !== "email" && <button disabled={loading} onClick={back} className="btn btn-ghost btn-sm">Back</button>}
-        <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">
+        <div className="text-center text-xs text-(--kt-faint) border-t border-base-200 pt-4">
           <Link className="text-primary font-bold hover:underline" href="/login">Back to Login</Link>
         </div>
       </div>

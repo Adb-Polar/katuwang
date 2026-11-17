@@ -70,7 +70,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
       <section className="card kt-card">
         <div className="card-body gap-4">
           <h2 className="card-title text-sm font-bold">Moderation Action History</h2>
-          <p className="text-xs text-base-content/60">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+          <p className="text-xs text-(--kt-muted)">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
@@ -126,17 +126,17 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                 <tbody>
                   {logs.map((log) => (
                     <tr key={log.id} className="text-sm">
-                      <td className="font-semibold text-base-content/80">
+                      <td className="font-semibold text-(--kt-muted)">
                         {auditActionDisplayLabel(log.action)}
                       </td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">
                         {statusDisplayLabel(log.targetType)} · {log.targetId}
                       </td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">
                         {log.admin.anonymousId} ({log.admin.firstName} {log.admin.lastName})
                       </td>
-                      <td className="min-w-48 max-w-md whitespace-normal break-words text-base-content/60">{formatAuditReason(log.reason) || "—"}</td>
-                      <td className="text-base-content/50">
+                      <td className="min-w-48 max-w-md whitespace-normal break-words text-(--kt-muted)">{formatAuditReason(log.reason) || "—"}</td>
+                      <td className="text-(--kt-faint)">
                         {formatDateTime(log.createdAt)}
                       </td>
                     </tr>

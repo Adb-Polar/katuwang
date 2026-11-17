@@ -7,7 +7,7 @@ export function GradeChoices({ value, onChange, disabled = false }: {
   value: string[]; onChange: (grades: string[]) => void; disabled?: boolean;
 }) {
   return <fieldset disabled={disabled} className="flex flex-wrap gap-x-3 gap-y-1">
-    <legend className="mb-1 text-2xs text-base-content/60">Grade coverage</legend>
+    <legend className="mb-1 text-2xs text-(--kt-muted)">Grade coverage</legend>
     {CURRICULUM_GRADES.map((grade) => <label key={grade} className="flex items-center gap-1 text-2xs">
       <input type="checkbox" className="checkbox checkbox-xs" checked={value.includes(grade)}
         onChange={(e) => onChange(CURRICULUM_GRADES.filter((g) => g === grade ? e.target.checked : value.includes(g)))} />
@@ -28,7 +28,7 @@ export default function CurriculumCoverage({ gradeLevels, curriculum, disabled, 
     track?: string; cluster?: string;
     associations?: { gradeLevel: string; curriculumVersion: string; track?: string | null; strand?: string | null; cluster?: string | null; sourceUrl: string; pdfPage?: number }[];
   } : null;
-  return <details className="mt-1 text-2xs text-base-content/60">
+  return <details className="mt-1 text-2xs text-(--kt-muted)">
     <summary className="cursor-pointer">{gradeCoverageLabel(gradeLevels)}
       {evidence?.status === "foundation" && " · foundation review"}
       {evidence?.status === "legacy" && " · legacy coverage; review needed"}

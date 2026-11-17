@@ -16,7 +16,7 @@ export default function UnauthorizedPage() {
             <AlertTriangle className="w-8 h-8" />
           </div>
           <h1 className="font-sans text-xl font-semibold tracking-tight text-base-content">Access Denied</h1>
-          <p className="text-xs text-base-content/60 leading-relaxed">
+          <p className="text-xs text-(--kt-muted) leading-relaxed">
             You do not have the required permissions to access this page. Please make sure you are logged into the correct account.
           </p>
           <div className="card-actions pt-2 w-full">

@@ -199,16 +199,16 @@ export default function TopicRequestModerationTable() {
                           className="inline-block hover:opacity-70 transition-opacity"
                         >
                           <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
-                          <div className="text-2xs text-base-content/50 mt-1 hover:underline">
+                          <div className="text-2xs text-(--kt-faint) mt-1 hover:underline">
                             {r.learner.firstName} {r.learner.lastName}
                           </div>
                         </Link>
                       </td>
                       <td>
                         <Link href={`/admin/topic-requests/${r.id}`} className="font-semibold link link-primary">{subjectDisplayLabel(r.subject)} · History</Link>
-                        <div className="text-2xs text-base-content/50">{r.topics.join(", ")}</div>
+                        <div className="text-2xs text-(--kt-faint)">{r.topics.join(", ")}</div>
                       </td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">
                         {r.directedTo ? (
                           <Link
                             href={`/admin/users/${r.directedTo.id}`}
@@ -220,7 +220,7 @@ export default function TopicRequestModerationTable() {
                           "Public"
                         )}
                       </td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">
                         {r.fulfilledClass ? (
                           <Link
                             href={`/admin/classes/${r.fulfilledClass.id}`}
@@ -266,7 +266,7 @@ export default function TopicRequestModerationTable() {
                 </tbody>
               </table>
               {requests.length === 0 && (
-                <div className="text-center py-8 text-base-content/40 italic text-xs">No requests found.</div>
+                <div className="text-center py-8 text-(--kt-faint) italic text-xs">No requests found.</div>
               )}
             </div>
           )}
@@ -283,7 +283,7 @@ export default function TopicRequestModerationTable() {
 
       <Modal open={closeTarget !== null} onClose={() => setCloseTarget(null)} title="Close request">
         {closeTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void moderate(closeTarget.id, "CANCELLED", e.currentTarget); }}>
-            <p className="text-2xs text-base-content/50 mb-4">
+            <p className="text-2xs text-(--kt-faint) mb-4">
               {subjectDisplayLabel(closeTarget.subject)} · {closeTarget.topics.join(", ")}
             </p>
 

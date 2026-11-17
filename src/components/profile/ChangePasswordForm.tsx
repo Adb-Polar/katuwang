@@ -75,7 +75,7 @@ export default function ChangePasswordForm({
           <button
             type="button"
             onClick={() => setShowCurrent((v) => !v)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
             aria-label={showCurrent ? "Hide current password" : "Show current password"}
           >
             {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -98,7 +98,7 @@ export default function ChangePasswordForm({
           <button
             type="button"
             onClick={() => setShowNew((v) => !v)}
-            className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
             aria-label={showNew ? "Hide new password" : "Show new password"}
           >
             {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

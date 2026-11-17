@@ -168,7 +168,7 @@ function PairEditor({
       >
         + Add row
       </button>
-      <p className="mt-1 text-2xs text-base-content/50">
+      <p className="mt-1 text-2xs text-(--kt-faint)">
         Leave a value <span className="font-mono">blank</span> to mean &ldquo;not taken&rdquo; (null).
       </p>
     </div>
@@ -290,7 +290,7 @@ export default function DevChartLab() {
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
           <h2 className="font-sans text-lg text-base-content">Pre / post series</h2>
-          <span className="text-2xs text-base-content/50">
+          <span className="text-2xs text-(--kt-faint)">
             feeds charts (a) grouped bars · (b) area · (d) per-row delta
           </span>
         </div>
@@ -311,7 +311,7 @@ export default function DevChartLab() {
           <div className="rounded-xl border border-base-200 bg-base-100 p-3">
             <PairEditor rows={pairRows} setRows={setPairRows} makeId={makeId} />
             <details className="mt-3">
-              <summary className="cursor-pointer text-2xs text-base-content/50">Parsed JSON</summary>
+              <summary className="cursor-pointer text-2xs text-(--kt-faint)">Parsed JSON</summary>
               <pre className="mt-1 max-h-48 overflow-auto rounded bg-base-200 p-2 text-2xs">
                 {JSON.stringify(sessionData, null, 2)}
               </pre>
@@ -342,7 +342,7 @@ export default function DevChartLab() {
       {/* ── per-question rate ── */}
       <section className="space-y-3">
         <h2 className="font-sans text-lg text-base-content">
-          Per-question rate <span className="text-2xs text-base-content/50">feeds chart (c)</span>
+          Per-question rate <span className="text-2xs text-(--kt-faint)">feeds chart (c)</span>
         </h2>
         <div className="flex flex-wrap gap-1.5">
           <button type="button" className="btn btn-xs" onClick={() => setQRows(seed(QUESTION_PRESET))}>
@@ -369,7 +369,7 @@ export default function DevChartLab() {
       <section className="space-y-3">
         <h2 className="font-sans text-lg text-base-content">
           Single-series bars{" "}
-          <span className="text-2xs text-base-content/50">BarChartCard (admin Reports)</span>
+          <span className="text-2xs text-(--kt-faint)">BarChartCard (admin Reports)</span>
         </h2>
         <div className="flex flex-wrap gap-1.5">
           <button type="button" className="btn btn-xs" onClick={() => setCountRows(seedC(COUNT_PRESET))}>

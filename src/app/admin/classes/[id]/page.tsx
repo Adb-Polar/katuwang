@@ -72,10 +72,10 @@ export default async function AdminClassDetailPage({
         extraFacts={
           <div className="col-span-2 flex items-center gap-1.5">
             <div className="min-w-0">
-              <div className="font-semibold text-2xs text-base-content/50">TUTOR</div>
+              <div className="font-semibold text-2xs text-(--kt-faint)">TUTOR</div>
               <div className="flex items-center gap-2">
                 <AnonymousIdBadge id={tutorClass.tutorProfile.user.anonymousId} role="TUTOR" />
-                <span className="text-base-content/60">
+                <span className="text-(--kt-muted)">
                   {tutorClass.tutorProfile.user.firstName} {tutorClass.tutorProfile.user.lastName}
                 </span>
               </div>
@@ -96,7 +96,7 @@ export default async function AdminClassDetailPage({
               Enrolled Learners ({tutorClass.enrollments.length} / {tutorClass.maxStudents})
             </h2>
             {tutorClass.enrollments.length === 0 ? (
-              <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-base-content/40 italic text-xs">
+              <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-(--kt-faint) italic text-xs">
                 No learners have enrolled in this class yet.
               </div>
             ) : (
@@ -115,10 +115,10 @@ export default async function AdminClassDetailPage({
                         <td>
                           <AnonymousIdBadge id={e.learner.anonymousId} role="LEARNER" />
                         </td>
-                        <td className="text-base-content/60">
+                        <td className="text-(--kt-muted)">
                           {gradeSection(e.learner.gradeLevel, e.learner.section)}
                         </td>
-                        <td className="text-base-content/60">{formatDateTime(e.enrolledAt)}</td>
+                        <td className="text-(--kt-muted)">{formatDateTime(e.enrolledAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -134,11 +134,11 @@ export default async function AdminClassDetailPage({
                 <div className="card-body gap-1 p-4">
                   <h2 className="card-title text-sm font-bold text-error">Moderation</h2>
                   {tutorClass.suspendedReason && (
-                    <p className="text-xs text-base-content/70">
+                    <p className="text-xs text-(--kt-muted)">
                       <span className="font-semibold">Reason:</span> {tutorClass.suspendedReason}
                     </p>
                   )}
-                  <p className="text-xs text-base-content/70">
+                  <p className="text-xs text-(--kt-muted)">
                     <span className="font-semibold">
                       {tutorClass.suspendedUntil ? "Until:" : "Duration:"}
                     </span>{" "}

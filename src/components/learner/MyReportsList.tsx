@@ -72,7 +72,7 @@ export default function MyReportsList() {
         <div className="card kt-card">
           <div className="card-body items-center text-center gap-2 py-10">
             <Flag className="h-6 w-6 text-base-content/30" />
-            <p className="text-sm text-base-content/50 italic">You haven&apos;t filed any reports.</p>
+            <p className="text-sm text-(--kt-faint) italic">You haven&apos;t filed any reports.</p>
           </div>
         </div>
       ) : !error ? (
@@ -81,7 +81,7 @@ export default function MyReportsList() {
             <div className="card-body gap-2">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-2xs font-semibold uppercase tracking-wider text-base-content/40">
+                  <span className="text-2xs font-semibold uppercase tracking-wider text-(--kt-faint)">
                     {r.targetType === "TUTOR" ? "Tutor" : "Class"}
                   </span>
                   <p className="font-mono text-sm font-semibold">{targetLabel(r)}</p>
@@ -100,19 +100,19 @@ export default function MyReportsList() {
               </div>
 
               {r.details && (
-                <p className="text-xs text-base-content/70 whitespace-pre-wrap">{r.details}</p>
+                <p className="text-xs text-(--kt-muted) whitespace-pre-wrap">{r.details}</p>
               )}
 
-              <p className="text-2xs text-base-content/40">Filed {formatDate(r.createdAt)}</p>
+              <p className="text-2xs text-(--kt-faint)">Filed {formatDate(r.createdAt)}</p>
 
               {r.status !== "PENDING" && (
                 <div className="rounded-lg border border-base-200 bg-base-200/30 p-3 text-xs space-y-1 mt-1">
-                  <p className="font-semibold text-base-content/70">
+                  <p className="font-semibold text-(--kt-muted)">
                     {r.status === "RESOLVED" ? "An admin acted on this report." : "Closed without action."}
                     {r.reviewedAt ? ` · ${formatDate(r.reviewedAt)}` : ""}
                   </p>
                   {r.resolutionNote && (
-                    <p className="text-base-content/70">
+                    <p className="text-(--kt-muted)">
                       <span className="font-semibold">Admin note:</span> {r.resolutionNote}
                     </p>
                   )}

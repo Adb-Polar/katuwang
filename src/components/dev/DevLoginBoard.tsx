@@ -73,7 +73,7 @@ export default function DevLoginBoard({
       <div className="card-body gap-3 p-4">
         <div className="flex items-center justify-between">
           <h2 className="font-sans text-sm font-semibold">
-            {title} <span className="text-base-content/40">({filtered.length})</span>
+            {title} <span className="text-(--kt-faint)">({filtered.length})</span>
           </h2>
           <span className={`badge badge-sm ${tone}`}>{title}</span>
         </div>
@@ -107,18 +107,18 @@ export default function DevLoginBoard({
                   )}
                   {busy === u.id && <span className="loading loading-spinner loading-xs" />}
                 </span>
-                <span className="text-2xs text-base-content/70">
+                <span className="text-2xs text-(--kt-muted)">
                   {u.firstName} {u.lastName}
                 </span>
-                <span className="text-2xs text-base-content/40">{u.email}</span>
-                <span className="text-2xs text-base-content/40">
+                <span className="text-2xs text-(--kt-faint)">{u.email}</span>
+                <span className="text-2xs text-(--kt-faint)">
                   {u.gradeLevel} · {u.section}
                 </span>
               </button>
             </li>
           ))}
           {slice.length === 0 && (
-            <li className="py-4 text-center text-2xs text-base-content/40">No accounts</li>
+            <li className="py-4 text-center text-2xs text-(--kt-faint)">No accounts</li>
           )}
         </ul>
 
@@ -131,7 +131,7 @@ export default function DevLoginBoard({
           >
             Prev
           </button>
-          <span className="text-2xs text-base-content/50">
+          <span className="text-2xs text-(--kt-faint)">
             Page {current + 1} / {pageCount}
           </span>
           <button

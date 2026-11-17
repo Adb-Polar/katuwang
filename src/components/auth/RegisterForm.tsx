@@ -123,7 +123,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
           <h1 className="font-sans text-xl font-semibold [word-spacing:-0.2em]">{copy.heading}</h1>
-          <p className="text-xs text-base-content/60">{copy.subheading}</p>
+          <p className="text-xs text-(--kt-muted)">{copy.subheading}</p>
         </div>
 
         <FeedbackBanner variant="error" message={error || null} />
@@ -256,7 +256,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -278,7 +278,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
                 aria-label={showConfirmPassword ? "Hide password" : "Show password"}
               >
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

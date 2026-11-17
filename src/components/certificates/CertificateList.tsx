@@ -45,7 +45,7 @@ export default function CertificateList({ admin = false, preview = false }: { ad
   }
   const download = (c: Certificate) => c.pdfReady
     ? <a className="btn btn-outline btn-sm min-h-11" href={`/api/certificates/${c.id}/download`} download>Download PDF</a>
-    : <span className="text-xs text-base-content/60">PDF being prepared</span>;
+    : <span className="text-xs text-(--kt-muted)">PDF being prepared</span>;
   return <section className="card kt-card"><div className="card-body gap-4">
     {preview && <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="card-title text-sm">My Certificates</h2><Link href="/learner/certificates" className="link link-primary text-sm">View all certificates</Link></div>}
     <FeedbackBanner variant="success" message={message || null} />
@@ -58,16 +58,16 @@ export default function CertificateList({ admin = false, preview = false }: { ad
       <FormField label="Issued through"><input type="date" className="input input-bordered w-full" value={issuedTo} min={issuedFrom || undefined} onChange={e => setIssuedTo(e.target.value)} /></FormField>
     </div>}
     <button type="button" className="btn btn-ghost btn-sm self-end" onClick={refetch}>Refresh certificates</button>
-    {loading ? <LoadingRow /> : loadError ? <LoadErrorState message={loadError} onRetry={refetch} /> : certificates.length === 0 ? <p className="text-sm text-base-content/60 py-6">
+    {loading ? <LoadingRow /> : loadError ? <LoadErrorState message={loadError} onRetry={refetch} /> : certificates.length === 0 ? <p className="text-sm text-(--kt-muted) py-6">
       {admin ? "No certificates match these filters." : "You haven't earned any certificates yet. Complete a tutoring class to receive your first certificate!"}
     </p> : <div className="grid gap-3">
       {certificates.map(c => <article key={c.id} className="flex flex-col gap-3 rounded-xl border border-base-200 p-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1 break-words">
           <h3 className="font-semibold text-sm">{c.subjectName} · {c.classCode}</h3>
           {admin && <p className="text-sm">{c.learnerName}</p>}
-          <p className="text-sm text-base-content/65">Tutor: {c.tutorName}</p>
-          <p className="text-xs text-base-content/65">Completed {formatDate(c.completedAt)}</p>
-          <p className="text-xs text-base-content/65">{delivery[c.emailStatus]}</p>
+          <p className="text-sm text-(--kt-muted)">Tutor: {c.tutorName}</p>
+          <p className="text-xs text-(--kt-muted)">Completed {formatDate(c.completedAt)}</p>
+          <p className="text-xs text-(--kt-muted)">{delivery[c.emailStatus]}</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <button type="button" className="btn btn-ghost btn-sm min-h-11" onClick={() => setSelected(c)}>Details</button>

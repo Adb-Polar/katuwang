@@ -12,7 +12,7 @@ export default function TutorRegisterPage() {
     <AuthLayout>
       <div className="w-full space-y-4">
         <RegisterForm type="TUTOR" />
-        <div className="text-center text-xs text-base-content/60">
+        <div className="text-center text-xs text-(--kt-muted)">
           Already have an account?{" "}
           <Link href="/login" className="link link-primary font-semibold">
             Log in here

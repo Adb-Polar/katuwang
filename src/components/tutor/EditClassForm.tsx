@@ -192,7 +192,7 @@ export default function EditClassForm({
             suspendedUntil={suspendedUntil}
             audience="tutor"
           />
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             To appeal this decision, go back to the{" "}
             <Link href={backHref} className="link link-primary">
               class page
@@ -247,7 +247,7 @@ export default function EditClassForm({
                             onClick={() => toggleTopic(topic)}
                             className={`badge text-2xs font-semibold gap-1 py-2.5 transition-colors ${
                               lockedTopic
-                                ? "badge-ghost text-base-content/40 cursor-not-allowed"
+                                ? "badge-ghost text-(--kt-faint) cursor-not-allowed"
                                 : selected
                                 ? "badge-primary cursor-pointer hover:opacity-80"
                                 : "badge-outline badge-primary border-dashed text-primary/70 cursor-pointer hover:bg-primary/10"
@@ -360,11 +360,11 @@ export default function EditClassForm({
               <div className="card kt-card">
                 <div className="card-body gap-3">
                   <h2 className="card-title text-sm font-bold">At a Glance</h2>
-                  <div className="flex items-center gap-2 text-xs text-base-content/70">
+                  <div className="flex items-center gap-2 text-xs text-(--kt-muted)">
                     <Users className="h-4 w-4 text-primary shrink-0" />
                     <span>{enrolledCount} currently enrolled</span>
                   </div>
-                  <label htmlFor="class-max-capacity" className="font-semibold text-2xs text-base-content/50">MAX CAPACITY</label>
+                  <label htmlFor="class-max-capacity" className="font-semibold text-2xs text-(--kt-faint)">MAX CAPACITY</label>
                   <input
                     id="class-max-capacity"
                     type="number"
@@ -376,7 +376,7 @@ export default function EditClassForm({
                     className="input input-bordered input-sm w-full focus:input-primary text-xs"
                   />
                   {enrolledCount > 0 && (
-                    <p className="text-2xs text-base-content/50">
+                    <p className="text-2xs text-(--kt-faint)">
                       Can&apos;t drop below {enrolledCount} (current enrollment).
                     </p>
                   )}

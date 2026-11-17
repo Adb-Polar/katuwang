@@ -14,7 +14,7 @@ import {
   Gavel,
   ClipboardList,
   Flag,
-  Sparkles,
+  BookmarkPlus,
   Camera,
   CameraOff,
   Lock,
@@ -34,7 +34,7 @@ export interface NotificationRow {
   createdAt: string;
 }
 
-export const FALLBACK_ICON: ReactNode = <Bell className="h-4 w-4 text-base-content/40" />;
+export const FALLBACK_ICON: ReactNode = <Bell className="h-4 w-4 text-(--kt-faint)" />;
 
 export const TYPE_ICON: Record<string, ReactNode> = {
   // topic requests
@@ -51,7 +51,7 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   // question-bank requests
   QUESTION_REQUEST_NEW: <ClipboardList className="h-4 w-4 text-info" />,
   QUESTION_REQUEST_RESOLVED: <CheckCheck className="h-4 w-4 text-success" />,
-  QUESTION_REQUEST_DISMISSED: <XCircle className="h-4 w-4 text-base-content/40" />,
+  QUESTION_REQUEST_DISMISSED: <XCircle className="h-4 w-4 text-(--kt-faint)" />,
   // class enrolment (tutor-facing)
   CLASS_ENROLLMENT_NEW: <UserPlus className="h-4 w-4 text-info" />,
   CLASS_ENROLLMENT_DROPPED: <UserMinus className="h-4 w-4 text-warning" />,
@@ -69,7 +69,7 @@ export const TYPE_ICON: Record<string, ReactNode> = {
   SESSION_PRETEST_OPEN: <ClipboardList className="h-4 w-4 text-info" />,
   SESSION_POSTTEST_OPEN: <ClipboardList className="h-4 w-4 text-success" />,
   // admin-recommended class (distinct from the chatbot's own recommend feature)
-  CLASS_RECOMMENDED_BY_ADMIN: <Sparkles className="h-4 w-4 text-secondary" />,
+  CLASS_RECOMMENDED_BY_ADMIN: <BookmarkPlus className="h-4 w-4 text-secondary" />,
   // profile picture moderation
   PROFILE_PICTURE_WARNING: <Camera className="h-4 w-4 text-warning" />,
   PROFILE_PICTURE_REMOVED: <CameraOff className="h-4 w-4 text-error" />,

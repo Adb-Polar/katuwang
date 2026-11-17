@@ -204,11 +204,11 @@ export default function UserManagementTable() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <Link href={`/admin/users/${u.id}`} className="font-semibold text-primary hover:underline">{u.firstName} {u.lastName}</Link>
-                      <p className="text-xs text-base-content/60">{u.anonymousId} · {gradeSection(u.gradeLevel, u.section)}</p>
+                      <p className="text-xs text-(--kt-muted)">{u.anonymousId} · {gradeSection(u.gradeLevel, u.section)}</p>
                     </div>
                     <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                   </div>
-                  <p className="text-xs break-all text-base-content/60">{u.email}</p>
+                  <p className="text-xs break-all text-(--kt-muted)">{u.email}</p>
                   <div className="flex flex-col gap-2">
                     <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 text-sm w-full">View details</Link>
                     <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 text-sm w-full">Manage account</button>
@@ -241,7 +241,7 @@ export default function UserManagementTable() {
                           role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
                         />
                       </td>
-                      <td className="text-base-content/70">
+                      <td className="text-(--kt-muted)">
                         <div className="flex items-center gap-2.5">
                           <div onClick={(e) => e.stopPropagation()}>
                             <UserAvatar
@@ -258,14 +258,14 @@ export default function UserManagementTable() {
                           </Link>
                         </div>
                       </td>
-                      <td className="text-base-content/60">{u.email}</td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">{u.email}</td>
+                      <td className="text-(--kt-muted)">
                         {gradeSection(u.gradeLevel, u.section)}
                       </td>
                       <td>
                         <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                         {u.status === "SUSPENDED" && u.statusExpiresAt && (
-                          <div className="text-2xs text-base-content/50 mt-1">
+                          <div className="text-2xs text-(--kt-faint) mt-1">
                             Until {formatDateTime(u.statusExpiresAt)}
                           </div>
                         )}
@@ -302,7 +302,7 @@ export default function UserManagementTable() {
 
       <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Account">
         {target && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void handleSave(e.currentTarget); }}>
-            <p className="text-2xs text-base-content/50 mb-4">
+            <p className="text-2xs text-(--kt-faint) mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>
 

@@ -237,10 +237,10 @@ export default function AdminManagementTable() {
                           role="ADMIN"
                         />
                       </td>
-                      <td className="text-base-content/70">
+                      <td className="text-(--kt-muted)">
                         {u.firstName} {u.lastName}
                       </td>
-                      <td className="text-base-content/60">{u.email}</td>
+                      <td className="text-(--kt-muted)">{u.email}</td>
                       <td>
                         {u.role === "SUPER_ADMIN" ? (
                           <span className="kt-badge kt-badge--accent text-2xs font-semibold">
@@ -255,17 +255,17 @@ export default function AdminManagementTable() {
                       <td>
                         <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
                         {u.status === "SUSPENDED" && u.statusReason && (
-                          <div className="text-2xs text-base-content/50 mt-1 max-w-xs truncate">
+                          <div className="text-2xs text-(--kt-faint) mt-1 max-w-xs truncate">
                             {u.statusReason}
                           </div>
                         )}
                       </td>
-                      <td className="text-base-content/60 text-xs">
+                      <td className="text-(--kt-muted) text-xs">
                         {formatDateTime(u.createdAt)} PHT
                       </td>
                       <td className="text-right">
                         {u.role === "SUPER_ADMIN" ? (
-                          <span className="text-2xs text-base-content/40 font-medium">
+                          <span className="text-2xs text-(--kt-faint) font-medium">
                             System Protected
                           </span>
                         ) : (
@@ -301,7 +301,7 @@ export default function AdminManagementTable() {
       {/* Manage Account Modal (mirroring UserManagementTable) */}
       <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Administrator">
         {target && <>
-            <p className="text-2xs text-base-content/50 mb-4">
+            <p className="text-2xs text-(--kt-faint) mb-4">
               {target.anonymousId} · {target.firstName} {target.lastName}
             </p>
 

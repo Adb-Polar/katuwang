@@ -17,7 +17,7 @@ export default function CharCount({
     <span
       aria-live="polite"
       className={`block text-2xs tabular-nums text-right mt-1 ${
-        near ? "text-warning" : "text-base-content/40"
+        near ? "text-warning" : "text-(--kt-faint)"
       } ${className}`}
     >
       {n}/{max}

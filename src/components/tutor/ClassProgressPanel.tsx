@@ -57,7 +57,7 @@ export default function ClassProgressPanel({ classId }: { classId: string }) {
       emptyHint="No session tests published yet."
       footer={
         data.totals.pairedCount > 0 ? (
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             Class-wide avg gain: {data.totals.avgDelta! > 0 ? "+" : ""}
             {data.totals.avgDelta}% across {data.totals.pairedCount} paired attempts.
           </p>

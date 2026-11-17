@@ -5,7 +5,7 @@ import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation"
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useEffect, useState } from "react";
-import { Sparkles } from "lucide-react";
+import { BookmarkPlus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -120,7 +120,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
     <section className="card kt-card">
       <div className="card-body gap-4">
         <h2 className="card-title text-sm font-bold flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-secondary" />
+          <BookmarkPlus className="h-4 w-4 text-secondary" />
           Recommend to a learner
         </h2>
 
@@ -133,7 +133,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
               <div className="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2">
                 <div className="flex items-center gap-2 text-xs">
                   <AnonymousIdBadge id={selected.anonymousId} role="LEARNER" />
-                  <span className="text-base-content/60">{gradeSection(selected.gradeLevel, selected.section)}</span>
+                  <span className="text-(--kt-muted)">{gradeSection(selected.gradeLevel, selected.section)}</span>
                 </div>
                 <button
                   type="button"
@@ -155,9 +155,9 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
                 {query.trim() && (
                   <div className="absolute z-10 mt-1 w-full rounded-lg border border-base-300 bg-base-100 shadow-lg max-h-48 overflow-y-auto">
                     {searching ? (
-                      <div className="p-3 text-2xs text-base-content/50">Searching...</div>
+                      <div className="p-3 text-2xs text-(--kt-faint)">Searching...</div>
                     ) : options.length === 0 ? (
-                      <div className="p-3 text-2xs text-base-content/50">No matching learners.</div>
+                      <div className="p-3 text-2xs text-(--kt-faint)">No matching learners.</div>
                     ) : (
                       options.map((opt) => (
                         <button
@@ -171,7 +171,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
                           className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-base-200 cursor-pointer"
                         >
                           <AnonymousIdBadge id={opt.anonymousId} role="LEARNER" />
-                          <span className="text-base-content/60">{gradeSection(opt.gradeLevel, opt.section)}</span>
+                          <span className="text-(--kt-muted)">{gradeSection(opt.gradeLevel, opt.section)}</span>
                         </button>
                       ))
                     )}
@@ -202,7 +202,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
 
         {recommendations.length > 0 && (
           <div className="border-t border-base-200 pt-3">
-            <h3 className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mb-2">
+            <h3 className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint) mb-2">
               Already recommended
             </h3>
             <ul className="space-y-1.5">
@@ -210,7 +210,7 @@ export default function RecommendClassForm({ classId }: { classId: string }) {
                 <li key={r.id} className="flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2">
                     <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
-                    <span className="text-base-content/50 text-2xs">{formatDateTime(r.createdAt)}</span>
+                    <span className="text-(--kt-faint) text-2xs">{formatDateTime(r.createdAt)}</span>
                   </div>
                 </li>
               ))}

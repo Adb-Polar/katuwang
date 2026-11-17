@@ -123,7 +123,7 @@ export default function MatchCriteriaFields({
         required
       >
         {!value.subject ? (
-          <div className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+          <div className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
             Select a subject to see its topics.
           </div>
         ) : (
@@ -176,7 +176,7 @@ export default function MatchCriteriaFields({
                   onChange={(e) => updateSlot(i, { startTime: e.target.value })}
                   className="input input-bordered input-sm text-xs w-28 min-w-0"
                 />
-                <span className="text-xs text-base-content/50 shrink-0">to</span>
+                <span className="text-xs text-(--kt-faint) shrink-0">to</span>
                 <input
                   type="time"
                   required data-after={slot.startTime} aria-label="End time"

@@ -25,7 +25,7 @@ export default function ClassModerationPanel({
         <AlertTriangle className="h-4 w-4 shrink-0" />
         This class was {banned ? "banned" : "suspended"} by an administrator
       </div>
-      <p className="text-xs text-base-content/70">
+      <p className="text-xs text-(--kt-muted)">
         {audience === "tutor"
           ? "It can't be edited and its sessions are read-only until the moderation is lifted."
           : banned
@@ -33,12 +33,12 @@ export default function ClassModerationPanel({
           : "It's temporarily unavailable and enrollment is frozen until the moderation is lifted."}
       </p>
       {suspendedReason && (
-        <p className="text-xs text-base-content/80">
+        <p className="text-xs text-(--kt-muted)">
           <span className="font-semibold">Reason:</span> {suspendedReason}
         </p>
       )}
       {status === "SUSPENDED" && (
-        <p className="text-xs text-base-content/80">
+        <p className="text-xs text-(--kt-muted)">
           <span className="font-semibold">{suspendedUntil ? "Suspended until:" : "Duration:"}</span>{" "}
           {suspendedUntil ? formatDateTime(suspendedUntil) : "Indefinite"}
         </p>

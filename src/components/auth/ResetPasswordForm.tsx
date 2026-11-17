@@ -87,7 +87,7 @@ export default function ResetPasswordForm() {
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <BrandMark />
           <h1 className="font-sans text-xl font-semibold text-base-content">Choose a new password</h1>
-          <p className="text-xs text-base-content/60">Enter and confirm your new password below.</p>
+          <p className="text-xs text-(--kt-muted)">Enter and confirm your new password below.</p>
         </div>
 
         <FeedbackBanner variant="error" message={error || null} />
@@ -98,10 +98,10 @@ export default function ResetPasswordForm() {
               <Check className="w-6 h-6" strokeWidth={3} />
             </div>
             <h3 className="font-sans text-base font-semibold">Password updated</h3>
-            <p className="text-xs text-base-content/60">Redirecting you to sign in...</p>
+            <p className="text-xs text-(--kt-muted)">Redirecting you to sign in...</p>
           </div>
         ) : validating ? (
-          <p className="text-xs text-base-content/60" role="status">Checking password reset authorization…</p>
+          <p className="text-xs text-(--kt-muted)" role="status">Checking password reset authorization…</p>
         ) : !authorized ? (
           <FeedbackBanner
             variant="error"
@@ -111,7 +111,7 @@ export default function ResetPasswordForm() {
           <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
             <div data-form-field="New Password" className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">New Password</span>
+                <span className="label-text font-semibold text-xs text-(--kt-muted)">New Password</span>
               </label>
               <div className="relative">
                 <input
@@ -130,7 +130,7 @@ export default function ResetPasswordForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors cursor-pointer"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-(--kt-faint) hover:text-base-content transition-colors cursor-pointer"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -140,7 +140,7 @@ export default function ResetPasswordForm() {
 
             <div data-form-field="Confirm Password" className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">Confirm Password</span>
+                <span className="label-text font-semibold text-xs text-(--kt-muted)">Confirm Password</span>
               </label>
               <input
                 type={showPassword ? "text" : "password"}
@@ -173,7 +173,7 @@ export default function ResetPasswordForm() {
           </ValidatedForm>
         )}
 
-        <div className="text-center text-xs text-base-content/50 border-t border-base-200 pt-4">
+        <div className="text-center text-xs text-(--kt-faint) border-t border-base-200 pt-4">
           <Link className="text-primary font-bold hover:underline" href="/login">
             Back to sign in
           </Link>

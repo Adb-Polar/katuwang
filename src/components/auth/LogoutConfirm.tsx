@@ -26,7 +26,7 @@ export default function LogoutConfirm() {
         <h1 className="font-sans text-xl font-semibold tracking-tight text-base-content">
           Sign out of Katuwang?
         </h1>
-        <p className="text-xs text-base-content/60 leading-relaxed">
+        <p className="text-xs text-(--kt-muted) leading-relaxed">
           You&apos;ll need to sign in again to get back into your portal.
         </p>
         <div className="card-actions pt-2 w-full flex-col gap-2">

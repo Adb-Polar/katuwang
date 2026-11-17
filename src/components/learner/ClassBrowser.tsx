@@ -119,7 +119,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
           )}
 
           {isBrowse && (
-            <p className="text-sm text-base-content/65">
+            <p className="text-sm text-(--kt-muted)">
               Explore classes across Grades 7–12. You can enroll at any grade level.
             </p>
           )}
@@ -203,7 +203,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
             />
           ) : (
             <>
-              <p className="text-xs text-base-content/50">
+              <p className="text-xs text-(--kt-faint)">
                 {total} class{total === 1 ? "" : "es"}
               </p>
               <div className="grid sm:grid-cols-2 gap-4">

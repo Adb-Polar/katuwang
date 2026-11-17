@@ -69,7 +69,7 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
   }
 
   if (!primary && reviews.length === 0) {
-    return <span className="text-2xs text-base-content/40">Not available</span>;
+    return <span className="text-2xs text-(--kt-faint)">Not available</span>;
   }
 
   return (
@@ -103,7 +103,7 @@ export default function SessionTestsCard({
       <h2 className="card-title text-sm font-bold">Session Tests</h2>
 
       {rows.length === 0 ? (
-        <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+        <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
           No sessions yet.
         </p>
       ) : (
@@ -115,7 +115,7 @@ export default function SessionTestsCard({
                 key={row.sessionId}
                 className="flex items-center justify-between gap-3 p-3 border border-dashed border-base-300 rounded-xl text-xs"
               >
-                <span className="text-base-content/60 truncate">{row.topic} — no test yet</span>
+                <span className="text-(--kt-muted) truncate">{row.topic} — no test yet</span>
                 <Link
                   href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`}
                   className="btn btn-outline btn-primary btn-xs text-2xs font-bold shrink-0"
@@ -139,11 +139,11 @@ export default function SessionTestsCard({
               className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
             >
               <div className="min-w-0 max-w-full">
-                <div className="font-semibold text-base-content/80 break-words">
+                <div className="font-semibold text-(--kt-muted) break-words">
                   {row.topic}: {row.test.title}
                 </div>
                 {audience === "learner" && (
-                  <div className="text-2xs text-base-content/50">
+                  <div className="text-2xs text-(--kt-faint)">
                     {row.pre?.status === "SUBMITTED" ? `Pre ${row.pre.scorePercent}%` : "Pre not taken"}
                     {" · "}
                     {row.post?.status === "SUBMITTED" ? `Post ${row.post.scorePercent}%` : "Post not taken"}

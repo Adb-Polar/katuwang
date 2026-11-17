@@ -18,7 +18,7 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
       <div className="chat-image avatar avatar-placeholder">
         <div
           className={`w-7 rounded-full grid place-items-center ${
-            isBot ? "bg-primary/10 text-primary" : "bg-base-300 text-base-content/60"
+            isBot ? "bg-primary/10 text-primary" : "bg-base-300 text-(--kt-muted)"
           }`}
         >
           {isBot ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
@@ -53,7 +53,7 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
             >
               <span className="block font-semibold text-base-content">{c.title}</span>
               {c.reasons.length > 0 && (
-                <span className="block text-base-content/60 mt-0.5">{c.reasons.join(" · ")}</span>
+                <span className="block text-(--kt-muted) mt-0.5">{c.reasons.join(" · ")}</span>
               )}
             </Link>
           ))}

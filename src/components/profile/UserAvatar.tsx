@@ -86,7 +86,7 @@ export default function UserAvatar({
         <div
           className={`${sizeStyle.container} rounded-full overflow-hidden border border-primary/20 bg-base-300 flex items-center justify-center font-bold text-primary shadow-2xs transition-all ${
             isZoomable
-              ? "group-hover:ring-2 group-hover:ring-primary group-hover:scale-105 active:scale-95"
+              ? "group-hover:ring-2 group-hover:ring-primary"
               : ""
           } ${className}`}
         >
@@ -128,7 +128,7 @@ export default function UserAvatar({
                   onError={() => setModalHasError(true)}
                 />
               ) : (
-                <div className="p-8 text-center text-xs text-base-content/60">
+                <div className="p-8 text-center text-xs text-(--kt-muted)">
                   Failed to load full-size image.
                 </div>
               )}
@@ -136,12 +136,12 @@ export default function UserAvatar({
             {(anonymousId || subtitle || role) && (
               <div className="mt-4 text-center space-y-0.5">
                 {name && anonymousId && name !== anonymousId && (
-                  <p className="text-xs font-mono font-medium text-base-content/80">
+                  <p className="text-xs font-mono font-medium text-(--kt-muted)">
                     {anonymousId}
                   </p>
                 )}
                 {subtitle && (
-                  <p className="text-2xs text-base-content/60">{subtitle}</p>
+                  <p className="text-2xs text-(--kt-muted)">{subtitle}</p>
                 )}
               </div>
             )}

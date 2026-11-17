@@ -131,13 +131,13 @@ export default function ClassDetailsView({
           <div className="card kt-card">
             <div className="card-body gap-4">
               <h2 className="card-title text-sm font-bold">Class Info</h2>
-              <div className="grid grid-cols-2 gap-4 text-xs text-base-content/80">
+              <div className="grid grid-cols-2 gap-4 text-xs text-(--kt-muted)">
                 {extraFacts}
                 {(building || room) && (
                   <div className="col-span-2 flex items-center gap-1.5">
                     <MapPin className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-semibold text-2xs text-base-content/50">LOCATION</div>
+                      <div className="font-semibold text-2xs text-(--kt-faint)">LOCATION</div>
                       <span className="font-medium">
                         {[building && `Bldg. ${building}`, room && `Room ${room}`].filter(Boolean).join(" · ")}
                       </span>
@@ -148,7 +148,7 @@ export default function ClassDetailsView({
                   <div className="col-span-2 flex items-center gap-1.5">
                     <LinkIcon className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <div className="font-semibold text-2xs text-base-content/50">MEETING LINK</div>
+                      <div className="font-semibold text-2xs text-(--kt-faint)">MEETING LINK</div>
                       <a
                         href={meetingLink}
                         target="_blank"
@@ -161,7 +161,7 @@ export default function ClassDetailsView({
                   </div>
                 )}
                 {!building && !room && !meetingLink && !extraFacts && (
-                  <p className="col-span-2 text-base-content/40 italic">No location or meeting link provided.</p>
+                  <p className="col-span-2 text-(--kt-faint) italic">No location or meeting link provided.</p>
                 )}
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function ClassDetailsView({
             <div className="card kt-card">
               <div className="card-body gap-2">
                 <h2 className="card-title text-sm font-bold">Description</h2>
-                <p className="text-xs text-base-content/70 leading-relaxed">{description}</p>
+                <p className="text-xs text-(--kt-muted) leading-relaxed">{description}</p>
               </div>
             </div>
           )}
@@ -200,7 +200,7 @@ export default function ClassDetailsView({
           <div className="card kt-card">
             <div className="card-body gap-3">
               <h2 className="card-title text-sm font-bold">At a Glance</h2>
-              <div className="flex items-center gap-2 text-xs text-base-content/70">
+              <div className="flex items-center gap-2 text-xs text-(--kt-muted)">
                 <Users className="h-4 w-4 text-primary shrink-0" />
                 <span>
                   {enrolledCount} / {maxStudents} enrolled

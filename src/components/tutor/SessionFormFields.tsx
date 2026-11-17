@@ -17,7 +17,7 @@ export default function SessionFormFields({ topics, topic, date, time, duration,
 }) {
   return (
     <div className="space-y-4 rounded-xl border border-base-300 bg-base-200/20 p-4 sm:p-5">
-      <p className="text-sm text-base-content/60">Set the topic, start time, and length. Times are in {SCHOOL_TIME_ZONE_LABEL}.</p>
+      <p className="text-sm text-(--kt-muted)">Set the topic, start time, and length. Times are in {SCHOOL_TIME_ZONE_LABEL}.</p>
       <FormField label="Topic" required size="md">
         <select name="topic" value={topic} onChange={(e) => onTopic(e.target.value)} required className="select select-bordered w-full min-h-11 text-base sm:text-sm">
           <option value="" disabled>Select topic</option>

@@ -105,9 +105,9 @@ export default async function LearnerDashboard() {
               <CalendarClock className="h-4 w-4 text-primary" />
               Upcoming sessions
             </h2>
-            <p className="text-xs text-base-content/60">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+            <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
             {upcomingSessions.length === 0 ? (
-              <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
                 No scheduled sessions yet. Browse classes to enroll.
               </p>
             ) : (
@@ -135,7 +135,7 @@ export default async function LearnerDashboard() {
                               {s.topic}
                             </span>
                           </div>
-                          <p className="text-2xs text-base-content/55 mt-0.5">
+                          <p className="text-2xs text-(--kt-faint) mt-0.5">
                             {formatTime(d)} ·{" "}
                             {s.duration} min
                           </p>
@@ -158,7 +158,7 @@ export default async function LearnerDashboard() {
             <CalendarClock className="h-4 w-4 text-primary" />
             This week
           </h2>
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             Sessions across your enrolled classes over the next 7 days.
           </p>
           <WeeklyTimetable

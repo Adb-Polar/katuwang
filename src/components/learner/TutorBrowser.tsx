@@ -132,7 +132,7 @@ export default function TutorBrowser() {
                 <div className="dropdown-content z-20 rounded-box border border-base-300 bg-base-100 p-3 shadow-lg w-64 max-h-64 overflow-y-auto">
                   {subjectGroups.filter((group) => group.items.length).map((group) => (
                     <fieldset key={group.label} className="mb-2 border-b border-base-200 pb-2 last:border-0">
-                      <legend className="text-2xs font-semibold uppercase tracking-wide text-base-content/55">{group.label}</legend>
+                      <legend className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">{group.label}</legend>
                       {group.items.map((s) => <label key={s.slug} className="flex items-center gap-2 py-1.5 text-xs">
                         <input type="checkbox" className="checkbox checkbox-xs checkbox-primary" checked={subjects.includes(s.slug)}
                           onChange={() => toggleSubject(s.slug)} />{s.name}
@@ -159,7 +159,7 @@ export default function TutorBrowser() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : tutors.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-base-300 py-10 text-center text-xs italic text-base-content/40">
+            <p className="rounded-xl border border-dashed border-base-300 py-10 text-center text-xs italic text-(--kt-faint)">
               No verified tutors match this filter yet.
             </p>
           ) : (
@@ -168,7 +168,7 @@ export default function TutorBrowser() {
                 <Link
                   key={t.id}
                   href={`/learner/tutors/${t.id}`}
-                  className="flex min-h-64 min-w-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-base-100 hover:shadow-md"
+                  className="flex min-h-64 min-w-0 flex-col gap-2.5 overflow-hidden rounded-xl border border-base-300 bg-base-200/40 p-4 text-left shadow-sm transition-colors hover:border-primary/50 hover:bg-base-100"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
@@ -183,7 +183,7 @@ export default function TutorBrowser() {
                       <div className="min-w-0">
                         <AnonymousIdBadge id={t.anonymousId} role="TUTOR" size="sm" showIcon />
                         {t.name && (
-                          <span className="block truncate text-2xs text-base-content/50 mt-0.5">{t.name}</span>
+                          <span className="block truncate text-2xs text-(--kt-faint) mt-0.5">{t.name}</span>
                         )}
                       </div>
                     </div>
@@ -197,14 +197,14 @@ export default function TutorBrowser() {
                         </span>
                       ))}
                       {t.subjects.length > MAX_VISIBLE_SUBJECTS && (
-                        <span className="shrink-0 text-2xs text-base-content/55">+{t.subjects.length - MAX_VISIBLE_SUBJECTS} more</span>
+                        <span className="shrink-0 text-2xs text-(--kt-faint)">+{t.subjects.length - MAX_VISIBLE_SUBJECTS} more</span>
                       )}
                     </div>
                   )}
 
                   {t.verifiedTopics?.length > 0 && (
                     <div className="min-w-0 space-y-1" aria-label="Certified topics">
-                      <p className="text-2xs text-base-content/55">Certified topics</p>
+                      <p className="text-2xs text-(--kt-faint)">Certified topics</p>
                       <div className="flex min-w-0 flex-wrap gap-1">
                         {t.verifiedTopics.slice(0, MAX_VISIBLE_TOPICS).map((cert) => (
                           <TopicChip
@@ -215,7 +215,7 @@ export default function TutorBrowser() {
                           />
                         ))}
                         {t.verifiedTopics.length > MAX_VISIBLE_TOPICS && (
-                          <span className="self-center text-2xs text-base-content/55">
+                          <span className="self-center text-2xs text-(--kt-faint)">
                             +{t.verifiedTopics.length - MAX_VISIBLE_TOPICS} more
                           </span>
                         )}
@@ -225,7 +225,7 @@ export default function TutorBrowser() {
 
                   {t.verifiedClasses.length > 0 && (
                     <div className="flex max-h-12 flex-wrap items-center gap-1 overflow-hidden">
-                      <span className="shrink-0 text-2xs text-base-content/45">Verified classes</span>
+                      <span className="shrink-0 text-2xs text-(--kt-faint)">Verified classes</span>
                       {t.verifiedClasses.slice(0, MAX_VISIBLE_CLASSES).map((c) => (
                         <span
                           key={c.code}
@@ -237,12 +237,12 @@ export default function TutorBrowser() {
                         </span>
                       ))}
                       {t.verifiedClasses.length > MAX_VISIBLE_CLASSES && (
-                        <span className="shrink-0 text-2xs text-base-content/55">+{t.verifiedClasses.length - MAX_VISIBLE_CLASSES} more</span>
+                        <span className="shrink-0 text-2xs text-(--kt-faint)">+{t.verifiedClasses.length - MAX_VISIBLE_CLASSES} more</span>
                       )}
                     </div>
                   )}
 
-                  <div className="mt-auto grid min-w-0 grid-cols-2 gap-2 border-t border-base-300 pt-2 text-2xs text-base-content/60">
+                  <div className="mt-auto grid min-w-0 grid-cols-2 gap-2 border-t border-base-300 pt-2 text-2xs text-(--kt-muted)">
                     <span className="flex min-w-0 items-center gap-1 truncate">
                       <BadgeCheck className="h-3 w-3 shrink-0 text-success" />
                       <span className="min-w-0 truncate">{t.verifiedTopicCount} verified {t.verifiedTopicCount === 1 ? "topic" : "topics"}</span>
@@ -253,7 +253,7 @@ export default function TutorBrowser() {
                     </span>
                     {t.nextSessionAt && (
                       <span className="col-span-2 flex min-w-0 items-center gap-1 truncate" title={`Next session ${fmtNext(t.nextSessionAt)}`}>
-                        <CalendarClock className="h-3 w-3 shrink-0 text-base-content/40" />
+                        <CalendarClock className="h-3 w-3 shrink-0 text-(--kt-faint)" />
                         <span className="min-w-0 truncate">Next session {fmtNext(t.nextSessionAt)}</span>
                       </span>
                     )}

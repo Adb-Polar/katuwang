@@ -80,7 +80,7 @@ export default function ProfileView({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <h2 className="text-sm font-bold">Grade and section</h2>
-              <p className="mt-1 text-sm text-base-content/70">
+              <p className="mt-1 text-sm text-(--kt-muted)">
                 {gradeText === "—" ? "Grade not set" : gradeText} · {section || "Section not set"}
               </p>
             </div>
@@ -104,7 +104,7 @@ export default function ProfileView({
               />
               <div>
                 <h2 className="card-title text-sm font-bold">Identity</h2>
-                <p className="text-2xs text-base-content/60 mt-0.5 flex items-start gap-1.5">
+                <p className="text-2xs text-(--kt-muted) mt-0.5 flex items-start gap-1.5">
                   <ShieldCheck className="h-3.5 w-3.5 shrink-0 mt-px text-success" />
                   Name and email are managed by an administrator.
                 </p>
@@ -113,7 +113,7 @@ export default function ProfileView({
             <dl className="divide-y divide-base-200">
               {identityRows.map((r) => (
                 <div key={r.label} className="grid gap-0.5 py-3 text-sm">
-                  <dt className="text-2xs uppercase tracking-wide text-base-content/45">{r.label}</dt>
+                  <dt className="text-2xs uppercase tracking-wide text-(--kt-faint)">{r.label}</dt>
                   <dd>{r.value}</dd>
                 </div>
               ))}
@@ -127,7 +127,7 @@ export default function ProfileView({
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="card-title text-sm font-bold">Your details</h2>
-                <p className="text-2xs text-base-content/60 mt-1">
+                <p className="text-2xs text-(--kt-muted) mt-1">
                   Grade level, section, and contact info — keep these current so tutors and admins can reach you.
                 </p>
               </div>
@@ -139,7 +139,7 @@ export default function ProfileView({
             <dl className="divide-y divide-base-200">
               {editableRows.map((r) => (
                 <div key={r.label} className="grid gap-0.5 py-3 text-sm">
-                  <dt className="text-2xs uppercase tracking-wide text-base-content/45">{r.label}</dt>
+                  <dt className="text-2xs uppercase tracking-wide text-(--kt-faint)">{r.label}</dt>
                   <dd className="font-semibold break-words">{r.value}</dd>
                 </div>
               ))}
@@ -153,12 +153,12 @@ export default function ProfileView({
           <div className="card-body gap-3 p-6">
             <div>
               <h2 className="card-title text-sm font-bold">Verified Topics</h2>
-              <p className="text-2xs text-base-content/60 mt-1">
+              <p className="text-2xs text-(--kt-muted) mt-1">
                 Topics you&apos;re certified to teach. Learners see these on your profile.
               </p>
             </div>
             {topicsBySubject.size === 0 ? (
-              <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
                 No verified topics yet — take an assessment from the Assessments page.
               </p>
             ) : (

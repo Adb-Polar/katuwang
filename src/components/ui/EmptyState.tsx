@@ -12,7 +12,7 @@ export default function EmptyState({
   padding?: string;
 }) {
   return (
-    <div className={`text-center ${padding} text-base-content/40 italic text-sm`}>
+    <div className={`text-center ${padding} text-(--kt-faint) italic text-sm`}>
       {children}
     </div>
   );

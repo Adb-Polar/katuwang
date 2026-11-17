@@ -23,7 +23,7 @@ export interface TutorProfileClass {
 function Grid({ classes, emptyHint }: { classes: TutorProfileClass[]; emptyHint: string }) {
   if (classes.length === 0) {
     return (
-      <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+      <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
         {emptyHint}
       </p>
     );

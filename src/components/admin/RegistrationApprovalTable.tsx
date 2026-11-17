@@ -45,7 +45,7 @@ interface PendingUser {
 
 function StudentRegistrationDetails({ user }: { user: PendingUser }) {
   return (
-    <dl className="mt-2 space-y-1 text-xs text-base-content/65 whitespace-normal break-words">
+    <dl className="mt-2 space-y-1 text-xs text-(--kt-muted) whitespace-normal break-words">
       <div><dt className="inline font-semibold">Student ID Number: </dt><dd className="inline">{user.studentIdNumber?.trim() || "Not provided"}</dd></div>
       <div><dt className="inline font-semibold">Adviser Teacher: </dt><dd className="inline">{user.adviserTeacherName?.trim() || "Not provided"}</dd></div>
     </dl>
@@ -182,9 +182,9 @@ export default function RegistrationApprovalTable() {
                   </div>
                   <div>
                     <p className="text-sm font-semibold">{u.firstName} {u.lastName}</p>
-                    <p className="break-all text-xs text-base-content/60">{u.email}</p>
+                    <p className="break-all text-xs text-(--kt-muted)">{u.email}</p>
                   </div>
-                  <div className="space-y-1 text-xs text-base-content/65">
+                  <div className="space-y-1 text-xs text-(--kt-muted)">
                     <StudentRegistrationDetails user={u} />
                     <p>{gradeSection(u.gradeLevel, u.section)}</p>
                     <p>Requested {formatDateTime(u.createdAt)}</p>
@@ -218,18 +218,18 @@ export default function RegistrationApprovalTable() {
                           role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
                         />
                       </td>
-                      <td className="text-base-content/70">
+                      <td className="text-(--kt-muted)">
                         {u.firstName} {u.lastName}
                         <StudentRegistrationDetails user={u} />
                       </td>
-                      <td className="text-base-content/60">{u.email}</td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">{u.email}</td>
+                      <td className="text-(--kt-muted)">
                         {u.role === "STUDENT_TUTOR" ? "Tutor" : "Learner"}
                       </td>
-                      <td className="text-base-content/60">
+                      <td className="text-(--kt-muted)">
                         {gradeSection(u.gradeLevel, u.section)}
                       </td>
-                      <td className="text-2xs text-base-content/50">{formatDateTime(u.createdAt)}</td>
+                      <td className="text-2xs text-(--kt-faint)">{formatDateTime(u.createdAt)}</td>
                       <td>
                         <div className="flex gap-2 justify-end">
                           <button
@@ -273,7 +273,7 @@ export default function RegistrationApprovalTable() {
 
       <Modal open={declineTarget !== null} onClose={() => setDeclineTarget(null)} title="Decline Registration">
         {declineTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void review(declineTarget, "DECLINE", reason, e.currentTarget); }}>
-            <p className="text-2xs text-base-content/50 mb-4">
+            <p className="text-2xs text-(--kt-faint) mb-4">
               {declineTarget.anonymousId} · {declineTarget.firstName} {declineTarget.lastName}
             </p>
 

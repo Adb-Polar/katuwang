@@ -137,7 +137,7 @@ export default function ReportsView() {
 
           <div className="card kt-card">
             <div className="card-body gap-2 p-5">
-              <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/70">
+              <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">
                 Enrollments — last 30 days
               </h3>
               <div className="h-56 w-full">

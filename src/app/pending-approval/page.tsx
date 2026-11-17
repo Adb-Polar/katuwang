@@ -24,11 +24,11 @@ export default function PendingApprovalPage() {
             <div className="w-12 h-12 rounded-full bg-warning/15 text-warning flex items-center justify-center">
               <Clock className="w-6 h-6" strokeWidth={2.25} />
             </div>
-            <p className="text-xs text-base-content/70 leading-relaxed">
+            <p className="text-xs text-(--kt-muted) leading-relaxed">
               Your registration was received, but an administrator still needs to
               review and approve your account before you can sign in.
             </p>
-            <p className="text-xs text-base-content/60 leading-relaxed">
+            <p className="text-xs text-(--kt-muted) leading-relaxed">
               Approvals are usually handled within a school day. Try signing in
               again later, or reach out to your school administrator if it has
               been longer than expected.

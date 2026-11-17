@@ -84,7 +84,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
           <ArrowLeft className="w-3.5 h-3.5" />
           Assessments
         </Link>
-        <span className="text-2xs text-base-content/50">
+        <span className="text-2xs text-(--kt-faint)">
           {subjectDisplayLabel(attempt.subject)} · attempt #{attempt.attemptNo}
         </span>
       </div>
@@ -94,7 +94,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="card-title text-sm font-bold">{attempt.topic}</h2>
-              <p className="text-2xs text-base-content/50 mt-0.5">
+              <p className="text-2xs text-(--kt-faint) mt-0.5">
                 {attempt.questionCount} questions · pass mark {attempt.passPercent}%
               </p>
             </div>
@@ -105,7 +105,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                 size="sm"
               />
             ) : (
-              <span className="text-2xs text-base-content/50">
+              <span className="text-2xs text-(--kt-faint)">
                 {answeredCount} / {attempt.items.length} answered
               </span>
             )}
@@ -131,7 +131,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
               return (
                 <li key={item.questionId} className="border border-base-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-start gap-2">
-                    <span className="text-2xs text-base-content/40 shrink-0 pt-0.5">
+                    <span className="text-2xs text-(--kt-faint) shrink-0 pt-0.5">
                       Q{item.position + 1}
                     </span>
                     <p className="text-sm font-semibold text-base-content/85">{item.prompt}</p>
@@ -168,7 +168,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                               setAnswers((prev) => ({ ...prev, [item.questionId]: o.id }))
                             }
                           />
-                          <span className="text-base-content/80">{o.text}</span>
+                          <span className="text-(--kt-muted)">{o.text}</span>
                           {submitted && optionIsCorrect === true && (
                             <span className="text-2xs text-success ml-auto">correct</span>
                           )}
@@ -181,7 +181,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                   </div>
 
                   {submitted && item.explanation && (
-                    <p className="text-2xs text-base-content/55 italic pl-6">{item.explanation}</p>
+                    <p className="text-2xs text-(--kt-faint) italic pl-6">{item.explanation}</p>
                   )}
                 </li>
               );

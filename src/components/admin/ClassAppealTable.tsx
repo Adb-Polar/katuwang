@@ -149,11 +149,11 @@ export default function ClassAppealTable() {
                     <tr key={a.id} className="text-sm align-top">
                       <td>
                         <span className="font-mono text-xs">{a.class.code}</span>
-                        <div className="text-2xs text-base-content/50 mt-0.5">
+                        <div className="text-2xs text-(--kt-faint) mt-0.5">
                           {subjectDisplayLabel(a.class.subject)} · was {statusDisplayLabel(a.class.status)}
                         </div>
                         {a.class.suspendedReason && (
-                          <div className="text-2xs text-base-content/40 mt-0.5 max-w-[14rem] whitespace-normal">
+                          <div className="text-2xs text-(--kt-faint) mt-0.5 max-w-[14rem] whitespace-normal">
                             Mod reason: {a.class.suspendedReason}
                           </div>
                         )}
@@ -162,12 +162,12 @@ export default function ClassAppealTable() {
                       <td>
                         <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
                       </td>
-                      <td className="text-2xs text-base-content/70 max-w-xs whitespace-normal">{a.reason}</td>
-                      <td className="text-2xs text-base-content/50">
+                      <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">{a.reason}</td>
+                      <td className="text-2xs text-(--kt-faint)">
                         {tab === "pending" ? formatDateTime(a.createdAt) : a.reviewedAt ? formatDateTime(a.reviewedAt) : "—"}
                       </td>
                       {tab !== "pending" && (
-                        <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
+                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
                           {a.reviewNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}

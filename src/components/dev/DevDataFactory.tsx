@@ -165,7 +165,7 @@ export default function DevDataFactory() {
             </select>
           </Field>
           {uRole !== "ADMIN" && (
-            <label className="flex items-center gap-2 text-2xs font-medium text-base-content/60">
+            <label className="flex items-center gap-2 text-2xs font-medium text-(--kt-muted)">
               <input
                 type="checkbox"
                 className="checkbox checkbox-xs"
@@ -312,7 +312,7 @@ export default function DevDataFactory() {
               onChange={(e) => setTrCount(Number(e.target.value))}
             />
           </Field>
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             Open requests from random existing learners, random subject/topics.
           </p>
           <ActionButton
@@ -326,7 +326,7 @@ export default function DevDataFactory() {
 
       {/* Wipe */}
       <Panel title="Clean up">
-        <p className="text-2xs text-base-content/60">
+        <p className="text-2xs text-(--kt-muted)">
           Deletes every <code className="rounded bg-base-300 px-1">@dev.test</code> account and everything it owns
           (classes, enrolments, requests). Seed accounts are untouched.
         </p>
@@ -350,8 +350,8 @@ export default function DevDataFactory() {
               {log.map((entry, i) => (
                 <li key={i} className="flex items-start gap-2 text-2xs">
                   <span className={entry.ok ? "text-success" : "text-error"}>{entry.ok ? "✓" : "✕"}</span>
-                  <span className="text-base-content/40">{entry.at}</span>
-                  <span className="text-base-content/80">{entry.text}</span>
+                  <span className="text-(--kt-faint)">{entry.at}</span>
+                  <span className="text-(--kt-muted)">{entry.text}</span>
                 </li>
               ))}
             </ul>
@@ -385,7 +385,7 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-2xs font-medium text-base-content/60">{label}</span>
+      <span className="text-2xs font-medium text-(--kt-muted)">{label}</span>
       {children}
     </label>
   );

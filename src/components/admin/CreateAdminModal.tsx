@@ -110,7 +110,7 @@ export default function CreateAdminModal({
 
   return (
     <Modal open={isOpen} onClose={handleClose} title={createdAdmin ? "Admin Provisioned" : "Provision Admin Account"} size="md">
-        <p className="text-2xs text-base-content/50 mb-4">
+        <p className="text-2xs text-(--kt-faint) mb-4">
           {createdAdmin
             ? "The new administrator account has been created."
             : "Assign administrative permissions with invitation link."}
@@ -130,7 +130,7 @@ export default function CreateAdminModal({
                 <p className="font-semibold text-sm">
                   {createdAdmin.firstName} {createdAdmin.lastName} ({createdAdmin.anonymousId})
                 </p>
-                <p className="text-base-content/70">
+                <p className="text-(--kt-muted)">
                   Assigned role: <span className="font-semibold">ADMIN</span>. An activation email has been queued to{" "}
                   <span className="font-mono text-base-content font-medium">{createdAdmin.email}</span>.
                 </p>
@@ -139,7 +139,7 @@ export default function CreateAdminModal({
 
             {activationUrl && (
               <div className="space-y-1.5">
-                <label htmlFor="admin-activation-url" className="text-xs font-medium text-base-content/70">
+                <label htmlFor="admin-activation-url" className="text-xs font-medium text-(--kt-muted)">
                   Direct Activation Link (valid for 48 hours)
                 </label>
                 <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ export default function CreateAdminModal({
                     )}
                   </button>
                 </div>
-                <p className="text-2xs text-base-content/50">
+                <p className="text-2xs text-(--kt-faint)">
                   You can copy this link if you need to provide it directly to the new administrator.
                 </p>
               </div>
@@ -230,7 +230,7 @@ export default function CreateAdminModal({
               />
             </FormField>
 
-            <div className="p-3 bg-base-200/50 rounded-xl text-2xs text-base-content/70 leading-relaxed border border-base-200">
+            <div className="p-3 bg-base-200/50 rounded-xl text-2xs text-(--kt-muted) leading-relaxed border border-base-200">
               <span className="font-semibold text-base-content">Security Notice:</span> The new account will be assigned the standard <span className="font-medium text-primary">ADMIN</span> role. It cannot be granted Super Admin privileges from this form. An activation link will be generated for password setup.
             </div>
 

@@ -216,7 +216,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
           </div>
 
           {!formMode && (
-            <p className="text-xs text-base-content/60">
+            <p className="text-xs text-(--kt-muted)">
               Post what you want to learn and when you&apos;re free. A tutor can attach a class, then you review and enroll.
             </p>
           )}
@@ -259,7 +259,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
               onSubmit={saveEdit}
               className="space-y-4 border border-base-200 rounded-xl p-4 bg-base-200/20"
             >
-              <div className="flex items-center gap-2 text-2xs text-base-content/50">
+              <div className="flex items-center gap-2 text-2xs text-(--kt-faint)">
                 <span className="badge badge-neutral text-2xs font-bold uppercase">
                   {subjectDisplayLabel(editingRequest.subject)}
                 </span>
@@ -316,7 +316,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : visibleRequests.length === 0 ? (
-            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-base-content/40 italic text-xs">
+            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
               No {tab.toLowerCase()} requests.
             </div>
           ) : (
@@ -330,7 +330,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                         <span className="badge badge-neutral text-2xs font-bold uppercase tracking-wide px-2 py-2">
                           {subjectDisplayLabel(r.subject)}
                         </span>
-                        <span className="text-base-content/50">{gradeLabel(r.gradeLevel)}</span>
+                        <span className="text-(--kt-faint)">{gradeLabel(r.gradeLevel)}</span>
                         <StatusBadge tone={tab === "Expired" ? "neutral" : meta.tone} label={tab === "Expired" ? "Expired" : meta.label} size="xs" />
                         <span className="badge badge-outline badge-sm text-2xs">
                           {r.directedTo ? `Directed to ${r.directedTo.anonymousId}` : "Public"}
@@ -368,7 +368,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     </div>
 
                     {r.slots.length > 0 && (
-                      <div className="flex items-center gap-1.5 text-2xs text-base-content/60 flex-wrap">
+                      <div className="flex items-center gap-1.5 text-2xs text-(--kt-muted) flex-wrap">
                         <Clock className="h-3 w-3 shrink-0" />
                         {r.slots.map((s, i) => (
                           <span key={i}>
@@ -379,15 +379,15 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                       </div>
                     )}
 
-                    {r.note && <p className="text-base-content/60 italic">“{r.note}”</p>}
+                    {r.note && <p className="text-(--kt-muted) italic">“{r.note}”</p>}
 
                     {r.fulfilledClass && (
-                      <p className="text-2xs text-base-content/70">Class covers: {r.fulfilledClass.topics.join(", ")}</p>
+                      <p className="text-2xs text-(--kt-muted)">Class covers: {r.fulfilledClass.topics.join(", ")}</p>
                     )}
 
                     {r.status === "ACCEPTED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
-                        <span className="text-2xs text-base-content/70">
+                        <span className="text-2xs text-(--kt-muted)">
                           {r.fulfilledClass.tutorAnonymousId} created a class
                           {r.fulfilledClass.nextSessionAt
                             ? ` · next ${formatDateTime(r.fulfilledClass.nextSessionAt)}`
@@ -404,7 +404,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
 
                     {r.status === "ENROLLED" && r.fulfilledClass && (
                       <div className="flex items-center justify-between gap-2 bg-success/5 border border-success/20 rounded-lg p-2 mt-1">
-                        <span className="text-2xs text-base-content/70">
+                        <span className="text-2xs text-(--kt-muted)">
                           Enrolled with {r.fulfilledClass.tutorAnonymousId} — class in progress.
                         </span>
                         <Link
@@ -417,10 +417,10 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
                     )}
 
                     {r.status === "FULFILLED" && (
-                      <p className="text-2xs text-base-content/40 italic">Completed ✓</p>
+                      <p className="text-2xs text-(--kt-faint) italic">Completed ✓</p>
                     )}
 
-                    <p className="text-2xs text-base-content/40">
+                    <p className="text-2xs text-(--kt-faint)">
                       Posted {formatDate(r.createdAt)}{r.status === "OPEN" && ` · Deadline ${formatDateTime(r.expiresAt)}`}
                     </p>
                   </div>

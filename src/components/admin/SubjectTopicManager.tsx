@@ -298,7 +298,7 @@ export default function SubjectTopicManager() {
         {/* subjects — header fixed, list scrolls, add-form pinned to the bottom */}
         <section className="card kt-card flex max-h-[32rem] flex-col overflow-hidden lg:max-h-[calc(100vh-9rem)]">
           <div className="card-body flex min-h-0 flex-col gap-3 overflow-hidden">
-            <h2 className="shrink-0 text-sm font-medium text-base-content/80">Subjects</h2>
+            <h2 className="shrink-0 text-sm font-medium text-(--kt-muted)">Subjects</h2>
 
             <ul className="-mx-2 min-h-0 flex-1 divide-y divide-base-200 overflow-y-auto px-2">
               {sortedSubjects.map((s, idx) => (
@@ -315,12 +315,12 @@ export default function SubjectTopicManager() {
                     >
                       <span
                         className={`block truncate text-xs ${
-                          s.active ? "" : "text-base-content/40 line-through"
+                          s.active ? "" : "text-(--kt-faint) line-through"
                         }`}
                       >
                         {s.name}
                       </span>
-                      <span className="block truncate font-mono text-2xs text-base-content/40">
+                      <span className="block truncate font-mono text-2xs text-(--kt-faint)">
                         {s.slug} · {s.topics.length} {s.topics.length === 1 ? "topic" : "topics"}
                       </span>
                     </button>
@@ -360,7 +360,7 @@ export default function SubjectTopicManager() {
             </ul>
 
             <ValidatedForm className="shrink-0 space-y-2 border-t border-base-200 pt-3" onSubmit={(e) => { e.preventDefault(); void addSubject(e.currentTarget); }}>
-              <p className="text-2xs text-base-content/60">Add a subject</p>
+              <p className="text-2xs text-(--kt-muted)">Add a subject</p>
               <div data-form-field="Grade levels"><CatalogGradePicker value={newSubjectGrades} onChange={setNewSubjectGrades} /><div data-field-feedback /></div>
               <div data-control-field className="min-w-0 flex-1 w-full">
                 <input
@@ -406,7 +406,7 @@ export default function SubjectTopicManager() {
         {/* topics of the selected subject — same fixed-header / scroll / pinned-add layout */}
         <section className="card kt-card flex max-h-[32rem] min-w-0 flex-col overflow-hidden lg:max-h-[calc(100vh-9rem)]">
           <div className="card-body flex min-h-0 flex-col gap-3 overflow-hidden">
-            <h2 className="shrink-0 text-sm font-medium text-base-content/80">
+            <h2 className="shrink-0 text-sm font-medium text-(--kt-muted)">
               {selected ? `${selected.name} — topics` : "Topics"}
             </h2>
 
@@ -469,7 +469,7 @@ export default function SubjectTopicManager() {
                             <div className="min-w-0 flex-1">
                             <span
                               className={`min-w-0 flex-1 truncate ${
-                                t.active ? "" : "text-base-content/40 line-through"
+                                t.active ? "" : "text-(--kt-faint) line-through"
                               }`}
                             >
                               {t.name}
@@ -520,7 +520,7 @@ export default function SubjectTopicManager() {
                       </li>
                     ))}
                   {visibleTopics.length === 0 && (
-                    <li className="py-6 text-center text-2xs italic text-base-content/40">{selected.topics.length ? "No topics match your filters." : "No topics yet."}</li>
+                    <li className="py-6 text-center text-2xs italic text-(--kt-faint)">{selected.topics.length ? "No topics match your filters." : "No topics yet."}</li>
                   )}
                 </ul>
 
@@ -550,7 +550,7 @@ export default function SubjectTopicManager() {
                 </ValidatedForm>
               </>
             ) : (
-              <p className="py-6 text-center text-xs italic text-base-content/40">
+              <p className="py-6 text-center text-xs italic text-(--kt-faint)">
                 Select a subject to manage its topics.
               </p>
             )}

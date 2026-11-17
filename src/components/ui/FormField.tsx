@@ -28,12 +28,12 @@ export default function FormField({
       })
     : node) : children;
   const labelNode = (
-    <span className={`${size === "md" ? "text-sm" : "text-xs"} font-semibold text-base-content/80`}>
+    <span className={`${size === "md" ? "text-sm" : "text-xs"} font-semibold text-(--kt-muted)`}>
       {label}{required && <span className="text-error ml-0.5">*</span>}
     </span>
   );
   const feedback = error ? <p id={feedbackId} className="text-xs text-error mt-1">{error}</p>
-    : hint ? <p id={feedbackId} className="text-xs text-base-content/60 mt-1">{hint}</p> : null;
+    : hint ? <p id={feedbackId} className="text-xs text-(--kt-muted) mt-1">{hint}</p> : null;
   const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div id={labelId}>{labelNode}</div>;
   if (orientation === "horizontal") return (
     <div data-form-field={label} role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">

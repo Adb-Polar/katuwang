@@ -120,7 +120,7 @@ export default function ReportButton({
             <h3 className="font-sans text-base font-semibold mb-1">
               Report {noun} {targetLabel}
             </h3>
-            <p className="text-xs text-base-content/60 mb-4">
+            <p className="text-xs text-(--kt-muted) mb-4">
               Only administrators see this report. Your identity is not shared with the {noun}.
             </p>
 
@@ -128,13 +128,13 @@ export default function ReportButton({
 
             <ValidatedForm onSubmit={submit} className="space-y-4 mt-3">
               <fieldset data-form-field="Violations" className="space-y-1.5">
-                <legend className="text-xs font-semibold text-base-content/80 pb-1">
+                <legend className="text-xs font-semibold text-(--kt-muted) pb-1">
                   What went wrong? <span className="text-error">*</span>
                 </legend>
                 {options.map((opt) => (
                   <label
                     key={opt.value}
-                    className="flex items-start gap-2 text-xs text-base-content/80 cursor-pointer"
+                    className="flex items-start gap-2 text-xs text-(--kt-muted) cursor-pointer"
                   >
                     <input
                       type="checkbox"

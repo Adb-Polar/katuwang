@@ -13,9 +13,9 @@
   default: true;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(99% 0.003 80);
-  --color-base-200: oklch(97% 0.005 80);
-  --color-base-300: oklch(93% 0.008 80);
+  --color-base-100: oklch(100% 0 0);
+  --color-base-200: oklch(97.5% 0.004 250);
+  --color-base-300: oklch(90% 0.008 250);
   --color-base-content: oklch(24% 0.02 258);
   --color-primary: oklch(40% 0.09 174);
   --color-primary-content: oklch(98% 0.01 174);
@@ -106,8 +106,8 @@
      light on base-100 for text-xs / text-2xs (D7): muted 60% ≈ 3.8:1,
      faint 42% ≈ 2.3:1. Darkened to clear 4.5:1; the two tiers stay ordered but
      the gap between them is now deliberately small. */
-  --kt-muted: color-mix(in oklch, var(--color-base-content) 66%, transparent);
-  --kt-faint: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  --kt-muted: oklch(46% 0.02 258); /* ~6.5:1 on base-200 */
+  --kt-faint: oklch(52% 0.02 258); /* ~5:1, the floor for text-2xs */
 }
 
 body { background: var(--color-base-200); }
@@ -189,7 +189,8 @@ b, strong { font-weight: var(--font-weight-bold); }
     padding: 0.3em 0.62em; border-radius: 999px; white-space: nowrap;
     background: var(--kt-tint-neutral); color: var(--kt-muted);
   }
-  .kt-badge::before { content: "●"; font-size: 0.6em; }
+  /* the dot signals status, so only status badges carry it */
+  .kt-badge:is(.kt-badge--info, .kt-badge--success, .kt-badge--warning, .kt-badge--error)::before { content: "●"; font-size: 0.6em; }
   .kt-badge .kt-code { opacity: 0.7; }
   .kt-badge--info { background: var(--kt-tint-info); color: var(--color-info); }
   .kt-badge--success { background: var(--kt-tint-success); color: var(--color-success); }
@@ -241,9 +242,9 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-nav-item {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 0.55rem 0.5rem; border-radius: var(--kt-radius-field);
-    /* Fragment Mono governs navigation labels per the notation brief — a
-       monospace nav column is on-thesis and distinctive. */
-    font-family: var(--font-mono);
+    /* Nav labels are words, not notation: Apfel Grotezk. Mono is kept for
+       IDs, codes, scores and dates only. */
+    font-family: var(--font-sans);
     font-size: 0.82rem; font-weight: 500; color: var(--kt-muted); text-decoration: none;
   }
   .kt-nav-item:hover { background: var(--color-base-200); color: var(--color-base-content); }
@@ -259,8 +260,7 @@ b, strong { font-weight: var(--font-weight-bold); }
     position: sticky; top: 0; z-index: 20;
     display: flex; align-items: center; gap: 1rem;
     padding: 0.75rem clamp(1rem, 4vw, 2rem);
-    background: color-mix(in oklch, var(--color-base-200) 85%, transparent);
-    backdrop-filter: saturate(180%) blur(6px);
+    background: var(--color-base-200);
     border-bottom: 1px solid var(--kt-border);
   }
   .kt-search {
@@ -321,9 +321,9 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-day > span:first-child { font-size: 0.66rem; font-weight: var(--font-weight-semibold); letter-spacing: 0.1em; text-transform: uppercase; color: var(--kt-faint); }
   .kt-slot { font-family: var(--font-mono); font-size: 0.76rem; background: var(--kt-tint-primary); color: var(--color-primary); border-radius: 0.4rem; padding: 0.15rem 0.4rem; }
 
-  /* Buttons are notation, not speech — Fragment Mono per the ROUND-2 brief.
-     Slightly tighter tracking so the wider mono glyphs don't stretch labels. */
-  .btn { font-family: var(--font-mono); letter-spacing: -0.01em; }
+  /* Button labels are words, so they use the sans face; mono is reserved for
+     notation (IDs, codes, scores, dates). */
+  .btn { font-family: var(--font-sans); }
 
 }
 
@@ -351,20 +351,4 @@ b, strong { font-weight: var(--font-weight-bold); }
 input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
   border-color: var(--color-error);
   outline-color: var(--color-error);
-}
-
-/* Palette from the supplied Katuwang landing page. */
-@theme {
-  --color-bg-main: #FAF8F5;
-  --color-card-surface: #FCFBF9;
-  --color-border-subtle: #EFECE6;
-  --color-text-main: #1F252E;
-  --color-brand-teal: #0F685C;
-  --color-brand-teal-light: #E6F3F1;
-  --color-learner-violet: #7B3293;
-  --color-learner-violet-light: #F5EBF8;
-  --color-tutor-gold: #D98E04;
-  --color-tutor-gold-light: #FDF6E2;
-  --color-dark-neutral: #242C38;
-  --color-dark-gold-text: #5E3D00;
 }

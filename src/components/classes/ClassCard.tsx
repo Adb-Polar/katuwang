@@ -77,7 +77,7 @@ export default function ClassCard({
 
   const isModerated = status === "SUSPENDED" || status === "BANNED";
 
-  const cardClassName = `card border cursor-pointer transition duration-200 hover:-translate-y-0.5 hover:shadow-md text-xs p-4 space-y-3 block ${
+  const cardClassName = `card border cursor-pointer transition-colors hover:border-primary/50 text-xs p-4 space-y-3 block ${
     isModerated
       ? "bg-error/5 hover:bg-error/10 border-error/30"
       : published
@@ -100,7 +100,7 @@ export default function ClassCard({
           )}
           <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subjectDisplayLabel(subject)}</h3>
           {gradeLevel && (
-            <p className="text-2xs font-semibold uppercase tracking-wide text-base-content/50 mt-0.5">
+            <p className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint) mt-0.5">
               {gradeLabel(gradeLevel)}
             </p>
           )}
@@ -131,12 +131,12 @@ export default function ClassCard({
             </span>
           )}
         </div>
-        {description && <p className="text-base-content/60 line-clamp-2 leading-relaxed">{description}</p>}
+        {description && <p className="text-(--kt-muted) line-clamp-2 leading-relaxed">{description}</p>}
       </div>
 
       <div className="divider my-0 opacity-40"></div>
 
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-base-content/70">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-(--kt-muted)">
         {nextSession ? (
           <>
             <div className="flex items-center gap-1">
@@ -149,7 +149,7 @@ export default function ClassCard({
             </div>
           </>
         ) : (
-          <span className="italic text-base-content/40">No upcoming sessions</span>
+          <span className="italic text-(--kt-faint)">No upcoming sessions</span>
         )}
         <div className="flex items-center gap-1">
           <Layers className="h-3.5 w-3.5 text-primary" />
@@ -176,7 +176,7 @@ export default function ClassCard({
             <span className="truncate">
               {tutorName || tutorAnonymousId}
               {tutorName && tutorSection && (
-                <span className="text-base-content/40"> · {tutorSection}</span>
+                <span className="text-(--kt-faint)"> · {tutorSection}</span>
               )}
             </span>
           </div>

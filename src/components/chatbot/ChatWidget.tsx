@@ -111,7 +111,7 @@ export default function ChatWidget() {
             <BrandMark size="sm" />
             <div className="min-w-0">
               <p className="text-xs font-bold leading-tight">Assistant</p>
-              <p className="text-2xs text-base-content/50 leading-tight">Navigation help &amp; FAQs</p>
+              <p className="text-2xs text-(--kt-faint) leading-tight">Navigation help &amp; FAQs</p>
             </div>
           </header>
 

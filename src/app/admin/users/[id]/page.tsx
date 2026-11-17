@@ -115,7 +115,7 @@ export default async function AdminUserDetailPage({
             <StatusBadge tone={STATUS_TONE[user.status]} label={statusDisplayLabel(user.status)} size="xs" />
           </div>
           {user.status !== "ACTIVE" && (
-            <div className="text-xs text-base-content/70 space-y-0.5">
+            <div className="text-xs text-(--kt-muted) space-y-0.5">
               {user.statusReason && (
                 <p>
                   <span className="font-semibold">Reason:</span> {user.statusReason}
@@ -152,7 +152,7 @@ export default async function AdminUserDetailPage({
             <dl className="divide-y divide-base-200">
               {facts.map((f) => (
                 <div key={f.label} className="grid sm:grid-cols-[10rem_1fr] gap-1 sm:gap-3 py-3 text-sm">
-                  <dt className="text-base-content/50">{f.label}</dt>
+                  <dt className="text-(--kt-faint)">{f.label}</dt>
                   <dd className="font-semibold break-all">{f.value}</dd>
                 </div>
               ))}
@@ -165,7 +165,7 @@ export default async function AdminUserDetailPage({
             <h2 className="card-title text-sm font-bold">Activity</h2>
             {counts.map((c) => (
               <div key={c.label} className="flex items-center justify-between text-sm py-1.5">
-                <span className="text-base-content/60">{c.label}</span>
+                <span className="text-(--kt-muted)">{c.label}</span>
                 <span className="font-sans font-bold">{c.value}</span>
               </div>
             ))}
@@ -177,7 +177,7 @@ export default async function AdminUserDetailPage({
         <div className="card-body gap-3 p-6">
           <h2 className="card-title text-sm font-bold">Recent moderation history</h2>
           {auditEntries.length === 0 ? (
-            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
+            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
               No audit-log entries reference this account.
             </p>
           ) : (
@@ -185,10 +185,10 @@ export default async function AdminUserDetailPage({
               {auditEntries.map((a) => (
                 <li key={a.id} className="py-2.5 text-xs">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-base-content/80">{a.action.replace(/_/g, " ")}</span>
-                    <span className="text-base-content/50 shrink-0">{formatDateTime(a.createdAt)}</span>
+                    <span className="font-semibold text-(--kt-muted)">{a.action.replace(/_/g, " ")}</span>
+                    <span className="text-(--kt-faint) shrink-0">{formatDateTime(a.createdAt)}</span>
                   </div>
-                  <div className="text-2xs text-base-content/50 mt-0.5">
+                  <div className="text-2xs text-(--kt-faint) mt-0.5">
                     by {a.admin.anonymousId}
                     {a.reason ? ` — ${a.reason}` : ""}
                   </div>

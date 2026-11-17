@@ -6,7 +6,7 @@ import ValidatedForm from "@/components/ui/ValidatedForm";
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
+import { BookOpenCheck, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ClassCard from "@/components/classes/ClassCard";
 import MatchCriteriaFields, {
@@ -48,7 +48,7 @@ interface Match {
 function reasonChips(r: MatchReasons) {
   const chips: { icon: typeof BadgeCheck; text: string }[] = [];
   if (r.matchedTopics.length > 0) {
-    chips.push({ icon: Sparkles, text: `Covers ${r.matchedTopics.join(", ")}` });
+    chips.push({ icon: BookOpenCheck, text: `Covers ${r.matchedTopics.join(", ")}` });
   }
   if (r.verifiedMatchedTopics.length > 0) {
     chips.push({ icon: BadgeCheck, text: `Verified for ${r.verifiedMatchedTopics.join(", ")}` });
@@ -127,7 +127,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
 
               {matches.length === 0 ? (
               <div className="text-center py-8 bg-base-200/10 border border-dashed border-base-300 rounded-xl space-y-2">
-                <p className="text-xs text-base-content/50 italic">
+                <p className="text-xs text-(--kt-faint) italic">
                   Nothing open fits this right now.
                 </p>
                 <Link href="/learner/tutors?tab=requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
@@ -162,9 +162,9 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                       <span className="badge badge-primary badge-sm text-2xs font-bold">
                         Match {Math.round(m.score)}
                       </span>
-                      <span className="text-2xs text-base-content/40">ranked by fit</span>
+                      <span className="text-2xs text-(--kt-faint)">ranked by fit</span>
                     </div>
-                    <ul className="text-2xs text-base-content/60 space-y-0.5 px-1">
+                    <ul className="text-2xs text-(--kt-muted) space-y-0.5 px-1">
                       {reasonChips(m.reasons).map((c, i) => (
                         <li key={i} className="flex items-center gap-1">
                           <c.icon className="h-3 w-3 text-primary shrink-0" />
@@ -184,7 +184,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h2 className="card-title text-base font-bold">What do you need help with?</h2>
-                  <p className="text-xs text-base-content/60 mt-1">
+                  <p className="text-xs text-(--kt-muted) mt-1">
                     Pick a subject and topics, add the times you&apos;re free, and we&apos;ll rank the open classes that
                     fit.
                   </p>
@@ -215,7 +215,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
                   {loading ? (
                     <span className="loading loading-spinner loading-sm" />
                   ) : (
-                    <Sparkles className="h-4 w-4" />
+                    <ListChecks className="h-4 w-4" />
                   )}
                   Auto Match
                 </button>

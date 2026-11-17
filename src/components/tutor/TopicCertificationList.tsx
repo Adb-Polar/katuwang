@@ -93,7 +93,7 @@ export default function TopicCertificationList({
 
   if (taughtTopics.length === 0) {
     return (
-      <p className="text-2xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
         No current teaching topics to show. You can choose a topic below to take an assessment.
       </p>
     );
@@ -118,11 +118,11 @@ export default function TopicCertificationList({
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="min-w-0">
-                <div className="font-semibold text-base-content/80 break-words">{topic}</div>
-                <div className="text-2xs text-base-content/50">
+                <div className="font-semibold text-(--kt-muted) break-words">{topic}</div>
+                <div className="text-2xs text-(--kt-faint)">
                   {subjectDisplayLabel(subject)}
                   {st && !st.bankReady && (
-                    <span className="ml-2 text-base-content/40">
+                    <span className="ml-2 text-(--kt-faint)">
                       · {st.activeQuestionCount}/{st.minBankSize} approved assessment questions
                     </span>
                   )}

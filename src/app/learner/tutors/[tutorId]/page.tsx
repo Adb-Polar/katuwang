@@ -182,10 +182,10 @@ export default async function LearnerTutorProfilePage({
             <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="sm" showIcon />
               {showRealNames && tutor.section && (
-                <span className="text-xs text-base-content/60">Section {tutor.section}</span>
+                <span className="text-xs text-(--kt-muted)">Section {tutor.section}</span>
               )}
             </div>
-            <p className="text-2xs text-base-content/50 pt-1">
+            <p className="text-2xs text-(--kt-faint) pt-1">
               {tutor.image
                 ? "Click profile picture to view full size."
                 : "Student tutor is using their anonymous monogram."}
@@ -198,7 +198,7 @@ export default async function LearnerTutorProfilePage({
         <div className="card-body gap-3">
           <h2 className="card-title text-sm font-bold">Verified Topics</h2>
           {bySubject.size === 0 ? (
-            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
               This tutor doesn&apos;t have any verified topics yet.
             </p>
           ) : (
@@ -221,7 +221,7 @@ export default async function LearnerTutorProfilePage({
       <section className="card kt-card">
         <div className="card-body gap-2">
           <h2 className="card-title text-sm font-bold">This week</h2>
-          <p className="text-2xs text-base-content/50">
+          <p className="text-2xs text-(--kt-faint)">
             This tutor&apos;s scheduled sessions over the next 7 days.
           </p>
           <WeeklyTimetable

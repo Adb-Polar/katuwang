@@ -38,7 +38,7 @@ export default function AccountControls() {
     <section className="card kt-card border border-error/25">
       <div className="card-body gap-3 p-6">
         <h2 className="card-title text-sm font-bold">Account controls</h2>
-        <p className="text-xs text-base-content/60">You can update your details above. Deleting your account permanently removes your profile and associated records. This cannot be undone.</p>
+        <p className="text-xs text-(--kt-muted)">You can update your details above. Deleting your account permanently removes your profile and associated records. This cannot be undone.</p>
         <button type="button" className="btn btn-outline btn-error btn-sm w-fit text-xs" onClick={() => setOpen((value) => !value)} aria-expanded={open}>
           {open ? "Cancel deletion" : "Delete account"}
         </button>

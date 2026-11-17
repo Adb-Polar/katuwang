@@ -41,7 +41,7 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
           setSaving(false);
         }
       }}>
-        <p className="text-xs text-base-content/60">{question.subject} · {question.topic}</p>
+        <p className="text-xs text-(--kt-muted)">{question.subject} · {question.topic}</p>
         <div className="space-y-2 rounded-lg border border-base-200 p-3 text-xs leading-relaxed [overflow-wrap:anywhere]">
           <p>{question.prompt}</p>
           {question.options.map(option => <p key={option.id}>{option.text}{option.isCorrect ? " (answer key)" : ""}</p>)}

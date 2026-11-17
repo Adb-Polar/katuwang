@@ -40,7 +40,7 @@ export default function RecoveryEmailSettings() {
   };
   return <section className="card kt-card"><div className="card-body gap-3">
     <h2 className="card-title text-sm">Recovery email</h2>
-    <p className="text-xs text-base-content/60">Add a backup email to receive verification codes if you forget your password. Verify the address before using it for password recovery.</p>
+    <p className="text-xs text-(--kt-muted)">Add a backup email to receive verification codes if you forget your password. Verify the address before using it for password recovery.</p>
     <FeedbackBanner variant="error" message={error || null} /><FeedbackBanner variant="success" message={message || null} />
     {loaded && <>
       <FormField label="Recovery email address" hint={editing ? "Use a different address from your Katuwang sign-in email. Leave blank to remove it." : "Choose Edit recovery email to change this address."} orientation="horizontal">

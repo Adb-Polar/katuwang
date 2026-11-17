@@ -157,15 +157,15 @@ export default function AbuseReportTable() {
                 <article key={r.id} className="rounded-xl border border-base-200 p-4 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="badge badge-neutral badge-sm font-bold">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
-                    <span className="text-xs text-base-content/60">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
+                    <span className="text-xs text-(--kt-muted)">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
                   </div>
                   <div className="text-sm font-semibold">{targetDetails(r)}</div>
-                  <p className="text-xs text-base-content/65">Reported by <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" /></p>
+                  <p className="text-xs text-(--kt-muted)">Reported by <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" /></p>
                   <div className="flex flex-wrap gap-1">
                     {r.violations.map((v) => <span key={v} className="badge badge-outline h-auto max-w-full whitespace-normal py-1 text-left text-xs">{violationLabel(v)}</span>)}
                   </div>
                   {r.details && <p className="text-sm whitespace-normal break-words">{r.details}</p>}
-                  {tab !== "pending" && <p className="text-xs text-base-content/65">Admin note: {r.resolutionNote || "No note"}</p>}
+                  {tab !== "pending" && <p className="text-xs text-(--kt-muted)">Admin note: {r.resolutionNote || "No note"}</p>}
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {tab === "pending" && <>
                       <button type="button" onClick={() => setResolveTarget(r)} className="btn btn-outline btn-success btn-sm min-h-11">Resolve</button>
@@ -215,7 +215,7 @@ export default function AbuseReportTable() {
                           )}
                         </div>
                         {r.targetType === "CLASS" && r.class && (
-                          <div className="text-2xs text-base-content/50 mt-0.5">{subjectDisplayLabel(r.class.subject)}</div>
+                          <div className="text-2xs text-(--kt-faint) mt-0.5">{subjectDisplayLabel(r.class.subject)}</div>
                         )}
                       </td>
                       <td>
@@ -230,10 +230,10 @@ export default function AbuseReportTable() {
                           ))}
                         </div>
                         {r.details && (
-                          <p className="text-2xs text-base-content/60 mt-1 whitespace-normal">{r.details}</p>
+                          <p className="text-2xs text-(--kt-muted) mt-1 whitespace-normal">{r.details}</p>
                         )}
                       </td>
-                      <td className="text-2xs text-base-content/50">
+                      <td className="text-2xs text-(--kt-faint)">
                         {tab === "pending"
                           ? formatDateTime(r.createdAt)
                           : r.reviewedAt
@@ -241,7 +241,7 @@ export default function AbuseReportTable() {
                             : "—"}
                       </td>
                       {tab !== "pending" && (
-                        <td className="text-2xs text-base-content/60 max-w-xs whitespace-normal">
+                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
                           {r.resolutionNote || <span className="text-base-content/30 italic">No note</span>}
                         </td>
                       )}
