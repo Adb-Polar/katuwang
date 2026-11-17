@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Flag } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { violationLabel } from "@/lib/reportViolations";
 import { formatDate } from "@/lib/datetime";
@@ -19,15 +18,28 @@ interface MyReport {
   createdAt: string;
 }
 
-const STATUS_BADGE: Record<MyReport["status"], string> = {
-  PENDING: "badge-warning",
-  RESOLVED: "badge-success",
-  DISMISSED: "badge-ghost",
+const STATUS_TONE: Record<MyReport["status"], string> = {
+  PENDING: "text-warning-content",
+  RESOLVED: "text-success",
+  DISMISSED: "text-(--kt-muted)",
 };
 
-function targetLabel(r: MyReport) {
-  if (r.targetType === "TUTOR") return r.target.anonymousId ?? "Tutor";
-  return `${r.target.subject ? subjectDisplayLabel(r.target.subject) : "Class"} · ${r.target.code ?? ""}`.trim();
+const OUTCOME: Record<MyReport["status"], string> = {
+  PENDING: "Waiting for an admin to review",
+  RESOLVED: "An admin acted on this report",
+  DISMISSED: "Closed without action",
+};
+
+function ReportTarget({ r }: { r: MyReport }) {
+  if (r.targetType === "TUTOR") {
+    return <>Tutor <span className="kt-id kt-id--tutor">{r.target.anonymousId ?? "unknown"}</span></>;
+  }
+  return (
+    <>
+      Class <span className="font-serif">{r.target.code ?? ""}</span>
+      {r.target.subject && <span className="text-(--kt-muted)"> · {subjectDisplayLabel(r.target.subject)}</span>}
+    </>
+  );
 }
 
 export default function MyReportsList() {
@@ -56,71 +68,44 @@ export default function MyReportsList() {
   }, [retryKey]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-10">
-        <span className="loading loading-spinner loading-md text-primary" />
-      </div>
-    );
+    return <p role="status" className="text-sm text-(--kt-muted)">Loading your reports…</p>;
   }
 
   return (
     <div className="space-y-4">
       <FeedbackBanner variant="error" message={error || null} />
-      {error && <button type="button" className="btn btn-outline btn-sm" onClick={() => { setError(""); setLoading(true); setRetryKey((key) => key + 1); }}>Retry reports</button>}
+      {error && <button type="button" className="btn btn-outline" onClick={() => { setError(""); setLoading(true); setRetryKey((key) => key + 1); }}>Try again</button>}
 
       {!error && reports.length === 0 ? (
-        <div className="card kt-card">
-          <div className="card-body items-center text-center gap-2 py-10">
-            <Flag className="h-6 w-6 text-base-content/30" />
-            <p className="text-sm text-(--kt-faint) italic">You haven&apos;t filed any reports.</p>
-          </div>
-        </div>
+        <section className="card kt-card">
+          <p className="kt-card-body text-(--kt-muted)">
+            You haven&apos;t reported anyone. If a tutor or class breaks the rules, use Report on their page and you&apos;ll see what happens to it here.
+          </p>
+        </section>
       ) : !error ? (
-        reports.map((r) => (
-          <section key={r.id} className="card kt-card">
-            <div className="card-body gap-2">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <span className="text-2xs font-semibold uppercase tracking-wider text-(--kt-faint)">
-                    {r.targetType === "TUTOR" ? "Tutor" : "Class"}
-                  </span>
-                  <p className="font-mono text-sm font-semibold">{targetLabel(r)}</p>
-                </div>
-                <span className={`badge badge-sm ${STATUS_BADGE[r.status]} text-2xs font-bold`}>
-                  {statusDisplayLabel(r.status)}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-1">
-                {r.violations.map((v) => (
-                  <span key={v} className="badge badge-outline badge-sm text-2xs">
-                    {violationLabel(v)}
-                  </span>
-                ))}
-              </div>
-
-              {r.details && (
-                <p className="text-xs text-(--kt-muted) whitespace-pre-wrap">{r.details}</p>
-              )}
-
-              <p className="text-2xs text-(--kt-faint)">Filed {formatDate(r.createdAt)}</p>
-
-              {r.status !== "PENDING" && (
-                <div className="rounded-lg border border-base-200 bg-base-200/30 p-3 text-xs space-y-1 mt-1">
-                  <p className="font-semibold text-(--kt-muted)">
-                    {r.status === "RESOLVED" ? "An admin acted on this report." : "Closed without action."}
-                    {r.reviewedAt ? ` · ${formatDate(r.reviewedAt)}` : ""}
-                  </p>
-                  {r.resolutionNote && (
-                    <p className="text-(--kt-muted)">
-                      <span className="font-semibold">Admin note:</span> {r.resolutionNote}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
-        ))
+        <section className="card kt-card" aria-label="My reports">
+          <ul>
+            {reports.map((r) => (
+              <li key={r.id} className="px-5 py-4 border-b border-(--kt-border) last:border-b-0 space-y-1">
+                <p className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <span className="font-medium"><ReportTarget r={r} /></span>
+                  <span className={`text-sm font-medium ${STATUS_TONE[r.status]}`}>{statusDisplayLabel(r.status)}</span>
+                </p>
+                <p className="text-sm break-words whitespace-pre-wrap">
+                  {r.violations.map(violationLabel).join(", ")}
+                  {r.details && <span className="text-(--kt-muted)"> — {r.details}</span>}
+                </p>
+                <p className="text-sm text-(--kt-muted)">
+                  Filed {formatDate(r.createdAt)} · {OUTCOME[r.status]}
+                  {r.reviewedAt && r.status !== "PENDING" ? ` on ${formatDate(r.reviewedAt)}` : ""}
+                </p>
+                {r.resolutionNote && (
+                  <p className="text-sm text-(--kt-muted) break-words">Admin note: {r.resolutionNote}</p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
     </div>
   );

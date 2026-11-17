@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, CheckCheck, Inbox } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import {
   NotificationRow,
-  TYPE_ICON,
-  FALLBACK_ICON,
-  relativeTime,
+  notificationKind,
+  notificationWhen,
 } from "@/components/notifications/notificationMeta";
 
 export default function NotificationList() {
@@ -73,60 +71,61 @@ export default function NotificationList() {
     <div className="flex flex-col gap-4">
       <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <div className="flex items-center justify-between">
-            <h2 className="card-title text-sm font-bold flex items-center gap-2">
-              <Bell className="h-4 w-4 text-primary" />
-              Notifications
-            </h2>
-            {unreadCount > 0 && (
-              <button onClick={markAllRead} disabled={marking} className="btn btn-ghost btn-xs text-2xs gap-1">
-                {marking ? <span className="loading loading-spinner loading-xs" /> : <CheckCheck className="h-3.5 w-3.5" />}
-                Mark all read
-              </button>
-            )}
-          </div>
+      {unreadCount > 0 ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-(--kt-radius-box) bg-(--kt-tint-primary) px-5 py-4">
+          <p className="flex items-baseline gap-2">
+            <span className="font-serif text-3xl leading-none text-primary">{unreadCount}</span>
+            <span>new since you last looked</span>
+          </p>
+          <button type="button" onClick={markAllRead} disabled={marking} className="btn btn-outline bg-base-100">
+            {marking && <span className="loading loading-spinner loading-sm" />}
+            Mark all as read
+          </button>
+        </div>
+      ) : (
+        !loading && notifications.length > 0 && <p className="text-sm text-(--kt-muted)">You&apos;re all caught up.</p>
+      )}
 
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <span className="loading loading-spinner loading-md text-primary" />
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs flex flex-col items-center gap-2">
-              <Inbox className="h-5 w-5" />
-              No notifications yet.
-            </div>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {notifications.map((n) => (
-                <li key={n.id}>
+      <section className="card kt-card" aria-label="Notifications" aria-busy={loading}>
+        {loading ? (
+          <p role="status" className="kt-card-body text-sm text-(--kt-muted)">Loading notifications…</p>
+        ) : notifications.length === 0 ? (
+          <p className="kt-card-body text-(--kt-muted)">
+            Nothing yet. When a class changes, a test opens or a request is answered, it shows up here.
+          </p>
+        ) : (
+          <ul>
+            {notifications.map((n) => {
+              const kind = notificationKind(n.type);
+              const unread = !n.readAt;
+              return (
+                <li key={n.id} className="border-b border-(--kt-border) last:border-b-0">
                   <button
                     type="button"
                     onClick={() => {
                       markOneRead(n.id);
                       if (n.link) router.push(n.link);
                     }}
-                    className="block w-full text-left"
+                    className={`w-full flex items-start gap-3 px-5 py-4 text-left border-l-2 transition-colors ${
+                      unread ? "border-l-primary bg-primary/5 hover:bg-primary/10" : "border-l-transparent hover:bg-base-200"
+                    }`}
                   >
-                    <div
-                      className={`flex items-start gap-3 py-3 px-2 -mx-2 rounded-lg text-xs hover:bg-base-200/40 ${
-                        !n.readAt ? "bg-primary/5" : ""
-                      }`}
-                    >
-                      <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? FALLBACK_ICON}</span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-(--kt-muted)">{n.message}</p>
-                        <p className="text-2xs text-(--kt-faint) mt-0.5">{relativeTime(n.createdAt)}</p>
-                      </div>
-                      {!n.readAt && <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-1.5" aria-hidden="true" />}
-                    </div>
+                    <span aria-hidden="true" className={`size-8 shrink-0 hidden sm:grid place-items-center rounded ${kind.tile}`}>
+                      {kind.icon}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm text-(--kt-muted)">
+                        {kind.label} · {notificationWhen(n.createdAt)}
+                        {unread && <span className="text-primary font-medium"> · New</span>}
+                      </span>
+                      <span className={`block break-words ${unread ? "font-medium" : ""}`}>{n.message}</span>
+                    </span>
                   </button>
                 </li>
-              ))}
-            </ul>
-          )}
-        </div>
+              );
+            })}
+          </ul>
+        )}
       </section>
     </div>
   );

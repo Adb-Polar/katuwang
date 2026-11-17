@@ -32,8 +32,9 @@ export default function FormField({
       {label}{required && <span className="text-error ml-0.5">*</span>}
     </span>
   );
-  const feedback = error ? <p id={feedbackId} className="text-xs text-error mt-1">{error}</p>
-    : hint ? <p id={feedbackId} className="text-xs text-(--kt-muted) mt-1">{hint}</p> : null;
+  const feedbackSize = size === "md" ? "text-sm" : "text-xs";
+  const feedback = error ? <p id={feedbackId} className={`${feedbackSize} text-error mt-1`}>{error}</p>
+    : hint ? <p id={feedbackId} className={`${feedbackSize} text-(--kt-muted) mt-1`}>{hint}</p> : null;
   const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div id={labelId}>{labelNode}</div>;
   if (orientation === "horizontal") return (
     <div data-form-field={label} role={nativeChild ? undefined : "group"} aria-labelledby={nativeChild ? undefined : labelId} aria-describedby={!nativeChild && (hint || error) ? feedbackId : undefined} className="w-full flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">

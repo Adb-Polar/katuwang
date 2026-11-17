@@ -1,7 +1,7 @@
 /** Native constraints plus whitespace checks, also used when password visibility is toggled. */
 export function fieldValidationMessage(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement) {
   if (field.disabled || !field.willValidate) return "";
-  if (field.required && !field.value.trim() && field.type !== "checkbox" && field.type !== "radio") return "Please fill in this field.";
+  if (field.required && !field.value.trim() && field.type !== "checkbox" && field.type !== "radio") return field.dataset.requiredMessage || "Please fill in this field.";
   if ("minLength" in field && field.minLength > 0 && field.value && field.value.length < field.minLength) return `Use at least ${field.minLength} characters.`;
   if ("maxLength" in field && field.maxLength > 0 && field.value.length > field.maxLength) return `Use no more than ${field.maxLength} characters.`;
   if (field.dataset.after && field.value && field.value <= field.dataset.after) return "End time must be after the start time.";

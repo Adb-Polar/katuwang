@@ -4,11 +4,10 @@ import { reportFieldError, reportServerFieldErrors } from "@/lib/formValidation"
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { BookOpenCheck, BadgeCheck, CalendarCheck, GraduationCap, ArrowLeft, ListChecks } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import ClassCard from "@/components/classes/ClassCard";
+import ClassCatalogCard from "@/components/classes/ClassCatalogCard";
 import MatchCriteriaFields, {
   MatchCriteriaValue,
   EMPTY_CRITERIA,
@@ -45,23 +44,35 @@ interface Match {
   reasons: MatchReasons;
 }
 
-function reasonChips(r: MatchReasons) {
-  const chips: { icon: typeof BadgeCheck; text: string }[] = [];
-  if (r.matchedTopics.length > 0) {
-    chips.push({ icon: BookOpenCheck, text: `Covers ${r.matchedTopics.join(", ")}` });
+/** One plain sentence explaining a result's rank, e.g. "Covers your topic · fits 1 of your times · your grade". */
+export function reasonLine(r: MatchReasons, searchedTopics: number): string {
+  const parts: string[] = [];
+  const matched = r.matchedTopics.length;
+  if (matched > 0) {
+    parts.push(matched >= searchedTopics
+      ? `covers ${searchedTopics === 1 ? "your topic" : "all your topics"}`
+      : `covers ${matched} of your ${searchedTopics} topics`);
   }
   if (r.verifiedMatchedTopics.length > 0) {
-    chips.push({ icon: BadgeCheck, text: `Verified for ${r.verifiedMatchedTopics.join(", ")}` });
+    parts.push(r.verifiedMatchedTopics.length === matched ? "tutor certified in it" : `tutor certified in ${r.verifiedMatchedTopics.length}`);
   }
-  if (r.scheduleFitCount > 0) {
-    chips.push({
-      icon: CalendarCheck,
-      text: `Fits ${r.scheduleFitCount} of your preferred time${r.scheduleFitCount === 1 ? "" : "s"}`,
-    });
-  }
-  if (r.gradeMatch === "exact") chips.push({ icon: GraduationCap, text: "Matches your grade" });
-  else if (r.gradeMatch === "adjacent") chips.push({ icon: GraduationCap, text: "Close to your grade" });
-  return chips;
+  if (r.scheduleFitCount > 0) parts.push(`fits ${r.scheduleFitCount} of your times`);
+  if (r.gradeMatch === "exact") parts.push("your grade");
+  else if (r.gradeMatch === "adjacent") parts.push("near your grade");
+  const line = parts.join(" · ");
+  return line ? line[0].toUpperCase() + line.slice(1) : "Open class in this subject";
+}
+
+/**
+ * Splits the API's ranked list into fit groups: the top score is "Best fit", everything below it "Also fits".
+ * Order inside a group is the API's (soonest session first on equal scores), so equal scores never look ranked.
+ */
+export function groupByFit<T extends { score: number }>(ranked: T[]): T[][] {
+  if (ranked.length === 0) return [];
+  const top = ranked[0].score;
+  const best = ranked.filter((m) => m.score === top);
+  const rest = ranked.filter((m) => m.score !== top);
+  return rest.length ? [best, rest] : [best];
 }
 
 export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) {
@@ -73,6 +84,16 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [flipped, setFlipped] = useState(false);
+  const [searchedTopics, setSearchedTopics] = useState(0);
+  const resultsHeading = useRef<HTMLHeadingElement>(null);
+  const formTop = useRef<HTMLDivElement>(null);
+  const firstRender = useRef(true);
+
+  // Move focus with the swap so keyboard and screen-reader users land on the panel they asked for.
+  useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    (flipped ? resultsHeading.current : formTop.current)?.focus();
+  }, [flipped]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     const validationForm = e.currentTarget;
@@ -92,6 +113,7 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not find matches.");
       setMatches(data.matches);
+      setSearchedTopics(criteria.topics.length);
       setFlipped(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not find matches.");
@@ -100,129 +122,99 @@ export default function MatchFinder({ defaultGrade }: { defaultGrade: string }) 
     }
   };
 
+  const showResults = flipped && matches !== null;
+
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
 
-      {/* One panel at a time — a short fade swaps the criteria form for the ranked results. */}
-      <div key={flipped ? "results" : "filters"} className="kt-swap">
-        {flipped && matches !== null ? (
-          <section className="card kt-card">
-            <div className="card-body gap-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="card-title text-sm font-bold">
-                  {matches.length > 0
-                    ? `${matches.length} class${matches.length === 1 ? "" : "es"} for you`
-                    : "No matches yet"}
-                </h2>
-                <button
-                  type="button"
-                  onClick={() => setFlipped(false)}
-                  className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Adjust filters
-                </button>
-              </div>
+      {/* Both panels stay mounted (only one is shown), so switching back keeps the form and its loaded catalog. */}
+      <section hidden={!showResults} aria-labelledby="match-results" className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="match-results" ref={resultsHeading} tabIndex={-1} className="font-serif text-xl font-medium outline-none">
+            {matches && matches.length > 0
+              ? `${matches.length} class${matches.length === 1 ? "" : "es"} fit`
+              : "Nothing open fits yet"}
+          </h2>
+          <button type="button" onClick={() => setFlipped(false)} className="btn btn-outline">
+            Change what I need
+          </button>
+        </div>
 
-              {matches.length === 0 ? (
-              <div className="text-center py-8 bg-base-200/10 border border-dashed border-base-300 rounded-xl space-y-2">
-                <p className="text-xs text-(--kt-faint) italic">
-                  Nothing open fits this right now.
-                </p>
-                <Link href="/learner/tutors?tab=requests" className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-xs">
-                  Post a class request instead
-                </Link>
-              </div>
-            ) : (
-              <div className="grid sm:grid-cols-2 gap-4">
-                {matches.map((m) => (
-                  <div key={m.class.id} className="space-y-1.5">
-                    <ClassCard
-                      code={m.class.code}
-                      subject={m.class.subject}
-                      gradeLevel={m.class.gradeLevel}
-                      topics={m.class.topics}
-                      verifiedTopics={m.class.verifiedTopics}
-                      description={m.class.description}
-                      sessions={m.class.sessions}
-                      status={m.class.status}
-                      published={m.class.published}
-                      suspendedReason={m.class.suspendedReason}
-                      enrolledCount={m.class._count.enrollments}
-                      maxStudents={m.class.maxStudents}
-                      activeLabel="Open"
-                      tutorAnonymousId={m.class.tutor.anonymousId}
-                      tutorName={m.class.tutor.name}
-                      tutorSection={m.class.tutor.section}
-                      tutorImage={m.class.tutor.image}
-                      href={`/learner/classes/${m.class.id}?from=browse`}
-                    />
-                    <div className="flex items-center gap-1.5 px-1">
-                      <span className="badge badge-primary badge-sm text-2xs font-bold">
-                        Match {Math.round(m.score)}
-                      </span>
-                      <span className="text-2xs text-(--kt-faint)">ranked by fit</span>
-                    </div>
-                    <ul className="text-2xs text-(--kt-muted) space-y-0.5 px-1">
-                      {reasonChips(m.reasons).map((c, i) => (
-                        <li key={i} className="flex items-center gap-1">
-                          <c.icon className="h-3 w-3 text-primary shrink-0" />
-                          {c.text}
-                        </li>
-                      ))}
-                    </ul>
+        {matches && matches.length === 0 ? (
+          <div className="card kt-card">
+            <div className="kt-card-body gap-3">
+              <p>No open class covers this right now. Ask for one and tutors who teach it will see your request.</p>
+              <Link href="/learner/tutors?tab=requests" className="btn btn-primary self-start">
+                Request a class
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {groupByFit(matches ?? []).map((group, gi, all) => {
+              const reasons = group.map((m) => reasonLine(m.reasons, searchedTopics));
+              const shared = reasons.every((r) => r === reasons[0]) ? reasons[0] : null;
+              return (
+                <section key={gi} aria-labelledby={`fit-group-${gi}`} className="space-y-3">
+                  <div>
+                    <h3 id={`fit-group-${gi}`} className="font-serif text-lg font-medium">
+                      {all.length === 1 ? "Equally good fits" : gi === 0 ? "Best fit" : "Also fits"}
+                      {group.length > 1 && <span className="font-sans text-sm font-normal text-(--kt-muted)"> · soonest first</span>}
+                    </h3>
+                    {shared && <p className="text-sm text-(--kt-muted)">{shared}</p>}
                   </div>
-                ))}
-              </div>
+                  <ul className="grid gap-4 sm:grid-cols-2">
+                    {group.map((m, i) => (
+                      <li key={m.class.id} className="flex flex-col gap-1.5">
+                        {!shared && <p className="text-sm text-(--kt-muted)">{reasons[i]}</p>}
+                        <ClassCatalogCard
+                          href={`/learner/classes/${m.class.id}?from=browse`}
+                          subject={m.class.subject}
+                          gradeLevel={m.class.gradeLevel}
+                          topics={m.class.topics}
+                          verifiedTopics={m.class.verifiedTopics}
+                          sessions={m.class.sessions}
+                          status={m.class.status}
+                          enrolledCount={m.class._count.enrollments}
+                          maxStudents={m.class.maxStudents}
+                          tutorAnonymousId={m.class.tutor.anonymousId}
+                          tutorName={m.class.tutor.name}
+                          tutorSection={m.class.tutor.section}
+                          showSeats
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <div hidden={showResults} ref={formTop} tabIndex={-1} className="card kt-card outline-none">
+        <div className="kt-card-body">
+          <ValidatedForm onSubmit={handleSubmit} className="space-y-6">
+            <MatchCriteriaFields
+              value={criteria}
+              onChange={setCriteria}
+              showFormatFilter
+              gradeHint="Used for ranking. Classes from every grade still show."
+            />
+            <div className="flex flex-wrap gap-3">
+              <button type="submit" disabled={loading} className="btn btn-primary">
+                {loading && <span className="loading loading-spinner loading-sm" />}
+                Find classes
+              </button>
+              {matches !== null && (
+                <button type="button" onClick={() => setFlipped(true)} className="btn btn-outline">
+                  Back to results
+                </button>
               )}
             </div>
-          </section>
-        ) : (
-          <section className="card kt-card">
-            <div className="card-body gap-5 p-6 sm:p-8">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="card-title text-base font-bold">What do you need help with?</h2>
-                  <p className="text-xs text-(--kt-muted) mt-1">
-                    Pick a subject and topics, add the times you&apos;re free, and we&apos;ll rank the open classes that
-                    fit.
-                  </p>
-                </div>
-                {matches !== null && (
-                  <button
-                    type="button"
-                    onClick={() => setFlipped(true)}
-                    className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs shrink-0"
-                  >
-                    <ListChecks className="h-3.5 w-3.5" />
-                    View results
-                  </button>
-                )}
-              </div>
-              <ValidatedForm onSubmit={handleSubmit} className="space-y-5">
-                <MatchCriteriaFields
-                  value={criteria}
-                  onChange={setCriteria}
-                  showFormatFilter
-                  gradeHint="Used for relevance. Classes and tutors from every grade remain available."
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn btn-primary btn-md text-sm gap-2 w-full sm:w-auto"
-                >
-                  {loading ? (
-                    <span className="loading loading-spinner loading-sm" />
-                  ) : (
-                    <ListChecks className="h-4 w-4" />
-                  )}
-                  Auto Match
-                </button>
-              </ValidatedForm>
-            </div>
-          </section>
-        )}
+          </ValidatedForm>
+        </div>
       </div>
     </div>
   );

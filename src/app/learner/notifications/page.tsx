@@ -10,11 +10,11 @@ export default function LearnerNotificationsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="Learner Portal"
+        eyebrow="Mga abiso"
         title="Notifications"
-        subtitle="Notifications and the reports you have filed."
+        subtitle="Updates about your classes and tests, and what happened to reports you filed."
       />
-      <Suspense fallback={<div className="loading loading-spinner loading-md" />}><LearnerUpdates /></Suspense>
+      <Suspense fallback={<p role="status" className="text-sm text-(--kt-muted)">Loading…</p>}><LearnerUpdates /></Suspense>
     </div>
   );
 }

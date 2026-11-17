@@ -74,17 +74,25 @@ export default function PortalLayout({
   // absent from the map falls back to `defaultExpandedGroups`. Starts empty so
   // the first client render matches SSR; the stored prefs load post-mount.
   const navPrefKey = `kt-nav:${portalLabel}`;
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return {};
-    try {
-      const raw = window.localStorage.getItem(navPrefKey);
-      return raw ? (JSON.parse(raw) as Record<string, boolean>) : {};
-    } catch {
-      return {};
-    }
-  });
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const prefsReady = useRef(false);
 
   useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(navPrefKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- stored prefs can only be read after hydration
+      if (raw) setCollapsed(JSON.parse(raw) as Record<string, boolean>);
+    } catch {
+      /* corrupt or unavailable storage — keep the defaults */
+    }
+  }, [navPrefKey]);
+
+  useEffect(() => {
+    // Skip the mount run (state is still the empty default) so it can't overwrite the stored prefs.
+    if (!prefsReady.current) {
+      prefsReady.current = true;
+      return;
+    }
     try {
       window.localStorage.setItem(navPrefKey, JSON.stringify(collapsed));
     } catch {

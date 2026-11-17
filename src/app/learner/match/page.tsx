@@ -19,9 +19,9 @@ export default async function LearnerMatchPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Learner Portal"
-        title="Auto Match"
-        subtitle="Tell us what you need and we'll rank the open classes that fit best."
+        eyebrow="Auto match"
+        title="Find a class for you"
+        subtitle="Pick a subject and topics, add when you're free, and we'll list the open classes that fit, best first."
       />
       <MatchFinder defaultGrade={me?.gradeLevel ?? ""} />
     </div>

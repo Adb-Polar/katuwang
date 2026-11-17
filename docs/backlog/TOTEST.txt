@@ -41,6 +41,32 @@ Portals on the landing theme (2026-11-17)
  [ ] Suspended/banned class on all three pages: moderation panel, frozen-enrollment note, tutor appeal card.
  [ ] Unpublished class: tutor sees the one-line notice; an enrolled learner sees "This class is hidden for now".
  [ ] Class with a meeting link and no room: "Online meeting link" shows in Where and opens in a new tab.
+ [Good] /learner/match (demo learner, 1280px and 375px): Filipino + 1 topic → 2 results as catalog
+    cards with "1. Covers your topic"; Change what I need / Back to results keep the subject and topics
+    with no catalog reload; focus moves to the results heading; nothing under 14px; only Plex Serif/Sans.
+ [Good] Auto match "When you're free" rows (demo learner, ~800px and 375px): labelled Day/From/To,
+    "On a specific date" shows a Date field, blank date blocks submit with "Pick a date, or choose a
+    weekday instead.", switching back to a weekday submits normally; rows stack cleanly on a phone.
+ [Good] Auto match results grouping (demo learner, Grade 8 Arts, all topics → 3 tied results; desktop and
+    375px): one "Equally good fits · soonest first" group with the shared reason once, no rank numbers.
+ [ ] Auto match with results of different fit (e.g. preferred times that only some classes meet): "Best fit"
+    then "Also fits", each card's own reason above it when reasons differ.
+ [ ] /learner/match with preferred times and several topics: reason line shows "covers 2 of your 3
+    topics", "fits N of your times", "near your grade"; a search with no results shows Request a class.
+ [ ] Find Tutors > class request form (TopicRequestManager / RequestTopicButton) after the shared
+    MatchCriteriaFields resize: topics list, time rows and "Add a time" fit the modal on a phone.
+ [ ] Forms using FormField size="md" (login, register, profile…): hints/errors now 14px — nothing wraps badly.
+ [ ] Decide: update the landing page's MatchResultSample to the new Auto match result layout.
+ [Good] /learner/notifications (demo learner, 1280px and 375px): day heading + one read row, My reports as
+    one flat row (Class CUR-H1 · Araling Panlipunan, Dismissed, reason, admin note); nothing under 14px; no
+    hydration error after reload; saved sidebar group state still applies.
+ [Good] Notifications flat list with sample data (fetch stubbed in the browser, 5 items over 3 days,
+    2 unread; 1280px and 375px): "Test · 03:47 PM · New", "Request · Yesterday · 02:47 PM",
+    "Class · Sat, Nov 14 · 08:47 AM"; kind tiles (hidden on phone); "2 new" band.
+ [ ] Notifications with unread items: left rule + "· New", "N new" + Mark all as read clears them and the
+    bell count; clicking a row marks it read and opens its link (writes to DB — needs go-ahead).
+ [ ] /tutor/notifications and /admin/notifications with real data: day groups, icons per kind.
+ [ ] Sidebar groups: collapse/expand a group, reload — the choice persists on all three portals.
  [Good] /learner/tutors catalog cards (demo learner, desktop and 375px): no date block, serif
     ube tutor ID, capped subjects/topics, footer counts, no horizontal scroll.
  [ ] /learner/tutors with "show tutor real names" ON: card title shows the name with the ID and

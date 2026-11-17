@@ -2,10 +2,9 @@
 
 import CatalogLoadState from "@/components/ui/CatalogLoadState";
 
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
-import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 
 export interface PreferredSlot {
@@ -60,6 +59,7 @@ export default function MatchCriteriaFields({
         : [...value.topics, topic],
     });
 
+  const anyDate = value.slots.some((s) => s.date != null);
   const updateSlot = (i: number, patch: Partial<PreferredSlot>) =>
     set({ slots: value.slots.map((s, idx) => (idx === i ? { ...s, ...patch } : s)) });
 
@@ -67,10 +67,10 @@ export default function MatchCriteriaFields({
     <div className="space-y-5">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <div className="grid sm:grid-cols-2 gap-4">
-        <FormField label="Grade level" required={gradeRequired} hint={gradeHint}>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <FormField size="md" label="Grade level" required={gradeRequired} hint={gradeHint}>
           <select
-            className="select select-bordered select-md w-full text-sm"
+            className="select select-bordered w-full"
             value={value.gradeLevel}
             required={gradeRequired}
             disabled={gradeLocked}
@@ -85,9 +85,9 @@ export default function MatchCriteriaFields({
           </select>
         </FormField>
 
-        <FormField label="Subject" required>
+        <FormField size="md" label="Subject" required>
           <select
-            className="select select-bordered select-md w-full text-sm"
+            className="select select-bordered w-full"
             required
             value={value.subject}
             onChange={(e) => onChange({ ...value, subject: e.target.value, topics: [] })}
@@ -102,9 +102,9 @@ export default function MatchCriteriaFields({
         </FormField>
 
         {showFormatFilter && (
-          <FormField label="Class format" hint="Filter by 1-on-1 or group classes.">
+          <FormField size="md" label="Class format">
             <select
-              className="select select-bordered select-md w-full text-sm"
+              className="select select-bordered w-full"
               value={value.classFormat}
               onChange={(e) => set({ classFormat: e.target.value })}
             >
@@ -116,28 +116,28 @@ export default function MatchCriteriaFields({
         )}
       </div>
 
-      <CatalogCurriculumHint subject={subjects.find((subject) => subject.slug === value.subject)} />
 
       <FormField
+        size="md"
         label={`Topics${value.topics.length > 0 ? ` (${value.topics.length} selected)` : ""}`}
         required
       >
         {!value.subject ? (
-          <div className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-            Select a subject to see its topics.
-          </div>
+          <p className="text-sm text-(--kt-muted)">
+            Choose a subject first to see its topics.
+          </p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 max-h-52 overflow-y-auto border border-base-200 rounded-lg p-2.5">
+          <div className="grid gap-x-4 sm:grid-cols-2 lg:grid-cols-3">
             {topicsFor(value.subject).map((topic) => (
               <label
                 key={topic}
-                className="flex items-center gap-1.5 text-xs cursor-pointer p-1.5 rounded hover:bg-base-200/50"
+                className="flex items-center gap-3 min-h-11 text-sm cursor-pointer"
               >
                 <input
                   type="checkbox"
                   checked={value.topics.includes(topic)}
                   onChange={() => toggleTopic(topic)}
-                  className="checkbox checkbox-xs checkbox-primary"
+                  className="checkbox checkbox-primary checkbox-sm"
                 />
                 <span>{topic}</span>
               </label>
@@ -146,63 +146,102 @@ export default function MatchCriteriaFields({
         )}
       </FormField>
 
-      <FormField label="Preferred times" hint="Optional — choose a date for a specific day, or leave it blank for a weekly preference. Times are in Philippine time.">
+      <FormField size="md" label="When you're free">
         <div className="space-y-3">
-          {value.slots.map((slot, i) => (
-            <div key={i} data-control-field className="rounded-lg border border-base-300 bg-base-100 p-3 flex flex-wrap items-center gap-2">
-              <input type="date" aria-label="Preferred date" value={slot.date ?? ""}
-                onChange={(e) => {
-                  const date = e.target.value;
-                  const day = date ? ["SUNDAY", ...DAYS.slice(0, 6)][new Date(`${date}T12:00:00Z`).getUTCDay()] : slot.day;
-                  updateSlot(i, { date: date || null, day });
-                }} className="input input-bordered input-sm text-xs w-auto min-w-36" />
-                <select
-                  aria-label="Preferred day"
-                  value={slot.day}
-                  onChange={(e) => updateSlot(i, { day: e.target.value, date: null })}
-                  className="select select-bordered select-sm text-xs w-28 min-w-0"
-                >
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>
-                      {d[0] + d.slice(1).toLowerCase()}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="time"
-                  required aria-label="Start time"
-                  value={slot.startTime}
-                  onChange={(e) => updateSlot(i, { startTime: e.target.value })}
-                  className="input input-bordered input-sm text-xs w-28 min-w-0"
-                />
-                <span className="text-xs text-(--kt-faint) shrink-0">to</span>
-                <input
-                  type="time"
-                  required data-after={slot.startTime} aria-label="End time"
-                  value={slot.endTime}
-                  onChange={(e) => updateSlot(i, { endTime: e.target.value })}
-                  className="input input-bordered input-sm text-xs w-28 min-w-0"
-                />
-                <button
-                  type="button"
-                  onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
-                  className="btn btn-ghost btn-sm text-error shrink-0"
-                  aria-label={`Remove preferred time slot ${i + 1}`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              <div data-control-feedback />
-            </div>
-          ))}
+          <p className="text-sm text-(--kt-muted)">Optional. Add the times you can join, in Philippine time.</p>
+          {value.slots.length > 0 && (
+            <ul className="border-t border-(--kt-border)">
+              {value.slots.map((slot, i) => {
+                // Every row shares one column layout so Day / From / To / Remove line up; once any row uses a
+                // specific date, all rows get a Date column (left empty on weekly rows).
+                const onDate = slot.date != null;
+                return (
+                  <li
+                    key={i}
+                    data-control-field
+                    // Phone: Day (and Date) full width, From/To side by side. Wider: one row that fills the width.
+                    className={`grid grid-cols-2 items-end gap-3 py-3 border-b border-(--kt-border) ${
+                      anyDate ? "sm:grid-cols-[3fr_3fr_2fr_2fr_auto]" : "sm:grid-cols-[3fr_2fr_2fr_auto]"
+                    }`}
+                  >
+                    <label className="col-span-2 sm:col-span-1 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">Day</span>
+                      <select
+                        value={onDate ? "DATE" : slot.day}
+                        onChange={(e) =>
+                          updateSlot(i, e.target.value === "DATE" ? { date: "" } : { day: e.target.value, date: null })
+                        }
+                        className="select select-bordered w-full"
+                      >
+                        {DAYS.map((d) => (
+                          <option key={d} value={d}>
+                            Every {d[0] + d.slice(1).toLowerCase()}
+                          </option>
+                        ))}
+                        <option value="DATE">On a specific date</option>
+                      </select>
+                    </label>
+                    {anyDate && !onDate && <span aria-hidden="true" className="hidden sm:block" />}
+                    {onDate && (
+                      <label className="col-span-2 sm:col-span-1 flex flex-col gap-1">
+                        <span className="text-sm text-(--kt-muted)">Date</span>
+                        <input
+                          type="date"
+                          required
+                          data-required-message="Pick a date, or choose a weekday instead."
+                          value={slot.date ?? ""}
+                          onChange={(e) => {
+                            const date = e.target.value;
+                            const day = date ? ["SUNDAY", ...DAYS.slice(0, 6)][new Date(`${date}T12:00:00Z`).getUTCDay()] : slot.day;
+                            updateSlot(i, { date, day });
+                          }}
+                          className="input input-bordered w-full"
+                        />
+                      </label>
+                    )}
+                    <label className="min-w-0 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">From</span>
+                      <input
+                        type="time"
+                        required
+                        value={slot.startTime}
+                        onChange={(e) => updateSlot(i, { startTime: e.target.value })}
+                        className="input input-bordered w-full"
+                      />
+                    </label>
+                    <label className="min-w-0 flex flex-col gap-1">
+                      <span className="text-sm text-(--kt-muted)">To</span>
+                      <input
+                        type="time"
+                        required
+                        data-after={slot.startTime}
+                        value={slot.endTime}
+                        onChange={(e) => updateSlot(i, { endTime: e.target.value })}
+                        className="input input-bordered w-full"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => set({ slots: value.slots.filter((_, idx) => idx !== i) })}
+                      className="btn btn-ghost text-error col-span-2 sm:col-span-1 justify-self-start"
+                      aria-label={`Remove time ${i + 1}`}
+                    >
+                      Remove
+                    </button>
+                    <div data-control-feedback className="col-span-full empty:hidden" />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
           <button
             type="button"
             onClick={() =>
               set({ slots: [...value.slots, { day: "MONDAY", startTime: "15:00", endTime: "17:00" }] })
             }
-            className="btn btn-outline btn-sm text-xs gap-1 w-full"
+            className="btn btn-outline gap-1.5"
           >
-            <Plus className="h-3.5 w-3.5" /> Add time slot
+            <Plus aria-hidden="true" className="h-4 w-4" /> {value.slots.length ? "Add another time" : "Add a time"}
           </button>
         </div>
       </FormField>
@@ -216,7 +255,7 @@ export function criteriaToBody(value: MatchCriteriaValue) {
     subject: value.subject,
     topics: value.topics,
     ...(value.gradeLevel ? { gradeLevel: value.gradeLevel } : {}),
-    ...(value.slots.length > 0 ? { preferredSlots: value.slots } : {}),
+    ...(value.slots.length > 0 ? { preferredSlots: value.slots.map((s) => ({ ...s, date: s.date || null })) } : {}),
     ...(value.classFormat && value.classFormat !== "ANY" ? { classFormat: value.classFormat } : {}),
   };
 }

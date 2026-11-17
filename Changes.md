@@ -4635,3 +4635,75 @@ topic chips, "Class Info" and "At a Glance" cards, the seat progress bar, fact i
 - Admin page: tutor ID + name in the header line; roster and moderation card restyled to match.
 - `ClassModerationPanel`: 0.25rem corners, 14px text. `BackLink`: 14px text (all detail pages).
 - `classStatus.ts`: `nextSessionAt()` (next scheduled session, else the most recent) + tests.
+
+## Auto match page restyle (2026-11-17)
+
+`/learner/match`:
+- Header: kicker "Auto match" (matches the sidebar), title "Find a class for you", one subtitle (the form
+  card no longer repeats it under its own heading). Submit button "Find classes" (was "Auto Match" + icon).
+- Results use the Browse classes `ClassCatalogCard` (date-first, topic title, tutor ID, seats left) in a flat
+  ordered list instead of tutor-style `ClassCard`s inside a card. Each result has a serif rank number and one
+  plain reason line from new `reasonLine()` ("Covers your topic · fits 2 of your times · your grade"); removed
+  the "Match 12" score pill, "ranked by fit" and the reason icons. "Change what I need" / "Back to results" are
+  full-size outlined buttons (were 10.5px ghost buttons). Empty state: a card with a "Request a class" button.
+- Bug fix: switching between form and results remounted the form and reloaded the subject catalog, briefly
+  showing "Select subject" next to "Topics (1 selected)". Both panels now stay mounted and only one is shown;
+  focus moves to the results heading / form on each switch.
+- Shared `MatchCriteriaFields` (also the class-request forms on Find Tutors): `FormField size="md"`, default
+  -size selects and time inputs (were `-sm text-xs`), topic checkboxes as 44px rows in up to three columns
+  with no inner scroll box, slot rows separated by rules instead of boxes, "Add a time" outlined button,
+  "When you're free" label with a shorter hint. Removed the "Legacy K to 12 curriculum domains" hint here
+  (it stays on the tutor's other-topic assessment).
+- Shared `FormField`: hints and errors are 14px when `size="md"` (12px for the default size).
+- New `components/learner/__tests__/MatchFinder.test.ts` for `reasonLine`.
+- Not changed: the landing page's `MatchResultSample` still shows the old result layout.
+- "When you're free" rows reworked (user annotation): each time is one row of labelled fields — Day ("Every
+  Monday"… or "On a specific date", which reveals a Date field), From, To and a text "Remove" button — instead
+  of an unlabelled date box, day select, two times and a bin icon side by side. The intro line sits under the
+  label instead of below the button; the button reads "Add a time" / "Add another time". A blank specific
+  date says "Pick a date, or choose a weekday instead." via a new opt-in `data-required-message` attribute in
+  `lib/formValidation.ts` (+ `lib/__tests__/formValidation.test.ts`). Empty dates are sent as `null`.
+  Each time row is a grid that fills the form width (Day/Date wider, From/To equal, Remove at the end);
+  on phones Day and Date are full width with From/To side by side.
+  All rows share one column layout: once any row uses a specific date, weekly rows keep an empty Date
+  column so Day, From, To and Remove line up.
+- Results ranking reworked (user feedback: the "1." / "2." numbers under cards were confusing, and tied
+  results looked ranked). New `groupByFit()` splits results into "Best fit" (every top-scoring class) and
+  "Also fits" (the rest); when all scores tie the one group is "Equally good fits". Each group heading says
+  "soonest first" when it holds more than one class. A reason shared by the whole group is shown once under
+  its heading; otherwise each card has its reason line above it. Rank numbers removed; the results heading
+  is now just "N classes fit". Tests added for `groupByFit`.
+
+## Notifications page restyle + portal sidebar hydration fix (2026-11-17)
+
+`/learner/notifications` (and, through the shared list, `/tutor/notifications` and `/admin/notifications`):
+- Header kicker "Mga abiso" and a subtitle that says what's here; tabs "Notifications" / "My reports"
+  (was "Report logs"); text loading states instead of bare spinners.
+- `NotificationList`: no duplicate "Notifications" card heading with bell icon; notifications grouped by
+  Philippine calendar day under serif headings ("Today", "Yesterday", "Sat, Nov 14" — new `groupByDay()` in
+  `notificationMeta` + tests); one flat card with divider rows. Unread rows are ink, medium weight, with a
+  primary left rule and "· New" after the time; read rows are muted (was a 5% tint + 6px dot, all text 11–12px
+  muted). Time shown as clock time within its day. "Mark all as read" is a full-size outlined button with an
+  "N new" count, only when something is unread (was a 10.5px ghost button). Empty state says what will appear.
+- `notificationMeta`: the 26 coloured per-type icons are now five quiet kinds that inherit the text colour —
+  class, test/question bank, topic request, moderation (reports, appeals), account. Also used by the top-bar bell.
+- `MyReportsList` (learner): one card with divider rows instead of a card per report; the target is "Tutor
+  TUT-…" (serif ube) or "Class CODE · Subject" (serif code) instead of a caps "CLASS" eyebrow + mono name;
+  status as coloured text, reasons as plain text with the learner's details, then "Filed … · Closed without
+  action on …" and the admin note as muted lines (removed the badge pills and the boxed outcome). The empty
+  state explains how to report.
+- Bug fix (every portal): `PortalLayout` read saved sidebar-group state from localStorage during the first
+  render, so server and client disagreed whenever a group's saved state differed from its default and React
+  threw "Hydration failed". It now starts from the defaults, loads the saved state after mount, and skips the
+  mount-time write so the saved state isn't overwritten.
+- Not changed: `NotificationBell` dropdown still uses its own small text and ghost "Mark all read".
+- Second pass (user: "too bland"): the list is now a calendar rail like the learner dashboard's week — per
+  day a serif day number with weekday/month ("Today" in primary), a timeline with a filled dot per unread
+  item and a hollow dot per read one; each item shows a small tinted tile for its kind (Class blue, Test
+  green, Request info, Report warm, Account grey — new `notificationKind()`; tiles hidden on phones) and
+  "Kind · time · New". Unread items sit on a light primary wash. One tinted band at the top: a serif unread
+  count, "new since you last looked" and Mark all as read; with nothing unread it says "You're all caught up."
+- Third pass (user annotation): removed the per-day date column and timeline. One flat list; the line above
+  each message is "Kind · when · New", where "when" is the time for today and "Yesterday · 02:40 PM" or
+  "Sat, Nov 14 · 08:40 AM" for older ones (new `notificationWhen()` replaces `groupByDay()`, with tests).
+  Unread rows keep the primary left rule and light wash; kind tiles stay (hidden on phones).
