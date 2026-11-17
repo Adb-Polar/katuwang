@@ -1014,3 +1014,7 @@ Email verification OTP (codex/email-verification-otp)
 Admin activity summaries
  [ ] /admin and /admin/audit-log: catalog replacement events show readable topic changes and reassessment status without JSON, operation IDs, or backup hashes; plain-text reasons remain visible.
  [ ] /admin on a narrow screen: summaries wrap and timestamps stack without horizontal overflow.
+
+Learner dashboard (Changes.md Part 90)
+ [ ] /learner as a learner with one active and one withdrawn enrolment: "Enrolled classes" shows only the active one (matches My Classes).
+ [ ] /learner keyboard: Tab from the top goes Upcoming session links → stat cards → This week timetable → Certificates, same order as on screen, at desktop and phone width.

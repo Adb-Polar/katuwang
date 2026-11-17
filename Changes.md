@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [90](#part-90) | **Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`)** | The "Enrolled classes" stat no longer counts withdrawn enrolments; the four dashboard blocks are now in the DOM in the order they appear on screen (Upcoming → Stats → This week → Certificates), so keyboard/screen-reader order matches the visual order (WCAG 1.3.2 / 2.4.3). | See Part 90 below. `src/app/learner/page.tsx` + new page test. |
 | [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
 | [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
 | [89](#part-89) | **Philippine K–12 Subject & Topic Database (Grades 7–12)** | Comprehensive research on DepEd MATATAG (Grades 7–10) and SHS (Grades 11–12) curricula; structured dataset (126 competencies, 47 subjects, 155 topics); populated MariaDB catalog via idempotent seed script without schema changes or data loss; added unit test suite (12 tests) verifying DepEd provenance, grade mapping, and matching engine compatibility. | See Part 89 below. Dataset + Seed + Tests. |
@@ -4086,6 +4087,17 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - `pnpm lint` clean (0 errors).
 
 <a id="part-89"></a>
+## Part 90 — Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`) (2026-11-17)
+
+Two fixes on `/learner` found by a report-only UI audit. No visual redesign; no schema change.
+
+1. **Enrolled-classes count excluded withdrawals.** `prisma.classEnrollment.count` now filters `withdrawnAt: null`, matching the upcoming/weekly session queries in the same `Promise.all`. The open-requests count reuses the page's `now` instead of a second `new Date()`.
+2. **Visual order = DOM order.** Removed the `order-1`…`order-4` classes and reordered the JSX to Upcoming sessions → stat cards → This week → Certificates. Layout stays a single `flex-col` column, so the on-screen result is unchanged; Tab order now follows it.
+
+Tests: new `src/app/learner/__tests__/page.test.tsx` (prisma mocked via `vi.hoisted`) — asserts the count query includes `withdrawnAt: null` and that the rendered markup has the four blocks in reading order with no `order-*` classes. tsc + lint clean; full suite 1380 passed, 1 known unrelated failure (`ValidatedForm.test.tsx` add-session case).
+
+---
+
 ## Part 89 — Philippine K–12 Subject & Topic Database for Katuwang (Grades 7–12) (2026-10-19)
 
 Comprehensive research and integration of the official Philippine Department of Education (DepEd) secondary curriculum (Grades 7–12) for Taysan Resettlement Integrated School (TRIS), Legazpi City, Albay.
