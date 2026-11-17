@@ -39,5 +39,8 @@ it("compares discrete sessions without treating missing scores as zero and label
     expect(gain.cell(props.data[1])).toBe("Awaiting paired scores");
     expect(gain.cell(props.data[2])).toBe("-20 percentage points");
     expect(host.textContent).toContain("percentage points · paired tests only");
+    expect(host.textContent).toContain("2 of 3 session tests have both your pre-test and post-test score.");
+    // Learner data never borrows the tutor (accent) colour.
+    expect(props.series.map((s) => s.color)).not.toContain("var(--color-accent)");
   } finally { await act(async () => root.unmount()); }
 });

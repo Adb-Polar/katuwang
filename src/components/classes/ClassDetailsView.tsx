@@ -1,116 +1,162 @@
 import type { ReactNode } from "react";
-import { Link as LinkIcon, Users, EyeOff, MapPin } from "lucide-react";
+import { BadgeCheck, EyeOff } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
+import PageHeader from "@/components/ui/PageHeader";
 import StatusBadge from "@/components/ui/StatusBadge";
-import TopicChip from "@/components/ui/TopicChip";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import ClassModerationPanel from "./ClassModerationPanel";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { formatDateTime } from "@/lib/datetime";
+import { gradeNumber } from "@/lib/gradeLevels";
 
+export type ClassDetailsAudience = "learner" | "tutor" | "admin";
+
+/**
+ * One class, shared by the learner, tutor and admin portals: serif header (subject · grade kicker,
+ * topics as the title), a single line of plain facts, then the page's actions, sessions and extras.
+ */
 export default function ClassDetailsView({
+  audience,
   backHref,
+  backLabel,
   code,
   subject,
+  gradeLevel,
   topics,
   verifiedTopics,
   status,
-  activeLabel,
   published = true,
   suspendedReason,
   suspendedUntil,
-  moderationAudience = "tutor",
   moderationExtra,
   maxStudents,
   enrolledCount,
+  nextSessionAt,
   building,
   room,
   meetingLink,
   description,
-  extraFacts,
+  tutor,
   sessions,
   roster,
   belowRoster,
   sidebarExtra,
   actions,
 }: {
+  audience: ClassDetailsAudience;
   backHref: string;
-  /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow above the subject. */
+  backLabel: string;
+  /** Human-friendly class code (e.g. "C-0007"). */
   code?: string | null;
   subject: string;
+  gradeLevel?: string | null;
   topics: string[];
-  /** Topics (from `topics`) the tutor has been verified for, shown with a badge. */
+  /** Topics (from `topics`) the tutor holds a certification for. */
   verifiedTopics?: string[];
   status: ClassLifecycleStatus;
-  activeLabel: string;
-  /** Tutor-only: whether the class is visible to learners. Defaults to true. */
+  /** Whether the class is visible to learners. Defaults to true. */
   published?: boolean;
   /** Admin's reason when the class is SUSPENDED/BANNED; renders a moderation panel. */
   suspendedReason?: string | null;
-  /** ISO string; null = indefinite. Shown in the moderation panel for SUSPENDED. */
+  /** ISO string; null = indefinite. */
   suspendedUntil?: string | null;
-  /** Tailors the moderation panel copy. Defaults to "tutor". */
-  moderationAudience?: "tutor" | "learner";
-  /** Rendered directly below the moderation panel when SUSPENDED/BANNED (e.g. the tutor's appeal card). */
+  /** Rendered directly below the moderation panel (e.g. the tutor's appeal card). */
   moderationExtra?: ReactNode;
   maxStudents: number;
   enrolledCount: number;
+  /** ISO string of the next session, or of the most recent one when none is upcoming. */
+  nextSessionAt?: string | null;
   building?: string | null;
   room?: string | null;
   meetingLink: string | null;
   description: string | null;
-  /** Extra cells rendered inside the schedule info grid (e.g. a tutor-ID cell for learners). */
-  extraFacts?: ReactNode;
-  /** The class's Sessions card content (e.g. a <SessionsList /> plus an Add Session control). */
+  /** The tutor, as shown to this audience (anonymous ID, or name where allowed). Omit on the tutor's own page. */
+  tutor?: ReactNode;
+  /** The Sessions section's content: a heading row plus a <SessionsList variant="calendar" />. */
   sessions?: ReactNode;
-  /** Full-width content rendered below Sessions (e.g. the enrolled-learners roster). */
+  /** Full-width content below Sessions (e.g. the enrolled-learners roster). */
   roster?: ReactNode;
-  /** Full-width content rendered below the roster (e.g. session-test progress/list). */
+  /** Full-width content below the roster; each child brings its own card. */
   belowRoster?: ReactNode;
-  /** Extra cards rendered in the right-hand sidebar, below the quick-facts card. */
+  /** Right-hand column (admin tools). Without it the page is a single column. */
   sidebarExtra?: ReactNode;
-  /** Primary action buttons, rendered top-right next to the back link. */
-  actions: ReactNode;
+  /** The page's own buttons, placed after the facts so they read in order. */
+  actions?: ReactNode;
 }) {
   const isFull = enrolledCount >= maxStudents;
-  const { tone, label } = getClassStatusBadge(status, isFull, activeLabel);
-  const fillPct = Math.min(100, Math.round((enrolledCount / maxStudents) * 100));
+  const { tone, label } = getClassStatusBadge(status, isFull, "Open");
+  const isPlainOpen = status === "SCHEDULED" && !isFull;
+  const grade = gradeLevel ? gradeNumber(gradeLevel) : null;
+  const kicker = `${subjectDisplayLabel(subject)}${grade ? ` · Grade ${grade}` : ""}`;
+  const verified = topics.filter((t) => verifiedTopics?.includes(t));
+  const where = [building && `Bldg. ${building}`, room && `Room ${room}`].filter(Boolean).join(" · ");
+  const seatsLeft = Math.max(0, maxStudents - enrolledCount);
+  const sessionIsPast = nextSessionAt ? new Date(nextSessionAt) <= new Date() : false;
+  const showSeats = audience === "learner" && status === "SCHEDULED";
+
+  const main = (
+    <div className="min-w-0 space-y-6">
+      {sessions && (
+        <section className="card kt-card">
+          <div className="kt-card-body gap-1">{sessions}</div>
+        </section>
+      )}
+
+      {description && (
+        <section className="card kt-card">
+          <div className="kt-card-body gap-2">
+            <h2 className="font-serif text-xl font-medium">About this class</h2>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{description}</p>
+          </div>
+        </section>
+      )}
+
+      {roster && (
+        <section className="card kt-card">
+          <div className="kt-card-body gap-3">{roster}</div>
+        </section>
+      )}
+
+      {belowRoster}
+    </div>
+  );
 
   return (
-    <div className={`space-y-6 rounded-box ${!published ? "bg-base-300 border border-base-content/10 p-4" : ""}`}>
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <BackLink href={backHref}>Back to Classes</BackLink>
-        <div className="flex items-center gap-2">{actions}</div>
-      </div>
+    <div className="space-y-6">
+      <BackLink href={backHref}>{backLabel}</BackLink>
 
-      <div className="space-y-2">
-        {code && (
-          <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
-            {code}
+      <div className="space-y-3">
+        {topics.length === 1 ? (
+          <PageHeader eyebrow={kicker} title={topics[0]} />
+        ) : (
+          <>
+            <PageHeader eyebrow={grade ? `Grade ${grade}` : undefined} title={subjectDisplayLabel(subject)} />
+            {topics.length > 1 && (
+              <ul aria-label="Topics" className="flex flex-col gap-0.5 text-base">
+                {topics.map((t) => <li key={t}>{t}</li>)}
+              </ul>
+            )}
+          </>
+        )}
+        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-(--kt-muted)">
+          {code && <span>Class <span className="font-serif text-base-content">{code}</span></span>}
+          {tutor && <><span aria-hidden="true">·</span><span className="inline-flex items-center gap-1">Tutor {tutor}</span></>}
+          {published && !isPlainOpen && <StatusBadge tone={tone} label={label} size="sm" />}
+        </p>
+        {verified.length > 0 && (
+          <p className="flex items-start gap-1.5 text-sm text-success">
+            <BadgeCheck aria-hidden="true" className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>
+              {audience === "tutor" ? "You're" : "The tutor is"} certified in {verified.length === topics.length ? (topics.length === 1 ? "this topic" : "all these topics") : verified.join(", ")}.
+            </span>
           </p>
         )}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
-            {subjectDisplayLabel(subject)}
-          </span>
-          {published ? (
-            <StatusBadge tone={tone} label={label} size="sm" />
-          ) : (
-            <span className="badge badge-warning badge-outline text-2xs font-semibold uppercase tracking-wide gap-1 py-2.5">
-              <EyeOff className="h-3 w-3" />
-              Unpublished
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {topics.map((topic) => (
-            <TopicChip
-              key={topic}
-              topic={topic}
-              tone="primary"
-              verified={verifiedTopics?.includes(topic)}
-            />
-          ))}
-        </div>
+        {!published && (
+          <p className="flex items-start gap-1.5 text-sm text-warning-content">
+            <EyeOff aria-hidden="true" className="h-4 w-4 mt-0.5 shrink-0" />
+            <span>Unpublished — learners can&apos;t see or join this class{audience === "tutor" ? " until you publish it from Manage" : ""}.</span>
+          </p>
+        )}
       </div>
 
       {(status === "SUSPENDED" || status === "BANNED") && (
@@ -119,99 +165,48 @@ export default function ClassDetailsView({
             status={status}
             suspendedReason={suspendedReason}
             suspendedUntil={suspendedUntil}
-            audience={moderationAudience}
+            audience={audience === "learner" ? "learner" : "tutor"}
           />
           {moderationExtra}
         </div>
       )}
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Main column */}
-        <div className="min-w-0 lg:col-span-2 space-y-6">
-          <div className="card kt-card">
-            <div className="card-body gap-4">
-              <h2 className="card-title text-sm font-bold">Class Info</h2>
-              <div className="grid grid-cols-2 gap-4 text-xs text-(--kt-muted)">
-                {extraFacts}
-                {(building || room) && (
-                  <div className="col-span-2 flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-semibold text-2xs text-(--kt-faint)">LOCATION</div>
-                      <span className="font-medium">
-                        {[building && `Bldg. ${building}`, room && `Room ${room}`].filter(Boolean).join(" · ")}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {meetingLink && (
-                  <div className="col-span-2 flex items-center gap-1.5">
-                    <LinkIcon className="h-4 w-4 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-semibold text-2xs text-(--kt-faint)">MEETING LINK</div>
-                      <a
-                        href={meetingLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="link link-primary font-medium break-all"
-                      >
-                        {meetingLink}
-                      </a>
-                    </div>
-                  </div>
-                )}
-                {!building && !room && !meetingLink && !extraFacts && (
-                  <p className="col-span-2 text-(--kt-faint) italic">No location or meeting link provided.</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {sessions && (
-            <div className="card kt-card">
-              <div className="card-body gap-3">{sessions}</div>
-            </div>
-          )}
-
-          {description && (
-            <div className="card kt-card">
-              <div className="card-body gap-2">
-                <h2 className="card-title text-sm font-bold">Description</h2>
-                <p className="text-xs text-(--kt-muted) leading-relaxed">{description}</p>
-              </div>
-            </div>
-          )}
-
-          {roster && (
-            <div className="card kt-card">
-              <div className="card-body gap-3">{roster}</div>
-            </div>
-          )}
-
-          {belowRoster && (
-            <div className="card kt-card">
-              <div className="card-body gap-3">{belowRoster}</div>
-            </div>
-          )}
+      <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-3 text-sm">
+        <div>
+          <dt className="text-(--kt-muted)">{sessionIsPast ? "Last session" : "Next session"}</dt>
+          <dd className="font-medium">{nextSessionAt ? formatDateTime(nextSessionAt) : "None scheduled"}</dd>
         </div>
-
-        {/* Sidebar */}
-        <div className="min-w-0 space-y-6">
-          <div className="card kt-card">
-            <div className="card-body gap-3">
-              <h2 className="card-title text-sm font-bold">At a Glance</h2>
-              <div className="flex items-center gap-2 text-xs text-(--kt-muted)">
-                <Users className="h-4 w-4 text-primary shrink-0" />
-                <span>
-                  {enrolledCount} / {maxStudents} enrolled
-                </span>
-              </div>
-              <progress className="progress progress-primary w-full" value={fillPct} max={100}></progress>
-            </div>
-          </div>
-          {sidebarExtra}
+        <div className="min-w-0">
+          <dt className="text-(--kt-muted)">Where</dt>
+          <dd className="font-medium break-words">
+            {where || (meetingLink ? (
+              <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary break-all">Online meeting link</a>
+            ) : "Not set yet")}
+            {where && meetingLink && (
+              <> · <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">meeting link</a></>
+            )}
+          </dd>
         </div>
-      </div>
+        <div>
+          <dt className="text-(--kt-muted)">{showSeats ? "Seats" : "Enrolled"}</dt>
+          <dd className="font-medium">
+            {showSeats
+              ? (isFull ? `Full · ${maxStudents} of ${maxStudents} taken` : `${seatsLeft} of ${maxStudents} left`)
+              : `${enrolledCount} of ${maxStudents}`}
+          </dd>
+        </div>
+      </dl>
+
+      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+
+      {sidebarExtra ? (
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="min-w-0 lg:col-span-2">{main}</div>
+          <div className="min-w-0 space-y-6">{sidebarExtra}</div>
+        </div>
+      ) : (
+        <div className="max-w-3xl">{main}</div>
+      )}
     </div>
   );
 }

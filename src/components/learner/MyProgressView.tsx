@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import FormField from "@/components/ui/FormField";
 import { GroupedBarChart } from "@/components/charts";
 import { formatDate } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
@@ -82,17 +83,19 @@ export default function MyProgressView({
       post: r.postScore,
     })) ?? [];
 
+  const summary = data?.summary;
+  const gain = summary?.avgDelta ?? null;
+  const showChart = !loading && !error && data && data.summary.sessionsWithTest > 0;
+
   return (
     <div className="space-y-4">
-      {!compact && (
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <h1 className="text-lg font-sans">My Progress</h1>
-          {classOptions && classOptions.length > 0 && (
+      {!compact && classOptions && classOptions.length > 1 && (
+        <div className="sm:max-w-sm">
+          <FormField label="Class" size="md">
             <select
-              aria-label="Filter progress by class"
               value={classId}
               onChange={(e) => { setLoading(true); setError(""); setData(null); setClassId(e.target.value); }}
-              className="select select-bordered select-sm text-xs"
+              className="select select-bordered w-full"
             >
               <option value="">All classes</option>
               {classOptions.map((c) => (
@@ -101,65 +104,49 @@ export default function MyProgressView({
                 </option>
               ))}
             </select>
-          )}
+          </FormField>
         </div>
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
-      {data?.series.some(row => row.withdrawnAt) && <p className="text-xs text-(--kt-muted)">Includes retained learning records from classes you withdrew from.</p>}
       {error && <button type="button" onClick={() => { setLoading(true); setError(""); setData(null); setRetryCount((count) => count + 1); }} className="btn btn-outline btn-error min-h-11">Retry loading progress</button>}
 
       {loading && <p role="status" className="text-sm text-(--kt-muted)">Loading progress…</p>}
-      {!loading && !error && data?.summary.sessionsWithTest === 0 && (
-        <div className="rounded-xl border border-base-300 p-4 text-sm space-y-2">
-          <p>No session tests have been recorded for this selection yet. Open a class to check upcoming sessions and tests.</p>
-          <Link className="link link-primary" href={fixedClassId ? `/learner/classes/${fixedClassId}` : "/learner/my-classes"}>View my classes</Link>
-        </div>
-      )}
-      {data && !error && (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="card kt-card kt-stat p-4">
-            <span className="kt-stat-title">Sessions with a test</span>
-            <span className="kt-stat-value">{data.summary.sessionsWithTest}</span>
+      {!loading && !error && summary?.sessionsWithTest === 0 && (
+        <section className="card kt-card">
+          <div className="kt-card-body gap-3">
+            <p>No session tests yet{classId ? " for this class" : ""}. When your tutor publishes one, your scores show up here.</p>
+            <Link className="btn btn-primary self-start" href={fixedClassId ? `/learner/classes/${fixedClassId}` : "/learner/my-classes"}>
+              {fixedClassId ? "See this class's sessions" : "See my classes"}
+            </Link>
           </div>
-          <div className="card kt-card kt-stat p-4">
-            <span className="kt-stat-title">Paired pre/post</span>
-            <span className="kt-stat-value">{data.summary.pairedCount}</span>
-          </div>
-          <div className="card kt-card kt-stat p-4">
-            <span className="kt-stat-title">Average gain</span>
-            <span
-              className={`kt-stat-value ${
-                data.summary.avgDelta == null
-                  ? "text-base-content/30"
-                  : data.summary.avgDelta > 0
-                  ? "text-success"
-                  : data.summary.avgDelta < 0
-                  ? "text-error"
-                  : ""
-              }`}
-            >
-              {data.summary.avgDelta == null
-                ? "—"
-                : data.summary.avgDelta > 0
-                ? `+${data.summary.avgDelta}`
-                : data.summary.avgDelta}
-            </span>
-            <span className="text-xs text-(--kt-muted)">percentage points · paired tests only</span>
-          </div>
-        </div>
+        </section>
       )}
 
-      {!loading && !error && data && data.summary.sessionsWithTest > 0 && <GroupedBarChart
-        title="Pre-test and post-test scores by session"
+      {summary && !error && summary.sessionsWithTest > 0 && (
+        <section aria-label="Average gain" className="rounded-(--kt-radius-box) border border-(--kt-border) bg-primary/5 px-5 py-4">
+          <p className={`font-serif text-4xl leading-tight ${gain != null && gain > 0 ? "text-success" : "text-base-content"}`}>
+            {gain == null ? "—" : gain > 0 ? `+${gain}` : gain}
+          </p>
+          <p className="text-sm text-(--kt-muted)">percentage points · paired tests only</p>
+          <p className="mt-2 text-sm">
+            {summary.pairedCount} of {summary.sessionsWithTest} session test{summary.sessionsWithTest === 1 ? "" : "s"} {summary.sessionsWithTest === 1 ? "has" : "have"} both your pre-test and post-test score.
+          </p>
+          {data?.series.some(row => row.withdrawnAt) && <p className="mt-1 text-sm text-(--kt-muted)">Includes classes you withdrew from.</p>}
+        </section>
+      )}
+
+      {showChart && <GroupedBarChart
+        title="Before and after, by session"
+        titleAs="h2"
         data={chartData}
         xKey="label"
         tickKey="session"
         unit="%"
         yDomain={[0, 100]}
-        minChartWidth={Math.max(320, chartData.length * 90)}
+        minChartWidth={chartData.length >= 4 ? chartData.length * 90 : undefined}
         missingLabel="Not taken yet"
-        footer={<p className="text-xs text-(--kt-muted)">Compare the two scores within each session. Topics and assessment difficulty may differ between sessions. Missing attempts are not zero scores. Scroll horizontally to view more sessions.</p>}
+        footer={<p className="text-sm text-(--kt-muted)">Compare the two bars within a session; topics differ between sessions. A missing bar means that test wasn&rsquo;t taken.{chartData.length >= 4 ? " Scroll sideways for more sessions." : ""}</p>}
         tableColumns={[
           { header: "Session", cell: (r) => String(r.session) },
           { header: "Class", cell: (r) => String(r.classCode) },
@@ -170,8 +157,8 @@ export default function MyProgressView({
           { header: "Gain", align: "right", cell: (r) => r.delta == null ? "Awaiting paired scores" : `${Number(r.delta) > 0 ? "+" : ""}${r.delta} percentage points` },
         ]}
         series={[
-          { key: "pre", name: "Pre-test", color: "var(--color-accent)" },
-          { key: "post", name: "Post-test", color: "var(--color-success)" },
+          { key: "pre", name: "Pre-test", color: "oklch(63% 0.05 222)" },
+          { key: "post", name: "Post-test", color: "var(--color-primary)" },
         ]}
       />}
     </div>

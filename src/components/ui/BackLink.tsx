@@ -15,7 +15,7 @@ export default function BackLink({
   children: ReactNode;
 }) {
   return (
-    <Link href={href} className="btn btn-ghost btn-sm text-xs gap-1.5">
+    <Link href={href} className="btn btn-ghost btn-sm text-sm gap-1.5">
       <ArrowLeft className="h-3.5 w-3.5" />
       {children}
     </Link>

@@ -21,6 +21,26 @@ Portals on the landing theme (2026-11-17)
     44px Download PDF; only Plex Serif/Sans, no horizontal scroll.
  [ ] /learner/certificates with a learner who has real certificates: Download PDF saves the file;
     a pending PDF shows the "still being made" line; more than 20 shows pagination.
+ [Good] /learner/progress (demo learner, desktop and 375px): serif header, tinted gain band, slate/blue
+    bars with ink legend, no chart scrollbar for 1 session, 44px "Show data table"; compact view on
+    /learner/classes/[id] matches; only Plex Serif/Sans, no console errors.
+ [ ] /learner/progress with a learner in 2+ tested classes: the Class filter shows, lists only tested
+    classes, and switching it reloads the band and chart; with 4+ sessions the chart scrolls and says so.
+ [ ] Tutor class page pre/post chart (ClassProgressPanel) and /admin reports tables after the shared
+    chart/table restyle: serif chart title, 12px ticks, larger "Show data table".
+ [Good] Class detail, learner (demo learner; CUR-0086 not enrolled, CUR-H1 enrolled/completed; ~726px
+    and 375px): h1 + kicker, facts row, Enroll after facts, calendar sessions, "Last session" and
+    "Enrolled" on a completed class, session tests + progress band without nested cards, back label
+    follows ?from=. Only Plex Serif/Sans, no horizontal scroll, no console/server errors.
+ [Good] Class detail, tutor (demo tutor, C-0240, ~800px) and admin (super admin, 1280px and 375px):
+    multi-topic header, session controls under calendar rows, roster, chart ticks "Session N", tests rows.
+ [ ] Tutor class page at 375px: session controls (reschedule/finish/cancel/delete) wrap cleanly
+    under each calendar row; Manage menu opens and its items work.
+ [ ] Enroll and Unenroll from a learner class page (writes to the DB — needs go-ahead): button
+    states, the confirm dialog, redirect to My classes.
+ [ ] Suspended/banned class on all three pages: moderation panel, frozen-enrollment note, tutor appeal card.
+ [ ] Unpublished class: tutor sees the one-line notice; an enrolled learner sees "This class is hidden for now".
+ [ ] Class with a meeting link and no room: "Online meeting link" shows in Where and opens in a new tab.
  [Good] /learner/tutors catalog cards (demo learner, desktop and 375px): no date block, serif
     ube tutor ID, capped subjects/topics, footer counts, no horizontal scroll.
  [ ] /learner/tutors with "show tutor real names" ON: card title shows the name with the ID and

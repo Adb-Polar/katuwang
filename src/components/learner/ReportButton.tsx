@@ -86,7 +86,7 @@ export default function ReportButton({
 
   if (done) {
     return (
-      <span className="text-2xs text-success italic inline-flex items-center gap-1">
+      <span className="text-sm text-success inline-flex items-center gap-1">
         <Flag className="h-3.5 w-3.5" />
         Report sent to the admins.
       </span>
@@ -98,7 +98,7 @@ export default function ReportButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="btn btn-ghost btn-sm text-xs gap-1.5 text-error hover:bg-error/10"
+        className="btn btn-ghost gap-1.5 text-error hover:bg-error/10"
       >
         <Flag className="h-3.5 w-3.5" />
         Report this {noun}

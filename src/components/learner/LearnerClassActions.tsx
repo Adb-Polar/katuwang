@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, XCircle } from "lucide-react";
 import { clearClassBrowserCache } from "@/lib/classBrowserCache";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -69,7 +68,7 @@ export default function LearnerClassActions({
       <FeedbackBanner variant="error" message={error || null} />
 
       {isEnrolled && isModerated && (
-        <span className="text-2xs text-error/80 italic">
+        <span className="text-sm text-error">
           Enrollment is frozen while this class is under moderation.
         </span>
       )}
@@ -79,9 +78,8 @@ export default function LearnerClassActions({
           <button
             onClick={() => setConfirmUnenroll(true)}
             disabled={loading}
-            className="btn btn-error btn-sm text-xs gap-1 cursor-pointer"
+            className="btn btn-outline btn-error"
           >
-            <XCircle className="h-3.5 w-3.5" />
             Unenroll
           </button>
         )
@@ -90,10 +88,9 @@ export default function LearnerClassActions({
           <button
             onClick={handleEnroll}
             disabled={loading || isFull}
-            className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer"
+            className="btn btn-primary"
           >
-            <CheckCircle className="h-3.5 w-3.5" />
-            {isFull ? "Full" : "Enroll"}
+            {isFull ? "Class is full" : "Enroll in this class"}
           </button>
         )
       )}

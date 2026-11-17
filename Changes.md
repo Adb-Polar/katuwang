@@ -4587,3 +4587,51 @@ etc. — admin information the learner can't act on), `rounded-xl` row boxes ins
 dashboard preview look the same as before. New test `components/certificates/__tests__/LearnerCertificateList.test.tsx`
 (Manila date, download link, pending PDF, empty-state link, pagination hidden on one page).
 The tutor-real-name issue noted above is not changed here.
+
+## Learner progress page restyle (2026-11-17)
+
+`/learner/progress` brought onto the landing theme:
+- `app/learner/progress/page.tsx`: serif `PageHeader` (kicker "Pag-unlad mo", "My progress"). The class
+  filter now lists only classes with a published (non-draft) session test — the same rule
+  `/api/learner/progress` uses — instead of every enrolment (the demo learner had 55 options, most empty).
+- `MyProgressView.tsx`: the three stat cards ("Sessions with a test", "Paired pre/post", "Average gain")
+  are one lightly tinted band — big serif gain, "percentage points · paired tests only", and "N of M
+  session tests have both your pre-test and post-test score." The filter is a labelled 44px `FormField`
+  select, shown only with two or more classes. Pre-test bars are a muted slate (3.44:1 on white) and
+  post-test bars brand blue; they were the tutor ube fill, whose legend text was 2.00:1. Footer cut to
+  two sentences; the "scroll sideways" hint and the chart's minimum width only apply from 4 sessions.
+  Empty state is a card with a button. Removed the `text-xs` notes and the opacity-based "—" colour.
+- Shared `charts/GroupedBarChart.tsx`: title is a serif sentence-case heading (new `titleAs` prop,
+  default `h3`) instead of an uppercase 12px eyebrow; axis ticks 12px, legend 13px in ink; bar corners
+  2px. Also changes the tutor class page's pre/post chart (`ClassProgressPanel`) and `/dev/charts`.
+- Shared `charts/DataTable.tsx`: "Show data table" toggle is 14px muted with a 44px tap height (was 11px
+  faint) and the table uses `table-sm`. Also changes admin reports and every chart's table.
+- `MyProgressView.test.tsx`: asserts the band sentence and that learner series never use the accent colour.
+
+## Class detail pages restyle — learner, tutor, admin (2026-11-17)
+
+`components/classes/ClassDetailsView.tsx` rewritten (plan: `docs/plans/class-detail-restyle.md`); it now
+takes `audience`, `backLabel`, `gradeLevel`, `nextSessionAt` and `tutor` and drops `activeLabel`,
+`moderationAudience` and `extraFacts`. All three portals' class pages now have an `h1`: serif header with
+"Subject · Grade N" kicker and the topic as title (subject as title + topic list for multi-topic classes),
+one muted line with the serif class code and tutor ID, a three-fact row (Next/Last session · Where ·
+Seats/Enrolled), the actions after the facts, then plain sections. Removed: the dark uppercase subject pill,
+topic chips, "Class Info" and "At a Glance" cards, the seat progress bar, fact icons and caps labels, the
+"Open"/"Scheduled" badges, the grey "unpublished" page wash (now a one-line notice), and every `text-2xs`/`text-xs`.
+
+- `SessionsList`: new opt-in `variant="calendar"` (date-led rows) used by the three class pages; the boxed
+  list stays for the edit form, session actions and the landing sample.
+- `SessionTestsCard` (learner + tutor): its own card, serif "Session tests", divider rows, full-size buttons,
+  no duplicate "Pre-test closed" text, test titles no longer repeat the topic. `PostPosttestButton` full size.
+- `LearnerClassActions`: "Enroll in this class" / "Class is full" / outlined "Unenroll", no icons; moderation
+  note 14px without opacity. `ReportButton` normal size (also on the tutor profile page).
+- `TutorInfoTrigger`: a serif ube ID link (name + ID + section when real names are on); avatar removed.
+- Learner page: back label follows `?from=` ("Back to my classes" / "Back to browse classes"); the
+  "class is hidden" screen is a plain serif heading + button.
+- Tutor page: duplicate "Manage in Edit" link removed (the Manage menu has Edit); `ClassManageMenu` trigger
+  and items full size; `EnrolledLearnersTable` serif heading, serif coral learner IDs, no avatars/chevrons.
+  `ClassProgressPanel`: slate/blue bars, "Session N" axis ticks (long topics were clipped), serif title,
+  footer gain in percentage points (it said "%").
+- Admin page: tutor ID + name in the header line; roster and moderation card restyled to match.
+- `ClassModerationPanel`: 0.25rem corners, 14px text. `BackLink`: 14px text (all detail pages).
+- `classStatus.ts`: `nextSessionAt()` (next scheduled session, else the most recent) + tests.

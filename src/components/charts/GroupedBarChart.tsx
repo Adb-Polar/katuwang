@@ -65,6 +65,7 @@ function renderTooltip(
  */
 export default function GroupedBarChart({
   title,
+  titleAs: TitleTag = "h3",
   data,
   xKey,
   tickKey = xKey,
@@ -78,6 +79,8 @@ export default function GroupedBarChart({
   footer,
 }: {
   title: string;
+  /** Heading level for the title, so it fits the host page's outline. */
+  titleAs?: "h2" | "h3";
   data: ChartRow[];
   xKey: string;
   /** Optional short axis label; tooltip and table retain the full xKey. */
@@ -119,7 +122,7 @@ export default function GroupedBarChart({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">{title}</h3>
+        <TitleTag className="font-serif text-lg font-medium text-base-content">{title}</TitleTag>
         {hasData ? (
           <div className="w-full overflow-x-auto" tabIndex={minChartWidth ? 0 : undefined} aria-label={minChartWidth ? "Session comparison chart; scroll horizontally for more sessions" : undefined}>
             <div className="h-56 w-full" style={{ minWidth: minChartWidth }}>
@@ -129,7 +132,7 @@ export default function GroupedBarChart({
                   <XAxis
                     dataKey="__x"
                     tickFormatter={xTickLabel}
-                    tick={{ fontSize: 10, fill: c.text }}
+                    tick={{ fontSize: 12, fill: c.text }}
                     interval={0}
                     angle={-20}
                     textAnchor="end"
@@ -138,21 +141,25 @@ export default function GroupedBarChart({
                   <YAxis
                     allowDecimals={false}
                     domain={yDomain}
-                    tick={{ fontSize: 10, fill: c.text }}
+                    tick={{ fontSize: 12, fill: c.text }}
                     tickFormatter={unit ? (v) => `${v}${unit}` : undefined}
                   />
                   <Tooltip
                     cursor={{ fill: c.grid, opacity: 0.4 }}
                     content={(props) => renderTooltip(props, series, unit ?? "", xKey, missingLabel)}
                   />
-                  <Legend wrapperStyle={{ fontSize: 11 }} itemSorter={() => 0} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 13 }}
+                    itemSorter={() => 0}
+                    formatter={(value) => <span style={{ color: c.text }}>{value}</span>}
+                  />
                   {series.map((s) => (
                     <Bar
                       key={s.key}
                       dataKey={s.key}
                       name={s.name}
                       fill={s.color}
-                      radius={[4, 4, 0, 0]}
+                      radius={[2, 2, 0, 0]}
                       maxBarSize={40}
                     />
                   ))}
@@ -161,7 +168,7 @@ export default function GroupedBarChart({
             </div>
           </div>
         ) : (
-          <p className="py-8 text-center text-xs italic text-(--kt-faint)">{emptyHint}</p>
+          <p className="py-8 text-center text-sm text-(--kt-muted)">{emptyHint}</p>
         )}
         {footer}
         <div className="overflow-x-auto"><DataTable rows={data} columns={columns} /></div>

@@ -78,33 +78,33 @@ export default function ClassManageMenu({
 
   return (
     <>
-      {error && <span className="text-2xs text-error">{error}</span>}
+      {error && <span className="text-sm text-error">{error}</span>}
 
       <div className="dropdown dropdown-end">
-        <div tabIndex={0} role="button" className="btn btn-outline btn-sm text-xs gap-1.5 cursor-pointer">
+        <div tabIndex={0} role="button" className="btn btn-outline gap-1.5">
           <MoreVertical className="h-3.5 w-3.5" />
           Manage Class
         </div>
         <ul
           tabIndex={0}
-          className="dropdown-content menu menu-sm bg-base-100 rounded-box z-10 w-60 p-2 shadow-lg border border-base-200 mt-2"
+          className="dropdown-content menu bg-base-100 rounded-box z-10 w-60 p-2 shadow-lg border border-base-200 mt-2"
         >
           {!isModerated && (
             <li>
-              <Link href={`/tutor/classes/${classId}/edit`} className="text-xs gap-2">
+              <Link href={`/tutor/classes/${classId}/edit`} className="gap-2">
                 <Pencil className="h-3.5 w-3.5" />
                 Edit Class Info
               </Link>
             </li>
           )}
           {isModerated && (
-            <li className="menu-title text-2xs">
+            <li className="menu-title">
               <span>This class is {status.toLowerCase()} — actions are disabled.</span>
             </li>
           )}
           {isScheduled && (
             <li>
-              <button onClick={handleTogglePublish} disabled={publishing} className="text-xs gap-2">
+              <button onClick={handleTogglePublish} disabled={publishing} className="gap-2">
                 {published ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 {published ? "Unpublish Class" : "Publish Class"}
               </button>
@@ -114,20 +114,20 @@ export default function ClassManageMenu({
             <>
               <div className="divider my-1"></div>
               <li>
-                <button onClick={() => setPendingAction("complete")} className="text-xs gap-2 text-success">
+                <button onClick={() => setPendingAction("complete")} className="gap-2 text-success">
                   <CheckCircle className="h-3.5 w-3.5" />
                   Finish Class
                 </button>
               </li>
               <li>
-                <button onClick={() => setPendingAction("cancel")} className="text-xs gap-2 text-error">
+                <button onClick={() => setPendingAction("cancel")} className="gap-2 text-error">
                   <XCircle className="h-3.5 w-3.5" />
                   Cancel Class
                 </button>
               </li>
               {!hasEnrollments && (
                 <li>
-                  <button onClick={() => setPendingAction("delete")} className="text-xs gap-2 text-error">
+                  <button onClick={() => setPendingAction("delete")} className="gap-2 text-error">
                     <Trash2 className="h-3.5 w-3.5" />
                     Delete Class
                   </button>

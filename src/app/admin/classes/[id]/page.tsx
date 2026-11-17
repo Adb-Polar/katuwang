@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
+import { nextSessionAt } from "@/components/classes/classStatus";
 import SessionsList from "@/components/classes/SessionsList";
 import RecommendClassForm from "@/components/classes/RecommendClassForm";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
@@ -55,55 +56,54 @@ export default async function AdminClassDetailPage({
   return (
     <div className="space-y-6">
       <ClassDetailsView
+        audience="admin"
         backHref="/admin/classes"
+        backLabel="Back to classes"
         code={tutorClass.code}
         subject={tutorClass.subject}
+        gradeLevel={tutorClass.gradeLevel}
         topics={topics}
         verifiedTopics={verifiedTopics}
         status={tutorClass.status}
-        activeLabel="Scheduled"
         published={tutorClass.published}
         maxStudents={tutorClass.maxStudents}
         enrolledCount={tutorClass.enrollments.length}
+        nextSessionAt={nextSessionAt(tutorClass.sessions)}
         building={tutorClass.building}
         room={tutorClass.room}
         meetingLink={tutorClass.meetingLink}
         description={tutorClass.description}
-        extraFacts={
-          <div className="col-span-2 flex items-center gap-1.5">
-            <div className="min-w-0">
-              <div className="font-semibold text-2xs text-(--kt-faint)">TUTOR</div>
-              <div className="flex items-center gap-2">
-                <AnonymousIdBadge id={tutorClass.tutorProfile.user.anonymousId} role="TUTOR" />
-                <span className="text-(--kt-muted)">
-                  {tutorClass.tutorProfile.user.firstName} {tutorClass.tutorProfile.user.lastName}
-                </span>
-              </div>
-            </div>
-          </div>
+        tutor={
+          <span>
+            <span className="kt-id kt-id--tutor">{tutorClass.tutorProfile.user.anonymousId}</span>{" "}
+            <span className="text-base-content">
+              {tutorClass.tutorProfile.user.firstName} {tutorClass.tutorProfile.user.lastName}
+            </span>
+          </span>
         }
         sessions={
           <>
-            <h2 className="card-title text-sm font-bold">Sessions</h2>
+            <h2 className="font-serif text-xl font-medium">Sessions</h2>
             <SessionsList
+              variant="calendar"
               sessions={tutorClass.sessions.map((s) => ({ ...s, scheduledAt: s.scheduledAt.toISOString() }))}
             />
           </>
         }
         roster={
           <>
-            <h2 className="card-title text-sm font-bold">
-              Enrolled Learners ({tutorClass.enrollments.length} / {tutorClass.maxStudents})
+            <h2 className="font-serif text-xl font-medium">
+              Enrolled learners <span className="text-(--kt-muted) text-base">{tutorClass.enrollments.length} of {tutorClass.maxStudents}</span>
             </h2>
             {tutorClass.enrollments.length === 0 ? (
-              <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-(--kt-faint) italic text-xs">
+              <p className="py-3 text-sm text-(--kt-muted)">
                 No learners have enrolled in this class yet.
-              </div>
+              </p>
             ) : (
-              <div className="border border-base-200 rounded-xl overflow-x-auto">
-                <table className="table table-sm">
+              <div className="overflow-x-auto">
+                <table className="table">
                   <thead>
-                    <tr className="text-2xs">
+                    <tr>
                       <th>Anonymous ID</th>
                       <th>Grade &amp; Section</th>
                       <th>Enrolled</th>
@@ -111,7 +111,7 @@ export default async function AdminClassDetailPage({
                   </thead>
                   <tbody>
                     {tutorClass.enrollments.map((e) => (
-                      <tr key={e.id} className="text-xs">
+                      <tr key={e.id}>
                         <td>
                           <AnonymousIdBadge id={e.learner.anonymousId} role="LEARNER" />
                         </td>
@@ -131,14 +131,14 @@ export default async function AdminClassDetailPage({
           <>
             {(tutorClass.status === "SUSPENDED" || tutorClass.status === "BANNED") && (
               <div className="card kt-card border-error/40!">
-                <div className="card-body gap-1 p-4">
-                  <h2 className="card-title text-sm font-bold text-error">Moderation</h2>
+                <div className="kt-card-body gap-1">
+                  <h2 className="font-serif text-xl font-medium text-error">Moderation</h2>
                   {tutorClass.suspendedReason && (
-                    <p className="text-xs text-(--kt-muted)">
+                    <p className="text-sm text-(--kt-muted)">
                       <span className="font-semibold">Reason:</span> {tutorClass.suspendedReason}
                     </p>
                   )}
-                  <p className="text-xs text-(--kt-muted)">
+                  <p className="text-sm text-(--kt-muted)">
                     <span className="font-semibold">
                       {tutorClass.suspendedUntil ? "Until:" : "Duration:"}
                     </span>{" "}

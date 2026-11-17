@@ -20,12 +20,12 @@ export default function ClassModerationPanel({
 }) {
   const banned = status === "BANNED";
   return (
-    <div className="rounded-xl border border-error/30 bg-error/10 p-4 space-y-2">
-      <div className="flex items-center gap-2 text-error font-bold text-sm">
+    <div className="rounded-(--kt-radius-box) border border-error/40 bg-error/5 p-4 space-y-2">
+      <div className="flex items-center gap-2 text-error font-semibold">
         <AlertTriangle className="h-4 w-4 shrink-0" />
         This class was {banned ? "banned" : "suspended"} by an administrator
       </div>
-      <p className="text-xs text-(--kt-muted)">
+      <p className="text-sm">
         {audience === "tutor"
           ? "It can't be edited and its sessions are read-only until the moderation is lifted."
           : banned
@@ -33,12 +33,12 @@ export default function ClassModerationPanel({
           : "It's temporarily unavailable and enrollment is frozen until the moderation is lifted."}
       </p>
       {suspendedReason && (
-        <p className="text-xs text-(--kt-muted)">
+        <p className="text-sm">
           <span className="font-semibold">Reason:</span> {suspendedReason}
         </p>
       )}
       {status === "SUSPENDED" && (
-        <p className="text-xs text-(--kt-muted)">
+        <p className="text-sm">
           <span className="font-semibold">{suspendedUntil ? "Suspended until:" : "Duration:"}</span>{" "}
           {suspendedUntil ? formatDateTime(suspendedUntil) : "Indefinite"}
         </p>

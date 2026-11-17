@@ -23,3 +23,17 @@ export function getSessionStatusBadge(
   if (status === "COMPLETED") return { tone: "info", label: "Completed" };
   return { tone: "error", label: "Cancelled" };
 }
+
+/** ISO time of the next upcoming scheduled session, else the most recent one, else null. */
+export function nextSessionAt(
+  sessions: { scheduledAt: Date | string; status: SessionLifecycleStatus }[],
+  now: Date = new Date(),
+): string | null {
+  const iso = (d: Date | string) => new Date(d).toISOString();
+  const upcoming = sessions
+    .filter((s) => s.status === "SCHEDULED" && new Date(s.scheduledAt) > now)
+    .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime())[0];
+  if (upcoming) return iso(upcoming.scheduledAt);
+  const latest = [...sessions].sort((a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime())[0];
+  return latest ? iso(latest.scheduledAt) : null;
+}

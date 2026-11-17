@@ -37,29 +37,32 @@ export default function ClassProgressPanel({ classId }: { classId: string }) {
     );
   }
 
-  const chartData = data.sessions.map((s) => ({
-    label: s.topic,
+  const chartData = data.sessions.map((s, i) => ({
+    session: `Session ${i + 1}`,
+    label: `Session ${i + 1} · ${s.topic}`,
     pre: s.avgPre,
     post: s.avgPost,
   }));
 
   return (
     <GroupedBarChart
-      title="Pre vs post average, by session"
+      title="Class average before and after, by session"
+      titleAs="h2"
       data={chartData}
       xKey="label"
+      tickKey="session"
       series={[
-        { key: "pre", name: "Pre-test", color: "var(--color-accent)" },
-        { key: "post", name: "Post-test", color: "var(--color-success)" },
+        { key: "pre", name: "Pre-test", color: "oklch(63% 0.05 222)" },
+        { key: "post", name: "Post-test", color: "var(--color-primary)" },
       ]}
       unit="%"
       yDomain={[0, 100]}
       emptyHint="No session tests published yet."
       footer={
         data.totals.pairedCount > 0 ? (
-          <p className="text-2xs text-(--kt-faint)">
-            Class-wide avg gain: {data.totals.avgDelta! > 0 ? "+" : ""}
-            {data.totals.avgDelta}% across {data.totals.pairedCount} paired attempts.
+          <p className="text-sm text-(--kt-muted)">
+            Class average gain: {data.totals.avgDelta! > 0 ? "+" : ""}
+            {data.totals.avgDelta} percentage points across {data.totals.pairedCount} paired attempts.
           </p>
         ) : undefined
       }

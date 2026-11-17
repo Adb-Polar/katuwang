@@ -2,11 +2,12 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound, redirect } from "next/navigation";
 import { hasClassStarted } from "@/lib/classQueries";
 import Link from "next/link";
-import { Users, EyeOff } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { getSetting } from "@/lib/settings";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
+import { nextSessionAt } from "@/components/classes/classStatus";
 import SessionsList from "@/components/classes/SessionsList";
 import LearnerClassActions from "@/components/learner/LearnerClassActions";
 import TutorInfoTrigger from "@/components/learner/TutorInfoTrigger";
@@ -60,7 +61,7 @@ export default async function LearnerClassDetailPage({
         tutorProfile: {
           select: {
             user: {
-              select: { id: true, anonymousId: true, image: true, firstName: true, lastName: true, section: true, gradeLevel: true },
+              select: { id: true, anonymousId: true, firstName: true, lastName: true, section: true },
             },
             topicCertifications: {
               where: { status: "CERTIFIED" },
@@ -90,16 +91,14 @@ export default async function LearnerClassDetailPage({
   // but the details stay hidden until it's published again.
   if (isEnrolled && !tutorClass.published) {
     return (
-      <div className="mx-auto max-w-lg py-16 text-center space-y-4">
-        <div className="inline-flex p-3 rounded-2xl bg-warning/10 text-warning">
-          <EyeOff className="h-6 w-6" />
-        </div>
-        <h1 className="text-lg font-bold text-base-content">This class isn&apos;t published yet</h1>
-        <p className="text-sm text-(--kt-muted)">
-          You&apos;re still enrolled. Your tutor has temporarily hidden the class details —
-          check back once it&apos;s published again.
+      <div className="max-w-lg py-12 space-y-4">
+        <EyeOff aria-hidden="true" className="h-6 w-6 text-(--kt-muted)" />
+        <h1 className="font-serif text-3xl font-medium">This class is hidden for now</h1>
+        <p className="text-(--kt-muted)">
+          You&apos;re still enrolled. Your tutor has hidden the class details for the moment;
+          they&apos;ll be back here once it&apos;s published again.
         </p>
-        <Link href="/learner/my-classes" className="btn btn-neutral btn-sm">
+        <Link href="/learner/my-classes" className="btn btn-primary">
           Back to my classes
         </Link>
       </div>
@@ -114,42 +113,38 @@ export default async function LearnerClassDetailPage({
 
   return (
     <ClassDetailsView
+      audience="learner"
       backHref={backHref}
+      backLabel={from === "my-classes" ? "Back to my classes" : "Back to browse classes"}
       code={tutorClass.code}
       subject={tutorClass.subject}
+      gradeLevel={tutorClass.gradeLevel}
       topics={tutorClass.topics.map((t) => t.topic)}
       verifiedTopics={verifiedTopics}
       status={tutorClass.status}
-      activeLabel="Open"
       published={tutorClass.published}
       suspendedReason={tutorClass.suspendedReason}
       suspendedUntil={tutorClass.suspendedUntil?.toISOString() ?? null}
-      moderationAudience="learner"
       maxStudents={tutorClass.maxStudents}
       enrolledCount={tutorClass._count.enrollments}
+      nextSessionAt={nextSessionAt(tutorClass.sessions)}
       building={tutorClass.building}
       room={tutorClass.room}
       meetingLink={tutorClass.meetingLink}
       description={tutorClass.description}
-      extraFacts={
-        <div className="flex items-center gap-1.5">
-          <Users className="h-4 w-4 text-primary shrink-0" />
-          <div>
-            <div className="font-semibold text-2xs text-(--kt-faint)">TUTOR</div>
-            <TutorInfoTrigger
-              tutorId={tutorUser.id}
-              anonymousId={tutorUser.anonymousId}
-              name={showRealNames ? `${tutorUser.firstName} ${tutorUser.lastName}`.trim() : null}
-              section={showRealNames ? tutorUser.section : null}
-              image={tutorUser.image}
-            />
-          </div>
-        </div>
+      tutor={
+        <TutorInfoTrigger
+          tutorId={tutorUser.id}
+          anonymousId={tutorUser.anonymousId}
+          name={showRealNames ? `${tutorUser.firstName} ${tutorUser.lastName}`.trim() : null}
+          section={showRealNames ? tutorUser.section : null}
+        />
       }
       sessions={
         <>
-          <h2 className="card-title text-sm font-bold">Sessions</h2>
+          <h2 className="font-serif text-xl font-medium">Sessions</h2>
           <SessionsList
+            variant="calendar"
             sessions={tutorClass.sessions.map((s) => ({
               id: s.id,
               topic: s.topic,
@@ -162,7 +157,7 @@ export default async function LearnerClassDetailPage({
       }
       belowRoster={
         isEnrolled ? (
-          <div className="space-y-6">
+          <>
             <SessionTestsCard
               classId={tutorClass.id}
               audience="learner"
@@ -181,7 +176,7 @@ export default async function LearnerClassDetailPage({
               })}
             />
             <MyProgressView fixedClassId={tutorClass.id} compact />
-          </div>
+          </>
         ) : undefined
       }
       actions={

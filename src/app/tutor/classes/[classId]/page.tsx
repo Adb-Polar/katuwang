@@ -1,9 +1,8 @@
 import { getActiveServerSession } from "@/lib/serverSession";
 import { notFound, redirect } from "next/navigation";
-import Link from "next/link";
-import { Pencil } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import ClassDetailsView from "@/components/classes/ClassDetailsView";
+import { nextSessionAt } from "@/components/classes/classStatus";
 import SessionsList from "@/components/classes/SessionsList";
 import EnrolledLearnersTable from "@/components/classes/EnrolledLearnersTable";
 import ClassManageMenu from "@/components/tutor/ClassManageMenu";
@@ -71,35 +70,31 @@ export default async function TutorClassDetailPage({
 
   return (
     <ClassDetailsView
+      audience="tutor"
       backHref="/tutor/classes"
+      backLabel="Back to my classes"
       code={tutorClass.code}
       subject={tutorClass.subject}
+      gradeLevel={tutorClass.gradeLevel}
       topics={classTopics}
       verifiedTopics={verifiedTopics}
       status={tutorClass.status}
-      activeLabel="Active"
       published={tutorClass.published}
       suspendedReason={tutorClass.suspendedReason}
       suspendedUntil={tutorClass.suspendedUntil?.toISOString() ?? null}
       moderationExtra={locked ? <ClassAppealCard classId={tutorClass.id} appeal={latestAppeal} /> : undefined}
       maxStudents={tutorClass.maxStudents}
       enrolledCount={tutorClass.enrollments.length}
+      nextSessionAt={nextSessionAt(tutorClass.sessions)}
       building={tutorClass.building}
       room={tutorClass.room}
       meetingLink={tutorClass.meetingLink}
       description={tutorClass.description}
       sessions={
         <>
-          <div className="flex items-center justify-between">
-            <h2 className="card-title text-sm font-bold">Sessions</h2>
-            {!locked && (
-              <Link href={`/tutor/classes/${tutorClass.id}/edit`} className="btn btn-ghost btn-xs text-xs gap-1">
-                <Pencil className="h-3 w-3" />
-                Manage in Edit
-              </Link>
-            )}
-          </div>
+          <h2 className="font-serif text-xl font-medium">Sessions</h2>
           <SessionsList
+            variant="calendar"
             sessions={tutorClass.sessions.map((s) => ({
               id: s.id,
               topic: s.topic,
@@ -118,7 +113,7 @@ export default async function TutorClassDetailPage({
         />
       }
       belowRoster={
-        <div className="space-y-6">
+        <>
           <ClassProgressPanel classId={tutorClass.id} />
           <SessionTestsCard
             classId={tutorClass.id}
@@ -132,7 +127,7 @@ export default async function TutorClassDetailPage({
             }))}
             tutorActionsEnabled={!locked}
           />
-        </div>
+        </>
       }
       actions={
         <ClassManageMenu

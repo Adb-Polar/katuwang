@@ -33,10 +33,10 @@ export default function PostPosttestButton({ classId, sessionId }: { classId: st
   return (
     <>
       <div className="flex flex-col items-end gap-1">
-        <button type="button" onClick={() => setConfirming(true)} className="btn btn-primary btn-xs text-2xs font-bold">
+        <button type="button" onClick={() => setConfirming(true)} className="btn btn-primary">
           Publish post-test
         </button>
-        {error && <span role="alert" className="text-2xs text-error">{error}</span>}
+        {error && <span role="alert" className="text-sm text-error">{error}</span>}
       </div>
       <ConfirmDialog
         open={confirming}

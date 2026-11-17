@@ -1,9 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import UserAvatar from "@/components/profile/UserAvatar";
 import { gradeSection } from "@/lib/gradeLevels";
 
 interface Learner {
@@ -29,46 +26,33 @@ export default function EnrolledLearnersTable({
 }) {
   return (
     <>
-      <h2 className="card-title text-sm font-bold">
-        Enrolled Learners ({enrollments.length} / {maxStudents})
+      <h2 className="font-serif text-xl font-medium">
+        Enrolled learners <span className="text-(--kt-muted) text-base">{enrollments.length} of {maxStudents}</span>
       </h2>
 
       {enrollments.length === 0 ? (
-        <div className="text-center py-6 bg-base-200/10 border border-base-200 rounded-xl text-(--kt-faint) italic text-xs">
+        <p className="py-3 text-sm text-(--kt-muted)">
           No learners have enrolled in this class yet.
-        </div>
+        </p>
       ) : (
-        <div className="border border-base-200 rounded-xl overflow-x-auto">
-          <table className="table table-sm">
+        <div className="overflow-x-auto">
+          <table className="table">
             <thead>
-              <tr className="text-2xs">
+              <tr>
                 <th>Anonymous ID</th>
-                <th>Grade &amp; Section</th>
-                <th></th>
+                <th>Grade &amp; section</th>
               </tr>
             </thead>
             <tbody>
               {enrollments.map((enr) => (
-                <tr key={enr.id} className="hover:bg-base-200/40">
+                <tr key={enr.id}>
                   <td>
-                    <div className="flex items-center gap-2">
-                      <UserAvatar
-                        src={enr.learner.image}
-                        anonymousId={enr.learner.anonymousId}
-                        size="sm"
-                        role="LEARNER"
-                        subtitle={gradeSection(enr.learner.gradeLevel, enr.learner.section)}
-                      />
-                      <Link href={`/tutor/students/${enr.learner.id}`} aria-label={`View ${enr.learner.anonymousId} details`} className="link link-primary rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                        <AnonymousIdBadge id={enr.learner.anonymousId} role="LEARNER" />
-                      </Link>
-                    </div>
+                    <Link href={`/tutor/students/${enr.learner.id}`} aria-label={`View ${enr.learner.anonymousId} details`} className="link link-hover kt-id kt-id--learner">
+                      {enr.learner.anonymousId}
+                    </Link>
                   </td>
                   <td className="text-(--kt-muted)">
                     {gradeSection(enr.learner.gradeLevel, enr.learner.section)}
-                  </td>
-                  <td className="text-right">
-                    <ChevronRight aria-hidden="true" className="h-4 w-4 text-base-content/30 inline" />
                   </td>
                 </tr>
               ))}

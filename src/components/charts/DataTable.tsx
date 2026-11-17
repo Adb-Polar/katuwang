@@ -33,10 +33,10 @@ export default function DataTable<Row extends Record<string, unknown>>(
 
   return (
     <details className="mt-2">
-      <summary className="text-2xs text-(--kt-faint) cursor-pointer hover:text-(--kt-muted)">
+      <summary className="py-3 text-sm text-(--kt-muted) cursor-pointer hover:text-base-content">
         Show data table
       </summary>
-      <table className="table table-xs mt-2">
+      <table className="table table-sm mt-1">
         {columns.some((c) => c.header) && (
           <thead>
             <tr>
