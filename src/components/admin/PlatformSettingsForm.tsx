@@ -16,7 +16,7 @@ type SettingGroup = "General" | "Assessment";
 const SETTING_META: Record<string, { label: string; description: string; group: SettingGroup }> = {
   requireCertificationForClassCreation: {
     label: "Require certification for class creation",
-    description: "When enabled, tutors can only create classes for topics they hold a CERTIFIED certification for.",
+    description: "When enabled, tutors can only create classes for topics they are certified in.",
     group: "General",
   },
   registrationOpen: {
@@ -39,7 +39,7 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
   requireRegistrationApproval: {
     label: "Require admin approval for new registrations",
     description:
-      "When enabled, new learner and tutor accounts are created as PENDING and cannot log in until an admin approves them from the Registrations queue.",
+      "When enabled, new learner and tutor accounts are created as pending and cannot log in until an admin approves them from the Registrations queue.",
     group: "General",
   },
   requireEmailVerification: {
@@ -232,8 +232,8 @@ export default function PlatformSettingsForm() {
     return (
       <div key={setting.key} className="flex items-center justify-between gap-4 py-4">
         <div>
-          <p className="text-sm font-semibold text-base-content">{meta?.label || setting.key}</p>
-          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-xs text-(--kt-muted) mt-0.5">{meta.description}</p>}
+          <p className="font-medium text-base-content">{meta?.label || setting.key}</p>
+          {meta?.description && <p id={`setting-${setting.key}-description`} className="text-sm text-(--kt-muted) mt-0.5">{meta.description}</p>}
         </div>
         <label className="inline-flex min-h-11 shrink-0 items-center px-2 -mx-2">
           <input
@@ -267,7 +267,7 @@ export default function PlatformSettingsForm() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">General</h2>
+          <h2 className="font-serif text-xl font-medium">General</h2>
           {loading ? (
             <LoadingRow />
           ) : (
@@ -275,14 +275,14 @@ export default function PlatformSettingsForm() {
               {generalToggles.map(renderToggle)}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-4">
                 <div>
-                  <p className="text-sm font-semibold text-base-content">Profile picture requirement</p>
-                  <p className="text-xs text-(--kt-muted) mt-0.5">
+                  <p className="font-medium text-base-content">Profile picture requirement</p>
+                  <p className="text-sm text-(--kt-muted) mt-0.5">
                     Require tutors to upload before publishing classes or accepting requests. The learner option also requires a picture before enrollment. Profile access remains available.
                   </p>
                 </div>
                 <select
                   aria-label="Profile picture requirement"
-                  className="select select-bordered select-sm w-full sm:w-56 text-xs focus:select-primary"
+                  className="select select-bordered w-full sm:w-64 focus:select-primary"
                   value={profilePicValue}
                   disabled={savingKey === "profilePictureRequirement"}
                   onChange={(e) => updateProfilePicRequirement(e.target.value)}
@@ -299,8 +299,8 @@ export default function PlatformSettingsForm() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Assessment</h2>
-          <p className="text-xs text-(--kt-muted) -mt-1">
+          <h2 className="font-serif text-xl font-medium">Assessment</h2>
+          <p className="text-sm text-(--kt-muted) -mt-2">
             One set of assessment settings, applied to every subject and topic.
           </p>
 
@@ -310,7 +310,7 @@ export default function PlatformSettingsForm() {
           {!configError && <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
             {ASSESSMENT_FIELDS.map((f) => (
               <label key={f.key} className="flex flex-col gap-1">
-                <span className="text-xs font-semibold text-base-content">{f.label}</span>
+                <span className="font-medium text-base-content">{f.label}</span>
                 <input
                   ref={(element) => { if (element) settingInputs.current[f.key] = element; }}
                   aria-invalid={Boolean(fieldErrors[f.key])}
@@ -323,15 +323,15 @@ export default function PlatformSettingsForm() {
                   disabled={config === null || savingField === f.key}
                   onChange={(e) => setDraft((d) => ({ ...d, [f.key]: e.target.value }))}
                   onBlur={() => saveField(f.key)}
-                  className="input input-bordered input-sm text-xs focus:input-primary"
+                  className="input input-bordered focus:input-primary"
                 />
-                {fieldErrors[f.key] && <span id={`setting-${f.key}-error`} role="alert" className="text-xs text-error">{fieldErrors[f.key]}</span>}
-                <span className="text-2xs text-(--kt-faint)">{f.description}</span>
+                {fieldErrors[f.key] && <span id={`setting-${f.key}-error`} role="alert" className="text-sm text-error">{fieldErrors[f.key]}</span>}
+                <span className="text-sm text-(--kt-muted)">{f.description}</span>
               </label>
             ))}
           </div>}
           {config === null && !configError && (
-            <p className="text-2xs text-(--kt-faint)">Loading assessment settings…</p>
+            <p className="text-sm text-(--kt-muted)">Loading assessment settings…</p>
           )}
         </div>
       </section>

@@ -36,7 +36,7 @@ export default function DataTable<Row extends Record<string, unknown>>(
       <summary className="py-3 text-sm text-(--kt-muted) cursor-pointer hover:text-base-content">
         Show data table
       </summary>
-      <table className="table table-sm mt-1">
+      <table className="table mt-1">
         {columns.some((c) => c.header) && (
           <thead>
             <tr>
@@ -67,7 +67,7 @@ export default function DataTable<Row extends Record<string, unknown>>(
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-3 text-(--kt-faint) italic text-xs"
+                className="text-center py-3 text-(--kt-muted)"
               >
                 No data yet.
               </td>

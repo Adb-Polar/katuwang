@@ -10,7 +10,7 @@ export default function AdminSessionTestsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Session Tests"
+        title="Session tests"
         subtitle="Every tutor-built session test and its learner pre/post results."
       />
       <SessionTestsTable />

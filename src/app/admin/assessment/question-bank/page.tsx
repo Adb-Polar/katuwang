@@ -10,7 +10,7 @@ export default function AdminQuestionBankPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Assessment"
-        title="Question Bank"
+        title="Question bank"
         subtitle="Drill in by subject, then topic, to author single-answer questions and tune each topic's quiz."
       />
       <QuestionBankManager only="questions" />

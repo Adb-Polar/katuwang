@@ -9,8 +9,8 @@ export default function AdminCertificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Admin Portal"
-        title="Tutor Certifications"
+        eyebrow="Assessment"
+        title="Tutor certifications"
         subtitle="Approve or reject pending topic certification requests from tutors."
       />
       <CertificationReviewTable />

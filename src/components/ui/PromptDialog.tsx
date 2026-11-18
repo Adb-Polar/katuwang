@@ -58,18 +58,16 @@ export default function PromptDialog({
       <ValidatedForm onSubmit={(e) => { e.preventDefault(); onConfirm(note.trim()); }}>
         <div className="flex items-start gap-3">
           {tone === "danger" && (
-            <div className="p-2 rounded-lg bg-error/10 text-error shrink-0">
-              <TriangleAlert className="w-4 h-4" strokeWidth={2.5} />
-            </div>
+            <TriangleAlert className="w-5 h-5 mt-1 text-error shrink-0" aria-hidden="true" />
           )}
           <div className="space-y-1">
-            <h3 className="font-bold text-sm text-base-content">{title}</h3>
-            {description && <p className="text-xs text-(--kt-muted)">{description}</p>}
+            <h2 className="font-serif text-xl font-medium leading-tight text-base-content">{title}</h2>
+            {description && <p className="text-sm text-(--kt-muted)">{description}</p>}
           </div>
         </div>
 
-        <label className="form-control mt-3">
-          <span className="label-text text-2xs font-semibold text-(--kt-muted) pb-1">
+        <label className="form-control mt-4 block">
+          <span className="block pb-1.5 text-[0.9rem] font-medium text-base-content">
             {noteLabel}
           </span>
           <textarea
@@ -79,15 +77,15 @@ export default function PromptDialog({
             rows={3}
             maxLength={noteMax}
             placeholder={notePlaceholder}
-            className="textarea textarea-bordered text-xs w-full focus:textarea-primary"
+            className="textarea textarea-bordered w-full focus:textarea-primary"
           />
           <CharCount value={note} max={noteMax} />
         </label>
 
-        <div className="modal-action pt-1">
+        <div className="modal-action pt-4">
           <button
             type="button"
-            className="btn btn-ghost btn-sm"
+            className="btn btn-ghost"
             onClick={onCancel}
             disabled={loading}
           >
@@ -95,10 +93,10 @@ export default function PromptDialog({
           </button>
           <button
             type="submit"
-            className={`btn btn-sm ${tone === "danger" ? "btn-error" : "btn-primary"}`}
+            className={`btn ${tone === "danger" ? "btn-error" : "btn-primary"}`}
             disabled={confirmDisabled}
           >
-            {loading && <span className="loading loading-spinner loading-xs" />}
+            {loading && <span className="loading loading-spinner loading-sm" />}
             {confirmLabel}
           </button>
         </div>

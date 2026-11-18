@@ -62,10 +62,9 @@ export default function ChatbotMissesTable() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Unanswered Questions</h2>
-          <p className="text-xs text-(--kt-faint) -mt-2">
-            Messages the assistant couldn&apos;t match to a nav intent or FAQ, grouped by
-            normalised wording. Use these to grow the FAQ knowledge base.
+          <p className="text-sm text-(--kt-muted)">
+            Messages the assistant couldn&apos;t match to a page or an FAQ answer. Messages with the
+            same wording are counted together.
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -74,14 +73,14 @@ export default function ChatbotMissesTable() {
               aria-label="Search unanswered messages"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search message text..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              placeholder="Search message text"
+              className="input input-bordered w-full focus:input-primary"
             />
             <select
               aria-label="Filter unanswered messages by role"
               value={role}
               onChange={(e) => setRole(e.target.value as "" | MissGroup["role"])}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered w-full focus:select-primary"
             >
               <option value="">All roles</option>
               <option value="STUDENT_LEARNER">Learner</option>
@@ -95,10 +94,10 @@ export default function ChatbotMissesTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <th>Message</th>
                     <th>Role</th>
                     <SortableTh label="Count" field="count" sort={sort} dir={dir} onSort={toggle} />
@@ -108,16 +107,14 @@ export default function ChatbotMissesTable() {
                 </thead>
                 <tbody>
                   {groups.map((g) => (
-                    <tr key={`${g.role}:${g.normalized}`} className="text-sm">
-                      <td className="text-(--kt-muted) max-w-md truncate" title={g.normalized}>
+                    <tr key={`${g.role}:${g.normalized}`}>
+                      <td className="max-w-md truncate" title={g.normalized}>
                         {g.sample}
                       </td>
-                      <td>
-                        <span className="badge badge-ghost badge-sm">{ROLE_LABELS[g.role]}</span>
-                      </td>
-                      <td className="text-(--kt-muted)">{g.count}</td>
-                      <td className="text-(--kt-faint)">{formatDateTime(g.firstSeen)}</td>
-                      <td className="text-(--kt-faint)">{formatDateTime(g.lastSeen)}</td>
+                      <td className="text-(--kt-muted)">{ROLE_LABELS[g.role]}</td>
+                      <td className="tabular-nums">{g.count}</td>
+                      <td className="whitespace-nowrap text-sm text-(--kt-muted)">{formatDateTime(g.firstSeen)}</td>
+                      <td className="whitespace-nowrap text-sm text-(--kt-muted)">{formatDateTime(g.lastSeen)}</td>
                     </tr>
                   ))}
                 </tbody>

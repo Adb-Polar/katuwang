@@ -5312,3 +5312,42 @@ Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failu
 page + answers dialog, new class page, class page grade text, a confirm dialog (cancelled), sidebar — 1280px, and
 375px for results and new class (nothing under 12px, no horizontal scroll). Not seen: the appeal card (needs a
 suspended class), the add-session modal after the change, creating a class.
+
+---
+
+## Admin portal unslop pass (2026-11-18)
+
+Every `/admin` page, modal and admin-only component brought onto the landing theme, the same way the learner and
+tutor portals were. Audit, findings and the list of non-styling bugs found (not fixed):
+`docs/reports/admin-portal-unslop-audit-2026-11-18.md`. Rules: `docs/plans/admin-portal-unslop.md`.
+
+- **Shared:** new `src/components/ui/StatusText.tsx` (status as coloured text + dot) and
+  `src/components/ui/AnonymousIdText.tsx` (serif `kt-id`, role colour) used on admin pages instead of the
+  `StatusBadge` / `AnonymousIdBadge` pills (those stay for learner/tutor/landing). `StatCard` deleted.
+  `Pagination` (no mono, 14px — ripples to learner/tutor lists), `PromptDialog` (serif title, full-size note and
+  buttons), `ActionMenu` (14px items), `EmptyState` (no italic), `AuditLogLink`, `CatalogLoadState` (14px),
+  `charts/DataTable` and `charts/BarChartCard` (h2 titles, 12px ticks).
+- **Dashboard** (`src/app/admin/page.tsx`): linked numbers line instead of 4 stat tiles; "Needs attention" first
+  in the DOM (the old `order-*` swap made reading order differ from the screen); readable activity rows.
+- **Tables** (users, registrations, classes, class appeals, abuse reports, class requests, session tests,
+  certifications, question requests, results, audit log, chatbot, administrators): duplicate in-card headings
+  removed, one card level, divided rows on phones, default-size fields/buttons, 14–16px text, sentence case.
+  `/admin/classes` desktop rows: View + "⋮" moderation menu (Suspend / Ban / Reinstate).
+- **Question bank:** subject names instead of slugs, plain-text counts, flattened boxes.
+- **Analytics:** numbers line instead of tiles, flat chart fill, readable ticks, sentence-case titles.
+- **User page:** serif section headings; readable role, audit action and reason (no raw enums/JSON).
+- **Subjects & topics, settings, administrators + create-admin modal, avatar moderation, recommend-class form,
+  curriculum coverage:** readable sizes, no mono/uppercase, plain copy (no "Provision", "UploadThing CDN").
+- **Sidebar labels and page titles** in sentence case ("Certificates", "Class requests", "Question bank"…).
+
+Checks: tsc and lint clean; `pnpm test` 1432 passed, 1 failed (known `ValidatedForm` add-session case).
+Browser-checked as the demo super admin at 1280px and 375px (read-only).
+
+### Portal sidebar and header (2026-11-18, same pass)
+
+Shared by all three portals (`src/components/layout/PortalLayout.tsx`, `GlobalSearch.tsx`, `src/app/globals.css`):
+avatar coloured by the signed-in role (was tutor ube for everyone; admins now brand blue, learners coral) at a
+readable size; nav icons without the grey chip behind them; nav items 15px and group labels in the muted grey;
+unread count as red text instead of a 10px pill; "Log out" in muted text instead of faded red; the "⌘K" hint
+removed (wrong on Windows/Linux; `aria-keyshortcuts` added); search dropdown text 14px. Audit table in
+`docs/reports/admin-portal-unslop-audit-2026-11-18.md`.

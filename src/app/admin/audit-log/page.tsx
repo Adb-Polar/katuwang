@@ -16,7 +16,7 @@ export default async function AdminAuditLogPage({
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Audit Log"
+        title="Audit log"
         subtitle="A history of moderation actions taken by administrators."
       />
       <AuditLogTable initialQuery={q ?? ""} />

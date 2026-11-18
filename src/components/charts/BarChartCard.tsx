@@ -33,21 +33,21 @@ export default function BarChartCard({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="font-serif text-xl font-medium leading-tight">{title}</h3>
+        <h2 className="font-serif text-xl font-medium leading-tight">{title}</h2>
         <div className="h-52 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>
               <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fontSize: 10, fill: c.text }}
+                tick={{ fontSize: 12, fill: c.text }}
                 interval={0}
                 angle={-20}
                 textAnchor="end"
                 height={56}
                 tickFormatter={(value: string) => value.length > 12 ? `${value.slice(0, 11)}…` : value}
               />
-              <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: c.text }} />
+              <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: c.text }} />
               <Tooltip
                 contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: c.grid }}
                 cursor={{ fill: c.grid, opacity: 0.4 }}

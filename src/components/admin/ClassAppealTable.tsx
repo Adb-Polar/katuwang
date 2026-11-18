@@ -7,7 +7,7 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
 import AuditLogLink from "@/components/ui/AuditLogLink";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import PromptDialog from "@/components/ui/PromptDialog";
@@ -109,8 +109,6 @@ export default function ClassAppealTable() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Class Appeals</h2>
-
           <Tabs
             tabs={[
               { key: "pending", label: "Pending" },
@@ -126,10 +124,10 @@ export default function ClassAppealTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <th>Class</th>
                     <th>Tutor</th>
                     <th>Tutor&apos;s reason</th>
@@ -141,50 +139,54 @@ export default function ClassAppealTable() {
                       onSort={toggle}
                     />
                     {tab !== "pending" && <th>Admin note</th>}
-                    {tab === "pending" && <th></th>}
+                    {tab === "pending" && <th><span className="sr-only">Actions</span></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {appeals.map((a) => (
-                    <tr key={a.id} className="text-sm align-top">
+                    <tr key={a.id} className="align-top">
                       <td>
-                        <span className="font-mono text-xs">{a.class.code}</span>
-                        <div className="text-2xs text-(--kt-faint) mt-0.5">
+                        <span className="whitespace-nowrap font-medium">{a.class.code}</span>
+                        <div className="text-sm text-(--kt-muted)">
                           {subjectDisplayLabel(a.class.subject)} · was {statusDisplayLabel(a.class.status)}
                         </div>
                         {a.class.suspendedReason && (
-                          <div className="text-2xs text-(--kt-faint) mt-0.5 max-w-[14rem] whitespace-normal">
-                            Mod reason: {a.class.suspendedReason}
+                          <div className="text-sm text-(--kt-muted) max-w-[14rem] whitespace-normal">
+                            Moderation reason: {a.class.suspendedReason}
                           </div>
                         )}
                         <AuditLogLink targetId={a.class.id} />
                       </td>
                       <td>
-                        <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
+                        <AnonymousIdText id={a.tutor.anonymousId} role="TUTOR" />
                       </td>
-                      <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">{a.reason}</td>
-                      <td className="text-2xs text-(--kt-faint)">
+                      <td className="max-w-xs whitespace-normal">{a.reason}</td>
+                      <td className="text-sm text-(--kt-muted)">
                         {tab === "pending" ? formatDateTime(a.createdAt) : a.reviewedAt ? formatDateTime(a.reviewedAt) : "—"}
                       </td>
                       {tab !== "pending" && (
-                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
-                          {a.reviewNote || <span className="text-base-content/30 italic">No note</span>}
+                        <td className="max-w-xs whitespace-normal">
+                          {a.reviewNote || <span className="text-sm text-(--kt-muted)">No note</span>}
                         </td>
                       )}
                       {tab === "pending" && (
-                        <td className="flex gap-2 justify-end">
+                        <td>
+                          <div className="flex flex-wrap gap-2 justify-end">
                           <button
                             onClick={() => setApproveTarget(a)}
-                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                            type="button"
+                            className="btn btn-outline btn-success min-h-11 md:min-h-0"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => setRejectTarget(a)}
-                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                            type="button"
+                            className="btn btn-outline btn-error min-h-11 md:min-h-0"
                           >
                             Reject
                           </button>
+                          </div>
                         </td>
                       )}
                     </tr>

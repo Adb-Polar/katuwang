@@ -5,7 +5,7 @@ import ClassDetailsView from "@/components/classes/ClassDetailsView";
 import { nextSessionAt } from "@/components/classes/classStatus";
 import SessionsList from "@/components/classes/SessionsList";
 import RecommendClassForm from "@/components/classes/RecommendClassForm";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeSection } from "@/lib/gradeLevels";
 import { isAdminRole } from "@/lib/permissions";
@@ -75,7 +75,7 @@ export default async function AdminClassDetailPage({
         description={tutorClass.description}
         tutor={
           <span>
-            <span className="kt-id kt-id--tutor">{tutorClass.tutorProfile.user.anonymousId}</span>{" "}
+            <AnonymousIdText id={tutorClass.tutorProfile.user.anonymousId} role="TUTOR" />{" "}
             <span className="text-base-content">
               {tutorClass.tutorProfile.user.firstName} {tutorClass.tutorProfile.user.lastName}
             </span>
@@ -105,7 +105,7 @@ export default async function AdminClassDetailPage({
                   <thead>
                     <tr>
                       <th>Anonymous ID</th>
-                      <th>Grade &amp; Section</th>
+                      <th>Grade and section</th>
                       <th>Enrolled</th>
                     </tr>
                   </thead>
@@ -113,7 +113,7 @@ export default async function AdminClassDetailPage({
                     {tutorClass.enrollments.map((e) => (
                       <tr key={e.id}>
                         <td>
-                          <AnonymousIdBadge id={e.learner.anonymousId} role="LEARNER" />
+                          <AnonymousIdText id={e.learner.anonymousId} role="LEARNER" />
                         </td>
                         <td className="text-(--kt-muted)">
                           {gradeSection(e.learner.gradeLevel, e.learner.section)}

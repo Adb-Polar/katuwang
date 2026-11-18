@@ -10,7 +10,7 @@ export default function AdminAssessmentResultsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Assessment"
-        title="Attempt Results"
+        title="Attempt results"
         subtitle="Review completed certification attempts, scores, and per-question answers."
       />
       <QuestionBankManager only="results" />

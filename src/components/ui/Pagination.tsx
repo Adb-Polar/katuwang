@@ -21,8 +21,8 @@ export default function Pagination({
   if (pageCount <= 1 && !onPageSizeChange) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 pt-2 font-mono">
-      <span className="text-xs text-(--kt-muted)">
+    <div className="flex flex-wrap items-center justify-between gap-2 pt-2">
+      <span className="text-sm text-(--kt-muted)">
         Page {page} of {pageCount} · {total} total
       </span>
       <div className="flex items-center gap-2">
@@ -46,7 +46,7 @@ export default function Pagination({
           disabled={page <= 1}
           className="btn btn-ghost min-h-11 text-sm"
         >
-          <ChevronLeft className="w-3 h-3" />
+          <ChevronLeft className="w-4 h-4" aria-hidden="true" />
           Prev
         </button>
         <button
@@ -56,7 +56,7 @@ export default function Pagination({
           className="btn btn-ghost min-h-11 text-sm"
         >
           Next
-          <ChevronRight className="w-3 h-3" />
+          <ChevronRight className="w-4 h-4" aria-hidden="true" />
         </button>
       </div>
     </div>

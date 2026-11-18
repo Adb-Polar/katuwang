@@ -11,8 +11,8 @@ import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import StatusBadge from "@/components/ui/StatusBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
+import StatusText from "@/components/ui/StatusText";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
@@ -125,8 +125,8 @@ export default function UserManagementTable() {
 
       setSuccess(
         status === "SUSPENDED" && data.statusExpiresAt
-          ? `${target.anonymousId} is now SUSPENDED until ${formatDateTime(data.statusExpiresAt)}.`
-          : `${target.anonymousId} is now ${status}.`
+          ? `${target.anonymousId} is now suspended until ${formatDateTime(data.statusExpiresAt)}.`
+          : `${target.anonymousId} is now ${statusDisplayLabel(status).toLowerCase()}.`
       );
       setTarget(null);
       refetch();
@@ -142,12 +142,10 @@ export default function UserManagementTable() {
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={target ? null : error || null} />
-      {!target && error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry accounts</button>}
+      {!target && error && <button type="button" className="btn btn-outline min-h-11" onClick={refetch}>Retry accounts</button>}
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-
-
           <Tabs
             tabs={[
               { key: "all", label: "All" },
@@ -165,15 +163,15 @@ export default function UserManagementTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or ID..."
-              className="input input-bordered min-h-11 w-full sm:max-w-xs text-base sm:text-sm focus:input-primary"
+              className="input input-bordered min-h-11 w-full sm:max-w-xs focus:input-primary"
             />
             <select
               aria-label="Filter accounts by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as AccountStatus | "")}
-              className="select select-bordered min-h-11 w-full sm:w-auto text-base sm:text-sm focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto focus:select-primary"
             >
-              <option value="">All Statuses</option>
+              <option value="">All statuses</option>
               <option value="ACTIVE">Active</option>
               <option value="SUSPENDED">Suspended</option>
               <option value="BANNED">Banned</option>
@@ -183,9 +181,9 @@ export default function UserManagementTable() {
               aria-label="Filter accounts by grade"
               value={gradeFilter}
               onChange={(e) => setGradeFilter(e.target.value as GradeLevel | "")}
-              className="select select-bordered min-h-11 w-full sm:w-auto text-base sm:text-sm focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto focus:select-primary"
             >
-              <option value="">All Grade Levels</option>
+              <option value="">All grade levels</option>
               {GRADE_LEVELS.map((g) => (
                 <option key={g.value} value={g.value}>
                   {g.label}
@@ -198,33 +196,35 @@ export default function UserManagementTable() {
             <LoadingRow />
           ) : (
             <>
-            <div className="grid gap-3 md:hidden">
+            <div className="md:hidden">
               {displayed.map((u) => (
-                <article key={u.id} className="rounded-xl border border-base-300 p-4 space-y-2">
+                <article key={u.id} className="space-y-2 border-b border-(--kt-border) py-4 last:border-b-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <Link href={`/admin/users/${u.id}`} className="font-semibold text-primary hover:underline">{u.firstName} {u.lastName}</Link>
-                      <p className="text-xs text-(--kt-muted)">{u.anonymousId} · {gradeSection(u.gradeLevel, u.section)}</p>
+                      <p className="text-sm text-(--kt-muted)">
+                        <AnonymousIdText id={u.anonymousId} role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"} /> · {gradeSection(u.gradeLevel, u.section)}
+                      </p>
                     </div>
-                    <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
+                    <StatusText tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} />
                   </div>
-                  <p className="text-xs break-all text-(--kt-muted)">{u.email}</p>
+                  <p className="text-sm break-all text-(--kt-muted)">{u.email}</p>
                   <div className="flex flex-col gap-2">
-                    <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 text-sm w-full">View details</Link>
-                    <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 text-sm w-full">Manage account</button>
+                    <Link href={`/admin/users/${u.id}`} className="btn btn-outline min-h-11 w-full">View details</Link>
+                    <button type="button" onClick={() => openModal(u)} className="btn btn-primary min-h-11 w-full">Manage account</button>
                   </div>
                 </article>
               ))}
               {!error && displayed.length === 0 && <EmptyState>No accounts found.</EmptyState>}
             </div>
-            <div className="hidden md:block overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="hidden md:block overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <SortableTh label="Code" field="code" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
-                    <th>Grade &amp; Section</th>
+                    <th>Grade &amp; section</th>
                     <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
                     <th></th>
                   </tr>
@@ -233,10 +233,10 @@ export default function UserManagementTable() {
                   {displayed.map((u) => (
                     <tr
                       key={u.id}
-                      className="text-sm hover:bg-base-200/40"
+                      className="hover:bg-base-200/40"
                     >
                       <td>
-                        <AnonymousIdBadge
+                        <AnonymousIdText
                           id={u.anonymousId}
                           role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
                         />
@@ -250,7 +250,7 @@ export default function UserManagementTable() {
                               anonymousId={u.anonymousId}
                               size="sm"
                               role={u.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"}
-                              modalTitle={`${u.firstName} ${u.lastName} - Profile Picture`}
+                              modalTitle={`${u.firstName} ${u.lastName} - profile picture`}
                             />
                           </div>
                           <Link href={`/admin/users/${u.id}`} className="font-semibold text-primary hover:underline">
@@ -263,9 +263,9 @@ export default function UserManagementTable() {
                         {gradeSection(u.gradeLevel, u.section)}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
+                        <StatusText tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} />
                         {u.status === "SUSPENDED" && u.statusExpiresAt && (
-                          <div className="text-2xs text-(--kt-faint) mt-1">
+                          <div className="text-sm text-(--kt-muted) mt-1">
                             Until {formatDateTime(u.statusExpiresAt)}
                           </div>
                         )}
@@ -274,7 +274,7 @@ export default function UserManagementTable() {
                         <button
                           onClick={() => openModal(u)}
                           aria-label={`Manage ${u.anonymousId} account`}
-                          className="btn btn-outline btn-primary min-h-11 text-xs font-bold"
+                          className="btn btn-outline btn-primary min-h-11"
                         >
                           Manage
                         </button>
@@ -300,20 +300,20 @@ export default function UserManagementTable() {
         </div>
       </section>
 
-      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Account">
+      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage account">
         {target && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void handleSave(e.currentTarget); }}>
-            <p className="text-2xs text-(--kt-faint) mb-4">
-              {target.anonymousId} · {target.firstName} {target.lastName}
+            <p className="text-sm text-(--kt-muted) mb-4">
+              <AnonymousIdText id={target.anonymousId} role={target.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER"} /> · {target.firstName} {target.lastName}
             </p>
 
             <FeedbackBanner variant="error" message={error || null} />
 
             <div className="space-y-3.5">
-              <FormField label="Status" required>
+              <FormField label="Status" required size="md">
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as AccountStatus)}
-                  className="select select-bordered select-sm w-full focus:select-primary text-xs"
+                  className="select select-bordered w-full focus:select-primary"
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="SUSPENDED">Suspended</option>
@@ -322,7 +322,7 @@ export default function UserManagementTable() {
               </FormField>
 
               {status === "SUSPENDED" && (
-                <FormField label="Duration (days)" hint="Leave blank for an indefinite suspension">
+                <FormField label="Duration (days)" hint="Leave blank for an indefinite suspension" size="md">
                   <input
                     type="number"
                     min={1}
@@ -330,18 +330,18 @@ export default function UserManagementTable() {
                     value={durationDays}
                     onChange={(e) => setDurationDays(e.target.value)}
                     placeholder="e.g. 5"
-                    className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                    className="input input-bordered w-full focus:input-primary"
                   />
                 </FormField>
               )}
 
-              <FormField label="Reason" hint="Optional — shown for your own records">
+              <FormField label="Reason" hint="Optional — shown for your own records" size="md">
                 <textarea
                   maxLength={500}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Why is this account's status changing?"
-                  className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-20"
+                  className="textarea textarea-bordered w-full focus:textarea-primary h-24"
                 />
               </FormField>
             </div>
@@ -350,15 +350,15 @@ export default function UserManagementTable() {
               <button
                 type="button"
                 onClick={() => setTarget(null)}
-                className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button type="submit"
                 disabled={saving}
-                className="btn btn-primary btn-sm text-xs cursor-pointer"
+                className="btn btn-primary"
               >
-                {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
+                {saving ? <span className="loading loading-spinner loading-sm"></span> : "Save"}
               </button>
             </div>
         </ValidatedForm>}

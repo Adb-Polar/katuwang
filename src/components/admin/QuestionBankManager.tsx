@@ -13,14 +13,14 @@ import CatalogLoadState from "@/components/ui/CatalogLoadState";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { formatDateTime } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import AdministrativeBankApproval from "@/components/admin/AdministrativeBankApproval";
 import QualificationReviewModal from "@/components/admin/QualificationReviewModal";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
-import StatusBadge from "@/components/ui/StatusBadge";
+import StatusText from "@/components/ui/StatusText";
 import Tabs from "@/components/ui/Tabs";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
@@ -146,8 +146,8 @@ export default function QuestionBankManager({ only }: { only?: QBankTab } = {}) 
             },
           },
           selTopic
-            ? { label: selSubject, onClick: () => setSelTopic(null) }
-            : { label: selSubject },
+            ? { label: subjectDisplayLabel(selSubject), onClick: () => setSelTopic(null) }
+            : { label: subjectDisplayLabel(selSubject) },
           ...(selTopic ? [{ label: selTopic }] : []),
         ]
       : null;
@@ -201,29 +201,29 @@ function Breadcrumb({
   const back = [...items].reverse().find((it) => it.onClick)?.onClick;
 
   return (
-    <div className="flex items-center gap-2 flex-wrap rounded-xl border border-base-200 bg-base-200/30 px-2 py-1.5">
+    <div className="flex items-center gap-2 flex-wrap">
       {back && (
         <button
           onClick={back}
-          className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 gap-1 text-2xs font-semibold text-(--kt-muted) hover:text-primary"
+          className="btn btn-ghost btn-sm min-h-11 sm:min-h-0 gap-1 text-(--kt-muted) hover:text-primary"
         >
           <CornerUpLeft className="w-3.5 h-3.5" />
           Back
         </button>
       )}
-      <span className="flex items-center gap-1 flex-wrap text-xs">
+      <span className="flex items-center gap-1 flex-wrap text-sm">
         {items.map((it, i) => (
           <span key={i} className="flex items-center gap-1">
-            {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-base-content/30" />}
+            {i > 0 && <ChevronRight className="w-3.5 h-3.5 text-(--kt-muted)" />}
             {it.onClick ? (
               <button
                 onClick={it.onClick}
-                className="rounded-md px-1.5 py-0.5 font-medium text-primary hover:bg-primary/10 cursor-pointer transition-colors"
+                className="px-1 py-0.5 font-medium text-primary hover:underline cursor-pointer"
               >
                 {it.label}
               </button>
             ) : (
-              <span className="rounded-md bg-base-100 border border-base-200 px-1.5 py-0.5 font-semibold text-(--kt-muted)">
+              <span className="px-1 py-0.5 font-medium text-base-content">
                 {it.label}
               </span>
             )}
@@ -340,10 +340,10 @@ function QuestionsTab({
       <div className="space-y-4">
         <FeedbackBanner variant="success" message={success || null} />
         <AdministrativeBankApproval onApproved={count => afterWrite(`${count} questions approved for assessments.`)} />
-        <p className="text-2xs text-(--kt-faint)">
+        <p className="text-sm text-(--kt-muted)">
           Pick a subject to drill into its topics and questions.
         </p>
-        <div className="border border-base-200 rounded-xl divide-y divide-base-200">
+        <div className="divide-y divide-(--kt-border) border-y border-(--kt-border)">
           {SUBJECTS.map((s) => {
             const rows = coverage.filter((c) => c.subject === s);
             const totalTopics = topicsFor(s).length;
@@ -354,27 +354,19 @@ function QuestionsTab({
               <button
                 key={s}
                 onClick={() => setSelSubject(s)}
-                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-base-200/40 transition-colors cursor-pointer"
+                className="w-full text-left px-2 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 hover:bg-base-200/40 transition-colors cursor-pointer"
               >
                 <span className="min-w-0">
-                  <span className="block text-sm font-semibold text-base-content/90">{s}</span>
-                  <span className="block text-2xs text-(--kt-faint)">
-                    {totalTopics} topics · {activeQ} approved assessment question{activeQ === 1 ? "" : "s"}
+                  <span className="block font-medium text-base-content">{subjectDisplayLabel(s)}</span>
+                  <span className="block text-sm text-(--kt-muted)">
+                    {totalTopics} topic{totalTopics === 1 ? "" : "s"} · {activeQ} approved assessment question{activeQ === 1 ? "" : "s"}
                   </span>
                 </span>
-                <span className="flex items-center gap-2 shrink-0">
-                  {openReq > 0 && (
-                    <StatusBadge
-                      tone="info"
-                      label={`${openReq} req`}
-                      size="xs"
-                    />
-                  )}
-                  <StatusBadge
-                    tone={ready === totalTopics ? "success" : "warning"}
-                    label={`${ready}/${totalTopics} ready`}
-                    size="xs"
-                  />
+                <span className="text-sm text-(--kt-muted)">
+                  {openReq > 0 && `${openReq} open request${openReq === 1 ? "" : "s"} · `}
+                  <span className={ready === totalTopics ? "text-success" : "text-(--kt-warning-text)"}>
+                    {ready} of {totalTopics} topic{totalTopics === 1 ? "" : "s"} ready
+                  </span>
                 </span>
               </button>
             );
@@ -389,7 +381,7 @@ function QuestionsTab({
     return (
       <div className="space-y-4">
         <FeedbackBanner variant="success" message={success || null} />
-        <div className="border border-base-200 rounded-xl divide-y divide-base-200">
+        <div className="divide-y divide-(--kt-border) border-y border-(--kt-border)">
           {topicsFor(selSubject).map((t) => {
             const row = coverage.find((c) => c.subject === selSubject && c.topic === t);
             const active = row?.activeCount ?? 0;
@@ -399,18 +391,16 @@ function QuestionsTab({
               <button
                 key={t}
                 onClick={() => setSelTopic(t)}
-                className="w-full text-left px-4 py-3 flex items-center justify-between gap-3 hover:bg-base-200/40 transition-colors cursor-pointer"
+                className="w-full text-left px-2 py-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 hover:bg-base-200/40 transition-colors cursor-pointer"
               >
-                <span className="text-sm text-(--kt-muted)">{t}</span>
-                <span className="flex items-center gap-2 shrink-0">
-                  {row && row.openRequests > 0 && (
-                    <StatusBadge tone="info" label={`${row.openRequests} req`} size="xs" />
-                  )}
-                  <StatusBadge
-                    tone={isReady ? "success" : "warning"}
-                    label={isReady ? `Ready · ${active}` : `${active} / ${min}`}
-                    size="xs"
-                  />
+                <span className="min-w-0 text-base-content">{t}</span>
+                <span className="text-sm text-(--kt-muted)">
+                  {row && row.openRequests > 0 && `${row.openRequests} open request${row.openRequests === 1 ? "" : "s"} · `}
+                  <span className={isReady ? "text-success" : "text-(--kt-warning-text)"}>
+                    {isReady
+                      ? `Ready · ${active} question${active === 1 ? "" : "s"}`
+                      : `${active} of ${min} questions needed`}
+                  </span>
                 </span>
               </button>
             );
@@ -437,7 +427,7 @@ function QuestionsTab({
             setError("");
             setShowAdd(true);
           }}
-          className="btn btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+          className="btn btn-primary cursor-pointer"
         >
           Add question
         </button>
@@ -448,10 +438,10 @@ function QuestionsTab({
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
-        <div className="border border-base-200 rounded-xl">
-          <table role="table" aria-label={`Questions for ${topic}`} className="table table-sm block w-full xl:table xl:table-fixed">
+        <div>
+          <table role="table" aria-label={`Questions for ${topic}`} className="table block w-full xl:table xl:table-fixed">
             <thead role="rowgroup" className="hidden xl:table-header-group">
-              <tr role="row" className="text-xs">
+              <tr role="row">
                 <th role="columnheader" scope="col" className="w-[44%]">Prompt</th>
                 <th role="columnheader" scope="col" className="w-[28%]">Answer</th>
                 <th role="columnheader" scope="col">Status</th>
@@ -462,34 +452,33 @@ function QuestionsTab({
               {questions.map((q) => {
                 const correct = q.options.find((o) => o.isCorrect);
                 return (
-                  <tr role="row" key={q.id} className="grid grid-cols-1 text-sm sm:grid-cols-2 xl:table-row">
-                    <td role="cell" className="block min-w-0 whitespace-normal align-top text-(--kt-muted) [overflow-wrap:anywhere] sm:col-span-2 xl:table-cell">
-                      <span className="mb-1 block text-2xs font-semibold text-(--kt-faint) xl:hidden">Prompt</span>
+                  <tr role="row" key={q.id} className="grid grid-cols-1 sm:grid-cols-2 xl:table-row">
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top [overflow-wrap:anywhere] sm:col-span-2 xl:table-cell">
+                      <span className="mb-1 block text-sm font-medium text-(--kt-muted) xl:hidden">Prompt</span>
                       {q.prompt}
-                      <div className="text-2xs text-(--kt-faint) mt-0.5">
+                      <div className="text-sm text-(--kt-muted) mt-0.5">
                         v{q.version ?? 1} · {q.options.length} options · added {fmt(q.createdAt)}
                       </div>
                     </td>
-                    <td role="cell" className="block min-w-0 whitespace-normal align-top text-2xs text-(--kt-muted) [overflow-wrap:anywhere] xl:table-cell">
-                      <span className="mb-1 block font-semibold text-(--kt-faint) xl:hidden">Answer</span>
-                      {correct?.text || <span className="italic text-error/60">none marked</span>}
+                    <td role="cell" className="block min-w-0 whitespace-normal align-top [overflow-wrap:anywhere] xl:table-cell">
+                      <span className="mb-1 block text-sm font-medium text-(--kt-muted) xl:hidden">Answer</span>
+                      {correct?.text || <span className="text-sm text-error">None marked</span>}
                     </td>
                     <td role="cell" className="block min-w-0 whitespace-normal align-top xl:table-cell">
-                      <span className="mb-1 block text-2xs font-semibold text-(--kt-faint) xl:hidden">Status</span>
-                      <div className="flex flex-col items-start gap-1.5 [&>.kt-badge]:max-w-full [&>.kt-badge]:whitespace-normal [&>.kt-badge]:leading-relaxed [&>.kt-badge]:[overflow-wrap:anywhere]">
-                        <StatusBadge
+                      <span className="mb-1 block text-sm font-medium text-(--kt-muted) xl:hidden">Status</span>
+                      <div className="flex flex-col items-start gap-1 [&>span]:max-w-full [&>span]:whitespace-normal [&>span]:[overflow-wrap:anywhere]">
+                        <StatusText
                           tone={q.active ? "success" : "neutral"}
                           label={q.active ? "Active" : "Retired"}
-                          size="xs"
                         />
-                        <StatusBadge tone={q.reviewStatus === "APPROVED" ? "success" : "warning"} label={q.reviewStatus === "APPROVED" ? (q.qualificationApprovalMethod === "ADMIN_APPROVAL" ? "Admin approved for assessments" : "Qualified review approved") : q.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"} size="xs" />
+                        <StatusText tone={q.reviewStatus === "APPROVED" ? "success" : "warning"} label={q.reviewStatus === "APPROVED" ? (q.qualificationApprovalMethod === "ADMIN_APPROVAL" ? "Admin approved for assessments" : "Qualified review approved") : q.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"} />
                         {q.inUse && (
-                          <span className="text-2xs text-(--kt-faint)">in use</span>
+                          <span className="text-sm text-(--kt-muted)">In use</span>
                         )}
                       </div>
                     </td>
                     <td role="cell" className="block min-w-0 whitespace-normal align-top sm:col-span-2 xl:table-cell">
-                      <span className="mb-1 block text-2xs font-semibold text-(--kt-faint) xl:hidden">Actions</span>
+                      <span className="mb-1 block text-sm font-medium text-(--kt-muted) xl:hidden">Actions</span>
                       <div className="flex xl:justify-end">
                         <ActionMenu
                           label="Question actions"
@@ -600,16 +589,16 @@ function QuestionsTab({
 
       <Modal open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} title="Delete this question?">
         {deleteTarget && <div className="space-y-3">
-            <p className="text-xs text-(--kt-muted)">This cannot be undone.</p>
-            <p className="text-2xs text-(--kt-faint) border border-base-200 rounded-lg p-2">
+            <p className="text-(--kt-muted)">This cannot be undone.</p>
+            <p className="text-sm text-(--kt-muted) border-l-2 border-(--kt-border) pl-3">
               {deleteTarget.prompt}
             </p>
             <div className="modal-action pt-1">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDeleteTarget(null)}>
+              <button type="button" className="btn btn-ghost" onClick={() => setDeleteTarget(null)}>
                 Cancel
               </button>
               <button type="button"
-                className="btn btn-error btn-sm"
+                className="btn btn-error"
                 disabled={busyId === deleteTarget.id}
                 onClick={() => remove(deleteTarget)}
               >
@@ -629,26 +618,25 @@ function QuestionsTab({
 
 function CoveragePanel({ row }: { row: CoverageRow }) {
   return (
-    <div className="border border-base-200 bg-base-200/20 rounded-xl p-3 space-y-2 text-xs">
+    <div className="space-y-1 border-b border-(--kt-border) pb-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <span className="font-semibold text-(--kt-muted)">
+        <span className="font-medium text-base-content">
           {row.activeCount} approved assessment question{row.activeCount === 1 ? "" : "s"}
         </span>
         {row.ready ? (
-          <StatusBadge tone="success" label={`Ready · needs ≥ ${row.config.minBankSize}`} size="xs" />
+          <StatusText tone="success" label={`Ready · needs at least ${row.config.minBankSize}`} />
         ) : (
-          <StatusBadge
+          <StatusText
             tone="warning"
-            label={`${row.activeCount} / ${row.config.minBankSize} — not assessable yet`}
-            size="xs"
+            label={`${row.activeCount} of ${row.config.minBankSize} needed — not assessable yet`}
           />
         )}
       </div>
 
-      <div className="flex items-center justify-between gap-3 flex-wrap text-2xs text-(--kt-faint)">
+      <div className="flex items-center justify-between gap-3 flex-wrap text-sm text-(--kt-muted)">
         <span>
-          Platform assessment settings: {row.config.questionCount} questions / attempt ·{" "}
-          {row.config.passPercent}% to pass · min bank {row.config.minBankSize}
+          Platform assessment settings: {row.config.questionCount} questions per attempt ·{" "}
+          {row.config.passPercent}% to pass · at least {row.config.minBankSize} questions in the bank
         </span>
         <Link href="/admin/settings" className="text-primary hover:underline font-medium">
           Change in Settings → Assessment
@@ -734,10 +722,10 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
-        <div className="overflow-x-auto border border-base-200 rounded-xl">
-          <table className="table table-sm">
+        <div className="overflow-x-auto">
+          <table className="table">
             <thead>
-              <tr className="text-xs">
+              <tr>
                 <th>Tutor</th>
                 <th>Subject</th>
                 <th>Topic</th>
@@ -748,19 +736,19 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
             </thead>
             <tbody>
               {requests.map((r) => (
-                <tr key={r.id} className="text-sm align-top">
+                <tr key={r.id} className="align-top">
                   <td>
-                    <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" />
+                    <AnonymousIdText id={r.tutor.anonymousId} role="TUTOR" />
                   </td>
                   <td className="text-(--kt-muted)">{subjectDisplayLabel(r.subject)}</td>
                   <td className="text-(--kt-muted)">{r.topic}</td>
-                  <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
-                    {r.note || <span className="text-base-content/30 italic">No note</span>}
+                  <td className="text-sm text-(--kt-muted) max-w-xs whitespace-normal">
+                    {r.note || "No note"}
                     {r.resolutionNote && (
-                      <div className="text-2xs text-(--kt-faint) mt-1">↳ {r.resolutionNote}</div>
+                      <div className="mt-1">Note to tutor: {r.resolutionNote}</div>
                     )}
                   </td>
-                  <td className="text-2xs text-(--kt-faint)">
+                  <td className="text-sm text-(--kt-muted) whitespace-nowrap">
                     {fmt(status === "OPEN" ? r.createdAt : r.resolvedAt)}
                   </td>
                   {status === "OPEN" && (
@@ -772,7 +760,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                             setNote("");
                             setTarget({ req: r, decision: "RESOLVED" });
                           }}
-                          className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-success btn-sm min-h-11 sm:min-h-0 cursor-pointer"
                         >
                           Resolve
                         </button>
@@ -782,7 +770,7 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
                             setNote("");
                             setTarget({ req: r, decision: "DISMISSED" });
                           }}
-                          className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                          className="btn btn-outline btn-error btn-sm min-h-11 sm:min-h-0 cursor-pointer"
                         >
                           Dismiss
                         </button>
@@ -813,25 +801,26 @@ function RequestsTab({ onResolved }: { onResolved: () => void }) {
         title={target?.decision === "RESOLVED" ? "Resolve this request?" : "Dismiss this request?"}
       >
         {target && <ValidatedForm className="space-y-3" onSubmit={(e) => { e.preventDefault(); void resolve(e.currentTarget); }}>
-            <p className="text-xs text-(--kt-muted)">
-              {subjectDisplayLabel(target.req.subject)} · {target.req.topic} — from {target.req.tutor.anonymousId}
+            <p className="text-(--kt-muted)">
+              {subjectDisplayLabel(target.req.subject)} · {target.req.topic} — from{" "}
+              <AnonymousIdText id={target.req.tutor.anonymousId} role="TUTOR" />
             </p>
             <FeedbackBanner variant="error" message={error || null} />
-            <FormField label="Note for the tutor" hint="Optional">
+            <FormField label="Note for the tutor" hint="Optional" size="md">
               <textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={3}
                 maxLength={500}
-                className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
+                className="textarea textarea-bordered w-full focus:textarea-primary"
               />
             </FormField>
             <div className="modal-action pt-1">
-              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setTarget(null)} disabled={saving}>
+              <button type="button" className="btn btn-ghost" onClick={() => setTarget(null)} disabled={saving}>
                 Cancel
               </button>
               <button type="submit"
-                className={`btn btn-sm ${target.decision === "RESOLVED" ? "btn-success" : "btn-error"}`}
+                className={`btn ${target.decision === "RESOLVED" ? "btn-success" : "btn-error"}`}
                 disabled={saving}
               >
                 {saving && <span className="loading loading-spinner loading-xs" />}
@@ -918,13 +907,13 @@ function ResultsTab() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search tutor ID..."
-          className="input input-bordered input-sm text-xs focus:input-primary"
+          className="input input-bordered w-full min-h-11 focus:input-primary"
         />
         <select
           aria-label="Filter assessment results by subject"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="select select-bordered select-sm min-h-11 md:min-h-0 text-xs focus:select-primary"
+          className="select select-bordered w-full min-h-11 focus:select-primary"
         >
           <option value="">All subjects</option>
           {SUBJECTS.map((s) => (
@@ -937,7 +926,7 @@ function ResultsTab() {
           aria-label="Filter assessment results by outcome"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="select select-bordered select-sm min-h-11 md:min-h-0 text-xs focus:select-primary"
+          className="select select-bordered w-full min-h-11 focus:select-primary"
         >
           <option value="">All outcomes</option>
           <option value="PASSED">Passed</option>
@@ -951,10 +940,10 @@ function ResultsTab() {
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : (
-        <div className="overflow-x-auto border border-base-200 rounded-xl">
-          <table className="table table-sm">
+        <div className="overflow-x-auto">
+          <table className="table">
             <thead>
-              <tr className="text-xs">
+              <tr>
                 <th>Tutor</th>
                 <th>Subject</th>
                 <th>Topic</th>
@@ -967,9 +956,9 @@ function ResultsTab() {
             </thead>
             <tbody>
               {attempts.map((a) => (
-                <tr key={a.id} className="text-sm">
+                <tr key={a.id}>
                   <td>
-                    <AnonymousIdBadge id={a.tutor.anonymousId} role="TUTOR" />
+                    <AnonymousIdText id={a.tutor.anonymousId} role="TUTOR" />
                   </td>
                   <td className="text-(--kt-muted)">{subjectDisplayLabel(a.subject)}</td>
                   <td className="text-(--kt-muted)">{a.topic}</td>
@@ -978,17 +967,16 @@ function ResultsTab() {
                     {a.status === "IN_PROGRESS" ? "—" : `${a.scorePercent}% (${a.correctCount}/${a.questionCount})`}
                   </td>
                   <td>
-                    <StatusBadge
+                    <StatusText
                       tone={a.certificationEligible === false ? "neutral" : ATTEMPT_TONE[a.status].tone}
                       label={a.certificationEligible === false ? "Practice — not for certification" : ATTEMPT_TONE[a.status].label}
-                      size="xs"
                     />
                   </td>
-                  <td className="text-2xs text-(--kt-faint)">{fmt(a.submittedAt)}</td>
+                  <td className="text-sm text-(--kt-muted) whitespace-nowrap">{fmt(a.submittedAt)}</td>
                   <td className="text-right">
                     <button
                       onClick={() => openDetail(a.id)}
-                      className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                      className="btn btn-outline btn-sm min-h-11 sm:min-h-0 cursor-pointer"
                     >
                       View
                     </button>
@@ -1025,21 +1013,21 @@ function ResultsTab() {
               <LoadErrorState message={detailError} onRetry={() => detailId && openDetail(detailId)} />
             ) : detail ? (
               <>
-                    <p className="text-2xs text-(--kt-faint) mb-4">
-                      {detail.tutor.anonymousId} · attempt #{detail.attemptNo} ·{" "}
+                    <p className="text-sm text-(--kt-muted) mb-4">
+                      <AnonymousIdText id={detail.tutor.anonymousId} role="TUTOR" /> · attempt #{detail.attemptNo} ·{" "}
                       {detail.status === "IN_PROGRESS"
                         ? "in progress"
                         : `${detail.scorePercent}% (pass ≥ ${detail.passPercent}%)`}
                     </p>
 
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                <div className="max-h-[60vh] overflow-y-auto pr-1">
                   {detail.items.map((item) => (
-                    <div key={item.questionId} className="border border-base-200 rounded-xl p-3 space-y-2">
+                    <div key={item.questionId} className="space-y-2 border-b border-(--kt-border) py-3 first:pt-0 last:border-b-0">
                       <div className="flex items-start gap-2">
-                        <span className="text-2xs text-(--kt-faint) shrink-0">Q{item.position + 1}</span>
-                        <p className="text-xs font-semibold text-(--kt-muted)">{item.prompt}</p>
+                        <span className="text-sm text-(--kt-muted) shrink-0">Q{item.position + 1}</span>
+                        <p className="font-medium text-base-content">{item.prompt}</p>
                         {item.isCorrect != null && (
-                          <span className={`text-2xs shrink-0 ${item.isCorrect ? "text-success" : "text-error"}`}>
+                          <span className={`text-sm shrink-0 ${item.isCorrect ? "text-success" : "text-error"}`}>
                             {item.isCorrect ? "✓" : "✗"}
                           </span>
                         )}
@@ -1050,7 +1038,7 @@ function ResultsTab() {
                           return (
                             <li
                               key={o.id}
-                              className={`text-2xs rounded-lg px-2 py-1 border ${
+                              className={`text-sm rounded-lg px-2 py-1 border ${
                                 o.isCorrect
                                   ? "border-success/30 bg-success/5 text-success"
                                   : chosen
@@ -1066,14 +1054,14 @@ function ResultsTab() {
                         })}
                       </ul>
                       {item.explanation && (
-                        <p className="text-2xs text-(--kt-faint) italic">{item.explanation}</p>
+                        <p className="text-sm text-(--kt-muted)">{item.explanation}</p>
                       )}
                     </div>
                   ))}
                 </div>
 
                 <div className="modal-action pt-1">
-                  <button className="btn btn-ghost btn-sm" onClick={closeDetail}>
+                  <button className="btn btn-ghost" onClick={closeDetail}>
                     Close
                   </button>
                 </div>

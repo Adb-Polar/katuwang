@@ -7,7 +7,7 @@ import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Modal from "@/components/ui/Modal";
 import ValidatedForm from "@/components/ui/ValidatedForm";
@@ -127,13 +127,11 @@ export default function CertificationReviewTable() {
     <div className="space-y-6">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <FeedbackBanner variant="success" message={success || null} />
+      <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={approveTarget || rejectTarget ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Certification Requests</h2>
-
           <Tabs
             tabs={[
               { key: "pending", label: "Pending" },
@@ -151,13 +149,13 @@ export default function CertificationReviewTable() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search topic or tutor ID..."
-              className="input input-bordered min-h-11 text-base sm:text-sm focus:input-primary"
+              className="input input-bordered w-full min-h-11 focus:input-primary"
             />
             <select
               aria-label="Filter certifications by subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
+              className="select select-bordered w-full min-h-11 focus:select-primary"
             >
               <option value="">All subjects</option>
               {catalog.map((s) => (
@@ -170,7 +168,7 @@ export default function CertificationReviewTable() {
               aria-label="Sort certification requests"
               value={sort}
               onChange={(e) => setSort(e.target.value)}
-              className="select select-bordered min-h-11 text-base sm:text-sm focus:select-primary"
+              className="select select-bordered w-full min-h-11 focus:select-primary"
             >
               <option value="requested">Sort: Requested date</option>
               <option value="certified">Sort: Certified date</option>
@@ -187,10 +185,10 @@ export default function CertificationReviewTable() {
               <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry</button>
             </div>
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <th>Tutor</th>
                     <th>Subject</th>
                     <th>Topic</th>
@@ -202,16 +200,16 @@ export default function CertificationReviewTable() {
                 </thead>
                 <tbody>
                   {certifications.map((c) => (
-                    <tr key={c.id} className="text-sm">
+                    <tr key={c.id} className="align-top">
                       <td>
-                        <AnonymousIdBadge id={c.tutor.anonymousId} role="TUTOR" />
-                        <div className="text-2xs text-(--kt-faint) mt-1">
+                        <AnonymousIdText id={c.tutor.anonymousId} role="TUTOR" />
+                        <div className="text-sm text-(--kt-muted) mt-1">
                           {c.tutor.firstName} {c.tutor.lastName}
                         </div>
                       </td>
                       <td className="text-(--kt-muted)">{subjectDisplayLabel(c.subject)}</td>
                       <td className="text-(--kt-muted)">{c.topic}</td>
-                      <td className="text-(--kt-muted)">
+                      <td className="text-sm text-(--kt-muted) whitespace-nowrap">
                         {tab === "certified"
                           ? c.certifiedAt
                             ? formatDateTime(c.certifiedAt)
@@ -223,28 +221,30 @@ export default function CertificationReviewTable() {
                           : formatDateTime(c.requestedAt)}
                       </td>
                       {tab === "rejected" && (
-                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
-                          {c.reviewNote || <span className="text-base-content/30 italic">No note</span>}
+                        <td className="text-sm text-(--kt-muted) max-w-xs whitespace-normal">
+                          {c.reviewNote || "No note"}
                         </td>
                       )}
-                      {tab === "certified" && <td className="text-2xs whitespace-normal max-w-xs">
-                        {c.approvalMethod === "MANUAL" ? <>Manual review<p>{c.reviewNote}</p><p>{c.approvalEvidence}</p></> : c.approvalMethod === "ASSESSMENT" ? <>Passing assessment<p>{c.qualifyingAttemptId}</p></> : "Legacy record — provenance unavailable"}
+                      {tab === "certified" && <td className="whitespace-normal max-w-xs">
+                        {c.approvalMethod === "MANUAL" ? <>Manual review<p className="text-sm text-(--kt-muted)">{c.reviewNote}</p><p className="text-sm text-(--kt-muted)">{c.approvalEvidence}</p></> : c.approvalMethod === "ASSESSMENT" ? <>Passing assessment<p className="text-sm text-(--kt-muted)">{c.qualifyingAttemptId}</p></> : <span className="text-sm text-(--kt-muted)">Legacy record — provenance unavailable</span>}
                       </td>}
                       {tab === "pending" && (
-                        <td className="flex gap-2 justify-end">
-                          <button
-                            onClick={() => { setApprovalMethod("ASSESSMENT"); setError(""); setApproveTarget(c); }}
-                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
-                          >
-                            Approve assessment
-                          </button>
-                          <button onClick={() => { setApprovalMethod("MANUAL"); setManualReason(""); setManualEvidence(""); setError(""); setApproveTarget(c); }} className="btn btn-outline btn-warning btn-xs min-h-11 sm:min-h-0 text-2xs cursor-pointer">Manual certification</button>
-                          <button
-                            onClick={() => setRejectTarget(c)}
-                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
-                          >
-                            Reject
-                          </button>
+                        <td>
+                          <div className="flex flex-wrap gap-2 justify-end">
+                            <button
+                              onClick={() => { setApprovalMethod("ASSESSMENT"); setError(""); setApproveTarget(c); }}
+                              className="btn btn-outline btn-success btn-sm min-h-11 sm:min-h-0 cursor-pointer"
+                            >
+                              Approve assessment
+                            </button>
+                            <button onClick={() => { setApprovalMethod("MANUAL"); setManualReason(""); setManualEvidence(""); setError(""); setApproveTarget(c); }} className="btn btn-outline btn-warning btn-sm min-h-11 sm:min-h-0 cursor-pointer">Manual certification</button>
+                            <button
+                              onClick={() => setRejectTarget(c)}
+                              className="btn btn-outline btn-error btn-sm min-h-11 sm:min-h-0 cursor-pointer"
+                            >
+                              Reject
+                            </button>
+                          </div>
                         </td>
                       )}
                     </tr>
@@ -275,14 +275,14 @@ export default function CertificationReviewTable() {
 
       <Modal open={approveTarget !== null} onClose={() => setApproveTarget(null)} title={approvalMethod === "MANUAL" ? "Manual certification" : "Approve passing assessment?"} size="md">
         <ValidatedForm onSubmit={(event) => { event.preventDefault(); if (approveTarget) review(approveTarget, "CERTIFIED"); }}>
-          <p className="text-xs mb-3">{approveTarget?.tutor.anonymousId} · {approveTarget?.topic}</p>
-          <p className="text-xs mb-3">{approvalMethod === "MANUAL" ? "Use documented evidence of competence for this specific topic. This alternative does not record an assessment pass. Your reason and evidence will be audited." : "Requires a submitted passing assessment for this tutor and topic."}</p>
+          <p className="mb-3">{approveTarget && <AnonymousIdText id={approveTarget.tutor.anonymousId} role="TUTOR" />} · {approveTarget?.topic}</p>
+          <p className="text-sm text-(--kt-muted) mb-3">{approvalMethod === "MANUAL" ? "Use documented evidence of competence for this specific topic. This alternative does not record an assessment pass. Your reason and evidence will be audited." : "Requires a submitted passing assessment for this tutor and topic."}</p>
           <FeedbackBanner variant="error" message={error || null} />
           {approvalMethod === "MANUAL" && <div className="space-y-3">
-            <label className="form-control"><span className="label-text">Certification reason</span><textarea aria-label="Certification reason" required minLength={10} maxLength={500} value={manualReason} onChange={event => setManualReason(event.target.value)} className="textarea textarea-bordered w-full" /></label>
-            <label className="form-control"><span className="label-text">Qualification evidence</span><textarea aria-label="Qualification evidence" required minLength={10} maxLength={2000} value={manualEvidence} onChange={event => setManualEvidence(event.target.value)} placeholder="Describe or reference the reviewed credential, work sample or observed competency and its relevance to this topic." className="textarea textarea-bordered w-full" /></label>
+            <label className="flex flex-col gap-1"><span className="text-[0.9rem] font-medium">Certification reason</span><textarea aria-label="Certification reason" required minLength={10} maxLength={500} value={manualReason} onChange={event => setManualReason(event.target.value)} className="textarea textarea-bordered w-full" /></label>
+            <label className="flex flex-col gap-1"><span className="text-[0.9rem] font-medium">Qualification evidence</span><textarea aria-label="Qualification evidence" required minLength={10} maxLength={2000} value={manualEvidence} onChange={event => setManualEvidence(event.target.value)} placeholder="Describe or reference the reviewed credential, work sample or observed competency and its relevance to this topic." className="textarea textarea-bordered w-full" /></label>
           </div>}
-          <div className="flex justify-end gap-2 mt-4"><button type="button" onClick={() => setApproveTarget(null)} className="btn btn-ghost btn-sm">Cancel</button><button type="submit" disabled={saving} className="btn btn-primary btn-sm">{approvalMethod === "MANUAL" ? "Certify with evidence" : "Approve assessment"}</button></div>
+          <div className="flex justify-end gap-2 mt-4"><button type="button" onClick={() => setApproveTarget(null)} className="btn btn-ghost">Cancel</button><button type="submit" disabled={saving} className="btn btn-primary">{approvalMethod === "MANUAL" ? "Certify with evidence" : "Approve assessment"}</button></div>
         </ValidatedForm>
       </Modal>
 

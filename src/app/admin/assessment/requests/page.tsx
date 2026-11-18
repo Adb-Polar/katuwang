@@ -10,7 +10,7 @@ export default function AdminAssessmentRequestsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Assessment"
-        title="Question Requests"
+        title="Question requests"
         subtitle="Review and resolve tutor requests for more questions on a given subject and topic."
       />
       <QuestionBankManager only="requests" />

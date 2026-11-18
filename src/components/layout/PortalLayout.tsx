@@ -202,8 +202,9 @@ export default function PortalLayout({
                   <span className="kt-ic">{item.icon}</span>
                   {item.label}
                   {!!item.badge && item.badge > 0 && (
-                    <span className="badge badge-error badge-xs ml-auto">
+                    <span className="ml-auto text-sm font-semibold tabular-nums text-error">
                       {item.badge > 99 ? "99+" : item.badge}
+                      <span className="sr-only"> unread</span>
                     </span>
                   )}
                 </Link>
@@ -221,13 +222,15 @@ export default function PortalLayout({
     </span>
   );
 
+  const avatarClass = `kt-avatar overflow-hidden ${idRole === "TUTOR" ? "kt-avatar--tutor" : idRole === "LEARNER" ? "kt-avatar--learner" : ""}`;
+
   const logoutLink = (
     <Link
       href="/logout"
-      className="flex items-center gap-2 text-sm font-medium text-error/80 hover:text-error transition-colors"
+      className="flex items-center gap-2 text-sm font-medium text-(--kt-muted) hover:text-base-content transition-colors"
     >
-      <LogOut className="w-4 h-4" />
-      Log Out
+      <LogOut className="w-4 h-4" aria-hidden="true" />
+      Log out
     </Link>
   );
 
@@ -257,12 +260,12 @@ export default function PortalLayout({
           <button
             ref={triggerRef}
             type="button"
-            className="lg:hidden btn btn-ghost btn-sm btn-square"
+            className="lg:hidden btn btn-ghost btn-square"
             aria-label="Open menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen(true)}
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5" aria-hidden="true" />
           </button>
 
           {idRole !== "TUTOR" && <GlobalSearch audience={idRole === "LEARNER" ? "learner" : "admin"} />}
@@ -273,7 +276,7 @@ export default function PortalLayout({
           {profileHref ? (
             <Link
               href={profileHref}
-              className="kt-avatar overflow-hidden"
+              className={avatarClass}
               aria-label="Your profile"
             >
               {avatarUrl ? (
@@ -292,7 +295,7 @@ export default function PortalLayout({
               )}
             </Link>
           ) : (
-            <span className="kt-avatar overflow-hidden" aria-hidden="true">
+            <span className={avatarClass} aria-hidden="true">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -342,11 +345,11 @@ export default function PortalLayout({
             </div>
             <button
               type="button"
-              className="btn btn-ghost btn-sm btn-square"
+              className="btn btn-ghost btn-square"
               aria-label="Close menu"
               onClick={() => setMenuOpen(false)}
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
           <span className="kt-nav-label pb-0! px-2! text-primary">{portalLabel}</span>

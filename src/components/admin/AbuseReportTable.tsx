@@ -8,7 +8,7 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
 import AuditLogLink from "@/components/ui/AuditLogLink";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
@@ -78,7 +78,7 @@ export default function AbuseReportTable() {
     r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
 
   const targetDetails = (r: Report) => r.targetType === "TUTOR" ? (
-    r.tutor ? <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" /> : "—"
+    r.tutor ? <AnonymousIdText id={r.tutor.anonymousId} role="TUTOR" /> : "—"
   ) : r.class ? (
     <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
       {r.class.code} · {subjectDisplayLabel(r.class.subject)}
@@ -122,8 +122,6 @@ export default function AbuseReportTable() {
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Abuse Reports</h2>
-
           <div className="flex flex-wrap items-center justify-between gap-3">
             <Tabs
               tabs={[
@@ -138,7 +136,7 @@ export default function AbuseReportTable() {
               aria-label="Filter by report target"
               value={targetFilter}
               onChange={(e) => setTargetFilter(e.target.value as "" | "TUTOR" | "CLASS")}
-              className="select select-bordered select-sm min-h-11 md:min-h-0 w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered w-full sm:w-auto focus:select-primary"
             >
               <option value="">All targets</option>
               <option value="TUTOR">Tutor reports</option>
@@ -152,34 +150,32 @@ export default function AbuseReportTable() {
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
             <>
-            <div className="space-y-3 md:hidden">
+            <div className="md:hidden">
               {reports.map((r) => (
-                <article key={r.id} className="rounded-xl border border-base-200 p-4 space-y-3">
+                <article key={r.id} className="space-y-2 border-b border-(--kt-border) py-4 last:border-b-0">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="badge badge-neutral badge-sm font-bold">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
-                    <span className="text-xs text-(--kt-muted)">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
+                    <span className="text-sm text-(--kt-muted)">{r.targetType === "TUTOR" ? "Tutor report" : "Class report"}</span>
+                    <span className="text-sm text-(--kt-muted)">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
                   </div>
-                  <div className="text-sm font-semibold">{targetDetails(r)}</div>
-                  <p className="text-xs text-(--kt-muted)">Reported by <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" /></p>
-                  <div className="flex flex-wrap gap-1">
-                    {r.violations.map((v) => <span key={v} className="badge badge-outline h-auto max-w-full whitespace-normal py-1 text-left text-xs">{violationLabel(v)}</span>)}
-                  </div>
-                  {r.details && <p className="text-sm whitespace-normal break-words">{r.details}</p>}
-                  {tab !== "pending" && <p className="text-xs text-(--kt-muted)">Admin note: {r.resolutionNote || "No note"}</p>}
+                  <div className="font-medium">{targetDetails(r)}</div>
+                  <p className="text-sm text-(--kt-muted)">Reported by <AnonymousIdText id={r.reporter.anonymousId} role="LEARNER" /></p>
+                  <p>{r.violations.map(violationLabel).join(", ")}</p>
+                  {r.details && <p className="text-sm text-(--kt-muted) whitespace-normal break-words">{r.details}</p>}
+                  {tab !== "pending" && <p className="text-sm text-(--kt-muted)">Admin note: {r.resolutionNote || "No note"}</p>}
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     {tab === "pending" && <>
-                      <button type="button" onClick={() => setResolveTarget(r)} className="btn btn-outline btn-success btn-sm min-h-11">Resolve</button>
-                      <button type="button" onClick={() => setDismissTarget(r)} className="btn btn-outline btn-error btn-sm min-h-11">Dismiss</button>
+                      <button type="button" onClick={() => setResolveTarget(r)} className="btn btn-outline btn-success min-h-11">Resolve</button>
+                      <button type="button" onClick={() => setDismissTarget(r)} className="btn btn-outline btn-error min-h-11">Dismiss</button>
                     </>}
                     <AuditLogLink targetId={r.id} className="ml-auto" />
                   </div>
                 </article>
               ))}
             </div>
-            <div className="hidden overflow-x-auto rounded-xl border border-base-200 md:block">
-              <table className="table table-sm">
+            <div className="hidden overflow-x-auto md:block">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <th>Target</th>
                     <th>Reporter</th>
                     <th>Reasons</th>
@@ -191,18 +187,18 @@ export default function AbuseReportTable() {
                       onSort={toggle}
                     />
                     {tab !== "pending" && <th>Admin note</th>}
-                    <th></th>
+                    <th><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {reports.map((r) => (
-                    <tr key={r.id} className="text-sm align-top">
+                    <tr key={r.id} className="align-top">
                       <td>
-                        <span className="badge badge-neutral badge-xs text-2xs font-bold mb-1">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</span>
-                        <div className="font-mono text-xs">
+                        <div className="text-sm text-(--kt-muted)">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</div>
+                        <div className="whitespace-nowrap font-medium">
                           {r.targetType === "TUTOR" ? (
                             r.tutor ? (
-                              <AnonymousIdBadge id={r.tutor.anonymousId} role="TUTOR" />
+                              <AnonymousIdText id={r.tutor.anonymousId} role="TUTOR" />
                             ) : (
                               "—"
                             )
@@ -215,25 +211,19 @@ export default function AbuseReportTable() {
                           )}
                         </div>
                         {r.targetType === "CLASS" && r.class && (
-                          <div className="text-2xs text-(--kt-faint) mt-0.5">{subjectDisplayLabel(r.class.subject)}</div>
+                          <div className="text-sm text-(--kt-muted)">{subjectDisplayLabel(r.class.subject)}</div>
                         )}
                       </td>
                       <td>
-                        <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" />
+                        <AnonymousIdText id={r.reporter.anonymousId} role="LEARNER" />
                       </td>
                       <td className="max-w-xs whitespace-normal">
-                        <div className="flex flex-wrap gap-1">
-                          {r.violations.map((v) => (
-                            <span key={v} className="badge badge-outline badge-xs text-2xs">
-                              {violationLabel(v)}
-                            </span>
-                          ))}
-                        </div>
+                        <p>{r.violations.map(violationLabel).join(", ")}</p>
                         {r.details && (
-                          <p className="text-2xs text-(--kt-muted) mt-1 whitespace-normal">{r.details}</p>
+                          <p className="text-sm text-(--kt-muted) mt-1 whitespace-normal">{r.details}</p>
                         )}
                       </td>
-                      <td className="text-2xs text-(--kt-faint)">
+                      <td className="text-sm text-(--kt-muted)">
                         {tab === "pending"
                           ? formatDateTime(r.createdAt)
                           : r.reviewedAt
@@ -241,8 +231,8 @@ export default function AbuseReportTable() {
                             : "—"}
                       </td>
                       {tab !== "pending" && (
-                        <td className="text-2xs text-(--kt-muted) max-w-xs whitespace-normal">
-                          {r.resolutionNote || <span className="text-base-content/30 italic">No note</span>}
+                        <td className="max-w-xs whitespace-normal">
+                          {r.resolutionNote || <span className="text-sm text-(--kt-muted)">No note</span>}
                         </td>
                       )}
                       <td>
@@ -250,14 +240,16 @@ export default function AbuseReportTable() {
                           {tab === "pending" && (
                             <div className="flex items-center gap-2">
                               <button
+                                type="button"
                                 onClick={() => setResolveTarget(r)}
-                                className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                                className="btn btn-outline btn-success"
                               >
                                 Resolve
                               </button>
                               <button
+                                type="button"
                                 onClick={() => setDismissTarget(r)}
-                                className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                                className="btn btn-outline btn-error"
                               >
                                 Dismiss
                               </button>

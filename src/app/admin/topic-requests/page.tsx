@@ -10,7 +10,7 @@ export default function AdminTopicRequestsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Class Requests"
+        title="Class requests"
         subtitle="Close a request that violates platform policy, or re-open one."
       />
       <TopicRequestModerationTable />

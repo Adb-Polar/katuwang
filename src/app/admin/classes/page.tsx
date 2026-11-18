@@ -10,7 +10,7 @@ export default function AdminClassesPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="All Classes"
+        title="Classes"
         subtitle="Suspend a class that violates platform policy, or reinstate one."
       />
       <ClassModerationTable />

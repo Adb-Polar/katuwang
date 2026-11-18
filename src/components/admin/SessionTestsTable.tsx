@@ -7,15 +7,15 @@ import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import Pagination from "@/components/ui/Pagination";
-import StatusBadge from "@/components/ui/StatusBadge";
+import StatusText from "@/components/ui/StatusText";
 import SortableTh from "@/components/ui/SortableTh";
 import SessionTestResults from "@/components/tutor/SessionTestResults";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
-import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
@@ -82,8 +82,7 @@ export default function SessionTestsTable() {
   if (openId) {
     return (
       <div className="space-y-4">
-
-              <button onClick={() => setOpenId(null)} className="btn btn-ghost btn-sm text-xs">
+        <button type="button" onClick={() => setOpenId(null)} className="btn btn-ghost">
           ← Back to session tests
         </button>
         <SessionTestResults
@@ -106,14 +105,14 @@ export default function SessionTestsTable() {
               aria-label="Search session tests"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search title / class / tutor..."
-              className="input input-bordered input-sm text-xs focus:input-primary"
+              placeholder="Search by title, class, or tutor..."
+              className="input input-bordered w-full focus:input-primary"
             />
             <select
               aria-label="Filter session tests by subject"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered w-full focus:select-primary"
             >
               <option value="">All subjects</option>
               {subjects.map((s) => (
@@ -126,7 +125,7 @@ export default function SessionTestsTable() {
               aria-label="Filter session tests by status"
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="select select-bordered select-sm text-xs focus:select-primary"
+              className="select select-bordered w-full focus:select-primary"
             >
               <option value="">Any status</option>
               <option value="DRAFT">Draft</option>
@@ -140,10 +139,11 @@ export default function SessionTestsTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <>
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <SortableTh label="Class" field="classCode" sort={sort} dir={dir} onSort={toggle} />
                     <th>Tutor</th>
                     <SortableTh label="Session" field="sessionTopic" sort={sort} dir={dir} onSort={toggle} />
@@ -151,28 +151,28 @@ export default function SessionTestsTable() {
                     <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Questions" field="questionCount" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Attempts" field="attemptCount" sort={sort} dir={dir} onSort={toggle} />
-                    <th></th>
+                    <th><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {sorted.map((t) => (
-                    <tr key={t.id} className="text-sm">
-                      <td className="text-(--kt-muted)">
-                        <span className="font-mono text-2xs">{t.classCode}</span>
-                        <div className="text-2xs text-(--kt-faint)">{subjectDisplayLabel(t.subject)}</div>
+                    <tr key={t.id}>
+                      <td>
+                        <span className="whitespace-nowrap font-medium">{t.classCode}</span>
+                        <div className="text-sm text-(--kt-muted)">{subjectDisplayLabel(t.subject)}</div>
                       </td>
                       <td>
-                        <AnonymousIdBadge id={t.tutor.anonymousId} role="TUTOR" />
+                        <AnonymousIdText id={t.tutor.anonymousId} role="TUTOR" />
                       </td>
-                      <td className="text-(--kt-muted)">{t.sessionTopic}</td>
-                      <td className="text-(--kt-muted) max-w-[12rem] whitespace-normal">{t.title}</td>
+                      <td>{t.sessionTopic}</td>
+                      <td className="max-w-[12rem] whitespace-normal">{t.title}</td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[t.status]} label={t.status.toLowerCase()} size="xs" />
+                        <StatusText tone={STATUS_TONE[t.status]} label={statusDisplayLabel(t.status)} />
                       </td>
-                      <td className="text-(--kt-muted)">{t.questionCount}</td>
-                      <td className="text-(--kt-muted)">{t.attemptCount}</td>
+                      <td>{t.questionCount}</td>
+                      <td>{t.attemptCount}</td>
                       <td className="text-right">
-                        <button onClick={() => setOpenId(t.id)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
+                        <button type="button" onClick={() => setOpenId(t.id)} className="btn btn-outline min-h-11 md:min-h-0">
                           Results
                         </button>
                       </td>
@@ -180,10 +180,9 @@ export default function SessionTestsTable() {
                   ))}
                 </tbody>
               </table>
-              {sorted.length === 0 && (
-                <EmptyState>No session tests match these filters.</EmptyState>
-              )}
             </div>
+            {sorted.length === 0 && <EmptyState>No session tests match these filters.</EmptyState>}
+            </>
           )}
 
           <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} onPageSizeChange={setPageSize} />

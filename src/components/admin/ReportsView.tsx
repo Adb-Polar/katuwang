@@ -104,42 +104,42 @@ export default function ReportsView() {
       <FeedbackBanner variant="error" message={error || null} />
 
       {error && (
-        <button type="button" className="btn btn-outline btn-sm" onClick={() => setRetryKey((key) => key + 1)}>
+        <button type="button" className="btn btn-outline" onClick={() => setRetryKey((key) => key + 1)}>
           Retry reports
         </button>
       )}
 
       {reports && (
         <>
-          <div className="flex justify-end">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <dl className="flex flex-wrap gap-x-8 gap-y-3">
+              {[
+                ["Enrollment records, all time", reports.enrollments.total],
+                ["Current enrollments", reports.enrollments.current],
+                ["Withdrawn", reports.enrollments.withdrawn],
+                ["New in the last 30 days", reports.enrollments.last30Days],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <dt className="text-sm text-(--kt-muted)">{label}</dt>
+                  <dd className="font-serif text-2xl font-medium tabular-nums">{value}</dd>
+                </div>
+              ))}
+            </dl>
             <button
               type="button"
               onClick={exportCsv}
-              className="btn btn-outline btn-sm gap-1.5 text-xs"
+              className="btn btn-outline gap-2"
             >
-              <Download className="h-3.5 w-3.5" />
+              <Download className="h-4 w-4" />
               Export CSV
             </button>
           </div>
 
-          <div className="stats bg-base-100 shadow-md border border-base-200 w-full sm:w-auto flex-wrap stats-vertical sm:stats-horizontal">
-            <div className="stat py-4">
-              <div className="stat-title text-2xs">Historical enrollment records</div>
-              <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.total}</div>
-            </div>
-            <div className="stat py-4"><div className="stat-title text-2xs">Current enrollments</div><div className="stat-value text-lg font-sans font-medium">{reports.enrollments.current}</div></div>
-            <div className="stat py-4"><div className="stat-title text-2xs">Withdrawn records</div><div className="stat-value text-lg font-sans font-medium">{reports.enrollments.withdrawn}</div></div>
-            <div className="stat py-4">
-              <div className="stat-title text-2xs">Enrollments (Last 30 Days)</div>
-              <div className="stat-value text-lg font-sans font-medium">{reports.enrollments.last30Days}</div>
-            </div>
-          </div>
-
           <div className="card kt-card">
             <div className="card-body gap-2 p-5">
-              <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">
-                Enrollments — last 30 days
-              </h3>
+              <h2 className="font-serif text-xl font-medium leading-tight">
+                Enrollments in the last 30 days
+              </h2>
               <div className="h-56 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
@@ -149,22 +149,17 @@ export default function ReportsView() {
                     }))}
                     margin={{ top: 4, right: 8, bottom: 4, left: -16 }}
                   >
-                    <defs>
-                      <linearGradient id="enrollFill" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={c.primary} stopOpacity={0.35} />
-                        <stop offset="100%" stopColor={c.primary} stopOpacity={0.02} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
-                    <XAxis dataKey="date" tick={{ fontSize: 9, fill: c.text }} interval={4} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: c.text }} />
+                    <XAxis dataKey="date" tick={{ fontSize: 12, fill: c.text }} interval={4} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: c.text }} />
                     <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, borderColor: c.grid }} />
                     <Area
                       type="monotone"
                       dataKey="count"
                       stroke={c.primary}
                       strokeWidth={2}
-                      fill="url(#enrollFill)"
+                      fill={c.primary}
+                      fillOpacity={0.12}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -177,37 +172,37 @@ export default function ReportsView() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <BarChartCard title="Users by Role" rows={reports.usersByRole} labelKey="role" color={c.primary} labelFormatter={statusDisplayLabel} />
+            <BarChartCard title="Users by role" rows={reports.usersByRole} labelKey="role" color={c.primary} labelFormatter={statusDisplayLabel} />
             <BarChartCard
-              title="Users by Grade Level"
+              title="Users by grade level"
               rows={reports.usersByGradeLevel}
               labelKey="gradeLevel"
               color={c.primary}
               labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
-              title="Users by Status"
+              title="Users by status"
               rows={reports.usersByStatus}
               labelKey="status"
               color={c.secondary}
               labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
-              title="Classes by Subject"
+              title="Classes by subject"
               rows={reports.classesBySubject}
               labelKey="subject"
               color={c.primary}
               labelFormatter={subjectDisplayLabel}
             />
             <BarChartCard
-              title="Classes by Status"
+              title="Classes by status"
               rows={reports.classesByStatus}
               labelKey="status"
               color={c.secondary}
               labelFormatter={statusDisplayLabel}
             />
             <BarChartCard
-              title="Certifications by Status"
+              title="Certifications by status"
               rows={reports.certificationsByStatus}
               labelKey="status"
               color={c.secondary}

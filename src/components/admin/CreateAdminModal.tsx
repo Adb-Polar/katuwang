@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserPlus, CheckCircle2, Copy, Check } from "lucide-react";
+import { UserPlus, Copy, Check } from "lucide-react";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Modal from "@/components/ui/Modal";
@@ -109,11 +109,11 @@ export default function CreateAdminModal({
   };
 
   return (
-    <Modal open={isOpen} onClose={handleClose} title={createdAdmin ? "Admin Provisioned" : "Provision Admin Account"} size="md">
-        <p className="text-2xs text-(--kt-faint) mb-4">
+    <Modal open={isOpen} onClose={handleClose} title={createdAdmin ? "Admin account created" : "Create admin account"} size="md">
+        <p className="text-sm text-(--kt-muted) mb-4">
           {createdAdmin
             ? "The new administrator account has been created."
-            : "Assign administrative permissions with invitation link."}
+            : "The new admin sets their own password from an activation link."}
         </p>
 
         {error && (
@@ -124,23 +124,20 @@ export default function CreateAdminModal({
 
         {createdAdmin ? (
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-success/10 border border-success/20 flex items-start gap-3">
-              <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-0.5" />
-              <div className="text-xs space-y-1 text-base-content">
-                <p className="font-semibold text-sm">
-                  {createdAdmin.firstName} {createdAdmin.lastName} ({createdAdmin.anonymousId})
-                </p>
-                <p className="text-(--kt-muted)">
-                  Assigned role: <span className="font-semibold">ADMIN</span>. An activation email has been queued to{" "}
-                  <span className="font-mono text-base-content font-medium">{createdAdmin.email}</span>.
-                </p>
-              </div>
+            <div className="space-y-1">
+              <p className="font-semibold">
+                {createdAdmin.firstName} {createdAdmin.lastName} ({createdAdmin.anonymousId})
+              </p>
+              <p className="text-sm text-(--kt-muted)">
+                Role: admin. An activation email has been queued to{" "}
+                <span className="text-base-content font-medium break-all">{createdAdmin.email}</span>.
+              </p>
             </div>
 
             {activationUrl && (
               <div className="space-y-1.5">
-                <label htmlFor="admin-activation-url" className="text-xs font-medium text-(--kt-muted)">
-                  Direct Activation Link (valid for 48 hours)
+                <label htmlFor="admin-activation-url" className="text-[0.9rem] font-medium text-base-content">
+                  Activation link (valid for 48 hours)
                 </label>
                 <div className="flex items-center gap-2">
                   <input
@@ -148,28 +145,28 @@ export default function CreateAdminModal({
                     type="text"
                     readOnly
                     value={activationUrl}
-                    className="input input-bordered input-sm font-mono text-2xs w-full bg-base-200/50"
+                    className="input input-bordered font-mono text-sm w-full"
                   />
                   <button
                     type="button"
                     onClick={handleCopyLink}
-                    className="btn btn-sm btn-outline btn-primary gap-1.5 shrink-0"
+                    className="btn btn-outline btn-primary gap-1.5 shrink-0"
                   >
                     {copied ? (
                       <>
-                        <Check className="w-3.5 h-3.5 text-success" />
-                        <span className="text-xs">Copied</span>
+                        <Check className="w-4 h-4 text-success" />
+                        <span>Copied</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span className="text-xs">Copy</span>
+                        <Copy className="w-4 h-4" />
+                        <span>Copy</span>
                       </>
                     )}
                   </button>
                 </div>
-                <p className="text-2xs text-(--kt-faint)">
-                  You can copy this link if you need to provide it directly to the new administrator.
+                <p className="text-sm text-(--kt-muted)">
+                  Copy this link if you need to give it to the new administrator directly.
                 </p>
               </div>
             )}
@@ -178,7 +175,7 @@ export default function CreateAdminModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="btn btn-primary btn-sm text-xs cursor-pointer w-full"
+                className="btn btn-primary"
               >
                 Done
               </button>
@@ -186,74 +183,74 @@ export default function CreateAdminModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3.5">
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="First Name" required>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField label="First name" required size="md">
                 <input
                   type="text"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Maria"
-                  className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                  className="input input-bordered w-full focus:input-primary"
                 />
               </FormField>
-              <FormField label="Last Name" required>
+              <FormField label="Last name" required size="md">
                 <input
                   type="text"
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="e.g. Santos"
-                  className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                  className="input input-bordered w-full focus:input-primary"
                 />
               </FormField>
             </div>
 
-            <FormField label="Email Address" required hint="Must be a valid email for account activation.">
+            <FormField label="Email address" required hint="Must be a valid email for account activation." size="md">
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@school.edu"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered w-full focus:input-primary"
               />
             </FormField>
 
-            <FormField label="Contact Info" hint="Optional mobile number or contact details.">
+            <FormField label="Contact info" hint="Optional mobile number or contact details." size="md">
               <input
                 type="text"
                 value={contactInfo}
                 onChange={(e) => setContactInfo(e.target.value)}
                 placeholder="e.g. 0917-123-4567"
-                className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                className="input input-bordered w-full focus:input-primary"
               />
             </FormField>
 
-            <div className="p-3 bg-base-200/50 rounded-xl text-2xs text-(--kt-muted) leading-relaxed border border-base-200">
-              <span className="font-semibold text-base-content">Security Notice:</span> The new account will be assigned the standard <span className="font-medium text-primary">ADMIN</span> role. It cannot be granted Super Admin privileges from this form. An activation link will be generated for password setup.
-            </div>
+            <p className="text-sm text-(--kt-muted)">
+              The new account gets the standard admin role. Super admin access can&apos;t be granted from this form.
+            </p>
 
             <div className="modal-action pt-3 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={loading}
-                className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary btn-sm text-xs cursor-pointer gap-1.5"
+                className="btn btn-primary gap-2"
               >
                 {loading ? (
-                  <span className="loading loading-spinner loading-xs" />
+                  <span className="loading loading-spinner loading-sm" />
                 ) : (
                   <>
-                    <UserPlus className="w-3.5 h-3.5" />
-                    <span>Provision Admin</span>
+                    <UserPlus className="w-4 h-4" />
+                    <span>Create admin</span>
                   </>
                 )}
               </button>

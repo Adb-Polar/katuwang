@@ -19,7 +19,7 @@ interface SearchGroup {
 const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
   class: <GraduationCap className="h-3.5 w-3.5 text-primary" />,
   tutor: <UserRound className="h-3.5 w-3.5 text-(--kt-tutor-text)" />,
-  topic: <Tag className="h-3.5 w-3.5 text-(--kt-faint)" />,
+  topic: <Tag className="h-3.5 w-3.5 text-(--kt-muted)" />,
 };
 
 const ADMIN_SCOPES = [
@@ -176,6 +176,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
         // fights our Escape-to-close. We render our own clear button below.
         type="text"
         role="combobox"
+        aria-keyshortcuts="Control+K Meta+K"
         aria-expanded={showPanel}
         aria-controls="global-search-results"
         placeholder={scopePlaceholder}
@@ -197,13 +198,11 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
             setGroups([]);
             inputRef.current?.focus();
           }}
-          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-(--kt-faint) hover:text-base-content"
+          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-(--kt-muted) hover:text-base-content"
         >
           <X className="h-3.5 w-3.5" />
         </button>
-      ) : (
-        <kbd className="hidden rounded border border-base-300 px-1.5 text-xs text-(--kt-muted) md:inline">⌘K</kbd>
-      )}
+      ) : null}
 
       {showPanel && (
         <div
@@ -220,7 +219,7 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
           ) : (
             groups.map((g) => (
               <div key={g.kind + g.label}>
-                <p className="px-3 pb-1 pt-2 text-xs font-medium text-(--kt-muted)">
+                <p className="px-3 pb-1 pt-2 text-sm font-medium text-(--kt-muted)">
                   {g.label}
                 </p>
                 {g.items.map((item) => {
@@ -241,10 +240,10 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
                       <span className="min-w-0 flex-1">
                         <span className="block truncate">{item.title}</span>
                         {item.subtitle && (
-                          <span className="block truncate text-xs text-(--kt-muted)">{item.subtitle}</span>
+                          <span className="block truncate text-sm text-(--kt-muted)">{item.subtitle}</span>
                         )}
                       </span>
-                      {idx === active && <CornerDownLeft className="h-3 w-3 shrink-0 text-base-content/30" />}
+                      {idx === active && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-(--kt-muted)" aria-hidden="true" />}
                     </button>
                   );
                 })}

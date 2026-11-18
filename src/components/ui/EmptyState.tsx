@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 /**
- * The muted italic "nothing here yet" row shown in place of an empty table body
+ * The muted "nothing here yet" row shown in place of an empty table body
  * or list. Matches the admin-table empty copy styling.
  */
 export default function EmptyState({
@@ -12,7 +12,7 @@ export default function EmptyState({
   padding?: string;
 }) {
   return (
-    <div className={`text-center ${padding} text-(--kt-faint) italic text-sm`}>
+    <div className={`text-center ${padding} text-(--kt-muted)`}>
       {children}
     </div>
   );

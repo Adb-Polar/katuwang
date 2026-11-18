@@ -11,7 +11,7 @@ export default function AdminAbuseReportsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Abuse Reports"
+        title="Abuse reports"
         subtitle="Learners flagging a tutor or a class. Resolve or dismiss each report — any suspension or ban is done from the Users or Classes pages."
       />
       <AbuseReportTable />

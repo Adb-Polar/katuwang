@@ -6,8 +6,8 @@ import { Role, AccountStatus } from "@prisma/client";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import SortableTh from "@/components/ui/SortableTh";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import StatusBadge from "@/components/ui/StatusBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
+import StatusText from "@/components/ui/StatusText";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Tabs from "@/components/ui/Tabs";
@@ -16,12 +16,13 @@ import { statusDisplayLabel } from "@/lib/displayLabels";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
-import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
 import CreateAdminModal from "@/components/admin/CreateAdminModal";
 import Modal from "@/components/ui/Modal";
-import { Shield, Crown, ShieldCheck, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
 const PAGE_SIZE = ADMIN_PAGE_SIZE;
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 interface AdminRecord {
   id: string;
@@ -96,25 +97,10 @@ export default function AdminManagementTable() {
     admins: admins.filter((a) => a.role === "ADMIN").length,
   };
 
-  const statCards: StatCardProps[] = [
-    {
-      label: "Total Administrators",
-      value: counts.total ?? admins.length,
-      icon: Shield,
-      tint: "primary",
-    },
-    {
-      label: "Super Admins",
-      value: counts.superAdmins ?? 0,
-      icon: Crown,
-      tint: "accent",
-    },
-    {
-      label: "Standard Admins",
-      value: counts.admins ?? 0,
-      icon: ShieldCheck,
-      tint: "success",
-    },
+  const adminNumbers = [
+    plural(counts.total ?? admins.length, "administrator", "administrators"),
+    plural(counts.superAdmins ?? 0, "super admin", "super admins"),
+    plural(counts.admins ?? 0, "standard admin", "standard admins"),
   ];
 
   const openModal = (admin: AdminRecord) => {
@@ -139,7 +125,7 @@ export default function AdminManagementTable() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update account.");
 
-      setSuccess(`${target.anonymousId} is now ${status}.`);
+      setSuccess(`${target.anonymousId} is now ${statusDisplayLabel(status).toLowerCase()}.`);
       setTarget(null);
       refetch();
       setTimeout(() => setSuccess(""), 4000);
@@ -154,35 +140,32 @@ export default function AdminManagementTable() {
     <div className="space-y-6">
       <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={target ? null : error || null} />
-      {!target && error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry administrators</button>}
+      {!target && error && <button type="button" className="btn btn-outline min-h-11" onClick={refetch}>Retry administrators</button>}
 
-      {/* Dashboard Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map((s) => (
-          <StatCard key={s.label} {...s} />
-        ))}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <ul aria-label="Administrator numbers" className="flex flex-wrap gap-x-6 gap-y-2 text-(--kt-muted)">
+          {adminNumbers.map((line) => (
+            <li key={line}>{line}</li>
+          ))}
+        </ul>
+        <button
+          type="button"
+          onClick={() => setCreateModalOpen(true)}
+          className="btn btn-primary gap-2 self-start sm:self-auto"
+        >
+          <UserPlus className="w-4 h-4" />
+          <span>Create admin account</span>
+        </button>
       </div>
 
-      {/* User Management Table Section */}
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="card-title text-sm font-bold">Platform Administrators</h2>
-            <button
-              type="button"
-              onClick={() => setCreateModalOpen(true)}
-              className="btn btn-primary btn-sm text-xs gap-1.5 cursor-pointer self-start sm:self-auto"
-            >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Create Admin Account</span>
-            </button>
-          </div>
 
           <Tabs
             tabs={[
               { key: "all", label: "All" },
-              { key: "super_admins", label: "Super Admins" },
-              { key: "admins", label: "Standard Admins" },
+              { key: "super_admins", label: "Super admins" },
+              { key: "admins", label: "Standard admins" },
             ]}
             active={activeTab}
             onChange={(key) => setActiveTab(key as "all" | "super_admins" | "admins")}
@@ -195,15 +178,15 @@ export default function AdminManagementTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, or ID..."
-              className="input input-bordered min-h-11 sm:input-sm w-full sm:max-w-xs text-base sm:text-xs focus:input-primary"
+              className="input input-bordered min-h-11 w-full sm:max-w-xs focus:input-primary"
             />
             <select
               aria-label="Filter administrators by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as AccountStatus | "")}
-              className="select select-bordered min-h-11 sm:select-sm w-full sm:w-auto text-base sm:text-xs focus:select-primary"
+              className="select select-bordered min-h-11 w-full sm:w-auto focus:select-primary"
             >
-              <option value="">All Statuses</option>
+              <option value="">All statuses</option>
               <option value="ACTIVE">Active</option>
               <option value="SUSPENDED">Suspended</option>
             </select>
@@ -212,10 +195,10 @@ export default function AdminManagementTable() {
           {loading ? (
             <LoadingRow />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <SortableTh label="Code" field="code" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Name" field="name" sort={sort} dir={dir} onSort={toggle} />
                     <th>Email</th>
@@ -229,10 +212,10 @@ export default function AdminManagementTable() {
                   {admins.map((u) => (
                     <tr
                       key={u.id}
-                      className="text-sm hover:bg-base-200/40"
+                      className="hover:bg-base-200/40"
                     >
                       <td>
-                        <AnonymousIdBadge
+                        <AnonymousIdText
                           id={u.anonymousId}
                           role="ADMIN"
                         />
@@ -242,37 +225,29 @@ export default function AdminManagementTable() {
                       </td>
                       <td className="text-(--kt-muted)">{u.email}</td>
                       <td>
-                        {u.role === "SUPER_ADMIN" ? (
-                          <span className="kt-badge kt-badge--accent text-2xs font-semibold">
-                            Super Admin
-                          </span>
-                        ) : (
-                          <span className="kt-badge kt-badge--neutral text-2xs font-semibold">
-                            Admin
-                          </span>
-                        )}
+                        {u.role === "SUPER_ADMIN" ? "Super admin" : "Admin"}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} size="xs" />
+                        <StatusText tone={STATUS_TONE[u.status]} label={statusDisplayLabel(u.status)} />
                         {u.status === "SUSPENDED" && u.statusReason && (
-                          <div className="text-2xs text-(--kt-faint) mt-1 max-w-xs truncate">
+                          <div className="text-sm text-(--kt-muted) mt-1 max-w-xs truncate">
                             {u.statusReason}
                           </div>
                         )}
                       </td>
-                      <td className="text-(--kt-muted) text-xs">
+                      <td className="text-sm text-(--kt-muted) whitespace-nowrap">
                         {formatDateTime(u.createdAt)} PHT
                       </td>
                       <td className="text-right">
                         {u.role === "SUPER_ADMIN" ? (
-                          <span className="text-2xs text-(--kt-faint) font-medium">
-                            System Protected
+                          <span className="text-sm text-(--kt-muted)">
+                            Protected
                           </span>
                         ) : (
                           <button
                             type="button"
                             onClick={() => openModal(u)}
-                            className="btn btn-outline btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-primary min-h-11"
                           >
                             Manage
                           </button>
@@ -298,33 +273,32 @@ export default function AdminManagementTable() {
         </div>
       </section>
 
-      {/* Manage Account Modal (mirroring UserManagementTable) */}
-      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage Administrator">
+      <Modal open={!!target} onClose={() => setTarget(null)} title="Manage administrator">
         {target && <>
-            <p className="text-2xs text-(--kt-faint) mb-4">
-              {target.anonymousId} · {target.firstName} {target.lastName}
+            <p className="text-sm text-(--kt-muted) mb-4">
+              <AnonymousIdText id={target.anonymousId} role="ADMIN" /> · {target.firstName} {target.lastName}
             </p>
 
             <FeedbackBanner variant="error" message={error || null} />
 
             <div className="space-y-3.5">
-              <FormField label="Status" required>
+              <FormField label="Status" required size="md">
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as AccountStatus)}
-                  className="select select-bordered select-sm w-full focus:select-primary text-xs"
+                  className="select select-bordered w-full focus:select-primary"
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="SUSPENDED">Suspended</option>
                 </select>
               </FormField>
 
-              <FormField label="Reason" hint="Optional — audit log record for this status change">
+              <FormField label="Reason" hint="Optional — audit log record for this status change" size="md">
                 <textarea
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Why is this account's status changing?"
-                  className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-20"
+                  className="textarea textarea-bordered w-full focus:textarea-primary h-24"
                 />
               </FormField>
             </div>
@@ -333,28 +307,27 @@ export default function AdminManagementTable() {
               <button
                 type="button"
                 onClick={() => setTarget(null)}
-                className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="btn btn-primary btn-sm text-xs cursor-pointer"
+                className="btn btn-primary"
               >
-                {saving ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
+                {saving ? <span className="loading loading-spinner loading-sm"></span> : "Save"}
               </button>
             </div>
         </>}
       </Modal>
 
-      {/* Create Admin Modal */}
       <CreateAdminModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
         onAdminCreated={() => {
           refetch();
-          setSuccess("New administrator account provisioned successfully.");
+          setSuccess("New admin account created.");
           setTimeout(() => setSuccess(""), 4000);
         }}
       />

@@ -12,6 +12,7 @@ import Pagination from "@/components/ui/Pagination";
 import SortableTh from "@/components/ui/SortableTh";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
 
 interface AuditLogEntry {
@@ -65,12 +66,11 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
-      {error && <button type="button" className="btn btn-outline btn-sm min-h-11" onClick={refetch}>Retry audit log</button>}
+      {error && <button type="button" className="btn btn-outline" onClick={refetch}>Retry audit log</button>}
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Moderation Action History</h2>
-          <p className="text-xs text-(--kt-muted)">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+          <p className="text-sm text-(--kt-muted)">Timestamps shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
@@ -78,14 +78,14 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               aria-label="Search audit log"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search admin ID, reason, target ID..."
-              className="input input-bordered min-h-11 sm:input-sm text-base sm:text-xs focus:input-primary"
+              placeholder="Search admin ID, reason or target ID"
+              className="input input-bordered w-full focus:input-primary"
             />
             <select
               aria-label="Filter audit actions"
               value={action}
               onChange={(e) => setAction(e.target.value)}
-              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
+              className="select select-bordered w-full focus:select-primary"
             >
               <option value="">All actions</option>
               {ACTIONS.map((a) => (
@@ -98,7 +98,7 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
               aria-label="Filter audit target types"
               value={targetType}
               onChange={(e) => setTargetType(e.target.value)}
-              className="select select-bordered min-h-11 sm:select-sm text-base sm:text-xs focus:select-primary"
+              className="select select-bordered w-full focus:select-primary"
             >
               <option value="">All target types</option>
               {TARGET_TYPES.map((t) => (
@@ -112,10 +112,10 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
           {loading ? (
             <LoadingRow />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-xs">
+                  <tr>
                     <SortableTh label="Action" field="action" sort={sort} dir={dir} onSort={toggle} />
                     <SortableTh label="Target" field="targetType" sort={sort} dir={dir} onSort={toggle} />
                     <th>Admin</th>
@@ -125,18 +125,19 @@ export default function AuditLogTable({ initialQuery = "" }: { initialQuery?: st
                 </thead>
                 <tbody>
                   {logs.map((log) => (
-                    <tr key={log.id} className="text-sm">
-                      <td className="font-semibold text-(--kt-muted)">
+                    <tr key={log.id}>
+                      <td className="font-medium">
                         {auditActionDisplayLabel(log.action)}
                       </td>
                       <td className="text-(--kt-muted)">
                         {statusDisplayLabel(log.targetType)} · {log.targetId}
                       </td>
-                      <td className="text-(--kt-muted)">
-                        {log.admin.anonymousId} ({log.admin.firstName} {log.admin.lastName})
+                      <td className="whitespace-nowrap">
+                        <AnonymousIdText id={log.admin.anonymousId} role="ADMIN" />
+                        <span className="text-sm text-(--kt-muted)"> {log.admin.firstName} {log.admin.lastName}</span>
                       </td>
                       <td className="min-w-48 max-w-md whitespace-normal break-words text-(--kt-muted)">{formatAuditReason(log.reason) || "—"}</td>
-                      <td className="text-(--kt-faint)">
+                      <td className="whitespace-nowrap text-sm text-(--kt-muted)">
                         {formatDateTime(log.createdAt)}
                       </td>
                     </tr>

@@ -76,7 +76,7 @@ export default function ActionMenu({ label, actions, disabled = false }: {
         aria-expanded={position !== null}
         aria-controls={position ? id : undefined}
         disabled={disabled}
-        className="btn btn-ghost btn-sm btn-square min-h-11 min-w-11 sm:min-h-8 sm:min-w-8"
+        className="btn btn-ghost btn-square min-h-11 min-w-11"
         onClick={() => position ? close() : open()}
         onKeyDown={(event) => {
           if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -118,7 +118,7 @@ export default function ActionMenu({ label, actions, disabled = false }: {
               tabIndex={-1}
               disabled={action.disabled}
               title={action.title}
-              className={`flex min-h-11 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-xs whitespace-normal hover:bg-base-200 focus:bg-base-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-9 ${action.danger ? "mt-1 border-t border-base-200 text-error" : ""}`}
+              className={`flex min-h-11 w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm whitespace-normal hover:bg-base-200 focus:bg-base-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-10 ${action.danger ? "mt-1 border-t border-base-200 text-error" : ""}`}
               onClick={() => { close(); action.onSelect(); }}
             >
               <span className="shrink-0" aria-hidden="true">{action.icon}</span>

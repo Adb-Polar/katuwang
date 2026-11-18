@@ -20,8 +20,8 @@ export default async function AdminAdminsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Super Admin Portal"
-        title="Platform Administrators"
-        subtitle="Provision and manage platform administrator accounts, view roles, and manage access."
+        title="Administrators"
+        subtitle="Create admin accounts and suspend or restore their access. Super admin accounts are protected."
       />
       <AdminManagementTable />
     </div>

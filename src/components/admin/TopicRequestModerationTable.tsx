@@ -13,8 +13,9 @@ import { usePaginatedList } from "@/hooks/usePaginatedList";
 import { useTableSort } from "@/hooks/useTableSort";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import SortableTh from "@/components/ui/SortableTh";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import StatusBadge from "@/components/ui/StatusBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
+import StatusText from "@/components/ui/StatusText";
+import EmptyState from "@/components/ui/EmptyState";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -118,13 +119,11 @@ export default function TopicRequestModerationTable() {
     <div className="space-y-6">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <FeedbackBanner variant="success" message={success || null} />
+      <FeedbackBanner variant="success" message={success || null} />
       <FeedbackBanner variant="error" message={closeTarget ? null : error || null} />
 
       <section className="card kt-card">
         <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">All Class Requests</h2>
-
           <div className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
@@ -132,15 +131,15 @@ export default function TopicRequestModerationTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by learner or topic..."
-              className="input input-bordered input-sm w-full sm:max-w-xs text-xs focus:input-primary"
+              className="input input-bordered w-full sm:max-w-xs focus:input-primary"
             />
             <select
               aria-label="Filter class requests by subject"
               value={subjectFilter}
               onChange={(e) => setSubjectFilter(e.target.value)}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered w-full sm:w-auto focus:select-primary"
             >
-              <option value="">All Subjects</option>
+              <option value="">All subjects</option>
               {subjectCatalog.map((s) => (
                 <option key={s.slug} value={s.slug}>
                   {s.name}
@@ -151,9 +150,9 @@ export default function TopicRequestModerationTable() {
               aria-label="Filter class requests by status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as RequestStatus | "EXPIRED" | "")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered w-full sm:w-auto focus:select-primary"
             >
-              <option value="">All Statuses</option>
+              <option value="">All statuses</option>
               <option value="EXPIRED">Expired</option>
               <option value="OPEN">Open</option>
               <option value="ACCEPTED">Accepted</option>
@@ -165,9 +164,9 @@ export default function TopicRequestModerationTable() {
               aria-label="Filter class requests by audience"
               value={scopeFilter}
               onChange={(e) => setScopeFilter(e.target.value as "" | "public" | "directed")}
-              className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
+              className="select select-bordered w-full sm:w-auto focus:select-primary"
             >
-              <option value="">Public + Directed</option>
+              <option value="">Public and directed</option>
               <option value="public">Public only</option>
               <option value="directed">Directed only</option>
             </select>
@@ -178,43 +177,44 @@ export default function TopicRequestModerationTable() {
           ) : loadError ? (
             <LoadErrorState message={loadError} onRetry={refetch} />
           ) : (
-            <div className="overflow-x-auto border border-base-200 rounded-xl">
-              <table className="table table-sm">
+            <>
+            <div className="overflow-x-auto">
+              <table className="table">
                 <thead>
-                  <tr className="text-2xs">
+                  <tr>
                     <th>Learner</th>
-                    <SortableTh label="Subject / Topics" field="subject" sort={sort} dir={dir} onSort={toggle} />
+                    <SortableTh label="Subject and topics" field="subject" sort={sort} dir={dir} onSort={toggle} />
                     <th>Directed to</th>
                     <th>Linked class</th>
                     <SortableTh label="Status" field="status" sort={sort} dir={dir} onSort={toggle} />
-                    <th></th>
+                    <th><span className="sr-only">Actions</span></th>
                   </tr>
                 </thead>
                 <tbody>
                   {requests.map((r) => (
-                    <tr key={r.id} className="text-xs">
+                    <tr key={r.id}>
                       <td>
                         <Link
                           href={`/admin/users/${r.learner.id}`}
-                          className="inline-block hover:opacity-70 transition-opacity"
+                          className="inline-block hover:underline"
                         >
-                          <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
-                          <div className="text-2xs text-(--kt-faint) mt-1 hover:underline">
+                          <AnonymousIdText id={r.learner.anonymousId} role="LEARNER" />
+                          <div className="text-sm text-(--kt-muted)">
                             {r.learner.firstName} {r.learner.lastName}
                           </div>
                         </Link>
                       </td>
                       <td>
-                        <Link href={`/admin/topic-requests/${r.id}`} className="font-semibold link link-primary">{subjectDisplayLabel(r.subject)} · History</Link>
-                        <div className="text-2xs text-(--kt-faint)">{r.topics.join(", ")}</div>
+                        <Link href={`/admin/topic-requests/${r.id}`} className="font-medium text-primary hover:underline">{subjectDisplayLabel(r.subject)}</Link>
+                        <div className="text-sm text-(--kt-muted)">{r.topics.join(", ")}</div>
                       </td>
                       <td className="text-(--kt-muted)">
                         {r.directedTo ? (
                           <Link
                             href={`/admin/users/${r.directedTo.id}`}
-                            className="inline-block hover:opacity-70 transition-opacity"
+                            className="inline-block hover:underline"
                           >
-                            <AnonymousIdBadge id={r.directedTo.anonymousId} role="TUTOR" />
+                            <AnonymousIdText id={r.directedTo.anonymousId} role="TUTOR" />
                           </Link>
                         ) : (
                           "Public"
@@ -224,7 +224,7 @@ export default function TopicRequestModerationTable() {
                         {r.fulfilledClass ? (
                           <Link
                             href={`/admin/classes/${r.fulfilledClass.id}`}
-                            className="font-mono text-2xs link link-hover text-primary"
+                            className="whitespace-nowrap font-medium text-primary hover:underline"
                           >
                             {r.fulfilledClass.code}
                           </Link>
@@ -233,7 +233,7 @@ export default function TopicRequestModerationTable() {
                         )}
                       </td>
                       <td>
-                        <StatusBadge tone={STATUS_TONE[r.status]} label={statusDisplayLabel(r.status)} size="xs" />
+                        <StatusText tone={STATUS_TONE[r.status]} label={statusDisplayLabel(r.status)} />
                       </td>
                       <td>
                         <div className="flex flex-wrap gap-2 justify-end">
@@ -241,20 +241,22 @@ export default function TopicRequestModerationTable() {
                           r.status === "ACCEPTED" ||
                           r.status === "ENROLLED") && (
                           <button
+                            type="button"
                             onClick={() => {
                               setCloseTarget(r);
                               setReason("");
                               setError("");
                             }}
-                            className="btn btn-outline btn-error btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-error min-h-11 md:min-h-0"
                           >
                             Close
                           </button>
                         )}
                         {(r.status === "CANCELLED" || r.status === "ACCEPTED") && (
                           <button
+                            type="button"
                             onClick={() => setReopenTarget(r)}
-                            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 text-2xs font-bold cursor-pointer"
+                            className="btn btn-outline btn-success min-h-11 md:min-h-0"
                           >
                             Re-open
                           </button>
@@ -265,10 +267,9 @@ export default function TopicRequestModerationTable() {
                   ))}
                 </tbody>
               </table>
-              {requests.length === 0 && (
-                <div className="text-center py-8 text-(--kt-faint) italic text-xs">No requests found.</div>
-              )}
             </div>
+            {requests.length === 0 && <EmptyState>No requests found.</EmptyState>}
+            </>
           )}
 
           <Pagination
@@ -283,19 +284,19 @@ export default function TopicRequestModerationTable() {
 
       <Modal open={closeTarget !== null} onClose={() => setCloseTarget(null)} title="Close request">
         {closeTarget && <ValidatedForm onSubmit={(e) => { e.preventDefault(); void moderate(closeTarget.id, "CANCELLED", e.currentTarget); }}>
-            <p className="text-2xs text-(--kt-faint) mb-4">
+            <p className="text-sm text-(--kt-muted) mb-4">
               {subjectDisplayLabel(closeTarget.subject)} · {closeTarget.topics.join(", ")}
             </p>
 
             <FeedbackBanner variant="error" message={error || null} />
 
-            <FormField label="Reason" hint="Optional — shown for your own records">
+            <FormField size="md" label="Reason" hint="Optional — shown for your own records">
               <textarea
                 maxLength={500}
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Why is this request being closed?"
-                className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-20"
+                className="textarea textarea-bordered w-full focus:textarea-primary h-24"
               />
             </FormField>
 
@@ -303,15 +304,15 @@ export default function TopicRequestModerationTable() {
               <button
                 type="button"
                 onClick={() => setCloseTarget(null)}
-                className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
+                className="btn btn-ghost"
               >
                 Cancel
               </button>
               <button type="submit"
                 disabled={saving}
-                className="btn btn-error btn-sm text-xs cursor-pointer"
+                className="btn btn-error"
               >
-                {saving ? <span className="loading loading-spinner loading-xs"></span> : "Close request"}
+                {saving ? <span className="loading loading-spinner loading-sm"></span> : "Close request"}
               </button>
             </div>
         </ValidatedForm>}

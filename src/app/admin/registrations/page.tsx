@@ -10,7 +10,7 @@ export default function AdminRegistrationsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Registration Approvals"
+        title="Registrations to review"
         subtitle="Approve or decline new learner and tutor accounts awaiting review. Active only while 'Require admin approval for new registrations' is enabled in Settings."
       />
       <RegistrationApprovalTable />

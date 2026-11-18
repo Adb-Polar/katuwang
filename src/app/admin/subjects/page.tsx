@@ -10,7 +10,7 @@ export default function AdminSubjectsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Subjects & Topics"
+        title="Subjects & topics"
         subtitle="The taxonomy used across classes, matching, class requests and assessments. Renaming a topic updates it everywhere it's already stored."
       />
       <SubjectTopicManager />

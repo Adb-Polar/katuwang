@@ -1,15 +1,15 @@
 import { redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
-import { ArrowRight, ScrollText, Users, GraduationCap, ShieldAlert, CalendarClock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
-import StatusBadge from "@/components/ui/StatusBadge";
-import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
-import { formatDateTime } from "@/lib/datetime";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
+import { formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import { formatAuditReason } from "@/lib/auditLogDisplay";
 import { Metadata } from "next";
 import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
@@ -55,107 +55,86 @@ export default async function AdminDashboard() {
       }),
     ]);
 
-  const statCards: StatCardProps[] = [
-    { label: "Learners", value: learnerCount, icon: Users, tint: "primary" },
-    { label: "Tutors", value: tutorCount, icon: GraduationCap, tint: "accent" },
-    { label: "Flagged Accounts", value: flaggedAccountCount, icon: ShieldAlert, tint: "error" },
-    { label: "Active Classes", value: activeClassCount, icon: CalendarClock, tint: "success" },
-  ];
-
-  // `tone` drives the count badge colour — only applied when value > 0, except
-  // "Active classes" which is informational and stays neutral.
-  const actions = [
-    { label: "Pending registrations", value: pendingRegistrationCount, href: "/admin/registrations", tone: "warning" },
-    { label: "Pending certifications", value: pendingCertCount, href: "/admin/assessment/certifications", tone: "warning" },
-    { label: "Open question requests", value: openQuestionRequestCount, href: "/admin/assessment/requests", tone: "warning" },
-    { label: "Open topic requests", value: openTopicRequestCount, href: "/admin/topic-requests", tone: "warning" },
-    { label: "Open class appeals", value: openClassAppealCount, href: "/admin/class-appeals", tone: "warning" },
-    { label: "Flagged accounts", value: flaggedAccountCount, href: "/admin/users", tone: "error" },
-    { label: "Active classes", value: activeClassCount, href: "/admin/classes", tone: "neutral" },
+  const queues = [
+    { label: "Registrations to review", value: pendingRegistrationCount, href: "/admin/registrations" },
+    { label: "Certification requests", value: pendingCertCount, href: "/admin/assessment/certifications" },
+    { label: "Question requests", value: openQuestionRequestCount, href: "/admin/assessment/requests" },
+    { label: "Open class requests", value: openTopicRequestCount, href: "/admin/topic-requests" },
+    { label: "Class appeals", value: openClassAppealCount, href: "/admin/class-appeals" },
+    { label: "Suspended or banned accounts", value: flaggedAccountCount, href: "/admin/users" },
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Admin Portal"
-        title="Admin Dashboard"
-        subtitle="Manage system configurations, user logs, and platform reports."
-        actions={<StatusBadge tone="error" label="Admin" size="sm" />}
-      />
+    <div className="flex flex-col gap-8">
+      <PageHeader eyebrow="Admin Portal" title="Dashboard" subtitle={`What needs a decision, and what admins did last. Times are in ${SCHOOL_TIME_ZONE_LABEL}.`} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((s) => (
-          <StatCard key={s.label} {...s} />
-        ))}
-      </div>
+      <nav aria-label="Platform numbers" className="flex flex-wrap gap-x-6 gap-y-2 -mt-4">
+        <Link href="/admin/users" className="link link-hover text-primary">
+          {plural(learnerCount, "learner", "learners")}
+        </Link>
+        <Link href="/admin/users" className="link link-hover text-primary">
+          {plural(tutorCount, "tutor", "tutors")}
+        </Link>
+        <Link href="/admin/classes" className="link link-hover text-primary">
+          {plural(activeClassCount, "scheduled class", "scheduled classes")}
+        </Link>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <section className="order-2 lg:order-1 lg:col-span-2 min-w-0 card kt-card">
-          <div className="card-body gap-3">
-            <h2 className="card-title text-sm font-bold flex items-center gap-2">
-              <ScrollText className="h-4 w-4 text-primary" />
-              Recent activity
-            </h2>
-            {recentLogs.length === 0 ? (
-              <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-                No audit-log entries yet.
-              </p>
-            ) : (
-              <ul className="divide-y divide-base-200">
-                {recentLogs.map((log) => {
-                  const summary = formatAuditReason(log.reason);
-                  return (
-                    <li key={log.id} className="py-2.5 text-xs">
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-                        <span className="min-w-0 break-words font-semibold text-(--kt-muted)">
-                          {auditActionDisplayLabel(log.action)}
-                          <span className="font-normal text-(--kt-faint)"> · {statusDisplayLabel(log.targetType)}</span>
-                        </span>
-                        <span className="text-(--kt-faint) shrink-0">{formatDateTime(log.createdAt)} PHT</span>
-                      </div>
-                      {summary && (
-                        <p className="mt-1 break-words text-xs leading-relaxed text-(--kt-muted)">
-                          {summary}
-                        </p>
-                      )}
-                      <p className="text-2xs text-(--kt-faint) mt-1">By {log.admin.anonymousId}</p>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            <Link href="/admin/audit-log" className="text-xs text-primary font-medium hover:underline mt-1">
-              View full audit log →
-            </Link>
-          </div>
-        </section>
-
-        <section className="order-1 lg:order-2 card kt-card">
-          <div className="card-body gap-2">
-            <h2 className="card-title text-sm font-bold">Needs attention</h2>
-            {actions.map((a) => (
+      <section aria-labelledby="needs-attention" className="kt-card">
+        <h2 id="needs-attention" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+          Needs attention
+        </h2>
+        <ul>
+          {queues.map((q) => (
+            <li key={q.href} className="border-b border-(--kt-border) last:border-b-0">
               <Link
-                key={a.href}
-                href={a.href}
-                className="flex items-center justify-between gap-2 py-2 text-xs font-medium text-(--kt-muted) hover:text-primary"
+                href={q.href}
+                className="flex! w-full items-center justify-between gap-4 px-5 py-3 hover:bg-base-200"
               >
-                <span>{a.label}</span>
-                <span className="flex items-center gap-1.5">
-                  <span
-                    className={`kt-badge kt-badge--${a.value > 0 ? a.tone : "neutral"}`}
-                  >
-                    {a.value}
-                  </span>
-                  <ArrowRight className="h-3.5 w-3.5" />
+                <span className={q.value > 0 ? "text-base-content" : "text-(--kt-muted)"}>{q.label}</span>
+                <span className={`tabular-nums ${q.value > 0 ? "font-semibold text-primary" : "text-(--kt-muted)"}`}>
+                  {q.value > 0 ? q.value : "None"}
                 </span>
               </Link>
-            ))}
-            <p className="text-2xs text-(--kt-faint) mt-1">
-              Signed in as {session!.user.fullName}.
-            </p>
-          </div>
-        </section>
-      </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section aria-labelledby="recent-activity" className="kt-card">
+        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
+          <h2 id="recent-activity" className="font-serif text-xl font-medium">
+            Recent activity
+          </h2>
+          <Link href="/admin/audit-log" className="link link-hover text-primary text-sm">
+            Full audit log
+          </Link>
+        </div>
+        {recentLogs.length === 0 ? (
+          <p className="px-5 py-6 text-(--kt-muted)">No admin actions logged yet.</p>
+        ) : (
+          <ul>
+            {recentLogs.map((log) => {
+              const summary = formatAuditReason(log.reason);
+              return (
+                <li key={log.id} className="px-5 py-4 border-b border-(--kt-border) last:border-b-0">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                    <p className="min-w-0 break-words font-medium">
+                      {auditActionDisplayLabel(log.action)}
+                      <span className="font-normal text-(--kt-muted)"> · {statusDisplayLabel(log.targetType)}</span>
+                    </p>
+                    <p className="shrink-0 text-sm text-(--kt-muted)">{formatDateTime(log.createdAt)}</p>
+                  </div>
+                  {summary && <p className="mt-1 break-words text-sm text-(--kt-muted)">{summary}</p>}
+                  <p className="mt-1 text-sm text-(--kt-muted)">
+                    by <AnonymousIdText id={log.admin.anonymousId} role="ADMIN" />
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
     </div>
   );
 }

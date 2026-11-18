@@ -11,7 +11,7 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Learner & Tutor Accounts"
+        title="Learner & tutor accounts"
         subtitle="Review accounts and suspend or ban ones that violate platform policy."
       />
       <UserManagementTable />

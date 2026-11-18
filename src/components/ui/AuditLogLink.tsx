@@ -13,7 +13,7 @@ export default function AuditLogLink({
   return (
     <Link
       href={`/admin/audit-log?q=${targetId}`}
-      className={`inline-flex min-h-11 items-center text-2xs text-primary hover:underline sm:min-h-0 ${className}`}
+      className={`inline-flex min-h-11 items-center text-sm text-primary hover:underline sm:min-h-0 ${className}`}
     >
       {children}
     </Link>

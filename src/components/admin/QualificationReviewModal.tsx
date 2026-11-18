@@ -5,6 +5,7 @@ import Modal from "@/components/ui/Modal";
 import ValidatedForm from "@/components/ui/ValidatedForm";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export default function QualificationReviewModal({ question, revoke, onClose, onSaved }: {
   question: { qualificationApprovalMethod?: "ADMIN_APPROVAL" | "QUALIFIED_REVIEW" | null; id: string; subject: string; topic: string; prompt: string; explanation: string | null; options: { id: string; text: string; isCorrect: boolean }[] };
@@ -16,7 +17,7 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
   const [reason, setReason] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
-  const textareaClass = "textarea textarea-bordered min-h-20 w-full resize-y text-sm focus:textarea-primary";
+  const textareaClass = "textarea textarea-bordered min-h-20 w-full resize-y focus:textarea-primary";
 
   return (
     <Modal open onClose={onClose} title={revoke ? "Revoke assessment approval" : "Record qualified topic review"} size="lg">
@@ -41,8 +42,8 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
           setSaving(false);
         }
       }}>
-        <p className="text-xs text-(--kt-muted)">{question.subject} · {question.topic}</p>
-        <div className="space-y-2 rounded-lg border border-base-200 p-3 text-xs leading-relaxed [overflow-wrap:anywhere]">
+        <p className="text-sm text-(--kt-muted)">{subjectDisplayLabel(question.subject)} · {question.topic}</p>
+        <div className="space-y-2 rounded-lg border border-(--kt-border) p-3 leading-relaxed [overflow-wrap:anywhere]">
           <p>{question.prompt}</p>
           {question.options.map(option => <p key={option.id}>{option.text}{option.isCorrect ? " (answer key)" : ""}</p>)}
           <p>Explanation: {question.explanation || "Missing — add a substantive explanation before review."}</p>
@@ -50,23 +51,23 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
         <FeedbackBanner variant="error" message={error || null} />
 
         {revoke ? (
-          <FormField label="Revocation reason" required>
+          <FormField label="Revocation reason" required size="md">
             <textarea aria-label="Revocation reason" rows={3} minLength={10} maxLength={1000} value={reason} onChange={event => setReason(event.target.value)} disabled={saving} className={textareaClass} />
           </FormField>
         ) : (
           <div className="flex flex-col gap-4">
-            <p className="text-xs leading-relaxed">Record an actual qualified review of this version. Demo questions require topic-specific replacement first. Approval locks content; later corrections need a new version and review.</p>
-            <FormField label="Topic competency and curriculum reference" required>
+            <p className="text-sm text-(--kt-muted) leading-relaxed">Record an actual qualified review of this version. Demo questions require topic-specific replacement first. Approval locks content; later corrections need a new version and review.</p>
+            <FormField label="Topic competency and curriculum reference" required size="md">
               <textarea aria-label="Topic competency and curriculum reference" rows={3} minLength={10} maxLength={2000} value={competency} onChange={event => setCompetency(event.target.value)} disabled={saving} className={textareaClass} />
             </FormField>
-            <FormField label="Qualified reviewer and credentials" required>
+            <FormField label="Qualified reviewer and credentials" required size="md">
               <textarea aria-label="Qualified reviewer and credentials" rows={3} minLength={10} maxLength={2000} value={credentials} onChange={event => setCredentials(event.target.value)} disabled={saving} className={textareaClass} />
             </FormField>
-            <FormField label="Review evidence and reference" required>
+            <FormField label="Review evidence and reference" required size="md">
               <textarea aria-label="Review evidence and reference" rows={3} minLength={20} maxLength={4000} value={evidence} onChange={event => setEvidence(event.target.value)} disabled={saving} className={textareaClass} />
             </FormField>
             <div data-form-field="Qualified review confirmation" className="space-y-1.5">
-              <label className="flex items-start gap-2 text-xs leading-relaxed">
+              <label className="flex items-start gap-2 text-sm leading-relaxed">
                 <input type="checkbox" required disabled={saving} className="checkbox checkbox-sm mt-0.5 shrink-0" />
                 <span>I confirm a qualified reviewer checked this topic-specific competency, answer key, explanation and distractors.</span>
               </label>
@@ -75,9 +76,9 @@ export default function QualificationReviewModal({ question, revoke, onClose, on
           </div>
         )}
 
-        <div className="flex flex-wrap justify-end gap-2 border-t border-base-200 pt-4">
-          <button type="button" onClick={onClose} className="btn btn-ghost btn-sm">Cancel</button>
-          <button type="submit" disabled={saving} className="btn btn-primary btn-sm">{saving ? "Saving…" : revoke ? "Revoke approval" : "Record review"}</button>
+        <div className="flex flex-wrap justify-end gap-2 border-t border-(--kt-border) pt-4">
+          <button type="button" onClick={onClose} className="btn btn-ghost">Cancel</button>
+          <button type="submit" disabled={saving} className="btn btn-primary">{saving ? "Saving…" : revoke ? "Revoke approval" : "Record review"}</button>
         </div>
       </ValidatedForm>
     </Modal>

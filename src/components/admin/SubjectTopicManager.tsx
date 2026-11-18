@@ -103,13 +103,13 @@ function RowMenu({ anchorId, busy, items }: { anchorId: string; busy: boolean; i
         aria-label="Row actions"
         aria-haspopup="menu"
         aria-expanded={open}
-        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0"
+        className="btn btn-ghost btn-sm btn-square min-h-11 min-w-11 sm:min-h-0 sm:min-w-0"
         onClick={() => {
           if (!open) place();
           setOpen((v) => !v);
         }}
       >
-        <MoreVertical className="h-3.5 w-3.5" />
+        <MoreVertical className="h-4 w-4" />
       </button>
       {open &&
         createPortal(
@@ -118,7 +118,7 @@ function RowMenu({ anchorId, busy, items }: { anchorId: string; busy: boolean; i
             id={anchorId}
             role="menu"
             style={{ position: "fixed", top: pos.top, left: pos.left, width: MENU_WIDTH }}
-            className="menu menu-xs z-[60] rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg"
+            className="menu menu-sm z-[60] rounded-box border border-base-200 bg-base-100 p-1.5 shadow-lg"
           >
             {items.map((it) => (
               <li key={it.label}>
@@ -129,7 +129,7 @@ function RowMenu({ anchorId, busy, items }: { anchorId: string; busy: boolean; i
                     setOpen(false);
                     it.onClick();
                   }}
-                  className={`gap-2 text-xs ${it.danger ? "text-error" : ""}`}
+                  className={`gap-2 text-sm ${it.danger ? "text-error" : ""}`}
                 >
                   {it.icon}
                   {it.label}
@@ -298,7 +298,7 @@ export default function SubjectTopicManager() {
         {/* subjects — header fixed, list scrolls, add-form pinned to the bottom */}
         <section className="card kt-card flex max-h-[32rem] flex-col overflow-hidden lg:max-h-[calc(100vh-9rem)]">
           <div className="card-body flex min-h-0 flex-col gap-3 overflow-hidden">
-            <h2 className="shrink-0 text-sm font-medium text-(--kt-muted)">Subjects</h2>
+            <h2 className="shrink-0 font-serif text-xl font-medium">Subjects</h2>
 
             <ul className="-mx-2 min-h-0 flex-1 divide-y divide-base-200 overflow-y-auto px-2">
               {sortedSubjects.map((s, idx) => (
@@ -314,13 +314,13 @@ export default function SubjectTopicManager() {
                       className="min-w-0 flex-1 text-left"
                     >
                       <span
-                        className={`block truncate text-xs ${
-                          s.active ? "" : "text-(--kt-faint) line-through"
+                        className={`block truncate ${
+                          s.active ? "" : "text-(--kt-muted) line-through"
                         }`}
                       >
                         {s.name}
                       </span>
-                      <span className="block truncate font-mono text-2xs text-(--kt-faint)">
+                      <span className="block truncate text-sm text-(--kt-muted)">
                         {s.slug} · {s.topics.length} {s.topics.length === 1 ? "topic" : "topics"}
                       </span>
                     </button>
@@ -360,7 +360,7 @@ export default function SubjectTopicManager() {
             </ul>
 
             <ValidatedForm className="shrink-0 space-y-2 border-t border-base-200 pt-3" onSubmit={(e) => { e.preventDefault(); void addSubject(e.currentTarget); }}>
-              <p className="text-2xs text-(--kt-muted)">Add a subject</p>
+              <p className="text-sm text-(--kt-muted)">Add a subject</p>
               <div data-form-field="Grade levels"><CatalogGradePicker value={newSubjectGrades} onChange={setNewSubjectGrades} /><div data-field-feedback /></div>
               <div data-control-field className="min-w-0 flex-1 w-full">
                 <input
@@ -372,7 +372,7 @@ export default function SubjectTopicManager() {
                   value={newSubjectName}
                   onChange={(e) => setNewSubjectName(e.target.value)}
                   placeholder="Name (e.g. Mathematics)"
-                  className="input input-bordered input-xs w-full text-xs"
+                  className="input input-bordered w-full"
                 />
                 <div data-control-feedback />
               </div>
@@ -387,17 +387,17 @@ export default function SubjectTopicManager() {
                   aria-label="Subject slug"
                   value={newSubjectSlug}
                   onChange={(e) => setNewSubjectSlug(e.target.value.toUpperCase())}
-                  placeholder="SLUG (e.g. MATH)"
-                  className="input input-bordered input-xs w-full font-mono text-xs"
+                  placeholder="Code (e.g. MATH)"
+                  className="input input-bordered w-full"
                 />
                 <div data-control-feedback />
               </div>
               <button
                 type="submit"
                 disabled={busy}
-                className="btn btn-primary btn-xs w-full text-2xs"
+                className="btn btn-primary w-full"
               >
-                <Plus className="h-3 w-3" /> Add subject
+                <Plus className="h-4 w-4" /> Add subject
               </button>
             </ValidatedForm>
           </div>
@@ -406,7 +406,7 @@ export default function SubjectTopicManager() {
         {/* topics of the selected subject — same fixed-header / scroll / pinned-add layout */}
         <section className="card kt-card flex max-h-[32rem] min-w-0 flex-col overflow-hidden lg:max-h-[calc(100vh-9rem)]">
           <div className="card-body flex min-h-0 flex-col gap-3 overflow-hidden">
-            <h2 className="shrink-0 text-sm font-medium text-(--kt-muted)">
+            <h2 className="shrink-0 font-serif text-xl font-medium">
               {selected ? `${selected.name} — topics` : "Topics"}
             </h2>
 
@@ -414,9 +414,9 @@ export default function SubjectTopicManager() {
               <>
                 <div className="flex flex-wrap gap-2">
                   <input type="search" aria-label="Search topics" placeholder="Search topics" value={topicQuery}
-                    onChange={(e) => setTopicQuery(e.target.value)} className="input input-bordered input-sm min-w-0 flex-1" />
+                    onChange={(e) => setTopicQuery(e.target.value)} className="input input-bordered min-w-0 flex-1" />
                   <select aria-label="Filter topics by grade" value={topicGrade} onChange={(e) => setTopicGrade(e.target.value)}
-                    className="select select-bordered select-sm">
+                    className="select select-bordered">
                     <option value="">All grades</option>
                     {CURRICULUM_GRADES.map((grade) => <option key={grade} value={grade}>Grade {grade.replace("GRADE_", "")}</option>)}
                   </select>
@@ -427,7 +427,7 @@ export default function SubjectTopicManager() {
                   {[...visibleTopics]
                     .sort((a, b) => a.order - b.order)
                     .map((t, idx, arr) => (
-                      <li key={t.id} className="flex items-center gap-1 py-1.5 text-xs">
+                      <li key={t.id} className="flex items-center gap-1 py-2">
                         {editingTopicId === t.id ? (
                           <ValidatedForm className="flex flex-wrap items-center gap-1 w-full" onSubmit={(e) => { e.preventDefault(); void saveTopicName(t, e.currentTarget); }}>
                             <div data-control-field className="min-w-0 flex-1 w-full">
@@ -442,7 +442,7 @@ export default function SubjectTopicManager() {
                                 onKeyDown={(e) => {
                                 if (e.key === "Escape") setEditingTopicId(null);
                                 }}
-                                className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                                className="input input-bordered min-w-0 flex-1"
                                 autoFocus
                               />
                               <div data-control-feedback />
@@ -450,18 +450,18 @@ export default function SubjectTopicManager() {
                             <button
                               type="submit"
                               disabled={busy}
-                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0 shrink-0 text-success"
+                              className="btn btn-ghost btn-sm btn-square min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 shrink-0 text-success"
                               aria-label="Save"
                             >
-                              <Check className="h-3.5 w-3.5" />
+                              <Check className="h-4 w-4" />
                             </button>
                             <button
                               type="button"
                               onClick={() => setEditingTopicId(null)}
-                              className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 btn-square min-w-11 sm:min-w-0 shrink-0"
+                              className="btn btn-ghost btn-sm btn-square min-h-11 min-w-11 sm:min-h-0 sm:min-w-0 shrink-0"
                               aria-label="Cancel"
                             >
-                              <X className="h-3.5 w-3.5" />
+                              <X className="h-4 w-4" />
                             </button>
                           </ValidatedForm>
                         ) : (
@@ -469,7 +469,7 @@ export default function SubjectTopicManager() {
                             <div className="min-w-0 flex-1">
                             <span
                               className={`min-w-0 flex-1 truncate ${
-                                t.active ? "" : "text-(--kt-faint) line-through"
+                                t.active ? "" : "text-(--kt-muted) line-through"
                               }`}
                             >
                               {t.name}
@@ -520,7 +520,7 @@ export default function SubjectTopicManager() {
                       </li>
                     ))}
                   {visibleTopics.length === 0 && (
-                    <li className="py-6 text-center text-2xs italic text-(--kt-faint)">{selected.topics.length ? "No topics match your filters." : "No topics yet."}</li>
+                    <li className="py-6 text-center text-sm text-(--kt-muted)">{selected.topics.length ? "No topics match your filters." : "No topics yet."}</li>
                   )}
                 </ul>
 
@@ -536,21 +536,21 @@ export default function SubjectTopicManager() {
                       value={newTopic}
                       onChange={(e) => setNewTopic(e.target.value)}
                       placeholder="New topic name"
-                      className="input input-bordered input-xs min-w-0 flex-1 text-xs"
+                      className="input input-bordered min-w-0 flex-1"
                     />
                     <div data-control-feedback />
                   </div>
                   <button
                     type="submit"
                     disabled={busy}
-                    className="btn btn-primary btn-xs text-2xs"
+                    className="btn btn-primary"
                   >
-                    <Plus className="h-3 w-3" /> Add
+                    <Plus className="h-4 w-4" /> Add
                   </button>
                 </ValidatedForm>
               </>
             ) : (
-              <p className="py-6 text-center text-xs italic text-(--kt-faint)">
+              <p className="py-6 text-center text-sm text-(--kt-muted)">
                 Select a subject to manage its topics.
               </p>
             )}

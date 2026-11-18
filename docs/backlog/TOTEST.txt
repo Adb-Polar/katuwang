@@ -1253,3 +1253,22 @@ Tutor portal audit — remaining pieces (Changes.md 2026-11-18)
  [ ] Admin session-test drill-down (/admin session tests → open one): results page reads well inside the admin page.
  [ ] Learner and admin pages: grades read "Grade N" everywhere gradeLabel/gradeSection is used; dialogs app-wide use the new serif title.
 
+
+Admin portal unslop pass (Changes.md 2026-11-18)
+ [Good: demo super admin, 1280px + 375px] /admin dashboard, users, classes (moderation menu + Suspend dialog opened and cancelled), question bank, analytics, subjects, settings, admins: Plex fonts only, no sideways scroll, no console/server errors.
+ [ ] Manage account modal on /admin/users: save Active/Suspended/Banned (DB write); success message reads "is now suspended".
+ [ ] /admin/registrations: approve and decline (with reason) a pending registration; phone rows.
+ [ ] /admin/classes: Suspend, Ban and Reinstate through the "⋮" menu on desktop and the buttons on phones.
+ [ ] Class appeals, abuse reports, class requests: approve/reject, resolve/dismiss, close/re-open dialogs.
+ [ ] Question bank: drill into a subject → topic, add/edit/delete a question, resolve a question request, open an attempt result.
+ [ ] Certifications: approve / reject / revoke a request.
+ [ ] /admin/subjects: add, rename, reorder and deactivate a subject and a topic; curriculum coverage editor.
+ [ ] /admin/settings: save both sections; "My account" password form.
+ [ ] /admin/admins (super admin): create an admin (activation link + email), manage an admin; numbers line.
+ [ ] /admin/users/[id]: avatar moderation actions (warn, remove, lock/unlock) and the moderation history list.
+ [ ] /admin/classes/[id]: recommend-class form (search a learner, add note, recommend).
+ [ ] Learner/tutor lists that use Pagination still read well (no mono, 14px page count).
+ [Good: admin 1280px + 375px drawer, tutor + learner 1280px] Sidebar/header: plain nav icons, 15px items, avatar colour by role (admin blue, tutor ube, learner coral), "Log out" muted.
+ [ ] Sidebar unread count shows as red text when there are unread notifications (none were unread for the demo accounts).
+ [ ] Ctrl+K / Cmd+K still focuses the search box (hint removed from the UI).
+ [ ] Tutor and learner phone drawers.

@@ -10,7 +10,7 @@ export default function AdminClassAppealsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Class Appeals"
+        title="Class appeals"
         subtitle="Tutors contesting a suspension or ban on one of their classes. Approving an appeal reinstates the class."
       />
       <ClassAppealTable />

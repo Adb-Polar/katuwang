@@ -10,7 +10,7 @@ export default function AdminReportsPage() {
     <div className="space-y-6">
       <PageHeader
         eyebrow="Admin Portal"
-        title="Platform Analytics"
+        title="Analytics"
         subtitle="Breakdown of users, classes, certifications, and enrollment activity."
       />
       <ReportsView />
