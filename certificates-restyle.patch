@@ -1,0 +1,200 @@
+diff --git a/Changes.md b/Changes.md
+index 1b2a641..929e323 100644
+--- a/Changes.md
++++ b/Changes.md
+@@ -4567,3 +4567,23 @@ topic), with "Subject · Grade N" as a small muted label above it; the date numb
+ smaller so it balances the title; in the footer the start time is ink/medium while duration,
+ session count and tutor stay muted. `ClassCatalogCard.tsx` only.
+ My classes header no longer has the "Browse more →" link (the sidebar already links to Browse classes).
++
++## Learner certificates page restyle (2026-11-17)
++
++`/learner/certificates` now uses a learner-only `components/certificates/LearnerCertificateList.tsx`:
++one flat `kt-card` list, each row led by a calendar-style completion date (serif day number, month
++and year below, Manila time, "Completed <date>" for screen readers), the subject as a serif title,
++"Class · Tutor" and the certificate number on muted lines, and a full-size "Download PDF" button
++(or "Your PDF is still being made…" while the PDF is pending). The empty state says how
++certificates appear and links to My classes. Header: kicker "Mga natapos mo", title "My
++certificates", subtitle "One for each class your tutor marked complete."
++
++Removed on the learner page: the "Details" modal (it repeated the row), the floating ghost
++"Refresh certificates" button, the email-delivery status strings ("Email accepted by provider",
++etc. — admin information the learner can't act on), `rounded-xl` row boxes inside the card,
++`text-xs`/`btn-sm` text and buttons, and pagination when everything fits on one page.
++
++`CertificateList.tsx` is unchanged, so `/admin/completion-certificates` and the `/learner`
++dashboard preview look the same as before. New test `components/certificates/__tests__/LearnerCertificateList.test.tsx`
++(Manila date, download link, pending PDF, empty-state link, pagination hidden on one page).
++The tutor-real-name issue noted above is not changed here.
+diff --git a/docs/backlog/TOTEST.txt b/docs/backlog/TOTEST.txt
+index c80839c..74a217d 100644
+--- a/docs/backlog/TOTEST.txt
++++ b/docs/backlog/TOTEST.txt
+@@ -16,6 +16,11 @@ Portals on the landing theme (2026-11-17)
+     date first, full topics, seats left, ube tutor IDs, no horizontal scroll.
+  [ ] My classes > Completed and Cancelled tabs: rows show the last session date (muted) and the
+     status; a class with no sessions shows "No date yet".
++ [Good] /learner/certificates (demo learner, desktop and 375px): empty state links to My classes;
++    with mocked data, rows show the date block, serif subject, unbroken TUT ID, certificate no.,
++    44px Download PDF; only Plex Serif/Sans, no horizontal scroll.
++ [ ] /learner/certificates with a learner who has real certificates: Download PDF saves the file;
++    a pending PDF shows the "still being made" line; more than 20 shows pagination.
+  [Good] /learner/tutors catalog cards (demo learner, desktop and 375px): no date block, serif
+     ube tutor ID, capped subjects/topics, footer counts, no horizontal scroll.
+  [ ] /learner/tutors with "show tutor real names" ON: card title shows the name with the ID and
+diff --git a/src/app/learner/certificates/page.tsx b/src/app/learner/certificates/page.tsx
+index a538e41..3c4d593 100644
+--- a/src/app/learner/certificates/page.tsx
++++ b/src/app/learner/certificates/page.tsx
+@@ -1,6 +1,11 @@
+-import CertificateList from "@/components/certificates/CertificateList";
++import LearnerCertificateList from "@/components/certificates/LearnerCertificateList";
+ import PageHeader from "@/components/ui/PageHeader";
+ export const metadata = { title: "My Certificates | Katuwang" };
+ export default function MyCertificatesPage() {
+-  return <div className="space-y-6"><PageHeader eyebrow="Learner Portal" title="My Certificates" subtitle="Certificates earned through tutor-confirmed class completion." /><CertificateList /></div>;
++  return (
++    <div className="space-y-6">
++      <PageHeader eyebrow="Mga natapos mo" title="My certificates" subtitle="One for each class your tutor marked complete." />
++      <LearnerCertificateList />
++    </div>
++  );
+ }
+diff --git a/src/components/certificates/LearnerCertificateList.tsx b/src/components/certificates/LearnerCertificateList.tsx
+new file mode 100644
+index 0000000..4b39a1f
+--- /dev/null
++++ b/src/components/certificates/LearnerCertificateList.tsx
+@@ -0,0 +1,76 @@
++"use client";
++import type { ReactNode } from "react";
++import Link from "next/link";
++import { usePaginatedList } from "@/hooks/usePaginatedList";
++import { formatDate, SCHOOL_TIME_ZONE } from "@/lib/datetime";
++import LoadErrorState from "@/components/ui/LoadErrorState";
++import LoadingRow from "@/components/ui/LoadingRow";
++import Pagination from "@/components/ui/Pagination";
++
++type LearnerCertificate = {
++  id: string; certificateNumber: string; tutorName: string;
++  subjectName: string; classCode: string; completedAt: string; pdfReady: boolean;
++};
++
++const NO_FILTERS: Record<string, string> = {};
++const dateParts = new Intl.DateTimeFormat("en-PH", { timeZone: SCHOOL_TIME_ZONE, day: "numeric", month: "short", year: "numeric" });
++
++function CompletedDate({ at }: { at: string }) {
++  const parts = Object.fromEntries(dateParts.formatToParts(new Date(at)).map(p => [p.type, p.value]));
++  return (
++    <time dateTime={at} className="w-14 shrink-0 flex flex-col items-center text-center">
++      <span className="sr-only">Completed {formatDate(at)}</span>
++      <span aria-hidden="true" className="font-serif text-3xl leading-tight">{parts.day}</span>
++      <span aria-hidden="true" className="text-sm text-(--kt-muted)">{parts.month} {parts.year}</span>
++    </time>
++  );
++}
++
++function Panel({ children }: { children: ReactNode }) {
++  return <section className="card kt-card"><div className="kt-card-body gap-3">{children}</div></section>;
++}
++
++/** The learner's own certificates, one date-led row each. Admins and the dashboard preview use CertificateList. */
++export default function LearnerCertificateList() {
++  const { data: certificates, total, page, pageSize, setPage, setPageSize, loading, loadError, refetch } = usePaginatedList<LearnerCertificate>(
++    "/api/certificates", "certificates", NO_FILTERS, 20, "Certificates could not be loaded.", "certificates",
++  );
++
++  if (loading) return <Panel><LoadingRow /></Panel>;
++  if (loadError) return <Panel><LoadErrorState message={loadError} onRetry={refetch} /></Panel>;
++  if (certificates.length === 0) {
++    return (
++      <Panel>
++        <p>When your tutor marks a class complete, its certificate shows up here.</p>
++        <Link href="/learner/my-classes" className="btn btn-primary self-start">See my classes</Link>
++      </Panel>
++    );
++  }
++
++  return (
++    <div className="space-y-4">
++      <section className="card kt-card" aria-label="Certificates">
++        <ol>
++          {certificates.map(c => (
++            <li key={c.id} className="flex gap-4 sm:gap-5 px-4 sm:px-5 py-5 border-b border-(--kt-border) last:border-b-0">
++              <CompletedDate at={c.completedAt} />
++              <div className="flex-1 min-w-0 flex flex-col items-start gap-1.5">
++                <h3 className="font-serif text-lg font-medium leading-snug">{c.subjectName}</h3>
++                <p className="text-sm text-(--kt-muted)">
++                  <span className="whitespace-nowrap">Class {c.classCode}</span> · <span className="whitespace-nowrap">Tutor {c.tutorName}</span>
++                </p>
++                <p className="text-sm text-(--kt-muted) max-w-full">
++                  Certificate no. <span className="font-serif text-base-content break-all">{c.certificateNumber}</span>
++                </p>
++                {c.pdfReady
++                  ? <a className="btn btn-outline mt-1.5" href={`/api/certificates/${c.id}/download`} download>Download PDF</a>
++                  : <p className="text-sm text-(--kt-muted)">Your PDF is still being made. Check back in a few minutes.</p>}
++              </div>
++            </li>
++          ))}
++        </ol>
++      </section>
++      {total > pageSize && <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} onPageSizeChange={setPageSize} />}
++    </div>
++  );
++}
+diff --git a/src/components/certificates/__tests__/LearnerCertificateList.test.tsx b/src/components/certificates/__tests__/LearnerCertificateList.test.tsx
+new file mode 100644
+index 0000000..89b7464
+--- /dev/null
++++ b/src/components/certificates/__tests__/LearnerCertificateList.test.tsx
+@@ -0,0 +1,50 @@
++// @vitest-environment jsdom
++import { act } from "react";
++import { createRoot } from "react-dom/client";
++import { afterEach, describe, expect, it, vi } from "vitest";
++
++const list = vi.hoisted(() => ({ state: {} as Record<string, unknown> }));
++vi.mock("@/hooks/usePaginatedList", () => ({ usePaginatedList: () => list.state }));
++import LearnerCertificateList from "../LearnerCertificateList";
++
++Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
++afterEach(() => vi.clearAllMocks());
++
++const cert = (over: Record<string, unknown> = {}) => ({
++  id: "c1", certificateNumber: "KTW-ABC123", tutorName: "TUT-0148", subjectName: "Mathematics",
++  classCode: "MATH-7A", completedAt: "2026-11-05T16:30:00Z", pdfReady: true, ...over,
++});
++
++function render(data: unknown[], total = data.length) {
++  list.state = { data, total, page: 1, pageSize: 20, setPage: vi.fn(), setPageSize: vi.fn(), loading: false, loadError: "", refetch: vi.fn() };
++  const host = document.createElement("div");
++  act(() => createRoot(host).render(<LearnerCertificateList />));
++  return host;
++}
++
++describe("LearnerCertificateList", () => {
++  it("shows the completion date in Manila time, the certificate number and a download link", () => {
++    const host = render([cert()]);
++    // 16:30Z on Nov 5 is Nov 6 in Asia/Manila.
++    expect(host.querySelector("time")?.textContent).toContain("Completed Nov 6, 2026");
++    expect(host.textContent).toContain("KTW-ABC123");
++    expect(host.querySelector("a[download]")?.getAttribute("href")).toBe("/api/certificates/c1/download");
++    expect(host.textContent).not.toMatch(/Details|Refresh|provider/);
++  });
++
++  it("explains a PDF that is not ready instead of offering a download", () => {
++    const host = render([cert({ pdfReady: false })]);
++    expect(host.querySelector("a[download]")).toBeNull();
++    expect(host.textContent).toContain("still being made");
++  });
++
++  it("points an empty list at My classes", () => {
++    const host = render([]);
++    expect(host.querySelector('a[href="/learner/my-classes"]')?.textContent).toBe("See my classes");
++  });
++
++  it("hides pagination when everything fits on one page", () => {
++    expect(render([cert()]).textContent).not.toMatch(/Page 1 of/);
++    expect(render([cert()], 45).textContent).toMatch(/Page 1 of 3/);
++  });
++});
