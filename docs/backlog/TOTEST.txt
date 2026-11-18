@@ -1,3 +1,30 @@
+Portals on the landing theme (2026-11-17)
+ [Good] /learner (demo learner): "Your week" heading, one stats line, day-grouped sessions with
+    full topics, desktop and 375px; /tutor, /admin, /admin/reports themed, charts recoloured.
+ [Good] /learner calendar rail: Today tinted, Tomorrow label, "Next · in N h" on the first
+    session only, rows stack on 375px.
+ [ ] /learner late at night / on a day with no session today: "Next" shows "tomorrow" or the
+    weekday; a learner with only next-week sessions sees them in the rail under the notice.
+ [ ] Walk every other learner, tutor and admin page: nothing reads as broken with Plex, the new
+    colours and 0.25rem corners (tables, modals, badges, forms, timetable on /tutor).
+ [ ] Learner IDs now coral and tutor IDs ube everywhere (rosters, search, reports, admin user
+    tables); nothing still violet for learners.
+ [ ] Learner dashboard with an account that has no sessions this week but later ones: shows
+    "Your next sessions"; with no sessions at all: "Browse classes" link.
+ [ ] Decide: certificates show the tutor's real name to learners (see Changes.md).
+ [Good] /learner/classes and /learner/my-classes as catalog cards (demo learner, desktop and 375px):
+    date first, full topics, seats left, ube tutor IDs, no horizontal scroll.
+ [ ] My classes > Completed and Cancelled tabs: rows show the last session date (muted) and the
+    status; a class with no sessions shows "No date yet".
+ [Good] /learner/tutors catalog cards (demo learner, desktop and 375px): no date block, serif
+    ube tutor ID, capped subjects/topics, footer counts, no horizontal scroll.
+ [ ] /learner/tutors with "show tutor real names" ON: card title shows the name with the ID and
+    section underneath; the "Any subject" picker opens, filters, and Clear resets it.
+ [ ] Follow-up: My classes is ordered newest-enrolled first (API `createdAt desc`); with dates
+    leading each row it would read better by next session date (needs an API change).
+ [ ] Follow-up redesigns: tutor dashboard and admin dashboard (same stat-tile/duplicate-view
+    tells), and a themed 404 page (Next.js default black page shows today).
+
 Public pages match the landing page (2026-11-17)
  [Good] All 15 public routes: IBM Plex only, Dagat buttons, no horizontal scroll at
     desktop and 375px; unknown-email login shows the inline error; ?registered banner shows.

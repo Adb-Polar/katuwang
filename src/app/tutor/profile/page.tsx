@@ -34,7 +34,7 @@ export default async function TutorProfilePage() {
     <ProfileView
       eyebrow="Tutor Portal"
       roleLabel="Student Tutor"
-      roleLabelClass="text-accent-content"
+      roleLabelClass="text-(--kt-tutor-text)"
       idRole="TUTOR"
       editHref="/tutor/profile/edit"
       fullName={session!.user.fullName}

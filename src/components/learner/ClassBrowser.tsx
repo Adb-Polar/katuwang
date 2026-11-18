@@ -13,7 +13,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Pagination from "@/components/ui/Pagination";
 import SearchInput from "@/components/ui/SearchInput";
 import Tabs from "@/components/ui/Tabs";
-import ClassCard from "@/components/classes/ClassCard";
+import ClassCatalogCard from "@/components/classes/ClassCatalogCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
 import LoadingRow from "@/components/ui/LoadingRow";
 
@@ -105,143 +105,132 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
 
             <FeedbackBanner variant="error" message={error || null} />
 
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          {isMine && (
-            <Tabs
-              tabs={MINE_TABS.map((t) => ({
-                ...t,
-                count: mineTabCounts?.[t.key],
-              }))}
-              active={mineTab}
-              onChange={(key) => setMineTab(key as MineTab)}
-            />
-          )}
+      <section className="flex flex-col gap-4">
+        {isMine && (
+          <Tabs
+            tabs={MINE_TABS.map((t) => ({
+              ...t,
+              count: mineTabCounts?.[t.key],
+            }))}
+            active={mineTab}
+            onChange={(key) => setMineTab(key as MineTab)}
+          />
+        )}
 
-          {isBrowse && (
-            <p className="text-sm text-(--kt-muted)">
-              Explore classes across Grades 7–12. You can enroll at any grade level.
-            </p>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <SearchInput
-              label="Search classes"
-              value={q}
-              onChange={setQ}
-              placeholder={meta.showTutorRealNames === true
-                ? "Search tutor name, code, subject, or topic..."
-                : "Search code, subject, or topic..."}
-            />
-            <select
-              className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
-              aria-label="Grade level"
-              value={gradeLevel}
-              onChange={(e) => { setGradeLevel(e.target.value); setSubject(""); setTopic(""); }}
-            >
-              <option value="">All grade levels (7–12)</option>
-              {GRADE_LEVELS.map((g) => (
-                <option key={g.value} value={g.value}>
-                  {g.label}
-                </option>
-              ))}
-            </select>
-            <select
-              className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
-              aria-label="Subject"
-              value={subject}
-              onChange={(e) => { setSubject(e.target.value); setTopic(""); }}
-            >
-              <option value="">All subjects</option>
-              {catalog.map((s) => (
-                <option key={s.slug} value={s.slug}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <select aria-label="Topic" className="select select-bordered select-sm text-base min-h-11 sm:text-sm" value={topic}
-              disabled={!subject} onChange={(e) => setTopic(e.target.value)}>
-              <option value="">All topics</option>
-              {topicsFor(subject).map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] gap-3">
+          <SearchInput
+            label="Search classes"
+            value={q}
+            onChange={setQ}
+            placeholder={meta.showTutorRealNames === true
+              ? "Search classes or tutors"
+              : "Search classes"}
+          />
+          <select
+            className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
+            aria-label="Grade level"
+            value={gradeLevel}
+            onChange={(e) => { setGradeLevel(e.target.value); setSubject(""); setTopic(""); }}
+          >
+            <option value="">All grades</option>
+            {GRADE_LEVELS.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+          <select
+            className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
+            aria-label="Subject"
+            value={subject}
+            onChange={(e) => { setSubject(e.target.value); setTopic(""); }}
+          >
+            <option value="">All subjects</option>
+            {catalog.map((s) => (
+              <option key={s.slug} value={s.slug}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+          <select aria-label="Topic" className="select select-bordered select-sm text-base min-h-11 sm:text-sm" value={topic}
+            disabled={!subject} onChange={(e) => setTopic(e.target.value)}>
+            <option value="">All topics</option>
+            {topicsFor(subject).map((t) => <option key={t} value={t}>{t}</option>)}
+          </select>
+        </div>
+
+        {loading ? (
+          <LoadingRow />
+        ) : error ? (
+          <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
+            <span>Classes could not be loaded.</span>
+            <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry loading classes</button>
           </div>
-
-          {loading ? (
-            <LoadingRow />
-          ) : error ? (
-            <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-error">
-              <span>Classes could not be loaded.</span>
-              <button type="button" onClick={refetch} className="btn btn-outline btn-error min-h-11">Retry loading classes</button>
-            </div>
-          ) : classes.length === 0 ? (
-            <ClassEmptyState
-              message={
-                hasFilters
-                  ? "No classes match your filters."
-                  : isBrowse
-                  ? "No upcoming classes available right now."
-                  : mineTab === "completed"
-                  ? "No completed classes yet."
-                  : mineTab === "cancelled"
-                  ? "No cancelled classes."
-                  : "You haven't enrolled in any classes yet."
-              }
-              action={
-                hasFilters ? (
-                  <button
-                    onClick={() => {
-                      setQ("");
-                      setTopic("");
-                      setSubject("");
-                      setGradeLevel("");
-                    }}
-                    className="btn btn-link btn-xs min-h-11 sm:min-h-0 text-primary mt-1 text-xs"
-                  >
-                    Clear filters
-                  </button>
-                ) : undefined
-              }
-            />
-          ) : (
-            <>
-              <p className="text-xs text-(--kt-faint)">
-                {total} class{total === 1 ? "" : "es"}
-              </p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {classes.map((c) => (
-                  <ClassCard
-                    key={c.id}
-                    code={c.code}
+        ) : classes.length === 0 ? (
+          <ClassEmptyState
+            message={
+              hasFilters
+                ? "No classes match your filters."
+                : isBrowse
+                ? "No upcoming classes available right now."
+                : mineTab === "completed"
+                ? "No completed classes yet."
+                : mineTab === "cancelled"
+                ? "No cancelled classes."
+                : "You haven't enrolled in any classes yet."
+            }
+            action={
+              hasFilters ? (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    setTopic("");
+                    setSubject("");
+                    setGradeLevel("");
+                  }}
+                  className="btn btn-link btn-xs min-h-11 sm:min-h-0 text-primary mt-1 text-xs"
+                >
+                  Clear filters
+                </button>
+              ) : undefined
+            }
+          />
+        ) : (
+          <>
+            <p className="text-sm text-(--kt-muted)">
+              {total} class{total === 1 ? "" : "es"}
+            </p>
+            <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {classes.map((c) => (
+                <li key={c.id}>
+                  <ClassCatalogCard
+                    href={`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`}
                     subject={c.subject}
                     gradeLevel={c.gradeLevel}
                     topics={c.topics}
                     verifiedTopics={c.verifiedTopics}
-                    description={c.description}
                     sessions={c.sessions}
                     status={c.status}
-                    published={c.published}
-                    suspendedReason={c.suspendedReason}
                     enrolledCount={c._count.enrollments}
                     maxStudents={c.maxStudents}
-                    activeLabel="Open"
                     tutorAnonymousId={c.tutor.anonymousId}
                     tutorName={c.tutor.name}
                     tutorSection={c.tutor.section}
-                    tutorImage={c.tutor.image}
-                    href={`/learner/classes/${c.id}?from=${isMine ? "my-classes" : "browse"}`}
+                    showSeats={isBrowse}
                   />
-                ))}
-              </div>
-              <Pagination
-                page={page}
-                pageSize={pageSize}
-                total={total}
-                onPageChange={setPage}
-                onPageSizeChange={setPageSize}
-                pageSizeOptions={[12, 24, 48, 96]}
-              />
-            </>
-          )}
-        </div>
+                </li>
+              ))}
+            </ul>
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[12, 24, 48, 96]}
+            />
+          </>
+        )}
       </section>
     </div>
   );

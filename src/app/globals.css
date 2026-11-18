@@ -2,58 +2,15 @@
 @plugin "daisyui";
 
 /*
-  Palette: three roles, three functional colors — not decoration.
-  primary  = brand teal, used app-wide (buttons/links/focus) and as the Admin portal accent
-  secondary = ube violet, the Learner role color (nav accent, learner-owned ID badges)
-  accent    = marigold gold, the Tutor role color (nav accent, tutor-owned ID badges)
-  warning is pulled toward orange-red (hue ~45) so it never collides with the gold accent (hue ~80).
-*/
-@plugin "daisyui/theme" {
-  name: "katuwang theme";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(97.5% 0.004 250);
-  --color-base-300: oklch(90% 0.008 250);
-  --color-base-content: oklch(24% 0.02 258);
-  --color-primary: oklch(40% 0.09 174);
-  --color-primary-content: oklch(98% 0.01 174);
-  --color-secondary: oklch(48% 0.16 300);
-  --color-secondary-content: oklch(98% 0.02 300);
-  --color-accent: oklch(76% 0.14 80);
-  --color-accent-content: oklch(24% 0.05 80);
-  --color-neutral: oklch(27% 0.035 258);
-  --color-neutral-content: oklch(97% 0.005 258);
-  --color-info: oklch(62% 0.12 230);
-  --color-info-content: oklch(97% 0.01 230);
-  --color-success: oklch(63% 0.13 152);
-  --color-success-content: oklch(97% 0.01 152);
-  --color-warning: oklch(70% 0.16 45);
-  --color-warning-content: oklch(22% 0.03 45);
-  --color-error: oklch(58% 0.19 22);
-  --color-error-content: oklch(98% 0.01 22);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
-}
-
-/*
-  Public pages (landing, sign-in/sign-up, privacy policy) use their own theme so they
-  match the landing page: the "Dagat" palette and flat 0.25rem shapes. Applied with
-  data-theme="katuwang-public" on the .kt-public wrapper (see components/public), so
-  DaisyUI buttons, inputs, selects and checkboxes inside those pages recolour without
-  touching the portal theme above.
-    secondary = learner coral, accent = tutor ube (same role mapping as the portal theme).
+  The app theme (landing page, public pages and all three portals): the "Dagat" palette and
+  flat 0.25rem shapes. Set on <html> in app/layout.tsx.
+    primary   = brand sea blue (#005770): buttons, links, focus, kickers, logo
+    secondary = learner coral — learner-owned IDs and accents
+    accent    = tutor ube, a light fill; use --kt-tutor-text for tutor text and icons
 */
 @plugin "daisyui/theme" {
   name: "katuwang-public";
-  default: false;
+  default: true;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(100% 0 0);
@@ -87,10 +44,12 @@
 }
 
 @theme inline {
-  /* Redesign: Apfel Grotezk = speech (sans + display), Fragment Mono = notation.
-     There is no serif/sans pairing — every heading is `font-sans`. */
-  --font-sans: var(--font-apfel), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-fragment-mono), ui-monospace, "SFMono-Regular", monospace;
+  /* Two fonts, both IBM Plex (loaded in app/layout.tsx): Serif for headings and IDs, Sans for
+     everything else. There is no monospace face — font-mono maps to Plex Sans, with tabular
+     figures where numbers line up. */
+  --font-sans: var(--lp-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--lp-serif), Georgia, serif;
+  --font-mono: var(--lp-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /*
@@ -105,13 +64,10 @@
   --text-2xs: 0.6875rem;
   --text-2xs--line-height: 1rem;
 
-  /* Weight scale. Apfel Grotezk ships 400 / 500 / 700 / 900 only — there is no
-     600 face, so `font-semibold` was snapping up to 700 and every emphasised run
-     rendered as heavy Fett. The emphasis utilities stay pinned to the 500 Mittel
-     face so blanket `font-bold` on small UI text (table headers, badges,
-     buttons, prose <strong>) reads as one step, not a shout. The 700 Fett face
-     is reserved for the two runs the type-scale contract names as the sole heavy
-     elements — page H1 and card titles — reached via `font-heavy`. */
+  /* Weight scale. The emphasis utilities stay pinned to 500 so blanket `font-bold` on small UI
+     text (table headers, badges, buttons, prose <strong>) reads as one step, not a shout.
+     700 is reserved for the few heavy runs (card titles) via `font-heavy`. Plex supports all
+     of these weights. */
   --font-weight-medium: 500;
   --font-weight-semibold: 500;
   --font-weight-bold: 500;
@@ -140,17 +96,16 @@
   --kt-tint-error: color-mix(in oklch, var(--color-error) 13%, var(--color-base-100));
   --kt-tint-neutral: color-mix(in oklch, var(--color-base-content) 6%, var(--color-base-100));
 
-  /* the accent is a light marigold used as a fill; darken it for use as ID text.
-     Was oklch(50% 0.12 80) — ~3.8:1 on the 24%-accent tint at 0.72rem, under the
-     4.5:1 floor for small text (design-review D7). */
-  --kt-tutor-text: oklch(44% 0.11 80);
+  /* the accent is a light ube fill; tutor text and icons use this darker ube instead
+     (5.2:1 on white, 4.8:1 on the tints). */
+  --kt-tutor-text: oklch(55% 0.16 300);
   --kt-warning-text: color-mix(in oklch, var(--color-warning) 80%, black);
   /* muted = secondary body text, faint = micro uppercase labels. Both were too
      light on base-100 for text-xs / text-2xs (D7): muted 60% ≈ 3.8:1,
      faint 42% ≈ 2.3:1. Darkened to clear 4.5:1; the two tiers stay ordered but
      the gap between them is now deliberately small. */
-  --kt-muted: oklch(46% 0.02 258); /* ~6.5:1 on base-200 */
-  --kt-faint: oklch(52% 0.02 258); /* ~5:1, the floor for text-2xs */
+  --kt-muted: oklch(46% 0.02 230); /* ~6.5:1 on base-200 */
+  --kt-faint: oklch(52% 0.02 230); /* ~5:1 */
 }
 
 body { background: var(--color-base-200); }
@@ -243,7 +198,7 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-badge--learner { background: var(--kt-tint-learner); color: var(--color-secondary); }
   .kt-badge--tutor { background: var(--kt-tint-tutor); color: var(--kt-tutor-text); }
 
-  .kt-id { font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.01em; white-space: nowrap; }
+  .kt-id { font-family: var(--font-serif); font-weight: 500; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .kt-id--learner { color: var(--color-secondary); }
   .kt-id--tutor { color: var(--kt-tutor-text); }
 
@@ -272,7 +227,8 @@ b, strong { font-weight: var(--font-weight-bold); }
 
   .kt-sidebar { background: var(--color-base-100); border-right: 1px solid var(--kt-border); }
   .kt-nav-label {
-    font-size: 0.66rem; font-weight: var(--font-weight-semibold); letter-spacing: 0.12em; text-transform: uppercase;
+    /* sentence case at a readable size — no uppercase spaced eyebrows (landing theme) */
+    font-size: 0.8rem; font-weight: var(--font-weight-semibold);
     color: var(--kt-faint); padding: 0 0.5rem 0.4rem;
   }
   .kt-nav-group-toggle {
@@ -285,8 +241,7 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-nav-item {
     display: flex; align-items: center; gap: 0.75rem;
     padding: 0.55rem 0.5rem; border-radius: var(--kt-radius-field);
-    /* Nav labels are words, not notation: Apfel Grotezk. Mono is kept for
-       IDs, codes, scores and dates only. */
+    /* Nav labels are words: Plex Sans. */
     font-family: var(--font-sans);
     font-size: 0.82rem; font-weight: 500; color: var(--kt-muted); text-decoration: none;
   }
@@ -306,11 +261,14 @@ b, strong { font-weight: var(--font-weight-bold); }
     background: var(--color-base-200);
     border-bottom: 1px solid var(--kt-border);
   }
+  /* Same shape as the page's form fields (DaisyUI input): 44px, field radius, field border. */
   .kt-search {
-    flex: 1; max-width: 26rem; display: flex; align-items: center; gap: 0.5rem;
-    background: var(--color-base-100); border: 1px solid var(--kt-border);
-    border-radius: 999px; padding: 0.5rem 0.9rem; font-size: 0.85rem; color: var(--kt-muted);
+    flex: 1; max-width: 28rem; min-height: 2.75rem; display: flex; align-items: center; gap: 0.6rem;
+    background: var(--color-base-100);
+    border: 1px solid color-mix(in oklch, var(--color-base-content) 20%, transparent);
+    border-radius: var(--radius-field); padding: 0 0.75rem; font-size: 0.875rem; color: var(--kt-muted);
   }
+  .kt-search:focus-within { outline: 2px solid var(--color-primary); outline-offset: 2px; }
   .kt-search input {
     border: 0; background: none; flex: 1; min-width: 0; font: inherit;
     color: var(--color-base-content); outline: none;

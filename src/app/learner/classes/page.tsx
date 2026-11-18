@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ClassBrowser from "@/components/learner/ClassBrowser";
 import PageHeader from "@/components/ui/PageHeader";
 
@@ -12,12 +11,7 @@ export default function LearnerBrowseClassesPage() {
       <PageHeader
         eyebrow="Learner Portal"
         title="Browse classes"
-        subtitle="Discover upcoming classes for Grades 7–12. Choose any grade level, regardless of your own."
-        actions={
-          <Link href="/learner/my-classes" className="btn btn-ghost btn-sm text-xs">
-            My classes →
-          </Link>
-        }
+        subtitle="Find a class on your topic at a time that works. Any grade level is open to you."
       />
       <ClassBrowser scope="browse" />
     </div>

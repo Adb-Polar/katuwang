@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ClassBrowser from "@/components/learner/ClassBrowser";
 import PageHeader from "@/components/ui/PageHeader";
 
@@ -13,11 +12,6 @@ export default function LearnerMyClassesPage() {
         eyebrow="Learner Portal"
         title="My classes"
         subtitle="Classes you're enrolled in — upcoming, completed, and cancelled."
-        actions={
-          <Link href="/learner/classes" className="btn btn-ghost btn-sm text-xs">
-            Browse more →
-          </Link>
-        }
       />
       <ClassBrowser scope="mine" />
     </div>

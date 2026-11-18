@@ -229,13 +229,13 @@ export default function PortalLayout({
       <aside ref={desktopRef} className="kt-sidebar hidden lg:flex flex-col gap-6 p-3 sticky top-0 h-screen overflow-y-auto">
         <div className="flex items-center gap-3 px-2 pt-1">
           <BrandMark />
-          <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
+          <p className="font-serif font-medium text-lg tracking-tight">Katuwang</p>
         </div>
         <span className="kt-nav-label pb-0! px-2! text-primary">{portalLabel}</span>
         <div className="flex-1">{navTree}</div>
         <div className="flex flex-col gap-3 px-2 pb-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
+            <span className="text-xs font-medium text-(--kt-faint)">
               Anonymous ID
             </span>
             {idNode}
@@ -332,7 +332,7 @@ export default function PortalLayout({
           <div className="flex items-center justify-between gap-3 px-2 pt-1">
             <div className="flex items-center gap-3">
               <BrandMark />
-              <p className="font-sans font-bold text-base tracking-tight">Katuwang</p>
+              <p className="font-serif font-medium text-lg tracking-tight">Katuwang</p>
             </div>
             <button
               type="button"
@@ -347,7 +347,7 @@ export default function PortalLayout({
           <div className="flex-1">{navTree}</div>
           <div className="flex flex-col gap-3 px-2 pb-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint)">
+              <span className="text-xs font-medium text-(--kt-faint)">
                 Anonymous ID
               </span>
               {idNode}
