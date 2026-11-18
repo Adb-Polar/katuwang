@@ -94,8 +94,8 @@ describe("gradeLevels utility", () => {
 
   describe("display helpers", () => {
     it("formats grade label and section", () => {
-      expect(gradeLabel("GRADE_10")).toBe("GRADE 10");
-      expect(gradeSection("GRADE_10", "Rizal")).toBe("GRADE 10 · Rizal");
+      expect(gradeLabel("GRADE_10")).toBe("Grade 10");
+      expect(gradeSection("GRADE_10", "Rizal")).toBe("Grade 10 · Rizal");
     });
   });
 });

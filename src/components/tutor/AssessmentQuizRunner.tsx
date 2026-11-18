@@ -2,26 +2,14 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import StatusBadge from "@/components/ui/StatusBadge";
+import BackLink from "@/components/ui/BackLink";
+import PageHeader from "@/components/ui/PageHeader";
+import { QuizQuestionList, QuizResult, QuizSubmitBar, type QuizListItem } from "@/components/quiz/QuizQuestionList";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 
-export interface QuizOption {
-  id: string;
-  text: string;
-  isCorrect?: boolean;
-}
-export interface QuizItem {
-  position: number;
-  questionId: string;
-  prompt: string;
-  options: QuizOption[];
-  selectedOptionId: string | null;
-  isCorrect?: boolean | null;
-  explanation?: string | null;
-}
+export type QuizItem = QuizListItem;
 export interface QuizAttempt {
   id: string;
   subject: string;
@@ -76,140 +64,63 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
   };
 
   const passed = attempt.status === "PASSED";
+  const practiceOnly = attempt.certificationEligible === false;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <Link href="/tutor/assessments" className="text-xs text-primary font-medium hover:underline inline-flex items-center gap-1">
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Assessments
-        </Link>
-        <span className="text-2xs text-(--kt-faint)">
-          {subjectDisplayLabel(attempt.subject)} · attempt #{attempt.attemptNo}
-        </span>
+    <div className="space-y-6 max-w-3xl">
+      <div className="space-y-3">
+        <BackLink href="/tutor/assessments">Back to assessments</BackLink>
+        <PageHeader
+          eyebrow="Topic assessment"
+          title={attempt.topic}
+          subtitle={`${subjectDisplayLabel(attempt.subject)} · ${attempt.questionCount} questions · pass mark ${attempt.passPercent}% · attempt ${attempt.attemptNo}`}
+        />
       </div>
 
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="card-title text-sm font-bold">{attempt.topic}</h2>
-              <p className="text-2xs text-(--kt-faint) mt-0.5">
-                {attempt.questionCount} questions · pass mark {attempt.passPercent}%
-              </p>
-            </div>
-            {submitted ? (
-              <StatusBadge
-                tone={passed ? "success" : "error"}
-                label={passed ? "Passed" : "Not passed"}
-                size="sm"
-              />
-            ) : (
-              <span className="text-2xs text-(--kt-faint)">
-                {answeredCount} / {attempt.items.length} answered
-              </span>
-            )}
-          </div>
+      {submitted && (
+        <QuizResult
+          scorePercent={attempt.scorePercent}
+          verdict={
+            <span className={practiceOnly ? "" : passed ? "text-success" : "text-error"}>
+              {practiceOnly ? "Practice result" : passed ? "Passed" : "Not passed"}
+            </span>
+          }
+          correct={attempt.correctCount}
+          total={attempt.questionCount}
+        >
+          <p>
+            {practiceOnly
+              ? "This attempt used demo or unreviewed questions, so it can't verify you. A reviewed assessment or an admin review is needed."
+              : passed
+              ? "Your result is recorded. Your topic status is on the Assessments page."
+              : `You need ${attempt.passPercent}% to pass. You can retake it from the Assessments page.`}
+          </p>
+        </QuizResult>
+      )}
 
-          {submitted && (
-            <FeedbackBanner
-              variant={attempt.certificationEligible === false ? "info" : passed ? "success" : "error"}
-              message={attempt.certificationEligible === false
-                ? `Practice result: ${attempt.scorePercent}%. This attempt uses demo or unreviewed content and cannot grant certification. A new reviewed assessment or documented manual review is required.`
-                : passed
-                ? `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). Your result has been recorded — check your topic status on the Assessments page.`
-                : `You scored ${attempt.scorePercent}% (${attempt.correctCount}/${attempt.questionCount}). You need ${attempt.passPercent}% to pass — you can retake this assessment.`}
+      <FeedbackBanner variant="error" message={error || null} />
 
-            />
-          )}
+      <QuizQuestionList
+        items={attempt.items}
+        answers={answers}
+        onAnswer={(questionId, optionId) => setAnswers((prev) => ({ ...prev, [questionId]: optionId }))}
+        submitted={submitted}
+        topic={attempt.topic}
+      />
 
-          <FeedbackBanner variant="error" message={error || null} />
-
-          <ol className="space-y-4">
-            {attempt.items.map((item) => {
-              const chosen = answers[item.questionId] ?? item.selectedOptionId;
-              return (
-                <li key={item.questionId} className="border border-base-200 rounded-xl p-4 space-y-3">
-                  <div className="flex items-start gap-2">
-                    <span className="text-2xs text-(--kt-faint) shrink-0 pt-0.5">
-                      Q{item.position + 1}
-                    </span>
-                    <p className="text-sm font-semibold text-base-content/85">{item.prompt}</p>
-                  </div>
-
-                  <div className="space-y-1.5 pl-6">
-                    {item.options.map((o) => {
-                      const isChosen = chosen === o.id;
-                      const showState = submitted;
-                      const optionIsCorrect = o.isCorrect ?? (isChosen ? item.isCorrect : undefined);
-                      const cls = showState
-                        ? optionIsCorrect
-                          ? "border-success/40 bg-success/5"
-                          : isChosen
-                          ? "border-error/40 bg-error/5"
-                          : "border-base-200"
-                        : isChosen
-                        ? "border-primary bg-primary/5"
-                        : "border-base-200 hover:border-base-300";
-                      return (
-                        <label
-                          key={o.id}
-                          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs cursor-pointer ${cls} ${
-                            submitted ? "cursor-default" : ""
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name={item.questionId}
-                            className="radio radio-xs radio-primary"
-                            checked={isChosen}
-                            disabled={submitted}
-                            onChange={() =>
-                              setAnswers((prev) => ({ ...prev, [item.questionId]: o.id }))
-                            }
-                          />
-                          <span className="text-(--kt-muted)">{o.text}</span>
-                          {submitted && optionIsCorrect === true && (
-                            <span className="text-2xs text-success ml-auto">correct</span>
-                          )}
-                          {submitted && isChosen && optionIsCorrect === false && (
-                            <span className="text-2xs text-error ml-auto">your answer</span>
-                          )}
-                        </label>
-                      );
-                    })}
-                  </div>
-
-                  {submitted && item.explanation && (
-                    <p className="text-2xs text-(--kt-faint) italic pl-6">{item.explanation}</p>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-
-          {!submitted && (
-            <div className="flex justify-end pt-1">
-              <button
-                onClick={() => (allAnswered ? doSubmit() : setConfirmOpen(true))}
-                disabled={submitting || answeredCount === 0}
-                className="btn btn-primary btn-sm text-xs cursor-pointer"
-              >
-                {submitting && <span className="loading loading-spinner loading-xs" />}
-                Submit assessment
-              </button>
-            </div>
-          )}
-
-          {submitted && (
-            <div className="flex justify-end pt-1">
-              <Link href="/tutor/assessments" className="btn btn-neutral btn-outline btn-sm text-xs">
-                Back to assessments
-              </Link>
-            </div>
-          )}
+      {submitted ? (
+        <div className="flex justify-end">
+          <Link href="/tutor/assessments" className="btn btn-outline">Back to assessments</Link>
         </div>
-      </section>
+      ) : (
+        <QuizSubmitBar
+          answered={answeredCount}
+          total={attempt.items.length}
+          submitting={submitting}
+          label="Submit assessment"
+          onSubmit={() => (allAnswered ? doSubmit() : setConfirmOpen(true))}
+        />
+      )}
 
       <ConfirmDialog
         open={confirmOpen}

@@ -111,7 +111,7 @@ Three tabs on one page — **Directed to me** (default), **Public requests**, an
 - **Accepted by me** (`tab=accepted`) — every request you've accepted that's still linked to its class (`ACCEPTED` = learner hasn't enrolled yet; `ENROLLED` = they have), showing the linked class, its next session, and enrollment count.
   (`GET /api/tutor/topic-requests?tab=accepted`)
 - **A request re-opens automatically** if you cancel or delete the linked class (`→ OPEN`, unlinked, learner notified) — it goes back into the open pool for any eligible tutor, not just you. **A request is marked `FULFILLED`** (terminal) if you complete the linked class (learner notified). If the learner cancels an `ACCEPTED` request, it's withdrawn on their end but **the class you created is kept** — only the link is cleared.
-- The tutor dashboard (`/tutor`) shows an "Open Class Requests" count (the combined directed + eligible-public pool you can act on), linking here.
+- The tutor dashboard (`/tutor`) shows an "N open class requests" link (the combined directed + eligible-public pool you can act on), linking here.
 - Gated by the `matchingEnabled` platform setting.
 
 ## Assessments (`/tutor/assessments`)
@@ -130,7 +130,7 @@ Two tabs: **Topics You Teach** and **Assessment History**.
   (`GET /api/tutor/assessments` for attempts, `GET /api/tutor/topic-certifications` for certification status)
 - `POST /api/tutor/topic-certifications` (upsert a `PENDING` certification request without taking a quiz) still exists and works, but no button in the current UI calls it — it predates the auto-graded quiz flow and is kept for API/back-compat only.
 - Being `CERTIFIED` in a topic is what unlocks teaching it when `requireCertificationForClassCreation` is enabled, and is surfaced to learners in the class browser as a "verified topic" signal.
-- The dashboard (`/tutor`) shows only a summary (verified/pending counts with a link) — the full quiz flow and history live on this dedicated page.
+- The dashboard (`/tutor`) shows only a summary ("N certified topics, N pending" link) — the full quiz flow and history live on this dedicated page.
 
 ## Notifications (`/tutor/notifications`)
 
@@ -155,10 +155,10 @@ Two tabs: **Topics You Teach** and **Assessment History**.
   overlapping/back-to-back sessions on the same weekday), and a matching read-only display
   component exists (`src/components/tutor/WeeklyScheduleView.tsx`, "Typical Weekly Schedule").
   **Neither is currently wired into any page** — no route imports them today.
-- What's actually shown, on both the tutor dashboard (`/tutor`, "This week" card) and the
-  learner-facing tutor profile (`/learner/tutors/[tutorId]`), is a literal, date-specific
-  schedule of the tutor's `SCHEDULED` sessions over the **next 7 days** (`WeeklyTimetable`
-  component) — not a recurring weekly pattern.
+- What's actually shown, on both the tutor dashboard (`/tutor`, "This week" day list,
+  `WeekDayRail`, shared with the learner dashboard) and the learner-facing tutor profile
+  (`/learner/tutors/[tutorId]`, `WeeklyTimetable`), is a literal, date-specific schedule of the
+  tutor's `SCHEDULED` sessions over the **next 7 days** — not a recurring weekly pattern.
 - Either way, nothing to manage: scheduling class sessions *is* how a tutor's availability is
   represented, derived or literal.
 

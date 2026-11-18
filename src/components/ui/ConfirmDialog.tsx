@@ -26,26 +26,24 @@ export default function ConfirmDialog({
     <Modal open={open} onClose={onCancel} title={title} bare>
       <div className="flex items-start gap-3">
         {tone === "danger" && (
-          <div className="p-2 rounded-lg bg-error/10 text-error shrink-0">
-            <TriangleAlert className="w-4 h-4" strokeWidth={2.5} />
-          </div>
+          <TriangleAlert className="w-5 h-5 mt-1 text-error shrink-0" aria-hidden="true" />
         )}
         <div className="space-y-1">
-          <h3 className="font-bold text-sm text-base-content">{title}</h3>
-          {description && <p className="text-xs text-(--kt-muted)">{description}</p>}
+          <h2 className="font-serif text-xl font-medium leading-tight text-base-content">{title}</h2>
+          {description && <p className="text-sm text-(--kt-muted)">{description}</p>}
         </div>
       </div>
       <div className="modal-action pt-4">
-        <button type="button" className="btn btn-ghost btn-sm" onClick={onCancel} disabled={loading}>
+        <button type="button" className="btn btn-ghost" onClick={onCancel} disabled={loading}>
           {cancelLabel}
         </button>
         <button
           type="button"
-          className={`btn btn-sm ${tone === "danger" ? "btn-error" : "btn-primary"}`}
+          className={`btn ${tone === "danger" ? "btn-error" : "btn-primary"}`}
           onClick={onConfirm}
           disabled={loading}
         >
-          {loading && <span className="loading loading-spinner loading-xs" />}
+          {loading && <span className="loading loading-spinner loading-sm" />}
           {confirmLabel}
         </button>
       </div>

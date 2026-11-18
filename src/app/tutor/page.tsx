@@ -1,29 +1,27 @@
 import { redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
-import {
-  CheckCircle2,
-  Circle,
-  AlertTriangle,
-  CalendarClock,
-  BookOpen,
-  BadgeCheck,
-  Users,
-  Inbox,
-} from "lucide-react";
+import { AlertTriangle, CheckCircle2, Circle } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
-import { addDays, formatDateTime, formatTime, formatWeekday, parseLocalDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { addDays, formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
-import StatCard from "@/components/ui/StatCard";
-import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
-import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
-import { subjectDisplayLabel } from "@/lib/displayLabels";
+import WeekDayRail, { groupByDay } from "@/components/schedule/WeekDayRail";
 
 export const metadata = {
   title: "Tutor Portal | Katuwang",
 };
+
+const SESSION_SELECT = {
+  id: true,
+  topic: true,
+  scheduledAt: true,
+  duration: true,
+  class: { select: { id: true, subject: true } },
+} as const;
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const tutorClassHref = (classId: string) => `/tutor/classes/${classId}`;
 
 export default async function TutorDashboard() {
   const session = await getActiveServerSession();
@@ -31,11 +29,15 @@ export default async function TutorDashboard() {
 
   const user = await prisma.user.findUnique({
     where: { id: session!.user.id },
-    include: {
+    select: {
+      status: true,
+      statusReason: true,
+      statusExpiresAt: true,
       tutorProfile: {
-        include: {
-          topicCertifications: true,
-          classes: { include: { topics: true, _count: { select: { enrollments: { where: { withdrawnAt: null } } } } } },
+        select: {
+          id: true,
+          topicCertifications: { select: { subject: true, topic: true, status: true } },
+          classes: { select: { _count: { select: { enrollments: { where: { withdrawnAt: null } } } } } },
         },
       },
     },
@@ -44,106 +46,62 @@ export default async function TutorDashboard() {
   const tutorProfile = user?.tutorProfile;
   const classes = tutorProfile?.classes ?? [];
   const certifications = tutorProfile?.topicCertifications ?? [];
+  const certifiedTopics = certifications
+    .filter((c) => c.status === "CERTIFIED")
+    .map(({ subject, topic }) => ({ subject, topic }));
+  const pendingCount = certifications.filter((c) => c.status === "PENDING").length;
 
   const now = new Date();
-  const [openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
-    tutorProfile
-      ? prisma.topicCertification
-          .findMany({
-            where: { tutorProfileId: tutorProfile.id, status: "CERTIFIED" },
-            select: { subject: true, topic: true },
-          })
-          .then((certifiedTopics) =>
-            prisma.topicRequest.count({ where: tutorPoolWhere(tutorProfile.id, certifiedTopics) })
-          )
-      : Promise.resolve(0),
-    tutorProfile
-      ? prisma.classSession.findMany({
-          where: {
-            status: "SCHEDULED",
-            scheduledAt: { gt: now },
-            class: { tutorProfileId: tutorProfile.id },
-          },
+  const ownSessions = { status: "SCHEDULED" as const, class: { tutorProfileId: tutorProfile?.id } };
+  const [openRequestCount, upcomingSessions, weeklySessions] = tutorProfile
+    ? await Promise.all([
+        prisma.topicRequest.count({ where: tutorPoolWhere(tutorProfile.id, certifiedTopics) }),
+        // Only used when nothing is scheduled this week: "your next sessions are …".
+        prisma.classSession.findMany({
+          where: { ...ownSessions, scheduledAt: { gt: now } },
           orderBy: { scheduledAt: "asc" },
-          take: 5,
-          select: {
-            id: true,
-            topic: true,
-            scheduledAt: true,
-            duration: true,
-            class: { select: { id: true, subject: true } },
-          },
-        })
-      : Promise.resolve([]),
-    tutorProfile
-      ? prisma.classSession.findMany({
-          where: {
-            status: "SCHEDULED",
-            scheduledAt: { gt: now, lt: addDays(now, 7) },
-            class: { tutorProfileId: tutorProfile.id },
-          },
+          take: 3,
+          select: SESSION_SELECT,
+        }),
+        prisma.classSession.findMany({
+          where: { ...ownSessions, scheduledAt: { gt: now, lte: addDays(now, 7) } },
           orderBy: { scheduledAt: "asc" },
-          select: {
-            id: true,
-            topic: true,
-            scheduledAt: true,
-            duration: true,
-            class: { select: { id: true, subject: true } },
-          },
-        })
-      : Promise.resolve([]),
-  ]);
-
-  const timetableSessions = weeklySessions.map((s) => ({
-    id: s.id,
-    topic: s.topic,
-    subject: s.class.subject,
-    classId: s.class.id,
-    scheduledAt: s.scheduledAt.toISOString(),
-    duration: s.duration,
-  }));
+          select: SESSION_SELECT,
+        }),
+      ])
+    : [0, [], []];
 
   const enrolledLearnerCount = classes.reduce((sum, c) => sum + c._count.enrollments, 0);
   const isModerated = user?.status !== "ACTIVE";
-
-  // Distinct (subject, topic) pairs the tutor currently teaches, across all their classes.
-  const taughtTopics = Array.from(
-    new Map(
-      classes.flatMap((c) => c.topics.map((t) => [`${c.subject}::${t.topic}`, { subject: c.subject, topic: t.topic }]))
-    ).values()
-  );
-
-  const certifiedCount = certifications.filter((c) => c.status === "CERTIFIED").length;
-  const pendingCount = certifications.filter((c) => c.status === "PENDING").length;
+  const days = groupByDay(weeklySessions);
+  const laterDays = groupByDay(upcomingSessions);
 
   const steps = [
-    { label: "Create your profile", done: true },
-    { label: "Schedule your first class", done: classes.length > 0 },
-    { label: "Request a topic assessment", done: certifications.length > 0 },
+    { label: "Schedule your first class", done: classes.length > 0, href: "/tutor/classes/new" },
+    { label: "Take a topic assessment", done: certifications.length > 0, href: "/tutor/assessments" },
   ];
   const onboardingComplete = steps.every((s) => s.done);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-8">
       <PageHeader
         eyebrow="Tutor Portal"
-        title="Manage your tutoring"
-        subtitle="Track your classes, sessions, and verified topics."
-        actions={<AnonymousIdBadge id={session!.user.anonymousId} role="TUTOR" size="md" showIcon />}
+        title="Your week"
+        subtitle={`Your sessions for the next 7 days. Times are in ${SCHOOL_TIME_ZONE_LABEL}.`}
       />
 
       {isModerated && (
-        <div className="rounded-xl border border-error/30 bg-error/10 p-4 space-y-1.5">
-          <div className="flex items-center gap-2 text-error font-bold text-sm">
-            <AlertTriangle className="h-4 w-4 shrink-0" />
+        <div role="alert" className="rounded-(--kt-radius-box) border border-error/30 bg-error/10 px-5 py-4 space-y-1">
+          <p className="flex items-center gap-2 text-error font-semibold">
+            <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
             Your account is {user?.status === "BANNED" ? "banned" : "suspended"}
-          </div>
+          </p>
           {user?.statusReason && (
-            <p className="text-xs text-(--kt-muted)">
+            <p className="text-sm">
               <span className="font-semibold">Reason:</span> {user.statusReason}
             </p>
           )}
-          <p className="text-xs text-(--kt-muted)">
+          <p className="text-sm text-(--kt-muted)">
             {user?.statusExpiresAt
               ? `In effect until ${formatDateTime(user.statusExpiresAt)}.`
               : "In effect indefinitely. Contact an administrator for details."}
@@ -151,110 +109,75 @@ export default async function TutorDashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Topics Taught" value={taughtTopics.length} icon={BookOpen} tint="primary" />
-        <StatCard label="Verified Topics" value={certifiedCount} icon={BadgeCheck} tint="success" />
-        <StatCard
-          label="Enrolled Learners"
-          value={enrolledLearnerCount}
-          icon={Users}
-          tint="secondary"
-          href="/tutor/students"
-        />
-        <StatCard
-          label="Open Class Requests"
-          value={openRequestCount}
-          icon={Inbox}
-          tint="accent"
-          href="/tutor/requests"
-        />
-      </div>
+      <nav aria-label="Your numbers" className="flex flex-wrap gap-x-6 gap-y-2 -mt-4">
+        <Link href="/tutor/students" className="link link-hover text-primary">
+          {plural(enrolledLearnerCount, "learner enrolled", "learners enrolled")}
+        </Link>
+        <span className="text-(--kt-muted)">{plural(weeklySessions.length, "session", "sessions")} this week</span>
+        <Link href="/tutor/requests" className="link link-hover text-primary">
+          {plural(openRequestCount, "open class request", "open class requests")}
+        </Link>
+        <Link href="/tutor/assessments" className="link link-hover text-primary">
+          {plural(certifiedTopics.length, "certified topic", "certified topics")}
+          {pendingCount > 0 && `, ${pendingCount} pending`}
+        </Link>
+      </nav>
 
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            Upcoming sessions
-          </h2>
-          <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
-          {upcomingSessions.length === 0 ? (
-            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-              No scheduled sessions across your classes.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {upcomingSessions.map((s) => {
-                const d = new Date(s.scheduledAt);
-                return (
-                  <li key={s.id}>
-                    <Link
-                      href={`/tutor/classes/${s.class.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
-                    >
-                      <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
-                        <span className="text-2xs font-bold uppercase leading-none">
-                          {formatWeekday(d)}
-                        </span>
-                        <span className="text-base font-bold leading-tight">{Number(parseLocalDateAndTime(d).date.slice(-2))}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                            {subjectDisplayLabel(s.class.subject)}
-                          </span>
-                          <span className="text-sm font-semibold text-base-content/85 truncate">
-                            {s.topic}
-                          </span>
-                        </div>
-                        <p className="text-2xs text-(--kt-faint) mt-0.5">
-                          {formatTime(d)} ·{" "}
-                          {s.duration} min
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      <section className="card kt-card">
-        <div className="card-body gap-2">
-          <h2 className="card-title text-sm font-bold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
+      <section aria-labelledby="this-week" className="kt-card">
+        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
+          <h2 id="this-week" className="font-serif text-xl font-medium">
             This week
           </h2>
-          <p className="text-2xs text-(--kt-faint)">
-            Your scheduled sessions over the next 7 days.
-          </p>
-          <WeeklyTimetable sessions={timetableSessions} />
+          <Link href="/tutor/classes" className="link link-hover text-primary text-sm">
+            My classes
+          </Link>
         </div>
+
+        {days.length > 0 ? (
+          <WeekDayRail days={days} now={now} hrefFor={tutorClassHref} />
+        ) : laterDays.length > 0 ? (
+          <>
+            <p className="px-5 pt-5 text-(--kt-muted)">Nothing scheduled in the next 7 days. Your next sessions:</p>
+            <WeekDayRail days={laterDays} now={now} hrefFor={tutorClassHref} />
+          </>
+        ) : (
+          <p className="px-5 py-6">
+            No sessions scheduled.{" "}
+            <Link href="/tutor/classes/new" className="link text-primary">
+              Create a class
+            </Link>{" "}
+            to start teaching.
+          </p>
+        )}
       </section>
 
-      {/* Onboarding Checklist — hidden once every step is done */}
       {!onboardingComplete && (
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Getting Started</h2>
-          <ul className="space-y-2">
+        <section aria-labelledby="getting-started" className="kt-card">
+          <h2 id="getting-started" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+            Getting started
+          </h2>
+          <ol className="px-5 py-4 space-y-3">
             {steps.map((step) => (
-              <li key={step.label} className="flex items-center gap-2 text-xs text-(--kt-muted)">
+              <li key={step.label} className="flex items-center gap-3">
                 {step.done ? (
-                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                  <>
+                    <CheckCircle2 className="h-5 w-5 text-success shrink-0" aria-hidden="true" />
+                    <span className="text-(--kt-muted) line-through">{step.label}</span>
+                    <span className="sr-only">(done)</span>
+                  </>
                 ) : (
-                  <Circle className="h-4 w-4 text-base-content/30 shrink-0" />
+                  <>
+                    <Circle className="h-5 w-5 text-(--kt-muted) shrink-0" aria-hidden="true" />
+                    <Link href={step.href} className="link text-primary">
+                      {step.label}
+                    </Link>
+                  </>
                 )}
-                <span className={step.done ? "" : "text-(--kt-faint)"}>{step.label}</span>
               </li>
             ))}
-          </ul>
-        </div>
-      </section>
+          </ol>
+        </section>
       )}
-
-      <AssessmentsSummaryCard certifiedCount={certifiedCount} pendingCount={pendingCount} />
     </div>
   );
 }

@@ -11,7 +11,7 @@ export default function TutorRequestsPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Class requests"
-        subtitle="Accept a request to auto-create a class for it — certification required per topic."
+        subtitle="Learners ask for classes on topics they need help with. Accepting a request creates the class for you."
       />
       <TopicRequestBrowser />
     </div>

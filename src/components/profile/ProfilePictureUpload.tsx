@@ -47,7 +47,7 @@ export default function ProfilePictureUpload({
       if (res && res[0]) {
         const fileUrl = res[0].ufsUrl ?? res[0].url;
         setCurrentImage(fileUrl);
-        setSuccess("Profile picture updated successfully.");
+        setSuccess("Photo updated.");
         onImageUpdated?.(fileUrl);
         try {
           await updateSession();
@@ -111,7 +111,7 @@ export default function ProfilePictureUpload({
       if (!res.ok) throw new Error(data.error || "Failed to remove profile picture.");
 
       setCurrentImage(null);
-      setSuccess("Profile picture removed.");
+      setSuccess("Photo removed.");
       onImageUpdated?.(null);
       try {
         await updateSession();
@@ -132,15 +132,14 @@ export default function ProfilePictureUpload({
       <FeedbackBanner variant="error" message={error || null} />
 
       {locked && (
-        <div className="alert alert-warning text-xs py-2 px-3 flex items-center gap-2">
-          <Lock className="w-4 h-4 shrink-0 text-warning" />
-          <span>Profile picture editing has been locked by an administrator.</span>
-        </div>
+        <p className="flex items-center gap-2 text-sm">
+          <Lock className="w-4 h-4 shrink-0" aria-hidden="true" />
+          An administrator has locked your photo, so it can&apos;t be changed for now.
+        </p>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center gap-6">
-        {/* Avatar Preview */}
-        <div className="relative group shrink-0">
+      <div className="flex flex-wrap items-center gap-5">
+        <div className="relative shrink-0">
           <UserAvatar
             src={currentImage}
             name={displayName}
@@ -148,60 +147,50 @@ export default function ProfilePictureUpload({
             modalTitle={`${displayName} - Profile Picture`}
           />
           {uploading && (
-            <div className="absolute inset-0 bg-base-900/60 rounded-full flex flex-col items-center justify-center text-white p-1 text-center">
+            <div className="absolute inset-0 bg-neutral/70 rounded-full flex flex-col items-center justify-center text-neutral-content p-1 text-center">
               <Loader2 className="w-6 h-6 animate-spin" />
-              <span className="text-2xs font-bold mt-1">
-                {optimizing ? "Optimizing..." : `${progress}%`}
+              <span className="text-sm font-semibold mt-1">
+                {optimizing ? "Preparing…" : `${progress}%`}
               </span>
             </div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex-1 text-center sm:text-left space-y-2">
-          <div>
-            <h3 className="text-sm font-bold text-base-content">Profile Photo</h3>
-            <p className="text-xs text-(--kt-muted)">
-              Upload a PNG, JPG, or WebP photo up to 2MB.
-            </p>
-          </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            disabled={locked || uploading || removing}
+          />
 
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              disabled={locked || uploading || removing}
-            />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={locked || uploading || removing}
+            className="btn btn-outline gap-2"
+          >
+            <Camera className="w-4 h-4" aria-hidden="true" />
+            {currentImage ? "Change photo" : "Upload photo"}
+          </button>
 
+          {currentImage && (
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleRemove}
               disabled={locked || uploading || removing}
-              className="btn btn-primary btn-sm text-xs gap-1.5 cursor-pointer"
+              className="btn btn-ghost text-error gap-2"
             >
-              <Camera className="w-3.5 h-3.5" />
-              {currentImage ? "Change photo" : "Upload photo"}
+              {removing ? (
+                <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Trash2 className="w-4 h-4" aria-hidden="true" />
+              )}
+              Remove
             </button>
-
-            {currentImage && (
-              <button
-                type="button"
-                onClick={handleRemove}
-                disabled={locked || uploading || removing}
-                className="btn btn-outline btn-error btn-sm text-xs gap-1.5 cursor-pointer"
-              >
-                {removing ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Trash2 className="w-3.5 h-3.5" />
-                )}
-                Remove
-              </button>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

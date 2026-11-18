@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { keepCodesTogether, readableSubjects } from "@/lib/displayLabels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import {
   NotificationRow,
@@ -115,7 +116,7 @@ export default function NotificationList() {
                         {kind} · {notificationWhen(n.createdAt)}
                         {unread && <span className="text-primary font-medium"> · New</span>}
                       </span>
-                      <span className={`block break-words ${unread ? "font-medium" : ""}`}>{n.message}</span>
+                      <span className={`block break-words ${unread ? "font-medium" : ""}`}>{keepCodesTogether(readableSubjects(n.message))}</span>
                     </span>
                   </button>
                 </li>

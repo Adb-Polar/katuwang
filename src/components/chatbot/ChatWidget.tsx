@@ -107,11 +107,11 @@ export default function ChatWidget() {
           aria-label="Katuwang assistant"
           className="fixed bottom-20 right-4 z-30 flex w-[min(22rem,calc(100vw-2rem))] max-h-[min(30rem,calc(100vh-7rem))] flex-col overflow-hidden rounded-2xl border border-base-300 bg-base-100 shadow-2xl"
         >
-          <header className="flex items-center gap-2 border-b border-base-200 bg-base-100 px-3 py-2.5">
+          <header className="flex items-center gap-3 border-b border-(--kt-border) bg-base-100 px-4 py-3">
             <BrandMark size="sm" />
             <div className="min-w-0">
-              <p className="text-xs font-bold leading-tight">Assistant</p>
-              <p className="text-2xs text-(--kt-faint) leading-tight">Navigation help &amp; FAQs</p>
+              <h2 className="font-serif text-lg font-medium leading-tight">Assistant</h2>
+              <p className="text-sm text-(--kt-muted) leading-tight">Finding your way around, and common questions</p>
             </div>
           </header>
 
@@ -128,14 +128,14 @@ export default function ChatWidget() {
             )}
           </div>
 
-          {error && <p className="px-3 pb-1 text-2xs text-error">{error}</p>}
+          {error && <p className="px-4 pb-1 text-sm text-error">{error}</p>}
 
           <ValidatedForm
             onSubmit={(e) => {
               e.preventDefault();
               send(input);
             }}
-            className="flex items-center gap-2 border-t border-base-200 p-2"
+            className="flex items-center gap-2 border-t border-(--kt-border) p-3"
           >
             <input
               value={input}
@@ -143,12 +143,12 @@ export default function ChatWidget() {
               maxLength={500}
               placeholder="Ask about Katuwang…"
               aria-label="Message"
-              className="input input-sm input-bordered flex-1 text-xs"
+              className="input input-bordered flex-1 min-w-0"
             />
             <button
               type="submit"
               disabled={sending || !input.trim()}
-              className="btn btn-sm btn-primary btn-square"
+              className="btn btn-primary btn-square"
               aria-label="Send"
             >
               <Send className="h-4 w-4" />

@@ -4825,3 +4825,490 @@ status, the grade (always the learner's own), the "until Nov 17, 11:30 PM" deadl
 closes within a day, via `closesSoon()`), the note, and "Posted … · History" (the title is the history link). Status
 lines appear only when something happened: "TUT-… made a class for this" + Review & enroll, enrolled, expired
 (+ Renew / Change times), or the outcome on the Past tab.
+
+## Tutor profile — edit page restyle and honest privacy line (2026-11-18)
+
+Unslop pass on `/tutor/profile` and `/tutor/profile/edit` (plan: `docs/plans/tutor-profile-unslop.md`).
+
+- **Bug (privacy copy):** the tutor profile said "Learners see you only as TUT-…" and "Only you and administrators
+  can see your real name…", but when the `showTutorRealNames` setting is on, learners do see tutors' real names.
+  `app/tutor/profile/page.tsx` now reads the setting and passes `learnersSeeRealName` to `ProfileView`, which then
+  says "Learners see your name and TUT-…" and "Your school shows tutors' real names to learners. Your email and
+  contact info stay between you and administrators." New `components/profile/__tests__/ProfileView.test.tsx`.
+- Certified topics header: the big serif "9 topics in 7 subjects" figures became a plain line in the section note
+  ("9 topics in 7 subjects. Learners see these on your profile.") and the right side holds an outlined
+  "Add a topic" button to `/tutor/assessments` (the empty state already linked there).
+- `ProfileEditView` (also used by `/learner/profile/edit`): three mismatched cards (a 14px bold "Profile Photo",
+  an untitled form, a 14px "Change password" card-title) are now three sections in the profile page's style —
+  serif "Photo", "Your details", "Password", each with one muted note (file types/size; contact info stays with
+  admins; you'll be signed out after changing it). Back link sits above the header; kicker "Iyong account" on both
+  edit pages (was "Tutor Portal" / "Learner Portal"); dropped the subtitle that listed the fields.
+- `ProfilePictureUpload`: heading and helper text moved to the section; buttons full size (were `btn-sm text-xs`),
+  "Upload/Change photo" outlined, "Remove" a quiet red ghost button; the locked notice is a plain line with a lock
+  icon instead of a 12px warning alert; upload overlay used a non-existent `bg-base-900/60` (so the white
+  progress text sat on nothing) — now `bg-neutral/70` with 14px text; messages "Photo updated." / "Photo removed.".
+- `ProfileEditForm` and `ChangePasswordForm` (the latter also on `/admin/settings`): `FormField size="md"`
+  labels, default-size inputs and buttons (were forced `text-sm`/`font-bold`), submit button aligned with the
+  inputs; removed the hints that only repeated the label ("Your current grade level.", "Your current class section.").
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser at 1280px and 375px
+as the demo tutor — only IBM Plex Sans/Serif, no text under 13px, no horizontal scroll.
+
+## Tutor dashboard — matches the learner dashboard (2026-11-18)
+
+User: unslop the `/tutor` dashboard, copy the learner dashboard's style.
+
+- New shared `components/schedule/WeekDayRail.tsx` (+ `groupByDay`): the learner dashboard's day-grouped "This week"
+  rail moved out of `app/learner/page.tsx` unchanged, with a `hrefFor(classId)` prop for the portal's class link;
+  it now works out today/tomorrow itself. The learner page renders the same markup (its tests pass unchanged).
+- `app/tutor/page.tsx`, same layout as `/learner`: header "Your week" with the time-zone line (was "Manage your
+  tutoring" + a TUT-ID pill — the ID is in the sidebar); one line of numbers — "N learners enrolled" (Students),
+  "N sessions this week", "N open class requests" (Requests), "N certified topics, N pending" (Assessments) —
+  instead of four tinted icon tiles; one "This week" card with the day rail and a "My classes" link (replaces the
+  "Upcoming sessions" list and the 7-column `WeeklyTimetable`, which showed the same sessions twice). With nothing
+  this week it shows the next 3 sessions; with none at all, "Create a class".
+- Removed the "Topics Taught" tile (duplicate of the classes page) and `AssessmentsSummaryCard` (it repeated the
+  certified/pending counts; now part of the numbers line) — the component is deleted, nothing else used it.
+- "Getting started" (only until done): serif heading, 16px steps, each open step links to where it's done
+  (`/tutor/classes/new`, `/tutor/assessments`); dropped the always-ticked "Create your profile".
+- Moderation notice: same content at 14–16px (was 12px), `role="alert"`.
+- Query clean-up: one `select` for the user instead of loading every class with its topics; the open-requests
+  count reuses the already-loaded certifications instead of a second `topicCertification` query.
+- New `app/tutor/__tests__/page.test.tsx` (reading order, counts, links, moderation notice).
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor at
+desktop and 375px — Plex only, nothing under 12px, no horizontal scroll.
+
+## Tutor "Your classes" — learner-style class cards (2026-11-18)
+
+User: unslop `/tutor/classes`, copy the learner portal's card style.
+
+- `app/tutor/classes/page.tsx`: full-size "Schedule a class" button in the page header (was a `btn-sm text-xs`
+  "Schedule Class" inside a "Class Schedule & Management" card); one plain subtitle instead of the 12px
+  "Schedule 1-on-1 sessions… Tutees will be able to…" blurb.
+- `components/tutor/ClassManagement.tsx`: no wrapping card — tabs ("Active", "History", with counts) and a
+  `sm:2 / xl:3` grid sit on the page like the learner's My classes. Each class uses the learner `ClassCatalogCard`
+  (next-session date block, "Subject · Grade N · C-0240" line, topics as the serif title, time · length · sessions
+  footer) instead of `ClassCard` (mono uppercase code, 10–12px text, outlined topic chips, icon row, description,
+  warning/error tinted backgrounds). The bottom-right shows the tutor's state in one place: "Suspended"/"Banned"
+  (with "Reason: …" under the topics), "Completed", "Cancelled", "Not published" (eye-off icon), else
+  "N of M enrolled" or "Full". The class description is no longer on the card (it's on the class page).
+- `ClassCatalogCard`: optional `code`, `aside` (replaces the status/seats text) and `notice` props; learner use
+  unchanged. `ClassCard` is still used by the learner's tutor profile and the landing sample.
+- `ClassEmptyState` (shared with the learner class browser): one plain line on a card with the next step as a link
+  ("No active classes. Schedule a class"), instead of a dashed grey box with a calendar icon and 12px faint text;
+  the learner "Clear filters" is a normal link (was `btn-link btn-xs text-xs`).
+- New `components/classes/__tests__/ClassCatalogCard.test.tsx`.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor at
+1280px (Active and History tabs) and 375px — Plex only, nothing under 12px, no horizontal scroll.
+
+Follow-up (user annotation: the three topics ran together as one long serif title — needs clear separation and
+hierarchy): `ClassCatalogCard` (tutor list and learner Browse / My classes) now makes the **first topic the serif
+title**; up to two more topics sit under it, one per line, in 14px sans on a thin left rule, then "+N more". The
+"Subject · Grade N · C-0240" line and the "09:00 AM · 60 min · 3 sessions" footer wrap by whole piece (no more
+"Araling / Panlipunan" or "09:00 / AM" splits). Test added for the title/list split.
+
+## Tutor "Your students" roster (2026-11-18)
+
+User: unslop `/tutor/students`. `components/tutor/StudentRoster.tsx`:
+- Was a `table-sm` with 10px uppercase headers, 12px cells, an "ST" avatar beside a tinted ID pill, "GRADE 8 · Rizal",
+  and "Enrolled in" as 10px mono outlined badges (`C-0241`) whose subject/topics only appeared in a hover `title`
+  (unreachable on phones, hidden from screen readers in practice).
+- Now one card with "N students" and a row per learner: avatar, the ID as a serif coral link (`kt-id--learner`) to
+  the student page, "Grade 8 · Section Rizal" under it; on the right (below on phones) one line per class — the
+  class's first topic linking to `/tutor/classes/[id]`, then "· Subject · C-0241" muted, "· withdrawn" when the
+  learner left. Pieces wrap whole (no "C-" / "0198" splits).
+- Filters at full size (`FormField size="md"`, default inputs/selects; were `input-sm text-xs`), "Grade level"
+  sentence case, placeholder "Learner ID, e.g. STU-0007". Loading is text instead of a spinner; the empty state is a
+  plain line on a card (was a dashed box with 12px italic faint text).
+- `app/tutor/students/page.tsx` subtitle: "Everyone enrolled in your classes. Learners appear only by their ID."
+- Test added to `StudentRoster.test.tsx` (ID link, grade line, topic link, withdrawn marker, count); the filter tests
+  are unchanged.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor at
+1280px and 375px — Plex only, nothing under 12px, no horizontal scroll.
+
+## Tutor "Class requests" (2026-11-18)
+
+User: unslop `/tutor/requests`. `components/tutor/TopicRequestBrowser.tsx`, on the learner request card's pattern:
+- Was: per request a tinted rounded box (primary tint for directed, grey for public) with 10–12px text, a tiny
+  "View history" link on top, a dark uppercase subject pill, a "Directed to you" badge, avatar + ID pill, outlined
+  topic badges, "Prefers: Friday (2026-12-11) 15:00–16:00, …" in 10px, the note in italic quotes, and a 10px
+  `btn-xs` "Accept & create class"; a blue info box with three 12px lines above the list; dashed italic empty states.
+- Now one card with a row per request: the first free time as the calendar block (dated day, "Every Sat", or
+  "Any time"); the first topic as the serif title linking to the request's history, other topics listed under it
+  (same title + list as the class cards); one muted line "Mathematics · 3:00–4:00 PM · from STU-0042 · Grade 8 ·
+  Rizal · asked Nov 17" (pieces wrap whole); "Also free: Every Saturday · 9:00–10:00 AM" when there are more times
+  (the learner card hides these in a tooltip); the note as plain 14px text; a full-size "Accept & create class".
+  Accepted rows: title + "Science · from STU-… · 0 of 5 enrolled · next …", "Waiting for the learner to enroll." /
+  "The learner enrolled." (success), and a "View class" button.
+- Tabs "Sent to you", "Public", "Accepted by you" with counts via the `Tabs` count prop (were "Private requests (0)"
+  etc. in the label). One muted sentence per tab replaces the info box ("…To accept one you need to be certified in
+  every topic it asks for — see your topics."); the learner-only "renew from My Requests" line is gone. Subject filter
+  full size beside it. Loading is text; empty states are plain lines on a card.
+- Page subtitle: "Learners ask for classes on topics they need help with. Accepting a request creates the class for you."
+- Shared: `SlotDate`, `slotRange`, `slotLabel` moved from `learner/TopicRequestManager.tsx` to
+  `components/requests/requestSlots.tsx` (learner card unchanged; `slotLabel.test.ts` import updated).
+- New `components/tutor/__tests__/TopicRequestBrowser.test.tsx` (open row, empty tab, accepted row).
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure). Browser as the demo tutor at
+1280px and 375px shows the header, tabs, note, filter and empty state (Plex only, no horizontal scroll); the demo
+tutor has no requests, so the rows themselves were only checked in the test render.
+
+## Class request history and accept pages (2026-11-18)
+
+User: unslop `/tutor/requests` again — the list was done, so this pass covers the two pages it links to.
+
+**`components/TopicRequestDetail.tsx`** (history page for `/tutor/requests/[id]`, `/learner/requests/[id]` and
+`/admin/topic-requests/[id]`):
+- Was one card with "Subject request" as a `card-title`, a run of "Status: … / Topics: … / Note: … / Preferred
+  times: FRIDAY 15:00–16:00" lines and a 12px "Submitted … · Deadline …", then a history list where each event showed
+  the **actor's internal user ID** and a "Changes" toggle with the raw `before`/`after` **JSON** (including learner,
+  tutor-profile and class IDs).
+- Now: back link above the header (kicker "Class request", the first topic as the `h1`, "Subject · Grade N"); a
+  "What was asked" section of label/value rows — status in words ("Waiting for a tutor", "Class created",
+  "Expired", …), topics one per line, free times via `slotLabel` ("Fri, Dec 11 · 3:00–4:00 PM"), note, Posted,
+  Open until / Closed; a "History" timeline with plain titles ("Request posted", "Request edited", "Free times
+  changed", "Cancelled", "Request expired"), the time, "by STU-…" / "by TUT-…" (role colours) or "by an
+  administrator", and readable change lines ("Topics: Percentages → Fractions, …", "Free times: Fri 3:00 PM–4:00 PM →
+  …", "Note: “…”"). Internal IDs are never shown.
+- New `lib/requestHistoryText.ts` (`eventTitle`, `changeLines`, `snapshotSlotLabel`, `REQUEST_STATUS_LABEL`) +
+  `lib/__tests__/requestHistoryText.test.ts`.
+
+**Accept page** (`/tutor/requests/[id]/accept`, `AcceptRequestForm`): back link; title "Create a class for this
+request" (was "Accept & create class" + "Auto-create a class from this class request. Certification required per
+topic."); the 12px intro is now 14px and says what is pre-filled; the 12px warning box for missing certifications is
+"You can't accept this request yet." with the missing topics and a "Go to assessments" button; card uses
+`kt-card-body` padding. Same form and API call.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure). Browser: a real request's
+history (edited + cancelled) through the admin portal at 1280px and 375px — Plex only, nothing under 12px, no
+horizontal scroll. The accept page wasn't reachable (the demo tutor has no eligible requests).
+
+## Tutor student page (2026-11-18)
+
+User annotation: unslop `/tutor/students/[studentId]`. `app/tutor/students/[studentId]/page.tsx`:
+- Was: kicker "Student Profile", `h1` "Anonymized profile", the STU ID twice as shield pills (header and card), a card
+  titled "Enrolled Student" with "GRADE 8 · Rizsal" at 12px and a 10px "Student is using their anonymous monogram."
+  line, then "Class history (2)" as 14px bold with each class as a grey box holding a dark subject pill, outlined
+  topic badges and a 10px calendar-icon date.
+- Now, like the profile page: one learner-coral band with the xl avatar, kicker "Your student", the ID as the serif
+  `h1` (`kt-id--learner`), "Grade 8 · Section Rizsal", and one privacy line ("Learners appear to tutors only by their
+  ID — no real name, email or contact details."). "Classes with you" (serif section title) lists each class as a
+  ruled row: "Subject · C-0241" muted, the first topic as a serif title linking to the class, other topics under it
+  on a thin rule, "Enrolled Nov 16, 2026" on the right and "Withdrew …" in red when the learner left (the row is
+  muted). Class code added to the query.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor
+(STU-0329) at 1280px and 375px — Plex only, nothing under 12px, no horizontal scroll.
+
+## Session test builder (2026-11-18)
+
+User annotation: unslop `/tutor/classes/[classId]/sessions/[sessionId]/test`. `components/tutor/SessionTestBuilder.tsx`
+(create form and builder; the bank / my-questions modals are unchanged):
+- Bugs: the page had **no `h1`** (only a 14px `card-title`), and the builder printed the raw subject enum
+  ("ARALING_PANLIPUNAN · pre/post test") in 10px uppercase monospace; the draft status badge read "draft".
+- Both states now open with a back link and `PageHeader`: kicker "Session test", the session topic as the `h1`,
+  "Araling Panlipunan · pre-test and post-test" (via `subjectDisplayLabel`). The builder's status badge plus a second
+  12px explanation became one sentence ("Draft — add questions, save them, then publish.", "Pre-test open to
+  enrolled learners…", "Post-test open…", "Closed — no new attempts can start."); Close pre-test / Publish post-test /
+  View results sit in the header actions at full size (were `btn-sm text-xs`, Close pre-test was a yellow button).
+- Create form: serif "Create the test" with a 14px explanation (was 10px faint); title + instructions now share
+  `TestFields` with the builder (`FormField size="md"`, default input/textarea; were `input-sm text-xs`).
+- Builder: serif "Test details" and "Questions 3"; full-size Add from bank / My questions / Write a question (were
+  10px `btn-xs`); questions as a numbered ruled list — serif number, prompt at body size (was muted 12px in a bordered
+  box), "Topic · from the question bank / written by you" (was a colour-coded "Bank"/"Custom" word), full-size
+  move/remove icon buttons with "Move question 2 up" labels; plain empty line instead of a dashed italic box;
+  Save details / Save question set outlined, Publish test primary, Close all testing outlined red.
+- `CharCount` (shared counter) is 12px instead of 10px.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor on a
+draft test at 1280px and 375px — one `h1`, Plex only, nothing under 12px, no horizontal scroll. Not seen: the create
+form after this change (the test had just been created), a test with questions, and published/closed states.
+
+Follow-up (user annotation circled the floating "Draft — add questions, save them, then publish." line and the
+subtitle): the status sentence between the header and the first card is gone. The header subtitle now carries the
+state after the subject — "Araling Panlipunan · **Draft**" / "No test yet" / "Pre-test open" / "Pre-test closed" /
+"Post-test open" (success colour while live) / "Closed" / "Session cancelled, no new attempts" — and the header
+buttons say what's next. The how-to ("Add questions, save the set, then publish. Learners can't see it until then.")
+is the Questions section's note while the test is editable. `PageHeader.subtitle` accepts a `ReactNode`.
+
+Question pickers (user annotation: unslop the "Add from the question bank" modal). `SessionTestBuilder.tsx`:
+- Bugs: the note printed the raw subject slug ("…for JHS_ARALING_PANLIPUNAN.Search…", also missing a space); bank
+  prompts are stored as "[Topic] Prompt", so every row showed the topic twice; every approved row said "Reviewed for
+  qualification" (internal wording, and true of nearly all rows).
+- Both pickers ("Add from bank", "My questions") now share `PickerModal` + `QuestionPickList`: serif `h2` title with
+  `aria-labelledby`, one-line note ("Araling Panlipunan questions. Search by question text or pick a topic." / "…in the
+  topics you're certified in"), full-size topic select, search box and an outlined Search (was a dark `btn-xs`); a
+  ruled list (no box per row) with the prompt at body size and the topic once under it; only non-approved questions
+  get a note ("Demo, practice only" / "Not reviewed yet, practice only"); questions already on the test are ticked,
+  disabled and say so; footer "2 selected · Cancel · Add 2 questions" at full size. Loading and empty states are text;
+  pagination only when there's more than one page. `displayPrompt()` strips the "[Topic]" prefix, also in the builder's
+  question list.
+Checked in the browser (bank modal, selection count, Cancel; nothing added). "My questions" not opened (the demo tutor
+has none).
+
+Write-a-question modal (user annotation). `components/quiz/QuestionFormModal.tsx`, shared with the admin question
+bank (Add question / Edit question / Create corrected version):
+- Bug: the line under the title was the raw subject slug ("JHS_ARALING_PANLIPUNAN"); both callers now pass
+  `subjectDisplayLabel(...)` ("Araling Panlipunan", and "Araling Panlipunan · Topic" in the admin bank).
+- Serif `h2` title, 14px context line (was 14px bold title + 10px faint slug); `FormField size="md"` labels; default
+  select / textarea / inputs (were `select-sm`, `textarea-sm`, `input-xs` with `text-xs`).
+- "Options" → "Answer choices": full-size radios and inputs, placeholders "Choice 1…", the chosen choice gets a
+  primary border and a "Correct answer" line under it, remove is a full-size ghost icon button (was a 10px "✕"), and
+  "+ Add option" is "Add a choice" with a plus icon. Hints: "Pick the correct answer with the circle beside it.",
+  "Optional. Learners see it after their answer is graded." "Question prompt" → "Question".
+- Footer divided by a rule; Cancel / submit at full size.
+- `lib/formValidation.ts`: `prompt` and `options` also match the new labels "Question" and "Answer choices", so server
+  field errors still focus the right control (the existing `ValidatedForm` question-options test covers it).
+Checked in the browser (tutor, opened and cancelled; nothing saved). Admin bank modal not opened.
+
+## Portal pop-ups: notifications panel and assistant (2026-11-18)
+
+User: fix the text hierarchy of the modals on `/tutor/requests`. The page's own components have no dialogs; its
+pop-ups are the portal-wide notifications panel (bell) and the assistant chat, so these changes apply on every
+learner, tutor and admin page.
+
+**Notifications** (`NotificationBell` dropdown, plus the message text on the full `/…/notifications` list):
+- Bug: messages showed raw subject codes ("STU-0329 enrolled in your JHS_ARALING_PANLIPUNAN class (C-0241)."). About 20
+  API routes build messages from `class.subject`, and existing rows already store the code, so the fix is at display
+  time: new `readableSubjects()` in `lib/displayLabels.ts` swaps known subject codes for their names ("…your Araling
+  Panlipunan class…"); `keepCodesTogether()` adds a word joiner so "C-0241" / "STU-0329" don't wrap at the hyphen.
+  Tests in `lib/__tests__/readableSubjects.test.ts`.
+- Panel: serif "Notifications" heading with "3 new" (was 12px bold with a bell icon), full-size "Mark all read" (was
+  10px), messages at 14px — unread in body colour and medium weight, read ones muted (was all muted 12px) — time at
+  12px muted (was 10px faint), a slightly larger unread dot labelled "Unread"; the per-type icons are gone from the
+  dropdown (the full page keeps its own layout); loading / empty / error are plain 14px text; "View all" is a 14px
+  link. Width 24rem (capped to the screen).
+
+**Assistant** (`ChatWidget`, `ChatMessage`): serif "Assistant" `h2` with "Finding your way around, and common
+questions" at 14px (were 12px bold + 10px faint "Navigation help & FAQs"); bubbles 14px (were 12px); link buttons and
+recommendation cards 14px (were 10px), card titles also pass through `readableSubjects`; suggestions are full-size
+rounded outline buttons (were 10px ghost badges); full-size message input and send button; 14px error line.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser on `/tutor/requests` as
+the demo tutor — both panels open, no text under 12px inside them, codes no longer split.
+
+## Tutor assessments page (2026-11-18)
+
+User annotation: unslop `/tutor/assessments`.
+- `AssessmentsTabs`: tabs "Topics (5)" / "History (2)" sit on the page (the whole thing was one card with tabs, a
+  12px intro and boxes inside). Subtitle: "Take an auto-graded quiz on a topic. Pass it and learners see you as verified
+  for that topic."
+- `TopicCertificationList`: one "Topics you teach" card (serif title + 14px note) with ruled rows — topic at body size
+  in body colour (was 12px muted bold in a grey box), "Subject · 3 of 20 questions ready · last score 45%, not passed"
+  as one 14px muted line (were 10px faint + a separate 10px red span), status as text on the right: "✓ Verified" in
+  green (was a 10px pill), "Passed, waiting for confirmation", "Questions requested"; buttons at the default size
+  (were bold with forced heights); reviewer note as one red line "Reviewer: …" (was a 10px red box). Empty state is a
+  plain line.
+- `OtherTopicAssessment`: its own card, serif "Any other topic" + 14px note (was a 12px heading + 10px faint text in a
+  grey box), grade / subject / topic in one row at full size (`FormField size="md"`), full-size "Start assessment".
+- `AssessmentHistory`: "Attempts" and "Topic status" as cards with serif titles and ruled rows; topic at body size,
+  "Subject · attempt 1 · Nov 15, 2026 · 20% (1 of 5)" at 14px, result as coloured text ("Passed", "Not passed",
+  "In progress", "Practice only"; "Verified", "Not verified", "Waiting for review") instead of pills; "used in N
+  classes" replaces a row of outlined badges that only repeated each class's status; full-size Resume / Review.
+
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure; `OtherTopicAssessment` tests
+pass); browser as the demo tutor, both tabs at 1280px and 375px — Plex only, nothing under 12px, no horizontal scroll.
+
+Follow-up (user: remove it): the curriculum hint under the "Any other topic" fields ("Legacy K to 12 curriculum
+domains. Check your school's curriculum.") is gone from `OtherTopicAssessment`. `CatalogCurriculumHint` itself stays
+(the class schedule form still uses it).
+
+## Long dropdown values stop before the arrow (2026-11-18)
+
+User annotation (`/tutor/assessments`, Topic "Traditional Asian Theater Music"): the chosen value ran under the
+dropdown arrow. In the customizable select (`appearance: base-select`, used for the bordered dropdown panels) the
+label isn't a text box, so DaisyUI's `text-overflow: ellipsis` only works with a `<selectedcontent>` element, which
+React 19.2 doesn't render. `src/app/globals.css` now clips every `select.select` / `.select select` at its content box
+(`overflow: clip; overflow-clip-margin: content-box`, inside `@supports (appearance: base-select)`), so long values
+stop before the arrow's padding; the full text shows in the open list. A clean cut, not an "…" (tried `<selectedcontent>`
+live — it gives the ellipsis, but needs React support first). Needed the usual dev restart + `.next/dev` clear.
+Checked: value clipped before the arrow; the list still opens with full, wrapped names.
+
+## Class page session rows (2026-11-18)
+
+User annotation on `/tutor/classes/[classId]`: the "Completed" pill and the session action row.
+- `SessionsList` (calendar variant, also on the learner class page): a finished or cancelled session's state is a word
+  at the end of the time line — "09:00 AM · 60 min · **Completed**" (cancelled in red) — instead of a 12px tinted pill
+  on its own line. The actions wrapper stretches to the row so the buttons don't wrap early.
+- `SessionActions`: the unlabeled pencil / ⓧ / trash icons and the 10px green outlined "Finish session" pill became
+  four 14px text buttons in one line: "Mark as done" (primary colour), "Reschedule", "Cancel" and "Delete" (red).
+  Accessible names kept ("Reschedule session", "Cancel session", "Delete session"; "Finish session" →
+  "Mark session as done"); the confirm dialog says "Mark this session as done?"; the reschedule modal title is
+  sentence case; errors are 14px.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure; `SessionActions` tests pass); browser as the
+demo tutor on class C-0240 at 1280px and 375px.
+
+## Session tests card (2026-11-18)
+
+User annotation on `/tutor/classes/[classId]`: the "Post-test open" pill and the View / Results buttons.
+`components/classes/SessionTestsCard.tsx` (tutor and learner class pages):
+- Every row now has the same shape: the session's test (or topic) at body weight, one 14px muted line under it, and
+  its buttons on the right. The status is a coloured word on that line — "Post-test open" / "Pre-test open" (green),
+  "Pre-test closed", "Draft", "Closed", "Session cancelled" (red) — instead of a 12px tinted pill that was clipped to
+  "Post-test ope" beside the buttons. Learners see "Post-test open · pre 80% · post not taken" on that line.
+- Rows without a test read "No test yet" on the second line (was inline "· no test yet").
+- Tutor buttons: "View test" (ghost) + "Results" (outlined primary), or "Finish building" for a draft (was "Build"
+  next to an outlined "View"); "Publish post-test" unchanged.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure; `SessionTestsCard` tests pass); browser as the
+demo tutor on class C-0240 at 1280px. At 375px the page has no horizontal scroll; the card itself wasn't scrolled
+into view.
+
+## Class page header, decluttered (2026-11-18)
+
+User annotation on `/tutor/classes/[classId]`: declutter the header. `components/classes/ClassDetailsView.tsx`
+(tutor, learner and admin class pages):
+- The class code joins the kicker ("Grade 7 · Class C-0240") instead of its own "Class C-0240" line.
+- Multi-topic classes: the topic list under the subject title is muted (it competed with the title at body colour).
+- The three labelled columns (Next session / Where / Enrolled, each label over a value) became one line:
+  "Next session **Nov 19, 2026, 9:00 AM** · **Bldg. 001 · Room 12** · **1 of 10 enrolled**" (learners: "N of M seats
+  left" / "Full", plus "Tutor TUT-…"; "Place not set" when there's no place or link). The status pill for non-open
+  classes sits at the end of that line.
+- Tutor page: "Manage class" moves into the header beside the title (its own row below the facts is gone); learner and
+  admin buttons stay after the facts. `ClassManageMenu` labels are sentence case ("Manage class", "Edit class info",
+  "Publish class", "Finish class", "Cancel class", "Delete class").
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure); browser as the demo tutor on C-0240 at 1280px
+and 375px.
+
+## Manage class menu (2026-11-18)
+
+User: unslop the Manage class menu (`components/tutor/ClassManageMenu.tsx`, tutor class page).
+- Was a DaisyUI `menu` of bare labels with 14px icons and a divider; "Finish class" was green like a success state;
+  nothing said what an action does until its confirm dialog; the moderated-class message was a `menu-title`.
+- Now each item is a title with a one-line muted note — Edit class info ("Topics, sessions, place and size"),
+  Unpublish / Publish class ("Hide it from learners browsing classes" / "Let learners find and join it"), Finish class
+  ("Ends it; eligible learners get certificates"), Cancel class ("Calls off the remaining sessions"), Delete class
+  ("Only while no one has enrolled"). Only the irreversible ones (Cancel, Delete) are red; Finish is plain. 16px icons,
+  muted (red for the two). 18rem wide with a thin rule between editing and ending. A moderated class shows one plain
+  line ("…so it can't be changed. See the notice above to appeal."). Same actions, same confirm dialogs.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure); browser as the demo tutor on C-0240 (opened,
+not used).
+
+## Edit class page (2026-11-18)
+
+User annotation: unslop `/tutor/classes/[classId]/edit`. `components/tutor/EditClassForm.tsx`:
+- Was: back link with small Cancel / "Save Changes" (`btn-sm text-xs`) on one row, a dark uppercase subject pill +
+  status pill as the only heading (no `h1`), a 14px bold "Class Info" card of 12px fields with decorative pin/link
+  icons, a separate "Description" card, a "Sessions" card in the boxed 10px list style, and an "At a Glance" sidebar
+  holding only an uppercase "MAX CAPACITY" input and a progress bar. Unpublished classes tinted the whole page grey
+  (`bg-base-300`), suspended ones red.
+- Now one column like the class page: back link, `PageHeader` (kicker "Edit class", the subject as `h1`, subtitle
+  "Active · 1 of 10 enrolled" / "Unpublished: learners can't see it yet" / "Suspended, so it can't be edited"), full-size
+  Cancel and "Save changes" in the header actions. One "Details" card (serif title) with `FormField size="md"` fields:
+  Topics as 14px rounded toggles (check when selected, plus when not, lock + muted fill when a session uses it, badge
+  when certified), Target grade, Location (building + room), Meeting link, Class size (with "Up to 10. N enrolled now,
+  so it can't go below that."), Description. "Sessions" card uses the calendar rows and text actions from the class
+  page; "Add Session" is a full-size outlined button. No page tint; the moderation panel stays for locked classes.
+- Field labels still start with "Topics", "Location", "Meeting link", "Target grade", "Description", so client and
+  server field errors still find them.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure); browser as the demo tutor on
+C-0240 at 1280px and 375px (no save).
+
+Follow-up (user: the Details card's typography doesn't match the rest of the system). Measured: in `FormField
+size="md"` the label, the helper text and the input were all 14px, and label and helper shared the same muted grey, so
+labels didn't read as labels. The public forms (login, sign-up; theme.md: "labels ~0.9rem; helper text 0.85rem muted")
+use body-colour labels. `components/ui/FormField.tsx` md size now renders labels at 0.9rem, medium weight, in
+`base-content`, and hints/errors at 0.85rem (hints muted). Applies to every `size="md"` field (~50: edit class, profile
+edit, password, recovery email, session test builder, question modal, assessments, student filters, request filter);
+the compact `sm` size is unchanged.
+
+Request rows, decluttered (user annotation on `/tutor/requests` with sample rows: declutter, fix the text hierarchy).
+`TopicRequestBrowser`:
+- Order is now: "Araling Panlipunan · Grade 7" small muted line → first topic as the serif title (other topics under
+  it as plain lines, no rule) → one muted 14px line with the first free time in body colour and weight
+  ("**9:00–10:30 AM** · or every Wed 3:00–4:00 PM · from STU-0042 · asked Nov 18") → the learner's note.
+- Removed: the learner's section (grade is already in the top line), the separate "Also free: …" line (other times
+  join the info line as "or every Wed …" / "or Dec 11 …"), the year on "asked".
+- New `DotLine`: parts joined with a non-breaking space before each "·", so a wrapped line never starts with a dot
+  (it used to start "· from STU-0042"), and no double spaces. Accepted rows use the same heading and line ("from
+  STU-… · 0 of 5 enrolled · first session …").
+- Test updated (`TopicRequestBrowser.test.tsx`: subject · grade line, no section, "or every Sat …", no line starting
+  with "·"). Checked with sample rows injected in the browser only (a mocked fetch; nothing written to the database).
+
+Request rows, grouped (user: still hard to read, no clear grouping). Each row now has three groups with more space
+between than within: (1) "Subject · Grade" + serif topic title (+ other topics); (2) a small labelled list — "When
+**9:00–10:30 AM**, or every Wed 3:00–4:00 PM" and "From STU-0042 · asked Nov 18" (muted 3.5rem labels like the profile
+rows; the When row is left out when the learner gave no times, since the date block already says "Any time");
+(3) the learner's note in quotes on a light tinted panel. Accepted rows: "From" and "Class 0 of 5 enrolled · first
+session …". Replaces the single dotted info line. Test updated.
+
+## Tutor assessment quiz page (2026-11-18)
+
+User annotation: unslop `/tutor/assessments/[attemptId]` (`components/tutor/AssessmentQuizRunner.tsx`).
+- Bugs: no `h1` (the topic was a 14px `card-title`); every prompt repeated its topic as a "[Katangiang Pisikal ng Asya]"
+  prefix. New shared `lib/questionText.ts` `displayPrompt()` (moved from `SessionTestBuilder`, + tests) strips it here too.
+- Header: back link "Back to assessments" (was a 12px link), `PageHeader` with kicker "Topic assessment", the topic as
+  `h1`, "Araling Panlipunan · 5 questions · pass mark 60% · attempt 1" (was 10px faint text in two places).
+- Questions: one card with ruled questions (was a card of bordered boxes); serif question number, prompt at body size
+  in body colour (was 14px semibold at 85% opacity), each in a `fieldset`/`legend`; answers as full-size rows with
+  `radio-sm` and body-colour text (were 12px muted with `radio-xs`); after grading the correct row gets a green edge and
+  "Correct answer", a wrong pick a red edge and "Your answer" (were 10px "correct" / "your answer"); explanations 14px
+  muted (were 10px italic faint). Answers sit under the prompt from `sm` up, full width on phones.
+- Result: a plain block with the score as a large serif number, "Passed" / "Not passed" / "Practice result", "N of M
+  correct" and one sentence on what's next — instead of a pill + a coloured alert.
+- Footer: "0 of 5 answered" (live) beside a full-size "Submit assessment" (was `btn-sm text-xs`).
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure); browser as the demo tutor on an in-progress
+attempt at 1280px and 375px (nothing answered or submitted).
+
+## Learner pre/post-tests share the quiz layout (2026-11-18)
+
+User: do the learner pre/post-tests share the tutor quiz component? They didn't — `components/quiz/SessionTestRunner.tsx`
+was a near-copy of the old tutor runner (no `h1`, 10–12px text, `radio-xs`, "[Topic]" prefixes, a pill + alert result).
+- New `components/quiz/QuizQuestionList.tsx`: `QuizQuestionList` (numbered questions in one card, full-size answer
+  rows, "Correct answer" / "Your answer" marks, explanations), `QuizResult` (large serif score, verdict, "N of M
+  correct", next-step text) and `QuizSubmitBar` ("N of M answered" + submit). Both `AssessmentQuizRunner` (tutor) and
+  `SessionTestRunner` (learner) use them, so the two can't drift apart again.
+- Learner test page: back link "Back to class", kicker "Pre-test" / "Post-test", the test title as `h1`, subtitle "5
+  questions · no pass or fail; it shows what you know before/after the session"; instructions as a plain paragraph
+  (was a 12px bordered box); result "50% · Up 20 points · 1 of 2 correct" + "Your pre-test score was 30%." (was one
+  long info alert) and "You'll see the right answers after you submit the post-test." when answers are held back;
+  loading is text.
+- `lib/questionText.ts` `displayPrompt(prompt, topic?)`: without a topic (learner items don't carry one) it strips any
+  leading "[…] ". Tests: `lib/__tests__/questionText.test.ts`, new `components/quiz/__tests__/SessionTestRunner.test.tsx`.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` failure). Browser: tutor quiz (graded attempt) after the
+refactor. The learner page wasn't opened — visiting a test with no attempt starts one in the shared DB — so it's
+covered by the component test only.
+
+Profile edit, second pass (user: unslop `/tutor/profile/edit` again). Since the shared `FormField` labels changed, this
+page was the only one still using side-by-side labels (`orientation="horizontal"`, a 10rem label column), so it read
+differently from every other form and "Confirm new password" wrapped onto two lines. `ProfileEditForm` and
+`ChangePasswordForm` now stack labels above fields like the rest of the system and pair related fields in two columns
+from `sm` up: Grade level | Section, then Contact info; Current password (half width), then New password | Confirm new
+password. Save buttons sit under the fields (the `sm:pl-43` offset is gone). Same fields, labels and validation; also
+shows on `/learner/profile/edit` and the admin "My Account" password form.
+
+## Tutor portal audit — remaining pieces (2026-11-18)
+
+User: audit the whole tutor portal, report what's still unstyled, restyle it. Report:
+`docs/reports/tutor-portal-unslop-audit-2026-11-18.md` (every route, modal and shared component; what was already done;
+what was left). Restyled in this change:
+- **Test results** (`/tutor/classes/[id]/sessions/[sid]/test/results`, `SessionTestResults`, also the admin drill-down):
+  back link "Back to the test", `PageHeader` (kicker "Test results", the test title as `h1`, "Class C-0240 · topic ·
+  Open") instead of an uppercase mono code line + 18px sans title + status pill; the four stat tiles became one line
+  ("**0 of 1** took the pre-test · **1 of 1** took the post-test · Average **—** → **20%** · Average gain **—** (0 took
+  both)") with one muted note; chart titles in plain words; "Each learner" as ruled rows (serif coral ID, "Pre — · Post
+  20% · +N", "View pre-test" / "View post-test") instead of a `table-sm` with ID pills and 10px "Pre"/"Post" buttons;
+  the answers dialog uses the shared `Modal` and `QuizQuestionList` (read-only) instead of a hand-built 10px modal.
+- **Charts** (`DeltaBar`, `BarChartCard`): serif titles instead of 12px uppercase tracked headings; `DeltaBar` rows
+  14px, IDs in the ID serif, plain empty text, readable "Show data table".
+- **New class page** (`/tutor/classes/new`, `ClassScheduleFields` page variant, also the accept-request form): back
+  link, title "Schedule a class", corrected subtitle (classes are published as soon as they're scheduled); serif
+  section heads ("Class details", "Where and how many"); labels "Subject", "Topics", "Class size", "Meeting link"
+  (were "Subject Area", "Topic(s)", "Max Capacity", "Meeting Link"; `reportFieldError` calls and the server-error
+  alias list updated); 10px italic dashed placeholder boxes → plain 14px lines; 14px topic checkboxes and custom-topic
+  chips; session boxes untinted with a serif "Session 1" legend and 0.9rem field labels; ghost Cancel.
+- **Grades** (`lib/gradeLevels.ts`): `gradeLabel("GRADE_10")` is "Grade 10" (was "GRADE 10"), so "GRADE 8 · Rizsal"
+  reads "Grade 8 · Rizsal" on the enrolled-learners table and wherever `gradeSection` is used. Test updated.
+- **Modals and dialogs** (`Modal`, `ConfirmDialog` — app-wide): serif titles (2xl / xl) instead of 14px bold, 14px
+  descriptions, full-size buttons, a plain warning icon instead of a tinted chip. Add session / Reschedule: fields no
+  longer in a bordered box inside the modal, "Add a session" title, ghost Cancel.
+- **Class appeal card** (suspended classes): plain card, 14–16px text, full-size "Appeal this decision" / "Send
+  appeal" (were 10px `btn-xs`), `FormField size="md"` textarea.
+- **Sidebar footer** (`PortalLayout`, all portals): "Your ID" + the ID in the role-coloured serif instead of
+  "Anonymous ID" + a 10px pill.
+Checks: tsc, lint, `pnpm test` (only the known `ValidatedForm` add-session failure). Browser as the demo tutor: results
+page + answers dialog, new class page, class page grade text, a confirm dialog (cancelled), sidebar — 1280px, and
+375px for results and new class (nothing under 12px, no horizontal scroll). Not seen: the appeal card (needs a
+suspended class), the add-session modal after the change, creating a class.

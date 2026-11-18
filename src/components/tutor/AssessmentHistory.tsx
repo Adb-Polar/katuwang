@@ -1,7 +1,6 @@
 import Link from "next/link";
-import StatusBadge from "@/components/ui/StatusBadge";
 import type { AttemptSummary } from "@/app/tutor/assessments/page";
-import { subjectDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { formatDate } from "@/lib/datetime";
 
 export interface CertificationDetail {
@@ -16,17 +15,20 @@ export interface CertificationDetail {
   usedInClasses: { id: string; subject: string; status: string }[];
 }
 
-const STATUS_BADGE = {
-  CERTIFIED: { tone: "success", label: "Verified" },
-  REJECTED: { tone: "error", label: "Not Passed" },
-  PENDING: { tone: "warning", label: "Awaiting review" },
+const STATUS_TEXT = {
+  CERTIFIED: { className: "text-success", label: "Verified" },
+  REJECTED: { className: "text-error", label: "Not verified" },
+  PENDING: { className: "text-base-content", label: "Waiting for review" },
 } as const;
 
-const ATTEMPT_BADGE = {
-  PASSED: { tone: "success", label: "Passed" },
-  FAILED: { tone: "error", label: "Failed" },
-  IN_PROGRESS: { tone: "warning", label: "In progress" },
+const ATTEMPT_TEXT = {
+  PASSED: { className: "text-success", label: "Passed" },
+  FAILED: { className: "text-error", label: "Not passed" },
+  IN_PROGRESS: { className: "text-base-content", label: "In progress" },
 } as const;
+
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";
+const rowClass = "px-5 py-4 border-b border-(--kt-border) last:border-b-0";
 
 export default function AssessmentHistory({
   certifications,
@@ -36,87 +38,67 @@ export default function AssessmentHistory({
   attempts: AttemptSummary[];
 }) {
   if (certifications.length === 0 && attempts.length === 0) {
-    return (
-      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-        You haven&apos;t taken any topic assessments yet.
-      </p>
-    );
+    return <p className="kt-card px-5 py-6">You haven&apos;t taken any topic assessments yet.</p>;
   }
 
   return (
     <div className="space-y-6">
       {attempts.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold text-(--kt-muted)">Attempts</h3>
-          {attempts.map((a) => (
-            <div key={a.id} className="border border-base-200 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="font-semibold text-sm text-(--kt-muted) break-words">{a.topic}</div>
-                <div className="text-2xs text-(--kt-faint)">
-                  {subjectDisplayLabel(a.subject)} · attempt #{a.attemptNo} · {formatDate(a.startedAt)}
-                  {a.status !== "IN_PROGRESS" && (
-                    <> · {a.scorePercent}% ({a.correctCount}/{a.questionCount})</>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-                <StatusBadge
-                  tone={a.certificationEligible === false ? "neutral" : ATTEMPT_BADGE[a.status].tone}
-                  label={a.certificationEligible === false ? "Practice — not for certification" : ATTEMPT_BADGE[a.status].label}
-                  size="xs"
-                />
-                <Link
-                  href={`/tutor/assessments/${a.id}`}
-                  className="btn btn-outline min-h-11 text-sm font-bold"
-                >
-                  {a.status === "IN_PROGRESS" ? "Resume" : "Review"}
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+        <section aria-labelledby="attempts" className="kt-card">
+          <h2 id="attempts" className={`${sectionTitle} px-5 py-4 border-b border-(--kt-border)`}>Attempts</h2>
+          <ul>
+            {attempts.map((a) => {
+              const state = a.certificationEligible === false
+                ? { className: "text-(--kt-muted)", label: "Practice only" }
+                : ATTEMPT_TEXT[a.status];
+              return (
+                <li key={a.id} className={`${rowClass} flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between`}>
+                  <div className="min-w-0">
+                    <p className="font-medium leading-snug break-words">{a.topic}</p>
+                    <p className="text-sm text-(--kt-muted)">
+                      {subjectDisplayLabel(a.subject)} · attempt {a.attemptNo} · {formatDate(a.startedAt)}
+                      {a.status !== "IN_PROGRESS" && <> · {a.scorePercent}% ({a.correctCount} of {a.questionCount})</>}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-4 sm:shrink-0">
+                    <span className={`text-sm font-medium ${state.className}`}>{state.label}</span>
+                    <Link href={`/tutor/assessments/${a.id}`} className="btn btn-outline">
+                      {a.status === "IN_PROGRESS" ? "Resume" : "Review"}
+                    </Link>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       {certifications.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold text-(--kt-muted)">Topic status</h3>
-          {certifications.map((c) => (
-            <div key={c.id} className="border border-base-200 rounded-xl p-3 space-y-2">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="font-semibold text-sm text-(--kt-muted) break-words">{c.topic}</div>
-                  <div className="text-2xs text-(--kt-faint)">{subjectDisplayLabel(c.subject)}</div>
+        <section aria-labelledby="topic-status" className="kt-card">
+          <h2 id="topic-status" className={`${sectionTitle} px-5 py-4 border-b border-(--kt-border)`}>Topic status</h2>
+          <ul>
+            {certifications.map((c) => (
+              <li key={c.id} className={`${rowClass} space-y-1`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-medium leading-snug break-words">{c.topic}</p>
+                    <p className="text-sm text-(--kt-muted)">
+                      {subjectDisplayLabel(c.subject)}
+                      {c.certifiedAt && ` · verified ${formatDate(c.certifiedAt)}`}
+                      {c.status === "REJECTED" && c.reviewedAt && ` · reviewed ${formatDate(c.reviewedAt)}`}
+                      {c.usedInClasses.length > 0 &&
+                        ` · used in ${c.usedInClasses.length} class${c.usedInClasses.length === 1 ? "" : "es"}`}
+                    </p>
+                  </div>
+                  <span className={`text-sm font-medium shrink-0 ${STATUS_TEXT[c.status].className}`}>
+                    {STATUS_TEXT[c.status].label}
+                  </span>
                 </div>
-                <StatusBadge
-                  tone={STATUS_BADGE[c.status].tone}
-                  label={STATUS_BADGE[c.status].label}
-                  size="xs"
-                />
-              </div>
-
-              <div className="text-2xs text-(--kt-faint) flex flex-wrap gap-x-4 gap-y-1">
-                {c.certifiedAt && <span>Certified {formatDate(c.certifiedAt)}</span>}
-                {c.status === "REJECTED" && c.reviewedAt && <span>Reviewed {formatDate(c.reviewedAt)}</span>}
-              </div>
-
-              {c.status === "REJECTED" && c.reviewNote && (
-                <p className="text-2xs text-error/80 bg-error/5 border border-error/20 rounded-lg px-2 py-1.5">
-                  <span className="font-semibold">Reviewer feedback:</span> {c.reviewNote}
-                </p>
-              )}
-
-              {c.usedInClasses.length > 0 && (
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {c.usedInClasses.map((cls) => (
-                    <span key={cls.id} className="badge badge-outline badge-sm text-2xs">
-                      {statusDisplayLabel(cls.status)}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+                {c.status === "REJECTED" && c.reviewNote && <p className="text-sm text-error">Reviewer: {c.reviewNote}</p>}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

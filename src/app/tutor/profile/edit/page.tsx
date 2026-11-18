@@ -24,7 +24,7 @@ export default async function TutorProfileEditPage() {
 
   return (
     <ProfileEditView
-      eyebrow="Tutor Portal"
+      eyebrow="Iyong account"
       backHref="/tutor/profile"
       endpoint="/api/tutor/profile"
       contactInfo={user?.contactInfo ?? ""}

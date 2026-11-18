@@ -96,9 +96,9 @@ export default function ClassScheduleFields({
   const rowSelectCls = "min-h-11 text-base sm:text-sm";
   const rowBtnCls = "min-h-11";
   const textareaCls = "text-base sm:text-sm h-24";
-  const actionBtnCls = page ? "btn-md text-sm" : "btn-sm text-xs";
+  const actionBtnCls = page ? "" : "btn-sm";
   const checkboxCls = page ? "checkbox-sm" : "checkbox-xs";
-  const topicLabelCls = page ? "text-xs" : "text-2xs";
+  const topicLabelCls = page ? "text-sm" : "text-xs";
   const fieldSize = page ? "md" : "sm";
   const [form, setForm] = useState<ClassScheduleFormValues>({
     subject: initial?.subject ?? "",
@@ -208,10 +208,10 @@ export default function ClassScheduleFields({
     setFormError("");
     if (!form.gradeLevel) return reportFieldError(e.currentTarget, "Grade level", "Please select a grade.");
     if (catalogLoading || catalogLoadError) return setFormError("Load the subject catalog before scheduling a class.");
-    if (!form.subject) return reportFieldError(e.currentTarget, "Subject Area", "Please select a subject.");
-    if (!availableSubjects.some(subject => subject.slug === form.subject)) return reportFieldError(e.currentTarget, "Subject Area", "Select a subject available for this grade.");
-    if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topic(s)", "Please select at least one topic.");
-    if (selectedTopics.some(topic => !subjectTopics.includes(topic) || isTopicDisabled(topic))) return reportFieldError(e.currentTarget, "Topic(s)", "Select topics available for this grade and subject.");
+    if (!form.subject) return reportFieldError(e.currentTarget, "Subject", "Please select a subject.");
+    if (!availableSubjects.some(subject => subject.slug === form.subject)) return reportFieldError(e.currentTarget, "Subject", "Select a subject available for this grade.");
+    if (selectedTopics.length === 0) return reportFieldError(e.currentTarget, "Topics", "Please select at least one topic.");
+    if (selectedTopics.some(topic => !subjectTopics.includes(topic) || isTopicDisabled(topic))) return reportFieldError(e.currentTarget, "Topics", "Select topics available for this grade and subject.");
     if (sessionRows.length === 0) return reportFieldError(e.currentTarget, "Sessions", "Please add at least one session.");
     const invalidSession = sessionRows.findIndex((r) => {
       const d = r.date || parseLocalDateAndTime(r.scheduledAt).date;
@@ -255,11 +255,11 @@ export default function ClassScheduleFields({
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
       <FeedbackBanner variant="error" message={formError || error || null} />
       <CatalogCurriculumHint subject={subjects.find((entry) => entry.slug === form.subject)} />
-      <p className="text-xs text-(--kt-muted)">Enter session dates and times in {SCHOOL_TIME_ZONE_LABEL}.</p>
+      <p className="text-sm text-(--kt-muted)">Dates and times are in {SCHOOL_TIME_ZONE_LABEL}.</p>
 
       <div className="space-y-4">
         <div>
-          <h2 className="font-bold text-base">Class details</h2>
+          <h2 className="font-serif text-xl font-medium">Class details</h2>
           <p className="text-sm text-(--kt-muted)">Select a grade, then choose its subject and topics.</p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -277,7 +277,7 @@ export default function ClassScheduleFields({
               ))}
             </select>
           </FormField>
-          <FormField size={fieldSize} label="Subject Area" required>
+          <FormField size={fieldSize} label="Subject" required>
             <select
               name="subject"
               value={form.subject}
@@ -298,11 +298,11 @@ export default function ClassScheduleFields({
         </div>
       </div>
 
-      <FormField size={fieldSize} label={`Topic(s)${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
+      <FormField size={fieldSize} label={`Topics${selectedTopics.length > 0 ? ` (${selectedTopics.length} selected)` : ""}`} required>
         {!form.gradeLevel || !form.subject ? (
-          <div className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-3 text-center">
-            {form.gradeLevel ? "Select a subject to see available topics." : "Select a grade and subject to see available topics."}
-          </div>
+          <p className="text-sm text-(--kt-muted)">
+            {form.gradeLevel ? "Pick a subject to see its topics." : "Pick a grade and subject to see their topics."}
+          </p>
         ) : (
           <div className="space-y-2">
             {subjectTopics.length > 8 && (
@@ -318,10 +318,10 @@ export default function ClassScheduleFields({
             <div
               className={`grid grid-cols-2 ${page ? "sm:grid-cols-3" : ""} gap-1.5 ${
                 page ? "max-h-56" : "max-h-40"
-              } overflow-y-auto border border-base-200 rounded-lg p-2`}
+              } overflow-y-auto border border-(--kt-border) rounded-field p-2`}
             >
               {shownTopicOptions.length === 0 && (
-                <p className="col-span-full text-2xs text-(--kt-faint) italic py-2 text-center">
+                <p className="col-span-full text-sm text-(--kt-muted) py-2">
                   {subjectTopics.length === 0 ? "No topics are available for this subject and grade." : `No topics match “${topicFilter}”.`}
                 </p>
               )}
@@ -352,7 +352,7 @@ export default function ClassScheduleFields({
             {customTopics.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {customTopics.map((t) => (
-                  <span key={t} className="badge badge-outline badge-sm gap-1 text-2xs">
+                  <span key={t} className="inline-flex items-center gap-1.5 rounded-full border border-(--kt-border) px-3 py-1 text-sm">
                     {t}
                     <button
                       type="button"
@@ -368,9 +368,8 @@ export default function ClassScheduleFields({
             )}
 
             {allowedTopicSet && (
-              <p className="text-2xs text-(--kt-faint)">
-                Your school requires certification to teach a topic — only topics you&apos;ve
-                been certified for can be picked.
+              <p className="text-sm text-(--kt-muted)">
+                You can only pick topics you&apos;re certified in; your school requires it.
               </p>
             )}
 
@@ -379,7 +378,7 @@ export default function ClassScheduleFields({
         )}
       </FormField>
 
-      <FormField size={fieldSize} label="Description" hint="Optional">
+      <FormField size={fieldSize} label="Description" hint="Optional. What the class will cover.">
         <textarea
           name="description"
           value={form.description}
@@ -398,20 +397,18 @@ export default function ClassScheduleFields({
         hint="Each session covers one topic from the ones selected above."
       >
         {!form.subject || selectedTopics.length === 0 ? (
-          <div className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-3 text-center">
-            Select a subject and at least one topic first.
-          </div>
+          <p className="text-sm text-(--kt-muted)">Pick a subject and at least one topic first.</p>
         ) : (
           <div className="space-y-4">
             {sessionRows.map((row, i) => (
               <fieldset
                 key={row.key}
                 data-session-row
-                className="min-w-0 rounded-xl border border-base-300 bg-base-200/20 p-4 sm:p-5"
+                className="min-w-0 rounded-(--kt-radius-box) border border-(--kt-border) p-4 sm:p-5"
               >
-                <legend className="px-2 text-sm font-bold">Session {i + 1}</legend>
+                <legend className="px-2 font-serif text-lg font-medium">Session {i + 1}</legend>
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-xs text-(--kt-muted)">Set the topic, start time, and length.</p>
+                  <p className="text-sm text-(--kt-muted)">Its topic, date, start time and length.</p>
                   <button
                     type="button"
                     data-validation-change
@@ -424,7 +421,7 @@ export default function ClassScheduleFields({
                 </div>
                 <div className={page ? "grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_9rem_8rem]" : "grid gap-3"}>
                   <label data-control-field className="min-w-0 space-y-1.5">
-                    <span className="block text-xs font-semibold">Topic</span>
+                    <span className="block text-[0.9rem] font-medium">Topic</span>
                     <select
                       data-session-control="topic"
                       value={row.topic}
@@ -441,7 +438,7 @@ export default function ClassScheduleFields({
                   </label>
                   <div data-validation-group className="contents">
                   <label data-control-field className="min-w-0 space-y-1.5">
-                    <span className="block text-xs font-semibold">Date</span>
+                    <span className="block text-[0.9rem] font-medium">Date</span>
                     <input
                       data-session-control="scheduledAt"
                       type="date"
@@ -453,7 +450,7 @@ export default function ClassScheduleFields({
                     <span data-control-feedback className="block" />
                   </label>
                   <label data-control-field className="min-w-0 space-y-1.5">
-                    <span className="block text-xs font-semibold">Start time</span>
+                    <span className="block text-[0.9rem] font-medium">Start time</span>
                     <input type="time" required value={row.time ?? parseLocalDateAndTime(row.scheduledAt).time}
                       onChange={(e) => updateSessionRow(row.key, "time", e.target.value)}
                       className={`input input-bordered ${rowInputCls} w-full min-w-0`} />
@@ -461,7 +458,7 @@ export default function ClassScheduleFields({
                   </label>
                   </div>
                   <label data-control-field className="min-w-0 space-y-1.5">
-                    <span className="block text-xs font-semibold">Duration</span>
+                    <span className="block text-[0.9rem] font-medium">Duration</span>
                     <select
                       data-session-control="duration"
                       value={row.duration}
@@ -480,29 +477,27 @@ export default function ClassScheduleFields({
               </fieldset>
             ))}
             {sessionRows.length === 0 && (
-              <p className="rounded-lg border border-dashed border-base-300 p-5 text-center text-sm text-(--kt-muted)">
-                No sessions yet. Add your first session to set a date and time.
-              </p>
+              <p className="text-sm text-(--kt-muted)">No sessions yet. Add one to set its date and time.</p>
             )}
             <button
               type="button"
               data-validation-change
               onClick={addSessionRow}
               disabled={sessionRows.length >= 20}
-              className={`btn btn-outline btn-primary ${rowBtnCls} ${page ? "text-sm" : "text-2xs"} font-bold gap-1 cursor-pointer`}
+              className={`btn btn-outline btn-primary ${rowBtnCls} gap-1.5`}
             >
-              <Plus className="h-3 w-3" /> Add Session
+              <Plus className="h-4 w-4" aria-hidden="true" /> Add Session
             </button>
           </div>
         )}
       </FormField>
 
-      <div className="space-y-4 border-t border-base-200 pt-6">
+      <div className="space-y-4 border-t border-(--kt-border) pt-6">
         <div>
-          <h2 className="font-bold text-base">Attendance details</h2>
-          <p className="text-sm text-(--kt-muted)">Add a room or an online meeting link, then set the class capacity.</p>
+          <h2 className="font-serif text-xl font-medium">Where and how many</h2>
+          <p className="text-sm text-(--kt-muted)">A room, an online meeting link, or both, and how many learners can join.</p>
         </div>
-        <FormField size={fieldSize} label="Location" hint="A location or a meeting link is required — for an in-person class">
+        <FormField size={fieldSize} label="Location" hint="Building and room for an in-person class.">
           <div className="flex flex-wrap items-center gap-1.5">
             <input
               type="text"
@@ -526,7 +521,7 @@ export default function ClassScheduleFields({
         </FormField>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <FormField size={fieldSize} label="Max Capacity" required>
+          <FormField size={fieldSize} label="Class size" required hint="Up to 10 learners.">
             <input
               type="number"
               name="maxStudents"
@@ -539,7 +534,7 @@ export default function ClassScheduleFields({
             />
           </FormField>
 
-          <FormField size={fieldSize} label="Meeting Link" hint="Required if no location is set">
+          <FormField size={fieldSize} label="Meeting link" hint="Needed if there's no building or room.">
             <input
               type="url"
               name="meetingLink"
@@ -553,15 +548,15 @@ export default function ClassScheduleFields({
 
       </div>
 
-      <div className={`${page ? "flex flex-wrap justify-end gap-3 border-t border-base-200 pt-6" : "modal-action pt-2"}`}>
+      <div className={`${page ? "flex flex-wrap justify-end gap-3 border-t border-(--kt-border) pt-6" : "modal-action pt-2"}`}>
         <button
           type="button"
           onClick={onCancel}
-          className={`btn btn-neutral btn-outline ${actionBtnCls} cursor-pointer`}
+          className={`btn btn-ghost ${actionBtnCls}`}
         >
           Cancel
         </button>
-        <button type="submit" disabled={submitting} className={`btn btn-primary ${actionBtnCls} cursor-pointer`}>
+        <button type="submit" disabled={submitting} className={`btn btn-primary ${actionBtnCls}`}>
           {submitting ? <span className="loading loading-spinner loading-sm"></span> : submitLabel}
         </button>
       </div>

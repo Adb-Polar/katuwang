@@ -4,14 +4,17 @@ import { FormValidationError, reportServerFieldErrors } from "@/lib/formValidati
 
 import ValidatedForm from "@/components/ui/ValidatedForm";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
-import StatusBadge from "@/components/ui/StatusBadge";
+import BackLink from "@/components/ui/BackLink";
+import PageHeader from "@/components/ui/PageHeader";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { displayPrompt } from "@/lib/questionText";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
@@ -62,6 +65,7 @@ export default function SessionTestBuilder({
         classId={classId}
         sessionId={sessionId}
         sessionTopic={sessionTopic}
+        classSubject={classSubject}
         onCreated={() => router.refresh()}
       />
     );
@@ -73,6 +77,7 @@ export default function SessionTestBuilder({
       sessionId={sessionId}
       classSubject={classSubject}
       classTopics={classTopics}
+      sessionTopic={sessionTopic}
       test={initialTest}
       sessionStatus={sessionStatus}
       attemptCount={attemptCount}
@@ -84,11 +89,13 @@ function CreateTestPanel({
   classId,
   sessionId,
   sessionTopic,
+  classSubject,
   onCreated,
 }: {
   classId: string;
   sessionId: string;
   sessionTopic: string;
+  classSubject: string;
   onCreated: () => void;
 }) {
   const [title, setTitle] = useState(`${sessionTopic} check-in`);
@@ -117,50 +124,102 @@ function CreateTestPanel({
   };
 
   return (
-    <div className="space-y-6">
-      <Link href={`/tutor/classes/${classId}`} className="btn btn-ghost btn-sm text-xs gap-1.5">
-        <ArrowLeft className="h-3.5 w-3.5" />
-        Back to class
-      </Link>
-      <section className="card kt-card max-w-xl">
-        <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Create this session&apos;s test</h2>
-          <p className="text-2xs text-(--kt-faint)">
-            One question set — learners take it before the session (pre-test) and again
-            when you post the post-test, so you can see the gain.
-          </p>
+    <div className="space-y-6 max-w-3xl">
+      <TestPageHeader classId={classId} sessionTopic={sessionTopic} classSubject={classSubject} status="No test yet" />
+      <section className="card kt-card" aria-labelledby="create-test">
+        <div className="kt-card-body gap-5">
+          <div>
+            <h2 id="create-test" className={sectionTitle}>Create the test</h2>
+            <p className="text-sm text-(--kt-muted)">
+              Learners answer the same questions before the session (the pre-test) and again after it, when you post
+              the post-test, so you can see what they learned.
+            </p>
+          </div>
           <FeedbackBanner variant="error" message={error || null} />
           <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void create(e.currentTarget); }}>
-          <FormField label="Title" required>
-            <input
-              required
-              minLength={3}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              maxLength={120}
-              className="input input-bordered input-sm w-full text-xs focus:input-primary"
-            />
-          </FormField>
-          <FormField label="Instructions" hint="Shown to learners before they start (optional)">
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              rows={3}
-              maxLength={2000}
-              className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
-            />
-            <CharCount value={instructions} max={2000} />
-          </FormField>
-          <div className="flex justify-end">
-            <button type="submit" disabled={busy} className="btn btn-primary btn-sm text-xs">
-              {busy && <span className="loading loading-spinner loading-xs" />}
-              Create test
-            </button>
-          </div>
+            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} editable />
+            <div className="flex justify-end">
+              <button type="submit" disabled={busy} className="btn btn-primary">
+                {busy && <span className="loading loading-spinner loading-sm" />}
+                Create test
+              </button>
+            </div>
           </ValidatedForm>
         </div>
       </section>
     </div>
+  );
+}
+
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";
+
+/** Back link + the page's h1: the session's topic, labelled with the class subject. */
+function TestPageHeader({
+  classId,
+  sessionTopic,
+  classSubject,
+  status,
+  actions,
+}: {
+  classId: string;
+  sessionTopic: string;
+  classSubject: string;
+  /** Where the test stands ("Draft", "Pre-test open", …), shown after the subject. */
+  status: ReactNode;
+  actions?: ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <BackLink href={`/tutor/classes/${classId}`}>Back to class</BackLink>
+      <PageHeader
+        eyebrow="Session test"
+        title={sessionTopic}
+        subtitle={<>{subjectDisplayLabel(classSubject)} · {status}</>}
+        actions={actions}
+      />
+    </div>
+  );
+}
+
+/** Title + instructions, shared by the create form and the builder's details section. */
+function TestFields({
+  title,
+  setTitle,
+  instructions,
+  setInstructions,
+  editable,
+}: {
+  title: string;
+  setTitle: (v: string) => void;
+  instructions: string;
+  setInstructions: (v: string) => void;
+  editable: boolean;
+}) {
+  return (
+    <>
+      <FormField size="md" label="Title" required>
+        <input
+          required
+          minLength={3}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={!editable}
+          maxLength={120}
+          className="input input-bordered w-full"
+        />
+      </FormField>
+      <FormField size="md" label="Instructions" hint="Optional. Learners see this before they start.">
+        <textarea
+          value={instructions}
+          onChange={(e) => setInstructions(e.target.value)}
+          disabled={!editable}
+          rows={3}
+          maxLength={2000}
+          className="textarea textarea-bordered w-full"
+        />
+        <CharCount value={instructions} max={2000} />
+      </FormField>
+    </>
   );
 }
 
@@ -169,6 +228,7 @@ function BuilderBody({
   sessionId,
   classSubject,
   classTopics,
+  sessionTopic,
   test,
   sessionStatus,
   attemptCount,
@@ -177,6 +237,7 @@ function BuilderBody({
   sessionId: string;
   classSubject: string;
   classTopics: string[];
+  sessionTopic: string;
   test: NonNullable<SessionTestBuilderProps["test"]>;
   sessionStatus: SessionTestBuilderProps["sessionStatus"];
   attemptCount: number;
@@ -297,172 +358,142 @@ function BuilderBody({
     }
   };
 
-  const statusTone = status === "PUBLISHED" ? "success" : status === "CLOSED" ? "warning" : "neutral";
-  const statusLabel = status === "PUBLISHED"
-    ? sessionStatus === "CANCELLED" ? "Session cancelled" : posttestOpen ? "Post-test open" : sessionStatus === "COMPLETED" || pretestClosed ? "Pre-test closed" : "Pre-test open"
-    : status.toLowerCase();
+  // Where the test stands, as a few words after the subject in the header (the header's buttons say what's next).
+  const isLive = status === "PUBLISHED" && sessionStatus !== "CANCELLED";
+  const statusWords =
+    status === "DRAFT" ? "Draft"
+    : status === "CLOSED" ? "Closed"
+    : sessionStatus === "CANCELLED" ? "Session cancelled, no new attempts"
+    : posttestOpen ? "Post-test open"
+    : pretestClosed || sessionStatus === "COMPLETED" ? "Pre-test closed"
+    : "Pre-test open";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <Link href={`/tutor/classes/${classId}`} className="btn btn-ghost btn-sm text-xs gap-1.5">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to class
-        </Link>
-        <div className="flex items-center gap-2">
-          <StatusBadge tone={statusTone} label={statusLabel} size="sm" />
-          {status === "PUBLISHED" && sessionStatus === "SCHEDULED" && !pretestClosed && !posttestOpen && (
-            <button type="button" onClick={() => setConfirmPretestClose(true)} disabled={busy} className="btn btn-warning btn-sm min-h-11 text-xs font-semibold">
-              Close pre-test
-            </button>
-          )}
-          {status === "PUBLISHED" && sessionStatus !== "CANCELLED" && !posttestOpen && (
-            <button type="button" onClick={() => setConfirmPosttestOpen(true)} disabled={busy} className="btn btn-primary btn-sm min-h-11 text-xs font-semibold">
-              Publish post-test
-            </button>
-          )}
-          {status !== "DRAFT" && (
-            <Link
-              href={`/tutor/classes/${classId}/sessions/${sessionId}/test/results`}
-              className="btn btn-outline btn-primary btn-sm text-xs"
-            >
-              View results
-            </Link>
-          )}
-        </div>
-      </div>
-
-      <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
-        {classSubject} · pre/post test
-      </p>
-      {status === "PUBLISHED" && (
-        <p className="text-xs text-(--kt-muted)">
-          {sessionStatus === "CANCELLED" ? "This session was cancelled; no new test attempts can start." : posttestOpen ? "Post-test available to enrolled learners." : pretestClosed || sessionStatus === "COMPLETED" ? "Pre-test closed. Post the post-test when it is ready." : "Pre-test open to enrolled learners. Post the post-test when it is ready."}
-        </p>
-      )}
+    <div className="space-y-6 max-w-3xl">
+      <TestPageHeader
+        classId={classId}
+        sessionTopic={sessionTopic}
+        classSubject={classSubject}
+        status={<span className={isLive ? "text-success font-medium" : "font-medium text-base-content"}>{statusWords}</span>}
+        actions={
+          <>
+            {status === "PUBLISHED" && sessionStatus === "SCHEDULED" && !pretestClosed && !posttestOpen && (
+              <button type="button" onClick={() => setConfirmPretestClose(true)} disabled={busy} className="btn btn-outline">
+                Close pre-test
+              </button>
+            )}
+            {status === "PUBLISHED" && sessionStatus !== "CANCELLED" && !posttestOpen && (
+              <button type="button" onClick={() => setConfirmPosttestOpen(true)} disabled={busy} className="btn btn-primary">
+                Publish post-test
+              </button>
+            )}
+            {status !== "DRAFT" && (
+              <Link href={`/tutor/classes/${classId}/sessions/${sessionId}/test/results`} className="btn btn-outline">
+                View results
+              </Link>
+            )}
+          </>
+        }
+      />
 
       <FeedbackBanner variant="success" message={notice || null} />
       <FeedbackBanner variant="error" message={error || null} />
 
       {/* ── Meta ── */}
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Test details</h2>
+      <section className="card kt-card" aria-labelledby="test-details">
+        <div className="kt-card-body gap-5">
+          <h2 id="test-details" className={sectionTitle}>Test details</h2>
           <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveMeta(e.currentTarget); }}>
-          <FormField label="Title" required>
-            <input
-              required
-              minLength={3}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={!editable}
-              maxLength={120}
-              className="input input-bordered input-sm w-full text-xs focus:input-primary"
-            />
-          </FormField>
-          <FormField label="Instructions" hint="Shown to learners before they start (optional)">
-            <textarea
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              disabled={!editable}
-              rows={3}
-              maxLength={2000}
-              className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
-            />
-            <CharCount value={instructions} max={2000} />
-          </FormField>
-          {editable && (
-            <div className="flex justify-end">
-              <button type="submit" disabled={busy} className="btn btn-neutral btn-sm text-xs">
-                {busy && <span className="loading loading-spinner loading-xs" />}
-                Save details
-              </button>
-            </div>
-          )}
+            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} editable={editable} />
+            {editable && (
+              <div className="flex justify-end">
+                <button type="submit" disabled={busy} className="btn btn-outline">
+                  {busy && <span className="loading loading-spinner loading-sm" />}
+                  Save details
+                </button>
+              </div>
+            )}
           </ValidatedForm>
         </div>
       </section>
 
       {/* ── Questions ── */}
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="card-title text-sm font-bold">Questions ({items.length})</h2>
+      <section className="card kt-card" aria-labelledby="test-questions">
+        <div className="kt-card-body gap-5">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 id="test-questions" className={sectionTitle}>
+                Questions <span className="font-sans text-base font-normal text-(--kt-muted)">{items.length}</span>
+              </h2>
+              {editable && (
+                <p className="text-sm text-(--kt-muted)">Add questions, save the set, then publish. Learners can&apos;t see it until then.</p>
+              )}
+            </div>
             {editable && (
-              <div className="flex gap-2">
-                <button onClick={() => setShowBank(true)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
-                  Add from bank
-                </button>
-                <button onClick={() => setShowMine(true)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
-                  My questions
-                </button>
-                <button
-                  onClick={() => setShowWrite(true)}
-                  className="btn btn-outline btn-primary btn-xs min-h-11 sm:min-h-0 text-2xs font-bold"
-                >
-                  Write a question
-                </button>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setShowBank(true)} className="btn btn-outline">Add from bank</button>
+                <button onClick={() => setShowMine(true)} className="btn btn-outline">My questions</button>
+                <button onClick={() => setShowWrite(true)} className="btn btn-outline">Write a question</button>
               </div>
             )}
           </div>
 
           {items.length === 0 ? (
-            <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-              No questions yet. Add some from the bank or write your own.
-            </p>
+            <p className="text-(--kt-muted)">No questions yet. Add some from the bank or write your own.</p>
           ) : (
-            <ul className="space-y-2">
+            <ol className="border-t border-(--kt-border)">
               {items.map((q, idx) => (
-                <li key={q.questionId} className="flex items-start gap-2 p-3 border border-base-200 rounded-xl text-xs">
-                  <span className="text-2xs text-(--kt-faint) pt-0.5 shrink-0">Q{idx + 1}</span>
+                <li key={q.questionId} className="flex items-start gap-4 py-3 border-b border-(--kt-border) last:border-b-0">
+                  <span className="font-serif text-lg leading-snug text-(--kt-muted) w-6 shrink-0 tabular-nums">{idx + 1}</span>
                   <div className="min-w-0 flex-1">
-                    <div className="text-(--kt-muted)">{q.prompt}</div>
-                    <div className="text-2xs text-(--kt-faint) mt-0.5">
-                      {q.topic} ·{" "}
-                      <span className={q.origin === "TUTOR" ? "text-(--kt-tutor-text)" : "text-primary"}>
-                        {q.origin === "TUTOR" ? "Custom" : "Bank"}
-                      </span>
-                    </div>
+                    <p className="leading-snug">{displayPrompt(q.prompt, q.topic)}</p>
+                    <p className="text-sm text-(--kt-muted) mt-0.5">
+                      {q.topic} · {q.origin === "TUTOR" ? "written by you" : "from the question bank"}
+                    </p>
                   </div>
                   {editable && (
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="flex items-center shrink-0">
                       <button
                         onClick={() => move(idx, -1)}
                         disabled={idx === 0}
-                        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0"
-                        aria-label="Move up"
+                        className="btn btn-ghost btn-square"
+                        aria-label={`Move question ${idx + 1} up`}
                       >
-                        <ChevronUp className="h-3 w-3" />
+                        <ChevronUp className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => move(idx, 1)}
                         disabled={idx === items.length - 1}
-                        className="btn btn-ghost btn-xs min-h-11 sm:min-h-0"
-                        aria-label="Move down"
+                        className="btn btn-ghost btn-square"
+                        aria-label={`Move question ${idx + 1} down`}
                       >
-                        <ChevronDown className="h-3 w-3" />
+                        <ChevronDown className="h-4 w-4" />
                       </button>
-                      <button onClick={() => removeAt(idx)} className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error" aria-label="Remove">
-                        <Trash2 className="h-3 w-3" />
+                      <button
+                        onClick={() => removeAt(idx)}
+                        className="btn btn-ghost btn-square text-error"
+                        aria-label={`Remove question ${idx + 1}`}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   )}
                 </li>
               ))}
-            </ul>
+            </ol>
           )}
 
           {editable && (
-            <div className="flex items-center justify-between gap-3 pt-1">
-              <button onClick={saveQuestions} disabled={busy || !dirty} className="btn btn-neutral btn-sm text-xs">
-                {busy && <span className="loading loading-spinner loading-xs" />}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <button onClick={saveQuestions} disabled={busy || !dirty} className="btn btn-outline">
+                {busy && <span className="loading loading-spinner loading-sm" />}
                 {dirty ? "Save question set" : "Saved"}
               </button>
               <button
                 onClick={() => setConfirmPublish(true)}
                 disabled={busy || items.length === 0 || dirty}
                 title={dirty ? "Save the question set first" : undefined}
-                className="btn btn-primary btn-sm text-xs"
+                className="btn btn-primary"
               >
                 Publish test
               </button>
@@ -470,8 +501,8 @@ function BuilderBody({
           )}
 
           {status === "PUBLISHED" && (posttestOpen || sessionStatus === "CANCELLED") && (
-            <div className="flex justify-end pt-1">
-              <button onClick={() => setConfirmClose(true)} disabled={busy} className="btn btn-outline btn-warning btn-sm text-xs">
+            <div className="flex justify-end">
+              <button onClick={() => setConfirmClose(true)} disabled={busy} className="btn btn-outline btn-error">
                 Close all testing
               </button>
             </div>
@@ -506,7 +537,7 @@ function BuilderBody({
       {showWrite && (
         <QuestionFormModal
           title="Write a question"
-          contextLabel={classSubject}
+          contextLabel={subjectDisplayLabel(classSubject)}
           submitLabel="Add question"
           topicField={{
             options: classTopics,
@@ -658,113 +689,171 @@ function AddFromBankModal({
       Array.from(picked.values()).map((r) => ({ questionId: r.id, prompt: r.prompt, origin: "BANK", topic: r.topic })),
     );
 
+  const subjectName = subjectDisplayLabel(subject);
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 kt-card space-y-4">
-        <h3 className="font-bold text-sm text-base-content">Add from the question bank</h3>
-        <p className="text-xs text-(--kt-muted)">
-          Showing active bank questions for {subject}.
-          {requiresCertification && " Bank access is limited to topics you are certified in."}
-          Search by question text or topic, or write your own questions for this session.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setFilters((prev) => ({ ...prev, q: q.trim(), page: 1 }));
-          }}
-          className="grid grid-cols-1 sm:grid-cols-3 gap-2"
+    <PickerModal
+      title="Add from the question bank"
+      note={
+        <>
+          {subjectName} questions{requiresCertification ? " in the topics you're certified in" : ""}. Search by
+          question text or pick a topic.
+        </>
+      }
+      pickedCount={picked.size}
+      busy={loading}
+      onCommit={commit}
+      onClose={onClose}
+    >
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          setFilters((prev) => ({ ...prev, q: q.trim(), page: 1 }));
+        }}
+        className="grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_auto] gap-2"
+      >
+        <select
+          aria-label="Filter by topic"
+          value={filters.topic}
+          onChange={(e) => setFilters((prev) => ({ ...prev, topic: e.target.value, page: 1 }))}
+          className="select select-bordered w-full"
         >
-          <select
-            aria-label="Filter by topic"
-            value={filters.topic}
-            onChange={(e) => setFilters((prev) => ({ ...prev, topic: e.target.value, page: 1 }))}
-            className="select select-bordered select-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1 truncate"
-          >
-            <option value="">All topics</option>
-            {topics.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-          <input
-            aria-label="Search bank questions"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search questions or topics..."
-            className="input input-bordered input-xs min-h-11 sm:min-h-0 text-xs sm:col-span-1"
-          />
-          <button type="submit" disabled={loading} className="btn btn-neutral btn-xs min-h-11 sm:min-h-0 text-2xs sm:col-span-1">
-            {loading ? <span className="loading loading-spinner loading-xs" /> : "Search"}
-          </button>
-        </form>
+          <option value="">All topics</option>
+          {topics.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <input
+          aria-label="Search bank questions"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Search questions"
+          className="input input-bordered w-full"
+        />
+        <button type="submit" disabled={loading} className="btn btn-outline">Search</button>
+      </form>
 
-        <FeedbackBanner variant="error" message={error || null} />
+      <FeedbackBanner variant="error" message={error || null} />
 
-        <div className="max-h-[45vh] overflow-y-auto space-y-1.5 pr-1">
-          {loading ? (
-            <div role="status" className="flex justify-center py-6">
-              <span className="loading loading-spinner loading-md text-primary" aria-label="Loading questions" />
-            </div>
-          ) : error ? null : rows.length === 0 ? (
-            <p className="text-2xs text-(--kt-faint) italic text-center py-6">
-              No active bank questions found for {subject}.
-              {filters.q || filters.topic
-                ? " Try another search or choose All topics."
-                : requiresCertification
-                  ? " Check your topic certifications, or ask an admin to add or activate questions for this subject."
-                  : " Ask an admin to add or activate questions for this subject."}
-            </p>
-          ) : (
-            rows.map((r) => {
-              const already = existingIds.has(r.id);
-              return (
-                <label
-                  key={r.id}
-                  className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${
-                    already ? "opacity-40" : "cursor-pointer hover:border-base-300"
-                  } border-base-200`}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-xs checkbox-primary mt-0.5"
-                    disabled={already}
-                    checked={picked.has(r.id)}
-                    onChange={() => toggle(r)}
-                  />
-                  <span>
-                    <span className="text-(--kt-muted)">{r.prompt}</span>
-                    <span className="block text-2xs text-(--kt-faint)">
-                      {r.topic} · {r.reviewStatus === "APPROVED" ? "Reviewed for qualification" : r.reviewStatus === "DEMO" ? "Demo — practice only" : "Unreviewed — practice only"}
-                      {already && " · already on this test"}
-                    </span>
-                  </span>
-                </label>
-              );
-            })
-          )}
+      {loading ? (
+        <p role="status" className="text-(--kt-muted) py-4">Loading questions…</p>
+      ) : error ? null : rows.length === 0 ? (
+        <p className="py-4">
+          No {subjectName} questions found.
+          {filters.q || filters.topic
+            ? " Try another search or choose All topics."
+            : requiresCertification
+              ? " Check your topic certifications, or ask an admin to add questions for this subject."
+              : " Ask an admin to add questions for this subject."}
+        </p>
+      ) : (
+        <QuestionPickList
+          rows={rows.map((r) => ({
+            id: r.id,
+            prompt: r.prompt,
+            topic: r.topic,
+            note: r.reviewStatus === "APPROVED" ? undefined : r.reviewStatus === "DEMO" ? "Demo, practice only" : "Not reviewed yet, practice only",
+          }))}
+          existingIds={existingIds}
+          isPicked={(id) => picked.has(id)}
+          onToggle={(id) => {
+            const row = rows.find((r) => r.id === id);
+            if (row) toggle(row);
+          }}
+        />
+      )}
+
+      {!loading && !error && total > BANK_PAGE_SIZE && (
+        <Pagination
+          page={filters.page}
+          pageSize={BANK_PAGE_SIZE}
+          total={total}
+          onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
+        />
+      )}
+    </PickerModal>
+  );
+}
+
+/** Modal shell shared by the two question pickers: serif title, a note, the list, Cancel / Add N questions. */
+function PickerModal({
+  title,
+  note,
+  pickedCount,
+  busy,
+  onCommit,
+  onClose,
+  children,
+}: {
+  title: string;
+  note?: ReactNode;
+  pickedCount: number;
+  busy: boolean;
+  onCommit: () => void;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="modal modal-open" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+      <div className="modal-box max-w-2xl p-6 space-y-4">
+        <div>
+          <h2 id="picker-title" className="font-serif text-2xl font-medium leading-tight">{title}</h2>
+          {note && <p className="text-sm text-(--kt-muted) mt-1">{note}</p>}
         </div>
-
-        {!loading && !error && (
-          <Pagination
-            page={filters.page}
-            pageSize={BANK_PAGE_SIZE}
-            total={total}
-            onPageChange={(page) => setFilters((prev) => ({ ...prev, page }))}
-          />
-        )}
-
-        <div className="modal-action pt-1">
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose}>
-            Cancel
-          </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={commit} disabled={loading || picked.size === 0}>
-            Add {picked.size || ""} selected
+        {children}
+        <div className="modal-action mt-0 pt-2 border-t border-(--kt-border) items-center">
+          <span className="mr-auto text-sm text-(--kt-muted)">{pickedCount > 0 ? `${pickedCount} selected` : ""}</span>
+          <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button type="button" className="btn btn-primary" onClick={onCommit} disabled={busy || pickedCount === 0}>
+            {pickedCount > 1 ? `Add ${pickedCount} questions` : "Add question"}
           </button>
         </div>
       </div>
       <label className="modal-backdrop" onClick={onClose} aria-label="Close" />
     </div>
+  );
+}
+
+/** Checkbox list of questions: prompt at body size, "Topic" (and a note) under it, already-added rows disabled. */
+function QuestionPickList({
+  rows,
+  existingIds,
+  isPicked,
+  onToggle,
+}: {
+  rows: { id: string; prompt: string; topic: string; note?: string }[];
+  existingIds: Set<string>;
+  isPicked: (id: string) => boolean;
+  onToggle: (id: string) => void;
+}) {
+  return (
+    <ul className="max-h-[50vh] overflow-y-auto border-y border-(--kt-border) -mx-6 px-6">
+      {rows.map((r) => {
+        const already = existingIds.has(r.id);
+        return (
+          <li key={r.id} className="border-b border-(--kt-border) last:border-b-0">
+            <label className={`flex items-start gap-3 py-3 ${already ? "text-(--kt-muted)" : "cursor-pointer"}`}>
+              <input
+                type="checkbox"
+                className="checkbox checkbox-primary checkbox-sm mt-0.5"
+                disabled={already}
+                checked={already || isPicked(r.id)}
+                onChange={() => onToggle(r.id)}
+              />
+              <span className="min-w-0">
+                <span className="block leading-snug">{displayPrompt(r.prompt, r.topic)}</span>
+                <span className="block text-sm text-(--kt-muted) mt-0.5">
+                  {r.topic}
+                  {r.note && ` · ${r.note}`}
+                  {already && " · already on this test"}
+                </span>
+              </span>
+            </label>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -817,58 +906,27 @@ function MyQuestionsModal({
     );
 
   return (
-    <div className="modal modal-open">
-      <div className="modal-box max-w-lg p-6 kt-card space-y-4">
-        <h3 className="font-bold text-sm text-base-content">Your custom questions</h3>
-        <FeedbackBanner variant="error" message={error || null} />
-        <div className="max-h-[45vh] overflow-y-auto space-y-1.5 pr-1">
-          {loading ? (
-            <div className="flex justify-center py-6">
-              <span className="loading loading-spinner loading-md text-primary" />
-            </div>
-          ) : rows.length === 0 ? (
-            <p className="text-2xs text-(--kt-faint) italic text-center py-6">
-              You haven&apos;t written any custom questions yet.
-            </p>
-          ) : (
-            rows.map((r) => {
-              const already = existingIds.has(r.id);
-              return (
-                <label
-                  key={r.id}
-                  className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${
-                    already ? "opacity-40" : "cursor-pointer hover:border-base-300"
-                  } border-base-200`}
-                >
-                  <input
-                    type="checkbox"
-                    className="checkbox checkbox-xs checkbox-primary mt-0.5"
-                    disabled={already}
-                    checked={picked.has(r.id)}
-                    onChange={() => toggle(r.id)}
-                  />
-                  <span>
-                    <span className="text-(--kt-muted)">{r.prompt}</span>
-                    <span className="block text-2xs text-(--kt-faint)">
-                      {r.topic}
-                      {already && " · already on this test"}
-                    </span>
-                  </span>
-                </label>
-              );
-            })
-          )}
-        </div>
-        <div className="modal-action pt-1">
-          <button className="btn btn-ghost btn-sm" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={commit} disabled={picked.size === 0}>
-            Add {picked.size || ""} selected
-          </button>
-        </div>
-      </div>
-      <label className="modal-backdrop" onClick={onClose} aria-label="Close" />
-    </div>
+    <PickerModal
+      title="Your questions"
+      note="Questions you've written for your classes."
+      pickedCount={picked.size}
+      busy={loading}
+      onCommit={commit}
+      onClose={onClose}
+    >
+      <FeedbackBanner variant="error" message={error || null} />
+      {loading ? (
+        <p role="status" className="text-(--kt-muted) py-4">Loading your questions…</p>
+      ) : rows.length === 0 ? (
+        <p className="py-4">You haven&apos;t written any questions yet. Use Write a question to add one.</p>
+      ) : (
+        <QuestionPickList
+          rows={rows}
+          existingIds={existingIds}
+          isPicked={(id) => picked.has(id)}
+          onToggle={toggle}
+        />
+      )}
+    </PickerModal>
   );
 }

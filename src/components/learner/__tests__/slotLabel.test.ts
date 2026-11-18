@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { slotLabel } from "../TopicRequestManager";
+import { slotLabel } from "@/components/requests/requestSlots";
 
 describe("slotLabel", () => {
   it("formats a dated slot with a weekday, date and 12-hour range", () => {

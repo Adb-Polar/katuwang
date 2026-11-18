@@ -7,6 +7,7 @@ import { isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
 import { reportServerFieldErrors } from "@/lib/formValidation";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { parseLocalDateAndTime } from "@/lib/datetime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
@@ -124,35 +125,42 @@ export default function AcceptRequestForm({
     <section className="card kt-card">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <div className="card-body gap-4 p-6 sm:p-8">
-        <p className="text-xs text-(--kt-muted)">
-          This creates a full class from the {subjectDisplayLabel(request.subject)} request. Include every requested topic. You must be certified for all selected topics.
-        </p>
-
-        {missingCertifications.length > 0 && (
-          <div className="text-xs text-warning bg-warning/10 border border-warning/30 rounded-lg p-3">
-            You need certification for every requested topic before accepting. Missing: {missingCertifications.join(", ")}.
+      <div className="kt-card-body gap-5">
+        {missingCertifications.length > 0 ? (
+          <div role="alert" className="space-y-2">
+            <p className="font-medium">You can&apos;t accept this request yet.</p>
+            <p className="text-sm">
+              It asks for {missingCertifications.length === 1 ? "a topic" : "topics"} you aren&apos;t certified in:{" "}
+              {missingCertifications.join(", ")}.
+            </p>
+            <Link href="/tutor/assessments" className="btn btn-outline">Go to assessments</Link>
           </div>
+        ) : (
+          <>
+            <p className="text-sm text-(--kt-muted)">
+              The topics, first session and description are filled in from the {subjectDisplayLabel(request.subject)}{" "}
+              request. Keep every requested topic; you can add sessions and change the rest.
+            </p>
+            <ClassScheduleFields
+              variant="page"
+              initial={{
+                subject: request.subject,
+                gradeLevel: isTargetGradeEligibleForTutor(request.gradeLevel, tutorGradeLevel) ? request.gradeLevel : "",
+                description: request.note ?? "",
+                topics: preselectedTopics,
+                sessionRows: initialSessionRows,
+              }}
+              subjectLocked
+              disabledTopics={disabledTopics}
+              tutorGradeLevel={tutorGradeLevel}
+              submitLabel="Accept & create class"
+              submitting={submitting}
+              error={error}
+              onCancel={() => router.push("/tutor/requests")}
+              onSubmit={submit}
+            />
+          </>
         )}
-
-        {missingCertifications.length === 0 && <ClassScheduleFields
-          variant="page"
-          initial={{
-            subject: request.subject,
-            gradeLevel: isTargetGradeEligibleForTutor(request.gradeLevel, tutorGradeLevel) ? request.gradeLevel : "",
-            description: request.note ?? "",
-            topics: preselectedTopics,
-            sessionRows: initialSessionRows,
-          }}
-          subjectLocked
-          disabledTopics={disabledTopics}
-          tutorGradeLevel={tutorGradeLevel}
-          submitLabel="Accept & create class"
-          submitting={submitting}
-          error={error}
-          onCancel={() => router.push("/tutor/requests")}
-          onSubmit={submit}
-        />}
       </div>
     </section>
   );

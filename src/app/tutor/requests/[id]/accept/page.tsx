@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import PageHeader from "@/components/ui/PageHeader";
+import BackLink from "@/components/ui/BackLink";
 import AcceptRequestForm from "@/components/tutor/AcceptRequestForm";
 
 export const metadata = {
@@ -49,11 +50,10 @@ export default async function AcceptTopicRequestPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        eyebrow="Tutor Portal"
-        title="Accept & create class"
-        subtitle="Auto-create a class from this class request. Certification required per topic."
-      />
+      <div className="space-y-3">
+        <BackLink href="/tutor/requests">Back to requests</BackLink>
+        <PageHeader eyebrow="Class request" title="Create a class for this request" />
+      </div>
       <AcceptRequestForm
         request={{
           id: request.id,

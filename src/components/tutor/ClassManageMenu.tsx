@@ -82,56 +82,54 @@ export default function ClassManageMenu({
 
       <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn btn-outline gap-1.5">
-          <MoreVertical className="h-3.5 w-3.5" />
-          Manage Class
+          <MoreVertical className="h-4 w-4" aria-hidden="true" />
+          Manage class
         </div>
         <ul
           tabIndex={0}
-          className="dropdown-content menu bg-base-100 rounded-box z-10 w-60 p-2 shadow-lg border border-base-200 mt-2"
+          aria-label="Manage class"
+          className="dropdown-content z-10 mt-2 w-72 rounded-box border border-base-300 bg-base-100 p-1.5 shadow-lg"
         >
-          {!isModerated && (
-            <li>
-              <Link href={`/tutor/classes/${classId}/edit`} className="gap-2">
-                <Pencil className="h-3.5 w-3.5" />
-                Edit Class Info
-              </Link>
+          {isModerated ? (
+            <li className="px-3 py-2 text-sm text-(--kt-muted)">
+              This class is {status.toLowerCase()}, so it can&apos;t be changed. See the notice above to appeal.
             </li>
-          )}
-          {isModerated && (
-            <li className="menu-title">
-              <span>This class is {status.toLowerCase()} — actions are disabled.</span>
-            </li>
+          ) : (
+            <MenuLink href={`/tutor/classes/${classId}/edit`} icon={Pencil} title="Edit class info" note="Topics, sessions, place and size" />
           )}
           {isScheduled && (
-            <li>
-              <button onClick={handleTogglePublish} disabled={publishing} className="gap-2">
-                {published ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                {published ? "Unpublish Class" : "Publish Class"}
-              </button>
-            </li>
+            <MenuButton
+              onClick={handleTogglePublish}
+              disabled={publishing}
+              icon={published ? EyeOff : Eye}
+              title={published ? "Unpublish class" : "Publish class"}
+              note={published ? "Hide it from learners browsing classes" : "Let learners find and join it"}
+            />
           )}
           {isScheduled && (
             <>
-              <div className="divider my-1"></div>
-              <li>
-                <button onClick={() => setPendingAction("complete")} className="gap-2 text-success">
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  Finish Class
-                </button>
-              </li>
-              <li>
-                <button onClick={() => setPendingAction("cancel")} className="gap-2 text-error">
-                  <XCircle className="h-3.5 w-3.5" />
-                  Cancel Class
-                </button>
-              </li>
+              <li role="separator" className="my-1.5 border-t border-(--kt-border)" />
+              <MenuButton
+                onClick={() => setPendingAction("complete")}
+                icon={CheckCircle}
+                title="Finish class"
+                note="Ends it; eligible learners get certificates"
+              />
+              <MenuButton
+                onClick={() => setPendingAction("cancel")}
+                icon={XCircle}
+                title="Cancel class"
+                note="Calls off the remaining sessions"
+                danger
+              />
               {!hasEnrollments && (
-                <li>
-                  <button onClick={() => setPendingAction("delete")} className="gap-2 text-error">
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Delete Class
-                  </button>
-                </li>
+                <MenuButton
+                  onClick={() => setPendingAction("delete")}
+                  icon={Trash2}
+                  title="Delete class"
+                  note="Only while no one has enrolled"
+                  danger
+                />
               )}
             </>
           )}
@@ -161,3 +159,52 @@ export default function ClassManageMenu({
     </>
   );
 }
+
+type MenuIcon = typeof Pencil;
+const itemClass = "flex w-full items-start gap-3 rounded-field px-3 py-2 text-left hover:bg-base-200 focus-visible:bg-base-200 focus-visible:outline-none disabled:opacity-50";
+
+function ItemText({ icon: Icon, title, note, danger }: { icon: MenuIcon; title: string; note: string; danger?: boolean }) {
+  return (
+    <>
+      <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${danger ? "text-error" : "text-(--kt-muted)"}`} aria-hidden="true" />
+      <span className="min-w-0">
+        <span className={`block font-medium ${danger ? "text-error" : ""}`}>{title}</span>
+        <span className="block text-sm text-(--kt-muted)">{note}</span>
+      </span>
+    </>
+  );
+}
+
+/** A menu row that navigates: title with a one-line note on what it does. */
+function MenuLink({ href, ...text }: { href: string; icon: MenuIcon; title: string; note: string }) {
+  return (
+    <li>
+      <Link href={href} className={itemClass}>
+        <ItemText {...text} />
+      </Link>
+    </li>
+  );
+}
+
+/** A menu row that acts (publish, finish, cancel, delete); `danger` colours the irreversible ones. */
+function MenuButton({
+  onClick,
+  disabled,
+  ...text
+}: {
+  onClick: () => void;
+  disabled?: boolean;
+  icon: MenuIcon;
+  title: string;
+  note: string;
+  danger?: boolean;
+}) {
+  return (
+    <li>
+      <button type="button" onClick={onClick} disabled={disabled} className={itemClass}>
+        <ItemText {...text} />
+      </button>
+    </li>
+  );
+}
+

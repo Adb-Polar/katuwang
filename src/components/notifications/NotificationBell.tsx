@@ -4,10 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { Bell, CheckCheck } from "lucide-react";
+import { keepCodesTogether, readableSubjects } from "@/lib/displayLabels";
 import {
   NotificationRow,
-  TYPE_ICON,
-  FALLBACK_ICON,
   relativeTime,
 } from "@/components/notifications/notificationMeta";
 
@@ -126,58 +125,59 @@ export default function NotificationBell({ unreadCount, notificationsHref }: Not
         <div
           role="menu"
           aria-label="Notifications"
-          className="absolute right-0 top-full mt-2 w-80 max-h-[70vh] overflow-y-auto rounded-box border border-base-300 bg-base-100 shadow-lg z-30"
+          className="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto rounded-box border border-base-300 bg-base-100 shadow-lg z-30"
         >
-          <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-base-200">
-            <span className="text-xs font-bold flex items-center gap-2">
-              <Bell className="h-3.5 w-3.5 text-primary" />
+          <div className="flex items-center justify-between gap-2 px-4 py-3 border-b border-(--kt-border)">
+            <span className="font-serif text-lg font-medium leading-none">
               Notifications
+              {unreadCount > 0 && <span className="ml-2 font-sans text-sm font-normal text-(--kt-muted)">{unreadCount} new</span>}
             </span>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="btn btn-ghost btn-xs text-2xs gap-1">
-                <CheckCheck className="h-3.5 w-3.5" />
+              <button onClick={markAllRead} className="btn btn-ghost btn-sm gap-1.5 text-sm font-normal">
+                <CheckCheck className="h-4 w-4" aria-hidden="true" />
                 Mark all read
               </button>
             )}
           </div>
 
           {loading && !loaded ? (
-            <div className="flex justify-center py-8">
-              <span className="loading loading-spinner loading-sm text-primary" />
-            </div>
+            <p role="status" className="px-4 py-6 text-sm text-(--kt-muted)">Loading…</p>
           ) : error ? (
-            <p className="px-3 py-6 text-center text-2xs text-error">{error}</p>
+            <p className="px-4 py-6 text-sm text-error">{error}</p>
           ) : items.length === 0 ? (
-            <p className="px-3 py-8 text-center text-2xs italic text-(--kt-faint)">No notifications yet.</p>
+            <p className="px-4 py-6 text-sm">No notifications yet.</p>
           ) : (
-            <ul className="divide-y divide-base-200">
+            <ul className="divide-y divide-(--kt-border)">
               {items.map((n) => (
                 <li key={n.id}>
                   <button
                     type="button"
                     role="menuitem"
                     onClick={() => handleRowClick(n)}
-                    className={`flex w-full items-start gap-2.5 px-3 py-2.5 text-left text-xs hover:bg-base-200/40 ${
+                    className={`flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-base-200/50 ${
                       !n.readAt ? "bg-primary/5" : ""
                     }`}
                   >
-                    <span className="mt-0.5 shrink-0">{TYPE_ICON[n.type] ?? FALLBACK_ICON}</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-(--kt-muted)">{n.message}</span>
-                      <span className="block text-2xs text-(--kt-faint) mt-0.5">{relativeTime(n.createdAt)}</span>
+                      <span className={`block text-sm leading-snug ${n.readAt ? "text-(--kt-muted)" : "text-base-content font-medium"}`}>
+                        {keepCodesTogether(readableSubjects(n.message))}
+                      </span>
+                      <span className="block text-xs text-(--kt-muted) mt-1">{relativeTime(n.createdAt)}</span>
                     </span>
-                    {!n.readAt && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+                    {!n.readAt && (
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" aria-label="Unread" role="img" />
+                    )}
                   </button>
                 </li>
               ))}
             </ul>
           )}
 
-          <div className="border-t border-base-200 px-3 py-2 text-center">
+          <div className="border-t border-(--kt-border) px-4 py-3">
             <Link
               href={notificationsHref}
               onClick={() => setOpen(false)}
-              className="text-2xs font-semibold text-primary hover:underline"
+              className="link link-hover text-primary text-sm font-medium"
             >
               View all
             </Link>

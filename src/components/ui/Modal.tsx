@@ -104,8 +104,8 @@ export default function Modal({
         onClick={(e) => e.stopPropagation()}
       >
         {!bare && (
-          <div className="flex items-start justify-between gap-3 mb-3">
-            <h3 className="font-bold text-sm text-base-content">{title}</h3>
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <h2 className="font-serif text-2xl font-medium leading-tight text-base-content">{title}</h2>
             <button
               type="button"
               onClick={(e) => {
@@ -113,7 +113,7 @@ export default function Modal({
                 onClose();
               }}
               aria-label="Close"
-              className="btn btn-sm btn-circle btn-ghost -mr-2 -mt-2 shrink-0"
+              className="btn btn-circle btn-ghost -mr-2 -mt-1 shrink-0"
             >
               <X className="h-4 w-4" />
             </button>

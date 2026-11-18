@@ -8,7 +8,7 @@ export default function PageHeader({
 }: {
   eyebrow?: string;
   title: string;
-  subtitle?: string;
+  subtitle?: ReactNode;
   actions?: ReactNode;
 }) {
   return (

@@ -10,20 +10,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import BackLink from "@/components/ui/BackLink";
-import {
-  Link as LinkIcon,
-  Users,
-  BadgeCheck,
-  Plus,
-  X,
-  Lock,
-  MapPin,
-  EyeOff,
-} from "lucide-react";
+import { BadgeCheck, Check, Lock, Plus } from "lucide-react";
 import { GradeLevel } from "@prisma/client";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { GRADE_LEVELS, getEligibleTargetGrades, isTargetGradeEligibleForTutor } from "@/lib/gradeLevels";
-import StatusBadge from "@/components/ui/StatusBadge";
+import PageHeader from "@/components/ui/PageHeader";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
@@ -98,7 +89,6 @@ export default function EditClassForm({
 
   const isFull = enrolledCount >= maxStudents;
   const { tone, label } = getClassStatusBadge(status, isFull, activeLabel);
-  const fillPct = Math.min(100, Math.round((enrolledCount / form.maxStudents) * 100));
 
   const toggleTopic = (topic: string) => {
     if (usedTopics.includes(topic)) return;
@@ -153,51 +143,48 @@ export default function EditClassForm({
     }
   };
 
+  const statusLine = locked
+    ? <span className="text-error font-medium">{status === "BANNED" ? "Banned" : "Suspended"}, so it can&apos;t be edited</span>
+    : !published
+    ? <span className="text-base-content font-medium">Unpublished: learners can&apos;t see it yet</span>
+    : <span className={`font-medium ${tone === "success" ? "text-success" : "text-base-content"}`}>{label}</span>;
+
   return (
-    <div
-      className={`space-y-6 rounded-box ${
-        locked
-          ? "bg-error/5 border border-error/20 p-4"
-          : !published
-          ? "bg-base-300 border border-base-content/10 p-4"
-          : ""
-      }`}
-    >
+    <div className="space-y-6 max-w-3xl">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-        <BackLink href={backHref}>Back to Class</BackLink>
-        <div className="flex items-center gap-2">
-          <Link href={backHref} className="btn btn-neutral btn-outline btn-sm text-xs">
-            {locked ? "Back" : "Cancel"}
-          </Link>
-          {!locked && (
-            <button
-              type="submit"
-              form="edit-class-form"
-              disabled={loading}
-              className="btn btn-primary btn-sm text-xs cursor-pointer"
-            >
-              {loading ? <span className="loading loading-spinner loading-xs"></span> : "Save Changes"}
-            </button>
-          )}
-        </div>
+      <div className="space-y-3">
+        <BackLink href={backHref}>Back to class</BackLink>
+        <PageHeader
+          eyebrow="Edit class"
+          title={subjectDisplayLabel(subject)}
+          subtitle={<>{statusLine} · {enrolledCount} of {maxStudents} enrolled</>}
+          actions={
+            <>
+              <Link href={backHref} className="btn btn-ghost">
+                {locked ? "Back" : "Cancel"}
+              </Link>
+              {!locked && (
+                <button type="submit" form="edit-class-form" disabled={loading} className="btn btn-primary">
+                  {loading ? <span className="loading loading-spinner loading-sm"></span> : "Save changes"}
+                </button>
+              )}
+            </>
+          }
+        />
       </div>
 
       {locked && (status === "SUSPENDED" || status === "BANNED") && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <ClassModerationPanel
             status={status}
             suspendedReason={suspendedReason}
             suspendedUntil={suspendedUntil}
             audience="tutor"
           />
-          <p className="text-2xs text-(--kt-faint)">
-            To appeal this decision, go back to the{" "}
-            <Link href={backHref} className="link link-primary">
-              class page
-            </Link>
-            .
+          <p className="text-sm">
+            To appeal, go back to the{" "}
+            <Link href={backHref} className="link link-primary">class page</Link>.
           </p>
         </div>
       )}
@@ -205,188 +192,156 @@ export default function EditClassForm({
       <FeedbackBanner variant="error" message={error || null} />
 
       <ValidatedForm id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="badge badge-neutral tracking-wider text-2xs uppercase font-bold px-2.5 py-2.5">
-            {subjectDisplayLabel(subject)}
-          </span>
-          {locked ? (
-            <StatusBadge tone="error" label={status === "BANNED" ? "Banned" : "Suspended"} size="sm" />
-          ) : published ? (
-            <StatusBadge tone={tone} label={label} size="sm" />
-          ) : (
-            <span className="badge badge-warning badge-outline text-2xs font-semibold uppercase tracking-wide gap-1 py-2.5">
-              <EyeOff className="h-3 w-3" />
-              Unpublished
-            </span>
-          )}
-        </div>
-
         <fieldset disabled={locked} className="contents">
-          <div className="grid lg:grid-cols-3 gap-6">
-            {/* Main column */}
-            <div className="min-w-0 lg:col-span-2 space-y-6">
-              <div className="card kt-card">
-                <div className="card-body gap-4">
-                  <h2 className="card-title text-sm font-bold">Class Info</h2>
+          <div className="space-y-6">
+          <section aria-labelledby="edit-details" className="card kt-card">
+            <div className="kt-card-body gap-5">
+              <h2 id="edit-details" className={sectionTitle}>Details</h2>
 
-                  <FormField
-                    label={`Topics (${topics.length} selected)`}
-                    required
-                    hint="Click a topic to add or remove it. Locked topics are already used by a session."
-                  >
-                    <div className="flex flex-wrap gap-1.5 border border-base-300 rounded-lg bg-base-100 p-2.5">
-                      {topicOptions.map((topic) => {
-                        const selected = topics.includes(topic);
-                        const lockedTopic = usedTopics.includes(topic);
-                        return (
-                          <button
-                            type="button"
-                            key={topic}
-                            aria-pressed={selected}
-                            disabled={lockedTopic || locked}
-                            onClick={() => toggleTopic(topic)}
-                            className={`badge text-2xs font-semibold gap-1 py-2.5 transition-colors ${
-                              lockedTopic
-                                ? "badge-ghost text-(--kt-faint) cursor-not-allowed"
-                                : selected
-                                ? "badge-primary cursor-pointer hover:opacity-80"
-                                : "badge-outline badge-primary border-dashed text-primary/70 cursor-pointer hover:bg-primary/10"
-                            }`}
-                          >
-                            {lockedTopic ? (
-                              <Lock className="h-3 w-3" />
-                            ) : (
-                              verifiedTopics?.includes(topic) && <BadgeCheck className="h-3 w-3" />
-                            )}
-                            {topic}
-                            {!lockedTopic && (selected ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />)}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                  </FormField>
-
-                  <FormField label="Target Grade" hint="Optional — used for class matching.">
-                    <select
-                      value={form.gradeLevel}
-                      onChange={(e) => setForm((prev) => ({ ...prev, gradeLevel: e.target.value }))}
-                      className="select select-bordered select-sm w-full focus:select-primary text-xs"
-                    >
-                      <option value="">Any grade</option>
-                      {(tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS).map((g) => (
-                        <option key={g.value} value={g.value}>
-                          {g.label}
-                        </option>
-                      ))}
-                    </select>
-                  </FormField>
-
-                  <FormField label="Location" hint="A location or a meeting link is required — for an in-person class">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="h-4 w-4 text-primary shrink-0" />
-                      <input
-                        type="text"
-                        aria-label="Building"
-                        value={form.building}
-                        onChange={(e) => setForm((prev) => ({ ...prev, building: e.target.value }))}
-                        placeholder="Building"
-                        className="input input-bordered input-sm w-full focus:input-primary text-xs"
-                      />
-                      <input
-                        type="text"
-                        aria-label="Room"
-                        value={form.room}
-                        onChange={(e) => setForm((prev) => ({ ...prev, room: e.target.value }))}
-                        placeholder="Room"
-                        className="input input-bordered input-sm w-32 shrink-0 focus:input-primary text-xs"
-                      />
-                    </div>
-                  </FormField>
-
-                  <FormField label="Meeting Link" hint="Required if no location is set">
-                    <div className="flex items-center gap-1.5">
-                      <LinkIcon className="h-4 w-4 text-primary shrink-0" />
-                      <input
-                        type="url"
-                        aria-label="Meeting link"
-                        value={form.meetingLink}
-                        onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
-                        placeholder="https://meet.google.com/..."
-                        className="input input-bordered input-sm w-full focus:input-primary text-xs"
-                      />
-                    </div>
-                  </FormField>
+              <FormField
+                size="md"
+                label={`Topics (${topics.length} selected)`}
+                required
+                hint="Tap a topic to add or remove it. Topics with a lock already have a session."
+              >
+                <div className="flex flex-wrap gap-2">
+                  {topicOptions.map((topic) => {
+                    const selected = topics.includes(topic);
+                    const lockedTopic = usedTopics.includes(topic);
+                    return (
+                      <button
+                        type="button"
+                        key={topic}
+                        aria-pressed={selected}
+                        disabled={lockedTopic || locked}
+                        onClick={() => toggleTopic(topic)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm text-left transition-colors ${
+                          lockedTopic
+                            ? "border-(--kt-border) bg-base-200 text-base-content cursor-not-allowed"
+                            : selected
+                            ? "border-primary bg-primary text-primary-content hover:opacity-90"
+                            : "border-(--kt-border) text-base-content hover:border-primary"
+                        }`}
+                      >
+                        {lockedTopic ? (
+                          <Lock className="h-3.5 w-3.5 shrink-0 text-(--kt-muted)" aria-label="has a session" />
+                        ) : selected ? (
+                          <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        ) : (
+                          <Plus className="h-3.5 w-3.5 shrink-0 text-(--kt-muted)" aria-hidden="true" />
+                        )}
+                        {topic}
+                        {verifiedTopics?.includes(topic) && (
+                          <BadgeCheck className="h-3.5 w-3.5 shrink-0" aria-label="you're certified" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
+              </FormField>
 
-              <div className="card kt-card">
-                <div className="card-body gap-2">
-                  <h2 className="card-title text-sm font-bold">Description</h2>
-                  <textarea
-                    aria-label="Class description"
-                    value={form.description}
-                    onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
-                    placeholder="Briefly explain what will be covered in this class... (optional)"
-                    maxLength={500}
-                    className="textarea textarea-bordered textarea-sm w-full focus:textarea-primary text-xs h-24"
-                  />
-                  <CharCount value={form.description} max={500} />
-                </div>
-              </div>
+              <FormField size="md" label="Target grade" hint="Optional. Used to match the class to learners.">
+                <select
+                  value={form.gradeLevel}
+                  onChange={(e) => setForm((prev) => ({ ...prev, gradeLevel: e.target.value }))}
+                  className="select select-bordered w-full"
+                >
+                  <option value="">Any grade</option>
+                  {(tutorGradeLevel ? getEligibleTargetGrades(tutorGradeLevel) : GRADE_LEVELS).map((g) => (
+                    <option key={g.value} value={g.value}>
+                      {g.label}
+                    </option>
+                  ))}
+                </select>
+              </FormField>
 
-              <div className="card kt-card">
-                <div className="card-body gap-3">
-                  <div className="flex items-center justify-between">
-                    <h2 className="card-title text-sm font-bold">Sessions</h2>
-                    {!locked && status === "SCHEDULED" && (
-                      <AddSessionModal classId={classId} classTopics={classTopics} />
-                    )}
-                  </div>
-                  <SessionsList
-                    sessions={sessions}
-                    renderActions={
-                      locked
-                        ? undefined
-                        : (s) => <SessionActions classId={classId} session={s} classTopics={classTopics} />
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <div className="min-w-0 space-y-6">
-              <div className="card kt-card">
-                <div className="card-body gap-3">
-                  <h2 className="card-title text-sm font-bold">At a Glance</h2>
-                  <div className="flex items-center gap-2 text-xs text-(--kt-muted)">
-                    <Users className="h-4 w-4 text-primary shrink-0" />
-                    <span>{enrolledCount} currently enrolled</span>
-                  </div>
-                  <label htmlFor="class-max-capacity" className="font-semibold text-2xs text-(--kt-faint)">MAX CAPACITY</label>
+              <FormField size="md" label="Location" hint="Building and room for an in-person class.">
+                <div className="flex items-center gap-2">
                   <input
-                    id="class-max-capacity"
-                    type="number"
-                    value={form.maxStudents}
-                    onChange={(e) => setForm((prev) => ({ ...prev, maxStudents: Number(e.target.value) }))}
-                    required
-                    min={Math.max(1, enrolledCount)}
-                    max={10}
-                    className="input input-bordered input-sm w-full focus:input-primary text-xs"
+                    type="text"
+                    aria-label="Building"
+                    value={form.building}
+                    onChange={(e) => setForm((prev) => ({ ...prev, building: e.target.value }))}
+                    placeholder="Building"
+                    className="input input-bordered w-full min-w-0"
                   />
-                  {enrolledCount > 0 && (
-                    <p className="text-2xs text-(--kt-faint)">
-                      Can&apos;t drop below {enrolledCount} (current enrollment).
-                    </p>
-                  )}
-                  <progress className="progress progress-primary w-full" value={fillPct} max={100}></progress>
+                  <input
+                    type="text"
+                    aria-label="Room"
+                    value={form.room}
+                    onChange={(e) => setForm((prev) => ({ ...prev, room: e.target.value }))}
+                    placeholder="Room"
+                    className="input input-bordered w-28 shrink-0"
+                  />
                 </div>
-              </div>
+              </FormField>
+
+              <FormField size="md" label="Meeting link" hint="Needed if there's no building or room.">
+                <input
+                  type="url"
+                  aria-label="Meeting link"
+                  value={form.meetingLink}
+                  onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
+                  placeholder="https://meet.google.com/..."
+                  className="input input-bordered w-full"
+                />
+              </FormField>
+
+              <FormField
+                size="md"
+                label="Class size"
+                hint={enrolledCount > 0 ? `Up to 10. ${enrolledCount} enrolled now, so it can't go below that.` : "Up to 10 learners."}
+              >
+                <input
+                  id="class-max-capacity"
+                  type="number"
+                  value={form.maxStudents}
+                  onChange={(e) => setForm((prev) => ({ ...prev, maxStudents: Number(e.target.value) }))}
+                  required
+                  min={Math.max(1, enrolledCount)}
+                  max={10}
+                  className="input input-bordered w-28"
+                />
+              </FormField>
+
+              <FormField size="md" label="Description" hint="Optional. What the class will cover.">
+                <textarea
+                  aria-label="Class description"
+                  value={form.description}
+                  onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+                  maxLength={500}
+                  rows={4}
+                  className="textarea textarea-bordered w-full"
+                />
+                <CharCount value={form.description} max={500} />
+              </FormField>
             </div>
+          </section>
+
+          <section aria-labelledby="edit-sessions" className="card kt-card">
+            <div className="kt-card-body gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="edit-sessions" className={sectionTitle}>Sessions</h2>
+                {!locked && status === "SCHEDULED" && (
+                  <AddSessionModal classId={classId} classTopics={classTopics} />
+                )}
+              </div>
+              <SessionsList
+                variant="calendar"
+                sessions={sessions}
+                renderActions={
+                  locked
+                    ? undefined
+                    : (s) => <SessionActions classId={classId} session={s} classTopics={classTopics} />
+                }
+              />
+            </div>
+          </section>
           </div>
         </fieldset>
       </ValidatedForm>
     </div>
   );
 }
+
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";

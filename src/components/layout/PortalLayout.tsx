@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { ChevronDown, LogOut, Menu, X } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import GlobalSearch from "@/components/layout/GlobalSearch";
 import ChatWidget from "@/components/chatbot/ChatWidget";
@@ -215,10 +214,11 @@ export default function PortalLayout({
     </nav>
   );
 
-  const idNode = idRole ? (
-    <AnonymousIdBadge id={anonymousId} role={idRole} showIcon />
-  ) : (
-    <span className="font-mono text-xs font-semibold text-primary">{anonymousId}</span>
+  // The ID in the role's colour, in the serif used for IDs everywhere else (was a 10px tinted pill).
+  const idNode = (
+    <span className={`kt-id text-base ${idRole === "TUTOR" ? "kt-id--tutor" : idRole === "LEARNER" ? "kt-id--learner" : "text-primary"}`}>
+      {anonymousId}
+    </span>
   );
 
   const logoutLink = (
@@ -243,9 +243,7 @@ export default function PortalLayout({
         <div className="flex-1">{navTree}</div>
         <div className="flex flex-col gap-3 px-2 pb-1">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-medium text-(--kt-faint)">
-              Anonymous ID
-            </span>
+            <span className="text-sm text-(--kt-muted)">Your ID</span>
             {idNode}
           </div>
           {logoutLink}
@@ -355,9 +353,7 @@ export default function PortalLayout({
           <div className="flex-1">{navTree}</div>
           <div className="flex flex-col gap-3 px-2 pb-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-medium text-(--kt-faint)">
-                Anonymous ID
-              </span>
+              <span className="text-sm text-(--kt-muted)">Your ID</span>
               {idNode}
             </div>
             {logoutLink}

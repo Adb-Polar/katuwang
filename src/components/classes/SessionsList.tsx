@@ -24,9 +24,16 @@ function CalendarSessions({ sessions, renderActions }: { sessions: SessionSummar
             </time>
             <div className="flex-1 min-w-0 flex flex-col items-start gap-1">
               <p className="font-medium break-words">{s.topic}</p>
-              <p className="text-sm text-(--kt-muted)">{formatTime(s.scheduledAt)} · {s.duration} min</p>
-              {s.status !== "SCHEDULED" && <StatusBadge tone={tone} label={label} size="sm" />}
-              {renderActions && <div className="mt-1">{renderActions(s)}</div>}
+              <p className="text-sm text-(--kt-muted)">
+                {formatTime(s.scheduledAt)} · {s.duration} min
+                {s.status !== "SCHEDULED" && (
+                  <span className={`font-medium ${tone === "error" ? "text-error" : tone === "success" ? "text-success" : "text-base-content"}`}>
+                    {" · "}
+                    {label}
+                  </span>
+                )}
+              </p>
+              {renderActions && <div className="mt-2 self-stretch">{renderActions(s)}</div>}
             </div>
           </li>
         );

@@ -112,7 +112,7 @@ export default async function TutorAssessmentsPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Your assessments"
-        subtitle="Take an auto-graded quiz for any topic you teach. Pass to earn a verified badge learners can see."
+        subtitle="Take an auto-graded quiz on a topic. Pass it and learners see you as verified for that topic."
       />
 
       <AssessmentsTabs

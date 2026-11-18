@@ -33,7 +33,7 @@ export default function BarChartCard({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">{title}</h3>
+        <h3 className="font-serif text-xl font-medium leading-tight">{title}</h3>
         <div className="h-52 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 4, right: 8, bottom: 4, left: -16 }}>

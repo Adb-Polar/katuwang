@@ -8,6 +8,7 @@ import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import Modal from "@/components/ui/Modal";
+import { Plus, X } from "lucide-react";
 
 export interface QuestionDraft {
   prompt: string;
@@ -96,21 +97,21 @@ export default function QuestionFormModal({
 
   return (
     <Modal open onClose={onClose} title={title} size="md" bare>
-      <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void submit(e.currentTarget); }}>
+      <ValidatedForm className="space-y-5" onSubmit={(e) => { e.preventDefault(); void submit(e.currentTarget); }}>
         <div>
-          <h3 className="font-bold text-sm text-base-content">{title}</h3>
-          {contextLabel && <p className="text-2xs text-(--kt-faint) mt-0.5">{contextLabel}</p>}
+          <h2 className="font-serif text-2xl font-medium leading-tight">{title}</h2>
+          {contextLabel && <p className="text-sm text-(--kt-muted) mt-1">{contextLabel}</p>}
         </div>
 
         <FeedbackBanner variant="error" message={error || null} />
 
         {topicField && (
-          <FormField label="Topic" required>
+          <FormField size="md" label="Topic" required>
             <select
               required
               value={topicField.value}
               onChange={(e) => topicField.onChange(e.target.value)}
-              className="select select-bordered select-sm text-xs w-full focus:select-primary truncate"
+              className="select select-bordered w-full"
             >
               {topicField.options.map((t) => (
                 <option key={t} value={t}>
@@ -121,7 +122,7 @@ export default function QuestionFormModal({
           </FormField>
         )}
 
-        <FormField label="Question prompt" required>
+        <FormField size="md" label="Question" required>
           <textarea
             required
             minLength={5}
@@ -129,74 +130,86 @@ export default function QuestionFormModal({
             onChange={(e) => setPrompt(e.target.value)}
             rows={3}
             maxLength={1000}
-            className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
+            className="textarea textarea-bordered w-full"
           />
         </FormField>
 
-        <FormField label="Options" hint="Select the one correct answer">
+        <FormField size="md" label="Answer choices" hint="Pick the correct answer with the circle beside it.">
           <div className="space-y-2">
             {options.map((o, i) => (
               <div key={i} data-control-field>
-              <div className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="correct-option"
-                  aria-label={`Mark option ${i + 1} as correct`}
-                  className="radio radio-xs radio-primary"
-                  checked={o.isCorrect}
-                  onChange={() => setCorrect(i)}
-                />
-                <input
-                  type="text"
-                  required
-                  aria-label={`Option ${i + 1} text`}
-                  value={o.text}
-                  onChange={(e) => setText(i, e.target.value)}
-                  maxLength={500}
-                  placeholder={`Option ${i + 1}`}
-                  className="input input-bordered input-xs text-xs flex-1 focus:input-primary"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeOption(i)}
-                  disabled={options.length <= OPTION_COUNT_MIN}
-                  className="btn btn-ghost btn-xs text-2xs"
-                  aria-label={`Remove option ${i + 1}`}
-                >
-                  ✕
-                </button>
-              </div>
-              <div data-control-feedback />
+                <div className="flex items-center gap-3">
+                  <input
+                    type="radio"
+                    name="correct-option"
+                    aria-label={`Mark option ${i + 1} as correct`}
+                    className="radio radio-primary"
+                    checked={o.isCorrect}
+                    onChange={() => setCorrect(i)}
+                  />
+                  <input
+                    type="text"
+                    required
+                    aria-label={`Option ${i + 1} text`}
+                    value={o.text}
+                    onChange={(e) => setText(i, e.target.value)}
+                    maxLength={500}
+                    placeholder={`Choice ${i + 1}`}
+                    className={`input input-bordered flex-1 min-w-0 ${o.isCorrect ? "border-primary" : ""}`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeOption(i)}
+                    disabled={options.length <= OPTION_COUNT_MIN}
+                    className="btn btn-ghost btn-square"
+                    aria-label={`Remove option ${i + 1}`}
+                  >
+                    <X className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </div>
+                {o.isCorrect && <p className="text-sm text-primary font-medium ml-9 mt-1">Correct answer</p>}
+                <div data-control-feedback />
               </div>
             ))}
             {options.length < OPTION_COUNT_MAX && (
-              <button type="button" onClick={addOption} className="btn btn-ghost btn-xs text-2xs">
-                + Add option
+              <button type="button" onClick={addOption} className="btn btn-ghost gap-2 -ml-2">
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Add a choice
               </button>
             )}
           </div>
         </FormField>
 
-        <FormField label="Explanation" hint="Shown after grading (optional)">
+        <FormField size="md" label="Explanation" hint="Optional. Learners see it after their answer is graded.">
           <textarea
             value={explanation}
             onChange={(e) => setExplanation(e.target.value)}
             rows={2}
             maxLength={1000}
-            className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
+            className="textarea textarea-bordered w-full"
           />
         </FormField>
 
-        {requireReason && <FormField label="Correction reason" required hint="Explain why a new version is needed. Existing tests keep the original content.">
-          <textarea aria-label="Correction reason" value={reason} onChange={event => setReason(event.target.value)} required minLength={10} maxLength={1000} className="textarea textarea-bordered w-full text-xs" />
-        </FormField>}
+        {requireReason && (
+          <FormField size="md" label="Correction reason" required hint="Explain why a new version is needed. Existing tests keep the original content.">
+            <textarea
+              aria-label="Correction reason"
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              required
+              minLength={10}
+              maxLength={1000}
+              className="textarea textarea-bordered w-full"
+            />
+          </FormField>
+        )}
 
-        <div className="modal-action pt-1">
-          <button type="button" className="btn btn-ghost btn-sm" onClick={onClose} disabled={saving}>
+        <div className="modal-action mt-0 pt-4 border-t border-(--kt-border)">
+          <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
-            {saving && <span className="loading loading-spinner loading-xs" />}
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving && <span className="loading loading-spinner loading-sm" />}
             {submitLabel}
           </button>
         </div>

@@ -82,15 +82,16 @@ export default function ProfileEditForm({
   };
 
   return (
-    <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
+    <ValidatedForm onSubmit={handleSubmit} className="space-y-5">
       <FeedbackBanner variant="error" message={error || null} />
       <FeedbackBanner variant="success" message={success || null} />
 
-      <FormField label="Grade level" required hint="Your current grade level." orientation="horizontal">
+      <div className="grid gap-4 sm:grid-cols-2">
+      <FormField size="md" label="Grade level" required>
         <select
           value={gradeLevel}
           onChange={(e) => setGradeLevel(e.target.value)}
-          className="select select-bordered select-md text-sm w-full"
+          className="select select-bordered w-full"
           required
         >
           <option value="" disabled>
@@ -104,22 +105,24 @@ export default function ProfileEditForm({
         </select>
       </FormField>
 
-      <FormField label="Section" required hint="Your current class section." orientation="horizontal">
+      <FormField size="md" label="Section" required>
         <input
           type="text"
           value={section}
           onChange={(e) => setSection(e.target.value)}
-          className="input input-bordered input-md text-sm w-full"
+          className="input input-bordered w-full"
           maxLength={50}
           required
         />
       </FormField>
+      </div>
 
       <FormField
+        size="md"
         label="Contact info"
-        hint="A Philippine mobile number, e.g. 0917 123 4567. Visible only to you and admins."
+        hint="A Philippine mobile number, e.g. 0917 123 4567."
         error={contactError || undefined}
-        orientation="horizontal"
+       
       >
         <input
           type="tel"
@@ -131,13 +134,13 @@ export default function ProfileEditForm({
             setContactInfo(next);
             validateContactLive(next);
           }}
-          className="input input-bordered input-md text-sm w-full"
+          className="input input-bordered w-full"
           placeholder="0917 123 4567"
         />
       </FormField>
 
-      <div className="pt-1">
-        <button type="submit" disabled={saving} className="btn btn-primary btn-md text-sm font-bold cursor-pointer">
+      <div>
+        <button type="submit" disabled={saving} className="btn btn-primary">
           {saving ? <span className="loading loading-spinner loading-sm"></span> : "Save changes"}
         </button>
       </div>

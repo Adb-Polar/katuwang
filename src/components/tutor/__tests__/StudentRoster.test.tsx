@@ -67,4 +67,21 @@ describe("student roster class filter", () => {
     expect(options()).toEqual([{ value: "", label: "All classes" }]);
     expect(host.textContent).toContain("No students match these filters yet.");
   });
+
+  it("lists each student by ID with their classes by topic, subject and code", async () => {
+    const student = {
+      id: "u1", anonymousId: "STU-0042", image: null, gradeLevel: "GRADE_8", section: "Rizal",
+      enrollments: [
+        { classId: "c1", code: "C-0001", subject: "MATH", topics: ["Fractions"], enrolledAt: "2026-11-01T00:00:00Z" },
+        { classId: "c3", code: "C-0003", subject: "SCIENCE", topics: ["Cells"], enrolledAt: "2026-11-01T00:00:00Z", withdrawnAt: "2026-11-05T00:00:00Z" },
+      ],
+    };
+    vi.mocked(fetch).mockResolvedValue({ ok: true, json: async () => ({ students: [student], total: 1, classes }) } as Response);
+    await act(async () => root.render(h(StudentRoster)));
+    expect(host.querySelector('a[href="/tutor/students/u1"]')?.textContent).toBe("STU-0042");
+    expect(host.textContent).toContain("Grade 8 · Section Rizal");
+    expect(host.querySelector('a[href="/tutor/classes/c1"]')?.textContent).toBe("Fractions");
+    expect(host.textContent).toContain("Cells · Science · C-0003 · withdrawn");
+    expect(host.textContent).toContain("1 student");
+  });
 });

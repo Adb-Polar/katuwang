@@ -1,15 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
-import { Calendar } from "lucide-react";
 import BackLink from "@/components/ui/BackLink";
 import UserAvatar from "@/components/profile/UserAvatar";
 import { prisma } from "@/lib/prisma";
-import PageHeader from "@/components/ui/PageHeader";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import { formatDate } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
-import { gradeSection } from "@/lib/gradeLevels";
+import { gradeNumber } from "@/lib/gradeLevels";
 
 export const metadata = {
   title: "Student Profile | Katuwang",
@@ -36,7 +33,7 @@ export default async function TutorStudentProfilePage({
     select: {
       enrolledAt: true,
       withdrawnAt: true,
-      class: { select: { id: true, subject: true, topics: { select: { topic: true } } } },
+      class: { select: { id: true, code: true, subject: true, topics: { select: { topic: true } } } },
       learner: { select: { anonymousId: true, image: true, gradeLevel: true, section: true } },
     },
     orderBy: { enrolledAt: "desc" },
@@ -45,73 +42,75 @@ export default async function TutorStudentProfilePage({
   if (enrollments.length === 0) notFound();
 
   const learner = enrollments[0].learner;
+  const gradeLine = `Grade ${gradeNumber(learner.gradeLevel)} · Section ${learner.section}`;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-3xl">
       <BackLink href="/tutor/students">Back to students</BackLink>
 
-      <PageHeader
-        eyebrow="Student Profile"
-        title="Anonymized profile"
-        subtitle="You never see a learner's real name, email, or contact details."
-        actions={<AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="md" showIcon />}
-      />
-
-      <section className="card kt-card">
-        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <UserAvatar
-            src={learner.image}
-            anonymousId={learner.anonymousId}
-            size="xl"
-            role="LEARNER"
-            subtitle={gradeSection(learner.gradeLevel, learner.section)}
-          />
-          <div className="text-center sm:text-left space-y-1">
-            <h2 className="text-base font-bold text-base-content">
-              Enrolled Student
-            </h2>
-            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-              <AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="sm" showIcon />
-              <span className="text-xs text-(--kt-muted)">
-                {gradeSection(learner.gradeLevel, learner.section)}
-              </span>
-            </div>
-            <p className="text-2xs text-(--kt-faint) pt-1">
-              {learner.image
-                ? "Click profile picture to view full size."
-                : "Student is using their anonymous monogram."}
-            </p>
-          </div>
+      {/* The learner's ID is the heading, on the one tinted band in the learner colour (like the profile page). */}
+      <section
+        aria-labelledby="student-id"
+        className="rounded-(--kt-radius-box) bg-secondary/10 px-5 py-6 sm:px-7 flex flex-col sm:flex-row sm:items-center gap-5"
+      >
+        <UserAvatar
+          src={learner.image}
+          anonymousId={learner.anonymousId}
+          size="xl"
+          role="LEARNER"
+          subtitle={gradeLine}
+        />
+        <div className="min-w-0 space-y-1">
+          <p className="font-serif italic text-base leading-none text-primary">Your student</p>
+          <h1 id="student-id" className="kt-id kt-id--learner text-3xl sm:text-4xl leading-tight">
+            {learner.anonymousId}
+          </h1>
+          <p>{gradeLine}</p>
+          <p className="text-sm text-(--kt-muted)">
+            Learners appear to tutors only by their ID — no real name, email or contact details.
+          </p>
         </div>
       </section>
 
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Class history ({enrollments.length})</h2>
-          <div className="space-y-2">
-            {enrollments.map((enr) => (
-              <Link
-                key={enr.class.id}
-                href={`/tutor/classes/${enr.class.id}`}
-                className="block border border-base-200 bg-base-200/20 hover:bg-base-200/40 rounded-lg p-3 space-y-1.5 transition-colors"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{subjectDisplayLabel(enr.class.subject)}</span>
-                  <span className="flex items-center gap-1 text-2xs text-(--kt-faint)">
-                    <Calendar className="h-3 w-3" />
-                    {formatDate(enr.enrolledAt)}{enr.withdrawnAt ? ` · Withdrawn ${formatDate(enr.withdrawnAt)}` : ""}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {enr.class.topics.map((t) => (
-                    <span key={t.topic} className="badge badge-outline badge-sm text-2xs">
-                      {t.topic}
-                    </span>
-                  ))}
-                </div>
-              </Link>
-            ))}
-          </div>
+      <section className="card kt-card" aria-labelledby="student-classes">
+        <div className="kt-card-body gap-2">
+          <h2 id="student-classes" className="font-serif text-2xl font-medium leading-tight">
+            Classes with you
+          </h2>
+          <ul>
+            {enrollments.map((enr) => {
+              const [firstTopic, ...otherTopics] = enr.class.topics.map((t) => t.topic);
+              return (
+                <li
+                  key={enr.class.id}
+                  className={`grid gap-x-6 gap-y-1 py-4 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[1fr_auto] ${enr.withdrawnAt ? "text-(--kt-muted)" : ""}`}
+                >
+                  <div className="min-w-0 space-y-1">
+                    <p className="flex flex-wrap gap-x-1.5 text-sm text-(--kt-muted)">
+                      <span className="whitespace-nowrap">{subjectDisplayLabel(enr.class.subject)}</span>
+                      <span className="whitespace-nowrap">· {enr.class.code}</span>
+                    </p>
+                    <h3 className="font-serif text-lg font-medium leading-snug">
+                      <Link href={`/tutor/classes/${enr.class.id}`} className="link link-hover">
+                        {firstTopic ?? subjectDisplayLabel(enr.class.subject)}
+                      </Link>
+                    </h3>
+                    {otherTopics.length > 0 && (
+                      <ul className="pl-3 border-l-2 border-(--kt-border) text-sm leading-snug space-y-1">
+                        {otherTopics.map((t) => <li key={t}>{t}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                  <p className="text-sm text-(--kt-muted) sm:text-right">
+                    Enrolled {formatDate(enr.enrolledAt)}
+                    {enr.withdrawnAt && (
+                      <span className="block text-error">Withdrew {formatDate(enr.withdrawnAt)}</span>
+                    )}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
     </div>

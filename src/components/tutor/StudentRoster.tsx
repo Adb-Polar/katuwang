@@ -4,10 +4,9 @@ import { useState } from "react";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import Link from "next/link";
 import { GradeLevel } from "@prisma/client";
-import { gradeLabel, gradeSection } from "@/lib/gradeLevels";
+import { gradeLabel, gradeNumber } from "@/lib/gradeLevels";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { usePaginatedList } from "@/hooks/usePaginatedList";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import FormField from "@/components/ui/FormField";
 import Pagination from "@/components/ui/Pagination";
 
@@ -79,20 +78,20 @@ export default function StudentRoster() {
   const classes = (meta.classes ?? []) as EnrolledClass[];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <FormField label="Search">
+        <FormField size="md" label="Search">
           <input
             type="text"
-            className="input input-bordered input-sm text-xs"
-            placeholder="Anonymous ID, e.g. STU-0007"
+            className="input input-bordered w-full"
+            placeholder="Learner ID, e.g. STU-0007"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
         </FormField>
-        <FormField label="Grade Level">
+        <FormField size="md" label="Grade level">
           <select
-            className="select select-bordered select-sm text-xs"
+            className="select select-bordered w-full"
             value={gradeLevel}
             onChange={(e) => setGradeLevel(e.target.value as GradeLevel | "")}
           >
@@ -104,18 +103,18 @@ export default function StudentRoster() {
             ))}
           </select>
         </FormField>
-        <FormField label="Section">
+        <FormField size="md" label="Section">
           <input
             type="text"
-            className="input input-bordered input-sm text-xs"
+            className="input input-bordered w-full"
             placeholder="e.g. Rizal"
             value={section}
             onChange={(e) => setSection(e.target.value)}
           />
         </FormField>
-        <FormField label="Class">
+        <FormField size="md" label="Class">
           <select
-            className="select select-bordered select-sm text-xs"
+            className="select select-bordered w-full"
             value={classId}
             onChange={(e) => setClassId(e.target.value)}
           >
@@ -130,66 +129,71 @@ export default function StudentRoster() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <span className="loading loading-spinner loading-md"></span>
-        </div>
+        <p role="status" className="text-(--kt-muted)">Loading students…</p>
       ) : loadError ? (
         <LoadErrorState message={loadError} onRetry={refetch} />
       ) : students.length === 0 ? (
-        <div className="text-center py-10 bg-base-200/10 border border-dashed border-base-300 rounded-xl text-(--kt-faint) italic text-xs">
-          No students match these filters yet.
-        </div>
+        <p className="kt-card px-5 py-6">No students match these filters yet.</p>
       ) : (
-        <div className="border border-base-200 rounded-xl overflow-x-auto">
-          <table className="table table-sm">
-            <thead>
-              <tr className="text-2xs">
-                <th>Anonymous ID</th>
-                <th>Grade &amp; Section</th>
-                <th>Enrolled In</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student.id} className="hover:bg-base-200/40">
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <UserAvatar
-                        src={student.image}
-                        anonymousId={student.anonymousId}
-                        size="sm"
-                        role="LEARNER"
-                        subtitle={gradeSection(student.gradeLevel, student.section)}
-                      />
-                      <Link href={`/tutor/students/${student.id}`} aria-label={`View ${student.anonymousId} details`} className="link link-primary rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                        <AnonymousIdBadge id={student.anonymousId} role="LEARNER" />
+        <section aria-label="Students" className="kt-card">
+          <p className="px-5 py-3 border-b border-(--kt-border) text-sm text-(--kt-muted)">
+            {total} student{total === 1 ? "" : "s"}
+          </p>
+          <ul>
+            {students.map((student) => (
+              <li
+                key={student.id}
+                className="grid gap-x-6 gap-y-3 px-5 py-4 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[15rem_1fr]"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <UserAvatar
+                    src={student.image}
+                    anonymousId={student.anonymousId}
+                    size="md"
+                    role="LEARNER"
+                    subtitle={studentLine(student)}
+                  />
+                  <div className="min-w-0">
+                    <Link
+                      href={`/tutor/students/${student.id}`}
+                      aria-label={`View ${student.anonymousId} details`}
+                      className="kt-id kt-id--learner text-lg hover:underline"
+                    >
+                      {student.anonymousId}
+                    </Link>
+                    <p className="text-sm text-(--kt-muted)">{studentLine(student)}</p>
+                  </div>
+                </div>
+
+                <ul aria-label={`${student.anonymousId}'s classes`} className="flex flex-col gap-1.5 min-w-0">
+                  {student.enrollments.map((enr) => (
+                    <li key={enr.classId} className={`leading-snug ${enr.withdrawnAt ? "text-(--kt-muted)" : ""}`}>
+                      <Link href={`/tutor/classes/${enr.classId}`} className="hover:underline">
+                        {enr.topics[0] ?? subjectDisplayLabel(enr.subject)}
                       </Link>
-                    </div>
-                  </td>
-                  <td className="text-xs text-(--kt-muted)">
-                    {gradeSection(student.gradeLevel, student.section)}
-                  </td>
-                  <td>
-                    <div className="flex flex-wrap gap-1">
-                      {student.enrollments.map((enr) => (
-                        <span
-                          key={enr.classId}
-                          className="badge badge-outline badge-sm text-2xs font-mono"
-                          title={`${subjectDisplayLabel(enr.subject)} — ${enr.topics.join(", ")}`}
-                        >
-                          {enr.code}{enr.withdrawnAt ? " · Withdrawn" : ""}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                      {[subjectDisplayLabel(enr.subject), enr.code, enr.withdrawnAt && "withdrawn"]
+                        .filter(Boolean)
+                        .map((part, i) => (
+                          <span key={i} className="text-sm text-(--kt-muted)">
+                            {" · "}
+                            <span className="whitespace-nowrap">{part}</span>
+                          </span>
+                        ))}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <Pagination page={page} pageSize={PAGE_SIZE} total={total} onPageChange={setPage} />
     </div>
   );
+}
+
+/** "Grade 8 · Section Rizal" */
+function studentLine(student: Student): string {
+  return `Grade ${gradeNumber(student.gradeLevel)} · Section ${student.section}`;
 }

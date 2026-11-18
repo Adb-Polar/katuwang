@@ -46,7 +46,7 @@ export default function NewClassForm({
 
   return (
     <section className="card kt-card">
-      <div className="card-body gap-4 p-6 sm:p-8">
+      <div className="kt-card-body gap-4 sm:p-8">
         <ClassScheduleFields
           variant="page"
           submitLabel="Schedule class"

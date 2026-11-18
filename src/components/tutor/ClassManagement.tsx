@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { EyeOff } from "lucide-react";
 
 import { useFetchList } from "@/hooks/useFetchList";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import { useTopicCertifications } from "@/hooks/useTopicCertifications";
 import Tabs from "@/components/ui/Tabs";
-import ClassCard from "@/components/classes/ClassCard";
+import ClassCatalogCard from "@/components/classes/ClassCatalogCard";
 import ClassEmptyState from "@/components/classes/ClassEmptyState";
 import LoadingRow from "@/components/ui/LoadingRow";
 
@@ -77,72 +77,77 @@ export default function ClassManagement() {
   const displayedClasses = activeTab === "active" ? activeClasses : pastClasses;
 
   return (
-    <div className="space-y-6">
+    <section className="flex flex-col gap-4">
+      <Tabs
+        tabs={[
+          { key: "active", label: "Active", count: activeClasses.length },
+          { key: "history", label: "History", count: pastClasses.length },
+        ]}
+        active={activeTab}
+        onChange={(key) => setActiveTab(key as "active" | "history")}
+      />
 
-      {/* Main Section */}
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <div className="flex justify-between items-center">
-            <h2 className="card-title text-base font-bold">Class Schedule &amp; Management</h2>
-            <Link href="/tutor/classes/new" className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer">
-              <Plus className="h-4 w-4" />
-              Schedule Class
-            </Link>
-          </div>
+      {loading ? (
+        <LoadingRow />
+      ) : loadError ? (
+        <LoadErrorState message={loadError} onRetry={refetch} />
+      ) : displayedClasses.length === 0 ? (
+        <ClassEmptyState
+          message={activeTab === "active" ? "No active classes." : "No past classes yet."}
+          action={
+            activeTab === "active" && (
+              <Link href="/tutor/classes/new" className="link text-primary">
+                Schedule a class
+              </Link>
+            )
+          }
+        />
+      ) : (
+        <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {displayedClasses.map((c) => (
+            <li key={c.id}>
+              <ClassCatalogCard
+                href={`/tutor/classes/${c.id}`}
+                code={c.code}
+                subject={c.subject}
+                gradeLevel={c.gradeLevel}
+                topics={c.topics}
+                verifiedTopics={verifiedTopicsFor(c.subject)}
+                sessions={c.sessions}
+                status={c.status}
+                enrolledCount={c.enrollments.length}
+                maxStudents={c.maxStudents}
+                showSeats={false}
+                aside={<ClassStateText tutorClass={c} />}
+                notice={isModerated(c) && c.suspendedReason ? `Reason: ${c.suspendedReason}` : null}
+              />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
 
-          <p className="text-xs text-(--kt-muted)">
-            Schedule 1-on-1 sessions or small group classes for any subject. Tutees will be able to discover and enroll in your scheduled classes.
-          </p>
+const isModerated = (c: TutorClass) => c.status === "SUSPENDED" || c.status === "BANNED";
 
-          <Tabs
-            tabs={[
-              { key: "active", label: "Active Classes", count: activeClasses.length },
-              { key: "history", label: "Class History", count: pastClasses.length },
-            ]}
-            active={activeTab}
-            onChange={(key) => setActiveTab(key as "active" | "history")}
-          />
-
-          {loading ? (
-            <LoadingRow />
-          ) : loadError ? (
-            <LoadErrorState message={loadError} onRetry={refetch} />
-          ) : displayedClasses.length === 0 ? (
-            <ClassEmptyState
-              message={activeTab === "active" ? "No active classes scheduled." : "No past classes found."}
-              action={
-                activeTab === "active" && (
-                  <Link href="/tutor/classes/new" className="btn btn-link btn-xs min-h-11 sm:min-h-0 text-primary mt-1 text-xs">
-                    Schedule your first class now
-                  </Link>
-                )
-              }
-            />
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-4 mt-2">
-              {displayedClasses.map((c) => (
-                <ClassCard
-                  key={c.id}
-                  code={c.code}
-                  subject={c.subject}
-                  gradeLevel={c.gradeLevel}
-                  topics={c.topics}
-                  verifiedTopics={verifiedTopicsFor(c.subject)}
-                  description={c.description}
-                  sessions={c.sessions}
-                  status={c.status}
-                  published={c.published}
-                  suspendedReason={c.suspendedReason}
-                  enrolledCount={c.enrollments.length}
-                  maxStudents={c.maxStudents}
-                  activeLabel="Active"
-                  href={`/tutor/classes/${c.id}`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
-    </div>
+/** Bottom-right of a tutor's class card: moderation, then lifecycle, then visibility, else enrolment. */
+function ClassStateText({ tutorClass: c }: { tutorClass: TutorClass }) {
+  if (isModerated(c)) return <span className="text-error">{c.status === "BANNED" ? "Banned" : "Suspended"}</span>;
+  if (c.status === "COMPLETED") return <span className="text-(--kt-muted)">Completed</span>;
+  if (c.status === "CANCELLED") return <span className="text-error">Cancelled</span>;
+  if (!c.published) {
+    return (
+      <span className="inline-flex items-center gap-1">
+        <EyeOff className="h-4 w-4" aria-hidden="true" />
+        Not published
+      </span>
+    );
+  }
+  const enrolled = c.enrollments.length;
+  return (
+    <span className={enrolled >= c.maxStudents ? "text-primary" : "text-(--kt-muted)"}>
+      {enrolled >= c.maxStudents ? "Full" : `${enrolled} of ${c.maxStudents} enrolled`}
+    </span>
   );
 }

@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import BackLink from "@/components/ui/BackLink";
-import StatusBadge from "@/components/ui/StatusBadge";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import PageHeader from "@/components/ui/PageHeader";
+import Modal from "@/components/ui/Modal";
+import { QuizQuestionList } from "@/components/quiz/QuizQuestionList";
 import { RateBarChart, DeltaBar, type DeltaRow } from "@/components/charts";
 import type { SessionTestResults as SessionTestResultsPayload } from "@/lib/sessionTestResults";
-import EmptyState from "@/components/ui/EmptyState";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 
 interface AttemptDetail {
@@ -29,7 +29,7 @@ interface AttemptDetail {
 const KIND_LABEL: Record<string, string> = { PRE: "Pre-test", POST: "Post-test" };
 
 function deltaClass(d: number | null) {
-  if (d == null) return "text-base-content/30";
+  if (d == null) return "text-(--kt-muted)";
   if (d > 0) return "text-success";
   if (d < 0) return "text-error";
   return "text-(--kt-faint)";
@@ -86,7 +86,7 @@ export default function SessionTestResults({
     }
   };
 
-  const backControl = backHref ? <BackLink href={backHref}>Back</BackLink> : null;
+  const backControl = backHref ? <BackLink href={backHref}>Back to the test</BackLink> : null;
 
   if (error) {
     return (
@@ -97,11 +97,7 @@ export default function SessionTestResults({
     );
   }
   if (!data) {
-    return (
-      <div className="flex justify-center py-16">
-        <span className="loading loading-spinner loading-md text-primary" />
-      </div>
-    );
+    return <p role="status" className="py-16 text-(--kt-muted)">Loading results…</p>;
   }
 
   const questionRateData = data.questions.map((q) => ({
@@ -119,52 +115,41 @@ export default function SessionTestResults({
     delta: l.delta,
   }));
 
+  const takers = data.totals.historicalEnrolled ?? data.totals.enrolled;
+  const statusWord = data.test.status === "PUBLISHED" ? "Open" : data.test.status === "CLOSED" ? "Closed" : "Draft";
+  const pct = (n: number | null | undefined) => (n == null ? "—" : `${n}%`);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
+    <div className="space-y-6 max-w-4xl">
+      <div className="space-y-3">
         {backControl}
-        <StatusBadge
-          tone={data.test.status === "PUBLISHED" ? "success" : data.test.status === "CLOSED" ? "warning" : "neutral"}
-          label={data.test.status.toLowerCase()}
-          size="sm"
+        <PageHeader
+          eyebrow="Test results"
+          title={data.test.title}
+          subtitle={`Class ${data.test.classCode} · ${data.test.sessionTopic} · ${statusWord}`}
         />
       </div>
 
-      <div>
-        <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
-          {data.test.classCode} · {data.test.sessionTopic}
+      {/* The four numbers as one readable line instead of four stat tiles. */}
+      <div className="space-y-1">
+        <p className="flex flex-wrap gap-x-5 gap-y-1">
+          <span><b className="font-medium">{data.totals.preSubmitted} of {takers}</b> took the pre-test</span>
+          <span><b className="font-medium">{data.totals.postSubmitted} of {takers}</b> took the post-test</span>
+          <span>
+            Average <b className="font-medium">{pct(data.totals.avgPre)}</b> → <b className="font-medium">{pct(data.totals.avgPost)}</b>
+          </span>
+          <span>
+            Average gain <b className={`font-medium ${deltaClass(data.totals.avgDelta)}`}>{fmtDelta(data.totals.avgDelta)}</b>
+            <span className="text-(--kt-muted)"> ({data.totals.pairedCount} took both)</span>
+          </span>
         </p>
-        <h1 className="text-lg font-sans">{data.test.title}</h1>
-      </div>
-
-      <p className="text-xs text-(--kt-muted)">{data.totals.enrolled} currently enrolled · {data.totals.historicalEnrolled ?? data.totals.enrolled} historical participants. Submitted results include withdrawn learners.</p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Pre-test submitted</span>
-          <span className="kt-stat-value">
-            {data.totals.preSubmitted} / {data.totals.historicalEnrolled ?? data.totals.enrolled}
-          </span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Post-test submitted</span>
-          <span className="kt-stat-value">
-            {data.totals.postSubmitted} / {data.totals.historicalEnrolled ?? data.totals.enrolled}
-          </span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Avg pre / post</span>
-          <span className="kt-stat-value">
-            {data.totals.avgPre ?? "—"}% / {data.totals.avgPost ?? "—"}%
-          </span>
-        </div>
-        <div className="card kt-card kt-stat p-4">
-          <span className="kt-stat-title">Avg gain ({data.totals.pairedCount} paired)</span>
-          <span className={`kt-stat-value ${deltaClass(data.totals.avgDelta)}`}>{fmtDelta(data.totals.avgDelta)}</span>
-        </div>
+        <p className="text-sm text-(--kt-muted)">
+          {data.totals.enrolled} enrolled now. Results include learners who have since left the class.
+        </p>
       </div>
 
       <RateBarChart
-        title="Per-question correct rate — pre vs post"
+        title="Correct answers per question, before and after"
         data={questionRateData}
         series={[
           { key: "pre", name: "Pre-test", color: "var(--color-accent)" },
@@ -173,127 +158,66 @@ export default function SessionTestResults({
         emptyHint="No questions yet."
       />
 
-      <DeltaBar title="Per-learner gain (post − pre)" rows={deltaRows} />
+      <DeltaBar title="Change per learner (post − pre)" rows={deltaRows} />
 
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Per learner</h2>
-          <div className="overflow-x-auto border border-base-200 rounded-xl">
-            <table className="table table-sm">
-              <thead>
-                <tr className="text-xs">
-                  <th>Learner</th>
-                  <th>Pre-test</th>
-                  <th>Post-test</th>
-                  <th>Δ</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.learners.map((l) => (
-                  <tr key={l.anonymousId} className="text-sm">
-                    <td>
-                      <AnonymousIdBadge id={l.anonymousId} role="LEARNER" />
-                    </td>
-                    <td className="text-(--kt-muted)">{l.pre != null ? `${l.pre}%` : "—"}</td>
-                    <td className="text-(--kt-muted)">{l.post != null ? `${l.post}%` : "—"}</td>
-                    <td className={`font-semibold ${deltaClass(l.delta)}`}>{fmtDelta(l.delta)}</td>
-                    <td className="text-right flex gap-1 justify-end">
-                      {l.preAttemptId && (
-                        <button onClick={() => openDetail(l.preAttemptId!)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
-                          Pre
-                        </button>
-                      )}
-                      {l.postAttemptId && (
-                        <button onClick={() => openDetail(l.postAttemptId!)} className="btn btn-outline btn-xs min-h-11 sm:min-h-0 text-2xs font-bold">
-                          Post
-                        </button>
-                      )}
-                      {!l.preAttemptId && !l.postAttemptId && (
-                        <span className="text-2xs text-base-content/30 italic">not taken</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {data.learners.length === 0 && (
-              <EmptyState>No learners enrolled yet.</EmptyState>
-            )}
-          </div>
-        </div>
+      <section aria-labelledby="per-learner" className="kt-card">
+        <h2 id="per-learner" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">Each learner</h2>
+        {data.learners.length === 0 ? (
+          <p className="px-5 py-6">No learners enrolled yet.</p>
+        ) : (
+          <ul>
+            {data.learners.map((l) => (
+              <li key={l.anonymousId} className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 border-b border-(--kt-border) last:border-b-0">
+                <span className="kt-id kt-id--learner text-base w-24">{l.anonymousId}</span>
+                <span className="text-sm">
+                  <span className="text-(--kt-muted)">Pre </span>{pct(l.pre)}
+                  <span className="text-(--kt-muted)"> · Post </span>{pct(l.post)}
+                  <span className="text-(--kt-muted)"> · </span>
+                  <span className={`font-medium ${deltaClass(l.delta)}`}>{fmtDelta(l.delta)}</span>
+                </span>
+                <span className="ml-auto flex gap-1">
+                  {l.preAttemptId && (
+                    <button onClick={() => openDetail(l.preAttemptId!)} className="btn btn-ghost btn-sm text-sm font-normal">
+                      View pre-test
+                    </button>
+                  )}
+                  {l.postAttemptId && (
+                    <button onClick={() => openDetail(l.postAttemptId!)} className="btn btn-ghost btn-sm text-sm font-normal">
+                      View post-test
+                    </button>
+                  )}
+                  {!l.preAttemptId && !l.postAttemptId && <span className="text-sm text-(--kt-muted)">Hasn&apos;t taken either</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
-      {(detail || detailLoading) && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl p-6 kt-card space-y-4">
-            {detailLoading || !detail ? (
-              <div className="flex justify-center py-10">
-                <span className="loading loading-spinner loading-md text-primary" />
-              </div>
-            ) : (
-              <>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-bold text-sm text-base-content">
-                      {detail.learner.anonymousId} · {KIND_LABEL[detail.kind] ?? detail.kind}
-                    </h3>
-                    <p className="text-2xs text-(--kt-faint) mt-0.5">
-                      {detail.scorePercent}% ({detail.correctCount}/{detail.totalQuestions})
-                    </p>
-                  </div>
-                  <button className="btn btn-sm btn-circle btn-ghost" onClick={() => setDetail(null)}>
-                    ✕
-                  </button>
-                </div>
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                  {detail.items.map((item) => (
-                    <div key={item.questionId} className="border border-base-200 rounded-xl p-3 space-y-2">
-                      <div className="flex items-start gap-2">
-                        <span className="text-2xs text-(--kt-faint) shrink-0">Q{item.position + 1}</span>
-                        <p className="text-xs font-semibold text-(--kt-muted)">{item.prompt}</p>
-                        {item.isCorrect != null && (
-                          <span className={`text-2xs shrink-0 ${item.isCorrect ? "text-success" : "text-error"}`}>
-                            {item.isCorrect ? "✓" : "✗"}
-                          </span>
-                        )}
-                      </div>
-                      <ul className="space-y-1">
-                        {item.options.map((o) => {
-                          const chosen = o.id === item.selectedOptionId;
-                          return (
-                            <li
-                              key={o.id}
-                              className={`text-2xs rounded-lg px-2 py-1 border ${
-                                o.isCorrect
-                                  ? "border-success/30 bg-success/5 text-success"
-                                  : chosen
-                                  ? "border-error/30 bg-error/5 text-error"
-                                  : "border-base-200 text-(--kt-muted)"
-                              }`}
-                            >
-                              {o.text}
-                              {o.isCorrect && " · correct"}
-                              {chosen && " · picked"}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                      {item.explanation && <p className="text-2xs text-(--kt-faint) italic">{item.explanation}</p>}
-                    </div>
-                  ))}
-                </div>
-                <div className="modal-action pt-1">
-                  <button className="btn btn-ghost btn-sm" onClick={() => setDetail(null)}>
-                    Close
-                  </button>
-                </div>
-              </>
-            )}
+      <Modal
+        portal
+        open={Boolean(detail || detailLoading)}
+        onClose={() => setDetail(null)}
+        title={detail ? `${detail.learner.anonymousId} · ${KIND_LABEL[detail.kind] ?? detail.kind}` : "Loading answers"}
+        size="lg"
+      >
+        {detailLoading || !detail ? (
+          <p role="status" className="py-6 text-(--kt-muted)">Loading answers…</p>
+        ) : (
+          <div className="space-y-4">
+            <p>
+              <span className="font-serif text-3xl leading-none">{detail.scorePercent}%</span>
+              <span className="text-sm text-(--kt-muted)"> · {detail.correctCount} of {detail.totalQuestions} correct</span>
+            </p>
+            <div className="max-h-[60vh] overflow-y-auto">
+              <QuizQuestionList items={detail.items} answers={{}} onAnswer={() => {}} submitted />
+            </div>
+            <div className="flex justify-end">
+              <button className="btn btn-ghost" onClick={() => setDetail(null)}>Close</button>
+            </div>
           </div>
-          <label className="modal-backdrop" onClick={() => setDetail(null)} aria-label="Close" />
-        </div>
-      )}
+        )}
+      </Modal>
     </div>
   );
 }

@@ -8,7 +8,6 @@ import { reportServerFieldErrors } from "@/lib/formValidation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
-import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
@@ -56,26 +55,26 @@ export default function OtherTopicAssessment() {
   };
 
   return (
-    <ValidatedForm onSubmit={(e) => { e.preventDefault(); void start(e.currentTarget); }} className="border border-base-200 bg-base-200/20 rounded-xl p-4 space-y-3">
+    <ValidatedForm onSubmit={(e) => { e.preventDefault(); void start(e.currentTarget); }} className="kt-card kt-card-body gap-4" aria-labelledby="other-topic">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
-            <div>
-        <h3 className="text-xs font-bold text-(--kt-muted)">Take an assessment for any topic</h3>
-        <p className="text-2xs text-(--kt-faint) mt-0.5">
-          You don&apos;t need a class for it — pass now and you&apos;ll be verified when you do teach it.
+      <div>
+        <h2 id="other-topic" className="font-serif text-2xl font-medium leading-tight">Any other topic</h2>
+        <p className="text-sm text-(--kt-muted)">
+          You don&apos;t need a class for it. Pass now and you&apos;re verified when you start teaching it.
         </p>
       </div>
       <FeedbackBanner variant="error" message={error || null} />
-      <div className="grid gap-3 sm:grid-cols-2">
-        <FormField label="Grade level">
+      <div className="grid gap-3 sm:grid-cols-3">
+        <FormField size="md" label="Grade level">
           <select aria-label="Assessment topic grade" value={grade}
             onChange={(e) => { setGrade(e.target.value); setSubject(""); setTopic(""); }}
-            className="select select-bordered select-sm w-full text-xs">
+            className="select select-bordered w-full">
             <option value="">All grades</option>
             {GRADE_LEVELS.map((entry) => <option key={entry.value} value={entry.value}>{entry.label}</option>)}
           </select>
         </FormField>
-        <FormField label="Subject" required>
+        <FormField size="md" label="Subject" required>
           <select
             required
             value={subject}
@@ -83,7 +82,7 @@ export default function OtherTopicAssessment() {
               setSubject(e.target.value);
               setTopic("");
             }}
-            className="select select-bordered select-sm w-full text-xs focus:select-primary"
+            className="select select-bordered w-full"
           >
             <option value="">Select subject</option>
             {subjects.map((s) => (
@@ -93,13 +92,13 @@ export default function OtherTopicAssessment() {
             ))}
           </select>
         </FormField>
-        <FormField label="Topic" required>
+        <FormField size="md" label="Topic" required>
           <select
             required
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             disabled={!subject}
-            className="select select-bordered select-sm w-full text-xs focus:select-primary disabled:opacity-60"
+            className="select select-bordered w-full"
           >
             <option value="">{subject ? "Select topic" : "Pick a subject first"}</option>
             {subject &&
@@ -111,14 +110,13 @@ export default function OtherTopicAssessment() {
           </select>
         </FormField>
       </div>
-      <CatalogCurriculumHint subject={subjects.find((entry) => entry.slug === subject)} />
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={busy}
-          className="btn btn-primary btn-sm text-xs"
+          className="btn btn-primary"
         >
-          {busy ? <span className="loading loading-spinner loading-xs" /> : "Start assessment"}
+          {busy ? <span className="loading loading-spinner loading-sm" /> : "Start assessment"}
         </button>
       </div>
     </ValidatedForm>

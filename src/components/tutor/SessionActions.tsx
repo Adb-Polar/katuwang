@@ -7,7 +7,6 @@ import ValidatedForm from "@/components/ui/ValidatedForm";
 import { useState } from "react";
 import Modal from "@/components/ui/Modal";
 import { useRouter } from "next/navigation";
-import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -112,45 +111,41 @@ export default function SessionActions({
 
   return (
     <>
-      {error && <span className="text-2xs text-error">{error}</span>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       {session.status === "SCHEDULED" && (
-        <div className="flex min-w-0 max-w-full flex-wrap items-center gap-1">
-          <button
-            type="button"
-            onClick={openRescheduleModal}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 cursor-pointer"
-            title="Reschedule"
-            aria-label="Reschedule session"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
+        <div className="flex min-w-0 max-w-full flex-wrap items-center -ml-2">
           <button
             type="button"
             onClick={() => setPendingAction("complete")}
-            className="btn btn-outline btn-success btn-xs min-h-11 sm:min-h-0 cursor-pointer gap-1"
-            aria-label="Finish session"
+            className="btn btn-ghost btn-sm px-2 text-sm font-medium text-primary"
+            aria-label="Mark session as done"
           >
-            <CheckCircle className="h-3.5 w-3.5" />
-            Finish session
+            Mark as done
+          </button>
+          <button
+            type="button"
+            onClick={openRescheduleModal}
+            className="btn btn-ghost btn-sm px-2 text-sm font-normal"
+            aria-label="Reschedule session"
+          >
+            Reschedule
           </button>
           <button
             type="button"
             onClick={() => setPendingAction("cancel")}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer"
-            title="Cancel"
+            className="btn btn-ghost btn-sm px-2 text-sm font-normal text-error"
             aria-label="Cancel session"
           >
-            <XCircle className="h-3.5 w-3.5" />
+            Cancel
           </button>
           <button
             type="button"
             onClick={() => setPendingAction("delete")}
-            className="btn btn-ghost btn-xs min-h-11 sm:min-h-0 text-error cursor-pointer"
-            title="Delete"
+            className="btn btn-ghost btn-sm px-2 text-sm font-normal text-error"
             aria-label="Delete session"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            Delete
           </button>
         </div>
       )}
@@ -160,7 +155,7 @@ export default function SessionActions({
         title={
           pendingAction === "delete"
             ? "Delete this session?"
-            : pendingAction === "complete" ? "Finish this session?" : "Cancel this session?"
+            : pendingAction === "complete" ? "Mark this session as done?" : "Cancel this session?"
         }
         description={pendingAction === "delete" ? "This cannot be undone." : undefined}
         confirmLabel={pendingAction === "delete" ? "Delete" : "Confirm"}
@@ -170,7 +165,7 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      <Modal portal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule Session" size="md">
+      <Modal portal open={isRescheduling} onClose={() => setIsRescheduling(false)} title="Reschedule session" size="md">
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <ValidatedForm onSubmit={handleReschedule} className="space-y-5 mt-4">
@@ -181,11 +176,11 @@ export default function SessionActions({
                 <button
                   type="button"
                   onClick={() => setIsRescheduling(false)}
-                  className="btn btn-neutral btn-outline min-h-11 text-sm cursor-pointer"
+                  className="btn btn-ghost"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={rescheduling} className="btn btn-primary min-h-11 text-sm cursor-pointer">
+                <button type="submit" disabled={rescheduling} className="btn btn-primary">
                   {rescheduling ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
                 </button>
               </div>

@@ -354,6 +354,17 @@ input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="
   outline-color: var(--color-error);
 }
 
+/* A long chosen value (e.g. "Traditional Asian Theater Music") ran under the dropdown arrow: in the customizable
+   select the label isn't a text box, so DaisyUI's text-overflow never applies (it needs a <selectedcontent>, which
+   React doesn't render yet). Clip it at the content edge so it stops before the arrow's padding. */
+@supports (appearance: base-select) {
+  select.select,
+  .select select {
+    overflow: clip;
+    overflow-clip-margin: content-box;
+  }
+}
+
 /* Open dropdown panels (DaisyUI's customizable select). Its default edge is base-200 plus a shadow scaled by
    --depth, which is 0 in this flat theme, so the panel had no visible edge on white. Give it the field's border
    colour and one soft shadow so it reads as a layer above the page. */

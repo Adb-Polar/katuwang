@@ -11,7 +11,7 @@ export default function TutorStudentsPage() {
       <PageHeader
         eyebrow="Tutor Portal"
         title="Your students"
-        subtitle="Every learner enrolled across your classes, anonymized."
+        subtitle="Everyone enrolled in your classes. Learners appear only by their ID."
       />
       <StudentRoster />
     </div>

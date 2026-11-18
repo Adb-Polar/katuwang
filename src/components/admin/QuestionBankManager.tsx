@@ -558,7 +558,7 @@ function QuestionsTab({
         <QuestionFormModal
           title={versionTarget ? "Create corrected version" : editTarget ? "Edit question" : "Add question"}
           requireReason={Boolean(versionTarget)}
-          contextLabel={`${subject} · ${topic}`}
+          contextLabel={`${subjectDisplayLabel(subject)} · ${topic}`}
           submitLabel={versionTarget ? "Create version" : editTarget ? "Save changes" : "Add question"}
           initial={
             formTarget

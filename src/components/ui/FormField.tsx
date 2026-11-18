@@ -28,11 +28,12 @@ export default function FormField({
       })
     : node) : children;
   const labelNode = (
-    <span className={`${size === "md" ? "text-sm" : "text-xs"} font-semibold text-(--kt-muted)`}>
+    <span className={size === "md" ? "text-[0.9rem] font-medium text-base-content" : "text-xs font-semibold text-(--kt-muted)"}>
       {label}{required && <span className="text-error ml-0.5">*</span>}
     </span>
   );
-  const feedbackSize = size === "md" ? "text-sm" : "text-xs";
+  // md matches the public forms: labels ~0.9rem in body colour, helper text 0.85rem muted (theme.md).
+  const feedbackSize = size === "md" ? "text-[0.85rem]" : "text-xs";
   const feedback = error ? <p id={feedbackId} className={`${feedbackSize} text-error mt-1`}>{error}</p>
     : hint ? <p id={feedbackId} className={`${feedbackSize} text-(--kt-muted) mt-1`}>{hint}</p> : null;
   const labelElement = nativeChild ? <label htmlFor={id}>{labelNode}</label> : <div id={labelId}>{labelNode}</div>;

@@ -119,11 +119,13 @@ export function getEligibleStudentGradesForTutor(_tutorGrade?: GradeLevel | stri
  * Replaces the ~12 hand-written `gradeLevel.replace("_", " ")` call sites
  * (which only swapped the first underscore).
  */
+/** "GRADE_10" → "Grade 10" (sentence case, not the raw enum in capitals). */
 export function gradeLabel(grade: string): string {
-  return grade.replace(/_/g, " ");
+  const spaced = grade.replace(/_/g, " ").toLowerCase();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-/** `"GRADE 10 · Rizal"` — the grade + section pair rendered across roster/detail views. */
+/** `"Grade 10 · Rizal"` — the grade + section pair rendered across roster/detail views. */
 export function gradeSection(grade: string, section: string): string {
   return `${gradeLabel(grade)} · ${section}`;
 }

@@ -1143,3 +1143,113 @@ Admin activity summaries
 Learner dashboard (Changes.md Part 90)
  [ ] /learner as a learner with one active and one withdrawn enrolment: "Enrolled classes" shows only the active one (matches My Classes).
  [ ] /learner keyboard: Tab from the top goes Upcoming session links → stat cards → This week timetable → Certificates, same order as on screen, at desktop and phone width.
+
+Tutor profile unslop (Changes.md 2026-11-18)
+ [Good: demo tutor, 1280px + 375px] /tutor/profile and /tutor/profile/edit render in the profile style: serif section titles, full-size controls, Plex fonts only, no horizontal scroll.
+ [ ] /admin/settings: turn "show tutor real names" on, then /tutor/profile reads "Learners see your name and TUT-…" and the details note no longer says only admins see the real name. Turn it back off afterwards (shared DB write).
+ [ ] /tutor/profile/edit: upload a photo — the progress overlay is dark with readable white text; then Remove — "Photo removed." shows. (Not done: writes to the shared DB / UploadThing.)
+ [ ] /tutor/profile/edit as a tutor whose photo an admin locked: the lock line shows and both photo buttons are disabled.
+ [ ] /admin/settings: the change-password form under "My Account" still lays out well with the larger labels.
+
+Tutor dashboard restyle (Changes.md 2026-11-18)
+ [Good: demo tutor, desktop + 375px] /tutor: "Your week" header, numbers line, one day-grouped "This week" card with the Next pill; Plex only, no horizontal scroll.
+ [ ] /learner as the demo learner: dashboard looks and links exactly as before (day rail moved to a shared component).
+ [ ] /tutor as a tutor with no classes and no assessments: "Getting started" shows both steps as links; the empty "This week" links to Create a class.
+ [ ] /tutor as a tutor with sessions only beyond 7 days: "Nothing scheduled in the next 7 days. Your next sessions:" with up to 3 sessions.
+ [ ] /tutor as a suspended tutor: the notice shows reason and end date at readable size.
+
+Tutor classes restyle (Changes.md 2026-11-18)
+ [Good: demo tutor, 1280px + 375px] /tutor/classes: learner-style cards on Active and History, "Not published" / "N of M enrolled" / "Completed" at the bottom right; header "Schedule a class" opens /tutor/classes/new.
+ [ ] /tutor/classes with a suspended or banned class: "Suspended"/"Banned" in red and "Reason: …" under the topics; suspended class stays in Active while the suspension runs.
+ [ ] /tutor/classes as a tutor with no classes: "No active classes. Schedule a class" line links to /tutor/classes/new.
+ [ ] /learner/my-classes and /learner/classes with no results: the plain empty line shows; "Clear filters" link resets filters.
+ [Good: demo tutor, 1280px + 375px] /tutor/classes multi-topic card: first topic is the serif title, the others listed under it one per line; meta and footer lines wrap by whole piece.
+ [ ] /learner/classes and /learner/my-classes: multi-topic classes show the same title + topic list.
+
+Tutor students roster (Changes.md 2026-11-18)
+ [Good: demo tutor, 1280px + 375px] /tutor/students: one row per learner (serif ID link, grade/section, classes by topic with subject and code); Plex only, no horizontal scroll.
+ [ ] /tutor/students filters: search by ID, grade, section and class each narrow the list and reset to page 1; "No students match these filters yet." shows for no results.
+ [ ] /tutor/students with a learner who withdrew from a class: that class line is muted with "· withdrawn".
+
+Tutor class requests (Changes.md 2026-11-18)
+ [Good: demo tutor, 1280px + 375px] /tutor/requests: header, tabs with counts, per-tab note, subject filter and empty state render; Plex only, no horizontal scroll.
+ [ ] /tutor/requests with real requests (demo tutor has none): rows show the date block, first topic as the title, other topics listed, the info line, "Also free" times, the note and "Accept & create class"; check at 375px too.
+ [ ] /tutor/requests "Accepted by you": waiting vs enrolled text and "View class" link.
+ [ ] /learner/tutors?tab=requests: the learner's request cards look the same as before (date block helpers moved to a shared file).
+
+Class request history and accept pages (Changes.md 2026-11-18)
+ [Good: admin, request cmw7i81hr…, 1280px + 375px] /admin/topic-requests/[id]: "What was asked" rows and a History timeline with plain event titles, "by STU-…", and readable change lines; no internal IDs or JSON.
+ [ ] /learner/requests/[id] and /tutor/requests/[id]: same page, back link goes to the right list; tutor actors show as TUT-… in ube.
+ [ ] /tutor/requests/[id]/accept as a tutor certified in every topic: intro line, pre-filled form, "Accept & create class" creates the class (DB write).
+ [ ] /tutor/requests/[id]/accept as a tutor missing a topic: "You can't accept this request yet." with the topic list and "Go to assessments".
+
+Tutor student page (Changes.md 2026-11-18)
+ [Good: demo tutor, STU-0329, 1280px + 375px] /tutor/students/[id]: coral band with ID as heading, "Classes with you" rows with topic links to the class.
+ [ ] /tutor/students/[id] for a learner with a profile photo: avatar opens full size; for a learner who withdrew: row muted with "Withdrew …".
+
+Session test builder (Changes.md 2026-11-18)
+ [Good: demo tutor, draft test, 1280px + 375px] builder header (topic h1, "Subject · Draft" subtitle), Test details and Questions sections with the publish how-to note.
+ [ ] Session with no test yet: "Create the test" form at full size; Create test opens the builder.
+ [ ] Builder with questions: numbered list, move up/down/remove, Save question set, Publish test; then the published states (Close pre-test, Publish post-test, View results, Close all testing) and their status sentences.
+ [Good: demo tutor, 1280px] "Add from the question bank": readable subject, prompts without "[Topic]", topic once per row, "2 selected · Add 2 questions"; Cancel closes without adding.
+ [ ] Add questions from the bank and from "My questions" (DB write on Save question set): rows show without the "[Topic]" prefix; already-added questions are ticked and disabled when the picker reopens.
+ [Good: demo tutor, 1280px] "Write a question" modal: readable subject, full-size fields, "Correct answer" under the chosen choice; Cancel closes without saving.
+ [ ] Write and add a question (DB write); a server-side error on a choice focuses that choice.
+ [ ] /admin question bank: Add question / Edit question / Create corrected version modals in the new style, context line "Subject · Topic".
+
+Portal pop-ups (Changes.md 2026-11-18)
+ [Good: demo tutor on /tutor/requests] Notifications panel: serif heading, 14px messages with subject names, codes not split; Assistant panel: serif heading, 14px bubbles, full-size suggestions and input.
+ [ ] Notifications panel with unread items: unread rows bold with the dot, "N new" in the heading, Mark all read clears them; at 375px the panel fits the screen.
+ [ ] /learner/notifications and /tutor/notifications: messages show subject names instead of codes.
+ [ ] Assistant: ask something that returns links and class cards; link buttons and cards are readable and card titles show subject names.
+
+Tutor assessments (Changes.md 2026-11-18)
+ [Good: demo tutor, 1280px + 375px] /tutor/assessments: Topics card with ruled rows and status text, "Any other topic" form, History tab with Attempts and Topic status cards.
+ [ ] /tutor/assessments: a topic without enough questions shows "N of M questions ready" and Request questions → "Questions requested"; a failed attempt shows "last score N%, not passed" and Retake; a passed attempt awaiting confirmation shows that text.
+
+Long dropdown values (Changes.md 2026-11-18)
+ [Good: Chrome, /tutor/assessments Topic select] long value stops before the arrow; the open list shows full names.
+ [ ] Firefox / Safari: selects look as before (rule only applies where appearance: base-select is supported).
+
+Class page session rows (Changes.md 2026-11-18)
+ [Good: demo tutor, C-0240, 1280px + 375px] sessions show "· Completed" in the time line and one row of text actions.
+ [ ] Mark as done / Reschedule / Cancel / Delete each open the right dialog and work (DB writes); a cancelled session shows "· Cancelled" in red; the learner class page shows the same status wording.
+
+Session tests card (Changes.md 2026-11-18)
+ [Good: demo tutor, C-0240, 1280px] "Post-test open" as green text under the title; View test + Results; "No test yet" rows match.
+ [ ] Same card at 375px, a draft test ("Finish building"), a cancelled session, and the learner class page ("Post-test open · pre N% · post …" with Take/Review buttons).
+
+Class page header (Changes.md 2026-11-18)
+ [Good: demo tutor, C-0240, 1280px + 375px] kicker with class code, muted topic list, one facts line, Manage class beside the title.
+ [ ] Learner class page (/learner/classes/[id]): facts line shows seats left and the tutor; Enroll/Withdraw buttons still after the facts. Admin class page: same line, admin tools unchanged.
+ [ ] Manage class menu opens inward from the right edge; every item still works.
+
+Manage class menu (Changes.md 2026-11-18)
+ [Good: demo tutor, C-0240, 1280px] menu items with notes; only Cancel/Delete in red.
+ [ ] Each item still works (Edit opens the edit page; Publish/Unpublish toggles; Finish/Cancel/Delete open their confirm dialogs) — DB writes; keyboard Tab reaches every item; at 375px the menu fits on screen; a suspended class shows the single "can't be changed" line.
+
+Edit class page (Changes.md 2026-11-18)
+ [Good: demo tutor, C-0240, 1280px + 375px] header with Save changes, Details card with full-size fields and topic toggles, Sessions in calendar rows.
+ [ ] Save changes with a new topic, place, class size and description (DB write); errors: no topic → focus on Topics; no place or link → focus on Location; class size below enrolled count blocked.
+ [ ] Unpublished class: subtitle says so, no grey page tint. Suspended class: read-only with the moderation panel and appeal link.
+ [Good: edit class page] form labels 0.9rem body colour, helper text 0.85rem muted.
+ [ ] Eyeball the other size="md" forms (profile edit, password, recovery email, test builder, write-a-question modal, assessments "Any other topic", students filters): labels darker than hints, nothing misaligned.
+
+Tutor assessment quiz (Changes.md 2026-11-18)
+ [Good: demo tutor, in-progress attempt, 1280px + 375px] topic h1, prompts without "[Topic]", full-size answers, answered count + Submit.
+ [ ] Answer and submit an attempt (DB write): result block with score, Passed/Not passed, correct/your-answer marks and explanations; partial submit shows the confirm dialog; a practice-only attempt says "Practice result".
+
+Learner pre/post-tests (Changes.md 2026-11-18)
+ [Good: tutor graded attempt] tutor quiz renders through the shared QuizQuestionList / QuizResult.
+ [ ] As a learner (opening a test starts an attempt — DB write): pre-test page with title h1, instructions, answered count and Submit test; after the post-test, "Up/Down N points", pre-test score line, Correct answer / Your answer marks; a pre-test with answers held back shows the "after you submit the post-test" line.
+ [Good: demo tutor, 1280px + 375px] /tutor/profile/edit: stacked labels, Grade | Section and New | Confirm password side by side, one column on phones.
+ [ ] /admin/settings "My Account" password form with the stacked layout.
+
+Tutor portal audit — remaining pieces (Changes.md 2026-11-18)
+ [Good: demo tutor] test results page + answers dialog, new class page (1280px + 375px), "Grade 8 · …" on the class page, confirm dialog look, sidebar "Your ID".
+ [ ] Create a class through /tutor/classes/new (DB write): field errors still focus Subject / Topics / Sessions / Location / Class size.
+ [ ] Add session and Reschedule modals: no inner box, serif title; save works.
+ [ ] Suspended class: appeal card (send an appeal, pending state, rejected state).
+ [ ] Admin session-test drill-down (/admin session tests → open one): results page reads well inside the admin page.
+ [ ] Learner and admin pages: grades read "Grade N" everywhere gradeLabel/gradeSection is used; dialogs app-wide use the new serif title.
+

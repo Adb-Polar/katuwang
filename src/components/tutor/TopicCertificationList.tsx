@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import StatusBadge from "@/components/ui/StatusBadge";
+import { BadgeCheck } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import type { TopicAssessmentStatus } from "@/lib/assessmentStatus";
@@ -93,99 +93,95 @@ export default function TopicCertificationList({
 
   if (taughtTopics.length === 0) {
     return (
-      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-        No current teaching topics to show. You can choose a topic below to take an assessment.
+      <p className="kt-card px-5 py-6">
+        You aren&apos;t teaching any topics right now. Pick one under &ldquo;Any other topic&rdquo; to take its assessment.
       </p>
     );
   }
 
   return (
-    <div className="space-y-3 mt-1">
+    <section aria-labelledby="taught-topics" className="kt-card">
+      <div className="px-5 py-4 border-b border-(--kt-border)">
+        <h2 id="taught-topics" className={sectionTitle}>Topics you teach</h2>
+        <p className="text-sm text-(--kt-muted)">
+          Pass a topic&apos;s assessment to get a verified mark learners can see. No assessment yet? Ask an admin to add
+          questions.
+        </p>
+      </div>
       <FeedbackBanner variant="error" message={error || null} />
-      {taughtTopics.map(({ subject, topic }) => {
-        const key = keyOf(subject, topic);
-        const st = topicStatuses[key];
-        const cert = certByKey.get(key);
-        const certStatus = st?.certificationStatus ?? cert?.status ?? null;
-        const lastAttempt = st?.lastAttempt ?? null;
-        const awaitingConfirmation = certStatus === "PENDING" && lastAttempt?.status === "PASSED" && lastAttempt.certificationEligible;
-        const wasRequested = requested.has(key) || st?.openRequest;
+      <ul>
+        {taughtTopics.map(({ subject, topic }) => {
+          const key = keyOf(subject, topic);
+          const st = topicStatuses[key];
+          const cert = certByKey.get(key);
+          const certStatus = st?.certificationStatus ?? cert?.status ?? null;
+          const lastAttempt = st?.lastAttempt ?? null;
+          const awaitingConfirmation = certStatus === "PENDING" && lastAttempt?.status === "PASSED" && lastAttempt.certificationEligible;
+          const wasRequested = requested.has(key) || st?.openRequest;
 
-        return (
-          <div
-            key={key}
-            className="flex flex-col gap-2 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="font-semibold text-(--kt-muted) break-words">{topic}</div>
-                <div className="text-2xs text-(--kt-faint)">
-                  {subjectDisplayLabel(subject)}
-                  {st && !st.bankReady && (
-                    <span className="ml-2 text-(--kt-faint)">
-                      · {st.activeQuestionCount}/{st.minBankSize} approved assessment questions
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
-                {certStatus === "CERTIFIED" ? (
-                  <StatusBadge tone="success" label="Verified" size="xs" />
-                ) : awaitingConfirmation ? (
-                  <StatusBadge tone="warning" label="Passed — awaiting confirmation" size="xs" />
-                ) : st?.inProgressAttemptId ? (
-                  <Link
-                    href={`/tutor/assessments/${st.inProgressAttemptId}`}
-                    className="btn btn-primary min-h-11 text-sm font-bold cursor-pointer"
-                  >
-                    Resume assessment
-                  </Link>
-                ) : st?.bankReady ? (
-                  <>
-                    {lastAttempt?.status === "FAILED" && (
-                      <span className="text-2xs text-error/70">Not passed — {lastAttempt.scorePercent}%</span>
+          return (
+            <li key={key} className="px-5 py-4 border-b border-(--kt-border) last:border-b-0 space-y-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-medium leading-snug break-words">{topic}</p>
+                  <p className="text-sm text-(--kt-muted)">
+                    {subjectDisplayLabel(subject)}
+                    {st && !st.bankReady && ` · ${st.activeQuestionCount} of ${st.minBankSize} questions ready`}
+                    {lastAttempt?.status === "FAILED" && certStatus !== "CERTIFIED" && (
+                      <span className="text-error"> · last score {lastAttempt.scorePercent}%, not passed</span>
                     )}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                  {certStatus === "CERTIFIED" ? (
+                    <span className="inline-flex items-center gap-1.5 font-medium text-success">
+                      <BadgeCheck className="h-4 w-4" aria-hidden="true" />
+                      Verified
+                    </span>
+                  ) : awaitingConfirmation ? (
+                    <span className="text-sm font-medium">Passed, waiting for confirmation</span>
+                  ) : st?.inProgressAttemptId ? (
+                    <Link href={`/tutor/assessments/${st.inProgressAttemptId}`} className="btn btn-primary">
+                      Resume assessment
+                    </Link>
+                  ) : st?.bankReady ? (
                     <button
                       onClick={() => startAssessment(subject, topic)}
                       disabled={busy === key}
-                      className="btn btn-outline btn-primary min-h-11 text-sm font-bold cursor-pointer"
+                      className="btn btn-outline btn-primary"
                     >
                       {busy === key ? (
-                        <span className="loading loading-spinner loading-xs"></span>
+                        <span className="loading loading-spinner loading-sm"></span>
                       ) : lastAttempt?.status === "FAILED" ? (
                         "Retake"
                       ) : (
                         "Take assessment"
                       )}
                     </button>
-                  </>
-                ) : wasRequested ? (
-                  <StatusBadge tone="neutral" label="Questions requested" size="xs" />
-                ) : (
-                  <button
-                    onClick={() => requestQuestions(subject, topic)}
-                    disabled={busy === key}
-                    className="btn btn-outline min-h-11 text-sm font-bold cursor-pointer"
-                  >
-                    {busy === key ? (
-                      <span className="loading loading-spinner loading-xs"></span>
-                    ) : (
-                      "Request questions"
-                    )}
-                  </button>
-                )}
+                  ) : wasRequested ? (
+                    <span className="text-sm text-(--kt-muted)">Questions requested</span>
+                  ) : (
+                    <button
+                      onClick={() => requestQuestions(subject, topic)}
+                      disabled={busy === key}
+                      className="btn btn-outline"
+                    >
+                      {busy === key ? <span className="loading loading-spinner loading-sm"></span> : "Request questions"}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
 
-            {certStatus === "REJECTED" && cert?.reviewNote && (
-              <p className="text-2xs text-error/80 bg-error/5 border border-error/20 rounded-lg px-2 py-1.5">
-                <span className="font-semibold">Reviewer feedback:</span> {cert.reviewNote}
-              </p>
-            )}
-          </div>
-        );
-      })}
-    </div>
+              {certStatus === "REJECTED" && cert?.reviewNote && (
+                <p className="text-sm text-error">Reviewer: {cert.reviewNote}</p>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
   );
 }
+
+const sectionTitle = "font-serif text-2xl font-medium leading-tight";

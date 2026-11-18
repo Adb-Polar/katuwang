@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Bot, User } from "lucide-react";
+import { readableSubjects } from "@/lib/displayLabels";
 import type { ChatTurn } from "@/components/chatbot/chatbotClient";
 
 interface ChatMessageProps {
@@ -26,7 +27,7 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
       </div>
 
       <div
-        className={`chat-bubble text-xs leading-relaxed ${
+        className={`chat-bubble text-sm leading-relaxed ${
           isBot ? "bg-base-200 text-base-content" : "bg-primary text-primary-content"
         }`}
       >
@@ -39,7 +40,7 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
             <Link
               key={l.href}
               href={l.href}
-              className="btn btn-xs btn-outline btn-primary w-fit text-2xs"
+              className="btn btn-sm btn-outline btn-primary w-fit text-sm font-medium"
             >
               {l.label} →
             </Link>
@@ -49,9 +50,9 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
             <Link
               key={c.id}
               href={c.href}
-              className="rounded-lg border border-base-300 bg-base-100 px-2.5 py-2 text-2xs hover:bg-base-200/50 w-full max-w-[15rem]"
+              className="rounded-lg border border-base-300 bg-base-100 px-3 py-2 text-sm hover:bg-base-200/50 w-full max-w-[16rem]"
             >
-              <span className="block font-semibold text-base-content">{c.title}</span>
+              <span className="block font-medium text-base-content">{readableSubjects(c.title)}</span>
               {c.reasons.length > 0 && (
                 <span className="block text-(--kt-muted) mt-0.5">{c.reasons.join(" · ")}</span>
               )}
@@ -65,7 +66,7 @@ export default function ChatMessage({ turn, onSuggestion }: ChatMessageProps) {
                   key={s}
                   type="button"
                   onClick={() => onSuggestion(s)}
-                  className="badge badge-sm badge-ghost hover:badge-primary cursor-pointer text-2xs"
+                  className="btn btn-sm btn-outline rounded-full font-normal text-sm"
                 >
                   {s}
                 </button>

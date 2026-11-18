@@ -29,9 +29,9 @@ export default function DeltaBar({
   return (
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
-        <h3 className="text-xs font-bold uppercase tracking-wide text-(--kt-muted)">{title}</h3>
+        <h3 className="font-serif text-xl font-medium leading-tight">{title}</h3>
         {rows.length === 0 ? (
-          <p className="py-8 text-center text-xs italic text-(--kt-faint)">{emptyHint}</p>
+          <p className="py-6 text-(--kt-muted)">{emptyHint}</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
             {rows.map((r, i) => {
@@ -39,8 +39,8 @@ export default function DeltaBar({
               const pct = d == null ? 0 : (Math.abs(d) / maxAbs) * 50;
               const down = d != null && d < 0;
               return (
-                <li key={`${r.label}::${i}`} className="flex items-center gap-3 text-xs">
-                  <span className="w-20 shrink-0 font-mono text-(--kt-muted)">{r.label}</span>
+                <li key={`${r.label}::${i}`} className="flex items-center gap-3 text-sm">
+                  <span className="w-20 shrink-0 kt-id">{r.label}</span>
                   <div className="relative h-4 flex-1 rounded bg-base-200">
                     <span className="absolute inset-y-0 left-1/2 w-px bg-base-300" />
                     {d != null && d !== 0 && (
@@ -71,10 +71,10 @@ export default function DeltaBar({
           </ul>
         )}
         <details className="mt-2">
-          <summary className="text-2xs text-(--kt-faint) cursor-pointer hover:text-(--kt-muted)">
+          <summary className="text-sm text-(--kt-muted) cursor-pointer hover:text-base-content">
             Show data table
           </summary>
-          <table className="table table-xs mt-2">
+          <table className="table table-sm mt-2">
             <thead>
               <tr>
                 <th>Learner</th>

@@ -9,6 +9,12 @@ import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { formatDateTime } from "@/lib/datetime";
 import { gradeNumber } from "@/lib/gradeLevels";
 
+/** "Grade 7 · Class C-0240" — the class code joins the kicker instead of taking its own line. */
+function codeKicker(kicker: string, code?: string | null): string | undefined {
+  const parts = [kicker, code && `Class ${code}`].filter(Boolean);
+  return parts.length ? parts.join(" · ") : undefined;
+}
+
 export type ClassDetailsAudience = "learner" | "tutor" | "admin";
 
 /**
@@ -93,6 +99,8 @@ export default function ClassDetailsView({
   const seatsLeft = Math.max(0, maxStudents - enrolledCount);
   const sessionIsPast = nextSessionAt ? new Date(nextSessionAt) <= new Date() : false;
   const showSeats = audience === "learner" && status === "SCHEDULED";
+  // The tutor's Manage menu sits beside the title; learners and admins keep their buttons after the facts.
+  const headerActions = audience === "tutor" ? actions : undefined;
 
   const main = (
     <div className="min-w-0 space-y-6">
@@ -127,22 +135,52 @@ export default function ClassDetailsView({
 
       <div className="space-y-3">
         {topics.length === 1 ? (
-          <PageHeader eyebrow={kicker} title={topics[0]} />
+          <PageHeader eyebrow={codeKicker(kicker, code)} title={topics[0]} actions={headerActions} />
         ) : (
           <>
-            <PageHeader eyebrow={grade ? `Grade ${grade}` : undefined} title={subjectDisplayLabel(subject)} />
+            <PageHeader
+              eyebrow={codeKicker(grade ? `Grade ${grade}` : "", code)}
+              title={subjectDisplayLabel(subject)}
+              actions={headerActions}
+            />
             {topics.length > 1 && (
-              <ul aria-label="Topics" className="flex flex-col gap-0.5 text-base">
+              <ul aria-label="Topics" className="flex flex-col gap-0.5 text-(--kt-muted)">
                 {topics.map((t) => <li key={t}>{t}</li>)}
               </ul>
             )}
           </>
         )}
-        <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-(--kt-muted)">
-          {code && <span>Class <span className="font-serif text-base-content">{code}</span></span>}
-          {tutor && <><span aria-hidden="true">·</span><span className="inline-flex items-center gap-1">Tutor {tutor}</span></>}
+
+        {/* The facts a reader acts on, as one line: when, where, how full (and the tutor for learners). */}
+        <p className="flex flex-wrap gap-x-2 gap-y-1">
+          <span className="whitespace-nowrap">
+            <span className="text-(--kt-muted)">{sessionIsPast ? "Last session " : "Next session "}</span>
+            <span className="font-medium">{nextSessionAt ? formatDateTime(nextSessionAt) : "none scheduled"}</span>
+          </span>
+          <span aria-hidden="true" className="text-(--kt-muted)">·</span>
+          <span className="font-medium break-words">
+            {where || (meetingLink ? (
+              <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">Online meeting link</a>
+            ) : <span className="text-(--kt-muted) font-normal">Place not set</span>)}
+            {where && meetingLink && (
+              <> · <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">meeting link</a></>
+            )}
+          </span>
+          <span aria-hidden="true" className="text-(--kt-muted)">·</span>
+          <span className="whitespace-nowrap font-medium">
+            {showSeats
+              ? (isFull ? "Full" : `${seatsLeft} of ${maxStudents} seats left`)
+              : `${enrolledCount} of ${maxStudents} enrolled`}
+          </span>
+          {tutor && (
+            <>
+              <span aria-hidden="true" className="text-(--kt-muted)">·</span>
+              <span className="inline-flex items-center gap-1">Tutor {tutor}</span>
+            </>
+          )}
           {published && !isPlainOpen && <StatusBadge tone={tone} label={label} size="sm" />}
         </p>
+
         {verified.length > 0 && (
           <p className="flex items-start gap-1.5 text-sm text-success">
             <BadgeCheck aria-hidden="true" className="h-4 w-4 mt-0.5 shrink-0" />
@@ -171,33 +209,7 @@ export default function ClassDetailsView({
         </div>
       )}
 
-      <dl className="grid gap-x-8 gap-y-3 sm:grid-cols-3 text-sm">
-        <div>
-          <dt className="text-(--kt-muted)">{sessionIsPast ? "Last session" : "Next session"}</dt>
-          <dd className="font-medium">{nextSessionAt ? formatDateTime(nextSessionAt) : "None scheduled"}</dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="text-(--kt-muted)">Where</dt>
-          <dd className="font-medium break-words">
-            {where || (meetingLink ? (
-              <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary break-all">Online meeting link</a>
-            ) : "Not set yet")}
-            {where && meetingLink && (
-              <> · <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">meeting link</a></>
-            )}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-(--kt-muted)">{showSeats ? "Seats" : "Enrolled"}</dt>
-          <dd className="font-medium">
-            {showSeats
-              ? (isFull ? `Full · ${maxStudents} of ${maxStudents} taken` : `${seatsLeft} of ${maxStudents} left`)
-              : `${enrolledCount} of ${maxStudents}`}
-          </dd>
-        </div>
-      </dl>
-
-      {actions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
+      {actions && !headerActions && <div className="flex flex-wrap items-center gap-3">{actions}</div>}
 
       {sidebarExtra ? (
         <div className="grid lg:grid-cols-3 gap-6">

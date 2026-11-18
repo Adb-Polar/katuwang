@@ -61,13 +61,13 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="btn btn-primary btn-sm text-xs gap-1 cursor-pointer"
+        className="btn btn-outline gap-1.5"
       >
-        <Plus className="h-3.5 w-3.5" />
+        <Plus className="h-4 w-4" aria-hidden="true" />
         Add Session
       </button>
 
-      <Modal portal open={isOpen} onClose={() => setIsOpen(false)} title="Add a Session" size="md">
+      <Modal portal open={isOpen} onClose={() => setIsOpen(false)} title="Add a session" size="md">
             <FeedbackBanner variant="error" message={error || null} />
 
             <ValidatedForm onSubmit={handleSubmit} className="space-y-5 mt-4">
@@ -78,11 +78,11 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
-                  className="btn btn-neutral btn-outline min-h-11 text-sm cursor-pointer"
+                  className="btn btn-ghost"
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="btn btn-primary min-h-11 text-sm cursor-pointer">
+                <button type="submit" disabled={loading} className="btn btn-primary">
                   {loading ? <span className="loading loading-spinner loading-xs"></span> : "Add Session"}
                 </button>
               </div>

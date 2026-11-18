@@ -49,6 +49,7 @@ export default function ProfileView({
   contactInfo,
   certifiedTopics,
   image,
+  learnersSeeRealName = false,
 }: {
   eyebrow: string;
   idRole: "LEARNER" | "TUTOR";
@@ -62,6 +63,8 @@ export default function ProfileView({
   /** Tutor only: their CERTIFIED topics, grouped by subject. */
   certifiedTopics?: { subject: string; topic: string }[];
   image?: string | null;
+  /** Tutor only: the `showTutorRealNames` setting is on, so learners see the tutor's real name too. */
+  learnersSeeRealName?: boolean;
 }) {
   const gradeText =
     GRADE_LEVELS.find((g) => g.value === gradeLevel)?.label ?? (gradeLevel ? gradeLabel(gradeLevel) : "Not set");
@@ -72,6 +75,8 @@ export default function ProfileView({
   const peers = idRole === "TUTOR" ? "Learners" : "Tutors and classmates";
 
   const isTutor = idRole === "TUTOR";
+  const nameIsShown = isTutor && learnersSeeRealName;
+  const topicCount = certifiedTopics?.length ?? 0;
   const gradeSection = [gradeLevel ? gradeText : null, section ? `Section ${section}` : null].filter(Boolean).join(" · ");
 
   return (
@@ -96,7 +101,7 @@ export default function ProfileView({
           </h1>
           {gradeSection && <p className="text-base">{gradeSection}</p>}
           <p className="text-sm text-(--kt-muted)">
-            {peers} see you only as{" "}
+            {nameIsShown ? `${peers} see your name and ` : `${peers} see you only as `}
             <span className={`kt-id text-base ${isTutor ? "kt-id--tutor" : "kt-id--learner"}`}>{anonymousId}</span>
           </p>
         </div>
@@ -106,7 +111,11 @@ export default function ProfileView({
         <div className="kt-card-body gap-6">
           <div>
             <h2 id="your-details" className={sectionTitle}>Your details</h2>
-            <p className="text-sm text-(--kt-muted)">Only you and administrators can see your real name, email and contact info.</p>
+            <p className="text-sm text-(--kt-muted)">
+              {nameIsShown
+                ? "Your school shows tutors' real names to learners. Your email and contact info stay between you and administrators."
+                : "Only you and administrators can see your real name, email and contact info."}
+            </p>
           </div>
           <Group title="Set by your school" note="Only an administrator can change these.">
             <Row label="Real name">{fullName}</Row>
@@ -130,15 +139,14 @@ export default function ProfileView({
             <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
               <div>
                 <h2 className={sectionTitle}>Topics you&apos;re certified in</h2>
-                <p className="text-sm text-(--kt-muted)">Learners see these on your profile.</p>
-              </div>
-              {topicsBySubject.size > 0 && (
-                <p className="flex items-baseline gap-x-1.5 text-sm text-(--kt-muted)">
-                  <span className="font-serif text-3xl leading-none text-(--kt-tutor-text)">{certifiedTopics.length}</span>
-                  topic{certifiedTopics.length === 1 ? "" : "s"} in
-                  <span className="font-serif text-3xl leading-none text-base-content">{topicsBySubject.size}</span>
-                  subject{topicsBySubject.size === 1 ? "" : "s"}
+                <p className="text-sm text-(--kt-muted)">
+                  {topicCount > 0 &&
+                    `${topicCount} topic${topicCount === 1 ? "" : "s"} in ${topicsBySubject.size} subject${topicsBySubject.size === 1 ? "" : "s"}. `}
+                  Learners see these on your profile.
                 </p>
+              </div>
+              {topicCount > 0 && (
+                <Link href="/tutor/assessments" className="btn btn-outline">Add a topic</Link>
               )}
             </div>
             {topicsBySubject.size === 0 ? (

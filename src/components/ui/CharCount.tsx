@@ -16,7 +16,7 @@ export default function CharCount({
   return (
     <span
       aria-live="polite"
-      className={`block text-2xs tabular-nums text-right mt-1 ${
+      className={`block text-xs tabular-nums text-right mt-1 ${
         near ? "text-warning" : "text-(--kt-faint)"
       } ${className}`}
     >

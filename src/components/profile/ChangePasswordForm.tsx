@@ -58,18 +58,19 @@ export default function ChangePasswordForm({
   };
 
   return (
-    <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
+    <ValidatedForm onSubmit={handleSubmit} className="space-y-5">
       <FeedbackBanner variant="error" message={error || null} />
       <FeedbackBanner variant="success" message={success || null} />
 
-      <FormField label="Current password" required orientation="horizontal">
+      <div className="grid gap-4 sm:grid-cols-2">
+      <FormField size="md" label="Current password" required>
         <div className="relative">
           <input
             type={showCurrent ? "text" : "password"}
             aria-label="Current password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className="input input-bordered input-md text-sm w-full pr-10"
+            className="input input-bordered w-full pr-10"
             required
           />
           <button
@@ -82,8 +83,10 @@ export default function ChangePasswordForm({
           </button>
         </div>
       </FormField>
+      </div>
 
-      <FormField label="New password" required hint="At least 8 characters." orientation="horizontal">
+      <div className="grid gap-4 sm:grid-cols-2">
+      <FormField size="md" label="New password" required hint="At least 8 characters.">
         <div className="relative">
           <input
             type={showNew ? "text" : "password"}
@@ -91,7 +94,7 @@ export default function ChangePasswordForm({
             aria-describedby={hintId}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="input input-bordered input-md text-sm w-full pr-10"
+            className="input input-bordered w-full pr-10"
             minLength={8}
             required
           />
@@ -107,18 +110,19 @@ export default function ChangePasswordForm({
       </FormField>
 
       <span id={hintId} className="sr-only">At least 8 characters.</span>
-      <FormField label="Confirm new password" required error={error === "New passwords do not match." ? error : undefined} orientation="horizontal">
+      <FormField size="md" label="Confirm new password" required error={error === "New passwords do not match." ? error : undefined}>
         <input
           type={showNew ? "text" : "password"}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="input input-bordered input-md text-sm w-full"
+          className="input input-bordered w-full"
           required
         />
       </FormField>
+      </div>
 
-      <div className="pt-1">
-        <button type="submit" disabled={saving} className="btn btn-primary btn-md text-sm font-bold cursor-pointer">
+      <div>
+        <button type="submit" disabled={saving} className="btn btn-primary">
           {saving ? <span className="loading loading-spinner loading-sm"></span> : "Update password"}
         </button>
       </div>

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import StatusBadge from "@/components/ui/StatusBadge";
 import PostPosttestButton from "@/components/tutor/PostPosttestButton";
 
 export interface SessionTestRow {
@@ -80,11 +79,18 @@ function LearnerAction({ classId, row }: { classId: string; row: SessionTestRow 
   );
 }
 
-const STATUS_TONE = {
-  DRAFT: { tone: "neutral" as const, label: "Draft" },
-  PUBLISHED: { tone: "success" as const, label: "Open" },
-  CLOSED: { tone: "warning" as const, label: "Closed" },
-};
+const rowClass = "flex flex-wrap items-center justify-between gap-3 py-4 border-b border-(--kt-border) last:border-b-0";
+
+/** Where a session's test stands, as a coloured word for the row's status line. */
+function testStatus(row: SessionTestRow): { label: string; className: string } {
+  const test = row.test!;
+  if (test.status === "DRAFT") return { label: "Draft", className: "text-base-content" };
+  if (test.status === "CLOSED") return { label: "Closed", className: "text-base-content" };
+  if (row.sessionStatus === "CANCELLED") return { label: "Session cancelled", className: "text-error" };
+  if (test.posttestOpenedAt) return { label: "Post-test open", className: "text-success" };
+  if (test.pretestClosedAt || row.sessionStatus === "COMPLETED") return { label: "Pre-test closed", className: "text-base-content" };
+  return { label: "Pre-test open", className: "text-success" };
+}
 
 /** Per-session pre/post test status — one row per `ClassSession`, not one per PRE/POST pair. */
 export default function SessionTestsCard({
@@ -112,11 +118,11 @@ export default function SessionTestsCard({
           // Tutor, no test yet on this session.
           if (!row.test && audience === "tutor") {
             return (
-              <div
-                key={row.sessionId}
-                className="flex flex-wrap items-center justify-between gap-3 py-4 border-b border-(--kt-border) last:border-b-0"
-              >
-                <span className="min-w-0 break-words"><span className="font-medium">{row.topic}</span> <span className="text-sm text-(--kt-muted)">· no test yet</span></span>
+              <div key={row.sessionId} className={rowClass}>
+                <div className="min-w-0">
+                  <p className="font-medium break-words">{row.topic}</p>
+                  <p className="text-sm text-(--kt-muted)">No test yet</p>
+                </div>
                 <Link
                   href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`}
                   className="btn btn-outline btn-primary shrink-0"
@@ -129,50 +135,49 @@ export default function SessionTestsCard({
 
           if (!row.test) return null; // learner: nothing published for this session
 
-          const st = STATUS_TONE[row.test.status];
-          const statusLabel = row.test.status === "PUBLISHED"
-            ? row.sessionStatus === "CANCELLED" ? "Session cancelled" : row.test.posttestOpenedAt ? "Post-test open" : row.test.pretestClosedAt || row.sessionStatus === "COMPLETED" ? "Pre-test closed" : "Pre-test open"
-            : st.label;
+          const status = testStatus(row);
 
           return (
-            <div
-              key={row.sessionId}
-              className="flex flex-wrap items-center justify-between gap-3 py-4 border-b border-(--kt-border) last:border-b-0"
-            >
+            <div key={row.sessionId} className={rowClass}>
               <div className="min-w-0 max-w-full">
-                <div className="font-medium break-words">
+                <p className="font-medium break-words">
                   {row.test.title.startsWith(row.topic) ? row.test.title : `${row.topic}: ${row.test.title}`}
-                </div>
-                {audience === "learner" && (
-                  <div className="text-sm text-(--kt-muted)">
-                    {row.pre?.status === "SUBMITTED" ? `Pre ${row.pre.scorePercent}%` : "Pre not taken"}
-                    {" · "}
-                    {row.post?.status === "SUBMITTED" ? `Post ${row.post.scorePercent}%` : "Post not taken"}
-                  </div>
-                )}
+                </p>
+                <p className="text-sm text-(--kt-muted)">
+                  <span className={`font-medium ${status.className}`}>{status.label}</span>
+                  {audience === "learner" && (
+                    <>
+                      {" · "}
+                      {row.pre?.status === "SUBMITTED" ? `pre ${row.pre.scorePercent}%` : "pre not taken"}
+                      {" · "}
+                      {row.post?.status === "SUBMITTED" ? `post ${row.post.scorePercent}%` : "post not taken"}
+                    </>
+                  )}
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <StatusBadge tone={st.tone} label={statusLabel} size="sm" />
-
                 {audience === "tutor" && (
                   <>
                     {tutorActionsEnabled && row.test.status === "PUBLISHED" && row.sessionStatus !== "CANCELLED" && !row.test.posttestOpenedAt && (
                       <PostPosttestButton classId={classId} sessionId={row.sessionId} />
                     )}
-                    <Link
-                      href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`}
-                      className="btn btn-outline"
-                    >
-                      {row.test.status === "DRAFT" ? "Build" : "View"}
-                    </Link>
-                    {row.test.status !== "DRAFT" && (
-                      <Link
-                        href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test/results`}
-                        className="btn btn-outline btn-primary"
-                      >
-                        Results
+                    {row.test.status === "DRAFT" ? (
+                      <Link href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`} className="btn btn-outline btn-primary">
+                        Finish building
                       </Link>
+                    ) : (
+                      <>
+                        <Link href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test`} className="btn btn-ghost">
+                          View test
+                        </Link>
+                        <Link
+                          href={`/tutor/classes/${classId}/sessions/${row.sessionId}/test/results`}
+                          className="btn btn-outline btn-primary"
+                        >
+                          Results
+                        </Link>
+                      </>
                     )}
                   </>
                 )}

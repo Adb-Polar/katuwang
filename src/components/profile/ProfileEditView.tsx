@@ -1,12 +1,27 @@
+import type { ReactNode } from "react";
 import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
 import ProfileEditForm from "@/components/profile/ProfileEditForm";
 import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
 import ProfilePictureUpload from "@/components/profile/ProfilePictureUpload";
 
+function EditSection({ id, title, note, children }: { id: string; title: string; note: string; children: ReactNode }) {
+  return (
+    <section className="card kt-card" aria-labelledby={id}>
+      <div className="kt-card-body gap-5">
+        <div>
+          <h2 id={id} className="font-serif text-2xl font-medium leading-tight">{title}</h2>
+          <p className="text-sm text-(--kt-muted)">{note}</p>
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
 /**
- * The self-service edit form on its own page (`/{role}/profile/edit`), mirroring
- * how class editing lives at `/tutor/classes/[id]/edit` rather than inline.
+ * The self-service edit page (`/{role}/profile/edit`): photo, the fields a student may change, and
+ * password — each as one section in the same style as the profile page it links back to.
  */
 export default function ProfileEditView({
   eyebrow,
@@ -28,37 +43,28 @@ export default function ProfileEditView({
   profilePictureLocked?: boolean;
 }) {
   return (
-    <div className="space-y-5">
-      <PageHeader
-        eyebrow={eyebrow}
-        title="Edit your details"
-        subtitle="Update your profile photo, grade level, section, and contact info."
-      />
-      <BackLink href={backHref}>Back to profile</BackLink>
+    <div className="space-y-8 max-w-3xl">
+      <div className="space-y-3">
+        <BackLink href={backHref}>Back to profile</BackLink>
+        <PageHeader eyebrow={eyebrow} title="Edit your details" />
+      </div>
 
-      <section className="card kt-card max-w-2xl">
-        <div className="card-body gap-4 p-6">
-          <ProfilePictureUpload initialImage={image} locked={profilePictureLocked} />
-        </div>
-      </section>
+      <EditSection id="edit-photo" title="Photo" note="A PNG, JPG or WebP image, up to 2MB.">
+        <ProfilePictureUpload initialImage={image} locked={profilePictureLocked} />
+      </EditSection>
 
-      <section className="card kt-card max-w-2xl">
-        <div className="card-body gap-4 p-6">
-          <ProfileEditForm
-            endpoint={endpoint}
-            initialContactInfo={contactInfo}
-            initialSection={section}
-            initialGradeLevel={gradeLevel}
-          />
-        </div>
-      </section>
+      <EditSection id="edit-details" title="Your details" note="Your contact info stays between you and administrators.">
+        <ProfileEditForm
+          endpoint={endpoint}
+          initialContactInfo={contactInfo}
+          initialSection={section}
+          initialGradeLevel={gradeLevel}
+        />
+      </EditSection>
 
-      <section className="card kt-card max-w-2xl">
-        <div className="card-body gap-4 p-6">
-          <h2 className="card-title text-sm font-bold">Change password</h2>
-          <ChangePasswordForm endpoint={`${endpoint}/password`} />
-        </div>
-      </section>
+      <EditSection id="edit-password" title="Password" note="You'll be signed out after changing it.">
+        <ChangePasswordForm endpoint={`${endpoint}/password`} />
+      </EditSection>
     </div>
   );
 }

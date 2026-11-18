@@ -31,36 +31,30 @@ export default function AssessmentsTabs({
   const [requested, setRequested] = useState<Set<string>>(new Set());
 
   return (
-    <section className="card kt-card">
-      <div className="card-body gap-4">
-        <Tabs
-          tabs={[
-            { key: "topics", label: "Topics You Teach", count: taughtTopics.length },
-            { key: "history", label: "Assessment History", count: attempts.length },
-          ]}
-          active={activeTab}
-          onChange={(key) => setActiveTab(key as "topics" | "history")}
-        />
+    <div className="flex flex-col gap-5">
+      <Tabs
+        tabs={[
+          { key: "topics", label: "Topics", count: taughtTopics.length },
+          { key: "history", label: "History", count: attempts.length },
+        ]}
+        active={activeTab}
+        onChange={(key) => setActiveTab(key as "topics" | "history")}
+      />
 
-        {activeTab === "topics" ? (
-          <>
-            <p className="text-xs text-(--kt-muted)">
-              Once you&apos;re teaching a topic, take its assessment to earn a verified badge learners can
-              see. If a topic has no assessment yet, you can ask an admin to add questions for it.
-            </p>
-            <TopicCertificationList
-              taughtTopics={taughtTopics}
-              initialCertifications={initialCertifications}
-              topicStatuses={topicStatuses}
-              requested={requested}
-              onRequested={(key) => setRequested((prev) => new Set(prev).add(key))}
-            />
-            <OtherTopicAssessment />
-          </>
-        ) : (
-          <AssessmentHistory certifications={certificationDetails} attempts={attempts} />
-        )}
-      </div>
-    </section>
+      {activeTab === "topics" ? (
+        <>
+          <TopicCertificationList
+            taughtTopics={taughtTopics}
+            initialCertifications={initialCertifications}
+            topicStatuses={topicStatuses}
+            requested={requested}
+            onRequested={(key) => setRequested((prev) => new Set(prev).add(key))}
+          />
+          <OtherTopicAssessment />
+        </>
+      ) : (
+        <AssessmentHistory certifications={certificationDetails} attempts={attempts} />
+      )}
+    </div>
   );
 }
