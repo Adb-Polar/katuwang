@@ -1,14 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import { getActiveServerSession } from "@/lib/serverSession";
 import BackLink from "@/components/ui/BackLink";
-import TopicChip from "@/components/ui/TopicChip";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { addDays } from "@/lib/datetime";
 import { getSetting } from "@/lib/settings";
 import { isStudentEligibleForTutor, isStudentEligibleForClass } from "@/lib/gradeLevels";
-import PageHeader from "@/components/ui/PageHeader";
-import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
 import ReportButton from "@/components/learner/ReportButton";
@@ -135,22 +134,56 @@ export default async function LearnerTutorProfilePage({
         })),
     );
 
+  const realName = showRealNames ? `${tutor.firstName} ${tutor.lastName}` : null;
+  const sectionLine = realName && tutor.section ? `Section ${tutor.section}` : null;
+  const canRequestTopic = isStudentEligibleForTutor(me?.gradeLevel, tutor.gradeLevel);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <BackLink href="/learner/classes">Back to classes</BackLink>
 
-      <PageHeader
-        eyebrow="Tutor Profile"
-        title={showRealNames ? `${tutor.firstName} ${tutor.lastName}` : "Anonymized profile"}
-        subtitle={
-          showRealNames
-            ? "Real names are shown here because an administrator has enabled it."
-            : "Learners and tutors never see each other's real names or contact details."
-        }
-        actions={
-          <div className="flex items-center gap-2 flex-wrap justify-end">
-            <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="md" showIcon />
-            {isStudentEligibleForTutor(me?.gradeLevel, tutor.gradeLevel) && (
+      {/* The tutor's ID (or name, when an administrator shows names) is the heading, on the one tinted band in the tutor colour. */}
+      <section
+        aria-labelledby="tutor-heading"
+        className="rounded-(--kt-radius-box) bg-(--kt-tint-tutor) px-5 py-6 sm:px-7 flex flex-col md:flex-row md:items-center gap-5"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center gap-5 min-w-0 flex-1">
+          <UserAvatar
+            src={tutor.image}
+            name={realName}
+            anonymousId={tutor.anonymousId}
+            size="xl"
+            role="TUTOR"
+            subtitle={sectionLine}
+          />
+          <div className="min-w-0 space-y-1">
+            <p className="font-serif italic text-base leading-none text-primary">Tutor profile</p>
+            {realName ? (
+              <>
+                <h1 id="tutor-heading" className="font-serif text-3xl sm:text-4xl font-medium leading-tight">
+                  {realName}
+                </h1>
+                <p>
+                  <AnonymousIdText id={tutor.anonymousId} role="TUTOR" />
+                  {sectionLine && <span className="text-(--kt-muted)"> · {sectionLine}</span>}
+                </p>
+              </>
+            ) : (
+              <h1 id="tutor-heading" className="kt-id kt-id--tutor text-3xl sm:text-4xl leading-tight">
+                {tutor.anonymousId}
+              </h1>
+            )}
+            <p className="text-sm text-(--kt-muted)">
+              {realName
+                ? "Real names are shown here because an administrator has enabled it."
+                : "Learners and tutors never see each other's real names or contact details."}
+              {tutor.image && " Select the picture to see it full size."}
+            </p>
+          </div>
+        </div>
+        {(canRequestTopic || canReport) && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {canRequestTopic && (
               <RequestTopicButton
                 tutorId={tutorId}
                 tutorAnonymousId={tutor.anonymousId}
@@ -162,68 +195,44 @@ export default async function LearnerTutorProfilePage({
               <ReportButton targetType="TUTOR" targetId={tutorId} targetLabel={tutor.anonymousId} />
             )}
           </div>
-        }
-      />
-
-      <section className="card kt-card">
-        <div className="card-body p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-          <UserAvatar
-            src={tutor.image}
-            name={showRealNames ? `${tutor.firstName} ${tutor.lastName}` : null}
-            anonymousId={tutor.anonymousId}
-            size="xl"
-            role="TUTOR"
-            subtitle={showRealNames && tutor.section ? `Section ${tutor.section}` : null}
-          />
-          <div className="text-center sm:text-left space-y-1">
-            <h2 className="text-base font-bold text-base-content">
-              {showRealNames ? `${tutor.firstName} ${tutor.lastName}` : "Certified Student Tutor"}
-            </h2>
-            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-              <AnonymousIdBadge id={tutor.anonymousId} role="TUTOR" size="sm" showIcon />
-              {showRealNames && tutor.section && (
-                <span className="text-xs text-(--kt-muted)">Section {tutor.section}</span>
-              )}
-            </div>
-            <p className="text-2xs text-(--kt-faint) pt-1">
-              {tutor.image
-                ? "Click profile picture to view full size."
-                : "Student tutor is using their anonymous monogram."}
-            </p>
-          </div>
-        </div>
+        )}
       </section>
 
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Verified Topics</h2>
-          {bySubject.size === 0 ? (
-            <p className="text-xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
-              This tutor doesn&apos;t have any verified topics yet.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {Array.from(bySubject.entries()).map(([subject, topics]) => (
-                <div key={subject} className="border border-base-200 bg-base-200/20 rounded-lg p-3 space-y-1.5">
-                  <span className="badge badge-neutral badge-sm text-2xs font-bold">{subject}</span>
-                  <div className="flex flex-wrap gap-1">
+      <section aria-labelledby="verified-topics" className="kt-card">
+        <h2 id="verified-topics" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+          Verified topics
+        </h2>
+        {bySubject.size === 0 ? (
+          <p className="px-5 py-5 text-(--kt-muted)">This tutor doesn&apos;t have any verified topics yet.</p>
+        ) : (
+          <dl className="px-5">
+            {Array.from(bySubject.entries()).map(([subject, topics]) => (
+              <div
+                key={subject}
+                className="grid gap-x-6 gap-y-1 py-4 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[14rem_1fr]"
+              >
+                <dt className="text-sm text-(--kt-muted) sm:pt-0.5">{subjectDisplayLabel(subject)}</dt>
+                <dd>
+                  <ul className="flex flex-wrap gap-x-4 gap-y-1">
                     {topics.map((t) => (
-                      <TopicChip key={t} topic={t} verified />
+                      <li key={t}>{t}</li>
                     ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </section>
 
-      <section className="card kt-card">
-        <div className="card-body gap-2">
-          <h2 className="card-title text-sm font-bold">This week</h2>
-          <p className="text-2xs text-(--kt-faint)">
-            This tutor&apos;s scheduled sessions over the next 7 days.
-          </p>
+      <section aria-labelledby="this-week" className="kt-card">
+        <div className="px-5 py-4 border-b border-(--kt-border)">
+          <h2 id="this-week" className="font-serif text-xl font-medium">
+            This week
+          </h2>
+          <p className="text-sm text-(--kt-muted)">This tutor&apos;s scheduled sessions over the next 7 days.</p>
+        </div>
+        <div className="kt-card-body">
           <WeeklyTimetable
             sessions={timetableSessions}
             hrefFor={(classId) => `/learner/classes/${classId}`}
@@ -232,9 +241,11 @@ export default async function LearnerTutorProfilePage({
         </div>
       </section>
 
-      <section className="card kt-card">
-        <div className="card-body gap-4">
-          <h2 className="card-title text-sm font-bold">Classes</h2>
+      <section aria-labelledby="tutor-classes" className="kt-card">
+        <h2 id="tutor-classes" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+          Classes
+        </h2>
+        <div className="kt-card-body">
           <TutorProfileClassTabs active={activeClasses} completed={completedClasses} />
         </div>
       </section>

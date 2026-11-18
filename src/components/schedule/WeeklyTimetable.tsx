@@ -46,39 +46,42 @@ export default function WeeklyTimetable({
     list.sort((a, b) => +new Date(a.scheduledAt) - +new Date(b.scheduledAt));
   }
 
+  if (sessions.length === 0) return <p className="text-(--kt-muted)">{emptyMessage}</p>;
+
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
-      {sessions.length === 0 && <p className="text-xs text-(--kt-faint) italic">{emptyMessage}</p>}
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-      {days.map(({ date, day, label }) => (
-        <div key={date} className="rounded-lg border border-base-200 bg-base-200/20 p-2 min-h-[5rem]">
-          <div className="text-2xs font-bold uppercase tracking-wide text-(--kt-faint) mb-1.5">
-            <span>{day}</span> <time dateTime={date}>{label}</time>
+    <div className="space-y-3">
+      <p className="text-sm text-(--kt-muted)">Times shown in {SCHOOL_TIME_ZONE_LABEL}.</p>
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-x-3 gap-y-5">
+        {days.map(({ date, day, label }) => (
+          <div key={date} className="min-w-0 border-t border-(--kt-border) pt-2">
+            <div className="text-sm text-(--kt-muted) mb-2">
+              <span>{day}</span> <time dateTime={date}>{label}</time>
+            </div>
+            <div className="space-y-1.5">
+              {(byDay[date] ?? []).length === 0 ? (
+                <p className="text-sm text-(--kt-muted)">
+                  <span aria-hidden="true">—</span>
+                  <span className="sr-only">No sessions</span>
+                </p>
+              ) : (
+                byDay[date].map((s) => (
+                  <Link
+                    key={s.id}
+                    href={hrefFor(s.classId)}
+                    // flex!: the portal's phone touch-target rule turns links into one centred row.
+                    className="flex! flex-col! items-stretch! rounded px-2 py-1.5 bg-primary/10 hover:bg-primary/15 text-sm transition-colors"
+                  >
+                    <span className="font-medium text-primary tabular-nums">{scheduleTime(s.scheduledAt)}</span>
+                    <span className="truncate" title={`${subjectDisplayLabel(s.subject)} — ${s.topic}`}>
+                      {s.topic}
+                    </span>
+                  </Link>
+                ))
+              )}
+            </div>
           </div>
-          <div className="space-y-1">
-            {(byDay[date] ?? []).length === 0 ? (
-              <div className="text-2xs text-base-content/25">—</div>
-            ) : (
-              byDay[date].map((s) => (
-                <Link
-                  key={s.id}
-                  href={hrefFor(s.classId)}
-                  className="block rounded-md bg-primary/10 hover:bg-primary/20 border border-primary/20 px-1.5 py-1 text-2xs transition-colors"
-                >
-                  <div className="font-bold text-primary/90">
-                    {scheduleTime(s.scheduledAt)}
-                  </div>
-                  <div className="truncate text-(--kt-muted)" title={`${subjectDisplayLabel(s.subject)} — ${s.topic}`}>
-                    {s.topic}
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
     </div>
   );
 }

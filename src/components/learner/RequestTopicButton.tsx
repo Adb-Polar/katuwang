@@ -67,27 +67,29 @@ export default function RequestTopicButton({
 
   return (
     <>
-      <button onClick={() => setOpen(true)} className="btn btn-primary btn-sm text-xs gap-1.5">
-        <Send className="h-3.5 w-3.5" />
+      <button onClick={() => setOpen(true)} className="btn btn-primary gap-2">
+        <Send className="h-4 w-4" aria-hidden="true" />
         Request a topic from this tutor
       </button>
 
       {open && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-lg p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
+          <div className="modal-box max-w-lg p-6 kt-card relative">
             <button
+              type="button"
+              aria-label="Close"
               onClick={() => setOpen(false)}
               className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
             >
-              ✕
+              <span aria-hidden="true">✕</span>
             </button>
-            <h3 className="font-sans text-base font-semibold mb-1">Request a topic from {tutorAnonymousId}</h3>
-            <p className="text-xs text-(--kt-muted) mb-4">
+            <h3 className="font-serif text-xl font-medium leading-tight mb-1 pr-10">Request a topic from {tutorAnonymousId}</h3>
+            <p className="text-sm text-(--kt-muted) mb-4">
               Only this tutor will see this request. They can accept it and create a class for you.
             </p>
 
             {verifiedTopicsHint && verifiedTopicsHint.length > 0 && (
-              <p className="text-2xs text-(--kt-faint) mb-3 italic">
+              <p className="text-sm text-(--kt-muted) mb-3">
                 This tutor is verified in: {verifiedTopicsHint.join(", ")}.
               </p>
             )}
@@ -96,22 +98,23 @@ export default function RequestTopicButton({
 
             <ValidatedForm onSubmit={submit} className="space-y-4 mt-3">
               <MatchCriteriaFields gradeRequired value={criteria} onChange={setCriteria} />
-              <FormField label="Note" hint="Optional — anything this tutor should know.">
+              <FormField size="md" label="Note" hint="Optional — anything this tutor should know.">
                 <textarea
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   maxLength={500}
-                  className="textarea textarea-bordered textarea-sm w-full text-xs h-16"
+                  rows={3}
+                  className="textarea textarea-bordered w-full"
                   placeholder="e.g. I struggle with word problems the most."
                 />
                 <CharCount value={note} max={500} />
               </FormField>
               <div className="modal-action pt-2">
-                <button type="button" onClick={() => setOpen(false)} className="btn btn-neutral btn-outline btn-sm text-xs">
+                <button type="button" onClick={() => setOpen(false)} className="btn btn-ghost">
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting} className="btn btn-primary btn-sm text-xs">
-                  {submitting ? <span className="loading loading-spinner loading-xs" /> : "Send request"}
+                <button type="submit" disabled={submitting} className="btn btn-primary">
+                  {submitting ? <span className="loading loading-spinner loading-sm" /> : "Send request"}
                 </button>
               </div>
             </ValidatedForm>

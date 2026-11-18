@@ -87,7 +87,7 @@ export default function ReportButton({
   if (done) {
     return (
       <span className="text-sm text-success inline-flex items-center gap-1">
-        <Flag className="h-3.5 w-3.5" />
+        <Flag className="h-4 w-4" aria-hidden="true" />
         Report sent to the admins.
       </span>
     );
@@ -100,13 +100,13 @@ export default function ReportButton({
         onClick={() => setOpen(true)}
         className="btn btn-ghost gap-1.5 text-error hover:bg-error/10"
       >
-        <Flag className="h-3.5 w-3.5" />
+        <Flag className="h-4 w-4" aria-hidden="true" />
         Report this {noun}
       </button>
 
       {open && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-md p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
+          <div className="modal-box max-w-md p-6 kt-card relative">
             <button
               onClick={() => {
                 setOpen(false);
@@ -117,10 +117,10 @@ export default function ReportButton({
             >
               ✕
             </button>
-            <h3 className="font-sans text-base font-semibold mb-1">
+            <h3 className="font-serif text-xl font-medium leading-tight mb-1 pr-10">
               Report {noun} {targetLabel}
             </h3>
-            <p className="text-xs text-(--kt-muted) mb-4">
+            <p className="text-sm text-(--kt-muted) mb-4">
               Only administrators see this report. Your identity is not shared with the {noun}.
             </p>
 
@@ -128,17 +128,17 @@ export default function ReportButton({
 
             <ValidatedForm onSubmit={submit} className="space-y-4 mt-3">
               <fieldset data-form-field="Violations" className="space-y-1.5">
-                <legend className="text-xs font-semibold text-(--kt-muted) pb-1">
+                <legend className="text-[0.9rem] font-medium text-base-content pb-1">
                   What went wrong? <span className="text-error">*</span>
                 </legend>
                 {options.map((opt) => (
                   <label
                     key={opt.value}
-                    className="flex items-start gap-2 text-xs text-(--kt-muted) cursor-pointer"
+                    className="flex items-start gap-2 text-sm cursor-pointer"
                   >
                     <input
                       type="checkbox"
-                      className="checkbox checkbox-sm checkbox-error mt-0.5"
+                      className="checkbox checkbox-sm checkbox-error mt-px"
                       checked={checked.has(opt.value)}
                       onChange={() => toggle(opt.value)}
                     />
@@ -148,7 +148,7 @@ export default function ReportButton({
               </fieldset>
 
               {isOther && (
-                <FormField label="Describe the issue" required>
+                <FormField size="md" label="Describe the issue" required>
                   <textarea
                     required
                     minLength={10}
@@ -157,7 +157,7 @@ export default function ReportButton({
                     maxLength={DETAILS_MAX}
                     rows={3}
                     placeholder="Tell the admins what happened."
-                    className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
+                    className="textarea textarea-bordered w-full focus:textarea-primary"
                   />
                   <CharCount value={details} max={DETAILS_MAX} />
                 </FormField>
@@ -170,16 +170,16 @@ export default function ReportButton({
                     setOpen(false);
                     reset();
                   }}
-                  className="btn btn-neutral btn-outline btn-sm text-xs"
+                  className="btn btn-ghost"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="btn btn-error btn-sm text-xs"
+                  className="btn btn-error"
                 >
-                  {submitting ? <span className="loading loading-spinner loading-xs" /> : "Submit report"}
+                  {submitting ? <span className="loading loading-spinner loading-sm" /> : "Submit report"}
                 </button>
               </div>
             </ValidatedForm>

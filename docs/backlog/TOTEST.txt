@@ -1272,3 +1272,7 @@ Admin portal unslop pass (Changes.md 2026-11-18)
  [ ] Sidebar unread count shows as red text when there are unread notifications (none were unread for the demo accounts).
  [ ] Ctrl+K / Cmd+K still focuses the search box (hint removed from the UI).
  [ ] Tutor and learner phone drawers.
+ [Good: demo learner, 1280px + 375px] /learner/tutors/[id] (no-image tutor, names off), Find tutors, Browse classes.
+ [ ] Tutor profile with showTutorRealNames on, with a profile picture, and with sessions this week (timetable columns).
+ [ ] Moderated / unpublished ClassCard on a tutor profile.
+ [ ] Request topic and Report pop-ups: send each once (DB write); close button and Escape behaviour.

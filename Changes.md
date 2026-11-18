@@ -5351,3 +5351,16 @@ readable size; nav icons without the grey chip behind them; nav items 15px and g
 unread count as red text instead of a 10px pill; "Log out" in muted text instead of faded red; the "⌘K" hint
 removed (wrong on Windows/Linux; `aria-keyshortcuts` added); search dropdown text 14px. Audit table in
 `docs/reports/admin-portal-unslop-audit-2026-11-18.md`.
+
+### Last learner pieces (2026-11-18, same pass)
+
+A repo-wide sweep found the learner tutor profile and a few shared pieces still on the old look; restyled:
+- `/learner/tutors/[tutorId]`: one tutor-tinted band with the ID as the `h1`, serif section headings, verified
+  topics as a list with subject names (no slugs or pills), plain empty states. `TutorProfileClassTabs`,
+  `WeeklyTimetable` (no boxed days or uppercase labels; just the message when there are no sessions) and
+  `ClassCard` (white card, serif subject, status as text, plain topic list, one footer line) to match.
+- `SessionsList` (learner/tutor/admin class pages): readable detail line, status as text, plain empty state.
+- Learner Browse classes / Find tutors filters at full size; "Can't find a subject" card heading; Request topic
+  and Report pop-ups (serif title, full-size fields and buttons, shared dialog surface, labelled close button).
+- `UserAvatar` initials readable; `DeltaBar` table; `TopicChip` 0.8rem; `AnonymousIdBadge` serif instead of mono.
+`ClassCard`/`SessionsList`/`TopicChip` are also used by `StoryTimeline`'s samples, which no page renders.

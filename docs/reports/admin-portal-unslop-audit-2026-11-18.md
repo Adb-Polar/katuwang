@@ -96,6 +96,15 @@ the search box instead); search dropdown text 14px. Checked as admin (1280px, 37
 Not changed: learner nav labels are still Title Case ("Browse Classes", "Find Tutors", "My Classes" …) — the
 settings copy quotes some of them, so renaming them is a separate change.
 
+## Repo-wide sweep — last learner pieces
+
+A grep of every portal and public route for the rubric's tells after the admin pass found these still on the old
+look, all now restyled: `/learner/tutors/[tutorId]` (Critical: 11px notes, card-title headings, dashed empty box,
+slug pills), `ClassCard`, `WeeklyTimetable`, `TutorProfileClassTabs`, `SessionsList`, learner filters
+(`select-sm`), `FindTutorRequests`, the Request topic and Report pop-ups, `UserAvatar`, `DeltaBar`, `TopicChip`,
+`AnonymousIdBadge` (mono). Left on purpose: landing illustrations, the dev tools, the create-admin activation link
+(mono so it can be copied), unused `WeeklyScheduleView` / `ProgressAreaChart` / `StoryTimeline`.
+
 ## Checks
 
 - `pnpm exec tsc --noEmit` clean; `pnpm lint` clean.

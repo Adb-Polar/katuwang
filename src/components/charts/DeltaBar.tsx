@@ -56,7 +56,7 @@ export default function DeltaBar({
                   </div>
                   <span className="w-24 shrink-0 text-right">
                     {d == null ? (
-                      <span className="text-(--kt-faint)">—</span>
+                      <span className="text-(--kt-muted)">—</span>
                     ) : (
                       <span className="kt-delta" data-dir={down ? "down" : "up"}>
                         {d > 0 ? "+" : ""}
@@ -74,7 +74,7 @@ export default function DeltaBar({
           <summary className="text-sm text-(--kt-muted) cursor-pointer hover:text-base-content">
             Show data table
           </summary>
-          <table className="table table-sm mt-2">
+          <table className="table mt-2">
             <thead>
               <tr>
                 <th>Learner</th>
@@ -86,7 +86,7 @@ export default function DeltaBar({
             <tbody>
               {rows.map((r, i) => (
                 <tr key={`${r.label}::${i}`}>
-                  <td className="text-(--kt-muted) font-mono">{r.label}</td>
+                  <td className="kt-id">{r.label}</td>
                   <td className="text-right">{r.pre == null ? "—" : `${r.pre}${unit}`}</td>
                   <td className="text-right">{r.post == null ? "—" : `${r.post}${unit}`}</td>
                   <td className="text-right font-semibold">
@@ -96,7 +96,7 @@ export default function DeltaBar({
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center py-3 text-(--kt-faint) italic text-xs">
+                  <td colSpan={4} className="text-center py-3 text-sm text-(--kt-muted)">
                     No data yet.
                   </td>
                 </tr>

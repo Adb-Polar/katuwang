@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { Calendar, Clock, Users, Layers, EyeOff, AlertTriangle } from "lucide-react";
-import StatusBadge from "@/components/ui/StatusBadge";
-import TopicChip from "@/components/ui/TopicChip";
+import { Check, EyeOff, AlertTriangle } from "lucide-react";
+import StatusText from "@/components/ui/StatusText";
+import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import { getClassStatusBadge, ClassLifecycleStatus } from "./classStatus";
 import UserAvatar from "@/components/profile/UserAvatar";
 import { formatDateTime, formatWeekday } from "@/lib/datetime";
@@ -34,13 +34,13 @@ export default function ClassCard({
   tutorImage,
   href,
 }: {
-  /** Human-friendly class code (e.g. "C-0007"); shown as an eyebrow when set. */
+  /** Human-friendly class code (e.g. "C-0007"); shown in the line above the subject when set. */
   code?: string | null;
   subject: string;
-  /** Optional target grade (e.g. "GRADE_9"); shown as a badge when set. */
+  /** Optional target grade (e.g. "GRADE_9"); shown beside the code when set. */
   gradeLevel?: string | null;
   topics: string[];
-  /** Topics (from `topics`) the tutor has been verified for, shown with a badge. */
+  /** Topics (from `topics`) the tutor has been verified for, shown with a check. */
   verifiedTopics?: string[];
   description: string | null;
   sessions: SessionLike[];
@@ -77,94 +77,83 @@ export default function ClassCard({
 
   const isModerated = status === "SUSPENDED" || status === "BANNED";
 
-  const cardClassName = `card border cursor-pointer transition-colors hover:border-primary/50 text-xs p-4 space-y-3 block ${
-    isModerated
-      ? "bg-error/5 hover:bg-error/10 border-error/30"
-      : published
-      ? "bg-base-200/30 hover:bg-base-200/60 hover:border-primary/40 border-base-300"
-      : "bg-warning/5 hover:bg-warning/10 border-warning/30"
+  // `card` keeps the portal's phone touch-target rule (`main a:not(.card)`) off the whole-card link.
+  const cardClassName = `card kt-card cursor-pointer p-5 gap-3 transition-colors hover:border-primary/50 ${
+    isModerated ? "border-error/40 bg-error/5" : published ? "" : "border-warning/50"
   }`;
 
   const MAX_TOPICS = 3;
   const shownTopics = topics.slice(0, MAX_TOPICS);
   const overflowCount = topics.length - shownTopics.length;
+  const meta = [code, gradeLevel && gradeLabel(gradeLevel)].filter(Boolean);
 
   const inner = (
     <>
-      <div className="flex justify-between items-start gap-2">
+      <div className="flex flex-wrap justify-between items-start gap-x-3 gap-y-1">
         <div className="min-w-0">
-          {code && (
-            <p className="font-mono text-2xs font-semibold uppercase tracking-wider text-primary/80">
-              {code}
+          {meta.length > 0 && (
+            <p className="flex flex-wrap gap-x-1.5 text-sm text-(--kt-muted)">
+              {meta.map((part, i) => (
+                <span key={i} className="whitespace-nowrap">
+                  {i > 0 && "· "}
+                  {part}
+                </span>
+              ))}
             </p>
           )}
-          <h3 className="text-sm font-bold text-base-content leading-tight truncate">{subjectDisplayLabel(subject)}</h3>
-          {gradeLevel && (
-            <p className="text-2xs font-semibold uppercase tracking-wide text-(--kt-faint) mt-0.5">
-              {gradeLabel(gradeLevel)}
-            </p>
-          )}
+          <h3 className="font-serif text-lg font-medium leading-snug break-words">{subjectDisplayLabel(subject)}</h3>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 shrink-0">
           {!published && (
-            <span className="badge badge-warning badge-outline text-2xs font-semibold uppercase tracking-wide gap-1 py-2">
-              <EyeOff className="h-3 w-3" />
+            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-(--kt-warning-text)">
+              <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
               Unpublished
             </span>
           )}
-          {/* An unpublished class isn't live, so don't also badge it "Active"/"Full".
+          {/* An unpublished class isn't live, so don't also mark it "Active"/"Full".
               Real lifecycle states (Completed/Suspended/Banned/Cancelled) still show. */}
-          {(published || status !== "SCHEDULED") && (
-            <StatusBadge tone={tone} label={label} size="xs" />
-          )}
+          {(published || status !== "SCHEDULED") && <StatusText tone={tone} label={label} />}
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <div className="flex flex-wrap gap-1">
-          {shownTopics.map((topic) => (
-            <TopicChip key={topic} topic={topic} verified={verifiedTopics?.includes(topic)} className="max-w-full min-w-0 truncate" />
-          ))}
-          {overflowCount > 0 && (
-            <span className="badge badge-ghost badge-sm text-2xs font-semibold py-2.5">
-              +{overflowCount} more
-            </span>
+      {(shownTopics.length > 0 || description) && (
+        <div className="space-y-1.5">
+          {shownTopics.length > 0 && (
+            <ul className="flex flex-wrap gap-x-3 gap-y-1">
+              {shownTopics.map((topic) => (
+                <li key={topic} className="min-w-0 break-words">
+                  {topic}
+                  {verifiedTopics?.includes(topic) && (
+                    <Check className="inline h-3.5 w-3.5 ml-1 -mt-0.5 text-success" aria-label="verified tutor" />
+                  )}
+                </li>
+              ))}
+              {overflowCount > 0 && <li className="text-(--kt-muted)">+{overflowCount} more</li>}
+            </ul>
           )}
+          {description && <p className="text-sm text-(--kt-muted) line-clamp-2">{description}</p>}
         </div>
-        {description && <p className="text-(--kt-muted) line-clamp-2 leading-relaxed">{description}</p>}
-      </div>
+      )}
 
-      <div className="divider my-0 opacity-40"></div>
-
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-(--kt-muted)">
-        {nextSession ? (
-          <>
-            <div className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-primary" />
-              <span>{formattedDate}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 text-primary" />
-              <span>{nextSession.duration} mins</span>
-            </div>
-          </>
-        ) : (
-          <span className="italic text-(--kt-faint)">No upcoming sessions</span>
-        )}
-        <div className="flex items-center gap-1">
-          <Layers className="h-3.5 w-3.5 text-primary" />
-          <span>
-            {sessions.length} session{sessions.length === 1 ? "" : "s"}
+      <div className="pt-3 border-t border-(--kt-border) flex flex-col gap-1 text-sm text-(--kt-muted)">
+        <p className="flex flex-wrap gap-x-1.5 tabular-nums">
+          {nextSession ? (
+            <>
+              <span className="whitespace-nowrap font-medium text-base-content">{formattedDate}</span>
+              <span className="whitespace-nowrap">· {nextSession.duration} min</span>
+            </>
+          ) : (
+            <span>No upcoming sessions</span>
+          )}
+          <span className="whitespace-nowrap">
+            · {sessions.length} session{sessions.length === 1 ? "" : "s"}
           </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Users className="h-3.5 w-3.5 text-primary" />
-          <span>
-            {enrolledCount} / {maxStudents} Enrolled
+          <span className="whitespace-nowrap">
+            · {enrolledCount} / {maxStudents} enrolled
           </span>
-        </div>
+        </p>
         {tutorAnonymousId && (
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
             <UserAvatar clickable={false}
               src={tutorImage}
               name={tutorName}
@@ -174,18 +163,21 @@ export default function ClassCard({
               subtitle={tutorName && tutorSection ? `Section ${tutorSection}` : undefined}
             />
             <span className="truncate">
-              {tutorName || tutorAnonymousId}
-              {tutorName && tutorSection && (
-                <span className="text-(--kt-faint)"> · {tutorSection}</span>
+              with{" "}
+              {tutorName ? (
+                <span className="kt-id kt-id--tutor">{tutorName}</span>
+              ) : (
+                <AnonymousIdText id={tutorAnonymousId} role="TUTOR" />
               )}
+              {tutorName && tutorSection && <span> · {tutorSection}</span>}
             </span>
           </div>
         )}
       </div>
 
       {isModerated && suspendedReason && (
-        <p className="flex items-start gap-1 text-2xs text-error/90 leading-relaxed">
-          <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+        <p className="flex items-start gap-1.5 text-sm text-error">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" aria-hidden="true" />
           <span>{suspendedReason}</span>
         </p>
       )}
@@ -193,5 +185,5 @@ export default function ClassCard({
   );
 
   return href ? <Link href={href} className={cardClassName}>{inner}</Link>
-    : <div className={cardClassName.replace("cursor-pointer", "")}>{inner}</div>;
+    : <div className={cardClassName.replace("cursor-pointer ", "")}>{inner}</div>;
 }

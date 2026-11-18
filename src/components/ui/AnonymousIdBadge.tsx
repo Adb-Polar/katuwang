@@ -13,7 +13,7 @@ const ROLE_STYLES = {
 } as const;
 
 const SIZES = {
-  sm: "text-2xs px-2 py-0.5 gap-1",
+  sm: "text-xs px-2 py-0.5 gap-1",
   md: "text-xs px-2.5 py-1 gap-1.5",
 } as const;
 
@@ -32,7 +32,7 @@ export default function AnonymousIdBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center text-nowrap rounded-full font-mono font-medium tracking-wide ${ROLE_STYLES[role]} ${SIZES[size]} ${className ?? ""}`}
+      className={`inline-flex items-center text-nowrap rounded-full font-serif font-medium ${ROLE_STYLES[role]} ${SIZES[size]} ${className ?? ""}`}
     >
       {showIcon && <ShieldCheck className="w-3 h-3 shrink-0" />}
       {id}

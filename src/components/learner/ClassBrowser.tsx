@@ -127,7 +127,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               : "Search classes"}
           />
           <select
-            className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
+            className="select select-bordered w-full"
             aria-label="Grade level"
             value={gradeLevel}
             onChange={(e) => { setGradeLevel(e.target.value); setSubject(""); setTopic(""); }}
@@ -140,7 +140,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
             ))}
           </select>
           <select
-            className="select select-bordered select-sm text-base min-h-11 sm:text-sm"
+            className="select select-bordered w-full"
             aria-label="Subject"
             value={subject}
             onChange={(e) => { setSubject(e.target.value); setTopic(""); }}
@@ -152,7 +152,7 @@ export default function ClassBrowser({ scope }: { scope: "browse" | "mine" }) {
               </option>
             ))}
           </select>
-          <select aria-label="Topic" className="select select-bordered select-sm text-base min-h-11 sm:text-sm" value={topic}
+          <select aria-label="Topic" className="select select-bordered w-full" value={topic}
             disabled={!subject} onChange={(e) => setTopic(e.target.value)}>
             <option value="">All topics</option>
             {topicsFor(subject).map((t) => <option key={t} value={t}>{t}</option>)}

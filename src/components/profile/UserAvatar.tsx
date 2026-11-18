@@ -19,9 +19,9 @@ interface UserAvatarProps {
 }
 
 const SIZE_CLASSES: Record<AvatarSize, { px: number; container: string; text: string }> = {
-  xs: { px: 24, container: "w-6 h-6", text: "text-3xs" },
-  sm: { px: 32, container: "w-8 h-8", text: "text-2xs" },
-  md: { px: 40, container: "w-10 h-10", text: "text-xs" },
+  xs: { px: 24, container: "w-6 h-6", text: "text-[0.7rem]" },
+  sm: { px: 32, container: "w-8 h-8", text: "text-[0.8rem]" },
+  md: { px: 40, container: "w-10 h-10", text: "text-sm" },
   lg: { px: 56, container: "w-14 h-14", text: "text-base" },
   xl: { px: 80, container: "w-20 h-20", text: "text-xl" },
   "2xl": { px: 112, container: "w-28 h-28", text: "text-3xl" },
@@ -53,7 +53,7 @@ export default function UserAvatar({
   const isImageValid = Boolean(src && !hasError);
   const isZoomable = Boolean(clickable && isImageValid);
 
-  const title = modalTitle ?? `${displayName}'s Profile Picture`;
+  const title = modalTitle ?? `${displayName}'s profile picture`;
 
   return (
     <>
@@ -84,7 +84,7 @@ export default function UserAvatar({
         title={isZoomable ? "Click to view larger picture" : undefined}
       >
         <div
-          className={`${sizeStyle.container} rounded-full overflow-hidden border border-primary/20 bg-base-300 flex items-center justify-center font-bold text-primary shadow-2xs transition-all ${
+          className={`${sizeStyle.container} rounded-full overflow-hidden border border-primary/20 bg-base-300 flex items-center justify-center font-sans font-semibold leading-none text-primary shadow-2xs transition-all ${
             isZoomable
               ? "group-hover:ring-2 group-hover:ring-primary"
               : ""
@@ -128,7 +128,7 @@ export default function UserAvatar({
                   onError={() => setModalHasError(true)}
                 />
               ) : (
-                <div className="p-8 text-center text-xs text-(--kt-muted)">
+                <div className="p-8 text-center text-sm text-(--kt-muted)">
                   Failed to load full-size image.
                 </div>
               )}
@@ -136,12 +136,12 @@ export default function UserAvatar({
             {(anonymousId || subtitle || role) && (
               <div className="mt-4 text-center space-y-0.5">
                 {name && anonymousId && name !== anonymousId && (
-                  <p className="text-xs font-mono font-medium text-(--kt-muted)">
+                  <p className="kt-id text-sm text-(--kt-muted)">
                     {anonymousId}
                   </p>
                 )}
                 {subtitle && (
-                  <p className="text-2xs text-(--kt-muted)">{subtitle}</p>
+                  <p className="text-sm text-(--kt-muted)">{subtitle}</p>
                 )}
               </div>
             )}

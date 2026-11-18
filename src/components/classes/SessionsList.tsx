@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Calendar, Clock } from "lucide-react";
-import StatusBadge from "@/components/ui/StatusBadge";
+import StatusText from "@/components/ui/StatusText";
 import { getSessionStatusBadge, SessionLifecycleStatus } from "./classStatus";
 import { formatDateTime, formatTime, SCHOOL_TIME_ZONE } from "@/lib/datetime";
 
@@ -64,7 +64,7 @@ export default function SessionsList({
   if (variant === "calendar") return <CalendarSessions sessions={sessions} renderActions={renderActions} />;
   if (sessions.length === 0) {
     return (
-      <p className="text-2xs text-(--kt-faint) italic border border-dashed border-base-300 rounded-lg py-4 text-center">
+      <p className="py-3 text-sm text-(--kt-muted)">
         No sessions scheduled yet.
       </p>
     );
@@ -77,23 +77,23 @@ export default function SessionsList({
         return (
           <div
             key={s.id}
-            className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl text-xs"
+            className="flex flex-wrap items-center justify-between gap-3 p-3 border border-base-200 bg-base-200/20 rounded-xl"
           >
             <div className="min-w-0 max-w-full space-y-1">
-              <div className="font-semibold text-(--kt-muted) break-words">{s.topic}</div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-2xs text-(--kt-faint)">
+              <div className="font-medium break-words">{s.topic}</div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-(--kt-muted)">
                 <span className="flex min-w-0 items-center gap-1">
-                  <Calendar className="h-3 w-3" />
+                  <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
                   {formatDateTime(s.scheduledAt)}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                   {s.duration} minutes
                 </span>
               </div>
             </div>
             <div className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
-              <StatusBadge tone={tone} label={label} size="xs" />
+              <StatusText tone={tone} label={label} />
               {renderActions?.(s)}
             </div>
           </div>

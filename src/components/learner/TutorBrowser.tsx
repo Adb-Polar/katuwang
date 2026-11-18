@@ -95,21 +95,21 @@ export default function TutorBrowser() {
             onChange={setQ}
             placeholder={meta.showTutorRealNames === true ? "Search tutors by name or ID" : "Search by tutor ID"}
           />
-          <select aria-label="Grade level" className="select select-bordered select-sm text-base min-h-11 sm:text-sm" value={gradeLevel}
+          <select aria-label="Grade level" className="select select-bordered w-full" value={gradeLevel}
             onFocus={() => subjectMenuRef.current?.removeAttribute("open")}
             onChange={(e) => { setGradeLevel(e.target.value); setSubjects([]); }}>
             <option value="">All grades</option>
             {GRADE_LEVELS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
           </select>
           <details ref={subjectMenuRef} className="dropdown w-full">
-            <summary className="select select-bordered select-sm text-base min-h-11 sm:text-sm w-full flex items-center justify-between list-none [&::-webkit-details-marker]:hidden bg-none cursor-pointer">
+            <summary className="select select-bordered w-full flex items-center justify-between list-none [&::-webkit-details-marker]:hidden bg-none cursor-pointer">
               <span>{subjects.length ? `Teaches ${subjects.length} subject${subjects.length === 1 ? "" : "s"}` : "Any subject"}</span>
               <ChevronDown className="h-4 w-4 text-(--kt-muted)" aria-hidden="true" />
             </summary>
             <div className="dropdown-content z-20 mt-1 rounded-field border border-base-300 bg-base-100 p-3 shadow-md w-72 max-h-72 overflow-y-auto">
               {subjectGroups.filter((group) => group.items.length).map((group) => (
                 <fieldset key={group.label} className="mb-2 border-b border-base-200 pb-2 last:border-0">
-                  <legend className="text-xs font-medium text-(--kt-muted)">{group.label}</legend>
+                  <legend className="text-sm font-medium text-(--kt-muted)">{group.label}</legend>
                   {group.items.map((s) => <label key={s.slug} className="flex items-center gap-2 py-1.5 text-sm">
                     <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={subjects.includes(s.slug)}
                       onChange={() => toggleSubject(s.slug)} />{s.name}
@@ -119,7 +119,7 @@ export default function TutorBrowser() {
               <button type="button" className="link link-hover text-primary text-sm" onClick={() => setSubjects([])}>Clear</button>
             </div>
           </details>
-          <select aria-label="Sort matching tutors" className="select select-bordered select-sm text-base min-h-11 sm:text-sm" value={sort}
+          <select aria-label="Sort matching tutors" className="select select-bordered w-full" value={sort}
             onFocus={() => subjectMenuRef.current?.removeAttribute("open")}
             onChange={(e) => setSort(e.target.value)}>
             <option value="codeAsc">Tutor ID: A–Z</option>
