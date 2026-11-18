@@ -5364,3 +5364,8 @@ A repo-wide sweep found the learner tutor profile and a few shared pieces still 
   and Report pop-ups (serif title, full-size fields and buttons, shared dialog surface, labelled close button).
 - `UserAvatar` initials readable; `DeltaBar` table; `TopicChip` 0.8rem; `AnonymousIdBadge` serif instead of mono.
 `ClassCard`/`SessionsList`/`TopicChip` are also used by `StoryTimeline`'s samples, which no page renders.
+
+### Ignore the local dev-server config (2026-11-18)
+
+`.gitignore` now ignores `/.claude/launch.json`, the per-machine dev-server config that Claude preview sessions
+write into each worktree, so it no longer shows up as an uncommitted change.

@@ -51,6 +51,8 @@ next-env.d.ts
 /docs/reviews/scratchpad/
 /docs/katuwang/
 .obsidian/
+# per-machine dev-server config written by Claude preview sessions
+/.claude/launch.json
 
 # Local task work and verification assets
 /work/
