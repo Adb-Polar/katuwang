@@ -1,3 +1,21 @@
+Input sanitization fixes (Changes.md Part 91, 2026-11-18)
+ [] Profile picture: upload a normal JPEG/PNG photo -> it saves and shows; download the stored
+    avatar and confirm it has no EXIF/GPS (e.g. `exiftool`), even for a small phone photo.
+ [] Profile picture: rename a text/SVG file to `avatar-test.webp` and upload it (devtools or a
+    direct UploadThing call) -> rejected with "That image could not be processed..." and the
+    previous avatar is still shown (not a broken image).
+ [] Profile picture: replacing an avatar removes the old one (no orphan in the UploadThing
+    dashboard) and the new one appears on ClassCard / tutor roster.
+ [] New class + Edit class: meeting link `javascript:alert(1)` or `ftp://x` -> inline error
+    under Meeting link, no request sent; `https://meet.google.com/abc` saves.
+ [] A class whose stored meetingLink is not http(s) (legacy row) shows "Place not set"
+    instead of a clickable link on the learner class page.
+ [] /register: first/last name or section of only spaces -> field error; section stops at 50
+    characters; Contact Info shows a phone keypad on mobile, "call my tita" -> PH-mobile error
+    under Contact Info, "+63 917 123 4567" registers and the admin user view shows 09171234567.
+ [] /admin/admins (super admin): create an admin whose first name is `<b>Hi</b>` -> the
+    invitation email shows the literal text `<b>Hi</b>`, not bold text.
+
 Portals on the landing theme (2026-11-17)
  [Good] /learner (demo learner): "Your week" heading, one stats line, day-grouped sessions with
     full topics, desktop and 375px; /tutor, /admin, /admin/reports themed, charts recoloured.

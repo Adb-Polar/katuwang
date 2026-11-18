@@ -1,6 +1,6 @@
 // Non-destructive audit probes: all authentication and database calls are mocked.
-// BUG-001/002 now assert secure behavior. BUG-005 remains historical reproduction
-// of a separate validation finding outside the three active backlog fixes.
+// BUG-001/002/005 now assert secure behavior (BUG-005 fixed by the input
+// sanitization audit, Changes.md Part 91).
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ session: vi.fn(), findMany: vi.fn(), count: vi.fn(), account: vi.fn(), certifications: vi.fn() }));
 vi.mock("next-auth", () => ({ getServerSession: mocks.session }));
@@ -32,9 +32,9 @@ describe("Audit defect reproduction with isolated mocks", () => {
     mocks.account.mockResolvedValue({ role: "ADMIN", status: "BANNED" });
     expect((await requireAdminSession()).authorized).toBe(false);
   });
-  it("BUG-005: whitespace-only names and section pass registration schema", () => {
+  it("BUG-005: whitespace-only names and section are rejected by the registration schema", () => {
     const result = commonRegisterSchema.safeParse({ studentIdNumber: "001-234", adviserTeacherName: "Maria Santos", firstName: "   ", lastName: "   ", email: "qa@example.test", password: "AuditOnly!2026", gradeLevel: "GRADE_9", section: "   ", consentGiven: true });
-    expect(result.success).toBe(true);
-    if (result.success) expect([result.data.firstName, result.data.lastName, result.data.section]).toEqual(["", "", ""]);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map(({ path }) => path[0])).toEqual(expect.arrayContaining(["firstName", "lastName", "section"]));
   });
 });

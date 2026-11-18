@@ -280,6 +280,9 @@ export default function EditClassForm({
                 <input
                   type="url"
                   aria-label="Meeting link"
+                  maxLength={191}
+                  pattern="https?://.+"
+                  title="Use a link that starts with https:// or http://"
                   value={form.meetingLink}
                   onChange={(e) => setForm((prev) => ({ ...prev, meetingLink: e.target.value }))}
                   placeholder="https://meet.google.com/..."

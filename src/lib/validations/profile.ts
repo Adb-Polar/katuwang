@@ -22,7 +22,7 @@ export const updateProfileSchema = z.object({
     .string()
     .trim()
     .toLowerCase()
-    .pipe(z.string().email("Invalid recovery email address."))
+    .pipe(z.string().email("Invalid recovery email address.").max(191, "Recovery email cannot exceed 191 characters."))
     .optional()
     .or(z.literal("")),
 });

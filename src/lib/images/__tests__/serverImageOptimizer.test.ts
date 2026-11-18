@@ -72,6 +72,23 @@ describe("optimizeImageBuffer", () => {
     expect(result.height).toBe(150);
   });
 
+  it("strips EXIF metadata even when re-encoding does not shrink the file", async () => {
+    // Low-quality noise: re-encoding at the normal quality makes it larger, which
+    // used to trigger the "keep the original" path (EXIF and all).
+    const noise = Buffer.alloc(64 * 64 * 3);
+    for (let i = 0; i < noise.length; i++) noise[i] = (i * 7919) % 256;
+    const withExif = await sharp(noise, { raw: { width: 64, height: 64, channels: 3 } })
+      .webp({ quality: 1 })
+      .withExif({ IFD0: { Copyright: "secret-location" } })
+      .toBuffer();
+    expect((await sharp(withExif).metadata()).exif).toBeDefined();
+
+    const result = await optimizeImageBuffer(withExif, { maxDimension: 512 });
+
+    expect(result.buffer.equals(withExif)).toBe(false);
+    expect((await sharp(result.buffer).metadata()).exif).toBeUndefined();
+  });
+
   it("rejects non-image buffers with ImageValidationError", async () => {
     const corruptBuffer = Buffer.from("not-an-image-file-header-content");
     await expect(optimizeImageBuffer(corruptBuffer)).rejects.toThrow(ImageValidationError);

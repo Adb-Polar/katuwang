@@ -58,6 +58,14 @@ describe("classDetailsSchema", () => {
   });
 });
 
+describe("classDetailsSchema trimming", () => {
+  it("trims before checking length, so padded values within the limit pass", () => {
+    const parsed = classDetailsSchema.parse({ ...validDetails, room: `  ${"r".repeat(50)}  `, building: "  Main  " });
+    expect(parsed.room).toBe("r".repeat(50));
+    expect(parsed.building).toBe("Main");
+  });
+});
+
 describe("createClassSchema", () => {
   const withMeetingLink = { ...validDetails, meetingLink: "https://meet.google.com/abc-defg-hij" };
 
@@ -72,6 +80,25 @@ describe("createClassSchema", () => {
   it("rejects more than 20 sessions", () => {
     const sessions = Array.from({ length: 21 }, () => validSession);
     expect(createClassSchema.safeParse({ ...withMeetingLink, sessions }).success).toBe(false);
+  });
+
+  it.each(["javascript:alert(1)", "data:text/html,<b>hi</b>", "ftp://files.example.com/x"])(
+    "rejects a non-web meeting link scheme: %s",
+    (meetingLink) => {
+      const result = createClassSchema.safeParse({ ...validDetails, meetingLink, sessions: [validSession] });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.message).toBe("Meeting link must start with https:// or http://.");
+    }
+  );
+
+  it("rejects a meeting link longer than 191 characters", () => {
+    const meetingLink = `https://meet.example.com/${"a".repeat(170)}`;
+    expect(createClassSchema.safeParse({ ...validDetails, meetingLink, sessions: [validSession] }).success).toBe(false);
+  });
+
+  it("accepts an http meeting link and an empty one alongside a location", () => {
+    expect(createClassSchema.safeParse({ ...validDetails, meetingLink: "http://zoom.us/j/1", sessions: [validSession] }).success).toBe(true);
+    expect(createClassSchema.safeParse({ ...validDetails, building: "Main", meetingLink: "", sessions: [validSession] }).success).toBe(true);
   });
 
   it("rejects when neither a location nor a meeting link is given", () => {

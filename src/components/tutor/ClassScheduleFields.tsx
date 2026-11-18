@@ -538,6 +538,9 @@ export default function ClassScheduleFields({
             <input
               type="url"
               name="meetingLink"
+              maxLength={191}
+              pattern="https?://.+"
+              title="Use a link that starts with https:// or http://"
               value={form.meetingLink}
               onChange={handleInputChange}
               placeholder="https://meet.google.com/..."

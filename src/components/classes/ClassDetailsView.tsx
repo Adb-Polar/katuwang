@@ -96,6 +96,8 @@ export default function ClassDetailsView({
   const kicker = `${subjectDisplayLabel(subject)}${grade ? ` · Grade ${grade}` : ""}`;
   const verified = topics.filter((t) => verifiedTopics?.includes(t));
   const where = [building && `Bldg. ${building}`, room && `Room ${room}`].filter(Boolean).join(" · ");
+  // Rows saved before the http(s)-only rule may hold another scheme; never link those.
+  const webMeetingLink = meetingLink && /^https?:\/\//i.test(meetingLink.trim()) ? meetingLink : null;
   const seatsLeft = Math.max(0, maxStudents - enrolledCount);
   const sessionIsPast = nextSessionAt ? new Date(nextSessionAt) <= new Date() : false;
   const showSeats = audience === "learner" && status === "SCHEDULED";
@@ -159,11 +161,11 @@ export default function ClassDetailsView({
           </span>
           <span aria-hidden="true" className="text-(--kt-muted)">·</span>
           <span className="font-medium break-words">
-            {where || (meetingLink ? (
-              <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">Online meeting link</a>
+            {where || (webMeetingLink ? (
+              <a href={webMeetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">Online meeting link</a>
             ) : <span className="text-(--kt-muted) font-normal">Place not set</span>)}
-            {where && meetingLink && (
-              <> · <a href={meetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">meeting link</a></>
+            {where && webMeetingLink && (
+              <> · <a href={webMeetingLink} target="_blank" rel="noopener noreferrer" className="link link-primary">meeting link</a></>
             )}
           </span>
           <span aria-hidden="true" className="text-(--kt-muted)">·</span>

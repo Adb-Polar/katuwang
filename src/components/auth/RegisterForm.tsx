@@ -205,6 +205,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               value={form.section}
               onChange={handleChange}
               required
+              maxLength={50}
               placeholder="e.g., Rizal"
               className="input input-bordered w-full"
             />
@@ -229,13 +230,16 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input type="email" name="recoveryEmail" value={form.recoveryEmail} onChange={handleChange} placeholder="backup@example.com" className="input input-bordered w-full" />
         </FormField>
 
-        <FormField size="md" label="Contact Info" hint="Optional — phone or guardian contact">
+        <FormField size="md" label="Contact Info" hint="Optional — Philippine mobile number">
           <input
-            type="text"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={20}
             name="contactInfo"
             value={form.contactInfo}
             onChange={handleChange}
-            placeholder="Phone or guardian contact"
+            placeholder="0917 123 4567"
             className="input input-bordered w-full"
           />
         </FormField>

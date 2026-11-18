@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validations/auth";
+import { normalizeContactInfo } from "@/lib/contactInfo";
 import { getSetting } from "@/lib/settings";
 import { registerAccount } from "@/lib/registration";
 import { sendMail, renderVerificationEmail } from "@/lib/mail";
@@ -45,6 +46,12 @@ export async function POST(req: NextRequest) {
 
     const data = result.data;
 
+    // Same PH-mobile rule as profile edits, so the column holds one shape.
+    const contact = normalizeContactInfo(data.contactInfo ?? "");
+    if (!contact.ok) {
+      return NextResponse.json({ error: contact.error, fieldErrors: [{ path: ["contactInfo"], message: contact.error }] }, { status: 400 });
+    }
+
     const account = await registerAccount({
       type: data.type,
       firstName: data.firstName,
@@ -55,7 +62,7 @@ export async function POST(req: NextRequest) {
       section: data.section,
       studentIdNumber: data.studentIdNumber,
       adviserTeacherName: data.adviserTeacherName,
-      contactInfo: data.contactInfo || null,
+      contactInfo: contact.value || null,
       recoveryEmail: data.recoveryEmail || null,
       consentGiven: data.consentGiven,
       requireApproval,

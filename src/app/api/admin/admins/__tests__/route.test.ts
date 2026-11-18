@@ -262,3 +262,43 @@ it("preserves admin-list filtering, sorting and pagination with the required req
     orderBy: { lastName: "asc" }, skip: 5, take: 5,
   }));
 });
+
+describe("POST /api/admin/admins invitation safety", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    getServerSessionMock.mockResolvedValue({ user: { id: "super-1", role: "SUPER_ADMIN" } });
+    userFindFirstMock.mockResolvedValue(null);
+    generateAnonymousIdMock.mockResolvedValue("ADM-0004");
+    tokenCreateMock.mockResolvedValue({ id: "token-id" });
+    auditLogCreateMock.mockResolvedValue({ id: "audit-id" });
+    sendMailMock.mockResolvedValue(true);
+  });
+
+  it("escapes the invitee's name in the invitation email HTML", async () => {
+    const firstName = `<a href="https://evil.test">Click</a>`;
+    userCreateMock.mockResolvedValue({ id: "a4", anonymousId: "ADM-0004", firstName, lastName: "X", email: "inv@example.com", role: "ADMIN", status: "ACTIVE", createdAt: new Date() });
+    const res = await POST(makePostRequest({ firstName, lastName: "X", email: "inv@example.com" }));
+    expect(res.status).toBe(201);
+    const { html, text } = sendMailMock.mock.calls[0][0];
+    expect(html).not.toContain("<a href=\"https://evil.test\">");
+    expect(html).toContain("&lt;a href=&quot;https://evil.test&quot;&gt;Click&lt;/a&gt;");
+    expect(text).toContain(firstName);
+  });
+
+  it("refuses to create an admin in production when NEXTAUTH_URL is unset", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXTAUTH_URL", "");
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: "newadmin@example.com" }));
+    expect(res.status).toBe(500);
+    expect(userCreateMock).not.toHaveBeenCalled();
+    expect(sendMailMock).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+  });
+
+  it("rejects an email longer than 191 characters", async () => {
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: `${"a".repeat(186)}@x.com` }));
+    expect(res.status).toBe(400);
+    expect(userCreateMock).not.toHaveBeenCalled();
+  });
+});
