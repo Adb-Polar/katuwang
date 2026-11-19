@@ -129,7 +129,7 @@ describe("inline form validation", () => {
   });
   it("focuses the add-session action, then the missing date in a newly added session", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, json: async () => ({ subjects: [{ slug: "MATH", name: "Mathematics", topics: ["Algebra"] }] }) })));
-    await act(async () => root.render(<ClassScheduleFields initial={{subject: "MATH", topics: ["Algebra"]}} onCancel={() => {}} onSubmit={vi.fn()} />));
+    await act(async () => root.render(<ClassScheduleFields initial={{gradeLevel: "GRADE_7", subject: "MATH", topics: ["Algebra"]}} onCancel={() => {}} onSubmit={vi.fn()} />));
     await submit();
     expect(document.activeElement?.textContent).toContain("Add Session");
     expect(document.activeElement?.closest("[data-form-field]")?.textContent).toContain("Please add at least one session.");
