@@ -1294,3 +1294,13 @@ Admin portal unslop pass (Changes.md 2026-11-18)
  [ ] Tutor profile with showTutorRealNames on, with a profile picture, and with sessions this week (timetable columns).
  [ ] Moderated / unpublished ClassCard on a tutor profile.
  [ ] Request topic and Report pop-ups: send each once (DB write); close button and Escape behaviour.
+
+
+Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
+ [Good: Chromium, /register/learner] "12345" first name, "abc!@#" student ID, "!!!@@@" section each show their own message under the field; "Peña", "2024-00123", "7-A" pass.
+ [ ] Register as tutor and learner end to end with real values (ñ / accented names, hyphenated LRN, section like "7-A"); confirm the account saves.
+ [ ] Profile edit (learner + tutor): section "<x>" is refused with "Use letters, numbers, spaces or hyphens only."; "STEM 1" saves.
+ [ ] Create class + Edit class: building "Bldg. 2" / room "Rm 101" save; "@@@" shows the location message.
+ [ ] Accept a topic request with a building/room (same rule through createClassSchema).
+ [ ] /admin/admins (super admin): name "123" is refused; contact "0917 123 4567" saves as 09171234567; "abc" is refused under Contact info.
+ [ ] Existing account whose stored section predates the rule (e.g. "7@A"): profile page loads; saving shows the section message until the section is corrected (the form always sends section).

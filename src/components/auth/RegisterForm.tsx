@@ -11,6 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import { PERSON_NAME, SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 type RegisterType = "LEARNER" | "TUTOR";
@@ -132,6 +133,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="firstName"
+              maxLength={50}
+              pattern={PERSON_NAME.pattern}
+              title={PERSON_NAME.message}
               value={form.firstName}
               onChange={handleChange}
               required
@@ -144,6 +148,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="lastName"
+              maxLength={50}
+              pattern={PERSON_NAME.pattern}
+              title={PERSON_NAME.message}
               value={form.lastName}
               onChange={handleChange}
               required
@@ -157,6 +164,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input
             type="text"
             name="studentIdNumber"
+            inputMode="numeric"
+            pattern={STUDENT_ID.pattern}
+            title={STUDENT_ID.message}
             value={form.studentIdNumber}
             onChange={handleChange}
             required
@@ -170,6 +180,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input
             type="text"
             name="adviserTeacherName"
+            pattern={PERSON_NAME.pattern}
+            title={PERSON_NAME.message}
             value={form.adviserTeacherName}
             onChange={handleChange}
             required
@@ -202,6 +214,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="section"
+              pattern={SECTION_NAME.pattern}
+              title={SECTION_NAME.message}
               value={form.section}
               onChange={handleChange}
               required

@@ -5424,3 +5424,32 @@ A repo-wide sweep found the learner tutor profile and a few shared pieces still 
 
 `.gitignore` now ignores `/.claude/launch.json`, the per-machine dev-server config that Claude preview sessions
 write into each worktree, so it no longer shows up as an uncommitted change.
+
+### Fix stale ValidatedForm add-session focus test (2026-11-19)
+
+`src/components/ui/__tests__/ValidatedForm.test.tsx` "focuses the add-session action…" failed since grade level
+became the first required field in `ClassScheduleFields` (grade → subject → topics): its initial values had no
+`gradeLevel`, so validation stopped at the grade select. The test now starts with `gradeLevel: "GRADE_7"`.
+Test-only change; full suite green (1457 passed).
+
+### Allowed-character rules for identity and location fields (2026-11-19)
+
+Probing `fix/input-sanitation` showed names, adviser name, student ID, section, building/room and admin contact
+accepted anything within length (`12345`, `@@##$$`, `<script>…`, emoji). React and the email templates already
+escape output, so this was data quality rather than XSS, but junk could be stored. New
+`src/lib/validations/textRules.ts` holds one rule per kind of field, used by both the Zod schema and the
+matching `<input pattern>` (each pattern compiles under the `u` flag Zod uses and the `v` flag browsers use):
+
+- **Person names** (register first/last, adviser teacher, admin first/last): letters incl. ñ/accents, spaces,
+  `.` `'` `-`; must start with a letter.
+- **Section** (register, learner/tutor profile): letters, digits, spaces, `-`.
+- **Student ID number**: digits and `-`.
+- **Building / room** (create class, edit class, accept topic request): letters, digits, spaces, `. # - /`.
+- **Admin contact info** (`POST /api/admin/admins`): now normalised with `normalizeContactInfo` (PH mobile,
+  stored as `09XXXXXXXXX`), same as register/profile; the create-admin modal input is `type="tel"`.
+
+Client: first/last name inputs gain `maxLength={50}`, building/room `maxLength` 100/50, student ID
+`inputMode="numeric"`. `fieldValidationMessage` now shows an input's `title` on a pattern mismatch instead of
+the browser's generic "match the requested format". Tests: new `textRules.test.ts` (rules, browser/server
+pattern parity, each schema); admin route tests cover markup names (400), bad contacts (400) and contact
+normalisation; the invitation-escaping test now uses a stored legacy name. Full suite green (1477 passed).

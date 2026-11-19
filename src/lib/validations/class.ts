@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOCATION_TEXT } from "@/lib/validations/textRules";
 import { SessionStatus, GradeLevel } from "@prisma/client";
 
 // `subject` is a slug from the admin-managed taxonomy — routes verify it
@@ -48,12 +49,14 @@ export const classDetailsSchema = z.object({
     .string()
     .trim()
     .max(100, "Building cannot exceed 100 characters.")
+    .regex(LOCATION_TEXT.regex, `Building: ${LOCATION_TEXT.message}`)
     .optional()
     .or(z.literal("")),
   room: z
     .string()
     .trim()
     .max(50, "Room cannot exceed 50 characters.")
+    .regex(LOCATION_TEXT.regex, `Room: ${LOCATION_TEXT.message}`)
     .optional()
     .or(z.literal("")),
   // Learners open this link, so only plain web links are allowed: `z.url()` alone

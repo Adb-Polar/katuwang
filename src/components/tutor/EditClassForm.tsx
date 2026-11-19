@@ -18,6 +18,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
+import { LOCATION_TEXT } from "@/lib/validations/textRules";
 import SessionsList, { SessionSummary } from "@/components/classes/SessionsList";
 import SessionActions from "@/components/tutor/SessionActions";
 import AddSessionModal from "@/components/tutor/AddSessionModal";
@@ -261,6 +262,9 @@ export default function EditClassForm({
                     type="text"
                     aria-label="Building"
                     value={form.building}
+                    maxLength={100}
+                    pattern={LOCATION_TEXT.pattern}
+                    title={LOCATION_TEXT.message}
                     onChange={(e) => setForm((prev) => ({ ...prev, building: e.target.value }))}
                     placeholder="Building"
                     className="input input-bordered w-full min-w-0"
@@ -269,6 +273,9 @@ export default function EditClassForm({
                     type="text"
                     aria-label="Room"
                     value={form.room}
+                    maxLength={50}
+                    pattern={LOCATION_TEXT.pattern}
+                    title={LOCATION_TEXT.message}
                     onChange={(e) => setForm((prev) => ({ ...prev, room: e.target.value }))}
                     placeholder="Room"
                     className="input input-bordered w-28 shrink-0"

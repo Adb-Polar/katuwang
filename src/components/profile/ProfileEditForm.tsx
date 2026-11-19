@@ -10,6 +10,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import { normalizeContactInfo } from "@/lib/contactInfo";
+import { SECTION_NAME } from "@/lib/validations/textRules";
 
 export default function ProfileEditForm({
   endpoint,
@@ -110,6 +111,8 @@ export default function ProfileEditForm({
           type="text"
           value={section}
           onChange={(e) => setSection(e.target.value)}
+          pattern={SECTION_NAME.pattern}
+          title={SECTION_NAME.message}
           className="input input-bordered w-full"
           maxLength={50}
           required

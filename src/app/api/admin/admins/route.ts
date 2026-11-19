@@ -6,6 +6,7 @@ import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { requireSuperAdminSession } from "@/lib/permissions";
 import { createAdminAccountSchema } from "@/lib/validations/admin";
 import { escapeHtml } from "@/lib/html";
+import { normalizeContactInfo } from "@/lib/contactInfo";
 import { generateAnonymousId } from "@/lib/idGenerator";
 import { generateResetToken, hashResetToken } from "@/lib/passwordReset";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -144,6 +145,12 @@ export async function POST(req: NextRequest) {
 
     const data = result.data;
 
+    // Same PH-mobile rule as learner/tutor contact info, so the column holds one shape.
+    const contact = normalizeContactInfo(data.contactInfo ?? "");
+    if (!contact.ok) {
+      return NextResponse.json({ error: contact.error, fieldErrors: [{ path: ["contactInfo"], message: contact.error }] }, { status: 400 });
+    }
+
     // The activation link must point at the real deployment. Fail before creating
     // the account rather than mailing a localhost link from production.
     const baseUrl = process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000");
@@ -190,7 +197,7 @@ export async function POST(req: NextRequest) {
           role: Role.ADMIN, // Server-enforced Role.ADMIN — client cannot elevate
           gradeLevel: GradeLevel.GRADE_12,
           section: "ADMIN",
-          contactInfo: data.contactInfo || null,
+          contactInfo: contact.value || null,
           consentGiven: true,
           status: AccountStatus.ACTIVE,
           emailVerifiedAt: new Date(),

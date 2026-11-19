@@ -5,6 +5,7 @@ import { UserPlus, Copy, Check } from "lucide-react";
 import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import Modal from "@/components/ui/Modal";
+import { PERSON_NAME } from "@/lib/validations/textRules";
 
 interface CreateAdminModalProps {
   isOpen: boolean;
@@ -189,6 +190,9 @@ export default function CreateAdminModal({
                   type="text"
                   required
                   value={firstName}
+                  maxLength={50}
+                  pattern={PERSON_NAME.pattern}
+                  title={PERSON_NAME.message}
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="e.g. Maria"
                   className="input input-bordered w-full focus:input-primary"
@@ -199,6 +203,9 @@ export default function CreateAdminModal({
                   type="text"
                   required
                   value={lastName}
+                  maxLength={50}
+                  pattern={PERSON_NAME.pattern}
+                  title={PERSON_NAME.message}
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="e.g. Santos"
                   className="input input-bordered w-full focus:input-primary"
@@ -217,9 +224,12 @@ export default function CreateAdminModal({
               />
             </FormField>
 
-            <FormField label="Contact info" hint="Optional mobile number or contact details." size="md">
+            <FormField label="Contact info" hint="Optional — Philippine mobile number." size="md">
               <input
-                type="text"
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                maxLength={20}
                 value={contactInfo}
                 onChange={(e) => setContactInfo(e.target.value)}
                 placeholder="e.g. 0917-123-4567"
