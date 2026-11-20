@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { NextRequest } from "next/server";
 
 const { mockQueryRaw } = vi.hoisted(() => ({
   mockQueryRaw: vi.fn(),
@@ -12,19 +13,50 @@ vi.mock("@/lib/prisma", () => ({
 
 import { GET } from "@/app/api/health/route";
 
+const SECRET = "test-health-secret";
+
+function healthRequest(authorization?: string) {
+  const headers = authorization ? { authorization } : undefined;
+  return new NextRequest("http://localhost/api/health", { headers });
+}
+
 describe("GET /api/health", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("HEALTH_CHECK_SECRET", SECRET);
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it.each([
+    ["no Authorization header", undefined],
+    ["a wrong token", "Bearer wrong-secret"],
+    ["the secret without the Bearer scheme", SECRET],
+    ["a token that only shares a prefix", `Bearer ${SECRET}x`],
+  ])("returns 401 without touching the database for %s", async (_label, authorization) => {
+    const response = await GET(healthRequest(authorization));
+
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: "Unauthorized." });
+    expect(mockQueryRaw).not.toHaveBeenCalled();
+  });
+
+  it("returns 401 for every request when HEALTH_CHECK_SECRET is unset", async () => {
+    vi.stubEnv("HEALTH_CHECK_SECRET", "");
+
+    const response = await GET(healthRequest("Bearer "));
+
+    expect(response.status).toBe(401);
+    expect(mockQueryRaw).not.toHaveBeenCalled();
   });
 
   it("returns 200 and healthy status when database is reachable", async () => {
     mockQueryRaw.mockResolvedValueOnce([{ 1: 1 }]);
 
-    const response = await GET();
+    const response = await GET(healthRequest(`Bearer ${SECRET}`));
     const data = await response.json();
 
     expect(response.status).toBe(200);
@@ -43,7 +75,7 @@ describe("GET /api/health", () => {
     const sensitiveDbError = new Error("Connection refused at mysql://avnadmin:SUPER_SECRET_PASSWORD@db-host:24446");
     mockQueryRaw.mockRejectedValueOnce(sensitiveDbError);
 
-    const response = await GET();
+    const response = await GET(healthRequest(`Bearer ${SECRET}`));
     const data = await response.json();
 
     expect(response.status).toBe(503);

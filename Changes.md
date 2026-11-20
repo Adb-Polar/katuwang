@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [93](#part-93) | **Health endpoint requires a cron secret** | `GET /api/health` now returns 401 unless the caller sends `Authorization: Bearer <HEALTH_CHECK_SECRET>`; fails closed when the env var is unset. | See Part 93 below. New `src/lib/bearerAuth.ts` (constant-time compare), shared with the certificate-jobs route. |
 | [92](#part-92) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 92 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
 | [91](#part-91) | **Input sanitization audit + High/Medium fixes** | Audited every input field across learner/tutor/admin portals, auth pages and account surfaces (`docs/plans/input-sanitization-audit.md`), then fixed the High/Medium gaps: avatars always re-encoded server-side (EXIF/GPS stripped, non-images rejected), meeting links http(s)-only, whitespace-only names/section rejected, register contact normalised to PH mobile, missing `max(191)`s, admin-invite email escaped. | See Part 91 below. Validations, register/admins/uploadthing routes, image optimizer, class forms + tests. |
 | [90](#part-90) | **Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`)** | The "Enrolled classes" stat no longer counts withdrawn enrolments; the four dashboard blocks are now in the DOM in the order they appear on screen (Upcoming → Stats → This week → Certificates), so keyboard/screen-reader order matches the visual order (WCAG 1.3.2 / 2.4.3). | See Part 90 below. `src/app/learner/page.tsx` + new page test. |
@@ -4087,6 +4088,22 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-93"></a>
+## Part 93 — Health endpoint requires a cron secret (2026-11-20)
+
+**Why:** `/api/health` was public, so anyone could hit it and make it run a database query. Only the uptime cron job needs it.
+
+**What changed**
+- `src/lib/bearerAuth.ts` (new): `hasValidBearerToken(header, secret)` compares `Bearer <secret>` in constant time (`timingSafeEqual`, length checked first). It fails closed: an unset or empty secret rejects everything.
+- `src/app/api/health/route.ts`: `GET` now checks `HEALTH_CHECK_SECRET` first and returns `401 { error: "Unauthorized." }` (with `no-store`) before touching the database. The 200/503 responses are unchanged.
+- `src/app/api/internal/certificate-jobs/route.ts`: uses the same helper instead of its own inline comparison. Behaviour unchanged.
+- `.env.example`: documents `HEALTH_CHECK_SECRET`.
+- Tests: `src/app/api/health/__tests__/route.test.ts` adds 401 cases (no header, wrong token, missing `Bearer`, prefix-only match, unset secret) and checks the DB is not queried.
+
+**Deploy note:** set `HEALTH_CHECK_SECRET` in Render and add the `Authorization: Bearer …` header to the cron job, or its checks will start getting 401.
+
+---
 
 <a id="part-92"></a>
 ## Part 92 — Report generation — all 3 portals (PDF + CSV) (2026-11-19)

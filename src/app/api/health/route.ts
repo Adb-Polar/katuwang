@@ -1,10 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { hasValidBearerToken } from "@/lib/bearerAuth";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function GET() {
+const NO_STORE = { "Cache-Control": "no-store, no-cache, must-revalidate" };
+
+export async function GET(req: NextRequest) {
+  if (!hasValidBearerToken(req.headers.get("authorization"), process.env.HEALTH_CHECK_SECRET)) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401, headers: NO_STORE });
+  }
+
   try {
     // Lightweight database connectivity verification
     await prisma.$queryRaw`SELECT 1`;
@@ -17,9 +24,7 @@ export async function GET() {
       },
       {
         status: 200,
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        },
+        headers: NO_STORE,
       }
     );
   } catch (error) {
@@ -34,9 +39,7 @@ export async function GET() {
       },
       {
         status: 503,
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        },
+        headers: NO_STORE,
       }
     );
   }
