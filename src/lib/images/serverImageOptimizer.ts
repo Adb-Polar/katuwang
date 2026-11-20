@@ -120,20 +120,8 @@ export async function optimizeImageBuffer(
     mimeType = "image/jpeg";
   }
 
-  // 8. Ensure output is not larger than original if dimensions were already within bounds
-  if (outputBuffer.length >= originalSize && !target.scaled && detectedFormat === outputFormat) {
-    // If output is somehow larger and dimensions were unchanged, keep the original
-    return {
-      buffer: inputBuffer,
-      format: detectedFormat,
-      width: rawWidth,
-      height: rawHeight,
-      originalSize,
-      optimizedSize: originalSize,
-      reductionPercent: 0,
-      mimeType: detectedFormat === "jpeg" ? "image/jpeg" : `image/${detectedFormat}`,
-    };
-  }
+  // 8. Always return the re-encoded buffer, even when it is not smaller: the
+  // original may carry EXIF/GPS metadata, and avatars are shown to peers (RA 10173).
 
   // Retrieve actual output dimensions
   const outputMetadata = await sharp(outputBuffer).metadata();

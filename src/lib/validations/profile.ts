@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SECTION_NAME } from "@/lib/validations/textRules";
 import { GradeLevel } from "@prisma/client";
 
 export { normalizeContactInfo } from "@/lib/contactInfo";
@@ -16,13 +17,14 @@ export const updateProfileSchema = z.object({
     .max(200, "Contact info cannot exceed 200 characters.")
     .optional()
     .or(z.literal("")),
-  section: z.string().trim().min(1, "Section is required.").max(50, "Section cannot exceed 50 characters.").optional(),
+  section: z.string().trim().min(1, "Section is required.").max(50, "Section cannot exceed 50 characters.")
+    .regex(SECTION_NAME.regex, `Section: ${SECTION_NAME.message}`).optional(),
   gradeLevel: z.nativeEnum(GradeLevel, { message: "Select a valid grade level." }).optional(),
   recoveryEmail: z
     .string()
     .trim()
     .toLowerCase()
-    .pipe(z.string().email("Invalid recovery email address."))
+    .pipe(z.string().email("Invalid recovery email address.").max(191, "Recovery email cannot exceed 191 characters."))
     .optional()
     .or(z.literal("")),
 });

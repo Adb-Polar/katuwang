@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LOCATION_TEXT } from "@/lib/validations/textRules";
 import { SessionStatus, GradeLevel } from "@prisma/client";
 
 // `subject` is a slug from the admin-managed taxonomy — routes verify it
@@ -35,8 +36,8 @@ export const classDetailsSchema = z.object({
     .max(10, "You can select up to 10 topics."),
   description: z
     .string()
-    .max(500, "Description cannot exceed 500 characters.")
     .trim()
+    .max(500, "Description cannot exceed 500 characters.")
     .optional()
     .or(z.literal("")),
   maxStudents: z.coerce
@@ -46,20 +47,26 @@ export const classDetailsSchema = z.object({
     .max(10, "Capacity cannot exceed 10 students."),
   building: z
     .string()
-    .max(100, "Building cannot exceed 100 characters.")
     .trim()
+    .max(100, "Building cannot exceed 100 characters.")
+    .regex(LOCATION_TEXT.regex, `Building: ${LOCATION_TEXT.message}`)
     .optional()
     .or(z.literal("")),
   room: z
     .string()
-    .max(50, "Room cannot exceed 50 characters.")
     .trim()
+    .max(50, "Room cannot exceed 50 characters.")
+    .regex(LOCATION_TEXT.regex, `Room: ${LOCATION_TEXT.message}`)
     .optional()
     .or(z.literal("")),
+  // Learners open this link, so only plain web links are allowed: `z.url()` alone
+  // also accepts `javascript:`, `data:` and other schemes.
   meetingLink: z
     .string()
     .trim()
+    .max(191, "Meeting link cannot exceed 191 characters.")
     .url("Invalid URL format.")
+    .refine((value) => /^https?:\/\//i.test(value), "Meeting link must start with https:// or http://.")
     .optional()
     .or(z.literal("")),
   published: z.boolean().optional(),

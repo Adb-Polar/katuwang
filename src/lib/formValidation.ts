@@ -5,6 +5,7 @@ export function fieldValidationMessage(field: HTMLInputElement | HTMLSelectEleme
   if ("minLength" in field && field.minLength > 0 && field.value && field.value.length < field.minLength) return `Use at least ${field.minLength} characters.`;
   if ("maxLength" in field && field.maxLength > 0 && field.value.length > field.maxLength) return `Use no more than ${field.maxLength} characters.`;
   if (field.dataset.after && field.value && field.value <= field.dataset.after) return "End time must be after the start time.";
+  if (field.validity.patternMismatch && field.title) return field.title;
   return field.validity.valid ? "" : field.validationMessage;
 }
 

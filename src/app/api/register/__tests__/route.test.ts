@@ -130,6 +130,31 @@ describe("POST /api/register", () => {
     expect(userCreate.mock.calls[0][0].data.recoveryEmailVerifiedAt).toBeUndefined();
   });
 
+  it.each([
+    ["firstName", "   "], ["lastName", "\t"], ["section", "  "], ["section", "a".repeat(51)],
+    ["email", `${"a".repeat(186)}@x.com`], ["recoveryEmail", `${"b".repeat(186)}@x.com`],
+  ])("rejects %s=%j with a 400 field error before any database write", async (field, value) => {
+    const res = await POST(makeRequest({ ...validLearner, [field]: value }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: [field] })]));
+    expect(userFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("rejects a contact that is not a PH mobile number", async () => {
+    const res = await POST(makeRequest({ ...validLearner, contactInfo: "call my tita" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors).toEqual([expect.objectContaining({ path: ["contactInfo"] })]);
+    expect(userCreate).not.toHaveBeenCalled();
+  });
+
+  it("normalises a PH mobile contact to 09XXXXXXXXX", async () => {
+    userFindUnique.mockResolvedValue(null);
+    userCreate.mockResolvedValue({ anonymousId: "STU-0001", email: validLearner.email, role: "STUDENT_LEARNER" });
+    const res = await POST(makeRequest({ ...validLearner, contactInfo: "+63 917 123 4567" }));
+    expect(res.status).toBe(201);
+    expect(userCreate.mock.calls[0][0].data.contactInfo).toBe("09171234567");
+  });
+
   it("registers a learner successfully", async () => {
     userFindUnique.mockResolvedValue(null);
     userCreate.mockResolvedValue({

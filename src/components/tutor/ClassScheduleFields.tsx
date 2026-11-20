@@ -14,6 +14,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import CatalogCurriculumHint from "@/components/ui/CatalogCurriculumHint";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
+import { LOCATION_TEXT } from "@/lib/validations/textRules";
 import { parseLocalDateAndTime, combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 
 export interface SessionRowValue {
@@ -503,6 +504,9 @@ export default function ClassScheduleFields({
               type="text"
               aria-label="Building"
               name="building"
+              maxLength={100}
+              pattern={LOCATION_TEXT.pattern}
+              title={LOCATION_TEXT.message}
               value={form.building}
               onChange={handleInputChange}
               placeholder="Building"
@@ -512,6 +516,9 @@ export default function ClassScheduleFields({
               type="text"
               aria-label="Room"
               name="room"
+              maxLength={50}
+              pattern={LOCATION_TEXT.pattern}
+              title={LOCATION_TEXT.message}
               value={form.room}
               onChange={handleInputChange}
               placeholder="Room"
@@ -538,6 +545,9 @@ export default function ClassScheduleFields({
             <input
               type="url"
               name="meetingLink"
+              maxLength={191}
+              pattern="https?://.+"
+              title="Use a link that starts with https:// or http://"
               value={form.meetingLink}
               onChange={handleInputChange}
               placeholder="https://meet.google.com/..."

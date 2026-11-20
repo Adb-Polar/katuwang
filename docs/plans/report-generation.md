@@ -1,6 +1,6 @@
 # Report Generation — all 3 portals (PDF + CSV)
 
-> **Status: DONE (2026-11-19, Changes.md Part 91).** Shipped as planned, with these adjustments:
+> **Status: DONE (2026-11-19, Changes.md Part 92).** Shipped as planned, with these adjustments:
 > - Only the learner progress query moved into a shared helper (`src/lib/progress/learner.ts`). The tutor and admin reports need date filters, per-learner rows and pre/post counts that the existing roll-up and `/api/admin/reports` don't have, so `src/lib/reports/{tutor,admin}.ts` query directly and the existing routes are unchanged.
 > - A tutor asking for someone else's class gets the existing `loadOwnedClass` status (403 for a class they don't own, 404 for a missing one), not a blanket 404.
 > - CSV adds a UTF-8 BOM and a CSV-injection guard; admin exports are capped at 5,000 rows with a note.

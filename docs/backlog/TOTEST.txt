@@ -1,4 +1,4 @@
-Report generation (2026-11-19, Changes.md Part 91)
+Report generation (2026-11-19, Changes.md Part 92)
  [Good: e2e 2026-11-19, 1280+375px] /learner/progress: download PDF and CSV for "All classes" and for one class; open the PDF; no tutor name anywhere.
  [Good: e2e 2026-11-19] /tutor class page: "Download class report" PDF/CSV; roster shows only STU- IDs.
  [Good: e2e 2026-11-19] /tutor dashboard "Reports" card: tutoring summary PDF/CSV.
@@ -7,6 +7,24 @@ Report generation (2026-11-19, Changes.md Part 91)
  [Good: e2e 2026-11-19] Date filter: change From/To and confirm rows change; From after To shows the error banner.
  [ ] CSV opens correctly in Excel/Sheets (Ñ and dashes intact, gains like +12 not shown as '+12).
  [Good: 150-row sample, 2026-11-19] Long reports paginate in the PDF with repeated table headers and "Page X of Y".
+
+Input sanitization fixes (Changes.md Part 91, 2026-11-18)
+ [] Profile picture: upload a normal JPEG/PNG photo -> it saves and shows; download the stored
+    avatar and confirm it has no EXIF/GPS (e.g. `exiftool`), even for a small phone photo.
+ [] Profile picture: rename a text/SVG file to `avatar-test.webp` and upload it (devtools or a
+    direct UploadThing call) -> rejected with "That image could not be processed..." and the
+    previous avatar is still shown (not a broken image).
+ [] Profile picture: replacing an avatar removes the old one (no orphan in the UploadThing
+    dashboard) and the new one appears on ClassCard / tutor roster.
+ [] New class + Edit class: meeting link `javascript:alert(1)` or `ftp://x` -> inline error
+    under Meeting link, no request sent; `https://meet.google.com/abc` saves.
+ [] A class whose stored meetingLink is not http(s) (legacy row) shows "Place not set"
+    instead of a clickable link on the learner class page.
+ [] /register: first/last name or section of only spaces -> field error; section stops at 50
+    characters; Contact Info shows a phone keypad on mobile, "call my tita" -> PH-mobile error
+    under Contact Info, "+63 917 123 4567" registers and the admin user view shows 09171234567.
+ [] /admin/admins (super admin): create an admin whose first name is `<b>Hi</b>` -> the
+    invitation email shows the literal text `<b>Hi</b>`, not bold text.
 
 Portals on the landing theme (2026-11-17)
  [Good] /learner (demo learner): "Your week" heading, one stats line, day-grouped sessions with
@@ -1286,3 +1304,13 @@ Admin portal unslop pass (Changes.md 2026-11-18)
  [ ] Tutor profile with showTutorRealNames on, with a profile picture, and with sessions this week (timetable columns).
  [ ] Moderated / unpublished ClassCard on a tutor profile.
  [ ] Request topic and Report pop-ups: send each once (DB write); close button and Escape behaviour.
+
+
+Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
+ [Good: Chromium, /register/learner] "12345" first name, "abc!@#" student ID, "!!!@@@" section each show their own message under the field; "Peña", "2024-00123", "7-A" pass.
+ [ ] Register as tutor and learner end to end with real values (ñ / accented names, hyphenated LRN, section like "7-A"); confirm the account saves.
+ [ ] Profile edit (learner + tutor): section "<x>" is refused with "Use letters, numbers, spaces or hyphens only."; "STEM 1" saves.
+ [ ] Create class + Edit class: building "Bldg. 2" / room "Rm 101" save; "@@@" shows the location message.
+ [ ] Accept a topic request with a building/room (same rule through createClassSchema).
+ [ ] /admin/admins (super admin): name "123" is refused; contact "0917 123 4567" saves as 09171234567; "abc" is refused under Contact info.
+ [ ] Existing account whose stored section predates the rule (e.g. "7@A"): profile page loads; saving shows the section message until the section is corrected (the form always sends section).

@@ -29,8 +29,8 @@ export const createTopicRequestSchema = matchCriteriaSchema.extend({
   gradeLevel: z.nativeEnum(GradeLevel, { message: "Invalid grade level." }),
   note: z
     .string()
-    .max(500, "Note cannot exceed 500 characters.")
     .trim()
+    .max(500, "Note cannot exceed 500 characters.")
     .optional()
     .or(z.literal("")),
   // Present → the request is directed at one specific tutor; absent → public (every eligible tutor sees it).

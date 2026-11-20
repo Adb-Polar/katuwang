@@ -1,7 +1,7 @@
 import type { MailContent } from "@/lib/mail";
 import { formatDate } from "@/lib/datetime";
 import type { CertificateSnapshot } from "./pdf";
-const escape = (value: string) => value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
+import { escapeHtml } from "@/lib/html";
 export function certificateEmail(c: CertificateSnapshot): MailContent {
   const paragraphs = [
     `Hello ${c.learnerName},`,
@@ -15,5 +15,5 @@ export function certificateEmail(c: CertificateSnapshot): MailContent {
     "Thank you for being part of the Katuwang learning community.",
     "Best regards, The Katuwang Team",
   ];
-  return { subject: "Katuwang - Your Certificate of Completion", text: paragraphs.join("\n\n"), html: `<div style="font-family:Arial,sans-serif;line-height:1.6">${paragraphs.map(p => `<p>${escape(p)}</p>`).join("")}</div>` };
+  return { subject: "Katuwang - Your Certificate of Completion", text: paragraphs.join("\n\n"), html: `<div style="font-family:Arial,sans-serif;line-height:1.6">${paragraphs.map(p => `<p>${escapeHtml(p)}</p>`).join("")}</div>` };
 }

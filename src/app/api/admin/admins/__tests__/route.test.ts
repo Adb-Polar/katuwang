@@ -262,3 +262,65 @@ it("preserves admin-list filtering, sorting and pagination with the required req
     orderBy: { lastName: "asc" }, skip: 5, take: 5,
   }));
 });
+
+describe("POST /api/admin/admins invitation safety", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.unstubAllEnvs();
+    getServerSessionMock.mockResolvedValue({ user: { id: "super-1", role: "SUPER_ADMIN" } });
+    userFindFirstMock.mockResolvedValue(null);
+    generateAnonymousIdMock.mockResolvedValue("ADM-0004");
+    tokenCreateMock.mockResolvedValue({ id: "token-id" });
+    auditLogCreateMock.mockResolvedValue({ id: "audit-id" });
+    sendMailMock.mockResolvedValue(true);
+  });
+
+  it("rejects markup in the invitee's name before creating the account", async () => {
+    const res = await POST(makePostRequest({ firstName: `<a href="https://evil.test">Click</a>`, lastName: "X", email: "inv@example.com" }));
+    expect(res.status).toBe(400);
+    expect(userCreateMock).not.toHaveBeenCalled();
+    expect(sendMailMock).not.toHaveBeenCalled();
+  });
+
+  it("escapes the stored name in the invitation email HTML", async () => {
+    // The stored row may predate the character rule; escaping is the second line of defence.
+    const firstName = `<a href="https://evil.test">Click</a>`;
+    userCreateMock.mockResolvedValue({ id: "a4", anonymousId: "ADM-0004", firstName, lastName: "X", email: "inv@example.com", role: "ADMIN", status: "ACTIVE", createdAt: new Date() });
+    const res = await POST(makePostRequest({ firstName: "Valid", lastName: "X", email: "inv@example.com" }));
+    expect(res.status).toBe(201);
+    const { html, text } = sendMailMock.mock.calls[0][0];
+    expect(html).not.toContain("<a href=\"https://evil.test\">");
+    expect(html).toContain("&lt;a href=&quot;https://evil.test&quot;&gt;Click&lt;/a&gt;");
+    expect(text).toContain(firstName);
+  });
+
+  it("refuses to create an admin in production when NEXTAUTH_URL is unset", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXTAUTH_URL", "");
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: "newadmin@example.com" }));
+    expect(res.status).toBe(500);
+    expect(userCreateMock).not.toHaveBeenCalled();
+    expect(sendMailMock).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+  });
+
+  it.each(["abc", "12345", "facebook.com/me"])("rejects a non-PH-mobile contact %j", async (contactInfo) => {
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: "newadmin@example.com", contactInfo }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).fieldErrors[0].path).toEqual(["contactInfo"]);
+    expect(userCreateMock).not.toHaveBeenCalled();
+  });
+
+  it("stores the contact number in the normalised 09XXXXXXXXX form", async () => {
+    userCreateMock.mockResolvedValue({ id: "a5", anonymousId: "ADM-0005", firstName: "New", lastName: "Admin", email: "newadmin@example.com", role: "ADMIN", status: "ACTIVE", createdAt: new Date() });
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: "newadmin@example.com", contactInfo: "+63 917 123 4567" }));
+    expect(res.status).toBe(201);
+    expect(userCreateMock.mock.calls[0][0].data.contactInfo).toBe("09171234567");
+  });
+
+  it("rejects an email longer than 191 characters", async () => {
+    const res = await POST(makePostRequest({ firstName: "New", lastName: "Admin", email: `${"a".repeat(186)}@x.com` }));
+    expect(res.status).toBe(400);
+    expect(userCreateMock).not.toHaveBeenCalled();
+  });
+});

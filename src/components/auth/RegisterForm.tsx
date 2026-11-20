@@ -11,6 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import { PERSON_NAME, SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 type RegisterType = "LEARNER" | "TUTOR";
@@ -132,6 +133,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="firstName"
+              maxLength={50}
+              pattern={PERSON_NAME.pattern}
+              title={PERSON_NAME.message}
               value={form.firstName}
               onChange={handleChange}
               required
@@ -144,6 +148,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="lastName"
+              maxLength={50}
+              pattern={PERSON_NAME.pattern}
+              title={PERSON_NAME.message}
               value={form.lastName}
               onChange={handleChange}
               required
@@ -157,6 +164,9 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input
             type="text"
             name="studentIdNumber"
+            inputMode="numeric"
+            pattern={STUDENT_ID.pattern}
+            title={STUDENT_ID.message}
             value={form.studentIdNumber}
             onChange={handleChange}
             required
@@ -170,6 +180,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input
             type="text"
             name="adviserTeacherName"
+            pattern={PERSON_NAME.pattern}
+            title={PERSON_NAME.message}
             value={form.adviserTeacherName}
             onChange={handleChange}
             required
@@ -202,9 +214,12 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             <input
               type="text"
               name="section"
+              pattern={SECTION_NAME.pattern}
+              title={SECTION_NAME.message}
               value={form.section}
               onChange={handleChange}
               required
+              maxLength={50}
               placeholder="e.g., Rizal"
               className="input input-bordered w-full"
             />
@@ -229,13 +244,16 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input type="email" name="recoveryEmail" value={form.recoveryEmail} onChange={handleChange} placeholder="backup@example.com" className="input input-bordered w-full" />
         </FormField>
 
-        <FormField size="md" label="Contact Info" hint="Optional — phone or guardian contact">
+        <FormField size="md" label="Contact Info" hint="Optional — Philippine mobile number">
           <input
-            type="text"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            maxLength={20}
             name="contactInfo"
             value={form.contactInfo}
             onChange={handleChange}
-            placeholder="Phone or guardian contact"
+            placeholder="0917 123 4567"
             className="input input-bordered w-full"
           />
         </FormField>

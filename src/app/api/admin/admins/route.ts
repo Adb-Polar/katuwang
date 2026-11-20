@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { requireSuperAdminSession } from "@/lib/permissions";
 import { createAdminAccountSchema } from "@/lib/validations/admin";
+import { escapeHtml } from "@/lib/html";
+import { normalizeContactInfo } from "@/lib/contactInfo";
 import { generateAnonymousId } from "@/lib/idGenerator";
 import { generateResetToken, hashResetToken } from "@/lib/passwordReset";
 import { AUDIT_ACTIONS, AUDIT_TARGET_TYPES } from "@/lib/auditLog";
@@ -143,6 +145,20 @@ export async function POST(req: NextRequest) {
 
     const data = result.data;
 
+    // Same PH-mobile rule as learner/tutor contact info, so the column holds one shape.
+    const contact = normalizeContactInfo(data.contactInfo ?? "");
+    if (!contact.ok) {
+      return NextResponse.json({ error: contact.error, fieldErrors: [{ path: ["contactInfo"], message: contact.error }] }, { status: 400 });
+    }
+
+    // The activation link must point at the real deployment. Fail before creating
+    // the account rather than mailing a localhost link from production.
+    const baseUrl = process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "production" ? "" : "http://localhost:3000");
+    if (!baseUrl) {
+      console.error("Cannot create admin account: NEXTAUTH_URL is not set.");
+      return NextResponse.json({ error: "An unexpected error occurred. Please try again." }, { status: 500 });
+    }
+
     // Check for duplicate account across email and recoveryEmail
     const existing = await prisma.user.findFirst({
       where: {
@@ -181,7 +197,7 @@ export async function POST(req: NextRequest) {
           role: Role.ADMIN, // Server-enforced Role.ADMIN — client cannot elevate
           gradeLevel: GradeLevel.GRADE_12,
           section: "ADMIN",
-          contactInfo: data.contactInfo || null,
+          contactInfo: contact.value || null,
           consentGiven: true,
           status: AccountStatus.ACTIVE,
           emailVerifiedAt: new Date(),
@@ -223,7 +239,6 @@ export async function POST(req: NextRequest) {
     });
 
     // Construct activation URL
-    const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
     const activationUrl = `${baseUrl}/reset-password?token=${rawToken}`;
 
     // Dispatch invitation email if mailer is configured
@@ -232,7 +247,7 @@ export async function POST(req: NextRequest) {
         to: newAdmin.email,
         subject: "Welcome to Katuwang — Set up your administrator account",
         text: `Hello ${newAdmin.firstName},\n\nYou have been invited to join Katuwang as an Administrator.\nPlease set your password using this link (valid for 48 hours):\n${activationUrl}\n\nBest regards,\nKatuwang Platform Administration`,
-        html: `<p>Hello ${newAdmin.firstName},</p><p>You have been invited to join Katuwang as an Administrator.</p><p><a href="${activationUrl}">Click here to set your password and activate your account</a> (valid for 48 hours).</p><p>Best regards,<br/>Katuwang Platform Administration</p>`,
+        html: `<p>Hello ${escapeHtml(newAdmin.firstName)},</p><p>You have been invited to join Katuwang as an Administrator.</p><p><a href="${escapeHtml(activationUrl)}">Click here to set your password and activate your account</a> (valid for 48 hours).</p><p>Best regards,<br/>Katuwang Platform Administration</p>`,
       });
     } catch (mailErr) {
       console.warn("Could not dispatch invitation email:", mailErr);

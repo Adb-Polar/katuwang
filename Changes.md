@@ -8,7 +8,8 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
-| [91](#part-91) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 91 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
+| [92](#part-92) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 92 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
+| [91](#part-91) | **Input sanitization audit + High/Medium fixes** | Audited every input field across learner/tutor/admin portals, auth pages and account surfaces (`docs/plans/input-sanitization-audit.md`), then fixed the High/Medium gaps: avatars always re-encoded server-side (EXIF/GPS stripped, non-images rejected), meeting links http(s)-only, whitespace-only names/section rejected, register contact normalised to PH mobile, missing `max(191)`s, admin-invite email escaped. | See Part 91 below. Validations, register/admins/uploadthing routes, image optimizer, class forms + tests. |
 | [90](#part-90) | **Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`)** | The "Enrolled classes" stat no longer counts withdrawn enrolments; the four dashboard blocks are now in the DOM in the order they appear on screen (Upcoming → Stats → This week → Certificates), so keyboard/screen-reader order matches the visual order (WCAG 1.3.2 / 2.4.3). | See Part 90 below. `src/app/learner/page.tsx` + new page test. |
 | [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
 | [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
@@ -4087,8 +4088,8 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
 
-<a id="part-89"></a>
-## Part 91 — Report generation — all 3 portals (PDF + CSV) (2026-11-19)
+<a id="part-92"></a>
+## Part 92 — Report generation — all 3 portals (PDF + CSV) (2026-11-19)
 
 Plan: `docs/plans/report-generation.md`. No schema change, no migration.
 
@@ -4106,6 +4107,61 @@ Tests: `src/lib/reports/__tests__/{range,render}.test.ts`, `src/app/api/{learner
 
 ---
 
+<a id="part-91"></a>
+## Part 91 — Input sanitization audit + High/Medium fixes (2026-11-18)
+
+Audited against `origin/develop` @ `774ab11`. Report: `docs/plans/input-sanitization-audit.md`
+(one table per portal: field → component → API route → Zod rule → client attributes → gap +
+severity, plus cross-cutting gaps). Approved scope: the **High + Medium** gaps. Low items are
+still open in the report.
+
+**U1 — Avatar uploads (High, RA 10173).** `src/app/api/uploadthing/core.ts` used to skip the
+server re-encode when the client-chosen filename looked like `avatar-*.webp`, kept the raw file
+when the re-encode wasn't smaller, and kept it when the optimizer threw (e.g. a non-image), so a
+photo could keep its EXIF/GPS data and be shown to peers. Now every upload is fetched, run
+through `optimizeImageBuffer` and stored as the sanitised copy. On any failure the raw upload is
+deleted and the user gets "That image could not be processed…". The previous avatar is deleted
+only after the new one is saved, so a rejected upload no longer leaves a broken image.
+`optimizeImageBuffer` no longer returns the original buffer when re-encoding doesn't shrink it.
+
+**T1 — Meeting link (High).** `classDetailsSchema.meetingLink` now requires `http(s)://` and has
+`max(191)` (`z.url()` alone accepted `javascript:`/`data:`/`ftp:`). The class create/edit inputs
+have a matching `pattern` and `maxLength`. `ClassDetailsView` only links an http(s) value, which
+covers rows saved before this rule.
+
+**Medium validation fixes.**
+- `.trim()` moved before `.min/.max` (Zod 4 runs checks in chain order): register first/last
+  name and section, class description/building/room, topic-request note. Whitespace-only names
+  or section are rejected instead of being saved as `""` (also fixes audit BUG-005, whose probe
+  in `docs/reports/capstone-audit-2026-10-22/evidence/audit-probes.test.ts` now asserts the
+  secure behaviour).
+- Register `section` capped at 50 (same as profile; `maxLength={50}` on the form).
+- Register `contactInfo` goes through `normalizeContactInfo` (PH mobile → `09XXXXXXXXX`), the
+  same rule as profile edits; the form field is now `type=tel` with a PH placeholder.
+- `max(191)` on register email/recovery email, profile recovery email and the admin-account
+  email (these used to fail at the DB with a 500).
+
+**X2 — Admin invitation email (Medium).** `firstName` and the activation URL are now
+HTML-escaped (new `src/lib/html.ts` `escapeHtml`, also used by the certificate email). In
+production, a missing `NEXTAUTH_URL` now fails before the account is created instead of mailing
+a `localhost` link.
+
+**Tests.**
+- New: avatar sanitisation (pre-optimised name still re-encoded, optimizer/fetch/store failures
+  reject without touching the DB or the old avatar).
+- New: an EXIF test that fails on the old optimizer.
+- New: meeting-link schemes and length, trim order, register 400s (blank names/section, long
+  emails, non-PH contact) and PH normalisation.
+- New: admin invite escaping, the production `NEXTAUTH_URL` guard and `escapeHtml`.
+- `tsc` and `lint` are clean.
+- Full suite: 1454 passed, 3 failed before the BUG-005 probe update. The remaining failures are
+  pre-existing and unrelated:
+  - the known `ValidatedForm` add-session focus case;
+  - `scripts/question-bank/replace.test.ts`, which hit its 5 s timeout under full-suite load
+    and passes on its own.
+- No database or schema changes. Not committed.
+
+<a id="part-89"></a>
 ## Part 90 — Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`) (2026-11-17)
 
 Two fixes on `/learner` found by a report-only UI audit. No visual redesign; no schema change.
@@ -5388,3 +5444,32 @@ A repo-wide sweep found the learner tutor profile and a few shared pieces still 
 
 `.gitignore` now ignores `/.claude/launch.json`, the per-machine dev-server config that Claude preview sessions
 write into each worktree, so it no longer shows up as an uncommitted change.
+
+### Fix stale ValidatedForm add-session focus test (2026-11-19)
+
+`src/components/ui/__tests__/ValidatedForm.test.tsx` "focuses the add-session action…" failed since grade level
+became the first required field in `ClassScheduleFields` (grade → subject → topics): its initial values had no
+`gradeLevel`, so validation stopped at the grade select. The test now starts with `gradeLevel: "GRADE_7"`.
+Test-only change; full suite green (1457 passed).
+
+### Allowed-character rules for identity and location fields (2026-11-19)
+
+Probing `fix/input-sanitation` showed names, adviser name, student ID, section, building/room and admin contact
+accepted anything within length (`12345`, `@@##$$`, `<script>…`, emoji). React and the email templates already
+escape output, so this was data quality rather than XSS, but junk could be stored. New
+`src/lib/validations/textRules.ts` holds one rule per kind of field, used by both the Zod schema and the
+matching `<input pattern>` (each pattern compiles under the `u` flag Zod uses and the `v` flag browsers use):
+
+- **Person names** (register first/last, adviser teacher, admin first/last): letters incl. ñ/accents, spaces,
+  `.` `'` `-`; must start with a letter.
+- **Section** (register, learner/tutor profile): letters, digits, spaces, `-`.
+- **Student ID number**: digits and `-`.
+- **Building / room** (create class, edit class, accept topic request): letters, digits, spaces, `. # - /`.
+- **Admin contact info** (`POST /api/admin/admins`): now normalised with `normalizeContactInfo` (PH mobile,
+  stored as `09XXXXXXXXX`), same as register/profile; the create-admin modal input is `type="tel"`.
+
+Client: first/last name inputs gain `maxLength={50}`, building/room `maxLength` 100/50, student ID
+`inputMode="numeric"`. `fieldValidationMessage` now shows an input's `title` on a pattern mismatch instead of
+the browser's generic "match the requested format". Tests: new `textRules.test.ts` (rules, browser/server
+pattern parity, each schema); admin route tests cover markup names (400), bad contacts (400) and contact
+normalisation; the invitation-escaping test now uses a stored legacy name. Full suite green (1477 passed).

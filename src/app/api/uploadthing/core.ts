@@ -38,50 +38,33 @@ export const ourFileRouter = {
         await utapi.deleteFiles(file.key);
         throw new UploadThingError("Profile picture update is no longer authorized.");
       }
-      // Clean up previous image in cloud storage if replacing
-      if (metadata.oldKey) {
-        try {
-          await utapi.deleteFiles(metadata.oldKey);
-        } catch (err) {
-          console.error("Failed to delete previous avatar from UploadThing:", err);
-        }
+      // Every upload is re-encoded server-side, whatever its name: the client
+      // controls the filename, and the raw file may carry EXIF/GPS metadata or not
+      // be a PNG/JPEG/WebP at all. Peers see avatars, so the raw file is never kept.
+      let finalKey: string;
+      let finalUrl: string;
+      try {
+        const response = await fetch(file.ufsUrl ?? file.url);
+        if (!response.ok) throw new Error(`Fetching the uploaded file failed (${response.status}).`);
+        const rawBuffer = Buffer.from(await response.arrayBuffer());
+        const optResult = await optimizeImageBuffer(rawBuffer, {
+          maxDimension: IMAGE_CONFIG.MAX_AVATAR_DIMENSION,
+          quality: IMAGE_CONFIG.WEBP_QUALITY,
+        });
+        const safeName = generateSafeAvatarFilename(optResult.format);
+        const optimizedFile = new File([new Uint8Array(optResult.buffer)], safeName, {
+          type: optResult.mimeType,
+        });
+        const uploadRes = await utapi.uploadFiles(optimizedFile);
+        const data = Array.isArray(uploadRes) ? uploadRes[0]?.data : uploadRes?.data;
+        if (!data?.key) throw new Error("Storing the sanitised image failed.");
+        finalKey = data.key;
+        finalUrl = data.ufsUrl ?? data.url;
+      } catch (err) {
+        console.error("Rejected profile picture upload:", err);
+        await utapi.deleteFiles(file.key).catch(() => undefined);
+        throw new UploadThingError("That image could not be processed. Upload a PNG, JPEG or WebP photo.");
       }
-
-      let finalKey = file.key;
-      let finalUrl = file.ufsUrl ?? file.url;
-
-      // Defense-in-depth: if raw unoptimized image bypassed client compression, optimize it server-side
-      const isAlreadyOptimized = file.name.startsWith("avatar-") && file.name.endsWith(".webp");
-      if (!isAlreadyOptimized) {
-        try {
-          const response = await fetch(finalUrl);
-          if (response.ok) {
-            const rawBuffer = Buffer.from(await response.arrayBuffer());
-            const optResult = await optimizeImageBuffer(rawBuffer, {
-              maxDimension: IMAGE_CONFIG.MAX_AVATAR_DIMENSION,
-              quality: IMAGE_CONFIG.WEBP_QUALITY,
-            });
-
-            if (optResult.optimizedSize < rawBuffer.length) {
-              const safeName = generateSafeAvatarFilename(optResult.format);
-              const optimizedFile = new File([new Uint8Array(optResult.buffer)], safeName, {
-                type: optResult.mimeType,
-              });
-              const uploadRes = await utapi.uploadFiles(optimizedFile);
-              const data = Array.isArray(uploadRes) ? uploadRes[0]?.data : uploadRes?.data;
-              if (data?.key) {
-                // Delete the uncompressed raw file from cloud storage
-                await utapi.deleteFiles(file.key);
-                finalKey = data.key;
-                finalUrl = data.ufsUrl ?? data.url;
-              }
-            }
-          }
-        } catch (optErr) {
-          console.error("Server-side fallback image optimization failed, keeping original:", optErr);
-        }
-      }
-
       await prisma.user.update({
         where: { id: metadata.userId },
         data: {
@@ -90,6 +73,16 @@ export const ourFileRouter = {
           profilePictureUpdatedAt: new Date(),
         },
       });
+
+      await utapi.deleteFiles(file.key).catch((err) => {
+        console.error("Failed to delete raw avatar upload from UploadThing:", err);
+      });
+      // Only now that the replacement is saved, clean up the previous image.
+      if (metadata.oldKey) {
+        await utapi.deleteFiles(metadata.oldKey).catch((err) => {
+          console.error("Failed to delete previous avatar from UploadThing:", err);
+        });
+      }
 
       return { uploadedBy: metadata.userId, url: finalUrl };
     }),
