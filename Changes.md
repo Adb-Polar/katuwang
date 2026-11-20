@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [91](#part-91) | **Health endpoint requires a cron secret** | `GET /api/health` now returns 401 unless the caller sends `Authorization: Bearer <HEALTH_CHECK_SECRET>`; fails closed when the env var is unset. | See Part 91 below. New `src/lib/bearerAuth.ts` (constant-time compare), shared with the certificate-jobs route. |
 | [90](#part-90) | **Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`)** | The "Enrolled classes" stat no longer counts withdrawn enrolments; the four dashboard blocks are now in the DOM in the order they appear on screen (Upcoming → Stats → This week → Certificates), so keyboard/screen-reader order matches the visual order (WCAG 1.3.2 / 2.4.3). | See Part 90 below. `src/app/learner/page.tsx` + new page test. |
 | [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
 | [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
@@ -5369,3 +5370,19 @@ A repo-wide sweep found the learner tutor profile and a few shared pieces still 
 
 `.gitignore` now ignores `/.claude/launch.json`, the per-machine dev-server config that Claude preview sessions
 write into each worktree, so it no longer shows up as an uncommitted change.
+
+---
+
+## Part 91 — Health endpoint requires a cron secret (2026-11-20)
+
+**Why:** `/api/health` was public, so anyone could hit it and make it run a database query. Only the uptime cron job needs it.
+
+**What changed**
+- `src/lib/bearerAuth.ts` (new): `hasValidBearerToken(header, secret)` compares `Bearer <secret>` in constant time (`timingSafeEqual`, length checked first). It fails closed: an unset or empty secret rejects everything.
+- `src/app/api/health/route.ts`: `GET` now checks `HEALTH_CHECK_SECRET` first and returns `401 { error: "Unauthorized." }` (with `no-store`) before touching the database. The 200/503 responses are unchanged.
+- `src/app/api/internal/certificate-jobs/route.ts`: uses the same helper instead of its own inline comparison. Behaviour unchanged.
+- `.env.example`: documents `HEALTH_CHECK_SECRET`.
+- Tests: `src/app/api/health/__tests__/route.test.ts` adds 401 cases (no header, wrong token, missing `Bearer`, prefix-only match, unset secret) and checks the DB is not queried.
+
+**Deploy note:** set `HEALTH_CHECK_SECRET` in Render and add the `Authorization: Bearer …` header to the cron job, or its checks will start getting 401.
+

@@ -1276,3 +1276,5 @@ Admin portal unslop pass (Changes.md 2026-11-18)
  [ ] Tutor profile with showTutorRealNames on, with a profile picture, and with sessions this week (timetable columns).
  [ ] Moderated / unpublished ClassCard on a tutor profile.
  [ ] Request topic and Report pop-ups: send each once (DB write); close button and Escape behaviour.
+ [ ] /api/health auth (Part 91): with HEALTH_CHECK_SECRET set on Render, `curl -i <site>/api/health` → 401; with `-H "Authorization: Bearer <secret>"` → 200 healthy. Update the cron job's request header before deploying, or it starts failing.
+ [ ] Certificate-jobs scheduler still gets 200 after the shared bearerAuth refactor (Part 91).
