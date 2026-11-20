@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [84](#part-84) | **Load balancer plan** | Planned running N instances behind nginx on the Oracle VM (shared DB rate limiter, health check, trusted IP, pool cap). Plan only, nothing executed. | `docs/plans/load-balancer.md`; indexed in `docs/plans/README.md`. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
 | [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
 | [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
@@ -3035,6 +3036,13 @@ clean, 643/643.
 (`aria-expanded` mismatch on `.kt-nav-group-toggle`). Now it starts `{}` (matches SSR) and a
 post-mount `useEffect` loads the stored prefs; the write-back effect is gated on a
 `prefsLoaded` flag so it never clobbers storage with the empty default.
+
+<a id="part-84"></a>
+## Part 84 — Load balancer plan (2026-11-19)
+
+Docs only. Added `docs/plans/load-balancer.md`: nginx `least_conn` upstream over 2 pm2-managed `next start` (standalone) instances on the Oracle VM. Blockers it addresses: in-memory rate limiter → `RateLimitBucket` DB table (atomic upsert, fail-open), `clientIp()` spoofable via `X-Forwarded-For`, missing `/api/health`, unbounded Prisma pool (`DB_POOL_SIZE`), `NEXTAUTH_URL` fallback leaking internal origin into email links. Schema change pending DB confirmation. Indexed in `docs/plans/README.md`.
+
+---
 
 <a id="part-83"></a>
 ## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
