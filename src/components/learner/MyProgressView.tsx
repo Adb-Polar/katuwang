@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
+import ReportDownloadButtons from "@/components/reports/ReportDownloadButtons";
 import { GroupedBarChart } from "@/components/charts";
 import { formatDate } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
@@ -106,6 +107,14 @@ export default function MyProgressView({
             </select>
           </FormField>
         </div>
+      )}
+
+      {!compact && (
+        <ReportDownloadButtons
+          endpoint="/api/learner/report"
+          params={{ classId: fixedClassId ?? (classId || undefined) }}
+          label={classId ? "Download this class's progress report" : "Download my progress report"}
+        />
       )}
 
       <FeedbackBanner variant="error" message={error || null} />

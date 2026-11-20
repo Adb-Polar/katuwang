@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [91](#part-91) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 91 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
 | [90](#part-90) | **Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`)** | The "Enrolled classes" stat no longer counts withdrawn enrolments; the four dashboard blocks are now in the DOM in the order they appear on screen (Upcoming → Stats → This week → Certificates), so keyboard/screen-reader order matches the visual order (WCAG 1.3.2 / 2.4.3). | See Part 90 below. `src/app/learner/page.tsx` + new page test. |
 | [88](#part-88) | **Separate Date and Time Form Inputs (`fix/separate-time-date-inputs`)** | Replaced combined `datetime-local` input controls with separate `<input type="date">` and `<input type="time">` controls across all session scheduling and rescheduling surfaces (`ClassScheduleFields`, `AddSessionModal`, `SessionActions`); introduced resilient `parseLocalDateAndTime` and `combineDateAndTime` in `src/lib/datetime.ts` with comprehensive unit tests; preserved 100% backward compatibility with API ISO string contracts. | See Part 88 below. Components + Datetime Lib + Tests. |
 | [87](#part-87) | **Comprehensive Question Bank Expansion (15 questions/topic across 155 topics)** | Cleared legacy questions and seeded 15 authentic multiple-choice questions for all 155 curriculum topics (2,325 questions, 9,300 options total); synchronized session test linkages; zero errors on remote Aiven MariaDB. | See Part 87 below. `seedQuestionBank.ts` + `questionBankData.ts`. |
@@ -4087,6 +4088,24 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - `pnpm lint` clean (0 errors).
 
 <a id="part-89"></a>
+## Part 91 — Report generation — all 3 portals (PDF + CSV) (2026-11-19)
+
+Plan: `docs/plans/report-generation.md`. No schema change, no migration.
+
+1. **Shared report lib (`src/lib/reports/`)** — builders return a format-neutral `ReportModel` (title, meta, summary tiles, table sections); `renderReportPdf` (pdf-lib, A4 portrait, paginated tables with repeated headers, ellipsis truncation, "Page X of Y" footer) and `renderReportCsv` (one flat CSV with a `Section` column, UTF-8 BOM, CSV-injection guard that leaves signed numbers like `+12` alone). `range.ts` resolves `from`/`to` in Philippine time; `query.ts` validates via `src/lib/validations/reports.ts`; `respond.ts` sends `attachment` + `private, no-store` + `nosniff`.
+2. **PDF assets shared** — font/logo loading moved from `src/lib/certificates/pdf.ts` to `src/lib/pdf/assets.ts` (`loadPdfAssets`); certificate output unchanged.
+3. **Learner** — `GET /api/learner/report?format&from&to[&classId]`: own anonymous ID, grade/section, class counts, per-session pre/post/gain, certificates (number, class, subject, date — never `tutorName`). The progress query moved to `src/lib/progress/learner.ts` (`getLearnerProgress`), now shared with `GET /api/learner/progress` (response unchanged). Buttons on `/learner/progress` (`MyProgressView`, follows the class filter).
+4. **Tutor** — `GET /api/tutor/report?scope=summary|class[&classId]`: class report (sessions with pre/post counts and averages, roster by learner anonymous ID with per-learner averages) behind the existing `loadOwnedClass` check (403/404 pass through); summary (classes, sessions, learners reached, average gain, quiz attempts, certified topics). Buttons on the class page (`ClassProgressPanel`) and a new "Reports" card on `/tutor`.
+5. **Admin** — `GET /api/admin/report?scope=overview|users|classes|enrollments|session-tests|certifications|audit-log`, admin/super-admin only, range-filtered, capped at 5,000 rows with a truncation note. Real names/emails included (admin-only, as in the portal). `/admin/reports` gets a "Generate a report" card; the old client-side "Export CSV" button is replaced.
+
+Tests: `src/lib/reports/__tests__/{range,render}.test.ts`, `src/app/api/{learner,tutor,admin}/report/__tests__/route.test.ts` (auth 401, 400 validation, ownership pass-through, date-window `where`, no `firstName/lastName/email/tutorName` in peer selects, PDF magic bytes + pagination, 500). tsc + lint + `pnpm build` clean; full suite 1,467 passed, 1 known unrelated failure (`ValidatedForm.test.tsx` add-session case, fails on a clean tree too). Sample PDF rendered and visually checked.
+
+**End-to-end run (2026-11-19, local MariaDB 11 in Docker + `pnpm dev`, throwaway seed):** 32/32 API checks (every role × scope × format, 400/401/403/404 paths) and 25/25 Playwright UI checks (PDF + CSV downloads and the From > To error banner on `/learner/progress`, a tutor class page, `/tutor`, `/admin/reports`, at 1280px and 375px; admin scope switch). Learner/tutor files contain no seeded real names or emails; all averages and gains match hand-computed values. Two fixes from the run:
+- **CSV header collision** — a data column labelled "Section" (admin Users export: school section) overwrote the CSV's own `Section` column. `renderReportCsv` now renames reserved-name data columns to `"<label> (data)"`; the Users column is now "School section". New test in `render.test.ts`.
+- **PDF column widths** — the 9–10-column session tables (tutor class report, admin session-tests export) truncated dates and headers; rebalanced weights and shortened headers to "Pre %", "Post %", "Gain".
+
+---
+
 ## Part 90 — Learner dashboard: enrolled count + reading order (`fix/learner-dashboard-count-order`) (2026-11-17)
 
 Two fixes on `/learner` found by a report-only UI audit. No visual redesign; no schema change.

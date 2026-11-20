@@ -137,6 +137,9 @@ Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
 - Certifications by status.
 - Total enrollments, enrollments in the last 30 days, and a zero-filled daily enrollment series over that same window (charted in `ReportsView.tsx`).
 
+**Generate a report** (card on the same page, added 2026-11-19): pick a report — platform overview, users registered, classes created, enrollments, session tests (pre/post), topic certifications or audit log — and a date range (PHT, default last 90 days, max 366), then download PDF or CSV. Exports include real names/emails; capped at 5,000 rows with a note when truncated.
+(`GET /api/admin/report?format=pdf|csv&scope=…&from=YYYY-MM-DD&to=YYYY-MM-DD`)
+
 (`GET /api/admin/reports`)
 
 ## Audit Log (`/admin/audit-log`)

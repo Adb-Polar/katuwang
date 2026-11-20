@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import LoadErrorState from "@/components/ui/LoadErrorState";
+import ReportDownloadButtons from "@/components/reports/ReportDownloadButtons";
 import { GroupedBarChart } from "@/components/charts";
 import type { ClassSessionTestRollup } from "@/lib/sessionTestResults";
 
@@ -45,6 +46,7 @@ export default function ClassProgressPanel({ classId }: { classId: string }) {
   }));
 
   return (
+    <div className="space-y-4">
     <GroupedBarChart
       title="Class average before and after, by session"
       titleAs="h2"
@@ -67,5 +69,11 @@ export default function ClassProgressPanel({ classId }: { classId: string }) {
         ) : undefined
       }
     />
+    <ReportDownloadButtons
+      endpoint="/api/tutor/report"
+      params={{ scope: "class", classId }}
+      label="Download class report"
+    />
+    </div>
   );
 }

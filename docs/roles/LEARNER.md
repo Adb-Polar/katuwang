@@ -107,6 +107,11 @@ UI copy calls this feature "class request" (changed 2026-09-06); the underlying 
 - **When a tutor accepts your request** — they build a full class from it (subject/topics/schedule pre-filled), and the request flips to `ACCEPTED`, linked to that class. Your requests page shows a "Review & enroll" link to the class's detail page. You are **not** auto-enrolled — you decide. Enrolling flips the request to `ENROLLED`; unenrolling flips it back to `ACCEPTED`.
 - **If the tutor cancels the linked class** — your request automatically re-opens (`→ OPEN`, unlinked) and you get a notification. **If the tutor completes the class** — your request is marked `FULFILLED` (terminal) and you get a notification.
 
+## Progress report download (`/learner/progress`, added 2026-11-19)
+
+- Download your own progress report as PDF or CSV for a date range (default last 90 days): your anonymous ID, grade/section, class counts, each session test's pre/post score and gain, and certificates earned. Follows the class filter. No tutor names and no class averages.
+  (`GET /api/learner/report?format=pdf|csv&from&to[&classId]`)
+
 ## Reporting a tutor or class (`/learner/reports`)
 
 - You can **report a tutor** from their profile (`/learner/tutors/[tutorId]`) — the "Report this tutor" button appears **only if you have joined at least one of that tutor's currently published classes** (the profile page only loads published classes to compute this; the report API itself checks your enrollment history against the tutor with no published-status restriction).

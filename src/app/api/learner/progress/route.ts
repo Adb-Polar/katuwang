@@ -1,14 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
-import { prisma } from "@/lib/prisma";
-
-function avg(nums: number[]): number | null {
-  return nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : null;
-}
+import { getLearnerProgress } from "@/lib/progress/learner";
 
 // ─── GET: The Learner's Own Pre/Post-Test Progress — chart (b) ─────────────
-// Double-blind: no tutor identity, no cohort/class-average stats (a 1-on-1 or
-// small class would make "class average" a de-anonymisation oracle).
+// Double-blind: see getLearnerProgress.
 export async function GET(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
@@ -18,71 +13,9 @@ export async function GET(req: NextRequest) {
     }
 
     const classId = req.nextUrl.searchParams.get("classId")?.trim() || undefined;
+    const { series, summary } = await getLearnerProgress(session.user.id, { classId });
 
-    const enrollments = await prisma.classEnrollment.findMany({
-      where: { learnerId: session.user.id, ...(classId ? { classId } : {}) },
-      select: {
-        withdrawnAt: true,
-        class: {
-          select: {
-            code: true,
-            subject: true,
-            sessions: {
-              select: {
-                id: true,
-                topic: true,
-                scheduledAt: true,
-                status: true,
-                test: {
-                  select: {
-                    status: true,
-                    attempts: {
-                      where: { learnerId: session.user.id },
-                      select: { kind: true, scorePercent: true, status: true },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    const series = enrollments
-      .flatMap((e) =>
-        e.class.sessions
-          .filter((s) => s.test && s.test.status !== "DRAFT")
-          .map((s) => {
-            const submitted = s.test!.attempts.filter((a) => a.status === "SUBMITTED");
-            const pre = submitted.find((a) => a.kind === "PRE")?.scorePercent ?? null;
-            const post = submitted.find((a) => a.kind === "POST")?.scorePercent ?? null;
-            const delta = pre != null && post != null ? post - pre : null;
-            return {
-              classCode: e.class.code,
-              withdrawnAt: e.withdrawnAt?.toISOString() ?? null,
-              subject: e.class.subject,
-              topic: s.topic,
-              scheduledAt: s.scheduledAt.toISOString(),
-              preScore: pre,
-              postScore: post,
-              delta,
-            };
-          }),
-      )
-      // Sort in JS — reads through session -> test -> attempts, not a Prisma orderBy path.
-      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
-
-    const deltas = series.filter((r) => r.delta != null).map((r) => r.delta!);
-
-    return NextResponse.json({
-      series,
-      summary: {
-        sessionsWithTest: series.length,
-        pairedCount: deltas.length,
-        avgDelta: avg(deltas),
-      },
-    });
+    return NextResponse.json({ series, summary });
   } catch (error) {
     console.error("Error building learner progress:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

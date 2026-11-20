@@ -12,6 +12,13 @@ Format: newest first.
 
 ---
 
+## Reports are generated on demand, peer reports stay double-blind (2026-11-19)
+
+**Decision:** PDF/CSV reports for all three portals are built per request and never stored (no `GeneratedReport` table). Learner and tutor reports carry anonymous IDs only; the learner report has no class/cohort averages and lists certificates without the tutor's name. Admin exports include real names and emails.
+**Thesis text says otherwise:** the thesis describes an analytics dashboard and "Privacy-Safe Reporting — aggregate-only views" but no downloadable reports or exports.
+**Why:** user-approved scope (2026-11-19): PDF + CSV, date-range filter, no schema change.
+**Implication for agents:** don't add report persistence or cohort averages to peer reports without a new decision; keep `tutorName`/real names out of learner/tutor outputs.
+
 ## Email verification checked before PENDING approval (2026-09-14)
 
 **Decision:** In `src/lib/auth.ts` `authorize()`, the (optional,

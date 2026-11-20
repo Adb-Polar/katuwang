@@ -91,6 +91,13 @@ per-question and per-learner pre→post gain can be measured. Gated by the
   appear in the admin question bank, another tutor's "my questions" list, or
   the certification quiz pool.
 
+## Reports (added 2026-11-19)
+
+- **Class report** — on a class's page, under the pre/post chart: sessions in the date range (pre/post counts, averages, gain) and the roster by learner anonymous ID with per-learner averages. Owner only; moderated classes are blocked like the results views.
+- **Tutoring summary** — "Reports" card on `/tutor`: all your classes, sessions, learners reached, average learner gain, qualification quiz attempts and certified topics.
+- PDF or CSV, date range in PHT (default last 90 days, max 366).
+  (`GET /api/tutor/report?format=pdf|csv&scope=summary|class[&classId]&from&to`)
+
 ## Students (`/tutor/students`)
 
 - **View your student roster** — every distinct learner enrolled in any of your classes, aggregated across classes, anonymized (`anonymousId`, grade level, section only), with the subjects/topics/enrollment dates for each of their enrollments with you.

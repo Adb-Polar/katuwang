@@ -1,3 +1,13 @@
+Report generation (2026-11-19, Changes.md Part 91)
+ [Good: e2e 2026-11-19, 1280+375px] /learner/progress: download PDF and CSV for "All classes" and for one class; open the PDF; no tutor name anywhere.
+ [Good: e2e 2026-11-19] /tutor class page: "Download class report" PDF/CSV; roster shows only STU- IDs.
+ [Good: e2e 2026-11-19] /tutor dashboard "Reports" card: tutoring summary PDF/CSV.
+ [Good: e2e 2026-11-19] Tutor requesting another tutor's classId via URL → 403, no file.
+ [Good: e2e 2026-11-19 via API; UI scope switch checked] /admin/reports "Generate a report": each of the 7 scopes downloads as PDF and CSV.
+ [Good: e2e 2026-11-19] Date filter: change From/To and confirm rows change; From after To shows the error banner.
+ [ ] CSV opens correctly in Excel/Sheets (Ñ and dashes intact, gains like +12 not shown as '+12).
+ [Good: 150-row sample, 2026-11-19] Long reports paginate in the PDF with repeated table headers and "Page X of Y".
+
 Portals on the landing theme (2026-11-17)
  [Good] /learner (demo learner): "Your week" heading, one stats line, day-grouped sessions with
     full topics, desktop and 375px; /tutor, /admin, /admin/reports themed, charts recoloured.

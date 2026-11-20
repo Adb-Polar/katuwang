@@ -1,26 +1,15 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { PDFDocument, rgb, type PDFFont } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
-import sharp from "sharp";
 import { formatDate } from "@/lib/datetime";
+import { loadPdfAssets } from "@/lib/pdf/assets";
 
 export type CertificateSnapshot = {
   certificateNumber: string; learnerName: string; tutorName: string;
   subjectName: string; classCode: string; completedAt: Date; issuedAt: Date;
 };
-let assets: Promise<Buffer[]> | undefined;
-function loadAssets() {
-  return assets ??= Promise.all([
-    readFile(path.join(process.cwd(), "assets/certificates/DejaVuSans.ttf")),
-    readFile(path.join(process.cwd(), "assets/certificates/DejaVuSerif.ttf")),
-    readFile(path.join(process.cwd(), "public/logos/green-logo-no-bg.svg")).then(svg => sharp(svg).resize(200).png().toBuffer()),
-  ]).catch(error => { assets = undefined; throw error; });
-}
-
 /** All input is drawn as PDF text; no HTML rendering, remote URLs, or user-supplied paths. */
 export async function generateCertificatePdf(snapshot: CertificateSnapshot): Promise<Uint8Array> {
-  const [sansBytes, serifBytes, logoBytes] = await loadAssets();
+  const { sans: sansBytes, serif: serifBytes, logoPng: logoBytes } = await loadPdfAssets();
   const doc = await PDFDocument.create();
   doc.registerFontkit(fontkit);
   const sans = await doc.embedFont(sansBytes, { subset: true });

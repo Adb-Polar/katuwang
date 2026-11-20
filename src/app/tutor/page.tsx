@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { tutorPoolWhere } from "@/lib/topicRequestVisibility";
 import { addDays, formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import PageHeader from "@/components/ui/PageHeader";
+import ReportDownloadButtons from "@/components/reports/ReportDownloadButtons";
 import WeekDayRail, { groupByDay } from "@/components/schedule/WeekDayRail";
 
 export const metadata = {
@@ -178,6 +179,15 @@ export default async function TutorDashboard() {
           </ol>
         </section>
       )}
+      <section aria-labelledby="tutor-reports" className="kt-card">
+        <div className="px-5 py-4 border-b border-(--kt-border)">
+          <h2 id="tutor-reports" className="font-serif text-xl font-medium">Reports</h2>
+          <p className="text-sm text-(--kt-muted)">Your classes, sessions, learner gains and quiz record for a date range. Learners appear by anonymous ID only.</p>
+        </div>
+        <div className="px-5 py-4">
+          <ReportDownloadButtons endpoint="/api/tutor/report" params={{ scope: "summary" }} label="Download tutoring summary" />
+        </div>
+      </section>
     </div>
   );
 }

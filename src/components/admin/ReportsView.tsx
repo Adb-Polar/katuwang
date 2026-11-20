@@ -10,12 +10,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Download } from "lucide-react";
 import { BarChartCard, DataTable, useThemeColors } from "@/components/charts";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import { toCsv, downloadCsv } from "@/lib/csv";
+import ReportDownloadButtons from "@/components/reports/ReportDownloadButtons";
 import LoadingRow from "@/components/ui/LoadingRow";
-import { parseLocalDateAndTime } from "@/lib/datetime";
 import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface Breakdown {
@@ -33,12 +31,23 @@ interface ReportsData {
   enrollments: { total: number; current: number; withdrawn: number; last30Days: number; byDay: { date: string; count: number }[] };
 }
 
+const REPORT_SCOPES = [
+  ["overview", "Platform overview"],
+  ["users", "Users registered"],
+  ["classes", "Classes created"],
+  ["enrollments", "Enrollments"],
+  ["session-tests", "Session tests (pre/post)"],
+  ["certifications", "Topic certifications"],
+  ["audit-log", "Audit log"],
+] as const;
+
 export default function ReportsView() {
   const c = useThemeColors();
   const [reports, setReports] = useState<ReportsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retryKey, setRetryKey] = useState(0);
+  const [scope, setScope] = useState<string>("overview");
 
   useEffect(() => {
     let cancelled = false;
@@ -68,37 +77,6 @@ export default function ReportsView() {
     );
   }
 
-  const exportCsv = () => {
-    if (!reports) return;
-    const sections: [string, Breakdown[], string][] = [
-      ["users_by_role", reports.usersByRole, "role"],
-      ["users_by_grade_level", reports.usersByGradeLevel, "gradeLevel"],
-      ["users_by_status", reports.usersByStatus, "status"],
-      ["classes_by_subject", reports.classesBySubject, "subject"],
-      ["classes_by_status", reports.classesByStatus, "status"],
-      ["certifications_by_status", reports.certificationsByStatus, "status"],
-    ];
-    const rows: Record<string, string | number>[] = [];
-    for (const [section, data, labelKey] of sections) {
-      for (const row of data) {
-        rows.push({ section, label: String(row[labelKey] ?? ""), count: row.count });
-      }
-    }
-    rows.push({ section: "enrollments_total", label: "historical", count: reports.enrollments.total });
-    rows.push({ section: "enrollments_total", label: "current", count: reports.enrollments.current });
-    rows.push({ section: "enrollments_total", label: "withdrawn", count: reports.enrollments.withdrawn });
-    rows.push({
-      section: "enrollments_total",
-      label: "last_30_days",
-      count: reports.enrollments.last30Days,
-    });
-    for (const d of reports.enrollments.byDay) {
-      rows.push({ section: "enrollments_by_day", label: d.date, count: d.count });
-    }
-    const today = parseLocalDateAndTime(new Date()).date;
-    downloadCsv(`katuwang-report-${today}.csv`, toCsv(rows, ["section", "label", "count"]));
-  };
-
   return (
     <div className="space-y-6">
       <FeedbackBanner variant="error" message={error || null} />
@@ -125,15 +103,21 @@ export default function ReportsView() {
                 </div>
               ))}
             </dl>
-            <button
-              type="button"
-              onClick={exportCsv}
-              className="btn btn-outline gap-2"
-            >
-              <Download className="h-4 w-4" />
-              Export CSV
-            </button>
           </div>
+
+          <section aria-labelledby="export-reports" className="card kt-card">
+            <div className="card-body gap-3 p-5">
+              <h2 id="export-reports" className="font-serif text-xl font-medium leading-tight">Generate a report</h2>
+              <p className="text-sm text-(--kt-muted)">PDF for printing or submission, CSV for spreadsheets. Exports include real names and emails, so handle them under RA 10173.</p>
+              <label className="flex flex-col gap-1 text-xs text-(--kt-muted) sm:max-w-xs">
+                Report
+                <select className="select select-bordered select-sm" value={scope} onChange={(e) => setScope(e.target.value)}>
+                  {REPORT_SCOPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                </select>
+              </label>
+              <ReportDownloadButtons endpoint="/api/admin/report" params={{ scope }} label="Date range" />
+            </div>
+          </section>
 
           <div className="card kt-card">
             <div className="card-body gap-2 p-5">
