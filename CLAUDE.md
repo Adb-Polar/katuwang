@@ -133,13 +133,17 @@ The system supports three distinct roles (`Role` enum in Prisma):
 - Use Next.js 16 App Router patterns. Reference `node_modules/next/dist/docs/` when verifying any breaking API changes.
 
 ### 3. API Route Handlers (`src/app/api/**/route.ts`)
-- **Authentication & RBAC**: Always verify session and required role using `getServerSession(authOptions)`:
+- **Authentication & RBAC**: Always verify session and required role using `getServerSession(authOptions)` — `401` when signed out, `403` when signed in with the wrong role:
   ```ts
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "STUDENT_TUTOR") {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
+  if (session.user.role !== "STUDENT_TUTOR") {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
   ```
+- **Request bodies**: Read JSON with `readJsonBody(req)` from `@/lib/requestBody` (never bare `req.json()`), so malformed JSON becomes a Zod `400`, not a `500`.
 - **Input Validation**: Validate incoming request JSON with Zod schemas (`src/lib/validations/`). Return `400` with the first validation error message if parsing fails.
 - **Response Format**:
   - Errors: Return `{ error: string }` with appropriate status code (`400`, `401`, `403`, `404`, `409`, `500`).
@@ -159,4 +163,4 @@ The system supports three distinct roles (`Role` enum in Prisma):
 ### 6. Testing Patterns (Vitest)
 - Place unit and route tests in `__tests__/` subdirectories matching the source file name (e.g. `src/app/api/classes/__tests__/route.test.ts`).
 - Mock `@/lib/prisma` with `vi.hoisted` and mock `next-auth`'s `getServerSession`.
-- Test positive flows, validation errors (400), authentication/authorization guards (401/403), business rule conflicts (409), and 500 error resilience.
+- Test positive flows, validation errors (400), authentication (401) and wrong-role (403) guards, business rule conflicts (409), and 500 error resilience.

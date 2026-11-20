@@ -43,10 +43,10 @@ describe("PATCH /api/admin/topic-requests/[id]", () => {
     updateMock.mockResolvedValue({ id: "r1", status: "CANCELLED" });
   });
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "t1", role: "STUDENT_TUTOR" } });
     const res = await PATCH(makeRequest({ status: "CANCELLED" }), { params });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("404 when the request doesn't exist", async () => {

@@ -172,7 +172,7 @@ Register a new learner account. No auth required. `403 { error: "Registration is
 **500** → `{ error }`.
 
 ### `GET /api/classes`
-Paginated class list for the learner. Requires `role === "STUDENT_LEARNER"` (else `401`). Runs `reinstateExpiredClasses()` first to lift any expired admin suspensions.
+Paginated class list for the learner. Requires `role === "STUDENT_LEARNER"` (else `401` signed out / `403` wrong role). Runs `reinstateExpiredClasses()` first to lift any expired admin suspensions.
 
 **Query params** (all optional): `scope` (`browse` | `mine`, default `browse`), `page` (default `1`), `pageSize` (default `12`, max `50`).
 - `scope=browse` → `SCHEDULED` + **published** classes with an upcoming `SCHEDULED` session that the learner is **not** enrolled in.
@@ -207,7 +207,7 @@ Enroll in a class. Runs `reinstateExpiredClasses()` first.
 
 **200/201** → `201` with the created `ClassEnrollment { id, classId, learnerId, enrolledAt }`.
 **400** → class isn't `SCHEDULED`, or `{ error: "This class has no upcoming sessions to enroll in." }`.
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **404** → class not found.
 **409** → `{ error: "This class is already full." }` or `{ error: "You are already enrolled in this class." }`.
 **500** → `{ error }`.
@@ -217,12 +217,12 @@ Unenroll from a class.
 
 **200** → `{ message: "Unenrolled successfully." }`.
 **400** → `{ error: "Cannot unenroll from a class that is already completed or cancelled." }`.
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **404** → class not found, or `{ error: "You are not enrolled in this class." }`.
 **500** → `{ error }`.
 
 ### `POST /api/learner/match`
-Rank browsable classes against match criteria. Requires `role === "STUDENT_LEARNER"` (`401`). `403 { error: "Matching is currently unavailable." }` when `matchingEnabled` is off.
+Rank browsable classes against match criteria. Requires `role === "STUDENT_LEARNER"` (`401` signed out, `403` wrong role). `403 { error: "Matching is currently unavailable." }` when `matchingEnabled` is off.
 
 **Body**
 ```json
@@ -236,14 +236,14 @@ Rank browsable classes against match criteria. Requires `role === "STUDENT_LEARN
 - `preferredSlots` optional (max 21); `day` is one of the 7 weekday names, times are `HH:MM` 24h with `startTime < endTime`.
 
 **200** → `{ "matches": [{ "class": <learner class DTO>, "score": number, "reasons": { "matchedTopics": string[], "verifiedMatchedTopics": string[], "scheduleFitCount": number, "gradeMatch": "exact" | "adjacent" | "any" | "none" } }] }` — best first, up to 20. `class` is the same anonymized shape as `GET /api/classes` entries (adds `gradeLevel`).
-**400** → invalid topic for subject, or validation error. **401** → not a learner. **403** → matching disabled.
+**400** → invalid topic for subject, or validation error. **401** → not signed in. **403** → not a learner, matching disabled.
 **500** → `{ error }`.
 
 ### `GET /api/learner/topic-requests`
 List the caller's own topic requests, newest first.
 
 **200** → array of `{ id, subject, gradeLevel, note, status, createdAt, topics: string[], slots: [{ day, startTime, endTime }], directedTo: { anonymousId } | null, fulfilledClass: { id, subject, nextSessionAt, tutorAnonymousId } | null }`. `status` is one of `OPEN | ACCEPTED | ENROLLED | FULFILLED | CANCELLED`.
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **500** → `{ error }`.
 
 ### `POST /api/learner/topic-requests`
@@ -263,7 +263,7 @@ Create a topic request. `403` when `matchingEnabled` is off.
 - When `directedTutorId` is given, it must resolve to a real `STUDENT_TUTOR` with a `TutorProfile` (`400` otherwise); the request's `directedTutorProfileId` is set and that tutor gets a `TOPIC_REQUEST_DIRECTED` notification, in the same transaction as the create.
 
 **201** → the created request (same shape as the GET entries).
-**400** → invalid topic for subject, invalid `directedTutorId`, or validation error. **401** → not a learner. **403** → matching disabled.
+**400** → invalid topic for subject, invalid `directedTutorId`, or validation error. **401** → not signed in. **403** → not a learner, matching disabled.
 **409** → `{ error }` when the learner already has 10 `OPEN` requests.
 **500** → `{ error }`.
 
@@ -275,11 +275,11 @@ Cancel one of the caller's own `OPEN` or `ACCEPTED` requests, or edit an `OPEN` 
 
 **200** → `{ id, status }` (cancel) or the updated request (edit).
 **400** → body invalid, the request is in a terminal state (cancel), or not `OPEN` (edit).
-**401** → not a learner. **404** → request not found or not the caller's.
+**401** → not signed in. **403** → not a learner. **404** → request not found or not the caller's.
 **500** → `{ error }`.
 
 ### `GET /api/learner/reports`
-The caller's own reports, newest first. Requires `role === "STUDENT_LEARNER"` (`401`).
+The caller's own reports, newest first. Requires `role === "STUDENT_LEARNER"` (`401` signed out, `403` wrong role).
 
 **200** → `{ reports: [{ id, targetType: "TUTOR"|"CLASS", target: { anonymousId? } | { code?, subject? }, violations: string[], details, status, resolutionNote, reviewedAt, createdAt }] }`. The reviewing admin's identity is never included.
 **500** → `{ error }`.
@@ -291,19 +291,19 @@ File a report against a tutor or a class.
 
 **201** → the created report.
 **400** → body invalid (no violation, or `OTHER` without a description).
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **403** → no enrollment relationship with the target (must have joined one of the tutor's classes / be enrolled in the class).
 **404** → tutor or class not found.
 **409** → the caller already has a `PENDING` report about that target.
 **500** → `{ error }`.
 
 ### `GET /api/learner/tutors`
-Browsable tutors for the Find Tutors page. Requires `role === "STUDENT_LEARNER"` (`401`).
+Browsable tutors for the Find Tutors page. Requires `role === "STUDENT_LEARNER"` (`401` signed out, `403` wrong role).
 
 **Query params** (all optional): `q` (matches `anonymousId`, `contains`), `subject` (subject slug — restricts to tutors `CERTIFIED` in that subject), `page` (default `1`), `pageSize` (default `12`, max `48`).
 
 **200** → `{ tutors: [{ id, anonymousId, name?, section?, verifiedTopicCount, subjects: string[], publishedClassCount, nextSessionAt }], total, page, pageSize }`. `name`/`section` are present only when `showTutorRealNames` is enabled.
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **500** → `{ error }`.
 
 ### `GET /api/search`
@@ -343,7 +343,7 @@ Ask the intent-based assistant. Any authenticated role.
 **500** → `{ error }`.
 
 ### `PATCH /api/learner/profile`
-Update the learner's own self-service profile fields. Requires `role === "STUDENT_LEARNER"` (`401`).
+Update the learner's own self-service profile fields. Requires `role === "STUDENT_LEARNER"` (`401` signed out, `403` wrong role).
 
 **Body** (partial)
 ```json
@@ -354,7 +354,7 @@ Update the learner's own self-service profile fields. Requires `role === "STUDEN
 
 **200** → `{ contactInfo, section }` (only these two fields — never echoes email/name).
 **400** → validation error (empty section, `contactInfo` too long).
-**401** → not a learner.
+**401** → not signed in. **403** → not a learner.
 **500** → `{ error }`.
 
 ### Session pre/post-tests (`sessionTestsEnabled`-gated)

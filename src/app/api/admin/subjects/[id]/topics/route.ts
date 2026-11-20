@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { invalidateSubjectCache } from "@/lib/subjects";
@@ -12,8 +13,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   try {
     const session = await getServerSession(authOptions);
     const { id: subjectId } = await params;
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const subject = await prisma.subject.findUnique({ where: { id: subjectId } });
@@ -21,7 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "Subject not found." }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = createTopicSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(

@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [84](#part-84) | **Live QA fixes — auth & input hardening** | Fixes from a QA pass on the Render deploy: wrong-role API calls now `403` (was `401`), malformed JSON `400` (was `500`), login rate limit keyed on Cloudflare's client IP + a per-IP cap, `notifications/read` validates `ids`, search `q` capped at 100 chars, guarded pages redirect to `/login`, seed refuses public password in production + a demo-password rotation script. | See Part 84 below. |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
 | [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
 | [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
@@ -3037,6 +3038,41 @@ post-mount `useEffect` loads the stored prefs; the write-back effect is gated on
 `prefsLoaded` flag so it never clobbers storage with the empty default.
 
 <a id="part-83"></a>
+## Part 84 — Live QA fixes: auth & input hardening (2026-11-20)
+
+On branch `fix/qa-auth-hardening`. From a strict QA pass against `https://katuwang-x9ea.onrender.com`.
+
+1. **Wrong role → `403 Forbidden`** (was `401`). Every `if (!session || role !== X)` guard in `src/app/api/**/route.ts`
+   (96 sites) split into `401 Unauthorized.` (signed out) + `403 Forbidden.` (wrong role). `api/dev` untouched (stays 404).
+   49 route tests updated to expect `403`; `CLAUDE.md` convention + `docs/roles/*.md` updated.
+2. **Malformed JSON → `400`** (was `500` on e.g. `/api/register`, `/api/learner/reports`). New `src/lib/requestBody.ts`
+   `readJsonBody(req)` returns `null` on a bad body, so the route's Zod schema rejects it. Swapped into 48 routes;
+   `tutor/classes/[classId]` PATCH (reads `body.status` before Zod) gets an explicit object check.
+3. **Login rate limit** (`src/lib/rateLimit.ts`, `src/lib/auth.ts`): `clientIp()` now prefers `cf-connecting-ip`, then
+   `x-real-ip`, and only then the first (client-spoofable) `x-forwarded-for` entry. Email lower-cased in the limiter key;
+   added a 30 / 10 min per-IP cap alongside the 10 / 10 min IP+email cap.
+4. **`POST /api/notifications/read`** validates its body (`src/lib/validations/notifications.ts`): `ids` must be a string
+   array (≤200); a malformed `ids` or bad JSON is `400` instead of silently marking **all** notifications read. An empty
+   body still means mark-all.
+5. **`GET /api/search`** rejects `q` longer than 100 chars (`400`).
+6. **`src/proxy.ts`** passes `pages: { signIn: "/login" }` to `withAuth`, so signed-out visits to guarded pages go to
+   `/login` instead of NextAuth's built-in `/api/auth/signin`.
+7. **Seeded demo credentials**: `prisma/seed.ts` reads `SEED_PASSWORD` (default stays `password123` for local dev) and
+   refuses to run with `NODE_ENV=production` unless it is set. New `prisma/rotate-seed-passwords.ts` (dry run by default,
+   `--apply` to write) gives every `@katuwang.test` / `@dev.test` account a random password — **not run**; production DB
+   change needs confirmation.
+
+**Not fixable in code (ops):**
+- The live deploy is **not running this repo's `main`**: it serves `/api/health` (absent here) and login errors
+  `EMAIL_NOT_FOUND` / `INCORRECT_PASSWORD` (account enumeration — the repo already returns one generic error). Redeploy.
+- `NEXTAUTH_URL` on Render points at `https://katuwang.onrender.com`, not the `-x9ea` host — fix the env var.
+
+Verified: `pnpm exec tsc --noEmit` clean, `pnpm test` 739/739 (+10 new: `requestBody`, `clientIp` precedence, notifications
+`ids` validation / bad JSON / empty body, search length cap, reports malformed JSON). `pnpm lint`: only the pre-existing
+`PortalLayout.tsx` setState-in-effect error. Not committed.
+
+---
+
 ## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
 
 On branch `feature/landing-page`. Part 82's chapter visuals were simplified lookalikes (`StoryVisuals.tsx`, deleted).

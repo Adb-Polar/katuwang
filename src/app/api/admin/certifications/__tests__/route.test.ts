@@ -33,10 +33,10 @@ describe("GET /api/admin/certifications", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 401 when the session user is not an admin", async () => {
+  it("returns 403 when the session user is not an admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     const res = await GET(makeRequest());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns a paginated payload with tutor identity flattened (defaults to PENDING)", async () => {

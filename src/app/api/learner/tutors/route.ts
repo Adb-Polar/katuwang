@@ -16,8 +16,11 @@ const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     await reinstateExpiredClasses();

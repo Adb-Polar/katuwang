@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
@@ -23,8 +24,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { id } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     if (!(await getSetting("matchingEnabled"))) {
@@ -40,7 +44,7 @@ export async function POST(
       return NextResponse.json({ error: "Tutor profile not found." }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = acceptTopicRequestSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";

@@ -50,10 +50,10 @@ const validBody = {
 describe("GET /api/admin/assessment-questions", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_TUTOR" } });
     const res = await GET(getReq());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns rows with an inUse flag derived from the attemptItems count", async () => {

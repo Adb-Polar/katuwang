@@ -14,8 +14,11 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId, attemptId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const owned = await loadOwnedSession(session.user.id, classId, sessionId);

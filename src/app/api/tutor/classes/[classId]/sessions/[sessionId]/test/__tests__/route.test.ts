@@ -75,10 +75,10 @@ beforeEach(() => {
 });
 
 describe("GET /test", () => {
-  it("401 for a non-tutor", async () => {
+  it("403 for a non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await GET(req("GET"), ctx());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns test: null when no test exists yet", async () => {

@@ -31,10 +31,10 @@ describe("PATCH /api/tutor/profile", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await PATCH(makeRequest({ section: "A" }));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 400 for an empty section", async () => {

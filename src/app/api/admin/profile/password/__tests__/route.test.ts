@@ -42,10 +42,10 @@ describe("POST /api/admin/profile/password", () => {
     expect(res.status).toBe(401);
   });
 
-  it("401 when the session role is not ADMIN", async () => {
+  it("403 when the session role is not ADMIN", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await POST(makeRequest({ currentPassword: "old12345", newPassword: "newpassword1" }));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("400 on invalid body", async () => {

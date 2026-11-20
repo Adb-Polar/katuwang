@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ADMIN_PAGE_SIZE } from "@/lib/pagination";
 import { getServerSession } from "next-auth";
 import { Prisma } from "@prisma/client";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAssessmentQuestionSchema } from "@/lib/validations/assessment";
@@ -15,8 +16,11 @@ export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
@@ -66,11 +70,14 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = createAssessmentQuestionSchema.safeParse(body);
 
     if (!result.success) {

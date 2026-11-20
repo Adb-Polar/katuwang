@@ -872,3 +872,20 @@ Security-review fixes (Changes.md Part 57)
     "sees ->" text are readable on the dark background (contrast).
  [] / with registrationOpen turned off in /admin/settings: Create account still
     lands on a register page that explains it is closed (no dead end).
+
+Part 84 — Live QA fixes (auth & input hardening), after redeploying this branch:
+ [] Signed out, open /admin, /tutor, /learner, /dashboard: each redirects to /login
+    (with callbackUrl), not /api/auth/signin.
+ [] Signed in as a learner, call GET /api/admin/reports and /api/tutor/classes:
+    403 {"error":"Forbidden."}; signed out: 401.
+ [] POST /api/register and /api/learner/reports with body `{bad`: 400, not 500.
+ [] Notification bell "mark all read" still works; POST /api/notifications/read
+    with {"ids":"x"} is 400 and leaves unread notifications unread.
+ [] Global search with a 101+ char query shows an error / no crash.
+ [] Login rate limit on Render: 11 wrong passwords for one email -> "Too many
+    sign-in attempts"; spoofing X-Forwarded-For does not reset it.
+ [] Login with a wrong password and with an unknown email shows the SAME error
+    (no EMAIL_NOT_FOUND / INCORRECT_PASSWORD codes in the callback URL).
+ [] /api/auth/providers URLs use the deployed host (NEXTAUTH_URL fixed on Render).
+ [] After running prisma/rotate-seed-passwords.ts --apply on prod: seeded accounts
+    no longer accept password123.

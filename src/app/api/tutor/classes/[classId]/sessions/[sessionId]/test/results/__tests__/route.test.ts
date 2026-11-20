@@ -36,10 +36,10 @@ beforeEach(() => {
 });
 
 describe("GET /test/results", () => {
-  it("401 for a non-tutor", async () => {
+  it("403 for a non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await GET(getReq(), ctx());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("404 when there is no test yet", async () => {

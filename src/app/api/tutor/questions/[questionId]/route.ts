@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateTutorQuestionSchema } from "@/lib/validations/sessionTest";
@@ -37,8 +38,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { questionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existing = await loadOwnQuestion(session.user.id, questionId);
@@ -52,7 +56,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       );
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = updateTutorQuestionSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
@@ -92,8 +96,11 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { questionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existing = await loadOwnQuestion(session.user.id, questionId);

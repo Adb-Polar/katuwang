@@ -13,8 +13,11 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { testId, attemptId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const attempt = await prisma.sessionTestAttempt.findUnique({

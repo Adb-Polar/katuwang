@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateProfileSchema, normalizeContactInfo } from "@/lib/validations/profile";
@@ -9,11 +10,14 @@ export async function PATCH(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = updateProfileSchema.safeParse(body);
 
     if (!result.success) {

@@ -56,10 +56,10 @@ describe("POST /api/tutor/classes/[classId]/sessions", () => {
     sessionFindMany.mockResolvedValue([]);
   });
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await post(validBody);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 404 when the class doesn't exist", async () => {

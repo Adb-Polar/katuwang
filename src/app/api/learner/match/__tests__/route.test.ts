@@ -32,10 +32,10 @@ describe("POST /api/learner/match", () => {
     reinstateMock.mockResolvedValue(undefined);
   });
 
-  it("returns 401 for a non-learner", async () => {
+  it("returns 403 for a non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     const res = await POST(makeRequest(validBody));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 403 when matching is disabled", async () => {

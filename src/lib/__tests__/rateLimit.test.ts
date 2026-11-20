@@ -45,6 +45,15 @@ describe("clientIp()", () => {
     expect(clientIp({ "x-forwarded-for": "198.51.100.4" })).toBe("198.51.100.4");
   });
 
+  it("prefers cf-connecting-ip over a spoofable x-forwarded-for", () => {
+    const h = new Headers({ "cf-connecting-ip": "203.0.113.50", "x-forwarded-for": "1.2.3.4" });
+    expect(clientIp(h)).toBe("203.0.113.50");
+  });
+
+  it("prefers x-real-ip over x-forwarded-for", () => {
+    expect(clientIp({ "x-real-ip": "198.51.100.9", "x-forwarded-for": "1.2.3.4" })).toBe("198.51.100.9");
+  });
+
   it("falls back to x-real-ip, then 'unknown'", () => {
     expect(clientIp({ "x-real-ip": "198.51.100.9" })).toBe("198.51.100.9");
     expect(clientIp({})).toBe("unknown");

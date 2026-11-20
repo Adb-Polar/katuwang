@@ -41,10 +41,10 @@ describe("GET /api/admin/abuse-reports", () => {
     reportCount.mockResolvedValue(1);
   });
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
     const res = await GET(req());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("defaults to the PENDING tab and returns a paginated envelope", async () => {

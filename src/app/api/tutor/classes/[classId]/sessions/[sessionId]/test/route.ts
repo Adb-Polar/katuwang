@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createSessionTestSchema, updateSessionTestSchema } from "@/lib/validations/sessionTest";
@@ -15,8 +16,11 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const owned = await loadOwnedSession(session.user.id, classId, sessionId);
@@ -41,8 +45,11 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
     if (!(await getSetting("sessionTestsEnabled"))) {
       return NextResponse.json({ error: "Session tests are disabled." }, { status: 403 });
@@ -57,7 +64,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "This session already has a test." }, { status: 409 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = createSessionTestSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
@@ -82,8 +89,11 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const owned = await loadOwnedSession(session.user.id, classId, sessionId);
@@ -97,7 +107,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "Only a draft test can be edited." }, { status: 409 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = updateSessionTestSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
@@ -126,8 +136,11 @@ export async function DELETE(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const owned = await loadOwnedSession(session.user.id, classId, sessionId);

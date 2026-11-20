@@ -23,10 +23,10 @@ function makeRequest(url = "http://localhost/api/admin/registrations") {
 describe("GET /api/admin/registrations", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await GET(makeRequest());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
     expect(findManyMock).not.toHaveBeenCalled();
   });
 

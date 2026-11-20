@@ -34,6 +34,9 @@ export default withAuth(
     callbacks: {
       authorized: ({ token }) => !!token, // Must be authenticated
     },
+    // Must mirror authOptions.pages — withAuth doesn't read authOptions, so
+    // without this, guarded pages bounce to NextAuth's built-in /api/auth/signin.
+    pages: { signIn: "/login" },
   },
 );
 

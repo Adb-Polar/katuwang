@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -16,8 +17,11 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existingClass = await prisma.tutorClass.findUnique({
@@ -51,7 +55,11 @@ export async function PATCH(
       );
     }
 
-    const body = await req.json();
+    const rawBody = await readJsonBody(req);
+    if (!rawBody || typeof rawBody !== "object" || Array.isArray(rawBody)) {
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    }
+    const body = rawBody as { status?: string } & Record<string, unknown>;
 
     // Custom status validation check if provided
     if (body.status && !["SCHEDULED", "COMPLETED", "CANCELLED"].includes(body.status)) {
@@ -226,8 +234,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existingClass = await prisma.tutorClass.findUnique({

@@ -25,9 +25,9 @@ beforeEach(() => {
 });
 
 describe("GET /api/admin/session-tests", () => {
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_TUTOR" } });
-    expect((await GET(getReq())).status).toBe(401);
+    expect((await GET(getReq())).status).toBe(403);
   });
 
   it("flattens the session/class join into classCode/subject/sessionTopic/tutor", async () => {

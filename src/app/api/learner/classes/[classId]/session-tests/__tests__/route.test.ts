@@ -29,9 +29,9 @@ beforeEach(() => {
 });
 
 describe("GET /api/learner/classes/[classId]/session-tests", () => {
-  it("401 for a non-learner", async () => {
+  it("403 for a non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_TUTOR" } });
-    expect((await GET(getReq(), ctx())).status).toBe(401);
+    expect((await GET(getReq(), ctx())).status).toBe(403);
   });
 
   it("403 when not enrolled", async () => {

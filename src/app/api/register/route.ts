@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validations/auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { getSetting } from "@/lib/settings";
 import { registerAccount } from "@/lib/registration";
 import { sendMail, renderVerificationEmail } from "@/lib/mail";
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
     const requireApproval = await getSetting("requireRegistrationApproval");
     const requireEmailVerification = await getSetting("requireEmailVerification");
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
 
     // Validate request body using Zod schema
     const result = registerSchema.safeParse(body);

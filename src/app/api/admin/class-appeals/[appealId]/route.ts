@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reviewClassAppealSchema } from "@/lib/validations/classAppeal";
@@ -15,8 +16,11 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     const { appealId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const appeal = await prisma.classAppeal.findUnique({
@@ -41,7 +45,7 @@ export async function PATCH(
       );
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = reviewClassAppealSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";

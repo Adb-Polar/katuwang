@@ -35,8 +35,10 @@ export const authOptions: NextAuthOptions = {
         // credential stuffing. Skipped under tests and when `req` is absent.
         if (rateLimitEnabled() && req?.headers) {
           const ip = clientIp(req.headers as Record<string, string | string[] | undefined>);
-          const limited = rateLimit(`login:${ip}:${credentials.email}`, 10, 10 * 60 * 1000);
-          if (!limited.ok) {
+          const limited = rateLimit(`login:${ip}:${credentials.email.trim().toLowerCase()}`, 10, 10 * 60 * 1000);
+          // Per-IP ceiling too, so spraying one password across many emails is capped.
+          const ipLimited = rateLimit(`login-ip:${ip}`, 30, 10 * 60 * 1000);
+          if (!limited.ok || !ipLimited.ok) {
             throw new Error("Too many sign-in attempts. Please wait a few minutes and try again.");
           }
         }

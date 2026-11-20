@@ -27,10 +27,10 @@ describe("GET /api/admin/chatbot-misses", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 401 when the session user is not an admin", async () => {
+  it("returns 403 when the session user is not an admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await GET(makeRequest());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("groups near-identical rows and returns a paginated payload", async () => {

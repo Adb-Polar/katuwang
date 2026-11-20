@@ -33,8 +33,11 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId, kind } = await params;
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
     if (!(await getSetting("sessionTestsEnabled"))) {
       return NextResponse.json({ error: "Session tests are disabled." }, { status: 403 });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { addSessionSchema } from "@/lib/validations/class";
@@ -15,8 +16,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const tutorProfile = await prisma.tutorProfile.findUnique({
@@ -55,7 +59,7 @@ export async function POST(
       );
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = addSessionSchema.safeParse(body);
 
     if (!result.success) {

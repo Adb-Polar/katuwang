@@ -145,7 +145,7 @@ throughout (never a learner's real name/id, only `anonymousId`):
 
 ## API Reference
 
-All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.
+All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }` when signed out and `403 { error: "Forbidden." }` for any other role.
 
 ### `GET /api/search`
 Quick search behind the top-bar box. **Not** admin-gated (any authenticated role), but results are role-scoped: an admin sees all classes, all non-admin accounts, and topic matches.
@@ -228,7 +228,7 @@ List/search all topic requests platform-wide.
 **Query params** (all optional): `q` (learner first/last name, anonymous ID, or topic text), `status` (`TopicRequestStatus` enum), `subject` (subject slug string), `scope` (`"public"` | `"directed"`), `page`, `pageSize` (same defaults as users).
 
 **200** → `{ requests: [{ id, subject, gradeLevel, note, status, createdAt, topics: string[], learner: { id, anonymousId, firstName, lastName }, directedTo: { anonymousId } | null, fulfilledClass: { id, code, status, nextSessionAt } | null }], total, page, pageSize }` — real learner name included (admin-only accountability view).
-**401** → not an admin.
+**401** → not signed in. **403** → not a admin.
 **500** → `{ error }`.
 
 ### `PATCH /api/admin/topic-requests/[id]`
@@ -245,11 +245,11 @@ Close or re-open a topic request.
 
 **200** → `{ id, status }`.
 **400** → invalid state transition or failed validation.
-**401** → not an admin. **404** → request not found.
+**401** → not signed in. **403** → not a admin. **404** → request not found.
 **500** → `{ error }`.
 
 ### `GET /api/admin/abuse-reports`
-List learner abuse reports, tabbed by status. Requires `role === "ADMIN"` (`401`).
+List learner abuse reports, tabbed by status. Requires `role === "ADMIN"` (`401` signed out, `403` wrong role).
 
 **Query params** (all optional): `status` (`PENDING` default / `RESOLVED` / `DISMISSED`), `targetType` (`TUTOR` / `CLASS` — omit for all), `page` (default `1`), `pageSize` (default `10`, max `100`), `sort` (`createdAt` / `reviewedAt` / `targetType` / `status`) + `dir` (`asc` / `desc`).
 
@@ -264,7 +264,7 @@ Resolve or dismiss a pending report.
 
 **200** → the updated report.
 **400** → invalid body, or the report is not `PENDING`.
-**401** → not an admin. **404** → report not found.
+**401** → not signed in. **403** → not a admin. **404** → report not found.
 **500** → `{ error }`.
 
 ### `GET /api/admin/certifications`
@@ -273,7 +273,7 @@ List topic certification requests, filtered/sorted/paginated.
 **Query params** (all optional): `status` (`PENDING` default / `CERTIFIED` / `REJECTED`), `q` (topic or tutor `anonymousId`, `contains`), `subject` (subject slug string), `sort` (`requested` default / `certified` / `reviewed` / `subject`), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
 **200** → `{ certifications: [{ ...TopicCertification, tutor: { id, anonymousId, firstName, lastName, email } }], total, page, pageSize }` (real identity included — admin-only accountability view). `REJECTED` defaults to newest-reviewed-first.
-**401** → not an admin.
+**401** → not signed in. **403** → not a admin.
 **500** → `{ error }`.
 
 ### `PATCH /api/admin/certifications/[certificationId]`
@@ -288,7 +288,7 @@ Approve or reject a pending certification request.
 
 **200** → the updated `TopicCertification`.
 **400** → certification is not `PENDING`, or failed validation.
-**401** → not an admin.
+**401** → not signed in. **403** → not a admin.
 **404** → certification not found.
 **500** → `{ error }`.
 

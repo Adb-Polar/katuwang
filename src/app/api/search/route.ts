@@ -65,6 +65,8 @@ export interface SearchGroup {
 // ─── GET: cross-cutting quick search for the top-bar box ───────────────────
 // Role-aware. Learners get browsable classes + verified tutors + topics; tutors
 // get their own classes + topics; admins get all classes + accounts + topics.
+const MAX_QUERY_LENGTH = 100;
+
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -80,6 +82,12 @@ export async function GET(req: NextRequest) {
     const params = new URL(req.url).searchParams;
     const q = (params.get("q") || "").trim();
     if (q.length < 2) return NextResponse.json({ groups: [] });
+    if (q.length > MAX_QUERY_LENGTH) {
+      return NextResponse.json(
+        { error: `Search query cannot exceed ${MAX_QUERY_LENGTH} characters.` },
+        { status: 400 }
+      );
+    }
 
     const scopeParam = params.get("scope") as SearchScope | null;
     const scope: SearchScope =

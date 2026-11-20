@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { setSessionTestQuestionsSchema } from "@/lib/validations/sessionTest";
@@ -16,8 +17,11 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     const session = await getServerSession(authOptions);
     const { classId, sessionId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_TUTOR") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_TUTOR") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const owned = await loadOwnedSession(session.user.id, classId, sessionId);
@@ -34,7 +38,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       );
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = setSessionTestQuestionsSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";

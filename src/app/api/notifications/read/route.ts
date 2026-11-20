@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { markNotificationsReadSchema } from "@/lib/validations/notifications";
 
 // ─── POST: Mark notifications read ───────────────────────────────────────────
 //   { ids?: string[] }  — omitted/empty = mark ALL of the caller's unread ones
@@ -13,8 +14,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const ids: string[] | undefined = Array.isArray(body?.ids) ? body.ids : undefined;
+    // An empty body means "mark all"; a body that is present must be well-formed,
+    // so a malformed `ids` can't silently fall through to marking everything read.
+    const raw = await req.text();
+    let body: unknown = {};
+    if (raw.trim()) {
+      try {
+        body = JSON.parse(raw);
+      } catch {
+        body = null;
+      }
+    }
+    const result = markNotificationsReadSchema.safeParse(body);
+    if (!result.success) {
+      const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
+    const ids = result.data.ids;
 
     await prisma.notification.updateMany({
       where: {

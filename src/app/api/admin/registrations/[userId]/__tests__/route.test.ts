@@ -38,10 +38,10 @@ function makeRequest(body: unknown) {
 describe("PATCH /api/admin/registrations/[userId]", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U9", role: "STUDENT_TUTOR" } });
     const res = await PATCH(makeRequest({ decision: "APPROVE" }), { params });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("404 when the user does not exist", async () => {

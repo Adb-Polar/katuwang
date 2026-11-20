@@ -14,8 +14,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     await reinstateExpiredClasses();
@@ -108,8 +111,11 @@ export async function DELETE(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existingClass = await prisma.tutorClass.findUnique({

@@ -12,8 +12,11 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const { testId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const results = await buildSessionTestResults(testId);

@@ -61,9 +61,9 @@ beforeEach(() => {
 });
 
 describe("POST /test/[kind]/start — the §2 ladder", () => {
-  it("401 wrong role", async () => {
+  it("403 wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_TUTOR" } });
-    expect((await POST(req(), ctx())).status).toBe(401);
+    expect((await POST(req(), ctx())).status).toBe(403);
   });
 
   it("403 flag off", async () => {

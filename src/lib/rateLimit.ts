@@ -75,9 +75,16 @@ export function clientIp(headers: HeaderBag): string {
     return Array.isArray(value) ? value[0] : value;
   };
 
+  // Cloudflare (in front of Render) overwrites CF-Connecting-IP with the real
+  // client address, so a caller can't spoof it. X-Forwarded-For's first entry
+  // is client-supplied and only used as a last resort (local/dev).
+  const cf = get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
+  const real = get("x-real-ip")?.trim();
+  if (real) return real;
   const forwarded = get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0]!.trim();
-  return get("x-real-ip") ?? "unknown";
+  return "unknown";
 }
 
 /** Standard 429 response with a `Retry-After` header. */

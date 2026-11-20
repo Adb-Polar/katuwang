@@ -11,7 +11,9 @@ loadEnv({ path: ".env.seed" });
 const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
-const DUMMY_PASSWORD = "password123";
+// Override with SEED_PASSWORD for any shared/deployed database — the default is
+// published in prisma/SEED_ACCOUNTS.md, so anyone can sign in with it.
+const DUMMY_PASSWORD = process.env.SEED_PASSWORD || "password123";
 
 // ─── Bulk generation config (opt-in via env vars) ────────────────────────────
 // Curated demo accounts above are always created. These add procedurally-
@@ -910,6 +912,11 @@ async function seedSessionTests(): Promise<boolean> {
 }
 
 async function main() {
+  // Refuse to plant well-known demo credentials on a production database.
+  if (process.env.NODE_ENV === "production" && !process.env.SEED_PASSWORD) {
+    throw new Error("Refusing to seed in production without SEED_PASSWORD (the default password is public).");
+  }
+
   // Initialize counters for both roles
   await prisma.idCounter.upsert({
     where: { role: "TUTOR" },
@@ -1275,7 +1282,7 @@ async function main() {
   const classTotal = buildClasses().length + generatedClasses.length;
 
   console.log("Seed complete.\n");
-  console.log(`All dummy accounts use the password: ${DUMMY_PASSWORD}\n`);
+  console.log(process.env.SEED_PASSWORD ? "All dummy accounts use SEED_PASSWORD.\n" : `All dummy accounts use the password: ${DUMMY_PASSWORD}\n`);
   console.log(
     `Totals — tutors: ${tutorTotal}, learners: ${learnerTotal}, classes: ${classTotal}, topic requests: ${GEN.topicRequests}, bank questions: ${questionsCreated} (${GEN.questionsPerTopic || "curated"} / topic), session tests: ${sessionTestsSeeded ? "yes" : "skipped"}`
   );

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readJsonBody } from "@/lib/requestBody";
 import { prisma } from "@/lib/prisma";
 import { forgotPasswordSchema } from "@/lib/validations/passwordReset";
 import { generateResetToken, hashResetToken, resetTokenExpiry } from "@/lib/passwordReset";
@@ -14,7 +15,7 @@ const NEUTRAL = {
 // ─── POST: Request a password reset link ──────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = forgotPasswordSchema.safeParse(body);
 
     if (!result.success) {

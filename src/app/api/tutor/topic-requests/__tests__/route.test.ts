@@ -57,9 +57,9 @@ describe("GET /api/tutor/topic-requests", () => {
     ]);
   });
 
-  it("401 for non-tutor", async () => {
+  it("403 for non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
-    expect((await GET(req())).status).toBe(401);
+    expect((await GET(req())).status).toBe(403);
   });
 
   it("403 when matching disabled", async () => {

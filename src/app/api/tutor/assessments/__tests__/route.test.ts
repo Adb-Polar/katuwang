@@ -84,10 +84,10 @@ describe("POST /api/tutor/assessments", () => {
     attemptAggregate.mockResolvedValue({ _max: { attemptNo: null } });
   });
 
-  it("401 for a non-tutor", async () => {
+  it("403 for a non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await POST(post(validBody));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("404 when the tutor has no profile", async () => {

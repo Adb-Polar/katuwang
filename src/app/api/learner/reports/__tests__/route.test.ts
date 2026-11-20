@@ -75,15 +75,27 @@ describe("POST /api/learner/reports", () => {
     userFindMany.mockResolvedValue([{ id: "admin1" }, { id: "admin2" }]);
   });
 
-  it("401 for a non-learner", async () => {
+  it("403 for a non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U9", role: "STUDENT_TUTOR" } });
     const res = await POST(req(tutorBody));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("400 when no violation is selected", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     const res = await POST(req({ ...tutorBody, violations: [] }));
+    expect(res.status).toBe(400);
+  });
+
+  it("400 (not 500) for a malformed JSON body", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    const res = await POST(
+      new NextRequest("http://localhost/api/learner/reports", {
+        method: "POST",
+        body: "{bad",
+        headers: { "content-type": "application/json" },
+      })
+    );
     expect(res.status).toBe(400);
   });
 
@@ -184,10 +196,10 @@ describe("GET /api/learner/reports", () => {
     ]);
   });
 
-  it("401 for a non-learner", async () => {
+  it("403 for a non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
     const res = await GET();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns only the caller's reports", async () => {

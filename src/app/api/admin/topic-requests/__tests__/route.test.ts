@@ -27,9 +27,9 @@ describe("GET /api/admin/topic-requests", () => {
     findManyMock.mockResolvedValue([]);
   });
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
-    expect((await GET(req())).status).toBe(401);
+    expect((await GET(req())).status).toBe(403);
   });
 
   it("filters by status, subject, and scope", async () => {

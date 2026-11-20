@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
@@ -21,8 +22,11 @@ export async function POST(
     const session = await getServerSession(authOptions);
     const { attemptId } = await params;
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const attempt = await prisma.sessionTestAttempt.findUnique({
@@ -38,7 +42,7 @@ export async function POST(
       return NextResponse.json({ error: "This attempt has already been submitted." }, { status: 409 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = submitAssessmentSchema.safeParse(body);
     if (!result.success) {
       const errorMsg = result.error.issues[0]?.message || "Invalid inputs.";

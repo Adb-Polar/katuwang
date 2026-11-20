@@ -55,9 +55,9 @@ describe("GET /api/learner/tutors", () => {
     ]);
   });
 
-  it("401 for a non-learner", async () => {
+  it("403 for a non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "T1", role: "STUDENT_TUTOR" } });
-    expect((await GET(req())).status).toBe(401);
+    expect((await GET(req())).status).toBe(403);
   });
 
   it("returns anonymized, aggregated tutor rows", async () => {

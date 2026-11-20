@@ -22,10 +22,10 @@ function makeRequest(body: unknown) {
 describe("PATCH /api/learner/profile", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_TUTOR" } });
     const res = await PATCH(makeRequest({ section: "A" }));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
     expect(userUpdate).not.toHaveBeenCalled();
   });
 

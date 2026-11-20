@@ -86,10 +86,10 @@ describe("POST /api/tutor/topic-requests/[id]/accept", () => {
     topicRequestUpdate.mockResolvedValue({ id: "r1", status: "ACCEPTED", fulfilledClassId: "c1" });
   });
 
-  it("401 for non-tutor", async () => {
+  it("403 for non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "l1", role: "STUDENT_LEARNER" } });
     const res = await POST(makeRequest(validBody()), { params });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("400 when the request is not OPEN", async () => {

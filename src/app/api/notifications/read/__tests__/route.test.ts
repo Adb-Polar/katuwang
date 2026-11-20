@@ -54,4 +54,30 @@ describe("POST /api/notifications/read", () => {
       data: { readAt: expect.any(Date) },
     });
   });
+
+  it("400 when ids is not an array (does not fall through to mark-all)", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
+    const res = await POST(makeRequest({ ids: "x" }));
+    expect(res.status).toBe(400);
+    expect(updateManyMock).not.toHaveBeenCalled();
+  });
+
+  it("400 for a malformed JSON body", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
+    const res = await POST(
+      new NextRequest("http://localhost/api/notifications/read", { method: "POST", body: "{bad" })
+    );
+    expect(res.status).toBe(400);
+    expect(updateManyMock).not.toHaveBeenCalled();
+  });
+
+  it("an empty body still marks all read", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
+    const res = await POST(new NextRequest("http://localhost/api/notifications/read", { method: "POST" }));
+    expect(res.status).toBe(200);
+    expect(updateManyMock).toHaveBeenCalledWith({
+      where: { userId: "U1", readAt: null },
+      data: { readAt: expect.any(Date) },
+    });
+  });
 });

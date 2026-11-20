@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { updateClassStatusSchema } from "@/lib/validations/admin";
@@ -16,8 +17,11 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     const { classId } = await params;
 
-    if (!session || session.user.role !== "ADMIN") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (session.user.role !== "ADMIN") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const existingClass = await prisma.tutorClass.findUnique({
@@ -29,7 +33,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Class not found." }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = updateClassStatusSchema.safeParse(body);
 
     if (!result.success) {

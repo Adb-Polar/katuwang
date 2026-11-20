@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readJsonBody } from "@/lib/requestBody";
 import { prisma } from "@/lib/prisma";
 import { verifyEmailSchema } from "@/lib/validations/emailVerification";
 import { hashVerificationToken } from "@/lib/emailVerification";
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
       if (!limited.ok) return tooManyRequests(limited.retryAfter);
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = verifyEmailSchema.safeParse(body);
 
     if (!result.success) {

@@ -195,7 +195,7 @@ Register a new tutor account. No auth required. `403 { error: "Registration is c
 **500** → `{ error }`.
 
 ### `GET /api/tutor/classes`
-List the authenticated tutor's own classes. Requires `role === "STUDENT_TUTOR"` (else `401`); `404` if no `TutorProfile` exists.
+List the authenticated tutor's own classes. Requires `role === "STUDENT_TUTOR"` (else `401` signed out / `403` wrong role); `404` if no `TutorProfile` exists.
 
 **Query params**: `status` (optional, `ClassStatus` enum) — filters the list.
 
@@ -227,7 +227,7 @@ Create a new class with its initial session(s).
 
 **201** → created `TutorClass` (`topics` as `string[]`, plus `sessions`).
 **400** → invalid topics/session topics/uncertified topics/past date/validation error.
-**401** → not a tutor. **404** → no tutor profile.
+**401** → not signed in. **403** → not a tutor. **404** → no tutor profile.
 **409** → `{ error: "Time conflict detected: ..." }` (self-overlap among submitted sessions, or overlap with an existing session).
 **500** → `{ error }`.
 
@@ -244,7 +244,7 @@ Add a new session to an existing class — the way to schedule the next meeting 
 
 **201** → the created `ClassSession`.
 **400** → class not `SCHEDULED`, invalid topic, past date, or validation error.
-**401** → not a tutor. **403** → not the owner, or class suspended/banned. **404** → class not found.
+**401** → not signed in. **403** → not a tutor, not the owner, or class suspended/banned. **404** → class not found.
 **409** → time conflict.
 **500** → `{ error }`.
 
@@ -259,7 +259,7 @@ Reschedule a session and/or change its status, independent of sibling sessions.
 
 **200** → the updated `ClassSession`.
 **400** → invalid topic/status/past date, or validation error.
-**401** → not a tutor. **403** → not the owner, or class suspended/banned. **404** → class or session not found.
+**401** → not signed in. **403** → not a tutor, not the owner, or class suspended/banned. **404** → class or session not found.
 **409** → time conflict.
 **500** → `{ error }`.
 
@@ -268,7 +268,7 @@ Delete a single session.
 
 **200** → `{ message: "Session deleted successfully." }`.
 **400** → `{ error: "Cannot delete a completed or cancelled session; its record is kept for history." }`, or `{ error: "Cannot delete the only session of a class with enrolled learners — cancel or delete the whole class instead." }`.
-**401** → not a tutor. **403** → not the owner, or class suspended/banned. **404** → class or session not found.
+**401** → not signed in. **403** → not a tutor, not the owner, or class suspended/banned. **404** → class or session not found.
 **500** → `{ error }`.
 
 ### `PATCH /api/tutor/classes/[classId]`
@@ -302,7 +302,7 @@ Delete an owned class. Only allowed with zero enrollments. Cascade-deletes its s
 List the authenticated tutor's own certification requests (`PENDING`, `CERTIFIED`, or `REJECTED`), newest-requested-first.
 
 **200** → array of `{ ...TopicCertification, usedInClasses: [{ id, subject, scheduledAt, status }] }` — each row includes `status`, `requestedAt`, `certifiedAt`, `reviewedAt`, `reviewNote`; `usedInClasses` lists the tutor's own classes whose subject+topic matches this certification (empty array if none).
-**401** → not a tutor. **404** → no tutor profile.
+**401** → not signed in. **403** → not a tutor. **404** → no tutor profile.
 **500** → `{ error }`.
 
 ### `POST /api/tutor/topic-certifications`
@@ -318,7 +318,7 @@ Request/upsert a certification for a subject + topic pair.
 **200** → the existing row when it is already `CERTIFIED`.
 **201** → the `TopicCertification` (newly created or reopened as `PENDING`).
 **400** → invalid topic for subject, or validation error.
-**401** → not a tutor. **404** → no tutor profile.
+**401** → not signed in. **403** → not a tutor. **404** → no tutor profile.
 **500** → `{ error }`.
 
 ### `GET /api/tutor/students`
@@ -327,7 +327,7 @@ Aggregate roster of every distinct learner enrolled in any of the tutor's classe
 **Query params** (all optional): `page` (default `1`), `pageSize` (default `10`, max `100`), `gradeLevel` (`GradeLevel` enum), `section` (free-text, `contains`), `subject` (subject slug string), `classId`.
 
 **200** → `{ students: [{ id, anonymousId, gradeLevel, section, enrollments: [{ classId, subject, topics: string[], enrolledAt }] }], total, page, pageSize }` — anonymized, no real name/email/contactInfo. Pagination is applied over distinct learners (grouped in application code), not raw enrollment rows.
-**401** → not a tutor. **404** → no tutor profile.
+**401** → not signed in. **403** → not a tutor. **404** → no tutor profile.
 **500** → `{ error }`.
 
 > Availability has no API. It is derived in-process from the tutor's `ClassSession`
@@ -377,11 +377,11 @@ Update the tutor's own self-service profile fields.
 
 **200** → `{ contactInfo, section }` (only these two fields — never echoes email/name).
 **400** → validation error.
-**401** → not a tutor.
+**401** → not signed in. **403** → not a tutor.
 **500** → `{ error }`.
 
 ### `GET /api/tutor/topic-requests`
-List topic requests the tutor can act on or has already accepted. Requires `role === "STUDENT_TUTOR"` (`401`); `404` if no `TutorProfile`; `403` when `matchingEnabled` is off.
+List topic requests the tutor can act on or has already accepted. Requires `role === "STUDENT_TUTOR"` (`401` signed out, `403` wrong role); `404` if no `TutorProfile`; `403` when `matchingEnabled` is off.
 
 **Query params** (all optional): `tab` (`"open"` default | `"accepted"`), `subject` (subject slug string), `page` (default `1`), `pageSize` (default `10`, max `100`).
 
@@ -401,7 +401,7 @@ Accept an `OPEN` request by auto-creating a full class from it. Does **not** enr
 
 **201** → `{ request: { id, status: "ACCEPTED", fulfilledClassId }, classId }`.
 **400** → request not `OPEN`, subject mismatch, uncertified topic(s), invalid session topic, past date, or validation error.
-**401** → not a tutor. **403** → not eligible for this request, or matching disabled. **404** → request or tutor profile not found.
+**401** → not signed in. **403** → not a tutor, not eligible for this request, or matching disabled. **404** → request or tutor profile not found.
 **409** → time conflict (internal overlap or against an existing session).
 **500** → `{ error }`.
 

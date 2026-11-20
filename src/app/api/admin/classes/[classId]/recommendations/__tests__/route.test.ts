@@ -67,10 +67,10 @@ describe("POST /api/admin/classes/[classId]/recommendations", () => {
     expect(res.status).toBe(401);
   });
 
-  it("401 when the session role is not ADMIN", async () => {
+  it("403 when the session role is not ADMIN", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "STUDENT_TUTOR" } });
     const res = await post({ learnerId: "L1" });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("404 when the class doesn't exist", async () => {

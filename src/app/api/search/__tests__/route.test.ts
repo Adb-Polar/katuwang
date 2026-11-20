@@ -72,6 +72,13 @@ describe("GET /api/search", () => {
     expect(classFindMany).not.toHaveBeenCalled();
   });
 
+  it("400 for a query longer than 100 chars", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
+    const res = await GET(req("a".repeat(101)));
+    expect(res.status).toBe(400);
+    expect(classFindMany).not.toHaveBeenCalled();
+  });
+
   it("learner: returns class, tutor and topic groups with learner hrefs", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "L1", role: "STUDENT_LEARNER" } });
     const json = await (await GET(req("linear"))).json();

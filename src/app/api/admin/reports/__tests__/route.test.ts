@@ -47,10 +47,10 @@ describe("GET /api/admin/reports", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 401 for a non-admin role", async () => {
+  it("returns 403 for a non-admin role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await GET();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns flattened breakdown counts", async () => {

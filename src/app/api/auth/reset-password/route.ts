@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { readJsonBody } from "@/lib/requestBody";
 import { prisma } from "@/lib/prisma";
 import { resetPasswordSchema } from "@/lib/validations/passwordReset";
 import { hashResetToken } from "@/lib/passwordReset";
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
       if (!limited.ok) return tooManyRequests(limited.retryAfter);
     }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = resetPasswordSchema.safeParse(body);
 
     if (!result.success) {

@@ -28,10 +28,10 @@ beforeEach(() => {
 });
 
 describe("GET /api/tutor/classes/[classId]/test-results", () => {
-  it("401 for a non-tutor", async () => {
+  it("403 for a non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_LEARNER" } });
     const res = await GET(getReq(), ctx());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("403 when the class belongs to another tutor", async () => {

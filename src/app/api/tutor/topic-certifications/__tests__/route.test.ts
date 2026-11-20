@@ -48,10 +48,10 @@ describe("GET /api/tutor/topic-certifications", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await GET();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 404 when no tutor profile exists", async () => {

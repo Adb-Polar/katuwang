@@ -20,10 +20,10 @@ const makeReq = (url = "http://localhost/api/admin/class-appeals") => new NextRe
 describe("GET /api/admin/class-appeals", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("401 for a non-admin", async () => {
+  it("403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_TUTOR" } });
     const res = await GET(makeReq());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("defaults to PENDING and shapes the tutor field", async () => {

@@ -37,10 +37,10 @@ describe("/api/admin/assessment-configs (global)", () => {
     auditLogCreate.mockResolvedValue({});
   });
 
-  it("GET 401 for a non-admin", async () => {
+  it("GET 403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_TUTOR" } });
     const res = await GET();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("GET returns the resolved config", async () => {
@@ -55,10 +55,10 @@ describe("/api/admin/assessment-configs (global)", () => {
     expect(await res.json()).toEqual({ questionCount: 7, passPercent: 75, minBankSize: 9 });
   });
 
-  it("PATCH 401 for a non-admin", async () => {
+  it("PATCH 403 for a non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U1", role: "STUDENT_TUTOR" } });
     const res = await PATCH(req({ passPercent: 70 }));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("PATCH 400 when passPercent is out of range", async () => {

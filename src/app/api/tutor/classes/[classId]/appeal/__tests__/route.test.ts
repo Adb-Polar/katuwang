@@ -67,10 +67,10 @@ describe("POST /api/tutor/classes/[classId]/appeal", () => {
     userFindMany.mockResolvedValue([{ id: "admin1" }, { id: "admin2" }]);
   });
 
-  it("401 for a non-tutor", async () => {
+  it("403 for a non-tutor", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "U9", role: "STUDENT_LEARNER" } });
     const res = await POST(req(goodBody), params);
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("400 on a too-short reason", async () => {

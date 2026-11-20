@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { readJsonBody } from "@/lib/requestBody";
 import { prisma } from "@/lib/prisma";
 import { resendVerificationSchema } from "@/lib/validations/emailVerification";
 import { generateVerificationToken, hashVerificationToken, verificationTokenExpiry } from "@/lib/emailVerification";
@@ -14,7 +15,7 @@ const NEUTRAL = {
 // ─── POST: Resend an email-verification link ──────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const result = resendVerificationSchema.safeParse(body);
 
     if (!result.success) {

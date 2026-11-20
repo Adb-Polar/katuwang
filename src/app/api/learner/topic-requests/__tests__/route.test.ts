@@ -65,9 +65,9 @@ const dbRow = {
 describe("GET /api/learner/topic-requests", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("401 for non-learner", async () => {
+  it("403 for non-learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "t1", role: "STUDENT_TUTOR" } });
-    expect((await GET()).status).toBe(401);
+    expect((await GET()).status).toBe(403);
   });
 
   it("returns only the caller's requests", async () => {

@@ -44,9 +44,9 @@ describe("/api/admin/subjects", () => {
     subjectCreate.mockResolvedValue({ id: "s9", slug: "ROBOTICS", name: "Robotics", order: 5 });
   });
 
-  it("GET 401 for non-admin", async () => {
+  it("GET 403 for non-admin", async () => {
     getServerSessionMock.mockResolvedValue({ user: { role: "STUDENT_TUTOR" } });
-    expect((await GET()).status).toBe(401);
+    expect((await GET()).status).toBe(403);
   });
 
   it("POST 400 on a bad slug", async () => {

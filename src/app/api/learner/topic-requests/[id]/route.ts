@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { readJsonBody } from "@/lib/requestBody";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -21,11 +22,14 @@ export async function PATCH(
     const session = await getServerSession(authOptions);
     const { id } = await params;
 
-    if (!session || session.user.role !== "STUDENT_LEARNER") {
+    if (!session) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
+    if (session.user.role !== "STUDENT_LEARNER") {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+    }
 
-    const body = await req.json();
+    const body = await readJsonBody(req);
     const isCancel = body && typeof body === "object" && "status" in body;
 
     // Validate the payload before any DB work (keeps 400s ahead of 404s).

@@ -68,10 +68,10 @@ describe("GET /api/tutor/classes", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await GET(new NextRequest("http://localhost/api/tutor/classes"));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 404 when no tutor profile exists", async () => {
@@ -108,10 +108,10 @@ describe("POST /api/tutor/classes", () => {
     sessionFindMany.mockResolvedValue([]);
   });
 
-  it("returns 401 for the wrong role", async () => {
+  it("returns 403 for the wrong role", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
     const res = await POST(makeRequest(validBody()));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
   });
 
   it("returns 404 when no tutor profile exists", async () => {
