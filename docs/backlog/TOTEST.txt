@@ -1276,3 +1276,4 @@ Admin portal unslop pass (Changes.md 2026-11-18)
  [ ] Tutor profile with showTutorRealNames on, with a profile picture, and with sessions this week (timetable columns).
  [ ] Moderated / unpublished ClassCard on a tutor profile.
  [ ] Request topic and Report pop-ups: send each once (DB write); close button and Escape behaviour.
+ [ ] /admin/reports "Classes by subject" with the real data: horizontal top-10 bars, readable subject names, "Top 10 of N" line, full list in the data table; other cards unchanged.
