@@ -1316,3 +1316,4 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Existing account whose stored section predates the rule (e.g. "7@A"): profile page loads; saving shows the section message until the section is corrected (the form always sends section).
  [ ] /api/health auth (Part 93): with HEALTH_CHECK_SECRET set on Render, `curl -i <site>/api/health` → 401; with `-H "Authorization: Bearer <secret>"` → 200 healthy. Update the cron job's request header before deploying, or it starts failing.
  [ ] Certificate-jobs scheduler still gets 200 after the shared bearerAuth refactor (Part 93).
+ [ ] /admin/reports "Classes by subject" with the real data: horizontal top-10 bars, readable subject names, "Top 10 of N" line, full list in the data table; other cards unchanged.

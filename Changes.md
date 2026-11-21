@@ -5490,3 +5490,10 @@ Client: first/last name inputs gain `maxLength={50}`, building/room `maxLength` 
 the browser's generic "match the requested format". Tests: new `textRules.test.ts` (rules, browser/server
 pattern parity, each schema); admin route tests cover markup names (400), bad contacts (400) and contact
 normalisation; the invitation-escaping test now uses a stored legacy name. Full suite green (1477 passed).
+
+### Crowded bar charts on admin analytics (2026-11-21)
+
+`BarChartCard` (`src/components/charts/BarChartCard.tsx`): with more than 8 categories the slanted x-axis labels
+overlapped into an unreadable band ("Classes by subject", ~45 subjects). Past 8 categories the card now draws a
+ranked horizontal chart of the top 10 by count, with a "Top 10 of N" line; the data table still lists every row.
+Cards with 8 or fewer categories are unchanged. Checks: tsc and lint clean; browser-checked on a temporary page.
