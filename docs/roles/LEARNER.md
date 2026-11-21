@@ -326,11 +326,11 @@ Browsable tutors for the Find Tutors page. Requires `role === "STUDENT_LEARNER"`
 **500** → `{ error }`.
 
 ### `GET /api/search`
-Quick search behind the top-bar box. Any authenticated role; results are scoped to the caller's role. Rate-limited to 40 requests/minute per account (`429` past that).
+Quick search behind the top-bar box and the search results page (`/learner/search`, `/admin/search`). Any authenticated role; results are scoped to the caller's role. Rate-limited to 40 requests/minute per account (`429` past that).
 
 **Query params**: `q` (required; fewer than 2 characters returns `{ groups: [] }`), `scope` (optional — `all` (default) | `tutorCode` | `subject` | `topic` | `classCode`, narrows which field(s) a class/tutor match is checked against).
 
-**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Learners get browsable classes + verified tutors + topics; tutors get their own classes + class requests + topics; admins get all classes + accounts + topics. Max 6 items per group; a group with zero matches is omitted.
+**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Learners get browsable classes + verified tutors + topics; tutors get their own classes + class requests + topics; admins get all classes + accounts + topics. 6 items per group by default, or `limit` (1–30) when the search results page asks for more; a group with zero matches is omitted.
 **401** → not authenticated.
 **500** → `{ error }`.
 

@@ -85,6 +85,25 @@ describe("GET /api/search", () => {
     expect(top.items[0].href).toContain("/learner/classes?q=");
   });
 
+  it("admin: class results show the subject name and a readable status, not the raw codes", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
+    classFindMany.mockResolvedValue([{ id: "c1", code: "C-0231", subject: "JHS_ARALING_PANLIPUNAN", status: "SCHEDULED" }]);
+    const json = await (await GET(req("C-0231", "classCode"))).json();
+    expect(json.groups[0].items[0]).toMatchObject({ title: "C-0231 · Araling Panlipunan", subtitle: "Scheduled" });
+  });
+
+  it("limit: defaults to the dropdown size and is capped for the results page", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
+    await GET(req("linear"));
+    expect(classFindMany.mock.calls[0][0].take).toBe(6);
+    classFindMany.mockClear();
+    await GET(new NextRequest("http://localhost/api/search?q=linear&limit=500"));
+    expect(classFindMany.mock.calls[0][0].take).toBe(30);
+    classFindMany.mockClear();
+    await GET(new NextRequest("http://localhost/api/search?q=linear&limit=abc"));
+    expect(classFindMany.mock.calls[0][0].take).toBe(6);
+  });
+
   it("tutor: only searches their own classes, no tutor group", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "T1", role: "STUDENT_TUTOR" } });
     const json = await (await GET(req("linear"))).json();

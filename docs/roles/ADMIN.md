@@ -195,11 +195,11 @@ throughout (never a learner's real name/id, only `anonymousId`):
 All endpoints below require an authenticated session with `role === "ADMIN"`, or respond `401 { error: "Unauthorized." }`.
 
 ### `GET /api/search`
-Quick search behind the top-bar box. **Not** admin-gated (any authenticated role), but results are role-scoped: an admin sees all classes, all non-admin accounts, and topic matches.
+Quick search behind the top-bar box and the search results page (`/learner/search`, `/admin/search`). **Not** admin-gated (any authenticated role), but results are role-scoped: an admin sees all classes, all non-admin accounts, and topic matches.
 
 **Query params**: `q` (required; fewer than 2 characters returns `{ groups: [] }`).
 
-**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. Max 6 items per group; account rows link to `/admin/users/[id]`, class rows to a pre-filtered `/admin/classes`.
+**200** → `{ groups: [{ kind: "class" | "tutor" | "topic", label, items: [{ id, title, subtitle?, href }] }] }`. 6 items per group by default, or `limit` (1–30) when the search results page asks for more; account rows link to `/admin/users/[id]`, class rows to a pre-filtered `/admin/classes`.
 **401** → not authenticated.
 **500** → `{ error }`.
 

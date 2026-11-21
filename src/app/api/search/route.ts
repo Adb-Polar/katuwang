@@ -11,8 +11,9 @@ import { portalPath } from "@/lib/portalPaths";
 import { rateLimit, rateLimitEnabled, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 import { tutorSearchClauses } from "@/lib/tutorSearch";
+import { PAGE_RESULTS_PER_GROUP, QUICK_RESULTS_PER_GROUP } from "@/lib/searchScopes";
+import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
-const PER_GROUP = 6;
 
 // Learners choose an entity; admins can also narrow the search to one field.
 const SEARCH_SCOPES = ["all", "tutor", "class", "tutorCode", "subject", "topic", "classCode"] as const;
@@ -83,6 +84,12 @@ export async function GET(req: NextRequest) {
     const q = (params.get("q") || "").trim();
     if (q.length < 2) return NextResponse.json({ groups: [] });
 
+    // The top-bar dropdown takes the default; the results page asks for more.
+    const limitParam = Number.parseInt(params.get("limit") ?? "", 10);
+    const perGroup = Number.isNaN(limitParam)
+      ? QUICK_RESULTS_PER_GROUP
+      : Math.min(Math.max(limitParam, 1), PAGE_RESULTS_PER_GROUP);
+
     const scopeParam = params.get("scope") as SearchScope | null;
     const scope: SearchScope =
       scopeParam && SEARCH_SCOPES.includes(scopeParam) ? scopeParam : "all";
@@ -109,9 +116,9 @@ export async function GET(req: NextRequest) {
             href: portalPath(role, `/classes?q=${encodeURIComponent(t.name)}`),
           });
         }
-        if (topicMatches.length >= PER_GROUP) break;
+        if (topicMatches.length >= perGroup) break;
       }
-      if (topicMatches.length >= PER_GROUP) break;
+      if (topicMatches.length >= perGroup) break;
     }
 
     if (role === "STUDENT_LEARNER") {
@@ -136,7 +143,7 @@ export async function GET(req: NextRequest) {
                 subject: true,
                 topics: { select: { topic: true }, take: 3 },
               },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
@@ -149,7 +156,7 @@ export async function GET(req: NextRequest) {
                 OR: tutorOr,
               },
               select: { id: true, anonymousId: true, firstName: true, lastName: true },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { anonymousId: "asc" },
             })
           : Promise.resolve([]),
@@ -161,7 +168,7 @@ export async function GET(req: NextRequest) {
           label: "Classes",
           items: classes.map((c) => ({
             id: c.id,
-            title: `${c.code} · ${c.subject}`,
+            title: `${c.code} · ${subjectDisplayLabel(c.subject)}`,
             subtitle: c.topics.map((t) => t.topic).join(", "),
             href: `/learner/classes/${c.id}`,
           })),
@@ -198,7 +205,7 @@ export async function GET(req: NextRequest) {
           ? prisma.tutorClass.findMany({
               where: { tutorProfile: { userId: session.user.id }, OR: classOr },
               select: { id: true, code: true, subject: true, status: true },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
@@ -226,7 +233,7 @@ export async function GET(req: NextRequest) {
                 topics: { select: { topic: true }, take: 3 },
                 directedTutorProfileId: true,
               },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { createdAt: "asc" },
             })
           : Promise.resolve([]),
@@ -238,8 +245,8 @@ export async function GET(req: NextRequest) {
           label: "Your classes",
           items: classes.map((c) => ({
             id: c.id,
-            title: `${c.code} · ${c.subject}`,
-            subtitle: c.status,
+            title: `${c.code} · ${subjectDisplayLabel(c.subject)}`,
+            subtitle: statusDisplayLabel(c.status),
             href: `/tutor/classes/${c.id}`,
           })),
         });
@@ -250,7 +257,7 @@ export async function GET(req: NextRequest) {
           label: "Class requests",
           items: requests.map((r) => ({
             id: r.id,
-            title: `${r.subject} · ${r.topics.map((t) => t.topic).join(", ")}`,
+            title: `${subjectDisplayLabel(r.subject)} · ${r.topics.map((t) => t.topic).join(", ")}`,
             subtitle:
               r.directedTutorProfileId === tutorProfile?.id ? "Directed to you" : "Public request",
             href: `/tutor/requests/${r.id}/accept`,
@@ -263,7 +270,7 @@ export async function GET(req: NextRequest) {
           ? prisma.tutorClass.findMany({
               where: { OR: classOr },
               select: { id: true, code: true, subject: true, status: true },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
@@ -282,7 +289,7 @@ export async function GET(req: NextRequest) {
                       ],
               },
               select: { id: true, anonymousId: true, role: true, firstName: true, lastName: true },
-              take: PER_GROUP,
+              take: perGroup,
               orderBy: { anonymousId: "asc" },
             })
           : Promise.resolve([]),
@@ -293,8 +300,8 @@ export async function GET(req: NextRequest) {
           label: "Classes",
           items: classes.map((c) => ({
             id: c.id,
-            title: `${c.code} · ${c.subject}`,
-            subtitle: c.status,
+            title: `${c.code} · ${subjectDisplayLabel(c.subject)}`,
+            subtitle: statusDisplayLabel(c.status),
             href: `/admin/classes?q=${encodeURIComponent(c.code)}`,
           })),
         });

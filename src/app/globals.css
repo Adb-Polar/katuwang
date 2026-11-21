@@ -272,12 +272,6 @@ b, strong { font-weight: var(--font-weight-bold); }
     border: 0; background: none; flex: 1; min-width: 0; font: inherit;
     color: var(--color-base-content); outline: none;
   }
-  /* Chrome/Safari draw their own clear "x" in a search input, in a colour we
-     don't control. Suppress it (and Edge's ::-ms-clear) — GlobalSearch renders
-     a themed clear button instead, so the affordance is the same everywhere. */
-  .kt-search input::-webkit-search-cancel-button,
-  .kt-search input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; }
-  .kt-search input::-ms-clear { display: none; }
   .kt-icon-btn {
     position: relative;
     width: 2.1rem; height: 2.1rem; display: grid; place-items: center; flex: none;

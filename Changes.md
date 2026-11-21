@@ -5497,3 +5497,28 @@ normalisation; the invitation-escaping test now uses a stored legacy name. Full 
 overlapped into an unreadable band ("Classes by subject", ~45 subjects). Past 8 categories the card now draws a
 ranked horizontal chart of the top 10 by count, with a "Top 10 of N" line; the data table still lists every row.
 Cards with 8 or fewer categories are unchanged. Checks: tsc and lint clean; browser-checked on a temporary page.
+
+### Global search cleanup (2026-11-21)
+
+Top-bar search (`src/components/layout/GlobalSearch.tsx`, `src/app/api/search/route.ts`, `src/app/globals.css`):
+- **Bug:** a failed request (500, rate limit, offline) showed "No matches"; it now says search isn't working.
+- **Results:** class rows show the subject name and a readable status ("C-0231 · Araling Panlipunan", "Scheduled")
+  instead of the raw subject code and enum. Per-row kind icons and the Enter glyph removed (the group label already
+  says what a row is); titles in body colour, details in muted.
+- **No matches:** offers the wider/other scope ("Search everything instead"; tutors ↔ classes for learners).
+- **Keyboard and screen readers:** real combobox wiring (`aria-activedescendant`, option ids, labelled groups,
+  result count announced), highlighted row scrolls into view, panel closes on Tab-out, "/" no longer steals focus
+  from a select, result rows are not tab stops. Clear button hit area 16px → 28px.
+- Superseded requests are aborted; spacing hacks and the dead `type="search"` CSS removed.
+Checks: tsc and lint clean; route test added for the readable labels; component browser-checked on a temporary
+page with mocked results (no database in this session).
+
+### Search results page (2026-11-21)
+
+New `/learner/search` and `/admin/search` (`?q=&scope=`), plan in `docs/plans/search-results-page.md`:
+- A search form (scope + query, plain GET so the URL can be shared) and results grouped as Classes / Tutors or
+  Accounts / Topics, up to 30 per group, with a match count and the same no-match and error messages as the dropdown.
+- The top-bar dropdown ends with "See all results for …", reachable with the arrow keys and Enter.
+- `GET /api/search` takes `limit` (1–30, default 6). Scope lists and helpers moved to `src/lib/searchScopes.ts`.
+Checks: tsc clean; new tests for `limit` and the scope helpers; page and dropdown browser-checked at 1000px and
+375px on a temporary page with mocked results (no database in this session).

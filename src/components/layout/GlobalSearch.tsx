@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, GraduationCap, UserRound, Tag, CornerDownLeft, X, ChevronDown } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
+import { MIN_QUERY_LENGTH, fallbackScope, scopesFor, searchPageHref, type Scope } from "@/lib/searchScopes";
 
 interface SearchItem {
   id: string;
@@ -16,83 +17,78 @@ interface SearchGroup {
   items: SearchItem[];
 }
 
-const KIND_ICON: Record<SearchGroup["kind"], React.ReactNode> = {
-  class: <GraduationCap className="h-3.5 w-3.5 text-primary" />,
-  tutor: <UserRound className="h-3.5 w-3.5 text-(--kt-tutor-text)" />,
-  topic: <Tag className="h-3.5 w-3.5 text-(--kt-muted)" />,
-};
+const DEBOUNCE_MS = 220;
+const LISTBOX_ID = "global-search-results";
+const optionId = (index: number) => `global-search-option-${index}`;
 
-const ADMIN_SCOPES = [
-  { value: "all", label: "Everything", placeholder: "Classes, tutors, topics…" },
-  { value: "tutorCode", label: "Tutor code", placeholder: "e.g. TUT-0007" },
-  { value: "subject", label: "Subject", placeholder: "e.g. Mathematics" },
-  { value: "topic", label: "Topic", placeholder: "e.g. Fractions" },
-  { value: "classCode", label: "Class code", placeholder: "e.g. CUR-0086" },
-] as const;
-const LEARNER_SCOPES = [
-  { value: "tutor", label: "Tutor", placeholder: "Name or TUT code…" },
-  { value: "class", label: "Class", placeholder: "Subject or class code…" },
-] as const;
-type Scope = (typeof ADMIN_SCOPES)[number]["value"] | (typeof LEARNER_SCOPES)[number]["value"];
+type Status = "idle" | "loading" | "done" | "error";
 
 export default function GlobalSearch({ audience = "admin" }: { audience?: "learner" | "admin" }) {
   const router = useRouter();
-  const scopes = audience === "learner" ? LEARNER_SCOPES : ADMIN_SCOPES;
+  const scopes = scopesFor(audience);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const [q, setQ] = useState("");
   const [scope, setScope] = useState<Scope>(scopes[0].value);
   const [groups, setGroups] = useState<SearchGroup[]>([]);
+  const [status, setStatus] = useState<Status>("idle");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [active, setActive] = useState(0);
 
-  // Flatten for keyboard navigation.
-  const flat = useMemo(() => groups.flatMap((g) => g.items), [groups]);
+  const term = q.trim();
+  const canSearch = term.length >= MIN_QUERY_LENGTH;
+  const resultCount = groups.reduce((sum, g) => sum + g.items.length, 0);
+  // The row after the last result opens the full results page.
+  const seeAllIndex = resultCount;
+  const optionCount = resultCount + 1;
+  const seeAllHref = searchPageHref(audience, term, scope);
 
-  // Debounced fetch. All state changes happen inside the timeout so the effect
-  // body never calls setState synchronously.
+  // Debounced fetch. State changes happen inside the timeout so the effect body
+  // never calls setState synchronously; the abort drops a superseded request.
   useEffect(() => {
-    const term = q.trim();
-    let cancelled = false;
-    const t = setTimeout(async () => {
-      if (term.length < 2) {
-        if (!cancelled) {
+    const controller = new AbortController();
+    const timer = setTimeout(
+      async () => {
+        if (!canSearch) {
           setGroups([]);
-          setLoading(false);
+          setStatus("idle");
+          return;
         }
-        return;
-      }
-      if (!cancelled) setLoading(true);
-      try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(term)}&scope=${scope}`,
-        );
-        if (!res.ok) throw new Error();
-        const json = await res.json();
-        if (cancelled) return;
-        setGroups(Array.isArray(json.groups) ? json.groups : []);
-        setActive(0);
-      } catch {
-        if (!cancelled) setGroups([]);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }, term.length < 2 ? 0 : 220);
+        setStatus("loading");
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(term)}&scope=${scope}`, {
+            signal: controller.signal,
+          });
+          if (!res.ok) throw new Error(`Search failed with ${res.status}`);
+          const json = await res.json();
+          setGroups(Array.isArray(json.groups) ? json.groups : []);
+          setActive(0);
+          setStatus("done");
+        } catch {
+          if (controller.signal.aborted) return;
+          setGroups([]);
+          setStatus("error");
+        }
+      },
+      canSearch ? DEBOUNCE_MS : 0,
+    );
     return () => {
-      cancelled = true;
-      clearTimeout(t);
+      clearTimeout(timer);
+      controller.abort();
     };
-  }, [q, scope]);
+  }, [term, canSearch, scope]);
 
-  // ⌘K / Ctrl+K / "/" focuses the box from anywhere.
+  // Ctrl+K / ⌘K, or "/" outside a text field, focuses the box from anywhere.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const mod = e.metaKey || e.ctrlKey;
       const el = document.activeElement;
-      const typing = el instanceof HTMLElement && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
-      if ((mod && e.key.toLowerCase() === "k") || (e.key === "/" && !typing)) {
+      const typing =
+        el instanceof HTMLElement &&
+        (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
+      const isShortcut = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (isShortcut || (e.key === "/" && !typing)) {
         e.preventDefault();
         inputRef.current?.focus();
         setOpen(true);
@@ -102,22 +98,24 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // Close on outside click.
+  // Keep the keyboard-highlighted result in view when the list scrolls.
   useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+    listRef.current?.querySelector(`#${optionId(active)}`)?.scrollIntoView({ block: "nearest" });
+  }, [active]);
 
-  const go = (item: SearchItem) => {
+  const changeScope = (next: Scope) => {
+    setScope(next);
+    setGroups([]);
+    setActive(0);
+    setOpen(true);
+  };
+
+  const go = (href: string) => {
     setOpen(false);
     setQ("");
     setGroups([]);
     inputRef.current?.blur();
-    router.push(item.href);
+    router.push(href);
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -126,61 +124,69 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
       inputRef.current?.blur();
       return;
     }
-    if (!open || flat.length === 0) return;
+    if (!open || resultCount === 0) return;
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActive((i) => (i + 1) % flat.length);
+      setActive((i) => (i + 1) % optionCount);
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActive((i) => (i - 1 + flat.length) % flat.length);
+      setActive((i) => (i - 1 + optionCount) % optionCount);
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const item = flat[active];
-      if (item) go(item);
+      const item = groups.flatMap((g) => g.items)[active];
+      go(item ? item.href : seeAllHref);
     }
   };
 
-  const term = q.trim();
-  const showPanel = open && term.length >= 2;
-  const scopePlaceholder =
-    scopes.find((s) => s.value === scope)?.placeholder ?? "Search…";
+  const showPanel = open && canSearch && status !== "idle";
+  const showResults = showPanel && resultCount > 0;
+  const currentScope = scopes.find((s) => s.value === scope) ?? scopes[0];
+  const fallback = fallbackScope(audience, scope);
+
+  let message: string | null = null;
+  if (status === "error") message = "Search isn’t working right now. Try again in a moment.";
+  else if (resultCount === 0) message = status === "loading" ? "Searching…" : `No matches for “${term}”.`;
+
+  let nextIndex = 0;
 
   return (
-    <div ref={rootRef} className="kt-search relative hidden sm:flex">
-      <span className="relative shrink-0 self-stretch flex items-center border-r border-base-300 -ml-0.75 mr-1">
-      <select
-        aria-label="Search scope"
-        value={scope}
-        onChange={(e) => {
-          setScope(e.target.value as Scope);
-          setGroups([]);
-          setActive(0);
-          setLoading(q.trim().length >= 2);
-          setOpen(true);
-        }}
-        className="h-full appearance-none bg-transparent pl-0.75 pr-7 text-sm text-base-content cursor-pointer focus:outline-none"
-      >
-        {scopes.map((s) => (
-          <option key={s.value} value={s.value}>
-            {s.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-2 h-4 w-4 text-(--kt-muted)" aria-hidden="true" />
+    <div
+      ref={rootRef}
+      className="kt-search relative hidden sm:flex"
+      onBlur={(e) => {
+        if (!rootRef.current?.contains(e.relatedTarget)) setOpen(false);
+      }}
+    >
+      <span className="relative flex shrink-0 items-center self-stretch border-r border-base-300">
+        <select
+          aria-label="Search in"
+          value={scope}
+          onChange={(e) => changeScope(e.target.value as Scope)}
+          className="h-full cursor-pointer appearance-none bg-transparent pr-7 text-sm text-base-content focus:outline-none"
+        >
+          {scopes.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-2 h-4 w-4 text-(--kt-muted)" aria-hidden="true" />
       </span>
-      <Search className="h-4 w-4 shrink-0" />
+      <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
       <input
         ref={inputRef}
         // `type="text"`, not "search": a search input adds a native clear "x"
-        // (styled by the browser, not us) and native Escape-to-clear, which
-        // fights our Escape-to-close. We render our own clear button below.
+        // and native Escape-to-clear, which fights our Escape-to-close.
         type="text"
         role="combobox"
-        aria-keyshortcuts="Control+K Meta+K"
-        aria-expanded={showPanel}
-        aria-controls="global-search-results"
-        placeholder={scopePlaceholder}
         aria-label="Search"
+        aria-keyshortcuts="Control+K Meta+K"
+        aria-autocomplete="list"
+        aria-expanded={showResults}
+        aria-controls={LISTBOX_ID}
+        aria-activedescendant={showResults ? optionId(active) : undefined}
+        autoComplete="off"
+        placeholder={currentScope.placeholder}
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
@@ -198,58 +204,89 @@ export default function GlobalSearch({ audience = "admin" }: { audience?: "learn
             setGroups([]);
             inputRef.current?.focus();
           }}
-          className="grid h-4 w-4 shrink-0 place-items-center rounded-full text-(--kt-muted) hover:text-base-content"
+          className="-mr-1.5 grid h-7 w-7 shrink-0 place-items-center rounded-field text-(--kt-muted) hover:text-base-content"
         >
-          <X className="h-3.5 w-3.5" />
+          <X className="h-4 w-4" aria-hidden="true" />
         </button>
       ) : null}
 
+      <p role="status" className="sr-only">
+        {showResults ? `${resultCount} ${resultCount === 1 ? "result" : "results"}` : ""}
+      </p>
+
       {showPanel && (
-        <div
-          id="global-search-results"
-          role="listbox"
-          className="absolute left-0 right-0 top-full z-30 mt-1 max-h-[70vh] overflow-y-auto rounded-field border border-base-300 bg-base-100 py-1.5 shadow-md"
-        >
-          {loading && flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-sm text-(--kt-muted)">Searching…</p>
-          ) : flat.length === 0 ? (
-            <p className="px-3 py-3 text-center text-sm text-(--kt-muted)">
-              No matches for “{term}”.
-            </p>
-          ) : (
-            groups.map((g) => (
-              <div key={g.kind + g.label}>
-                <p className="px-3 pb-1 pt-2 text-sm font-medium text-(--kt-muted)">
-                  {g.label}
-                </p>
-                {g.items.map((item) => {
-                  const idx = flat.findIndex((f) => f === item);
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      role="option"
-                      aria-selected={idx === active}
-                      onMouseEnter={() => setActive(idx)}
-                      onClick={() => go(item)}
-                      className={`flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm ${
-                        idx === active ? "bg-base-200/70" : ""
-                      }`}
-                    >
-                      <span className="shrink-0">{KIND_ICON[g.kind]}</span>
-                      <span className="min-w-0 flex-1">
+        <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-[70vh] overflow-y-auto rounded-field border border-base-300 bg-base-100 py-1.5 shadow-md">
+          {message && (
+            <div className="px-3 py-2.5 text-sm" role="status">
+              <p className="text-(--kt-muted)">{message}</p>
+              {status === "done" && fallback && (
+                <button
+                  type="button"
+                  className="link link-primary mt-1"
+                  // Safari doesn't focus a clicked button, so the blur would close the panel first.
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    changeScope(fallback.scope);
+                    inputRef.current?.focus();
+                  }}
+                >
+                  {fallback.label}
+                </button>
+              )}
+            </div>
+          )}
+          <div ref={listRef} id={LISTBOX_ID} role="listbox" aria-label="Search results">
+            {groups.map((g) => {
+              const headingId = `global-search-group-${g.kind}`;
+              return (
+                <div key={g.kind + g.label} role="group" aria-labelledby={headingId}>
+                  <p id={headingId} className="px-3 pb-1 pt-2 text-sm font-medium text-(--kt-muted)">
+                    {g.label}
+                  </p>
+                  {g.items.map((item) => {
+                    const index = nextIndex++;
+                    return (
+                      <button
+                        key={item.id}
+                        id={optionId(index)}
+                        type="button"
+                        role="option"
+                        tabIndex={-1}
+                        aria-selected={index === active}
+                        // Keep focus in the input so arrow keys keep working after a hover.
+                        onMouseDown={(e) => e.preventDefault()}
+                        onMouseEnter={() => setActive(index)}
+                        onClick={() => go(item.href)}
+                        className={`block w-full px-3 py-2 text-left text-sm text-base-content ${index === active ? "bg-base-200" : ""}`}
+                      >
                         <span className="block truncate">{item.title}</span>
                         {item.subtitle && (
-                          <span className="block truncate text-sm text-(--kt-muted)">{item.subtitle}</span>
+                          <span className="block truncate text-(--kt-muted)">{item.subtitle}</span>
                         )}
-                      </span>
-                      {idx === active && <CornerDownLeft className="h-3.5 w-3.5 shrink-0 text-(--kt-muted)" aria-hidden="true" />}
-                    </button>
-                  );
-                })}
-              </div>
-            ))
-          )}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            {showResults && (
+              <button
+                id={optionId(seeAllIndex)}
+                type="button"
+                role="option"
+                tabIndex={-1}
+                aria-selected={active === seeAllIndex}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setActive(seeAllIndex)}
+                onClick={() => go(seeAllHref)}
+                className={`mt-1.5 block w-full border-t border-base-300 px-3 py-2.5 text-left text-sm font-medium text-primary ${
+                  active === seeAllIndex ? "bg-base-200" : ""
+                }`}
+              >
+                See all results for “{term}”
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
