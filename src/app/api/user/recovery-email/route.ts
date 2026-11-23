@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { busyResponse } from "@/lib/requestQueue";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { updateProfileSchema } from "@/lib/validations/profile";
@@ -24,6 +25,8 @@ export async function PATCH(req: NextRequest) {
     const data = await recoveryEmailUpdateData(session.user.id, parsed.data.recoveryEmail, parsed.data.currentPassword);
     return NextResponse.json(await prisma.user.update({ where: { id: session.user.id }, data, select }));
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     if (error instanceof RecoveryEmailError) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Error updating recovery email:", error);
     return NextResponse.json({ error: "Could not update your recovery email. Please try again." }, { status: 500 });
@@ -53,6 +56,8 @@ export async function POST() {
     }
     return NextResponse.json({ message: "Verification code sent to your recovery email. It expires in 10 minutes." });
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error sending recovery verification:", error);
     return NextResponse.json({ error: "Could not send the verification code. Please try again." }, { status: 500 });
   }

@@ -1,4 +1,5 @@
 import { catalogFailureResponse } from "@/lib/catalogError";
+import { withQueue } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -10,7 +11,7 @@ import { rateLimit, rateLimitEnabled, tooManyRequests } from "@/lib/rateLimit";
 import { MINUTE_MS } from "@/lib/datetime";
 
 // ─── POST: ask the intent-based assistant ────────────────────────────────
-export async function POST(req: NextRequest) {
+async function handlePost(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
 
@@ -62,3 +63,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export const POST = withQueue("read", handlePost);

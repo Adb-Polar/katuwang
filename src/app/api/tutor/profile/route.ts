@@ -1,4 +1,5 @@
 import { recoveryEmailUpdateData, RecoveryEmailError } from "@/lib/recoveryEmail";
+import { busyResponse } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
@@ -44,6 +45,8 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(updated);
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     if (error instanceof RecoveryEmailError) return NextResponse.json({ error: error.message }, { status: 400 });
     console.error("Error updating tutor profile:", error);
     return NextResponse.json(

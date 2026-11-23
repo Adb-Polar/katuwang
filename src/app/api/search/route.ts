@@ -1,4 +1,5 @@
 import { catalogFailureResponse } from "@/lib/catalogError";
+import { withQueue } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
@@ -68,7 +69,7 @@ export interface SearchGroup {
 // ─── GET: cross-cutting quick search for the top-bar box ───────────────────
 // Role-aware. Learners get browsable classes + verified tutors + topics; tutors
 // get their own classes + topics; admins get all classes + accounts + topics.
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session) {
@@ -328,3 +329,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }
+
+export const GET = withQueue("read", handleGet);

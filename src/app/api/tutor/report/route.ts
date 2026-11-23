@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withQueue } from "@/lib/requestQueue";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { isAccessError, loadOwnedClass } from "@/lib/sessionTestAccess";
 import { parseReportQuery } from "@/lib/reports/query";
@@ -8,7 +9,7 @@ import { TUTOR_REPORT_SCOPES } from "@/lib/validations/reports";
 
 // ─── GET: Tutor class report or tutoring summary (PDF/CSV) ────────────────
 // ?scope=summary (default) | class&classId=… — learners by anonymousId only.
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session || session.user.role !== "STUDENT_TUTOR") {
@@ -39,3 +40,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 }
+
+export const GET = withQueue("report", handleGet);

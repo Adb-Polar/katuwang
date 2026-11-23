@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
+import { busyResponse } from "@/lib/requestQueue";
 import { RESET_COOKIE, RESET_COOKIE_PATH, privateJson } from "@/lib/recovery";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { resetPasswordSchema } from "@/lib/validations/passwordReset";
 import { hashResetToken } from "@/lib/passwordReset";
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
       return privateJson(INVALID, 400);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hashPassword(password);
 
     const changed = await prisma.$transaction(async tx => {
       await tx.$queryRaw`SELECT id FROM users WHERE id = ${record.userId} FOR UPDATE`;
@@ -65,7 +66,9 @@ export async function POST(req: NextRequest) {
     const response = privateJson({ message: "Your password has been reset. You can now sign in." });
     response.cookies.set(RESET_COOKIE, "", { path: RESET_COOKIE_PATH, maxAge: 0 });
     return response;
-  } catch {
+  } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error handling reset-password");
     return privateJson({ error: "An unexpected error occurred. Please try again." }, 500);
   }

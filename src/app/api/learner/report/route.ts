@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withQueue } from "@/lib/requestQueue";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { parseReportQuery } from "@/lib/reports/query";
 import { buildLearnerReport } from "@/lib/reports/learner";
 import { reportResponse } from "@/lib/reports/respond";
 
 // ─── GET: The learner's own progress report (PDF/CSV) ─────────────────────
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session || session.user.role !== "STUDENT_LEARNER") {
@@ -24,3 +25,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 }
+
+export const GET = withQueue("report", handleGet);

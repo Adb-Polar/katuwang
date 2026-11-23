@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasValidBearerToken } from "@/lib/bearerAuth";
 import { prisma } from "@/lib/prisma";
+import { queueStats } from "@/lib/requestQueue";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -20,6 +21,7 @@ export async function GET(req: NextRequest) {
       {
         status: "healthy",
         database: "connected",
+        queues: queueStats(),
         timestamp: new Date().toISOString(),
       },
       {

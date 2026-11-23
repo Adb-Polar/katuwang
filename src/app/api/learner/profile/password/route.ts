@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { busyResponse } from "@/lib/requestQueue";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { changePasswordSchema } from "@/lib/validations/changePassword";
 import { changeOwnPassword } from "@/lib/changePassword";
@@ -33,6 +34,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Password updated." });
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error changing learner password:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

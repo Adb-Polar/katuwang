@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [94](#part-94) | **Backend request queue (load shedding)** | A burst of sign-ins, report downloads or searches now waits in a bounded queue instead of freezing the server; when the queue is full the client gets `503` + `Retry-After` ("The server is busy right now"). | See Part 94 below. New `src/lib/requestQueue.ts` + `src/lib/password.ts`; three lanes (`password`, `report`, `read`). |
 | [93](#part-93) | **Health endpoint requires a cron secret** | `GET /api/health` now returns 401 unless the caller sends `Authorization: Bearer <HEALTH_CHECK_SECRET>`; fails closed when the env var is unset. | See Part 93 below. New `src/lib/bearerAuth.ts` (constant-time compare), shared with the certificate-jobs route. |
 | [92](#part-92) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 92 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
 | [91](#part-91) | **Input sanitization audit + High/Medium fixes** | Audited every input field across learner/tutor/admin portals, auth pages and account surfaces (`docs/plans/input-sanitization-audit.md`), then fixed the High/Medium gaps: avatars always re-encoded server-side (EXIF/GPS stripped, non-images rejected), meeting links http(s)-only, whitespace-only names/section rejected, register contact normalised to PH mobile, missing `max(191)`s, admin-invite email escaped. | See Part 91 below. Validations, register/admins/uploadthing routes, image optimizer, class forms + tests. |
@@ -4088,6 +4089,43 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-94"></a>
+## Part 94 — Backend request queue (load shedding) (2026-11-23)
+
+Plan: `docs/plans/request-queue.md`. Branch `feat/request-queue` (from `f414bdd`).
+
+**New.** `src/lib/requestQueue.ts` — `BoundedQueue` (max `concurrency` running, FIFO wait
+line capped at `maxQueued`, waiters rejected after `timeoutMs`), `QueueOverloadedError`,
+`runQueued(lane, task)`, `withQueue(lane, handler)`, `busyResponse(error)`, `serverBusy()`
+(503 + `Retry-After`), `queueStats()`, `laneOptions()` (env overrides
+`QUEUE_<LANE>_CONCURRENCY|MAX_QUEUED|TIMEOUT_MS`, `QUEUE_DISABLED=1`). Lanes kept on
+`globalThis`. `src/lib/password.ts` — `hashPassword` / `verifyPassword` (bcryptjs cost 12)
+run through the `password` lane.
+
+**Lanes.** `password` 2 running / 40 waiting / 15 s; `report` 2 / 10 / 20 s; `read` 8 / 100 / 10 s.
+
+**Wired in.**
+- Every `bcrypt.hash` / `bcrypt.compare` now goes through `src/lib/password.ts`:
+  `src/lib/auth.ts` (full lane → sign-in error "The server is busy right now…"),
+  `registration.ts`, `changePassword.ts`, `recoveryEmail.ts`, and the `account`,
+  `admin/admins`, `auth/reset-password` routes. `api/dev` (dev-only) left as is.
+- Routes that reach those helpers return the 503 from their `catch` via `busyResponse`:
+  `account`, `admin/admins`, `auth/reset-password`, `register`, `user/recovery-email`,
+  `{learner,tutor}/profile`, `{learner,tutor,admin}/profile/password`.
+- `withQueue("report")`: `GET /api/{learner,tutor,admin}/report`.
+- `withQueue("read")`: `GET /api/search`, `GET /api/classes`, `GET /api/learner/tutors`,
+  `POST /api/chatbot`.
+- `GET /api/health` adds `queues` (running / queued / rejected per lane).
+- `.env.example` documents the optional `QUEUE_*` variables.
+
+No schema change, no new dependency. Other routes still rely on the DB pool for
+back-pressure (see the plan's Limits).
+
+**Tests.** `src/lib/__tests__/requestQueue.test.ts` (20), `password.test.ts` (2).
+`pnpm test` 1547 passed / 107 skipped, `tsc` / `lint` clean. Burst simulation (100
+simultaneous password checks): 41 served, 59 shed, event-loop lag < 200 ms. Not run
+against a live server/DB in this session. Not committed.
 
 <a id="part-93"></a>
 ## Part 93 — Health endpoint requires a cron secret (2026-11-20)

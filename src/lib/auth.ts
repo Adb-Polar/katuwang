@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
+import { verifyPassword } from "./password";
+import { QueueOverloadedError } from "./requestQueue";
 import { prisma } from "./prisma";
 import { rateLimit, rateLimitEnabled, clientIp } from "./rateLimit";
 import { getSetting } from "./settings";
@@ -13,6 +14,18 @@ const DUMMY_PASSWORD_HASH = "$2b$12$IoGXJ6Gc974qVtoXzHgX0ON1saFbEG.vkr3Fz2b44U45
 // callback re-reads them from the DB for client/proxy display. Protected server
 // operations independently check the live account on every request.
 const TOKEN_STALE_MS = 5 * 60 * 1000;
+
+const SERVER_BUSY_MESSAGE = "The server is busy right now. Please try again in a moment.";
+
+/** Password check through the bounded `password` lane; a full lane becomes a sign-in error. */
+async function checkPassword(password: string, hash: string): Promise<boolean> {
+  try {
+    return await verifyPassword(password, hash);
+  } catch (error) {
+    if (error instanceof QueueOverloadedError) throw new Error(SERVER_BUSY_MESSAGE);
+    throw error;
+  }
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -43,11 +56,11 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) {
           // Keep response time comparable even though field feedback differs.
-          await bcrypt.compare(credentials.password, DUMMY_PASSWORD_HASH);
+          await checkPassword(credentials.password, DUMMY_PASSWORD_HASH);
           throw new Error("EMAIL_NOT_FOUND");
         }
 
-        const passwordMatch = await bcrypt.compare(
+        const passwordMatch = await checkPassword(
           credentials.password,
           user.password
         );

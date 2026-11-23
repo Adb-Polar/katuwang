@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { withQueue } from "@/lib/requestQueue";
 import { isAdminRole } from "@/lib/permissions";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { parseReportQuery } from "@/lib/reports/query";
@@ -7,7 +8,7 @@ import { reportResponse } from "@/lib/reports/respond";
 import { ADMIN_REPORT_SCOPES } from "@/lib/validations/reports";
 
 // ─── GET: Admin platform report / data exports (PDF/CSV) ──────────────────
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session || !isAdminRole(session.user.role)) {
@@ -28,3 +29,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred. Please try again." }, { status: 500 });
   }
 }
+
+export const GET = withQueue("report", handleGet);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
+import { busyResponse } from "@/lib/requestQueue";
+import { verifyPassword } from "@/lib/password";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
@@ -36,7 +37,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: "Enter your password and type DELETE to confirm." }, { status: 400 });
     }
     const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { id: true, password: true, tutorProfile: { select: { id: true } }, _count: { select: { learnerCompletionCertificates: true, tutorCompletionCertificates: true } } } });
-    if (!user || !(await bcrypt.compare(body.password, user.password))) {
+    if (!user || !(await verifyPassword(body.password, user.password))) {
       return NextResponse.json({ error: "Incorrect password." }, { status: 400 });
     }
 
@@ -71,6 +72,8 @@ export async function DELETE(req: NextRequest) {
     });
     return NextResponse.json({ message: "Account deleted." });
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error deleting account:", error);
     return NextResponse.json({ error: "Could not delete the account. Please contact an administrator." }, { status: 500 });
   }

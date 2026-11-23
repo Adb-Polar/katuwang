@@ -1,4 +1,5 @@
 import { isAdminRole } from "@/lib/permissions";
+import { busyResponse } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { changePasswordSchema } from "@/lib/validations/changePassword";
@@ -34,6 +35,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: "Password updated." });
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error changing admin password:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred." },

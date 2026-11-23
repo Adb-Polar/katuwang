@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { busyResponse } from "@/lib/requestQueue";
 import crypto from "crypto";
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { requireSuperAdminSession } from "@/lib/permissions";
@@ -121,6 +122,8 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error fetching admin accounts:", error);
     return NextResponse.json(
       { error: "Failed to fetch admin accounts." },
@@ -183,7 +186,7 @@ export async function POST(req: NextRequest) {
 
     // Initial unguessable random password (cannot be used until activated)
     const randomPassword = crypto.randomUUID() + crypto.randomBytes(16).toString("hex");
-    const initialHashedPassword = await bcrypt.hash(randomPassword, 12);
+    const initialHashedPassword = await hashPassword(randomPassword);
 
     const newAdmin = await prisma.$transaction(async (tx) => {
       // 1. Create the admin user
@@ -262,6 +265,8 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Error creating admin account:", error);
     return NextResponse.json(
       { error: "Failed to create admin account." },

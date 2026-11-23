@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import { hashPassword, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
 export type ChangeOwnPasswordResult =
@@ -18,10 +18,10 @@ export async function changeOwnPassword(
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { password: true } });
   if (!user) return { ok: false, code: "USER_NOT_FOUND" };
 
-  const matches = await bcrypt.compare(currentPassword, user.password);
+  const matches = await verifyPassword(currentPassword, user.password);
   if (!matches) return { ok: false, code: "WRONG_CURRENT_PASSWORD" };
 
-  const hashedPassword = await bcrypt.hash(newPassword, 12);
+  const hashedPassword = await hashPassword(newPassword);
   await prisma.user.update({ where: { id: userId }, data: { password: hashedPassword, sessionVersion: { increment: 1 } } });
 
   return { ok: true };

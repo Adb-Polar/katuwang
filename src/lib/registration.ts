@@ -1,4 +1,4 @@
-import bcrypt from "bcryptjs";
+import { hashPassword } from "@/lib/password";
 import { GradeLevel, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { generateAnonymousId } from "@/lib/idGenerator";
@@ -65,7 +65,7 @@ export async function registerAccount(input: RegisterAccountInput): Promise<Regi
     return { ok: false, code: "DUPLICATE_EMAIL" };
   }
 
-  const hashedPassword = await bcrypt.hash(password, 12);
+  const hashedPassword = await hashPassword(password);
   const isTutor = type === "TUTOR";
   const anonymousId = await generateAnonymousId(isTutor ? "TUTOR" : "LEARNER");
 

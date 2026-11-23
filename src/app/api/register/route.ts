@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { busyResponse } from "@/lib/requestQueue";
 import { registerSchema } from "@/lib/validations/auth";
 import { normalizeContactInfo } from "@/lib/contactInfo";
 import { getSetting } from "@/lib/settings";
@@ -80,6 +81,8 @@ export async function POST(req: NextRequest) {
       try {
         await sendMail({ to: data.email, ...renderVerificationEmail(account.verificationCode) });
       } catch (err) {
+        const busy = busyResponse(err);
+        if (busy) return busy;
         // Registration already succeeded — a mail failure shouldn't fail the
         // request. The account can request a new code via resend-verification.
         console.error("[register] failed to send verification email:", err);
@@ -105,6 +108,8 @@ export async function POST(req: NextRequest) {
       { status: 201 },
     );
   } catch (error) {
+    const busy = busyResponse(error);
+    if (busy) return busy;
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },

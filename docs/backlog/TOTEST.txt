@@ -1324,3 +1324,7 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Search results page: change scope or query in the form and submit; a query with more than 30 matches shows the "First 30 matches" line; 1-character query shows the "at least 2 characters" line.
  [ ] /learner/search with showTutorRealNames off: tutor rows show only the TUT code.
  [ ] /tutor/search does not exist (404) and /admin/search is refused for a learner.
+ [ ] Request queue (Part 94): normal sign-in, register, change password, report download (PDF + CSV), global search, class browser, tutor browser and chatbot all still work on the deployed site.
+ [ ] Request queue (Part 94): set QUEUE_PASSWORD_CONCURRENCY=1 and QUEUE_PASSWORD_MAX_QUEUED=1, fire ~10 sign-ins at once -> the extra ones show "The server is busy right now. Please try again in a moment." on the login form (not a blank error), and sign-in works again right after.
+ [ ] Request queue (Part 94): with QUEUE_REPORT_CONCURRENCY=1 and QUEUE_REPORT_MAX_QUEUED=1, click a report download several times fast -> extra clicks get a readable "server is busy" message, not a broken file.
+ [ ] /api/health (Part 94): authorised call shows a `queues` block with password / report / read counters.

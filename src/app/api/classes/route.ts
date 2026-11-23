@@ -1,4 +1,5 @@
 import { catalogFailureResponse } from "@/lib/catalogError";
+import { withQueue } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_PAGE_SIZE } from "@/lib/pagination";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -47,7 +48,7 @@ async function loadRankContext(learnerId: string, learnerGrade?: GradeLevel | nu
 }
 
 // ─── GET: Paginated Browsable / Enrolled Classes for a Learner ───────────────
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
 
@@ -192,3 +193,5 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export const GET = withQueue("read", handleGet);

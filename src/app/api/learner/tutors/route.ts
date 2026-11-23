@@ -1,4 +1,5 @@
 import { catalogFailureResponse } from "@/lib/catalogError";
+import { withQueue } from "@/lib/requestQueue";
 import { NextRequest, NextResponse } from "next/server";
 import { BROWSE_PAGE_SIZE, MAX_BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { getActiveServerSession } from "@/lib/serverSession";
@@ -17,7 +18,7 @@ const MAX_PAGE_SIZE = MAX_BROWSE_PAGE_SIZE;
 // ─── GET: Browsable tutors (learner-facing, anonymized) ────────────────────
 // A tutor is worth browsing once they hold at least one CERTIFIED topic. Real
 // names are withheld unless the `showTutorRealNames` platform setting is on.
-export async function GET(req: NextRequest) {
+async function handleGet(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
     if (!session || session.user.role !== "STUDENT_LEARNER") {
@@ -150,3 +151,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
   }
 }
+
+export const GET = withQueue("read", handleGet);
