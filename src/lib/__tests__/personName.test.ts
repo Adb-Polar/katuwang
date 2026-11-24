@@ -79,7 +79,17 @@ describe("repairPersonName", () => {
     expect(repairPersonName("A\u0347\u033d\u0351n\u0336g\u0489elica")).toBe("Angelica");
   });
 
-  it("keeps real accents while stripping decoration", () => {
+  it("removes every mark from Zalgo text, including ones NFC composed", () => {
+    const zalgo = "A\u0323\u0327\u0301\u0308n\u0327\u0331\u0308\u0302a";
+    expect(zalgo.normalize("NFC")).not.toBe(zalgo);
+    expect(repairPersonName(zalgo)).toBe("Ana");
+  });
+
+  it("leaves a valid name whose letters carry two composed marks", () => {
+    expect(repairPersonName("Vi\u1ec7t")).toBe("Vi\u1ec7t");
+  });
+
+  it("keeps real accents when stripping single decorative marks", () => {
     expect(repairPersonName("Pen\u0303a\u0336")).toBe("Pe\u00f1a");
   });
 

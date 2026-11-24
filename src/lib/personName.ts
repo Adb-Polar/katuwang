@@ -3,6 +3,7 @@ import { PERSON_NAME } from "@/lib/validations/textRules";
 const WORD_START = /(^|[ '-])(\p{L})/gu;
 const COMBINING_MARK = /\p{M}/u;
 const COMBINING_MARKS = /\p{M}+/gu;
+const STACKED_MARKS = /\p{M}{2}/u;
 
 function isSingleCase(name: string): boolean {
   return name === name.toLowerCase() || name === name.toUpperCase();
@@ -38,14 +39,23 @@ export function isValidPersonName(name: string): boolean {
   return PERSON_NAME.regex.test(name) && !COMBINING_MARK.test(name);
 }
 
+function stripMarks(name: string, marks: RegExp): string {
+  return name.normalize("NFD").replace(marks, "").normalize("NFC");
+}
+
 /**
- * Best-effort fix for an already-stored name: normalizes it and drops
- * decorative combining marks. Returns null when the result is still not a
- * valid name and needs a human to decide.
+ * Best-effort fix for an already-stored name. A valid name is only normalized.
+ * A decorated one loses the marks NFC could not compose; if any letter carried
+ * several marks (Zalgo) every mark goes, because the ones NFC did compose are
+ * decoration too. Returns null when the result still is not a valid name.
  */
 export function repairPersonName(stored: string): string | null {
   const normalized = normalizePersonName(stored);
   if (isValidPersonName(normalized)) return normalized;
-  const stripped = normalizePersonName(normalized.replace(COMBINING_MARKS, ""));
-  return isValidPersonName(stripped) ? stripped : null;
+  const isZalgo = STACKED_MARKS.test(normalized.normalize("NFD"));
+  const stripped = isZalgo
+    ? stripMarks(normalized, COMBINING_MARKS)
+    : normalized.replace(COMBINING_MARKS, "");
+  const repaired = normalizePersonName(stripped);
+  return isValidPersonName(repaired) ? repaired : null;
 }

@@ -4108,8 +4108,12 @@ affects new saves; this brings stored rows in line.
   anonymous id, field, before → after); `--apply` writes all updates in one transaction.
   Unrepairable names are reported and left unchanged.
 
-No schema change. **The script has not been run against any database** — `--apply` is a
-DB modification and needs confirmation.
+Follow-up after the first real run: the write now uses an interactive transaction with a
+120s timeout (the 5s default expired against the remote DB and rolled back), and
+`repairPersonName()` strips *every* mark from a name where a letter carried several
+(Zalgo) — NFC had composed one mark per letter, leaving `Ạņĝẽḽịḉä` instead of `Angelica`.
+
+No schema change. `--apply` is a DB modification and needs confirmation.
 
 **Tests.** New `src/lib/__tests__/nameCleanup.test.ts` (5); 5 added to
 `personName.test.ts`.

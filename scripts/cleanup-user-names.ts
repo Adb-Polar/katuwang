@@ -10,6 +10,10 @@ import { NAME_FIELDS, planNameCleanup, type NameCleanupPlan } from "../src/lib/n
 //   pnpm names:cleanup --apply    write them
 loadEnv();
 
+// Prisma's 5s default is too short for a remote database.
+const TRANSACTION_MAX_WAIT_MS = 30_000;
+const TRANSACTION_TIMEOUT_MS = 120_000;
+
 type PlannedUser = { id: string; anonymousId: string; plan: NameCleanupPlan; stored: Record<string, string | null> };
 
 async function planAllUsers(): Promise<PlannedUser[]> {
@@ -49,7 +53,12 @@ async function main() {
   }
 
   await prisma.$transaction(
-    toUpdate.map(({ id, plan }) => prisma.user.update({ where: { id }, data: plan.changes }))
+    async (tx) => {
+      for (const { id, plan } of toUpdate) {
+        await tx.user.update({ where: { id }, data: plan.changes });
+      }
+    },
+    { maxWait: TRANSACTION_MAX_WAIT_MS, timeout: TRANSACTION_TIMEOUT_MS }
   );
   console.log(`Updated ${toUpdate.length} users.`);
 }
