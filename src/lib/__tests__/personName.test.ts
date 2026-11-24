@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isValidPersonName, normalizePersonName } from "@/lib/personName";
+import { isValidPersonName, normalizePersonName, repairPersonName } from "@/lib/personName";
 
 describe("normalizePersonName", () => {
   it("title-cases an all-lowercase name", () => {
@@ -10,9 +10,14 @@ describe("normalizePersonName", () => {
     expect(normalizePersonName("ALEJANDRO D BEATO")).toBe("Alejandro D Beato");
   });
 
-  it("leaves a mixed-case name as typed", () => {
+  it("keeps the inner casing of a mixed-case name", () => {
     expect(normalizePersonName("McDonald")).toBe("McDonald");
-    expect(normalizePersonName("dela Cruz")).toBe("dela Cruz");
+    expect(normalizePersonName("Maria dela Cruz")).toBe("Maria dela Cruz");
+  });
+
+  it("capitalizes the first letter of a mixed-case name", () => {
+    expect(normalizePersonName("alejandro D Beato")).toBe("Alejandro D Beato");
+    expect(normalizePersonName("dela Cruz")).toBe("Dela Cruz");
   });
 
   it("capitalizes after hyphens and apostrophes", () => {
@@ -61,5 +66,25 @@ describe("isValidPersonName", () => {
   it("rejects a name that does not start with a letter", () => {
     expect(isValidPersonName("-Juan")).toBe(false);
     expect(isValidPersonName("")).toBe(false);
+  });
+});
+
+describe("repairPersonName", () => {
+  it("normalizes a valid stored name", () => {
+    expect(repairPersonName("  alejandro D  beato ")).toBe("Alejandro D beato");
+    expect(repairPersonName("RICO CADAG")).toBe("Rico Cadag");
+  });
+
+  it("strips decorative marks from Zalgo text", () => {
+    expect(repairPersonName("A\u0347\u033d\u0351n\u0336g\u0489elica")).toBe("Angelica");
+  });
+
+  it("keeps real accents while stripping decoration", () => {
+    expect(repairPersonName("Pen\u0303a\u0336")).toBe("Pe\u00f1a");
+  });
+
+  it("returns null when the name cannot be repaired", () => {
+    expect(repairPersonName("Juan123")).toBeNull();
+    expect(repairPersonName("\u0347\u033d")).toBeNull();
   });
 });

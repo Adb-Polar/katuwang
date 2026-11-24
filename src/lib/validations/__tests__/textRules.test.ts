@@ -48,11 +48,11 @@ describe("schemas apply the text rules", () => {
     expect(result.error!.issues[0].message).toContain(prefix);
   });
 
-  it("title-cases a name typed in one case and keeps mixed case", () => {
+  it("title-cases a name typed in one case and keeps inner mixed case", () => {
     const result = registerSchema.safeParse({ ...base, firstName: "alejandro  d", lastName: "BEATO", adviserTeacherName: "ms. McDonald" });
     expect(result.success && result.data.firstName).toBe("Alejandro D");
     expect(result.success && result.data.lastName).toBe("Beato");
-    expect(result.success && result.data.adviserTeacherName).toBe("ms. McDonald");
+    expect(result.success && result.data.adviserTeacherName).toBe("Ms. McDonald");
   });
 
   it("stores a decomposed accent as one character", () => {

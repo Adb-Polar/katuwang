@@ -18,6 +18,7 @@
     "db:deploy": "prisma migrate deploy",
     "db:migrate": "prisma migrate dev",
     "db:studio": "prisma studio",
+    "names:cleanup": "tsx scripts/cleanup-user-names.ts",
     "seed:super-admin": "tsx scripts/seed-super-admin.ts",
     "seed": "tsx prisma/seed.ts",
     "seed:curriculum": "tsx prisma/seedCurriculum.ts",

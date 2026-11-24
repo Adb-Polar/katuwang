@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [96](#part-96) | **Cleanup script for existing user names** | `pnpm names:cleanup` previews (and with `--apply` saves) the Part 95 name rules for users already in the database: fixes casing and whitespace, strips Zalgo marks, and lists names it cannot repair. Names now also always start with a capital letter. | See Part 96 below. |
 | [95](#part-95) | **Name normalization + Zalgo rejection** | Names are cleaned when saved: all-lowercase or all-uppercase names are title-cased (`alejandro d beato` → `Alejandro D Beato`), whitespace is collapsed, accents are stored composed, and stacked/decorative combining marks (Zalgo text) are rejected. Applies to register (first, last, adviser) and create-admin. | See Part 95 below. |
 | [94](#part-94) | **Backend request queue (load shedding)** | A burst of sign-ins, report downloads or searches now waits in a bounded queue instead of freezing the server; when the queue is full the client gets `503` + `Retry-After` ("The server is busy right now"). | See Part 94 below. New `src/lib/requestQueue.ts` + `src/lib/password.ts`; three lanes (`password`, `report`, `read`). |
 | [93](#part-93) | **Health endpoint requires a cron secret** | `GET /api/health` now returns 401 unless the caller sends `Authorization: Bearer <HEALTH_CHECK_SECRET>`; fails closed when the env var is unset. | See Part 93 below. New `src/lib/bearerAuth.ts` (constant-time compare), shared with the certificate-jobs route. |
@@ -4090,6 +4091,28 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-96"></a>
+## Part 96 — Cleanup script for existing user names (2026-11-24)
+
+Plan: `docs/plans/name-normalization.md` ("Backfill of existing rows"). Part 95 only
+affects new saves; this brings stored rows in line.
+
+- `src/lib/personName.ts`: `normalizePersonName()` now always capitalizes the first
+  letter, so a mixed-case `alejandro D Beato` becomes `Alejandro D Beato` (inner casing
+  is still kept). New `repairPersonName()` — normalize, then drop decorative combining
+  marks; returns `null` when the name is still invalid.
+- New `src/lib/nameCleanup.ts`: pure `planNameCleanup()` returning per-user `changes`
+  and `unfixable` fields for `firstName` / `lastName` / `adviserTeacherName`.
+- New `scripts/cleanup-user-names.ts` + `pnpm names:cleanup`: dry run by default (prints
+  anonymous id, field, before → after); `--apply` writes all updates in one transaction.
+  Unrepairable names are reported and left unchanged.
+
+No schema change. **The script has not been run against any database** — `--apply` is a
+DB modification and needs confirmation.
+
+**Tests.** New `src/lib/__tests__/nameCleanup.test.ts` (5); 5 added to
+`personName.test.ts`.
 
 <a id="part-95"></a>
 ## Part 95 — Name normalization + Zalgo rejection (2026-11-24)

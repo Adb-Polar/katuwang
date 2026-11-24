@@ -1333,3 +1333,6 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Names (Part 95): /register with pasted Zalgo text in a name field -> the browser blocks submit with "Use letters, spaces, periods, apostrophes or hyphens only."; "Niño", "Peñaflor", "O'Brien", "Ma. Teresa" are accepted.
  [ ] Names (Part 95): /admin create-admin modal with "maria" / "SANTOS" creates "Maria Santos".
  [ ] Names (Part 95): on a phone, the name fields in /register start each word with a capital letter.
+ [ ] Name cleanup (Part 96): `pnpm names:cleanup` against the local DB lists the expected before -> after names and writes nothing (re-running shows the same list).
+ [ ] Name cleanup (Part 96): `pnpm names:cleanup --apply` updates them; a second dry run reports 0 to update; /admin/users shows the cleaned names (STU-0337 reads "Angelica Santos").
+ [ ] Names (Part 96): /register with first name "alejandro D" is stored as "Alejandro D".

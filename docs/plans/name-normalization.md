@@ -16,7 +16,9 @@ reports, emails and search showing the raw value).
 1. `src/lib/personName.ts`
    - `normalizePersonName(raw)` — NFC-normalize, curly → straight apostrophe, trim,
      collapse whitespace. Title-case **only** when the whole name is one case (all
-     lower or all upper). Mixed-case input is kept, so `McDonald` / `dela Cruz` survive.
+     lower or all upper). Mixed-case input keeps its inner casing (`McDonald`,
+     `Maria dela Cruz`) and only gets its first letter capitalized
+     (`alejandro D Beato` → `Alejandro D Beato`).
    - `isValidPersonName(name)` — passes `PERSON_NAME` and has no combining mark left
      after NFC (a mark that does not compose is decoration, not an accent).
 2. `src/lib/validations/textRules.ts` — `PERSON_NAME` allows at most one combining mark
@@ -31,11 +33,22 @@ Client and server differ in one narrow case: a name with exactly one non-composi
 per letter (strikethrough-style text) passes the browser `pattern` and is rejected by
 the server with the normal field message.
 
-## Out of scope
+## Backfill of existing rows
 
-- **Backfill of existing rows.** A DB modification, so it needs explicit confirmation.
-  Until then, old lowercase / Zalgo names stay as stored.
+`pnpm names:cleanup` (`scripts/cleanup-user-names.ts`) rewrites stored `firstName`,
+`lastName` and `adviserTeacherName` to the same rules.
+
+- **Dry run by default.** Prints every `STU-/TUT-` id with the before → after value and
+  writes nothing. `--apply` saves the changes in one transaction.
+- Zalgo names are repaired by dropping the decorative marks (`repairPersonName`), so
+  `A͇̽ngelica` becomes `Angelica`.
+- A name that is still invalid after that (digits, symbols) is listed as
+  "NEEDS MANUAL REVIEW" and left unchanged.
+- Planning logic is the pure `planNameCleanup()` in `src/lib/nameCleanup.ts`.
+
+Running it with `--apply` is a DB modification and needs explicit confirmation.
 
 ## Status
 
-Steps 1–4 shipped — Changes.md Part 95. Backfill not done.
+Steps 1–4 shipped — Changes.md Part 95. Cleanup script written — Part 96; not yet run
+against any database.
