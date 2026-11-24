@@ -191,6 +191,7 @@ export default function CreateAdminModal({
                   required
                   value={firstName}
                   maxLength={50}
+                  autoCapitalize="words"
                   pattern={PERSON_NAME.pattern}
                   title={PERSON_NAME.message}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -204,6 +205,7 @@ export default function CreateAdminModal({
                   required
                   value={lastName}
                   maxLength={50}
+                  autoCapitalize="words"
                   pattern={PERSON_NAME.pattern}
                   title={PERSON_NAME.message}
                   onChange={(e) => setLastName(e.target.value)}

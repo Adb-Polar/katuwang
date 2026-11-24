@@ -1,26 +1,15 @@
 import { z } from "zod";
 import { GradeLevel } from "@prisma/client";
 import { passwordField } from "@/lib/validations/password";
-import { PERSON_NAME, SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
+import { personNameField } from "@/lib/validations/personNameField";
+import { SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
 
 /**
  * Shared registration fields validation schema.
  */
 export const commonRegisterSchema = z.object({
-  // `.trim()` must come first: Zod 4 runs checks in chain order, so a trailing
-  // trim would let a whitespace-only value pass `min(1)` and be stored as "".
-  firstName: z
-    .string()
-    .trim()
-    .min(1, "First name is required.")
-    .max(50, "First name cannot exceed 50 characters.")
-    .regex(PERSON_NAME.regex, `First name: ${PERSON_NAME.message}`),
-  lastName: z
-    .string()
-    .trim()
-    .min(1, "Last name is required.")
-    .max(50, "Last name cannot exceed 50 characters.")
-    .regex(PERSON_NAME.regex, `Last name: ${PERSON_NAME.message}`),
+  firstName: personNameField("First name", 50),
+  lastName: personNameField("Last name", 50),
   email: z
     .string()
     .trim()
@@ -41,10 +30,7 @@ export const commonRegisterSchema = z.object({
     .min(1, "Student ID Number is required.")
     .max(191, "Student ID Number cannot exceed 191 characters.")
     .regex(STUDENT_ID.regex, `Student ID Number: ${STUDENT_ID.message}`),
-  adviserTeacherName: z.string().trim()
-    .min(1, "Adviser Teacher's Name is required.")
-    .max(191, "Adviser Teacher's Name cannot exceed 191 characters.")
-    .regex(PERSON_NAME.regex, `Adviser Teacher's Name: ${PERSON_NAME.message}`),
+  adviserTeacherName: personNameField("Adviser Teacher's Name", 191),
   section: z.string().trim().min(1, "Section is required.").max(50, "Section cannot exceed 50 characters.")
     .regex(SECTION_NAME.regex, `Section: ${SECTION_NAME.message}`),
   // Length-checked here; the register route normalises it with `normalizeContactInfo`

@@ -1328,3 +1328,8 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Request queue (Part 94): set QUEUE_PASSWORD_CONCURRENCY=1 and QUEUE_PASSWORD_MAX_QUEUED=1, fire ~10 sign-ins at once -> the extra ones show "The server is busy right now. Please try again in a moment." on the login form (not a blank error), and sign-in works again right after.
  [ ] Request queue (Part 94): with QUEUE_REPORT_CONCURRENCY=1 and QUEUE_REPORT_MAX_QUEUED=1, click a report download several times fast -> extra clicks get a readable "server is busy" message, not a broken file.
  [ ] /api/health (Part 94): authorised call shows a `queues` block with password / report / read counters.
+ [ ] Names (Part 95): /register with first "alejandro d", last "BEATO" -> the account shows as "Alejandro D Beato" in /admin/users.
+ [ ] Names (Part 95): /register with last name "McDonald" or "dela Cruz" is stored exactly as typed.
+ [ ] Names (Part 95): /register with pasted Zalgo text in a name field -> the browser blocks submit with "Use letters, spaces, periods, apostrophes or hyphens only."; "Niño", "Peñaflor", "O'Brien", "Ma. Teresa" are accepted.
+ [ ] Names (Part 95): /admin create-admin modal with "maria" / "SANTOS" creates "Maria Santos".
+ [ ] Names (Part 95): on a phone, the name fields in /register start each word with a capital letter.

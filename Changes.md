@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [95](#part-95) | **Name normalization + Zalgo rejection** | Names are cleaned when saved: all-lowercase or all-uppercase names are title-cased (`alejandro d beato` → `Alejandro D Beato`), whitespace is collapsed, accents are stored composed, and stacked/decorative combining marks (Zalgo text) are rejected. Applies to register (first, last, adviser) and create-admin. | See Part 95 below. |
 | [94](#part-94) | **Backend request queue (load shedding)** | A burst of sign-ins, report downloads or searches now waits in a bounded queue instead of freezing the server; when the queue is full the client gets `503` + `Retry-After` ("The server is busy right now"). | See Part 94 below. New `src/lib/requestQueue.ts` + `src/lib/password.ts`; three lanes (`password`, `report`, `read`). |
 | [93](#part-93) | **Health endpoint requires a cron secret** | `GET /api/health` now returns 401 unless the caller sends `Authorization: Bearer <HEALTH_CHECK_SECRET>`; fails closed when the env var is unset. | See Part 93 below. New `src/lib/bearerAuth.ts` (constant-time compare), shared with the certificate-jobs route. |
 | [92](#part-92) | **Report generation — all 3 portals (PDF + CSV)** | Learners download a progress report, tutors a per-class report and a tutoring summary, admins a platform overview plus six data exports (users, classes, enrollments, session tests, certifications, audit log). Every report takes a from/to date range (PHT, default 90 days, max 366) and downloads as PDF or CSV. Generated on demand — no schema change. | See Part 92 below. `src/lib/reports/*`, 3 `…/report` routes, `ReportDownloadButtons`. |
@@ -4089,6 +4090,34 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-95"></a>
+## Part 95 — Name normalization + Zalgo rejection (2026-11-24)
+
+Plan: `docs/plans/name-normalization.md`. Branch `feat/request-queue`. Names were stored
+as typed, so lazy casing (`alejandro D Beato`) reached admin tables and reports, and
+Part 91's `PERSON_NAME` rule allowed unlimited combining marks, which let Zalgo text
+through (the banned `STU-0337`).
+
+- New `src/lib/personName.ts`: `normalizePersonName()` (NFC, curly → straight apostrophe,
+  trim, collapse whitespace, title-case only when the name is entirely one case — mixed
+  case such as `McDonald` / `dela Cruz` is kept) and `isValidPersonName()` (`PERSON_NAME`
+  plus no combining mark surviving NFC).
+- `src/lib/validations/textRules.ts`: `PERSON_NAME` now allows at most one combining mark
+  per letter, so the browser `pattern` blocks stacked marks while a decomposed `ñ` passes.
+- New `src/lib/validations/personNameField.ts`: `personNameField(label, maxLength)`
+  (normalize → required → max → character check). Replaces the inline chains for
+  `firstName` / `lastName` / `adviserTeacherName` in `auth.ts` and `firstName` /
+  `lastName` in `admin.ts` (`createAdminAccountSchema`; its over-length message is now
+  "… cannot exceed 50 characters." instead of "… is too long.").
+- `RegisterForm.tsx`, `CreateAdminModal.tsx`: `autoCapitalize="words"` on name inputs.
+
+No schema change. **Existing rows are not backfilled** — that is a DB modification and
+needs confirmation.
+
+**Tests.** New `src/lib/__tests__/personName.test.ts` (13); 6 cases added to
+`src/lib/validations/__tests__/textRules.test.ts`. `pnpm test` passes, `tsc` clean,
+`lint` 0 errors.
 
 <a id="part-94"></a>
 ## Part 94 — Backend request queue (load shedding) (2026-11-23)

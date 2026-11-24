@@ -9,7 +9,7 @@ const JUNK = ["<script>alert(1)</script>", "@@##$$", "Juan😀", "!!!"];
 
 describe("text rules", () => {
   it.each([
-    [PERSON_NAME, ["Juan", "Ma. Cristina", "O'Brien-Dela Cruz", "Peña", "José", "Ñoño"], [...JUNK, "12345", "Juan2", ".Juan", "-"]],
+    [PERSON_NAME, ["Juan", "Ma. Cristina", "O'Brien-Dela Cruz", "Peña", "José", "Ñoño"], [...JUNK, "12345", "Juan2", ".Juan", "-", "A\u0347\u033d\u0351ngelica"]],
     [SECTION_NAME, ["Rizal", "7-A", "STEM 1", "Sampaguita"], [...JUNK, "<b>7-A</b>", "-A"]],
     [STUDENT_ID, ["123456789012", "2024-00123"], [...JUNK, "abc", "12a4", "-123"]],
     [LOCATION_TEXT, ["Bldg. 2", "Rm 101", "Annex B/3", "#4", "Science Lab"], [...JUNK, "<b>", "Room;DROP"]],
@@ -48,6 +48,32 @@ describe("schemas apply the text rules", () => {
     expect(result.error!.issues[0].message).toContain(prefix);
   });
 
+  it("title-cases a name typed in one case and keeps mixed case", () => {
+    const result = registerSchema.safeParse({ ...base, firstName: "alejandro  d", lastName: "BEATO", adviserTeacherName: "ms. McDonald" });
+    expect(result.success && result.data.firstName).toBe("Alejandro D");
+    expect(result.success && result.data.lastName).toBe("Beato");
+    expect(result.success && result.data.adviserTeacherName).toBe("ms. McDonald");
+  });
+
+  it("stores a decomposed accent as one character", () => {
+    const result = registerSchema.safeParse({ ...base, lastName: "Pen\u0303a" });
+    expect(result.success && result.data.lastName).toBe("Pe\u00f1a");
+  });
+
+  it.each([
+    ["stacked marks", "A\u0347\u033d\u0351ngelica"],
+    ["one decorative mark per letter", "A\u0336n\u0336a\u0336"],
+  ])("register rejects a name with %s", (_label, value) => {
+    const result = registerSchema.safeParse({ ...base, firstName: value });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues[0].message).toContain("First name:");
+  });
+
+  it("a whitespace-only name is reported as required", () => {
+    const result = registerSchema.safeParse({ ...base, lastName: "   " });
+    expect(result.error!.issues[0].message).toBe("Last name is required.");
+  });
+
   it("trims before checking, so surrounding spaces are fine", () => {
     const result = registerSchema.safeParse({ ...base, firstName: "  Juan  " });
     expect(result.success && result.data.firstName).toBe("Juan");
@@ -67,6 +93,9 @@ describe("schemas apply the text rules", () => {
   });
 
   it("admin names use the person-name rule", () => {
+    const created = createAdminAccountSchema.safeParse({ firstName: "maria", lastName: "SANTOS", email: "a@b.com" });
+    expect(created.success && created.data.firstName).toBe("Maria");
+    expect(created.success && created.data.lastName).toBe("Santos");
     expect(createAdminAccountSchema.safeParse({ firstName: "Maria", lastName: "Santos", email: "a@b.com" }).success).toBe(true);
     expect(createAdminAccountSchema.safeParse({ firstName: "123", lastName: "Santos", email: "a@b.com" }).success).toBe(false);
   });

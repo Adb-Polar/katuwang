@@ -10,9 +10,13 @@ function rule(pattern: string, message: string): TextRule {
   return { pattern, regex: new RegExp(`^(?:${pattern})$`, "u"), message };
 }
 
-/** Personal names: letters (incl. ñ and accents), spaces, period, apostrophe, hyphen. */
+/**
+ * Personal names: letters (incl. ñ and accents), spaces, period, apostrophe, hyphen.
+ * At most one combining mark per letter, so a decomposed "ñ" passes but stacked
+ * marks (Zalgo text) do not.
+ */
 export const PERSON_NAME = rule(
-  "[\\p{L}\\p{M}][\\p{L}\\p{M} .'\\-]*",
+  "\\p{L}\\p{M}?(?:\\p{L}\\p{M}?|[ .'\\-])*",
   "Use letters, spaces, periods, apostrophes or hyphens only."
 );
 

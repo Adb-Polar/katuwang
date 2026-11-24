@@ -134,6 +134,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               type="text"
               name="firstName"
               maxLength={50}
+              autoCapitalize="words"
               pattern={PERSON_NAME.pattern}
               title={PERSON_NAME.message}
               value={form.firstName}
@@ -149,6 +150,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
               type="text"
               name="lastName"
               maxLength={50}
+              autoCapitalize="words"
               pattern={PERSON_NAME.pattern}
               title={PERSON_NAME.message}
               value={form.lastName}
@@ -180,6 +182,7 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           <input
             type="text"
             name="adviserTeacherName"
+            autoCapitalize="words"
             pattern={PERSON_NAME.pattern}
             title={PERSON_NAME.message}
             value={form.adviserTeacherName}

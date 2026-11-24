@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PERSON_NAME } from "@/lib/validations/textRules";
+import { personNameField } from "@/lib/validations/personNameField";
 
 export const updateUserStatusSchema = z.object({
   status: z.enum(["ACTIVE", "SUSPENDED", "BANNED"], {
@@ -114,10 +114,8 @@ export type UpdateProfilePictureRequirementInput = z.infer<
 >;
 
 export const createAdminAccountSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required.").max(50, "First name is too long.")
-    .regex(PERSON_NAME.regex, `First name: ${PERSON_NAME.message}`),
-  lastName: z.string().trim().min(1, "Last name is required.").max(50, "Last name is too long.")
-    .regex(PERSON_NAME.regex, `Last name: ${PERSON_NAME.message}`),
+  firstName: personNameField("First name", 50),
+  lastName: personNameField("Last name", 50),
   email: z.string().trim().email("Enter a valid email address.").max(191, "Email cannot exceed 191 characters.").toLowerCase(),
   contactInfo: z.string().trim().max(100, "Contact info cannot exceed 100 characters.").optional().nullable(),
 });
