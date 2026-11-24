@@ -12,6 +12,7 @@ Per `CLAUDE.md`, every plan lives here as `docs/plans/{plan-name}.md`.
 | [landing-page-redesign.md](./landing-page-redesign.md) | Modern redesign of the public `/` landing page: "The Key" direction — STU ⇄ TUT pairing hero, bento features, dark privacy section, real logo wired in | **Prototype 10 (Story) implemented** — Changes.md Parts 78–82 (04 Timetable was built first, then superseded). Plan's original "The Key" scope is historical; all 10 prototypes kept in `design/landing/`. |
 | [notification-system-expansion.md](./notification-system-expansion.md) | Broaden the DB-backed notification system beyond topic requests | See the plan for current status. |
 | [subject-topic-management.md](./subject-topic-management.md) | Admin-managed subject/topic catalog | See the plan for current status. |
+| [ui-general-improvements.md](./ui-general-improvements.md) | Batch of ~30 UI / general / tutor / learner / admin requests: dark mode, toasts, Overview rename, start/end-time scheduling, shuffled + timed tests, email allowlist, Google sign-in, contact admin, tutor→learner reports, super-admin audit log, dashboard + analytics merge with filters | **Implemented** — Changes.md Part 84. One schema migration, applied locally only. Not committed. |
 | [dev-data-factory.md](./dev-data-factory.md) | Dev-only data generation for local testing | See the plan for current status. |
 
 ## Archived (completed / superseded)

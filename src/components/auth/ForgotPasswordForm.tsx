@@ -1,5 +1,6 @@
 "use client";
 
+import RequiredMark from "@/components/ui/RequiredMark";
 import React, { useState } from "react";
 import Link from "next/link";
 import BrandMark from "@/components/ui/BrandMark";
@@ -56,7 +57,7 @@ export default function ForgotPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">Email Address</span>
+                <span className="label-text font-semibold text-xs text-base-content/75">Email Address<RequiredMark /></span>
               </label>
               <input
                 type="email"

@@ -52,7 +52,7 @@ describe("/api/admin/assessment-configs (global)", () => {
     ]);
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ questionCount: 7, passPercent: 75, minBankSize: 9 });
+    expect(await res.json()).toEqual({ questionCount: 7, passPercent: 75, minBankSize: 9, timeLimitMinutes: 0 });
   });
 
   it("PATCH 401 for a non-admin", async () => {

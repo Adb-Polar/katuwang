@@ -120,7 +120,7 @@ export default function QuestionFormModal({
           />
         </FormField>
 
-        <FormField label="Options" hint="Select the one correct answer">
+        <FormField label="Options" required hint="Select the one correct answer">
           <div className="space-y-2">
             {options.map((o, i) => (
               <div key={i} className="flex items-center gap-2">

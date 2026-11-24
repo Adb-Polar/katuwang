@@ -119,8 +119,8 @@ export const INTENTS: Intent[] = [
     response: (ctx) => ({
       text:
         ctx.role === TUTOR
-          ? "Open Profile to edit your details. Your availability is derived automatically from the sessions you schedule — there's no separate availability form."
-          : "Open Profile to review and edit your account details.",
+          ? "Click your avatar in the top-right corner to open your profile and edit your details. Your availability is derived automatically from the sessions you schedule — there's no separate availability form."
+          : "Click your avatar in the top-right corner to open your profile and edit your account details.",
     }),
     link: (ctx) =>
       ctx.role === LEARNER
@@ -294,8 +294,10 @@ export const INTENTS: Intent[] = [
     roles: [ADMIN],
     keywords: ["report", "analytics", "stats", "dashboard", "usage", "chart"],
     patterns: [/\b(reports?|analytics|statistics)\b/],
-    response: { text: "Open Reports for aggregate stats — users, classes, certifications, and enrolment trends." },
-    link: { href: "/admin/reports", label: "Reports" },
+    response: {
+      text: "Analytics are on the Dashboard — users, classes, certifications, and enrolment trends, with filters for period, grade and subject.",
+    },
+    link: { href: "/admin", label: "Dashboard" },
   },
   {
     id: "nav_admin_settings",
@@ -332,7 +334,7 @@ export const INTENTS: Intent[] = [
     roles: [ADMIN],
     keywords: ["audit", "log", "history", "action", "moderation"],
     patterns: [/\baudit log\b/, /\bmoderation history\b/],
-    response: { text: "Open Audit Log for a full history of moderation actions taken by administrators." },
+    response: { text: "The Audit Log holds the full history of moderation actions taken by administrators. Only super admins can open it." },
     link: { href: "/admin/audit-log", label: "Audit Log" },
   },
   {

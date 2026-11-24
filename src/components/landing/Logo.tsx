@@ -1,3 +1,6 @@
+/** Darkest logo shape — lightened by CSS in dark mode so it stays visible. */
+const DEEP_FILL = "#005744";
+
 const FIGURE_PATHS = [
   {
     fill: "#61A89A",
@@ -8,7 +11,7 @@ const FIGURE_PATHS = [
     d: "M83 19C88.25 19 92.5 23.25 92.5 28.5C92.5 32.5 90.5 35.5 87.8 37C89.5 38.5 89 40 89 43L89 48C88 53 80 58 69 64C60 68 58 72 58 78C59 84 59 89 55 92C51 94.5 44 94.5 40.5 91.5C37.5 89 37 85 37.5 80C38 74 41 70 48 64C56 60 66 56 72 46C73.5 42 75 39.5 78.2 37C75.5 35.5 73.5 32.3 73.5 28.5C73.5 23.25 77.75 19 83 19Z",
   },
   {
-    fill: "#005744",
+    fill: DEEP_FILL,
     d: "M74 68.5C68.5 71 63.8 74.2 63.2 77.5C65 82 69 88 74.5 92C77.5 94.2 81 95.3 84.5 95C88.5 94.5 92.5 91.3 96 85.6C88 80.5 80.5 74.8 74 68.5Z",
   },
 ] as const;
@@ -25,7 +28,12 @@ export default function Logo({
   return (
     <svg viewBox="29 19 76 76" className={`shrink-0 ${className}`} aria-hidden="true">
       {FIGURE_PATHS.map(({ d, fill }) => (
-        <path key={fill} d={d} fill={variant === "white" ? WHITE : fill} />
+        <path
+          key={fill}
+          d={d}
+          fill={variant === "white" ? WHITE : fill}
+          className={variant === "color" && fill === DEEP_FILL ? "kt-logo-deep" : undefined}
+        />
       ))}
     </svg>
   );

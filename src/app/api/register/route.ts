@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { registerSchema } from "@/lib/validations/auth";
-import { getSetting } from "@/lib/settings";
+import { getAllowedEmailDomains, getSetting } from "@/lib/settings";
+import { domainNotAllowedMessage, isEmailDomainAllowed } from "@/lib/emailDomains";
 import { registerAccount } from "@/lib/registration";
 import { sendMail, renderVerificationEmail } from "@/lib/mail";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
@@ -43,6 +44,14 @@ export async function POST(req: NextRequest) {
     }
 
     const data = result.data;
+
+    const allowedDomains = await getAllowedEmailDomains();
+    const rejectedEmail = [data.email, data.recoveryEmail].find(
+      (email) => email && !isEmailDomainAllowed(email, allowedDomains)
+    );
+    if (rejectedEmail) {
+      return NextResponse.json({ error: domainNotAllowedMessage(rejectedEmail, allowedDomains) }, { status: 400 });
+    }
 
     const account = await registerAccount({
       type: data.type,

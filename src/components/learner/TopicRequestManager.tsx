@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import Link from "next/link";
 import { Plus, Clock, X, Pencil } from "lucide-react";
@@ -39,6 +40,7 @@ const STATUS_TONE = {
 } as const;
 
 export default function TopicRequestManager({ defaultGrade }: { defaultGrade: string }) {
+  const toast = useToast();
   const { data: requests, loading, error, setError, refetch } = useFetchList<TopicRequest>(
     "/api/learner/topic-requests",
     "Could not load your requests."
@@ -150,6 +152,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not cancel the request.");
       setCancelId(null);
+      toast.success("Request cancelled.");
       refetch();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not cancel the request.");

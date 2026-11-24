@@ -26,7 +26,7 @@ vi.mock("bcryptjs", () => ({
 }));
 
 import bcrypt from "bcryptjs";
-import { authOptions } from "@/lib/auth";
+import { GOOGLE_ERROR, authOptions, resolveGoogleSignIn } from "@/lib/auth";
 
 const credentialsProvider = authOptions.providers[0] as unknown as {
   options: {
@@ -126,6 +126,7 @@ describe("auth authorize()", () => {
       anonymousId: "STU-0001",
       email: "juan@example.com",
       role: "STUDENT_LEARNER",
+      isSuperAdmin: false,
       fullName: "Juan Dela Cruz",
     });
   });
@@ -305,6 +306,7 @@ describe("auth authorize()", () => {
       anonymousId: "STU-0001",
       email: "juan@example.com",
       role: "STUDENT_LEARNER",
+      isSuperAdmin: false,
       fullName: "Juan Dela Cruz",
     });
   });
@@ -332,8 +334,138 @@ describe("auth authorize()", () => {
       anonymousId: "STU-0001",
       email: "juan@example.com",
       role: "STUDENT_LEARNER",
+      isSuperAdmin: false,
       fullName: "Juan Dela Cruz",
     });
+  });
+});
+
+describe("super admin claim", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getSettingMock.mockResolvedValue(false);
+    vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
+  });
+
+  const account = (overrides: Record<string, unknown>) => ({
+    id: "9",
+    email: "admin@gmail.com",
+    password: "hashed",
+    anonymousId: "ADM-0001",
+    firstName: "Site",
+    lastName: "Admin",
+    status: "ACTIVE",
+    ...overrides,
+  });
+
+  it("is true for an ADMIN flagged as super admin", async () => {
+    userFindUnique.mockResolvedValue(account({ role: "ADMIN", isSuperAdmin: true }));
+    await expect(authorize({ email: "admin@gmail.com", password: "x" })).resolves.toMatchObject({ isSuperAdmin: true });
+  });
+
+  it("is false for a regular ADMIN", async () => {
+    userFindUnique.mockResolvedValue(account({ role: "ADMIN", isSuperAdmin: false }));
+    await expect(authorize({ email: "admin@gmail.com", password: "x" })).resolves.toMatchObject({ isSuperAdmin: false });
+  });
+
+  it("is false for a non-admin even if the flag is set", async () => {
+    userFindUnique.mockResolvedValue(account({ role: "STUDENT_TUTOR", isSuperAdmin: true }));
+    await expect(authorize({ email: "admin@gmail.com", password: "x" })).resolves.toMatchObject({ isSuperAdmin: false });
+  });
+});
+
+describe("resolveGoogleSignIn", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    getSettingMock.mockResolvedValue(false);
+  });
+
+  const activeUser = { id: "1", email: "juan@gmail.com", role: "STUDENT_LEARNER", status: "ACTIVE" };
+  const errorCode = (result: string | true) =>
+    typeof result === "string" ? new URL(result, "http://localhost").searchParams.get("error") : null;
+
+  it("allows a verified Google email that matches an active account", async () => {
+    userFindUnique.mockResolvedValue(activeUser);
+    await expect(resolveGoogleSignIn({ email: "Juan@Gmail.com", email_verified: true })).resolves.toBe(true);
+    expect(userFindUnique).toHaveBeenCalledWith({ where: { email: "juan@gmail.com" } });
+  });
+
+  it("rejects when no Katuwang account has that email — it never creates one", async () => {
+    userFindUnique.mockResolvedValue(null);
+    const result = await resolveGoogleSignIn({ email: "stranger@gmail.com", email_verified: true });
+    expect(errorCode(result)).toBe(GOOGLE_ERROR.NO_ACCOUNT);
+  });
+
+  it("rejects an email Google has not verified, without looking the account up", async () => {
+    const result = await resolveGoogleSignIn({ email: "juan@gmail.com", email_verified: false });
+    expect(errorCode(result)).toBe(GOOGLE_ERROR.UNVERIFIED);
+    expect(userFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("rejects a profile with no email", async () => {
+    expect(errorCode(await resolveGoogleSignIn(undefined))).toBe(GOOGLE_ERROR.UNVERIFIED);
+  });
+
+  it("rejects a banned account with the same message as a password login", async () => {
+    userFindUnique.mockResolvedValue({ ...activeUser, status: "BANNED" });
+    const result = await resolveGoogleSignIn({ email: "juan@gmail.com", email_verified: true });
+    expect(errorCode(result)).toBe("Your account has been banned.");
+  });
+
+  it("rejects a suspended account", async () => {
+    userFindUnique.mockResolvedValue({ ...activeUser, status: "SUSPENDED", statusExpiresAt: null });
+    const result = await resolveGoogleSignIn({ email: "juan@gmail.com", email_verified: true });
+    expect(errorCode(result)).toMatch(/suspended/);
+  });
+
+  it("passes the ACCOUNT_PENDING sentinel through for an unapproved account", async () => {
+    userFindUnique.mockResolvedValue({ ...activeUser, status: "PENDING" });
+    const result = await resolveGoogleSignIn({ email: "juan@gmail.com", email_verified: true });
+    expect(errorCode(result)).toBe("ACCOUNT_PENDING");
+  });
+});
+
+describe("jwt callback", () => {
+  const jwt = authOptions.callbacks!.jwt! as unknown as (args: Record<string, unknown>) => Promise<Record<string, unknown>>;
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("swaps a Google profile for the Katuwang account that owns the email", async () => {
+    userFindUnique.mockResolvedValue({
+      id: "db-1",
+      anonymousId: "STU-0001",
+      email: "juan@gmail.com",
+      role: "STUDENT_LEARNER",
+      firstName: "Juan",
+      lastName: "Dela Cruz",
+      isSuperAdmin: false,
+    });
+
+    const token = await jwt({
+      token: {},
+      user: { id: "google-sub-123", email: "juan@gmail.com" },
+      account: { provider: "google" },
+    });
+
+    expect(token).toMatchObject({ id: "db-1", anonymousId: "STU-0001", role: "STUDENT_LEARNER", isSuperAdmin: false });
+  });
+
+  it("fails the Google sign-in if the account vanished between the two callbacks", async () => {
+    userFindUnique.mockResolvedValue(null);
+    await expect(
+      jwt({ token: {}, user: { id: "google-sub-123", email: "gone@gmail.com" }, account: { provider: "google" } })
+    ).rejects.toThrow(/No Katuwang account/);
+  });
+
+  it("uses the authorize() payload as-is for a password sign-in", async () => {
+    const token = await jwt({
+      token: {},
+      user: { id: "db-2", anonymousId: "ADM-0001", role: "ADMIN", isSuperAdmin: true, fullName: "Site Admin" },
+      account: { provider: "credentials" },
+    });
+
+    expect(token).toMatchObject({ id: "db-2", isSuperAdmin: true });
+    expect(userFindUnique).not.toHaveBeenCalled();
   });
 });
 

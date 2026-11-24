@@ -1,5 +1,6 @@
 "use client";
 
+import RequiredMark from "@/components/ui/RequiredMark";
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -78,7 +79,7 @@ export default function ResetPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">New Password</span>
+                <span className="label-text font-semibold text-xs text-base-content/75">New Password<RequiredMark /></span>
               </label>
               <div className="relative">
                 <input
@@ -107,7 +108,7 @@ export default function ResetPasswordForm() {
 
             <div className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">Confirm Password</span>
+                <span className="label-text font-semibold text-xs text-base-content/75">Confirm Password<RequiredMark /></span>
               </label>
               <input
                 type={showPassword ? "text" : "password"}

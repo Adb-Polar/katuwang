@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Send } from "lucide-react";
@@ -25,6 +26,7 @@ export default function RequestTopicButton({
   verifiedTopicsHint?: string[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [criteria, setCriteria] = useState<MatchCriteriaValue>({
     ...EMPTY_CRITERIA,
@@ -51,6 +53,7 @@ export default function RequestTopicButton({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not send your request.");
       setOpen(false);
+      toast.success("Request posted.");
       router.push("/learner/requests");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your request.");

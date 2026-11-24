@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAccessError, loadOwnedSession } from "@/lib/sessionTestAccess";
-import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
+import { serializeSessionTestAttempt, SESSION_TEST_ATTEMPT_SELECT } from "@/lib/sessionTestSerialize";
 
 type Ctx = { params: Promise<{ classId: string; sessionId: string; attemptId: string }> };
 
@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: Ctx) {
       where: { id: attemptId },
       include: {
         items: { include: { question: { include: { options: true } } } },
-        sessionTest: { select: { id: true, title: true, instructions: true } },
+        sessionTest: { select: SESSION_TEST_ATTEMPT_SELECT },
         learner: { select: { anonymousId: true } },
       },
     });

@@ -59,6 +59,14 @@ REJECTED REJECTED
         ReportTargetType {
             TUTOR TUTOR
 CLASS CLASS
+LEARNER LEARNER
+        }
+    
+
+
+        ContactMessageStatus {
+            OPEN OPEN
+RESOLVED RESOLVED
         }
     
 
@@ -163,6 +171,7 @@ SUBMITTED SUBMITTED
     String section 
     String contactInfo "❓"
     Boolean consentGiven 
+    Boolean isSuperAdmin 
     DateTime emailVerifiedAt "❓"
     AccountStatus status 
     String statusReason "❓"
@@ -449,6 +458,7 @@ SUBMITTED SUBMITTED
     ReportTargetType targetType 
     String reportedTutorProfileId "❓"
     String classId "❓"
+    String reportedLearnerId "❓"
     String details "❓"
     ReportStatus status 
     String resolutionNote "❓"
@@ -470,6 +480,7 @@ SUBMITTED SUBMITTED
     String sessionId 
     String title 
     String instructions "❓"
+    Int timeLimitMinutes "❓"
     SessionTestStatus status 
     DateTime publishedAt "❓"
     DateTime closedAt "❓"
@@ -507,6 +518,21 @@ SUBMITTED SUBMITTED
     Int position 
     String selectedOptionId "❓"
     Boolean isCorrect "❓"
+    }
+  
+
+  "contact_messages" {
+    String id "🗝️"
+    String name 
+    String email 
+    String senderId "❓"
+    String subject 
+    String message 
+    ContactMessageStatus status 
+    String adminNote "❓"
+    String resolvedById "❓"
+    DateTime resolvedAt "❓"
+    DateTime createdAt 
     }
   
     "users" |o--|| "Role" : "enum:role"
@@ -560,6 +586,7 @@ SUBMITTED SUBMITTED
     "reports" |o--|| "ReportTargetType" : "enum:targetType"
     "reports" }o--|o "tutor_profiles" : "reportedTutorProfile"
     "reports" }o--|o "tutor_classes" : "class"
+    "reports" }o--|o "users" : "reportedLearner"
     "reports" |o--|| "ReportStatus" : "enum:status"
     "reports" }o--|o "users" : "reviewedBy"
     "report_violations" }o--|| "reports" : "report"
@@ -575,4 +602,7 @@ SUBMITTED SUBMITTED
     "session_test_attempt_items" }o--|| "session_test_attempts" : "attempt"
     "session_test_attempt_items" }o--|| "assessment_questions" : "question"
     "session_test_attempt_items" }o--|o "assessment_options" : "selectedOption"
+    "contact_messages" }o--|o "users" : "sender"
+    "contact_messages" |o--|| "ContactMessageStatus" : "enum:status"
+    "contact_messages" }o--|o "users" : "resolvedBy"
 ```

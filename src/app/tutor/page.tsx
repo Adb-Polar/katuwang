@@ -9,6 +9,8 @@ import {
   BadgeCheck,
   Users,
   Inbox,
+  ArrowRight,
+  CalendarPlus,
 } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -18,13 +20,21 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard from "@/components/ui/StatCard";
 import AssessmentsSummaryCard from "@/components/tutor/AssessmentsSummaryCard";
+import RecentNotificationsCard from "@/components/notifications/RecentNotificationsCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 
 export const metadata = {
-  title: "Tutor Portal | Katuwang",
+  title: "Overview | Katuwang",
 };
 
-export default async function TutorDashboard() {
+const QUICK_ACTIONS = [
+  { label: "Schedule a class", href: "/tutor/classes/new", icon: CalendarPlus },
+  { label: "Browse class requests", href: "/tutor/requests", icon: Inbox },
+  { label: "See your students", href: "/tutor/students", icon: Users },
+  { label: "Take a topic assessment", href: "/tutor/assessments", icon: BadgeCheck },
+];
+
+export default async function TutorOverview() {
   const session = await getServerSession(authOptions);
 
   const user = await prisma.user.findUnique({
@@ -144,7 +154,10 @@ export default async function TutorDashboard() {
           <p className="text-xs text-base-content/70">
             {user?.statusExpiresAt
               ? `In effect until ${formatDateTime(user.statusExpiresAt)}.`
-              : "In effect indefinitely. Contact an administrator for details."}
+              : "In effect indefinitely."}{" "}
+            <Link href="/contact" className="link">
+              Contact an administrator
+            </Link>
           </p>
         </div>
       )}
@@ -168,54 +181,106 @@ export default async function TutorDashboard() {
         />
       </div>
 
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold flex items-center gap-2">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            Upcoming sessions
-          </h2>
-          {upcomingSessions.length === 0 ? (
-            <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-              No scheduled sessions across your classes.
-            </p>
-          ) : (
-            <ul className="space-y-2">
-              {upcomingSessions.map((s) => {
-                const d = new Date(s.scheduledAt);
-                return (
-                  <li key={s.id}>
-                    <Link
-                      href={`/tutor/classes/${s.class.id}`}
-                      className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
-                    >
-                      <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
-                        <span className="text-2xs font-bold uppercase leading-none">
-                          {formatWeekday(d)}
-                        </span>
-                        <span className="text-base font-bold leading-tight">{d.getDate()}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
-                            {s.class.subject}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="lg:col-span-2 card kt-card">
+          <div className="card-body gap-3">
+            <h2 className="card-title text-sm font-bold flex items-center gap-2">
+              <CalendarClock className="h-4 w-4 text-primary" />
+              Upcoming sessions
+            </h2>
+            {upcomingSessions.length === 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 border border-dashed border-base-300 rounded-lg py-10 px-4 text-center">
+                <CalendarClock className="h-7 w-7 text-base-content/30" />
+                <p className="text-sm text-base-content/70">You have no upcoming sessions.</p>
+                <Link href="/tutor/classes/new" className="btn btn-primary btn-sm text-xs">
+                  Schedule a class
+                </Link>
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {upcomingSessions.map((s) => {
+                  const d = new Date(s.scheduledAt);
+                  return (
+                    <li key={s.id}>
+                      <Link
+                        href={`/tutor/classes/${s.class.id}`}
+                        className="flex items-center gap-3 rounded-lg border border-base-200 bg-base-200/20 hover:bg-base-200/50 hover:border-primary/30 p-3 transition-colors"
+                      >
+                        <div className="flex flex-col items-center justify-center rounded-md bg-primary/10 text-primary px-2.5 py-1.5 shrink-0 w-14">
+                          <span className="text-2xs font-bold uppercase leading-none">
+                            {formatWeekday(d)}
                           </span>
-                          <span className="text-sm font-semibold text-base-content/85 truncate">
-                            {s.topic}
-                          </span>
+                          <span className="text-base font-bold leading-tight">{d.getDate()}</span>
                         </div>
-                        <p className="text-2xs text-base-content/55 mt-0.5">
-                          {formatTime(d)} ·{" "}
-                          {s.duration} min
-                        </p>
-                      </div>
-                    </Link>
-                  </li>
-                );
-              })}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="badge badge-neutral badge-sm text-2xs uppercase font-bold">
+                              {s.class.subject}
+                            </span>
+                            <span className="text-sm font-semibold text-base-content/85 truncate">
+                              {s.topic}
+                            </span>
+                          </div>
+                          <p className="text-2xs text-base-content/55 mt-0.5">
+                            {formatTime(d)} ·{" "}
+                            {s.duration} min
+                          </p>
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+
+        <div className="flex flex-col gap-6">
+          <section className="card kt-card">
+            <div className="card-body gap-2">
+              <h2 className="card-title text-sm font-bold">Quick actions</h2>
+              {QUICK_ACTIONS.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className="flex items-center justify-between gap-2 py-2 text-xs font-medium text-base-content/80 hover:text-primary"
+                >
+                  <span className="flex items-center gap-2">
+                    <action.icon className="h-4 w-4" />
+                    {action.label}
+                  </span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              ))}
+            </div>
+          </section>
+
+        {/* Onboarding Checklist — hidden once every step is done */}
+        {!onboardingComplete && (
+        <section className="card kt-card">
+          <div className="card-body gap-3">
+            <h2 className="card-title text-sm font-bold">Getting Started</h2>
+            <ul className="space-y-2">
+              {steps.map((step) => (
+                <li key={step.label} className="flex items-center gap-2 text-xs text-base-content/80">
+                  {step.done ? (
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                  ) : (
+                    <Circle className="h-4 w-4 text-base-content/30 shrink-0" />
+                  )}
+                  <span className={step.done ? "" : "text-base-content/50"}>{step.label}</span>
+                </li>
+              ))}
             </ul>
-          )}
+          </div>
+        </section>
+        )}
+
+          <AssessmentsSummaryCard certifiedCount={certifiedCount} pendingCount={pendingCount} />
+
+          <RecentNotificationsCard userId={session!.user.id} notificationsHref="/tutor/notifications" />
         </div>
-      </section>
+      </div>
 
       <section className="card kt-card">
         <div className="card-body gap-2">
@@ -229,29 +294,6 @@ export default async function TutorDashboard() {
           <WeeklyTimetable sessions={timetableSessions} />
         </div>
       </section>
-
-      {/* Onboarding Checklist — hidden once every step is done */}
-      {!onboardingComplete && (
-      <section className="card kt-card">
-        <div className="card-body gap-3">
-          <h2 className="card-title text-sm font-bold">Getting Started</h2>
-          <ul className="space-y-2">
-            {steps.map((step) => (
-              <li key={step.label} className="flex items-center gap-2 text-xs text-base-content/80">
-                {step.done ? (
-                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                ) : (
-                  <Circle className="h-4 w-4 text-base-content/30 shrink-0" />
-                )}
-                <span className={step.done ? "" : "text-base-content/50"}>{step.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-      )}
-
-      <AssessmentsSummaryCard certifiedCount={certifiedCount} pendingCount={pendingCount} />
     </div>
   );
 }

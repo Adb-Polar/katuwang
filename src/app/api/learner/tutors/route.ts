@@ -60,7 +60,11 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           anonymousId: true,
-          ...(showRealNames ? { firstName: true, lastName: true, section: true } : {}),
+          // Grade and section are not identifying on their own, so learners
+          // always see them; names stay behind the admin toggle.
+          gradeLevel: true,
+          section: true,
+          ...(showRealNames ? { firstName: true, lastName: true } : {}),
           tutorProfile: {
             select: {
               topicCertifications: {
@@ -110,8 +114,10 @@ export async function GET(req: NextRequest) {
       return {
         id: u.id,
         anonymousId: u.anonymousId,
+        gradeLevel: u.gradeLevel,
+        section: u.section,
         ...(showRealNames && "firstName" in u
-          ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(), section: u.section }
+          ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() }
           : {}),
         verifiedTopicCount: certs.length,
         subjects,

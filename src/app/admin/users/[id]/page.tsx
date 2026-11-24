@@ -58,18 +58,22 @@ export default async function AdminUserDetailPage({
 
   const idRole = user.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER";
 
-  const auditEntries = await prisma.auditLog.findMany({
-    where: { targetId: id },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-    select: {
-      id: true,
-      action: true,
-      reason: true,
-      createdAt: true,
-      admin: { select: { anonymousId: true } },
-    },
-  });
+  // Audit entries are super-admin only — a regular admin neither loads nor sees them.
+  const canSeeAudit = session.user.isSuperAdmin;
+  const auditEntries = canSeeAudit
+    ? await prisma.auditLog.findMany({
+        where: { targetId: id },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          id: true,
+          action: true,
+          reason: true,
+          createdAt: true,
+          admin: { select: { anonymousId: true } },
+        },
+      })
+    : [];
 
   const facts: { label: string; value: React.ReactNode }[] = [
     { label: "Real name", value: `${user.firstName} ${user.lastName}` },
@@ -160,6 +164,7 @@ export default async function AdminUserDetailPage({
         </section>
       </div>
 
+      {canSeeAudit && (
       <section className="card kt-card">
         <div className="card-body gap-3 p-6">
           <h2 className="card-title text-sm font-bold">Recent moderation history</h2>
@@ -185,6 +190,7 @@ export default async function AdminUserDetailPage({
           )}
         </div>
       </section>
+      )}
     </div>
   );
 }

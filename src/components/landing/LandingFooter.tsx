@@ -9,6 +9,10 @@ export default function LandingFooter() {
           <Link href="/privacy-policy" className="hover:underline">
             Privacy Policy
           </Link>{" "}
+          ·{" "}
+          <Link href="/contact" className="hover:underline">
+            Contact an administrator
+          </Link>{" "}
           · RA 10173
         </span>
       </div>

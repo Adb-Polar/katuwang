@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getSetting } from "@/lib/settings";
+import { getAssessmentConfig, getSetting } from "@/lib/settings";
+import { attemptDeadline, isSubmitTooLate } from "@/lib/attemptDeadline";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 import { gradeAttempt } from "@/lib/gradeAttempt";
@@ -43,9 +44,15 @@ export async function POST(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
+    // Answers that arrive after the time limit (plus a short grace window) are
+    // discarded — the attempt is graded with every question unanswered.
+    const { timeLimitMinutes } = await getAssessmentConfig();
+    const deadline = attemptDeadline(attempt.startedAt, timeLimitMinutes);
+    const answers = isSubmitTooLate(deadline, new Date()) ? [] : result.data.answers;
+
     const { graded, correctCount, scorePercent } = gradeAttempt(
       attempt.items,
-      result.data.answers,
+      answers,
       attempt.questionCount,
     );
     const passed = scorePercent >= attempt.passPercent;
@@ -126,7 +133,7 @@ export async function POST(
       return attemptRow;
     });
 
-    return NextResponse.json(serializeAttempt(updated, { reveal: true }));
+    return NextResponse.json(serializeAttempt(updated, { reveal: true, shuffled: true, timeLimitMinutes }));
   } catch (error) {
     console.error("Error submitting assessment:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

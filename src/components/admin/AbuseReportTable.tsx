@@ -13,7 +13,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import PromptDialog from "@/components/ui/PromptDialog";
 import Tabs from "@/components/ui/Tabs";
 import Pagination from "@/components/ui/Pagination";
-import { violationLabel } from "@/lib/reportViolations";
+import { violationLabel, type ReportTarget } from "@/lib/reportViolations";
 import { formatDateTime } from "@/lib/datetime";
 import LoadingRow from "@/components/ui/LoadingRow";
 import EmptyState from "@/components/ui/EmptyState";
@@ -22,7 +22,7 @@ const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Report {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  targetType: ReportTarget;
   violations: string[];
   details: string | null;
   status: "PENDING" | "RESOLVED" | "DISMISSED";
@@ -32,6 +32,7 @@ interface Report {
   reporter: { anonymousId: string };
   class: { id: string; code: string; subject: string; status: string } | null;
   tutor: { id: string; anonymousId: string } | null;
+  learner: { id: string; anonymousId: string } | null;
 }
 
 type Tab = "pending" | "resolved" | "dismissed";
@@ -43,7 +44,7 @@ const TAB_STATUS: Record<Tab, string> = {
 
 export default function AbuseReportTable() {
   const [tab, setTab] = useState<Tab>("pending");
-  const [targetFilter, setTargetFilter] = useState<"" | "TUTOR" | "CLASS">("");
+  const [targetFilter, setTargetFilter] = useState<"" | ReportTarget>("");
   const [success, setSuccess] = useState("");
   const [resolveTarget, setResolveTarget] = useState<Report | null>(null);
   const [dismissTarget, setDismissTarget] = useState<Report | null>(null);
@@ -72,7 +73,11 @@ export default function AbuseReportTable() {
   );
 
   const targetName = (r: Report) =>
-    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
+    r.targetType === "TUTOR"
+      ? (r.tutor?.anonymousId ?? "—")
+      : r.targetType === "LEARNER"
+        ? (r.learner?.anonymousId ?? "—")
+        : `${r.class?.subject ?? "—"} · ${r.class?.code ?? "—"}`;
 
   const review = async (report: Report, decision: "RESOLVE" | "DISMISS", reviewNote?: string) => {
     setSaving(true);
@@ -126,12 +131,13 @@ export default function AbuseReportTable() {
             <select
               aria-label="Filter by report target"
               value={targetFilter}
-              onChange={(e) => setTargetFilter(e.target.value as "" | "TUTOR" | "CLASS")}
+              onChange={(e) => setTargetFilter(e.target.value as "" | ReportTarget)}
               className="select select-bordered select-sm w-full sm:w-auto text-xs focus:select-primary"
             >
               <option value="">All targets</option>
               <option value="TUTOR">Tutor reports</option>
               <option value="CLASS">Class reports</option>
+              <option value="LEARNER">Learner reports</option>
             </select>
           </div>
 
@@ -168,6 +174,12 @@ export default function AbuseReportTable() {
                             ) : (
                               "—"
                             )
+                          ) : r.targetType === "LEARNER" ? (
+                            r.learner ? (
+                              <AnonymousIdBadge id={r.learner.anonymousId} role="LEARNER" />
+                            ) : (
+                              "—"
+                            )
                           ) : r.class ? (
                             <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
                               {r.class.code}
@@ -182,13 +194,13 @@ export default function AbuseReportTable() {
                         <AuditLogLink targetId={r.id} />
                       </td>
                       <td>
-                        <AnonymousIdBadge id={r.reporter.anonymousId} role="LEARNER" />
+                        <AnonymousIdBadge id={r.reporter.anonymousId} role={r.targetType === "LEARNER" ? "TUTOR" : "LEARNER"} />
                       </td>
                       <td className="max-w-xs whitespace-normal">
                         <div className="flex flex-wrap gap-1">
                           {r.violations.map((v) => (
                             <span key={v} className="badge badge-outline badge-xs text-2xs">
-                              {violationLabel(v)}
+                              {violationLabel(v, r.targetType)}
                             </span>
                           ))}
                         </div>

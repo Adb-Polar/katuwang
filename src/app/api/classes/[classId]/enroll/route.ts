@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { reinstateExpiredClasses } from "@/lib/moderation";
 import { notify } from "@/lib/notifications";
+import { findLearnerScheduleConflict } from "@/lib/classSessions";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
 export async function POST(
@@ -64,6 +65,20 @@ export async function POST(
     if (existingEnrollment) {
       return NextResponse.json(
         { error: "You are already enrolled in this class." },
+        { status: 409 }
+      );
+    }
+
+    const upcomingSessions = existingClass.sessions.filter(
+      (s) => s.status === "SCHEDULED" && new Date(s.scheduledAt).getTime() > Date.now()
+    );
+    const conflict = await findLearnerScheduleConflict(session.user.id, classId, upcomingSessions);
+    if (conflict) {
+      return NextResponse.json(
+        {
+          error: `Schedule conflict: this class overlaps a session of ${conflict.classCode} (${conflict.subject}), which you are already enrolled in.`,
+          conflict,
+        },
         { status: 409 }
       );
     }

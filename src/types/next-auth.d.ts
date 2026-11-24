@@ -8,6 +8,8 @@ declare module "next-auth" {
       id: string;
       anonymousId: string;
       role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+      /** ADMIN only: may open the audit log. */
+      isSuperAdmin: boolean;
       fullName: string;
       email: string;
       status: AccountStatus;
@@ -18,6 +20,7 @@ declare module "next-auth" {
     id: string;
     anonymousId: string;
     role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    isSuperAdmin: boolean;
     fullName: string;
   }
 }
@@ -27,6 +30,7 @@ declare module "next-auth/jwt" {
     id: string;
     anonymousId: string;
     role: "ADMIN" | "STUDENT_TUTOR" | "STUDENT_LEARNER";
+    isSuperAdmin: boolean;
     fullName: string;
     status: AccountStatus;
     /** Epoch ms of the last DB re-sync of `role`/`status`. */

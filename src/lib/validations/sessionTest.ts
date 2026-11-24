@@ -1,9 +1,20 @@
 import { z } from "zod";
 import { optionInputSchema } from "@/lib/validations/assessment";
+import { MAX_TIME_LIMIT_MINUTES } from "@/lib/attemptDeadline";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 
 // One test per ClassSession, served twice (PRE then POST) — so `kind` is NOT a
 // field here; it lives on the attempt. See docs/plans/assessments.md.
+
+
+/** Minutes per attempt. `null` clears the limit (untimed). */
+const timeLimitMinutes = z.coerce
+  .number()
+  .int("Time limit must be a whole number of minutes.")
+  .min(1, "Time limit must be at least 1 minute.")
+  .max(MAX_TIME_LIMIT_MINUTES, "Time limit cannot exceed 4 hours.")
+  .nullable()
+  .optional();
 
 export const createSessionTestSchema = z.object({
   title: z
@@ -17,6 +28,7 @@ export const createSessionTestSchema = z.object({
     .max(2000, "Instructions cannot exceed 2000 characters.")
     .optional()
     .or(z.literal("")),
+  timeLimitMinutes,
 });
 
 export type CreateSessionTestInput = z.infer<typeof createSessionTestSchema>;
@@ -34,6 +46,7 @@ export const updateSessionTestSchema = z.object({
     .max(2000, "Instructions cannot exceed 2000 characters.")
     .optional()
     .or(z.literal("")),
+  timeLimitMinutes,
 });
 
 export type UpdateSessionTestInput = z.infer<typeof updateSessionTestSchema>;

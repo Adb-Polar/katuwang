@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react";
 import { Flag } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import { violationLabel } from "@/lib/reportViolations";
+import { violationLabel, type ReportTarget } from "@/lib/reportViolations";
 import { formatDate } from "@/lib/datetime";
 
 interface MyReport {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  targetType: ReportTarget;
   target: { anonymousId?: string | null; code?: string | null; subject?: string | null };
   violations: string[];
   details: string | null;
@@ -26,10 +26,11 @@ const STATUS_BADGE: Record<MyReport["status"], string> = {
 
 function targetLabel(r: MyReport) {
   if (r.targetType === "TUTOR") return r.target.anonymousId ?? "Tutor";
+  if (r.targetType === "LEARNER") return r.target.anonymousId ?? "Learner";
   return `${r.target.subject ?? ""} · ${r.target.code ?? ""}`.trim();
 }
 
-export default function MyReportsList() {
+export default function MyReportsList({ endpoint }: { endpoint: "/api/learner/reports" | "/api/tutor/reports" }) {
   const [reports, setReports] = useState<MyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -38,7 +39,7 @@ export default function MyReportsList() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/learner/reports");
+        const res = await fetch(endpoint);
         if (!res.ok) throw new Error("Could not load your reports.");
         const data = await res.json();
         if (!cancelled) setReports(data.reports ?? []);
@@ -51,7 +52,7 @@ export default function MyReportsList() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [endpoint]);
 
   if (loading) {
     return (
@@ -91,7 +92,7 @@ export default function MyReportsList() {
               <div className="flex flex-wrap gap-1">
                 {r.violations.map((v) => (
                   <span key={v} className="badge badge-outline badge-sm text-2xs">
-                    {violationLabel(v)}
+                    {violationLabel(v, r.targetType)}
                   </span>
                 ))}
               </div>

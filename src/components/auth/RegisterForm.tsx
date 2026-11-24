@@ -8,6 +8,7 @@ import BrandMark from "@/components/ui/BrandMark";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { domainNotAllowedMessage, isEmailDomainAllowed } from "@/lib/emailDomains";
 
 type RegisterType = "LEARNER" | "TUTOR";
 
@@ -34,7 +35,15 @@ const ROLE_COPY: Record<RegisterType, { heading: React.ReactNode; subheading: st
   },
 };
 
-export default function RegisterForm({ type }: { type: RegisterType }) {
+export default function RegisterForm({
+  type,
+  allowedEmailDomains,
+}: {
+  type: RegisterType;
+  /** Domains registration accepts — shown as a hint and checked before submitting. */
+  allowedEmailDomains: string[];
+}) {
+  const [emailTouched, setEmailTouched] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -60,9 +69,18 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
     setForm((prev) => ({ ...prev, [target.name]: value }));
   };
 
+  const emailRejected = form.email.includes("@") && !isEmailDomainAllowed(form.email, allowedEmailDomains);
+  const emailDomainError =
+    emailTouched && emailRejected ? domainNotAllowedMessage(form.email, allowedEmailDomains) : undefined;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (emailRejected) {
+      setEmailTouched(true);
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
@@ -147,12 +165,18 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             </FormField>
           </div>
 
-          <FormField label="Email Address" required>
+          <FormField
+            label="Email Address"
+            required
+            hint={`Accepted: ${allowedEmailDomains.map((domain) => `@${domain}`).join(", ")}`}
+            error={emailDomainError}
+          >
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
+              onBlur={() => setEmailTouched(true)}
               required
               placeholder="you@example.com"
               className="input input-bordered input-sm w-full focus:input-primary text-xs"

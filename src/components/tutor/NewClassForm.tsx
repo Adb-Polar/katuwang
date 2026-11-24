@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ClassScheduleFields, { ClassScheduleSubmitPayload } from "@/components/tutor/ClassScheduleFields";
@@ -11,6 +12,7 @@ import ClassScheduleFields, { ClassScheduleSubmitPayload } from "@/components/tu
  */
 export default function NewClassForm({ allowedTopics }: { allowedTopics?: string[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -27,6 +29,7 @@ export default function NewClassForm({ allowedTopics }: { allowedTopics?: string
       if (!res.ok) throw new Error(data.error || "Failed to create class.");
 
       // Land on the class we just made.
+      toast.success("Class created.");
       router.push(`/tutor/classes/${data.id}`);
       router.refresh();
     } catch (err) {

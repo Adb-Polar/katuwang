@@ -1,3 +1,4 @@
+import RequiredMark from "./RequiredMark";
 import type { ReactNode } from "react";
 
 export default function FormField({
@@ -21,7 +22,7 @@ export default function FormField({
   const labelNode = (
     <span className={`${size === "md" ? "text-sm" : "text-xs"} font-semibold text-base-content/80`}>
       {label}
-      {required && <span className="text-error ml-0.5">*</span>}
+      {required && <RequiredMark />}
     </span>
   );
 

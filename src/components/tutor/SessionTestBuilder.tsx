@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_TIME_LIMIT_MINUTES } from "@/lib/attemptDeadline";
+import { useToast } from "@/components/ui/Toast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,6 +20,12 @@ interface BuilderQuestion {
   topic: string;
 }
 
+/** Blank input = untimed (`null`); otherwise the whole number of minutes. */
+function parseTimeLimit(raw: string): number | null {
+  const minutes = Number.parseInt(raw, 10);
+  return Number.isFinite(minutes) && minutes > 0 ? minutes : null;
+}
+
 export interface SessionTestBuilderProps {
   classId: string;
   sessionId: string;
@@ -29,6 +37,7 @@ export interface SessionTestBuilderProps {
     id: string;
     title: string;
     instructions: string | null;
+    timeLimitMinutes: number | null;
     status: "DRAFT" | "PUBLISHED" | "CLOSED";
     questions: { questionId: string; prompt: string; origin: string; topic: string }[];
   } | null;
@@ -83,8 +92,10 @@ function CreateTestPanel({
 }) {
   const [title, setTitle] = useState(`${sessionTopic} check-in`);
   const [instructions, setInstructions] = useState("");
+  const [timeLimit, setTimeLimit] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const toast = useToast();
 
   const create = async () => {
     setBusy(true);
@@ -93,10 +104,15 @@ function CreateTestPanel({
       const res = await fetch(`/api/tutor/classes/${classId}/sessions/${sessionId}/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
+        body: JSON.stringify({
+          title,
+          instructions: instructions.trim() || undefined,
+          timeLimitMinutes: parseTimeLimit(timeLimit),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create test.");
+      toast.success("Test created.");
       onCreated();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create test.");
@@ -137,6 +153,17 @@ function CreateTestPanel({
             />
             <CharCount value={instructions} max={2000} />
           </FormField>
+          <FormField label="Time limit (minutes)" hint="Optional — leave blank for an untimed test. The test auto-submits when time runs out.">
+            <input
+              type="number"
+              min={1}
+              max={MAX_TIME_LIMIT_MINUTES}
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(e.target.value)}
+              placeholder="Untimed"
+              className="input input-bordered input-sm w-40 text-xs focus:input-primary"
+            />
+          </FormField>
           <div className="flex justify-end">
             <button onClick={create} disabled={busy || title.trim().length < 3} className="btn btn-primary btn-sm text-xs">
               {busy && <span className="loading loading-spinner loading-xs" />}
@@ -168,6 +195,7 @@ function BuilderBody({
 
   const [title, setTitle] = useState(test.title);
   const [instructions, setInstructions] = useState(test.instructions ?? "");
+  const [timeLimit, setTimeLimit] = useState(test.timeLimitMinutes ? String(test.timeLimitMinutes) : "");
   const [items, setItems] = useState<BuilderQuestion[]>(test.questions);
   const [savedIds, setSavedIds] = useState<string[]>(test.questions.map((q) => q.questionId));
   const [status, setStatus] = useState(test.status);
@@ -212,7 +240,11 @@ function BuilderBody({
       const res = await fetch(`/api/tutor/classes/${classId}/sessions/${sessionId}/test`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
+        body: JSON.stringify({
+          title,
+          instructions: instructions.trim() || undefined,
+          timeLimitMinutes: parseTimeLimit(timeLimit),
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save.");
@@ -318,6 +350,18 @@ function BuilderBody({
               className="textarea textarea-bordered textarea-sm w-full text-xs focus:textarea-primary"
             />
             <CharCount value={instructions} max={2000} />
+          </FormField>
+          <FormField label="Time limit (minutes)" hint="Optional — leave blank for an untimed test. The test auto-submits when time runs out.">
+            <input
+              type="number"
+              min={1}
+              max={MAX_TIME_LIMIT_MINUTES}
+              value={timeLimit}
+              onChange={(e) => setTimeLimit(e.target.value)}
+              disabled={!editable}
+              placeholder="Untimed"
+              className="input input-bordered input-sm w-40 text-xs focus:input-primary"
+            />
           </FormField>
           {editable && (
             <div className="flex justify-end">

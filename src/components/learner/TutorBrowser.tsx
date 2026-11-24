@@ -1,5 +1,6 @@
 "use client";
 
+import { gradeSection } from "@/lib/gradeLevels";
 import { useState } from "react";
 import { BROWSE_PAGE_SIZE } from "@/lib/pagination";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,8 @@ interface TutorRow {
   id: string;
   anonymousId: string;
   name?: string;
-  section?: string;
+  gradeLevel: string;
+  section: string;
   verifiedTopicCount: number;
   subjects: string[];
   verifiedClasses: { code: string; subject: string }[];
@@ -128,6 +130,8 @@ export default function TutorBrowser() {
                       <span className="truncate text-2xs text-base-content/50">{t.name}</span>
                     )}
                   </div>
+
+                  <span className="text-2xs text-base-content/60">{gradeSection(t.gradeLevel, t.section)}</span>
 
                   {t.subjects.length > 0 && (
                     <div className="flex flex-wrap gap-1">

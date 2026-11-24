@@ -61,6 +61,9 @@ export default async function AccountDeclinedPage({
             <Link href="/register" className="text-xs font-bold text-base-content/60 hover:text-primary hover:underline">
               Register again
             </Link>
+            <Link href="/contact" className="text-xs font-bold text-base-content/60 hover:text-primary hover:underline">
+              Contact an administrator
+            </Link>
           </div>
         </div>
       </div>

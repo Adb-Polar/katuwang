@@ -12,6 +12,99 @@ Format: newest first.
 
 ---
 
+## Super admin is a flag on ADMIN, not a fourth role (2026-11-24)
+
+**Decision:** `User.isSuperAdmin` (boolean) marks the admin(s) who may open the
+audit log — nav item, `/admin/audit-log`, `GET /api/admin/audit-log`, the
+"View audit log" links, and the audit block on `/admin/users/[id]`. Every other
+admin permission is unchanged. The seed makes `ADM-0001` the super admin.
+
+**Thesis text says otherwise:** it names a single Administrator.
+
+**Why:** requested 2026-11-24 ("audit logs should only be visible to
+superadmin"); the owner chose a flag over a `SUPER_ADMIN` role so the "3 roles
+only" decision below still holds.
+
+**Implication for agents:** do not add a `SUPER_ADMIN` enum value or a separate
+portal. Gate on `session.user.isSuperAdmin` (JWT claim, re-synced with role).
+There is no UI to grant the flag yet — it is set in the database/seed.
+
+## Dark mode is supported (supersedes "light theme only") (2026-11-24)
+
+**Decision:** the app ships two DaisyUI themes, `katuwang theme` (light) and
+`katuwang dark`, switched by `ThemeToggle` and stored per browser.
+
+**Why:** requested 2026-11-24. `docs/plans/landing-page-redesign.md` says
+"Light theme only … no dark mode toggle"; that line is now historical.
+
+**Implication for agents:** never hardcode colours — use theme tokens
+(`bg-base-100`, `text-base-content`, `--kt-*`) so both themes work. A literal
+`--kt-*` token needs a value in the `[data-theme="katuwang dark"]` block too.
+
+## Session tests are served in a shuffled order; stored order is unchanged (2026-11-24)
+
+**Decision:** learners get each session-test attempt's questions and options in
+an order derived from the attempt id (`seededShuffle`), applied when the attempt
+is serialized. `SessionTestQuestion.position` / `SessionTestAttemptItem.position`
+still hold the tutor's authored order.
+
+**Why:** requested 2026-11-24 to make copying answers harder. Shuffling at
+serve time (not at write time) keeps `position` as the pre/post join key that
+"one question set served twice" below relies on.
+
+**Implication for agents:** pass `shuffled: true` only for the taker's own
+views; tutor/admin views stay in authored order. Do not persist a per-attempt
+order or reorder `position`.
+
+## Tests can be timed; late answers are discarded (2026-11-24)
+
+**Decision:** `SessionTest.timeLimitMinutes` (per test, tutor-set, null =
+untimed) and the `assessmentTimeLimitMinutes` platform setting (certification
+quiz, 0 = untimed). The client auto-submits at zero; a submit more than 30 s
+past the deadline is graded with every question unanswered.
+
+**Implication for agents:** the certification limit is the live setting, not a
+per-attempt snapshot — there is no column for it. Empty answer lists are valid
+on submit (a timed-out attempt may have none).
+
+## Tutor grade level and section are visible to learners (2026-11-24)
+
+**Decision:** learners always see a tutor's grade level and section (tutor
+profile, Find Tutors). Real names, email and contact info remain hidden unless
+`showTutorRealNames` is on.
+
+**Why:** requested 2026-11-24 so a learner can judge fit. Tutors already see a
+learner's grade and section, so this makes the boundary symmetric; neither field
+identifies a person on its own.
+
+**Implication for agents:** grade + section are peer-visible; anything else
+personal is not.
+
+## Tutors can report learners (2026-11-24)
+
+**Decision:** a tutor may report a learner enrolled in one of their classes
+(`ReportTargetType.LEARNER`, `Report.reportedLearnerId`, `/api/tutor/reports`).
+It reuses the existing violation enum with learner wording and the same admin
+queue. The older entry below ("learner reports are relationship-gated") still
+describes the learner side.
+
+**Implication for agents:** learners still cannot report learners, and tutors
+cannot report tutors or classes. Admin review stays resolve/dismiss + note.
+
+## Registration is limited to an admin-managed email-domain allowlist; Google sign-in never creates accounts (2026-11-24)
+
+**Decision:** `/api/register` rejects emails (and recovery emails) whose domain
+is not on the `allowedEmailDomains` platform setting. Google sign-in only signs
+in an existing account with a matching, Google-verified email.
+
+**Why:** requested 2026-11-24 to stop junk addresses (`asa@qwqe`, `a@test.123`);
+the owner chose an allowlist over format-only checks, and "existing accounts
+only" for Google so registration consent and admin approval cannot be bypassed.
+
+**Implication for agents:** do not auto-provision users from OAuth. The
+allowlist is checked at registration only — never retroactively at login. The
+public contact form deliberately accepts any valid email.
+
 ## Email verification checked before PENDING approval (2026-09-14)
 
 **Decision:** In `src/lib/auth.ts` `authorize()`, the (optional,

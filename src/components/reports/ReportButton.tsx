@@ -7,7 +7,16 @@ import type { ReportViolationType } from "@prisma/client";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
-import { REPORT_VIOLATIONS } from "@/lib/reportViolations";
+import { REPORT_VIOLATIONS, type ReportTarget } from "@/lib/reportViolations";
+
+const TARGET_NOUN: Record<ReportTarget, string> = { TUTOR: "tutor", CLASS: "class", LEARNER: "learner" };
+
+// Learners report tutors and classes; tutors report learners.
+const REPORT_ENDPOINT: Record<ReportTarget, string> = {
+  TUTOR: "/api/learner/reports",
+  CLASS: "/api/learner/reports",
+  LEARNER: "/api/tutor/reports",
+};
 
 const DETAILS_MAX = 1000;
 
@@ -16,9 +25,9 @@ export default function ReportButton({
   targetId,
   targetLabel,
 }: {
-  targetType: "TUTOR" | "CLASS";
+  targetType: ReportTarget;
   targetId: string;
-  /** Anonymised label shown in the modal heading, e.g. "TUT-0007" or "MATH · C-0231". */
+  /** Anonymised label shown in the modal heading, e.g. "TUT-0007", "STU-0012" or "MATH · C-0231". */
   targetLabel: string;
 }) {
   const router = useRouter();
@@ -34,7 +43,7 @@ export default function ReportButton({
   const canSubmit =
     checked.size > 0 && (!isOther || details.trim().length >= 10) && !submitting;
 
-  const noun = targetType === "TUTOR" ? "tutor" : "class";
+  const noun = TARGET_NOUN[targetType];
 
   const reset = () => {
     setChecked(new Set());
@@ -56,7 +65,7 @@ export default function ReportButton({
     setError("");
     setSubmitting(true);
     try {
-      const res = await fetch("/api/learner/reports", {
+      const res = await fetch(REPORT_ENDPOINT[targetType], {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

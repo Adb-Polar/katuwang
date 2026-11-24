@@ -1,11 +1,13 @@
 import type { Prisma } from "@prisma/client";
+import { attemptDeadline } from "@/lib/attemptDeadline";
+import { seededShuffle } from "@/lib/shuffle";
 
 // ─── Attempt (learner's run) ───────────────────────────────────────────────
 
 export type SessionTestAttemptWithItems = Prisma.SessionTestAttemptGetPayload<{
   include: {
     items: { include: { question: { include: { options: true } } } };
-    sessionTest: { select: { id: true; title: true; instructions: true } };
+    sessionTest: { select: { id: true; title: true; instructions: true; timeLimitMinutes: true } };
   };
 }>;
 
@@ -31,27 +33,47 @@ export interface SerializedSessionTestAttempt {
   scorePercent?: number;
   startedAt: string;
   submittedAt: string | null;
+  /** Per-attempt time limit in minutes; `null` = untimed. */
+  timeLimitMinutes: number | null;
+  /** ISO instant the attempt auto-submits; `null` = untimed. */
+  deadlineAt: string | null;
   items: SerializedSessionTestItem[];
 }
+
+/** The `sessionTest` fields every attempt serializer call needs selected. */
+export const SESSION_TEST_ATTEMPT_SELECT = {
+  id: true,
+  title: true,
+  instructions: true,
+  timeLimitMinutes: true,
+} as const;
 
 /**
  * Shapes a learner's session-test attempt for a detail view. When `reveal` is
  * false (an in-progress attempt), correct-answer flags, explanations, per-item
  * grades and the score are stripped — the keys are absent, not nulled.
+ *
+ * `shuffled` is for the learner's own views: questions and options come back
+ * in an order derived from the attempt id, so every learner (and the PRE and
+ * POST run of the same learner) sees a different order, yet a resumed attempt
+ * keeps its order. Stored `position`s are untouched — tutor/admin views and
+ * the pre/post comparison keep the tutor's authored order.
  */
 export function serializeSessionTestAttempt(
   attempt: SessionTestAttemptWithItems,
-  { reveal }: { reveal: boolean },
+  { reveal, shuffled = false }: { reveal: boolean; shuffled?: boolean },
 ): SerializedSessionTestAttempt {
-  const items = [...attempt.items]
-    .sort((a, b) => a.position - b.position)
-    .map((item) => {
-      const options = [...item.question.options]
-        .sort((a, b) => a.position - b.position)
+  const authoredOrder = [...attempt.items].sort((a, b) => a.position - b.position);
+  const servedOrder = shuffled ? seededShuffle(authoredOrder, attempt.id) : authoredOrder;
+  const deadline = attemptDeadline(attempt.startedAt, attempt.sessionTest.timeLimitMinutes);
+
+  const items = servedOrder.map((item, servedIndex) => {
+      const authoredOptions = [...item.question.options].sort((a, b) => a.position - b.position);
+      const options = (shuffled ? seededShuffle(authoredOptions, `${attempt.id}:${item.questionId}`) : authoredOptions)
         .map((o) => ({ id: o.id, text: o.text, ...(reveal ? { isCorrect: o.isCorrect } : {}) }));
 
       return {
-        position: item.position,
+        position: shuffled ? servedIndex : item.position,
         questionId: item.questionId,
         prompt: item.question.prompt,
         options,
@@ -75,6 +97,8 @@ export function serializeSessionTestAttempt(
       : {}),
     startedAt: attempt.startedAt.toISOString(),
     submittedAt: attempt.submittedAt ? attempt.submittedAt.toISOString() : null,
+    timeLimitMinutes: attempt.sessionTest.timeLimitMinutes,
+    deadlineAt: deadline ? deadline.toISOString() : null,
     items,
   };
 }
@@ -103,6 +127,7 @@ export interface SerializedSessionTest {
   sessionId: string;
   title: string;
   instructions: string | null;
+  timeLimitMinutes: number | null;
   status: string;
   publishedAt: string | null;
   closedAt: string | null;
@@ -116,6 +141,7 @@ export function serializeSessionTest(test: SessionTestWithQuestions): Serialized
     sessionId: test.sessionId,
     title: test.title,
     instructions: test.instructions,
+    timeLimitMinutes: test.timeLimitMinutes,
     status: test.status,
     publishedAt: test.publishedAt ? test.publishedAt.toISOString() : null,
     closedAt: test.closedAt ? test.closedAt.toISOString() : null,

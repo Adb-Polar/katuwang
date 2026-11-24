@@ -26,6 +26,9 @@ export default function UnauthorizedPage() {
             >
               Go to Dashboard
             </Link>
+            <Link href="/contact" className="btn btn-ghost btn-sm w-full text-xs">
+              Contact an administrator
+            </Link>
           </div>
         </div>
       </div>

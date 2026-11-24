@@ -1,7 +1,9 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sessionTimeFromRange } from "@/lib/sessionTime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
 
@@ -49,6 +51,8 @@ function nextOccurrence(day: string, time: string): string {
   )}:${pad(result.getMinutes())}`;
 }
 
+const DEFAULT_SESSION_MINUTES = 60;
+
 let rowIdCounter = 0;
 
 /**
@@ -66,6 +70,7 @@ export default function AcceptRequestForm({
   certifiedTopics: string[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const { topicsFor } = useSubjectCatalog();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -80,8 +85,7 @@ export default function AcceptRequestForm({
         {
           key: `accept-row-${++rowIdCounter}`,
           topic: preselectedTopics[0] ?? "",
-          scheduledAt: nextOccurrence(firstSlot.day, firstSlot.startTime),
-          duration: 60,
+          time: sessionTimeFromRange(nextOccurrence(firstSlot.day, firstSlot.startTime), DEFAULT_SESSION_MINUTES),
         },
       ]
     : [];
@@ -97,6 +101,7 @@ export default function AcceptRequestForm({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not accept this request.");
+      toast.success("Request accepted — class created.");
       router.push(`/tutor/classes/${data.classId}`);
       router.refresh();
     } catch (err) {

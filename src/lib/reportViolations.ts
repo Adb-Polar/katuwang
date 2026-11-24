@@ -31,13 +31,34 @@ const CLASS_VIOLATIONS: ViolationOption[] = [
   { value: "OTHER", label: "Other (describe below)" },
 ];
 
-export const REPORT_VIOLATIONS: Record<"TUTOR" | "CLASS", ViolationOption[]> = {
+// What a tutor can tick about a learner. Reuses the shared enum values with
+// learner-appropriate wording, so no new violation types are needed.
+const LEARNER_VIOLATIONS: ViolationOption[] = [
+  { value: "HARASSMENT_OR_BULLYING", label: "Harassment, bullying or intimidation" },
+  { value: "ANONYMITY_BREACH", label: "Asked for my real name, contact details or socials" },
+  { value: "DISCRIMINATION", label: "Discriminatory or hateful remarks" },
+  { value: "INAPPROPRIATE_CONTENT", label: "Inappropriate or explicit content" },
+  { value: "UNPROFESSIONAL_CONDUCT", label: "Disruptive or disrespectful behaviour in sessions" },
+  { value: "NO_SHOW_OR_ABSENCE", label: "Repeatedly enrolls but does not attend" },
+  { value: "SPAM_OR_DUPLICATE", label: "Spam or abusive enroll/unenroll activity" },
+  { value: "OTHER", label: "Other (describe below)" },
+];
+
+export type ReportTarget = "TUTOR" | "CLASS" | "LEARNER";
+
+export const REPORT_VIOLATIONS: Record<ReportTarget, ViolationOption[]> = {
   TUTOR: TUTOR_VIOLATIONS,
   CLASS: CLASS_VIOLATIONS,
+  LEARNER: LEARNER_VIOLATIONS,
 };
 
-// Every value that may legitimately arrive in a report body — the union of both
-// lists. Used as the Zod enum source.
+/** The violation values a report against `target` may carry — a Zod enum source. */
+export function violationValuesFor(target: ReportTarget): [ReportViolationType, ...ReportViolationType[]] {
+  return REPORT_VIOLATIONS[target].map((v) => v.value) as [ReportViolationType, ...ReportViolationType[]];
+}
+
+// Every value a learner's report (against a tutor or a class) may carry.
+// Used as the Zod enum source for the learner route.
 export const ALL_VIOLATION_VALUES = Array.from(
   new Set([...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS].map((v) => v.value))
 ) as [ReportViolationType, ...ReportViolationType[]];
@@ -46,7 +67,12 @@ export const VIOLATION_LABEL: Record<ReportViolationType, string> = Object.fromE
   [...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS].map((v) => [v.value, v.label])
 ) as Record<ReportViolationType, string>;
 
-/** Human label for a violation value, falling back to the raw value if unknown. */
-export function violationLabel(type: string): string {
-  return VIOLATION_LABEL[type as ReportViolationType] ?? type;
+/**
+ * Human label for a violation value, falling back to the raw value if unknown.
+ * Pass the report's target so a value shared across lists (e.g.
+ * `NO_SHOW_OR_ABSENCE`) reads with the wording that target's form used.
+ */
+export function violationLabel(type: string, target?: ReportTarget): string {
+  const targetLabel = target ? REPORT_VIOLATIONS[target].find((v) => v.value === type)?.label : undefined;
+  return targetLabel ?? VIOLATION_LABEL[type as ReportViolationType] ?? type;
 }

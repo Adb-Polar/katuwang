@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAssessmentConfig } from "@/lib/settings";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 import AssessmentQuizRunner, { QuizAttempt } from "@/components/tutor/AssessmentQuizRunner";
 
@@ -29,7 +30,12 @@ export default async function TutorAssessmentAttemptPage({
     notFound();
   }
 
-  const serialized = serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS" });
+  const { timeLimitMinutes } = await getAssessmentConfig();
+  const serialized = serializeAttempt(attempt, {
+    reveal: attempt.status !== "IN_PROGRESS",
+    shuffled: true,
+    timeLimitMinutes,
+  });
 
   return <AssessmentQuizRunner attempt={serialized as QuizAttempt} />;
 }

@@ -43,6 +43,12 @@ export default function PendingApprovalPage() {
               <ArrowLeft className="w-3.5 h-3.5" />
               Back to sign in
             </Link>
+            <p className="mt-3 text-xs text-base-content/60">
+              Waiting longer than expected?{" "}
+              <Link href="/contact" className="font-bold text-primary hover:underline">
+                Contact an administrator
+              </Link>
+            </p>
           </div>
         </div>
       </div>

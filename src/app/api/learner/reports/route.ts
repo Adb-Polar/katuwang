@@ -1,3 +1,4 @@
+import type { ReportTargetType } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import type { Prisma, ReportViolationType } from "@prisma/client";
@@ -8,7 +9,7 @@ import { notifyMany } from "@/lib/notifications";
 
 interface ReportRow {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  targetType: ReportTargetType;
   details: string | null;
   status: string;
   resolutionNote: string | null;

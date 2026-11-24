@@ -84,21 +84,56 @@ This page also has a **My Account** section (added 2026-09-14) to change your ow
 first self-service account surface admins have had, since this page previously covered only
 platform-wide settings. (`POST /api/admin/profile/password`, `401` on a wrong current password.)
 
-## Reports & Analytics (`/admin/reports`)
+## Dashboard & Analytics (`/admin`)
 
-Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
+The dashboard and the former Reports page are one page (`/admin/reports` redirects here). Top to bottom: four
+"right now" stat cards, **Needs attention** tiles (pending registrations, certifications, question requests, topic
+requests, class appeals, abuse reports, contact messages, flagged accounts, active classes), then **Analytics**.
+"Recent activity" was removed (audit entries are super-admin only).
 
-- Users by role, by grade level, and by account status.
-- Classes by subject and by status.
-- Certifications by status.
-- Total enrollments and enrollments in the last 30 days.
+- **Filters** — Period (All time, last 7 / 30 / 90 days, last 12 months, custom range), Grade level, Subject. The
+  selection lives in the URL (`?range=&from=&to=&grade=&subject=`); Export CSV includes it.
+- **Charts** — enrollment trend (daily), users by role / grade level / status, classes by subject / status,
+  certifications by status. Dates filter by creation date; grade applies to users, classes and enrollments; subject
+  applies to classes, certifications and enrollments.
 
-(`GET /api/admin/reports`)
+(`GET /api/admin/reports?from=YYYY-MM-DD&to=YYYY-MM-DD&gradeLevel=&subject=` — `from`/`to` come as a pair, at most 366
+days apart; without them the breakdowns are all-time and the trend covers the last 30 days. `400` on an invalid
+filter. Response: `range { allTime, from, to, trendDays }`, the six breakdown arrays, and
+`enrollments { total, inPeriod, byDay[] }`.)
 
-## Audit Log (`/admin/audit-log`)
+## Audit Log (`/admin/audit-log`) — super admins only
 
-- **View moderation action history** — the most recent 200 `AuditLog` entries (user status changes, class status changes, certification approvals/rejections), each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp.
-  (`GET /api/admin/audit-log`)
+- **Who can see it** — only an admin whose account has `isSuperAdmin` set (the seeded `ADM-0001`). For a regular
+  admin the sidebar item and every "View audit log" link are hidden, the page redirects to Access Denied, the API
+  returns `403`, and the moderation-history block on a user's page is not shown. There is no UI to grant the flag.
+- **View moderation action history** — paginated `AuditLog` entries with action / target-type filters and search,
+  each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp.
+  (`GET /api/admin/audit-log` → `{ logs, total, page, pageSize, facets }`)
+
+## Contact Messages (`/admin/contact-messages`)
+
+Inbox for the public `/contact` form (often from people who cannot sign in). Tabs: Open / Resolved. Each message
+shows the sender's name, email (mailto link), topic, text, and — if they were signed in — their anonymous ID. Reply
+by email, then **Mark resolved** (optional internal note) or **Re-open**; both are audit-logged
+(`CONTACT_MESSAGE_RESOLVED` / `CONTACT_MESSAGE_REOPENED`). Every active admin gets a `CONTACT_MESSAGE_NEW`
+notification for a new message.
+
+- `GET /api/admin/contact-messages?status=OPEN|RESOLVED&page=&pageSize=` → `{ messages, total, page, pageSize, counts }`
+- `PATCH /api/admin/contact-messages/[messageId]` `{ status: "OPEN" | "RESOLVED", adminNote? }` — `404` unknown,
+  `409` already in that status.
+
+## Other changes — 2026-11-24 (Changes.md Part 84)
+
+- **My profile** (`/admin/profile`, opened from the top-right avatar) — identity + change password (moved out of Settings).
+- **Settings → Accepted email domains** — the list registration accepts (`GET`/`PUT /api/admin/settings/email-domains`
+  `{ domains: string[] }`; at least one, at most 50, each a real domain such as `school.edu.ph`).
+- **Settings → Time limit (minutes)** — time limit for the tutor certification quiz; `0` = untimed
+  (`PATCH /api/admin/assessment-configs` `{ timeLimitMinutes }`).
+- **Abuse Reports** — tutors can now report learners; the queue has a "Learner reports" filter and shows the learner's
+  anonymous ID as the target.
+- **Sign-in** — admins use the same `/login`, including "Continue with Google" when configured (existing accounts only).
+- **Dark mode** toggle in the top bar.
 
 ## Notifications (`/admin/notifications`)
 
@@ -310,6 +345,8 @@ Update one platform setting (upserts into `PlatformSetting`).
 **500** → `{ error }`.
 
 ### `GET /api/admin/reports`
+
+> Updated 2026-11-24: accepts `from`, `to`, `gradeLevel`, `subject` (see "Dashboard & Analytics" above); returns `400` for an invalid filter; `enrollments.last30Days` is now `enrollments.inPeriod` and a `range` object is included.
 Read-only platform breakdown dashboard (Prisma `groupBy` aggregates).
 
 **200**
@@ -327,6 +364,8 @@ Read-only platform breakdown dashboard (Prisma `groupBy` aggregates).
 **500** → `{ error }`.
 
 ### `GET /api/admin/audit-log`
+
+> Updated 2026-11-24: returns `403` unless the admin is a super admin (`isSuperAdmin`). The response is paginated: `{ logs, total, page, pageSize, facets }`.
 Most recent 200 `AuditLog` entries.
 
 **200** → array of `{ id, adminId, admin: { anonymousId, firstName, lastName }, action, targetType, targetId, reason, createdAt }`, newest first.

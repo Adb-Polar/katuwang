@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useThemeMode } from "@/hooks/useThemeMode";
+import type { ThemeMode } from "@/lib/theme";
 
 const FALLBACK_COLORS = {
   primary: "#2f6f68",
@@ -14,26 +15,42 @@ const FALLBACK_COLORS = {
 
 export type ThemeColors = typeof FALLBACK_COLORS;
 
+const COLOR_TOKENS: Record<keyof ThemeColors, string> = {
+  primary: "--color-primary",
+  secondary: "--color-secondary",
+  accent: "--color-accent",
+  success: "--color-success",
+  error: "--color-error",
+  grid: "--color-base-300",
+  text: "--color-base-content",
+};
+
+function readThemeColors(): ThemeColors {
+  const styles = getComputedStyle(document.documentElement);
+  const colors = { ...FALLBACK_COLORS };
+  for (const key of Object.keys(COLOR_TOKENS) as (keyof ThemeColors)[]) {
+    colors[key] = styles.getPropertyValue(COLOR_TOKENS[key]).trim() || FALLBACK_COLORS[key];
+  }
+  return colors;
+}
+
+/** Theme tokens are static CSS, so each mode's colours are read at most once. */
+const colorsByMode = new Map<ThemeMode, ThemeColors>();
+
+function colorsFor(mode: ThemeMode): ThemeColors {
+  if (typeof window === "undefined") return FALLBACK_COLORS;
+  let colors = colorsByMode.get(mode);
+  if (!colors) {
+    colors = readThemeColors();
+    colorsByMode.set(mode, colors);
+  }
+  return colors;
+}
+
 /**
- * Reads the DaisyUI OKLCH theme tokens so charts match the rest of the app.
- * Widened from the original ReportsView copy to also expose accent / success /
- * error, which the session pre/post-test charts need.
+ * Reads the DaisyUI OKLCH theme tokens so charts match the rest of the app,
+ * and switches palette when the user toggles between light and dark.
  */
 export function useThemeColors(): ThemeColors {
-  const [colors] = useState<ThemeColors>(() => {
-    if (typeof window === "undefined") return FALLBACK_COLORS;
-    const s = getComputedStyle(document.documentElement);
-    const get = (v: string, fallback: string) => s.getPropertyValue(v).trim() || fallback;
-    return {
-      primary: get("--color-primary", FALLBACK_COLORS.primary),
-      secondary: get("--color-secondary", FALLBACK_COLORS.secondary),
-      accent: get("--color-accent", FALLBACK_COLORS.accent),
-      success: get("--color-success", FALLBACK_COLORS.success),
-      error: get("--color-error", FALLBACK_COLORS.error),
-      grid: get("--color-base-300", FALLBACK_COLORS.grid),
-      text: get("--color-base-content", FALLBACK_COLORS.text),
-    };
-  });
-
-  return colors;
+  return colorsFor(useThemeMode());
 }

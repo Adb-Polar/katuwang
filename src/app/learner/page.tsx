@@ -1,26 +1,27 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
-import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight } from "lucide-react";
+import { CalendarClock, BookOpen, Inbox, Sparkles, ArrowRight, TrendingUp } from "lucide-react";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import StatCard, { type StatCardProps } from "@/components/ui/StatCard";
+import RecentNotificationsCard from "@/components/notifications/RecentNotificationsCard";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import { addDays, formatTime, formatWeekday } from "@/lib/datetime";
 
 export const metadata = {
-  title: "Learner Portal | Katuwang",
+  title: "Overview | Katuwang",
 };
 
-export default async function LearnerDashboard() {
+export default async function LearnerOverview() {
   const session = await getServerSession(authOptions);
   const learnerId = session!.user.id;
 
   const now = new Date();
   const weekAhead = addDays(now, 7);
 
-  const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions] = await Promise.all([
+  const [enrolledCount, openRequestCount, upcomingSessions, weeklySessions, completedSessionCount, postTests] = await Promise.all([
     prisma.classEnrollment.count({ where: { learnerId } }),
     prisma.topicRequest.count({ where: { learnerId, status: "OPEN" } }),
     prisma.classSession.findMany({
@@ -54,7 +55,25 @@ export default async function LearnerDashboard() {
         class: { select: { id: true, subject: true } },
       },
     }),
+    prisma.classSession.count({
+      where: { status: "COMPLETED", class: { enrollments: { some: { learnerId } } } },
+    }),
+    prisma.sessionTestAttempt.aggregate({
+      where: { learnerId, kind: "POST", status: "SUBMITTED" },
+      _count: { _all: true },
+      _avg: { scorePercent: true },
+    }),
   ]);
+
+  const postTestCount = postTests._count._all;
+  const progressRows: { label: string; value: string }[] = [
+    { label: "Sessions completed", value: String(completedSessionCount) },
+    { label: "Post-tests taken", value: String(postTestCount) },
+    {
+      label: "Average post-test score",
+      value: postTests._avg.scorePercent === null ? "—" : `${Math.round(postTests._avg.scorePercent)}%`,
+    },
+  ];
 
   const timetableSessions = weeklySessions.map((s) => ({
     id: s.id,
@@ -87,6 +106,13 @@ export default async function LearnerDashboard() {
       icon: Inbox,
       tint: "accent",
     },
+    {
+      label: "Sessions completed",
+      value: completedSessionCount,
+      href: "/learner/progress",
+      icon: TrendingUp,
+      tint: "success",
+    },
   ];
 
   return (
@@ -98,7 +124,7 @@ export default async function LearnerDashboard() {
         actions={<AnonymousIdBadge id={session!.user.anonymousId} role="LEARNER" size="md" showIcon />}
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
           <StatCard key={s.label} {...s} />
         ))}
@@ -112,9 +138,18 @@ export default async function LearnerDashboard() {
               Upcoming sessions
             </h2>
             {upcomingSessions.length === 0 ? (
-              <p className="text-xs text-base-content/50 italic border border-dashed border-base-300 rounded-lg py-6 text-center">
-                No scheduled sessions yet. Browse classes to enroll.
-              </p>
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 border border-dashed border-base-300 rounded-lg py-10 px-4 text-center">
+                <CalendarClock className="h-7 w-7 text-base-content/30" />
+                <p className="text-sm text-base-content/70">You have no upcoming sessions.</p>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Link href="/learner/classes" className="btn btn-primary btn-sm text-xs">
+                    Browse classes
+                  </Link>
+                  <Link href="/learner/match" className="btn btn-outline btn-sm text-xs">
+                    Try Auto Match
+                  </Link>
+                </div>
+              </div>
             ) : (
               <ul className="space-y-2">
                 {upcomingSessions.map((s) => {
@@ -154,6 +189,7 @@ export default async function LearnerDashboard() {
           </div>
         </section>
 
+        <div className="flex flex-col gap-6">
         <section className="card kt-card">
           <div className="card-body gap-2">
             <h2 className="card-title text-sm font-bold">Quick links</h2>
@@ -176,6 +212,36 @@ export default async function LearnerDashboard() {
             ))}
           </div>
         </section>
+
+        <section className="card kt-card">
+          <div className="card-body gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="card-title text-sm font-bold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                Your progress
+              </h2>
+              <Link href="/learner/progress" className="link link-primary text-2xs font-bold flex items-center gap-1">
+                Details <ArrowRight className="h-3 w-3" />
+              </Link>
+            </div>
+            <dl className="space-y-2">
+              {progressRows.map((row) => (
+                <div key={row.label} className="flex items-center justify-between gap-3 text-xs">
+                  <dt className="text-base-content/70">{row.label}</dt>
+                  <dd className="font-mono font-semibold">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+            {postTestCount === 0 && (
+              <p className="text-2xs text-base-content/55">
+                Take the post-test after a session to see how much you improved.
+              </p>
+            )}
+          </div>
+        </section>
+
+        <RecentNotificationsCard userId={learnerId} notificationsHref="/learner/notifications" />
+        </div>
       </div>
 
       <section className="card kt-card">

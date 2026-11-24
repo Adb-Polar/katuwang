@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isAccessError, loadEnrolledSession } from "@/lib/sessionTestAccess";
-import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
+import { serializeSessionTestAttempt, SESSION_TEST_ATTEMPT_SELECT } from "@/lib/sessionTestSerialize";
 import { getSetting } from "@/lib/settings";
 import { Prisma } from "@prisma/client";
 import type { SessionStatus, SessionTestKind } from "@prisma/client";
@@ -12,7 +12,7 @@ type Ctx = { params: Promise<{ classId: string; sessionId: string; kind: string 
 
 const ATTEMPT_INCLUDE = {
   items: { include: { question: { include: { options: true } } } },
-  sessionTest: { select: { id: true, title: true, instructions: true } },
+  sessionTest: { select: SESSION_TEST_ATTEMPT_SELECT },
 } as const;
 
 /**
@@ -70,7 +70,7 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: "You have already completed this test." }, { status: 409 });
     }
     if (existing) {
-      return NextResponse.json(serializeSessionTestAttempt(existing, { reveal: false }), { status: 200 });
+      return NextResponse.json(serializeSessionTestAttempt(existing, { reveal: false, shuffled: true }), { status: 200 });
     }
 
     const blocked = newStartBlockReason(kind, access.session.status);
@@ -108,13 +108,13 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
           include: ATTEMPT_INCLUDE,
         });
         if (raceWinner) {
-          return NextResponse.json(serializeSessionTestAttempt(raceWinner, { reveal: false }), { status: 200 });
+          return NextResponse.json(serializeSessionTestAttempt(raceWinner, { reveal: false, shuffled: true }), { status: 200 });
         }
       }
       throw err;
     }
 
-    return NextResponse.json(serializeSessionTestAttempt(attempt, { reveal: false }), { status: 201 });
+    return NextResponse.json(serializeSessionTestAttempt(attempt, { reveal: false, shuffled: true }), { status: 201 });
   } catch (error) {
     console.error("Error starting session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

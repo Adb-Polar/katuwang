@@ -1,3 +1,4 @@
+import ReportButton from "@/components/reports/ReportButton";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -51,7 +52,12 @@ export default async function TutorStudentProfilePage({
         eyebrow="Student Profile"
         title="Anonymized profile"
         subtitle="You never see a learner's real name, email, or contact details."
-        actions={<AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="md" showIcon />}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <AnonymousIdBadge id={learner.anonymousId} role="LEARNER" size="md" showIcon />
+            <ReportButton targetType="LEARNER" targetId={studentId} targetLabel={learner.anonymousId} />
+          </div>
+        }
       />
 
       <section className="card kt-card">

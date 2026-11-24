@@ -3,13 +3,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { submitAssessmentSchema } from "@/lib/validations/assessment";
-import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
+import { serializeSessionTestAttempt, SESSION_TEST_ATTEMPT_SELECT } from "@/lib/sessionTestSerialize";
+import { attemptDeadline, isSubmitTooLate } from "@/lib/attemptDeadline";
 import { gradeAttempt } from "@/lib/gradeAttempt";
 import { notify } from "@/lib/notifications";
 
 const ATTEMPT_INCLUDE = {
   items: { include: { question: { include: { options: true } } } },
-  sessionTest: { select: { id: true, title: true, instructions: true } },
+  sessionTest: { select: SESSION_TEST_ATTEMPT_SELECT },
 } as const;
 
 // ─── POST: Grade & Submit a Session-Test Attempt ───────────────────────────
@@ -45,9 +46,14 @@ export async function POST(
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
+    // Answers that arrive after the time limit (plus a short grace window) are
+    // discarded — the attempt is closed with every question unanswered.
+    const deadline = attemptDeadline(attempt.startedAt, attempt.sessionTest.timeLimitMinutes);
+    const answers = isSubmitTooLate(deadline, new Date()) ? [] : result.data.answers;
+
     const { graded, correctCount, scorePercent } = gradeAttempt(
       attempt.items,
-      result.data.answers,
+      answers,
       attempt.totalQuestions,
     );
 
@@ -97,7 +103,7 @@ export async function POST(
       return submitted;
     });
 
-    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true }));
+    return NextResponse.json(serializeSessionTestAttempt(updated, { reveal: true, shuffled: true }));
   } catch (error) {
     console.error("Error submitting session test:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

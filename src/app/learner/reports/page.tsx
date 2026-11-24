@@ -1,5 +1,5 @@
 import PageHeader from "@/components/ui/PageHeader";
-import MyReportsList from "@/components/learner/MyReportsList";
+import MyReportsList from "@/components/reports/MyReportsList";
 
 export const metadata = {
   title: "My Reports | Katuwang",
@@ -13,7 +13,7 @@ export default function LearnerReportsPage() {
         title="My Reports"
         subtitle="Reports you have filed against a tutor or a class. Administrators review each one privately."
       />
-      <MyReportsList />
+      <MyReportsList endpoint="/api/learner/reports" />
     </div>
   );
 }

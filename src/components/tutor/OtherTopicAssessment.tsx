@@ -56,7 +56,7 @@ export default function OtherTopicAssessment() {
       </div>
       <FeedbackBanner variant="error" message={error || null} />
       <div className="grid gap-3 sm:grid-cols-2">
-        <FormField label="Subject">
+        <FormField label="Subject" required>
           <select
             value={subject}
             onChange={(e) => {
@@ -73,7 +73,7 @@ export default function OtherTopicAssessment() {
             ))}
           </select>
         </FormField>
-        <FormField label="Topic">
+        <FormField label="Topic" required>
           <select
             value={topic}
             onChange={(e) => setTopic(e.target.value)}

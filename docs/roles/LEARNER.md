@@ -6,6 +6,18 @@ Source: `src/app/learner/**`, `src/app/api/classes/**`, `src/components/learner/
 
 ---
 
+## Updates — 2026-11-24 (Changes.md Part 84)
+
+- **Overview** — the portal home (`/learner`) is called Overview. It shows stat cards, upcoming sessions, quick links, a progress snapshot, recent notifications and the weekly timetable.
+- **Profile** — no sidebar item; click the avatar in the top-right corner. A light/dark theme toggle sits beside it.
+- **Registration email** — must be on the admin-managed accepted-domain list (`400` with the accepted domains otherwise); the same applies to the recovery email (`PATCH /api/learner/profile`). **Google sign-in** works only for an already registered email.
+- **Enrollment conflict** — `POST /api/classes/[classId]/enroll` returns `409` `{ error, conflict: { classCode, subject, scheduledAt, duration } }` when an upcoming session of the class overlaps a session of another class you are enrolled in. The UI names the class and shows the time in your time zone.
+- **Tutor details** — the tutor profile and Find Tutors cards show the tutor's grade level and section (`GET /api/learner/tutors` returns `gradeLevel` and `section` for every tutor). Real names stay hidden unless `showTutorRealNames` is on.
+- **Session tests** — questions and options are served in an order unique to each attempt (stable if you leave and resume). A test may have a **time limit** (`timeLimitMinutes`, `deadlineAt` on the attempt): a countdown is shown and the test submits itself at zero; answers sent more than 30 s late are discarded. Text cannot be selected or copied while an attempt is in progress.
+- **Reports** — a tutor can now report *you* (reviewed privately by admins). Learners still report tutors and classes only.
+- **Contact an administrator** — `/contact` works even when you cannot sign in (pending, suspended, banned). `POST /api/contact` `{ name, email, subject, message }` → `201`; `400` invalid; `429` after 3 messages/hour per IP.
+- **Feedback** — enrolling, leaving a class and posting or cancelling a request confirm with a toast.
+
 ## Registration
 
 - **Register as a learner** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent (linked to `/privacy-policy`). Only accepted while the `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.

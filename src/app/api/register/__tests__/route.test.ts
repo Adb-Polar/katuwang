@@ -49,7 +49,7 @@ const validLearner = {
   type: "LEARNER",
   firstName: "Juan",
   lastName: "Dela Cruz",
-  email: "juan@example.com",
+  email: "juan@gmail.com",
   password: "Tr4vel-mug-lantern",
   gradeLevel: "GRADE_10",
   section: "Rizal",
@@ -78,6 +78,41 @@ describe("POST /api/register", () => {
     expect(userFindUnique).not.toHaveBeenCalled();
   });
 
+  it.each(["asa@qwqe", "a@test.123", "juan@unlisted.org"])("returns 400 for the unaccepted address %s", async (email) => {
+    const res = await POST(makeRequest({ ...validLearner, email }));
+
+    expect(res.status).toBe(400);
+    expect(userFindUnique).not.toHaveBeenCalled();
+  });
+
+  it("names the accepted domains when the domain is not on the allowlist", async () => {
+    const res = await POST(makeRequest({ ...validLearner, email: "juan@unlisted.org" }));
+
+    const json = await res.json();
+    expect(json.error).toContain("@unlisted.org");
+    expect(json.error).toContain("@gmail.com");
+  });
+
+  it("returns 400 when the recovery email is on an unaccepted domain", async () => {
+    const res = await POST(makeRequest({ ...validLearner, recoveryEmail: "parent@unlisted.org" }));
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("@unlisted.org");
+  });
+
+  it("accepts a domain an admin added and rejects the old defaults", async () => {
+    platformSettingFindUnique.mockImplementation(({ where }: { where: { key: string } }) =>
+      Promise.resolve(where.key === "allowedEmailDomains" ? { key: where.key, value: "school.edu.ph" } : null)
+    );
+    userFindUnique.mockResolvedValue({ id: "existing" });
+
+    const accepted = await POST(makeRequest({ ...validLearner, email: "juan@school.edu.ph" }));
+    const rejected = await POST(makeRequest(validLearner));
+
+    expect(accepted.status).toBe(409); // passed the allowlist, reached the duplicate check
+    expect(rejected.status).toBe(400);
+  });
+
   it("returns 409 when the email already exists", async () => {
     userFindUnique.mockResolvedValue({ id: "existing-user" });
 
@@ -103,7 +138,7 @@ describe("POST /api/register", () => {
     expect(userCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          email: "juan@example.com",
+          email: "juan@gmail.com",
           password: "hashed-password",
           role: "STUDENT_LEARNER",
         }),
@@ -118,7 +153,7 @@ describe("POST /api/register", () => {
         user: {
           create: vi.fn().mockResolvedValue({
             anonymousId: "TUT-0001",
-            email: "tutor@example.com",
+            email: "tutor@gmail.com",
             role: "STUDENT_TUTOR",
           }),
         },
@@ -129,7 +164,7 @@ describe("POST /api/register", () => {
       makeRequest({
         ...validLearner,
         type: "TUTOR",
-        email: "tutor@example.com",
+        email: "tutor@gmail.com",
       })
     );
 

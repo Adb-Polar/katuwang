@@ -18,7 +18,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Student Learner | ✅ | ✅ `Role.STUDENT_LEARNER` |
 | Student Tutor | ✅ | ✅ `Role.STUDENT_TUTOR` |
 | ~~Teacher Moderator~~ | Named in thesis text | **Intentionally dropped.** Team decided the platform ships with 3 roles only (Learner, Tutor, Admin); moderation duties fold into `ADMIN`. The thesis reference doc is stale on this point — not a build gap. |
-| Administrator | ✅ | ✅ `Role.ADMIN`, full `/admin` portal |
+| Administrator | ✅ | ✅ `Role.ADMIN`, full `/admin` portal. `User.isSuperAdmin` (a flag, not a role) additionally unlocks the audit log — see `decisions.md` |
 
 ---
 
@@ -27,14 +27,16 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Feature | Status | Notes |
 |---|---|---|
 | Registration (learner & tutor) | ✅ | `/register/learner`, `/register/tutor`, `POST /api/register` |
-| Authentication (login/logout) | ✅ | NextAuth credentials + JWT, `/login`, `/logout` |
+| Authentication (login/logout) | ✅ | NextAuth credentials + JWT, `/login`, `/logout`; optional Google sign-in for existing accounts only (2026-11-24, Changes.md Part 84) |
+| Email-domain allowlist at registration | ✅ | 2026-11-24: `allowedEmailDomains` setting, `src/lib/emailDomains.ts`, editable in `/admin/settings` |
+| Contact an administrator (public) | ✅ | 2026-11-24: `/contact`, `POST /api/contact`, `ContactMessage` model, inbox at `/admin/contact-messages` |
 | Auto-generated anonymous usernames (`STU-####`/`TUT-####`) | ✅ | `generateAnonymousId()` in `src/lib/idGenerator.ts`, atomic via `IdCounter` |
 | Password hashing (bcrypt) | ✅ | used in `/api/register`, auth callbacks |
 | Password reset flow | ✅ | `/forgot-password`, `/reset-password`, `PasswordResetToken` model (token hashed, expiring, single-use); reset link emailed via `src/lib/mail.ts` (Nodemailer/SMTP, env-configured, console fallback when unset) |
 | Email verification (optional gate) | ✅ | landed 2026-09-14 (Changes.md Part 72): `User.emailVerifiedAt`, `VerificationToken` model, `requireEmailVerification` platform setting (defaults **off** — enabling it retroactively blocks unverified existing accounts, see `decisions.md`); checked before `PENDING`/`DECLINED` in `authorize()` |
 | Change password (self-service) | ✅ | landed 2026-09-14 (Changes.md Part 74): `POST /api/{learner,tutor,admin}/profile/password`, `ChangePasswordForm` on the profile-edit page (learner/tutor) and `/admin/settings` (admin) |
 | Role-Based Access Control | ✅ | `src/proxy.ts` middleware + per-route `getServerSession` checks |
-| Profile management | ✅ | `/learner/profile`, `/tutor/profile`, `ProfileEditForm`/`ProfileView` |
+| Profile management | ✅ | `/learner/profile`, `/tutor/profile`, `/admin/profile`, opened from the top-bar avatar; `ProfileEditForm`/`ProfileView` |
 | Admin approval of new registrations (optional gate) | ✅ | `AccountStatus.PENDING`, `/admin/registrations`, `requireRegistrationApproval` platform setting |
 | Account moderation (suspend/ban) | ✅ | `AccountStatus` (`SUSPENDED`/`BANNED`), `statusExpiresAt`, `/admin/users` |
 | Double-blind anonymity (no real names across peer boundary) | ✅ | peer-facing DTOs expose only `id`/`anonymousId`; `showTutorRealNames` admin toggle exists as an override |
@@ -45,14 +47,15 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Feature | Status | Notes |
 |---|---|---|
 | Tutor creates/manages classes | ✅ | `TutorClass` model, `/tutor/classes`, `ClassManagement.tsx` |
-| Class scheduling (individual meetings) | ✅ | `ClassSession` model, `AddSessionModal`, `WeeklyScheduleView` |
+| Class scheduling (individual meetings) | ✅ | `ClassSession` model, `AddSessionModal`, `WeeklyScheduleView`; date + start/end time with inline conflict checks (`SessionTimeFields`, `GET /api/tutor/sessions/busy`, 2026-11-24) |
 | Session status tracking (scheduled/completed/cancelled) | ✅ | `SessionStatus` enum, `SessionActions.tsx` |
 | One-on-one vs. group setup | ✅ | `TutorClass.maxStudents` |
 | Class topics (sub-topics per class) | ✅ | `ClassTopic` model |
-| Learner enrollment/unenrollment | ✅ | `ClassEnrollment` model, `/api/classes/[classId]/enroll` |
+| Learner enrollment/unenrollment | ✅ | `ClassEnrollment` model, `/api/classes/[classId]/enroll`; blocks a schedule clash with another enrolled class and names it (2026-11-24) |
 | Roster / enrolled learners view | ✅ | `EnrolledLearnersTable.tsx`, `StudentRoster.tsx` |
 | Class moderation (suspend/ban/cancel) | ✅ | `ClassStatus` (`SUSPENDED`/`BANNED`), `ClassModerationPanel.tsx`, `/admin/classes` |
 | Learner reports a tutor or class | ✅ | `Report` / `ReportViolation` models, `ReportButton.tsx`, `POST /api/learner/reports`, admin review at `/admin/abuse-reports` (resolve/dismiss + note only; enforcement stays on Users/Classes pages) — added 2026-09-10 |
+| Tutor reports a learner | ✅ | 2026-11-24: `ReportTargetType.LEARNER`, `POST /api/tutor/reports`, button on `/tutor/students/[id]`, `/tutor/reports`, same admin queue |
 | Admin recommends a class to a specific learner | ✅ | landed 2026-09-14 (Changes.md Part 75): `ClassRecommendation` model, `POST /api/admin/classes/[classId]/recommendations`, `RecommendClassForm` on `/admin/classes/[id]`; notification-only (`CLASS_RECOMMENDED_BY_ADMIN`), learner still self-enrolls. Not the same feature as the chatbot's learner-initiated class recommendation (Module 5) — see `decisions.md` |
 
 ## 3. Tutor Matching Module
@@ -101,6 +104,10 @@ Landed 2026-09-04 (Changes.md Part 19); usability pass (typo tolerance,
 narrowed `smalltalk_capabilities`, confidence gate, admin misses review, KB
 expansion) landed the same day (Part 30).
 
+**Assessment hardening (2026-11-24, Changes.md Part 84):** tests are served with questions and options in a
+per-attempt shuffled order, can carry a time limit with auto-submit (`SessionTest.timeLimitMinutes`; certification
+quiz via the `assessmentTimeLimitMinutes` setting), and block text selection/copy while in progress.
+
 ## 6. Analytics Dashboard Module (Admin)
 
 | Feature | Status | Notes |
@@ -108,9 +115,10 @@ expansion) landed the same day (Part 30).
 | Users by role/grade/status breakdown | ✅ | `GET /api/admin/reports` |
 | Classes by subject/status breakdown | ✅ | same route |
 | Certification status breakdown | ✅ | same route |
-| Enrollment trend (rolling 30-day daily series) | ✅ | same route, zero-filled daily buckets |
-| Visual charts/report UI | ✅ | `/admin/reports`, `ReportsView.tsx` |
-| Admin audit log of moderation actions | ✅ | `AuditLog` model, `/admin/audit-log`, `AuditLogTable.tsx` (not one of the 6 named modules, but supports the platform's governance/security scope) |
+| Enrollment trend (daily series) | ✅ | same route, zero-filled daily buckets; last 30 days by default or the selected range |
+| Chart filters (period, grade level, subject) | ✅ | 2026-11-24: `?from&to&gradeLevel&subject`, `src/lib/reportFilters.ts` |
+| Visual charts/report UI | ✅ | on the admin dashboard `/admin` (`ReportsView.tsx`); `/admin/reports` redirects there since 2026-11-24 |
+| Admin audit log of moderation actions | ✅ | `AuditLog` model, `/admin/audit-log`, `AuditLogTable.tsx` — **super admins only** since 2026-11-24 (not one of the 6 named modules, but supports the platform's governance/security scope) |
 
 ---
 

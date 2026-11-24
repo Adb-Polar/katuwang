@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_TIME_LIMIT_MINUTES } from "@/lib/attemptDeadline";
 import { OPTION_COUNT_MAX, OPTION_COUNT_MIN } from "@/lib/assessmentConfig";
 
 // ─── Question bank (admin) ───────────────────────────────────────────────────
@@ -72,8 +73,14 @@ export const updateGlobalAssessmentConfigSchema = z
     questionCount: z.coerce.number().int().min(1, "At least 1 question.").max(50, "At most 50 questions.").optional(),
     passPercent: z.coerce.number().int().min(1, "Pass mark must be 1-100.").max(100, "Pass mark must be 1-100.").optional(),
     minBankSize: z.coerce.number().int().min(1, "At least 1.").max(200, "At most 200.").optional(),
+    timeLimitMinutes: z.coerce
+      .number()
+      .int()
+      .min(0, "Time limit cannot be negative.")
+      .max(MAX_TIME_LIMIT_MINUTES, "Time limit cannot exceed 4 hours.")
+      .optional(),
   })
-  .refine((d) => d.questionCount !== undefined || d.passPercent !== undefined || d.minBankSize !== undefined, {
+  .refine((d) => Object.values(d).some((value) => value !== undefined), {
     message: "Provide at least one setting to update.",
   });
 
@@ -96,7 +103,6 @@ export const submitAssessmentSchema = z.object({
         optionId: z.string().trim().min(1, "Missing option id."),
       })
     )
-    .min(1, "Answer at least one question.")
     .max(50, "Too many answers."),
 });
 

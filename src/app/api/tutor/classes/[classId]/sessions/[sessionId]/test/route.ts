@@ -64,9 +64,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { title, instructions } = result.data;
+    const { title, instructions, timeLimitMinutes } = result.data;
     const test = await prisma.sessionTest.create({
-      data: { sessionId, title, instructions: instructions || null },
+      data: { sessionId, title, instructions: instructions || null, timeLimitMinutes: timeLimitMinutes ?? null },
     });
 
     return NextResponse.json(test, { status: 201 });
@@ -104,12 +104,13 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: errorMsg }, { status: 400 });
     }
 
-    const { title, instructions } = result.data;
+    const { title, instructions, timeLimitMinutes } = result.data;
     const updated = await prisma.sessionTest.update({
       where: { id: owned.test.id },
       data: {
         ...(title !== undefined ? { title } : {}),
         ...(instructions !== undefined ? { instructions: instructions || null } : {}),
+        ...(timeLimitMinutes !== undefined ? { timeLimitMinutes } : {}),
       },
     });
 

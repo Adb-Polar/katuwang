@@ -6,6 +6,22 @@ Source: `src/app/tutor/**`, `src/app/api/tutor/**`, `src/components/tutor/**`
 
 ---
 
+## Updates — 2026-11-24 (Changes.md Part 84)
+
+- **Overview** — the portal home (`/tutor`) is called Overview: stat cards, upcoming sessions, quick actions, onboarding checklist, assessments summary, recent notifications, weekly timetable.
+- **Profile** — no sidebar item; click the avatar in the top-right corner. A light/dark theme toggle sits beside it.
+- **Scheduling uses start and end time** — the new-class, accept-request, Add Session and Reschedule forms take a date, a start time and an end time and show the resulting duration. The API contract is unchanged (`scheduledAt` + `duration`, 15–240 minutes).
+- **Instant schedule checks** — past dates cannot be picked; a slot that overlaps one of your sessions, another row in the form, or is shorter than 15 min / longer than 4 h is flagged inline and the submit button is disabled. The server checks still apply.
+  - `GET /api/tutor/sessions/busy` → `[{ id, scheduledAt, duration, topic, classCode }]` — your upcoming `SCHEDULED` sessions in `SCHEDULED` classes. `401` non-tutor, `404` no `TutorProfile`.
+- **Session test time limit** — optional "Time limit (minutes)" when creating or editing a test (`timeLimitMinutes`, 1–240, `null` = untimed) on `POST`/`PATCH …/sessions/[sessionId]/test`. Learners get the questions and options in a shuffled order; your builder and results stay in the order you authored.
+- **Certification quiz** — options are shuffled per attempt; if an admin sets a time limit the quiz shows a countdown and auto-submits. Text cannot be copied during an attempt.
+- **Report a learner** — open a learner from Students (`/tutor/students/[studentId]`) → "Report this learner". Your reports are listed at `/tutor/reports`.
+  - `POST /api/tutor/reports` `{ targetId: <learner user id>, violations: [...], details? }` → `201`. `400` no/invalid reason or "Other" without ≥10 characters; `404` not a learner; `403` the learner was never enrolled in one of your classes; `409` you already have a pending report about them.
+  - `GET /api/tutor/reports` → `{ reports: [{ id, targetType: "LEARNER", target: { anonymousId }, violations, details, status, resolutionNote, reviewedAt, createdAt }] }`.
+- **Learners see your grade level and section** on your profile and in Find Tutors (never your name, unless `showTutorRealNames` is on).
+- **Contact an administrator** — `/contact`, also linked from the suspension banner.
+- **Feedback** — class, session, appeal, request and test actions confirm with a toast.
+
 ## Registration
 
 - **Register as a tutor** — sign up with first/last name, email, password, grade level, section, optional contact info, and consent (linked to `/privacy-policy`). A `TutorProfile` is created in the same transaction as the `User`. Only accepted while `registrationOpen` platform setting is `true`. If the `requireEmailVerification` platform setting is on, login is blocked until you click the emailed verify link (`/verify-email`) — checked before the separate `requireRegistrationApproval` gate.

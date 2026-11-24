@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import AuthProvider from "@/components/providers/SessionProvider";
+import { THEME_INIT_SCRIPT, THEME_NAMES } from "@/lib/theme";
+import AppProviders from "@/components/providers/AppProviders";
 
 // Apfel Grotezk (Collletttivo / Alexander Meyer) — SIL OFL 1.1. Display + body face.
 const apfel = localFont({
@@ -34,11 +35,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang="en"
-      data-theme="katuwang theme"
+      data-theme={THEME_NAMES.light}
       className={`${apfel.variable} ${fragmentMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col font-sans bg-base-200">
-        <AuthProvider>{children}</AuthProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

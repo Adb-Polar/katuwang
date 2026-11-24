@@ -63,6 +63,12 @@ enum ClassAppealStatus {
 enum ReportTargetType {
   TUTOR
   CLASS
+  LEARNER
+}
+
+enum ContactMessageStatus {
+  OPEN
+  RESOLVED
 }
 
 enum ReportStatus {
@@ -155,6 +161,10 @@ model User {
   contactInfo   String?
   consentGiven  Boolean    @default(false)
 
+  // ADMIN accounts only: grants access to the audit log. Not a fourth role —
+  // every other admin permission is identical (see docs/reference/decisions.md).
+  isSuperAdmin Boolean @default(false)
+
   // Set once the account's email address is confirmed via a VerificationToken.
   // Null = unverified. Orthogonal to `status` — gates login independently
   // (see src/lib/auth.ts) of the PENDING admin-approval flow.
@@ -192,8 +202,14 @@ model User {
   reviewedClassAppeals     ClassAppeal[]        @relation("ReviewedClassAppeals")
 
   // Abuse reports (learner-facing "filed", admin-facing "reviewed")
-  reportsFiled    Report[] @relation("ReportsFiled")
-  reviewedReports Report[] @relation("ReviewedReports")
+  reportsFiled             Report[] @relation("ReportsFiled")
+  reviewedReports          Report[] @relation("ReviewedReports")
+  // Reports a tutor filed against this user as a learner
+  reportsReceivedAsLearner Report[] @relation("LearnerReportsReceived")
+
+  // "Contact administrator" messages: sent while signed in / resolved as admin
+  contactMessagesSent     ContactMessage[] @relation("ContactMessagesSent")
+  contactMessagesResolved ContactMessage[] @relation("ContactMessagesResolved")
 
   notifications Notification[]
   chatbotMisses ChatbotMiss[]
@@ -686,9 +702,9 @@ model ClassAppeal {
   @@map("class_appeals")
 }
 
-// ─── Report (learner flags a tutor or a class for admin review) ────────────
-// Exactly one of `reportedTutorProfileId` / `classId` is set, chosen by
-// `targetType` — enforced in the API, not the DB. The ticked checklist items
+// ─── Report (a learner flags a tutor or a class; a tutor flags a learner) ───
+// Exactly one of `reportedTutorProfileId` / `classId` / `reportedLearnerId` is
+// set, chosen by `targetType` — enforced in the API, not the DB. The ticked checklist items
 // are child rows (3NF), mirroring ClassTopic / TopicRequestTopic.
 
 model Report {
@@ -700,6 +716,8 @@ model Report {
   reportedTutorProfile   TutorProfile?     @relation("ReportsReceived", fields: [reportedTutorProfileId], references: [id], onDelete: Cascade)
   classId                String?
   class                  TutorClass?       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  reportedLearnerId      String?
+  reportedLearner        User?             @relation("LearnerReportsReceived", fields: [reportedLearnerId], references: [id], onDelete: Cascade)
   details                String?           @db.Text // free-text message (required when "Other" is ticked)
   status                 ReportStatus      @default(PENDING)
   resolutionNote         String?           @db.Text // admin's note back to the reporter
@@ -711,6 +729,7 @@ model Report {
 
   @@index([status, createdAt])
   @@index([reporterId])
+  @@index([reportedLearnerId])
   @@map("reports")
 }
 
@@ -733,16 +752,19 @@ model ReportViolation {
 // Editable only while DRAFT and with zero attempts (see docs/plans/assessments.md).
 
 model SessionTest {
-  id           String            @id @default(cuid())
-  sessionId    String            @unique
-  session      ClassSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  title        String
-  instructions String?           @db.Text
-  status       SessionTestStatus @default(DRAFT)
-  publishedAt  DateTime?
-  closedAt     DateTime?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  id               String            @id @default(cuid())
+  sessionId        String            @unique
+  session          ClassSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  title            String
+  instructions     String?           @db.Text
+  // Minutes a learner has per attempt, counted from the attempt's `startedAt`.
+  // Null = untimed.
+  timeLimitMinutes Int?
+  status           SessionTestStatus @default(DRAFT)
+  publishedAt      DateTime?
+  closedAt         DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
   questions SessionTestQuestion[]
   attempts  SessionTestAttempt[]
@@ -800,4 +822,28 @@ model SessionTestAttemptItem {
   @@unique([attemptId, position])
   @@unique([attemptId, questionId])
   @@map("session_test_attempt_items")
+}
+
+// ─── Contact Administrator ──────────────────────────────────────────────────
+// A message to the admins from the public /contact form. The sender may be
+// signed out (or suspended/banned and unable to sign in), so name and email
+// are captured on the row; `senderId` is set only when a session existed.
+
+model ContactMessage {
+  id           String               @id @default(cuid())
+  name         String
+  email        String
+  senderId     String?
+  sender       User?                @relation("ContactMessagesSent", fields: [senderId], references: [id], onDelete: SetNull)
+  subject      String
+  message      String               @db.Text
+  status       ContactMessageStatus @default(OPEN)
+  adminNote    String?              @db.Text
+  resolvedById String?
+  resolvedBy   User?                @relation("ContactMessagesResolved", fields: [resolvedById], references: [id], onDelete: SetNull)
+  resolvedAt   DateTime?
+  createdAt    DateTime             @default(now())
+
+  @@index([status, createdAt])
+  @@map("contact_messages")
 }

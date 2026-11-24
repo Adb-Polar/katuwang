@@ -1,13 +1,5 @@
 import { Prisma } from "@prisma/client";
-
-/** In-place Fisher–Yates shuffle. */
-function shuffle<T>(arr: T[]): T[] {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
+import { shuffle } from "@/lib/shuffle";
 
 /**
  * Picks `count` question ids from a topic's active bank for a new attempt.

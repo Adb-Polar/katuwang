@@ -1,3 +1,6 @@
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
 import PageHeader from "@/components/ui/PageHeader";
 import AuditLogTable from "@/components/admin/AuditLogTable";
 
@@ -10,6 +13,9 @@ export default async function AdminAuditLogPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user.isSuperAdmin) redirect("/unauthorized");
+
   const { q } = await searchParams;
 
   return (
@@ -17,7 +23,7 @@ export default async function AdminAuditLogPage({
       <PageHeader
         eyebrow="Admin Portal"
         title="Audit Log"
-        subtitle="A history of moderation actions taken by administrators."
+        subtitle="A history of moderation actions taken by administrators. Visible to super admins only."
       />
       <AuditLogTable initialQuery={q ?? ""} />
     </div>

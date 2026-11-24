@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getAssessmentConfig } from "@/lib/settings";
 import { serializeAttempt } from "@/lib/assessmentSerialize";
 
 // ─── GET: One of the Tutor's Own Attempts ───────────────────────────────────
@@ -30,7 +31,10 @@ export async function GET(
       return NextResponse.json({ error: "Attempt not found." }, { status: 404 });
     }
 
-    return NextResponse.json(serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS" }));
+    const { timeLimitMinutes } = await getAssessmentConfig();
+    return NextResponse.json(
+      serializeAttempt(attempt, { reveal: attempt.status !== "IN_PROGRESS", shuffled: true, timeLimitMinutes })
+    );
   } catch (error) {
     console.error("Error fetching tutor assessment attempt:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

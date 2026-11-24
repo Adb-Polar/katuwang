@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SessionStatus, GradeLevel } from "@prisma/client";
+import { MAX_SESSION_MINUTES, MIN_SESSION_MINUTES } from "@/lib/sessionTime";
 
 // `subject` is a slug from the admin-managed taxonomy — routes verify it
 // exists via src/lib/subjects.ts (`subjectExists` / `topicExists`).
@@ -11,8 +12,8 @@ export const sessionSchema = z.object({
   duration: z.coerce
     .number()
     .int()
-    .min(15, "Duration must be at least 15 minutes.")
-    .max(240, "Duration cannot exceed 4 hours."),
+    .min(MIN_SESSION_MINUTES, "Duration must be at least 15 minutes.")
+    .max(MAX_SESSION_MINUTES, "Duration cannot exceed 4 hours."),
 });
 
 export type SessionInput = z.infer<typeof sessionSchema>;

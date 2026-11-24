@@ -10,6 +10,7 @@ const {
   enrollmentDelete,
   topicRequestUpdateMany,
   notificationCreate,
+  classSessionFindMany,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   tutorClassFindUnique: vi.fn(),
@@ -19,6 +20,7 @@ const {
   enrollmentDelete: vi.fn(),
   topicRequestUpdateMany: vi.fn(),
   notificationCreate: vi.fn(),
+  classSessionFindMany: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({
@@ -41,6 +43,9 @@ vi.mock("@/lib/prisma", () => ({
     },
     notification: {
       create: notificationCreate,
+    },
+    classSession: {
+      findMany: classSessionFindMany,
     },
     $transaction: (fn: (tx: unknown) => unknown) =>
       fn({
@@ -82,6 +87,55 @@ describe("POST /api/classes/[classId]/enroll", () => {
     vi.clearAllMocks();
     tutorClassUpdateMany.mockResolvedValue({ count: 0 });
     topicRequestUpdateMany.mockResolvedValue({ count: 0 });
+    classSessionFindMany.mockResolvedValue([]);
+  });
+
+  it("returns 409 naming the class whose session overlaps", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue(null);
+    const clashStart = new Date(futureClass.sessions[0].scheduledAt.getTime() + 30 * 60 * 1000);
+    classSessionFindMany.mockResolvedValue([
+      { scheduledAt: clashStart, duration: 60, class: { code: "C-0007", subject: "SCIENCE" } },
+    ]);
+
+    const res = await POST(makeRequest("POST"), makeParams());
+
+    expect(res.status).toBe(409);
+    const json = await res.json();
+    expect(json.error).toMatch(/C-0007 \(SCIENCE\)/);
+    expect(json.conflict).toMatchObject({ classCode: "C-0007", subject: "SCIENCE", duration: 60 });
+    expect(enrollmentCreate).not.toHaveBeenCalled();
+  });
+
+  it("enrolls when another enrolled session is back-to-back, not overlapping", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1" });
+    const afterEnd = new Date(futureClass.sessions[0].scheduledAt.getTime() + 60 * 60 * 1000);
+    classSessionFindMany.mockResolvedValue([
+      { scheduledAt: afterEnd, duration: 60, class: { code: "C-0007", subject: "SCIENCE" } },
+    ]);
+
+    const res = await POST(makeRequest("POST"), makeParams());
+
+    expect(res.status).toBe(201);
+  });
+
+  it("excludes the target class and other learners from the conflict lookup", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    tutorClassFindUnique.mockResolvedValue(futureClass);
+    enrollmentFindUnique.mockResolvedValue(null);
+    enrollmentCreate.mockResolvedValue({ id: "e1" });
+
+    await POST(makeRequest("POST"), makeParams());
+
+    expect(classSessionFindMany.mock.calls[0][0].where).toMatchObject({
+      status: "SCHEDULED",
+      classId: { not: "c1" },
+      class: { status: "SCHEDULED", enrollments: { some: { learnerId: "l1" } } },
+    });
   });
 
   it("returns 401 when unauthenticated or wrong role", async () => {

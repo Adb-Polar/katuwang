@@ -41,8 +41,17 @@ describe("GET /api/admin/audit-log", () => {
     expect(res.status).toBe(401);
   });
 
+  it("returns 403 for a regular admin, without touching the log", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin2", role: "ADMIN", isSuperAdmin: false } });
+
+    const res = await GET(makeRequest());
+
+    expect(res.status).toBe(403);
+    expect(auditLogFindMany).not.toHaveBeenCalled();
+  });
+
   it("returns a paginated payload ordered by newest first by default", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN", isSuperAdmin: true } });
     auditLogFindMany.mockResolvedValue([
       {
         id: "a1",
@@ -66,7 +75,7 @@ describe("GET /api/admin/audit-log", () => {
   });
 
   it("applies action / targetType / q filters and a sortable column", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN", isSuperAdmin: true } });
     auditLogFindMany.mockResolvedValue([]);
 
     await GET(makeRequest("?action=CLASS_STATUS_CHANGE&targetType=CLASS&q=spam&sort=action&dir=asc"));
@@ -88,7 +97,7 @@ describe("GET /api/admin/audit-log", () => {
   });
 
   it("ignores an unknown sort column, falling back to createdAt", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN", isSuperAdmin: true } });
     auditLogFindMany.mockResolvedValue([]);
 
     await GET(makeRequest("?sort=reason"));

@@ -116,6 +116,45 @@ describe("POST /learner/session-test-attempts/[attemptId]/submit", () => {
     );
   });
 
+  it("discards answers submitted after the time limit plus grace", async () => {
+    const startedElevenMinutesAgo = new Date(Date.now() - 11 * 60 * 1000);
+    sessionTestAttemptFindUnique.mockResolvedValue({
+      ...inProgressAttempt,
+      startedAt: startedElevenMinutesAgo,
+      sessionTest: { ...inProgressAttempt.sessionTest, timeLimitMinutes: 10 },
+    });
+    sessionTestAttemptUpdate.mockResolvedValue({
+      ...inProgressAttempt,
+      status: "SUBMITTED",
+      correctCount: 0,
+      scorePercent: 0,
+      startedAt: startedElevenMinutesAgo,
+      submittedAt: new Date(),
+    });
+
+    const res = await POST(post({ answers: [{ questionId: "q1", optionId: "o2" }] }), ctx());
+
+    expect(res.status).toBe(200);
+    expect(sessionTestAttemptUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ correctCount: 0, scorePercent: 0 }) }),
+    );
+  });
+
+  it("accepts an empty answer list so a timed-out attempt can auto-submit", async () => {
+    sessionTestAttemptUpdate.mockResolvedValue({
+      ...inProgressAttempt,
+      status: "SUBMITTED",
+      correctCount: 0,
+      scorePercent: 0,
+      startedAt: new Date(),
+      submittedAt: new Date(),
+    });
+
+    const res = await POST(post({ answers: [] }), ctx());
+
+    expect(res.status).toBe(200);
+  });
+
   it("notifies the tutor once a PRE attempt is submitted", async () => {
     sessionTestAttemptUpdate.mockResolvedValue({
       ...inProgressAttempt,

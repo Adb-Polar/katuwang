@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import QuizCountdown from "@/components/quiz/QuizCountdown";
+import NoCopyRegion from "@/components/quiz/NoCopyRegion";
 
 export interface SessionTestRunnerOption {
   id: string;
@@ -30,6 +32,8 @@ export interface SessionTestRunnerAttempt {
   totalQuestions: number;
   correctCount?: number;
   scorePercent?: number;
+  timeLimitMinutes?: number | null;
+  deadlineAt?: string | null;
   items: SessionTestRunnerItem[];
 }
 
@@ -174,14 +178,20 @@ export default function SessionTestRunner({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="card-title text-sm font-bold">{attempt.title}</h2>
-              <p className="text-2xs text-base-content/50 mt-0.5">{attempt.totalQuestions} questions</p>
+              <p className="text-2xs text-base-content/50 mt-0.5">
+                {attempt.totalQuestions} questions
+                {attempt.timeLimitMinutes ? ` · ${attempt.timeLimitMinutes} min time limit` : ""}
+              </p>
             </div>
             {submitted ? (
               <StatusBadge tone="info" label={`${attempt.scorePercent}%`} size="sm" />
             ) : (
-              <span className="text-2xs text-base-content/50">
-                {answeredCount} / {attempt.items.length} answered
-              </span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-2xs text-base-content/50">
+                  {answeredCount} / {attempt.items.length} answered
+                </span>
+                {attempt.deadlineAt && <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={() => !submitting && doSubmit()} />}
+              </div>
             )}
           </div>
 
@@ -206,6 +216,7 @@ export default function SessionTestRunner({
 
           <FeedbackBanner variant="error" message={error || null} />
 
+          <NoCopyRegion enabled={!submitted}>
           <ol className="space-y-4">
             {attempt.items.map((item) => {
               const chosen = answers[item.questionId] ?? item.selectedOptionId;
@@ -260,6 +271,7 @@ export default function SessionTestRunner({
               );
             })}
           </ol>
+          </NoCopyRegion>
 
           {!submitted ? (
             <div className="flex justify-end pt-1">

@@ -35,6 +35,7 @@ export default async function TutorSessionTestBuilderPage({
               id: serialized.id,
               title: serialized.title,
               instructions: serialized.instructions,
+              timeLimitMinutes: serialized.timeLimitMinutes,
               status: serialized.status as "DRAFT" | "PUBLISHED" | "CLOSED",
               questions: serialized.questions.map((q) => ({
                 questionId: q.questionId,

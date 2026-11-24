@@ -1,21 +1,20 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
-import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle, Trash2, Pencil } from "lucide-react";
-import FeedbackBanner from "@/components/ui/FeedbackBanner";
-import FormField from "@/components/ui/FormField";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import RescheduleSessionModal from "@/components/tutor/RescheduleSessionModal";
 import { SessionSummary } from "@/components/classes/SessionsList";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
 
-function toDatetimeLocal(iso: string) {
-  const d = new Date(iso);
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  return d.toISOString().slice(0, 16);
-}
+const SUCCESS_MESSAGES: Record<NonNullable<PendingAction>, string> = {
+  cancel: "Session cancelled.",
+  complete: "Session marked as completed.",
+  delete: "Session deleted.",
+};
 
 export default function SessionActions({
   classId,
@@ -27,16 +26,12 @@ export default function SessionActions({
   classTopics: string[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [isRescheduling, setIsRescheduling] = useState(false);
-  const [topic, setTopic] = useState(session.topic);
-  const [scheduledAt, setScheduledAt] = useState(toDatetimeLocal(session.scheduledAt));
-  const [duration, setDuration] = useState(session.duration);
-  const [rescheduleError, setRescheduleError] = useState("");
-  const [rescheduling, setRescheduling] = useState(false);
 
   const sessionUrl = `/api/tutor/classes/${classId}/sessions/${session.id}`;
 
@@ -58,33 +53,13 @@ export default function SessionActions({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to update session.");
       }
+      toast.success(SUCCESS_MESSAGES[pendingAction]);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
       setPendingAction(null);
-    }
-  };
-
-  const handleReschedule = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setRescheduling(true);
-    setRescheduleError("");
-    try {
-      const res = await fetch(sessionUrl, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, scheduledAt: new Date(scheduledAt).toISOString(), duration }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to reschedule session.");
-      setIsRescheduling(false);
-      router.refresh();
-    } catch (err) {
-      setRescheduleError(err instanceof Error ? err.message : "Failed to reschedule session.");
-    } finally {
-      setRescheduling(false);
     }
   };
 
@@ -148,78 +123,13 @@ export default function SessionActions({
         onCancel={() => setPendingAction(null)}
       />
 
-      {isRescheduling && typeof document !== "undefined" &&
-        createPortal(
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm p-6 bg-base-100 border border-base-200 rounded-2xl relative shadow-xl">
-            <button
-              type="button"
-              onClick={() => setIsRescheduling(false)}
-              className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
-            >
-              ✕
-            </button>
-            <h3 className="font-sans text-base font-semibold mb-4">Reschedule Session</h3>
-
-            <FeedbackBanner variant="error" message={rescheduleError || null} />
-
-            <form onSubmit={handleReschedule} className="space-y-3.5 mt-3.5">
-              <FormField label="Topic" required>
-                <select
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  {classTopics.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
-
-              <FormField label="Date & Time" required>
-                <input
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(e) => setScheduledAt(e.target.value)}
-                  required
-                  className="input input-bordered input-sm w-full text-xs"
-                />
-              </FormField>
-
-              <FormField label="Duration" required>
-                <select
-                  value={duration}
-                  onChange={(e) => setDuration(Number(e.target.value))}
-                  required
-                  className="select select-bordered select-sm w-full text-xs"
-                >
-                  <option value={30}>30 mins</option>
-                  <option value={45}>45 mins</option>
-                  <option value={60}>60 mins</option>
-                  <option value={90}>90 mins</option>
-                  <option value={120}>120 mins</option>
-                </select>
-              </FormField>
-
-              <div className="modal-action pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsRescheduling(false)}
-                  className="btn btn-neutral btn-outline btn-sm text-xs cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button type="submit" disabled={rescheduling} className="btn btn-primary btn-sm text-xs cursor-pointer">
-                  {rescheduling ? <span className="loading loading-spinner loading-xs"></span> : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>,
-        document.body
+      {isRescheduling && (
+        <RescheduleSessionModal
+          sessionUrl={sessionUrl}
+          session={session}
+          classTopics={classTopics}
+          onClose={() => setIsRescheduling(false)}
+        />
       )}
     </>
   );

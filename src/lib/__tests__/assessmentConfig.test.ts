@@ -21,11 +21,13 @@ describe("getAssessmentConfig", () => {
       { key: "assessmentQuestionCount", value: "8" },
       { key: "assessmentPassPercent", value: "60" },
       { key: "assessmentMinBankSize", value: "12" },
+      { key: "assessmentTimeLimitMinutes", value: "20" },
     ]);
     await expect(getAssessmentConfig()).resolves.toEqual({
       questionCount: 8,
       passPercent: 60,
       minBankSize: 12,
+      timeLimitMinutes: 20,
     });
   });
 
@@ -39,6 +41,17 @@ describe("getAssessmentConfig", () => {
       questionCount: ASSESSMENT_DEFAULTS.questionCount,
       passPercent: ASSESSMENT_DEFAULTS.passPercent,
       minBankSize: 7,
+      timeLimitMinutes: 0,
+    });
+  });
+
+  it("treats a stored time limit of 0 as untimed and a negative one as the default", async () => {
+    findMany.mockResolvedValue([{ key: "assessmentTimeLimitMinutes", value: "0" }]);
+    await expect(getAssessmentConfig()).resolves.toMatchObject({ timeLimitMinutes: 0 });
+
+    findMany.mockResolvedValue([{ key: "assessmentTimeLimitMinutes", value: "-3" }]);
+    await expect(getAssessmentConfig()).resolves.toMatchObject({
+      timeLimitMinutes: ASSESSMENT_DEFAULTS.timeLimitMinutes,
     });
   });
 });

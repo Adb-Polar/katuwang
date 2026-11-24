@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [84](#part-84) | **UI, general, tutor, learner & admin improvements batch** | Dark mode, toasts on every action, Overview rename, avatar → profile, start/end-time scheduling with instant conflict checks, enrollment conflict message, shuffled + timed + copy-protected tests, email-domain allowlist, Google sign-in, contact-administrator form + inbox, tutors can report learners, super-admin-only audit log, analytics merged into the dashboard with filters. | See Part 84 below. One schema migration (`20261124000000_…`). |
 | [83](#part-83) | **Landing Story visuals use the app's real components** | The four timeline chapters now render the actual Auto Match form, `ClassCard` match result, tutor-profile layout and My Progress chart with sample data (no lookalike markup). | See Part 83 below. |
 | [82](#part-82) | **Landing page → 10 Story** | `/` now follows prototype 10: "From I'm stuck to I got it" hero, four-chapter timeline built from project components, dark privacy payoff, closing CTA. Default system typography (no 900 weight). Replaces the 04 Timetable page. | See Part 82 below. |
 | [81](#part-81) | **Landing timetable reuses project components** | The landing page's bespoke grid replaced by the app's `WeeklyTimetable` + `StatusBadge` + `AnonymousIdBadge` inside the standard `kt-card`. | See Part 81 below. |
@@ -3037,6 +3038,89 @@ post-mount `useEffect` loads the stored prefs; the write-back effect is gated on
 `prefsLoaded` flag so it never clobbers storage with the empty default.
 
 <a id="part-83"></a>
+## Part 84 — UI, general, tutor, learner & admin improvements batch (2026-11-24)
+
+On branch `fix/expert-recomendations`. Plan: `docs/plans/ui-general-improvements.md`.
+
+**Schema (one migration, applied to a local scratch DB only — run `npx prisma db push` or apply
+`prisma/migrations/20261124000000_superadmin_contact_learner_reports_test_time_limit/migration.sql` on the real DB):**
+`User.isSuperAdmin`, `SessionTest.timeLimitMinutes`, `ReportTargetType.LEARNER` + `Report.reportedLearnerId`, new
+`ContactMessage` table + `ContactMessageStatus` enum. Seed: `ADM-0001` is the super admin; new regular admin
+`ADM-0002 staff.admin@katuwang.test`.
+
+**UI**
+- **Overview**: learner/tutor "Dashboard" nav item and page title renamed to Overview.
+- **Profile**: the sidebar Profile item is gone; the top-right avatar opens the profile (all three portals). New
+  `/admin/profile` (identity + change password — moved out of `/admin/settings`).
+- **Dark mode**: second DaisyUI theme `katuwang dark` in `globals.css`; `ui/ThemeToggle` in the portal top bar, auth
+  pages and landing nav; choice stored in `localStorage` (`kt-theme`), applied before paint by an inline script
+  (`lib/theme.ts`), defaults to the OS preference. Charts recolour on toggle (`charts/useThemeColors`).
+- **Blank space**: learner and tutor Overview are now a 2/3 + 1/3 layout — quick links/actions, progress snapshot
+  (learner), assessments + onboarding (tutor) and `notifications/RecentNotificationsCard` in the side column; empty
+  "Upcoming sessions" states have call-to-action buttons. Admin "Needs attention" is a full-width tile grid.
+- **Required fields**: `ui/RequiredMark` asterisk added to the login, forgot/reset password and prompt-dialog labels
+  and the few `FormField`s that were required but unmarked.
+- **Action feedback**: `ui/Toast` (`ToastProvider` + `useToast`, mounted in `providers/AppProviders`). Success toasts
+  added to every previously silent action: create/edit/delete/cancel/complete/publish class, add/reschedule/cancel/
+  complete/delete session, class appeal, accept request, question request, assessment request, create test,
+  enroll/leave class, post/cancel class request.
+
+**Tutor**
+- **Start/end time**: `tutor/SessionTimeFields` (date + start time + end time, live "Duration: 1h 30m") replaces the
+  datetime + duration select in the new-class form, accept-request form, Add Session and the new
+  `tutor/RescheduleSessionModal`. The API still receives `{scheduledAt, duration}` — no schema change.
+- **Instant validation**: past dates are disabled (`min` = today); `GET /api/tutor/sessions/busy` feeds the forms the
+  tutor's booked sessions, so an overlap (with an existing session or another row in the form), an end ≤ start, or a
+  length outside 15 min–4 h shows inline and disables submit. Rules live in `lib/sessionTime.ts` / `lib/timeRanges.ts`.
+
+**Learner**
+- **Schedule conflict**: enrolling in a class that overlaps a session of a class you are already in is now blocked
+  (409) — there was no check before. The message names the class and, in the learner's time zone, when it meets
+  (`findLearnerScheduleConflict` in `lib/classSessions.ts`).
+- **Tutor details**: the tutor profile shows a details card (grade level, section, verified topics, active classes,
+  sessions completed); grade + section also appear on the Find Tutors cards. Names stay behind `showTutorRealNames`.
+
+**Assessments**
+- **Randomised**: session pre/post tests serve questions and options in a per-attempt shuffled order (seeded by the
+  attempt id — stable on resume, different per learner and between PRE and POST); certification-quiz options are
+  shuffled the same way. Stored positions are untouched, so tutor/admin views and the pre/post comparison are unchanged.
+- **Duration**: optional time limit per session test (tutor sets it in the test builder) and a platform-wide limit for
+  the certification quiz (admin setting, 0 = untimed). `quiz/QuizCountdown` shows the time left and auto-submits at
+  zero; the server discards answers arriving more than 30 s after the deadline (`lib/attemptDeadline.ts`).
+- **No copy**: `quiz/NoCopyRegion` blocks select/copy/cut/drag/context menu while an attempt is in progress.
+
+**Accounts**
+- **Email allowlist**: registration (and recovery emails) only accept admin-approved domains — default
+  `gmail.com, yahoo.com, outlook.com, deped.gov.ph`, editable in Settings → Accepted email domains
+  (`PUT /api/admin/settings/email-domains`). `asa@qwqe` / `a@test.123` are rejected. Existing accounts are unaffected.
+- **Google sign-in**: "Continue with Google" on `/login` when `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` are set (see
+  `.env.example`). It only signs in an existing account whose email matches a verified Google email, and applies the
+  same suspended/banned/pending checks as a password login (`assertAccountCanSignIn`, `resolveGoogleSignIn`).
+- **Contact an administrator**: public `/contact` form (works signed out), `POST /api/contact` (rate-limited 3/hour
+  per IP, honeypot), admin inbox `/admin/contact-messages` (resolve/re-open + internal note, audit-logged, admins
+  notified). Linked from login, landing footer, unauthorized, pending-approval, account-declined and the blocked-
+  account messages. `/login?reason=account-inactive` now explains itself (the redirect existed; nothing read it).
+- **Tutors can report learners**: "Report this learner" on `/tutor/students/[id]`, `POST/GET /api/tutor/reports`
+  (only a learner enrolled in one of the tutor's classes; one open report per learner), `/tutor/reports`, and the
+  admin Abuse Reports queue shows learner targets. `ReportButton`/`MyReportsList` moved to `components/reports/`.
+
+**Admin**
+- **Super admin**: the Audit Log (nav item, page, API, "View audit log" links, the audit block on a user's page) is
+  visible to super admins only; regular admins get 403 / are redirected.
+- **Dashboard + analytics merged**: `/admin` shows the stat cards, Needs attention, then the analytics; "Recent
+  activity" removed; `/admin/reports` redirects to `/admin` and its nav item is gone.
+- **Chart filters**: period (all time, 7/30/90 days, 12 months, custom), grade level and subject; state in the URL;
+  CSV export includes the filters. `GET /api/admin/reports?from&to&gradeLevel&subject` (`lib/reportFilters.ts`).
+  Response change: `enrollments.last30Days` → `enrollments.inPeriod`, plus a `range` object.
+
+**Verification:** 917 unit/route tests pass (was 729), `tsc` clean, lint unchanged (one pre-existing error in
+`PortalLayout.tsx`). Checked in Chromium against a seeded local MariaDB: light + dark screenshots of all three
+portals, class creation with an inline conflict, a timed shuffled post-test through auto-submit, the contact form →
+admin inbox → resolve, the register-domain check, a tutor reporting a learner, and an enrollment conflict.
+Not verifiable here: a real Google sign-in (needs OAuth keys).
+
+---
+
 ## Part 83 — Story landing: chapter visuals now use the app's real components (2026-09-21)
 
 On branch `feature/landing-page`. Part 82's chapter visuals were simplified lookalikes (`StoryVisuals.tsx`, deleted).

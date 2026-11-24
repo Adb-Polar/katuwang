@@ -108,3 +108,74 @@ describe("serializeSessionTest", () => {
     expect(s.questions[0].origin).toBe("BANK");
   });
 });
+
+describe("serializeSessionTestAttempt — shuffled order and time limit", () => {
+  const QUESTION_COUNT = 8;
+  const manyItems = Array.from({ length: QUESTION_COUNT }, (_, i) => ({
+    id: `i${i}`,
+    attemptId: "at1",
+    questionId: `q${i}`,
+    position: i,
+    selectedOptionId: null,
+    isCorrect: null,
+    question: {
+      id: `q${i}`,
+      prompt: `Question ${i}`,
+      explanation: null,
+      options: ["a", "b", "c", "d"].map((letter, position) => ({
+        id: `q${i}${letter}`,
+        questionId: `q${i}`,
+        text: letter,
+        isCorrect: position === 0,
+        position,
+      })),
+    },
+  }));
+  const attemptWith = (id: string, timeLimitMinutes: number | null = null) =>
+    ({
+      ...baseAttempt,
+      id,
+      totalQuestions: QUESTION_COUNT,
+      sessionTest: { id: "st1", title: "t", instructions: null, timeLimitMinutes },
+      items: manyItems,
+    }) as unknown as SessionTestAttemptWithItems;
+  const questionOrder = (id: string, shuffled: boolean) =>
+    serializeSessionTestAttempt(attemptWith(id), { reveal: false, shuffled }).items.map((i) => i.questionId);
+
+  it("keeps the authored order when not shuffled", () => {
+    expect(questionOrder("at1", false)).toEqual(manyItems.map((i) => i.questionId));
+  });
+
+  it("serves the same shuffled order every time for one attempt", () => {
+    expect(questionOrder("at1", true)).toEqual(questionOrder("at1", true));
+  });
+
+  it("serves different orders to different attempts", () => {
+    const orders = new Set(["at1", "at2", "at3", "at4"].map((id) => questionOrder(id, true).join(",")));
+    expect(orders.size).toBeGreaterThan(1);
+  });
+
+  it("serves every question exactly once and renumbers positions from 0", () => {
+    const { items } = serializeSessionTestAttempt(attemptWith("at1"), { reveal: false, shuffled: true });
+    expect([...items.map((i) => i.questionId)].sort()).toEqual(manyItems.map((i) => i.questionId).sort());
+    expect(items.map((i) => i.position)).toEqual(manyItems.map((_, index) => index));
+  });
+
+  it("shuffles options without losing any", () => {
+    const { items } = serializeSessionTestAttempt(attemptWith("at1"), { reveal: false, shuffled: true });
+    const optionOrders = new Set(items.map((i) => i.options.map((o) => o.text).join("")));
+    expect(optionOrders.size).toBeGreaterThan(1);
+    expect(items.every((i) => [...i.options.map((o) => o.text)].sort().join("") === "abcd")).toBe(true);
+  });
+
+  it("reports the deadline for a timed test", () => {
+    const s = serializeSessionTestAttempt(attemptWith("at1", 15), { reveal: false });
+    expect(s.timeLimitMinutes).toBe(15);
+    expect(s.deadlineAt).toBe("2026-09-01T00:15:00.000Z");
+  });
+
+  it("reports no deadline for an untimed test", () => {
+    const s = serializeSessionTestAttempt(attemptWith("at1", null), { reveal: false });
+    expect(s.deadlineAt).toBeNull();
+  });
+});

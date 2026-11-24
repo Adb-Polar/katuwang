@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_ALLOWED_EMAIL_DOMAINS, isValidDomain, normalizeDomain } from "@/lib/emailDomains";
 
 export const updateUserStatusSchema = z.object({
   status: z.enum(["ACTIVE", "SUSPENDED", "BANNED"], {
@@ -67,3 +68,13 @@ export const reviewRegistrationSchema = z.object({
 });
 
 export type ReviewRegistrationInput = z.infer<typeof reviewRegistrationSchema>;
+
+export const updateAllowedEmailDomainsSchema = z.object({
+  domains: z
+    .array(z.string().transform(normalizeDomain).refine(isValidDomain, { message: "Enter domains like school.edu.ph." }))
+    .min(1, "Keep at least one accepted email domain.")
+    .max(MAX_ALLOWED_EMAIL_DOMAINS, `At most ${MAX_ALLOWED_EMAIL_DOMAINS} domains.`)
+    .transform((domains) => [...new Set(domains)]),
+});
+
+export type UpdateAllowedEmailDomainsInput = z.infer<typeof updateAllowedEmailDomainsSchema>;

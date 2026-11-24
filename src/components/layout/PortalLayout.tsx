@@ -8,6 +8,7 @@ import BrandMark from "@/components/ui/BrandMark";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import GlobalSearch from "@/components/layout/GlobalSearch";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import ChatWidget from "@/components/chatbot/ChatWidget";
 
 export interface NavItem {
@@ -233,6 +234,7 @@ export default function PortalLayout({
 
           <div className="flex-1" />
 
+          <ThemeToggle />
           {helpHref ? (
             <Link href={helpHref} className="kt-icon-btn" aria-label="Help & FAQs">
               <HelpCircle className="w-4 h-4" />
@@ -244,7 +246,7 @@ export default function PortalLayout({
           )}
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           {profileHref ? (
-            <Link href={profileHref} className="kt-avatar" aria-label="Your profile">
+            <Link href={profileHref} className="kt-avatar" aria-label="Your profile" title="Your profile">
               {anonymousId.replace(/[^A-Za-z0-9]/g, "").slice(0, 2).toUpperCase()}
             </Link>
           ) : (
@@ -261,7 +263,7 @@ export default function PortalLayout({
 
       {/* mobile drawer */}
       <div
-        className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 lg:hidden ${
+        className={`fixed inset-0 z-40 bg-(--kt-backdrop) transition-opacity duration-200 lg:hidden ${
           menuOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={() => setMenuOpen(false)}

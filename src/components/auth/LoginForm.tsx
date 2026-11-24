@@ -1,14 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import RequiredMark from "@/components/ui/RequiredMark";
+import React, { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check, Eye, EyeOff } from "lucide-react";
 import BrandMark from "@/components/ui/BrandMark";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
+import { loginNoticeFromQuery, noticeForSignInError } from "@/lib/loginNotice";
 
-export default function LoginForm() {
+/** Google's "G" — the one brand mark the sign-in button is required to carry. */
+function GoogleMark() {
+  return (
+    <svg viewBox="0 0 18 18" className="h-4 w-4" aria-hidden="true">
+      <path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z" />
+      <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z" />
+      <path fill="#FBBC05" d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z" />
+      <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z" />
+    </svg>
+  );
+}
+
+export default function LoginForm({ googleEnabled = false }: { googleEnabled?: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -21,6 +35,16 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [blocked, setBlocked] = useState(false);
+
+  // A failed Google sign-in or the route guard lands here with ?error= / ?reason=.
+  const queryNotice = loginNoticeFromQuery(params);
+  const queryRedirect = queryNotice.redirectTo;
+  useEffect(() => {
+    if (queryRedirect) router.replace(queryRedirect);
+  }, [queryRedirect, router]);
+  const shownError = error || queryNotice.message || "";
+  const suggestContact = error ? blocked : queryNotice.suggestContact === true;
 
   // Derive success message from registration redirect query parameters
   const isRegistered = params.get("registered") === "true";
@@ -55,21 +79,15 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        if (result.error === "ACCOUNT_PENDING") {
-          router.push("/pending-approval");
+        const notice = noticeForSignInError(result.error, email);
+        if (notice.redirectTo) {
+          router.push(notice.redirectTo);
           return;
         }
-        if (result.error.startsWith("ACCOUNT_DECLINED")) {
-          const sep = result.error.indexOf(":");
-          const reason = sep >= 0 ? result.error.slice(sep + 1).trim() : "";
-          router.push(reason ? `/account-declined?reason=${encodeURIComponent(reason)}` : "/account-declined");
-          return;
-        }
-        if (result.error === "ACCOUNT_UNVERIFIED") {
-          router.push(`/account-unverified?email=${encodeURIComponent(email)}`);
-          return;
-        }
-        setError(result.error);
+        // Credential errors ("Invalid email or password.") are our own server
+        // text and safe to show as-is; blocked-account errors get fixed copy.
+        setError(notice.suggestContact ? notice.message! : result.error);
+        setBlocked(notice.suggestContact === true);
         setLoading(false);
       } else {
         setSuccess(true);
@@ -96,7 +114,12 @@ export default function LoginForm() {
         </div>
 
         <FeedbackBanner variant="success" message={successMsg || null} />
-        <FeedbackBanner variant="error" message={error || null} />
+        <FeedbackBanner variant="error" message={shownError || null} />
+        {suggestContact && (
+          <Link href="/contact" className="btn btn-outline btn-sm text-xs w-full">
+            Contact an administrator
+          </Link>
+        )}
 
         {success ? (
           /* Successful Login State Animation */
@@ -114,7 +137,7 @@ export default function LoginForm() {
             {/* Email Input */}
             <div className="form-control w-full">
               <label className="label py-1">
-                <span className="label-text font-semibold text-xs text-base-content/75">Email Address</span>
+                <span className="label-text font-semibold text-xs text-base-content/75">Email Address<RequiredMark /></span>
               </label>
               <input
                 type="email"
@@ -134,7 +157,7 @@ export default function LoginForm() {
             <div className="form-control w-full">
               <div className="flex items-center justify-between">
                 <label className="label py-1">
-                  <span className="label-text font-semibold text-xs text-base-content/75">Password</span>
+                  <span className="label-text font-semibold text-xs text-base-content/75">Password<RequiredMark /></span>
                 </label>
               </div>
               <div className="relative">
@@ -193,6 +216,24 @@ export default function LoginForm() {
                 <span>Sign In to Portal</span>
               )}
             </button>
+
+            {googleEnabled && (
+              <>
+                <div className="divider text-2xs text-base-content/50 my-0">or</div>
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+                  className="btn btn-outline btn-sm w-full text-xs gap-2"
+                >
+                  <GoogleMark />
+                  Continue with Google
+                </button>
+                <p className="text-2xs text-center text-base-content/50">
+                  Works only with the email address your Katuwang account was registered with.
+                </p>
+              </>
+            )}
           </form>
         )}
 
@@ -202,6 +243,12 @@ export default function LoginForm() {
           <Link className="text-primary font-bold hover:underline" href={"/register"}>
             Register
           </Link>
+          <p className="mt-2">
+            Trouble signing in?{" "}
+            <Link className="text-primary font-bold hover:underline" href="/contact">
+              Contact an administrator
+            </Link>
+          </p>
         </div>
       </div>
     </div>

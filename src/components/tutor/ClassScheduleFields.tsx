@@ -8,12 +8,15 @@ import { GRADE_LEVELS } from "@/lib/gradeLevels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
+import SessionTimeFields from "@/components/tutor/SessionTimeFields";
+import { useBusySlots } from "@/hooks/useBusySlots";
+import { EMPTY_SESSION_TIME, resolveSessionTime, sessionTimeError, type SessionTimeValue } from "@/lib/sessionTime";
+import type { TimedRange } from "@/lib/timeRanges";
 
 export interface SessionRowValue {
   key: string;
   topic: string;
-  scheduledAt: string;
-  duration: number;
+  time: SessionTimeValue;
 }
 
 export interface ClassScheduleFormValues {
@@ -157,7 +160,7 @@ export default function ClassScheduleFields({
   const addSessionRow = () => {
     setSessionRows((prev) => [
       ...prev,
-      { key: newRowKey(), topic: selectedTopics[0] ?? "", scheduledAt: "", duration: 60 },
+      { key: newRowKey(), topic: selectedTopics[0] ?? "", time: EMPTY_SESSION_TIME },
     ]);
   };
 
@@ -165,9 +168,23 @@ export default function ClassScheduleFields({
     setSessionRows((prev) => prev.filter((r) => r.key !== key));
   };
 
-  const updateSessionRow = (key: string, field: "topic" | "scheduledAt" | "duration", value: string | number) => {
-    setSessionRows((prev) => prev.map((r) => (r.key === key ? { ...r, [field]: value } : r)));
+  const updateSessionRow = (key: string, change: Partial<Pick<SessionRowValue, "topic" | "time">>) => {
+    setSessionRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...change } : r)));
   };
+
+  // Session-time problems are computed on every render so each row shows its
+  // error while the tutor is still picking a slot.
+  const busy = useBusySlots();
+  const [formOpenedAt] = useState(() => new Date());
+  const resolvedRows = sessionRows.map((row) => resolveSessionTime(row.time));
+  const rowErrors = sessionRows.map((row, i) =>
+    sessionTimeError(row.time, {
+      now: formOpenedAt,
+      busy,
+      siblings: resolvedRows.filter((other, j) => j !== i && other !== null && other.duration > 0) as TimedRange[],
+    })
+  );
+  const hasRowError = rowErrors.some(Boolean);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,9 +192,10 @@ export default function ClassScheduleFields({
     if (!form.subject) return setFormError("Please select a subject.");
     if (selectedTopics.length === 0) return setFormError("Please select at least one topic.");
     if (sessionRows.length === 0) return setFormError("Please add at least one session.");
-    if (sessionRows.some((r) => !r.topic || !r.scheduledAt)) {
-      return setFormError("Every session needs a topic and a date/time.");
+    if (sessionRows.some((r) => !r.topic) || resolvedRows.some((r) => r === null)) {
+      return setFormError("Every session needs a topic, a date, and a start and end time.");
     }
+    if (hasRowError) return setFormError("Fix the highlighted session times first.");
     if (!form.building.trim() && !form.room.trim() && !form.meetingLink.trim()) {
       return setFormError("Please provide a location (building/room) or a meeting link.");
     }
@@ -185,10 +203,10 @@ export default function ClassScheduleFields({
     onSubmit({
       ...form,
       topics: selectedTopics,
-      sessions: sessionRows.map((r) => ({
-        topic: r.topic,
-        scheduledAt: new Date(r.scheduledAt).toISOString(),
-        duration: r.duration,
+      sessions: sessionRows.map((row, i) => ({
+        topic: row.topic,
+        scheduledAt: resolvedRows[i]!.scheduledAt.toISOString(),
+        duration: resolvedRows[i]!.duration,
       })),
     });
   };
@@ -370,7 +388,7 @@ export default function ClassScheduleFields({
                   </span>
                   <select
                     value={row.topic}
-                    onChange={(e) => updateSessionRow(row.key, "topic", e.target.value)}
+                    onChange={(e) => updateSessionRow(row.key, { topic: e.target.value })}
                     className={`select select-bordered ${rowSelectCls} flex-1 min-w-0 truncate`}
                   >
                     {selectedTopics.map((t) => (
@@ -388,25 +406,13 @@ export default function ClassScheduleFields({
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  <input
-                    type="datetime-local"
-                    value={row.scheduledAt}
-                    onChange={(e) => updateSessionRow(row.key, "scheduledAt", e.target.value)}
-                    className={`input input-bordered ${rowInputCls} flex-1 min-w-[9.5rem]`}
-                  />
-                  <select
-                    value={row.duration}
-                    onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
-                    className={`select select-bordered ${rowSelectCls} shrink-0`}
-                  >
-                    <option value={30}>30m</option>
-                    <option value={45}>45m</option>
-                    <option value={60}>60m</option>
-                    <option value={90}>90m</option>
-                    <option value={120}>120m</option>
-                  </select>
-                </div>
+                <SessionTimeFields
+                  value={row.time}
+                  onChange={(time) => updateSessionRow(row.key, { time })}
+                  error={rowErrors[i]}
+                  busy={busy}
+                  inputClassName={rowInputCls}
+                />
               </div>
             ))}
             <button
@@ -475,7 +481,11 @@ export default function ClassScheduleFields({
         >
           Cancel
         </button>
-        <button type="submit" disabled={submitting} className={`btn btn-primary ${actionBtnCls} cursor-pointer`}>
+        <button
+          type="submit"
+          disabled={submitting || hasRowError}
+          className={`btn btn-primary ${actionBtnCls} cursor-pointer`}
+        >
           {submitting ? <span className="loading loading-spinner loading-sm"></span> : submitLabel}
         </button>
       </div>

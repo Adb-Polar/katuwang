@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { GOOGLE_SIGN_IN_ENABLED } from "@/lib/auth";
 import LoginForm from "@/components/auth/LoginForm";
 import AuthLayout from "@/components/auth/AuthLayout";
 
@@ -16,7 +17,7 @@ export default function LoginPage() {
           <p className="mt-4 text-xs text-base-content/60">Loading form...</p>
         </div>
       }>
-        <LoginForm />
+        <LoginForm googleEnabled={GOOGLE_SIGN_IN_ENABLED} />
       </Suspense>
     </AuthLayout>
   );

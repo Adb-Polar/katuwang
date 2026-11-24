@@ -963,9 +963,36 @@ async function main() {
   const passwordHash = await bcrypt.hash(DUMMY_PASSWORD, 12);
 
   // Admin account
+  // Seeded accounts use @katuwang.test, so make sure the dev allowlist accepts it
+  // for anyone registering a new test account by hand. Never overwrites a list
+  // an admin has already saved.
+  await prisma.platformSetting.upsert({
+    where: { key: "allowedEmailDomains" },
+    update: {},
+    create: { key: "allowedEmailDomains", value: "gmail.com,yahoo.com,outlook.com,deped.gov.ph,katuwang.test" },
+  });
+
+  // A regular (non-super) admin — cannot open the audit log.
+  await prisma.user.upsert({
+    where: { email: "staff.admin@katuwang.test" },
+    update: {},
+    create: {
+      anonymousId: "ADM-0002",
+      firstName: "Staff",
+      lastName: "Admin",
+      email: "staff.admin@katuwang.test",
+      password: passwordHash,
+      role: "ADMIN",
+      gradeLevel: "GRADE_12",
+      section: "N/A",
+      consentGiven: true,
+      emailVerifiedAt: new Date(),
+    },
+  });
+
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@katuwang.test" },
-    update: {},
+    update: { isSuperAdmin: true },
     create: {
       anonymousId: "ADM-0001",
       firstName: "Katuwang",
@@ -1283,7 +1310,8 @@ async function main() {
     console.log("Generated accounts use emails like gen.tutor.001@seed.katuwang.test / gen.learner.001@seed.katuwang.test");
   }
   console.log("\nAdmin:");
-  console.log("  ADM-0001  admin@katuwang.test");
+  console.log("  ADM-0001  admin@katuwang.test (super admin)");
+  console.log("  ADM-0002  staff.admin@katuwang.test");
   console.log("\nCurated tutors:");
   for (const t of TUTORS) console.log(`  ${tutorUsers[t.email].anonymousId}  ${t.email}`);
   console.log("\nCurated learners:");

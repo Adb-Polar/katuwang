@@ -1,3 +1,5 @@
+import { getAllowedEmailDomains } from "@/lib/settings";
+import { domainNotAllowedMessage, isEmailDomainAllowed } from "@/lib/emailDomains";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -22,6 +24,13 @@ export async function PATCH(req: NextRequest) {
     }
 
     const { contactInfo, section, gradeLevel, recoveryEmail } = result.data;
+
+    if (recoveryEmail) {
+      const allowedDomains = await getAllowedEmailDomains();
+      if (!isEmailDomainAllowed(recoveryEmail, allowedDomains)) {
+        return NextResponse.json({ error: domainNotAllowedMessage(recoveryEmail, allowedDomains) }, { status: 400 });
+      }
+    }
 
     let normalizedContact: string | undefined;
     if (contactInfo !== undefined) {

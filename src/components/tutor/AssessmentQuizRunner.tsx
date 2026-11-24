@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import StatusBadge from "@/components/ui/StatusBadge";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import QuizCountdown from "@/components/quiz/QuizCountdown";
+import NoCopyRegion from "@/components/quiz/NoCopyRegion";
 
 export interface QuizOption {
   id: string;
@@ -32,6 +34,7 @@ export interface QuizAttempt {
   correctCount?: number;
   scorePercent?: number;
   submittedAt: string | null;
+  deadlineAt?: string | null;
   items: QuizItem[];
 }
 
@@ -103,9 +106,14 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
                 size="sm"
               />
             ) : (
-              <span className="text-2xs text-base-content/50">
-                {answeredCount} / {attempt.items.length} answered
-              </span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-2xs text-base-content/50">
+                  {answeredCount} / {attempt.items.length} answered
+                </span>
+                {attempt.deadlineAt && (
+                  <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={() => !submitting && doSubmit()} />
+                )}
+              </div>
             )}
           </div>
 
@@ -122,6 +130,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
 
           <FeedbackBanner variant="error" message={error || null} />
 
+          <NoCopyRegion enabled={!submitted}>
           <ol className="space-y-4">
             {attempt.items.map((item) => {
               const chosen = answers[item.questionId] ?? item.selectedOptionId;
@@ -183,6 +192,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
               );
             })}
           </ol>
+          </NoCopyRegion>
 
           {!submitted && (
             <div className="flex justify-end pt-1">

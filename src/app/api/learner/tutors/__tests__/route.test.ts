@@ -115,4 +115,24 @@ describe("GET /api/learner/tutors", () => {
     const json = await (await GET(req())).json();
     expect(json.tutors[0].name).toBe("Ana Cruz");
   });
+
+  it("always includes grade level and section but no name when real names are off", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    getSettingMock.mockResolvedValue(false);
+    findManyMock.mockResolvedValue([
+      {
+        id: "u1",
+        anonymousId: "TUT-0148",
+        gradeLevel: "GRADE_10",
+        section: "Rizal",
+        tutorProfile: { topicCertifications: [], _count: { classes: 0 }, classes: [] },
+      },
+    ]);
+
+    const json = await (await GET(req())).json();
+
+    expect(json.tutors[0]).toMatchObject({ gradeLevel: "GRADE_10", section: "Rizal" });
+    expect(json.tutors[0].name).toBeUndefined();
+    expect(findManyMock.mock.calls[0][0].select.firstName).toBeUndefined();
+  });
 });

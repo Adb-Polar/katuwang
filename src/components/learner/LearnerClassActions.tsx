@@ -1,12 +1,26 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, XCircle } from "lucide-react";
 import { clearClassBrowserCache } from "@/lib/classBrowserCache";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import ReportButton from "@/components/learner/ReportButton";
+import { formatDate } from "@/lib/datetime";
+import { formatTimeRange } from "@/lib/sessionTime";
+import ReportButton from "@/components/reports/ReportButton";
+
+interface EnrollErrorBody {
+  error?: string;
+  conflict?: { classCode: string; subject: string; scheduledAt: string; duration: number };
+}
+
+/** Names the clashing class and, in the learner's own time zone, when it meets. */
+function enrollErrorMessage({ error, conflict }: EnrollErrorBody): string {
+  if (!conflict) return error || "Failed to enroll.";
+  return `Schedule conflict: this class overlaps ${conflict.classCode} (${conflict.subject}), which you are already enrolled in, on ${formatDate(conflict.scheduledAt)} at ${formatTimeRange(conflict)}.`;
+}
 
 export default function LearnerClassActions({
   classId,
@@ -23,6 +37,7 @@ export default function LearnerClassActions({
   reportLabel: string;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [confirmUnenroll, setConfirmUnenroll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -35,8 +50,9 @@ export default function LearnerClassActions({
     try {
       const res = await fetch(`/api/classes/${classId}/enroll`, { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to enroll.");
+      if (!res.ok) throw new Error(enrollErrorMessage(data));
       clearClassBrowserCache();
+      toast.success("You are enrolled in this class.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to enroll.");
@@ -53,6 +69,7 @@ export default function LearnerClassActions({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to unenroll.");
       clearClassBrowserCache();
+      toast.success("You have left the class.");
       router.push("/learner/my-classes");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to unenroll.");

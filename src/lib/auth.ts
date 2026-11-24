@@ -1,5 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+import type { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma } from "./prisma";
 import { rateLimit, rateLimitEnabled, clientIp } from "./rateLimit";
@@ -17,6 +19,114 @@ const INVALID_CREDENTIALS = "Invalid email or password.";
 // callback re-reads them from the DB (so an admin suspend/ban takes effect
 // mid-session instead of only at the 8h expiry).
 const TOKEN_STALE_MS = 5 * 60 * 1000;
+
+type AccountRow = Pick<
+  User,
+  | "id"
+  | "anonymousId"
+  | "email"
+  | "role"
+  | "firstName"
+  | "lastName"
+  | "isSuperAdmin"
+  | "status"
+  | "statusReason"
+  | "statusExpiresAt"
+  | "emailVerifiedAt"
+>;
+
+/**
+ * The account-state gate shared by every sign-in method. Throws the message
+ * (or sentinel) the login page shows; returns normally when sign-in may go on.
+ * An expired suspension is lifted here as a side effect.
+ */
+export async function assertAccountCanSignIn(user: AccountRow): Promise<void> {
+  if (user.status === "SUSPENDED" && user.statusExpiresAt && user.statusExpiresAt <= new Date()) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { status: "ACTIVE", statusReason: null, statusUpdatedAt: new Date(), statusExpiresAt: null },
+    });
+    user.status = "ACTIVE";
+  }
+
+  if (user.status === "SUSPENDED") {
+    throw new Error("Your account has been suspended. Contact an administrator for details.");
+  }
+
+  if (user.status === "BANNED") {
+    throw new Error("Your account has been banned.");
+  }
+
+  // Verification is checked before approval/pending status — a user who
+  // hasn't confirmed their email shouldn't be told their account is
+  // "pending admin review", which implies verification already happened.
+  if (!user.emailVerifiedAt && (await getSetting("requireEmailVerification"))) {
+    // Sentinel — the login page redirects this to /account-unverified.
+    throw new Error("ACCOUNT_UNVERIFIED");
+  }
+
+  if (user.status === "PENDING") {
+    // Sentinel — the login page redirects this to /pending-approval.
+    throw new Error("ACCOUNT_PENDING");
+  }
+
+  if (user.status === "DECLINED") {
+    // Sentinel (+ optional reason after the first ":") — the login page
+    // redirects this to /account-declined, which surfaces the reason.
+    throw new Error(user.statusReason ? `ACCOUNT_DECLINED:${user.statusReason}` : "ACCOUNT_DECLINED");
+  }
+}
+
+function toSessionUser(user: AccountRow) {
+  return {
+    id: user.id,
+    anonymousId: user.anonymousId,
+    email: user.email,
+    role: user.role,
+    isSuperAdmin: user.role === "ADMIN" && user.isSuperAdmin,
+    fullName: `${user.firstName} ${user.lastName}`.trim(),
+  };
+}
+
+// ─── Google sign-in ──────────────────────────────────────────────────────────
+// Offered only when both OAuth env vars are set. Google proves who the person
+// is; it never creates an account — the email must already belong to a
+// registered Katuwang user, who then passes the same gate as a password login.
+
+export const GOOGLE_SIGN_IN_ENABLED = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
+
+/** `?error=` codes the login page turns into messages. */
+export const GOOGLE_ERROR = {
+  NO_ACCOUNT: "GOOGLE_NO_ACCOUNT",
+  UNVERIFIED: "GOOGLE_EMAIL_UNVERIFIED",
+} as const;
+
+const loginErrorUrl = (code: string) => `/login?error=${encodeURIComponent(code)}`;
+
+/**
+ * Decides a Google sign-in: `true` to continue, or a `/login?error=…` URL to
+ * bounce back with the reason.
+ */
+export async function resolveGoogleSignIn(profile: { email?: string; email_verified?: boolean } | undefined) {
+  const email = profile?.email?.trim().toLowerCase();
+  if (!email || profile?.email_verified !== true) return loginErrorUrl(GOOGLE_ERROR.UNVERIFIED);
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user) return loginErrorUrl(GOOGLE_ERROR.NO_ACCOUNT);
+
+  try {
+    await assertAccountCanSignIn(user);
+  } catch (error) {
+    return loginErrorUrl(error instanceof Error ? error.message : "Sign-in failed.");
+  }
+  return true;
+}
+
+async function findSessionUserByEmail(email: string | null | undefined) {
+  const user = email ? await prisma.user.findUnique({ where: { email: email.toLowerCase() } }) : null;
+  if (!user) throw new Error("No Katuwang account matches this Google sign-in.");
+  return toSessionUser(user);
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -60,63 +170,38 @@ export const authOptions: NextAuthOptions = {
           throw new Error(INVALID_CREDENTIALS);
         }
 
-        if (user.status === "SUSPENDED" && user.statusExpiresAt && user.statusExpiresAt <= new Date()) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: { status: "ACTIVE", statusReason: null, statusUpdatedAt: new Date(), statusExpiresAt: null },
-          });
-          user.status = "ACTIVE";
-        }
+        await assertAccountCanSignIn(user);
 
-        if (user.status === "SUSPENDED") {
-          throw new Error("Your account has been suspended. Contact an administrator for details.");
-        }
-
-        if (user.status === "BANNED") {
-          throw new Error("Your account has been banned.");
-        }
-
-        // Verification is checked before approval/pending status — a user who
-        // hasn't confirmed their email shouldn't be told their account is
-        // "pending admin review", which implies verification already happened.
-        if (!user.emailVerifiedAt && (await getSetting("requireEmailVerification"))) {
-          // Sentinel — LoginForm redirects this to /account-unverified.
-          throw new Error("ACCOUNT_UNVERIFIED");
-        }
-
-        if (user.status === "PENDING") {
-          // Sentinel — LoginForm redirects this to the /pending-approval page
-          // instead of showing it as an inline error.
-          throw new Error("ACCOUNT_PENDING");
-        }
-
-        if (user.status === "DECLINED") {
-          // Sentinel (+ optional reason after the first ":") — LoginForm
-          // redirects this to /account-declined, which surfaces the reason.
-          throw new Error(
-            user.statusReason ? `ACCOUNT_DECLINED:${user.statusReason}` : "ACCOUNT_DECLINED"
-          );
-        }
-
-        return {
-          id: user.id,
-          anonymousId: user.anonymousId,
-          email: user.email,
-          role: user.role,
-          fullName: `${user.firstName} ${user.lastName}`.trim(),
-        };
+        return toSessionUser(user);
       },
     }),
+    ...(GOOGLE_SIGN_IN_ENABLED
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID!,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          }),
+        ]
+      : []),
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ account, profile }) {
+      if (account?.provider !== "google") return true;
+      return resolveGoogleSignIn(profile as { email?: string; email_verified?: boolean } | undefined);
+    },
+
+    async jwt({ token, user, account }) {
       // On sign in, attach user data to the JWT
       if (user) {
-        token.id = user.id;
-        token.anonymousId = user.anonymousId;
-        token.role = user.role;
-        token.fullName = user.fullName;
+        // A Google sign-in hands us Google's profile, not our account row —
+        // swap in the Katuwang user that owns the verified email.
+        const sessionUser = account?.provider === "google" ? await findSessionUserByEmail(user.email) : user;
+        token.id = sessionUser.id;
+        token.anonymousId = sessionUser.anonymousId;
+        token.role = sessionUser.role;
+        token.isSuperAdmin = sessionUser.isSuperAdmin;
+        token.fullName = sessionUser.fullName;
         token.status = "ACTIVE";
         token.checkedAt = Date.now();
         return token;
@@ -127,11 +212,12 @@ export const authOptions: NextAuthOptions = {
       if (token.id && (!token.checkedAt || Date.now() - token.checkedAt > TOKEN_STALE_MS)) {
         const fresh = await prisma.user.findUnique({
           where: { id: token.id },
-          select: { role: true, status: true },
+          select: { role: true, status: true, isSuperAdmin: true },
         });
         token.checkedAt = Date.now();
         token.status = fresh ? fresh.status : "BANNED";
         if (fresh) token.role = fresh.role;
+        token.isSuperAdmin = fresh?.role === "ADMIN" && fresh.isSuperAdmin;
       }
       return token;
     },
@@ -142,6 +228,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
         session.user.anonymousId = token.anonymousId;
         session.user.role = token.role;
+        session.user.isSuperAdmin = token.isSuperAdmin === true;
         session.user.fullName = token.fullName;
         session.user.status = token.status ?? "ACTIVE";
       }

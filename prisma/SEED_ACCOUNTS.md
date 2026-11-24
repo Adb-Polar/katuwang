@@ -13,7 +13,8 @@ Re-running the seed script is safe — it reuses these accounts by email and onl
 
 | Anonymous ID | Email                  | Name           |
 | ------------ | ----------------------- | -------------- |
-| ADM-0001     | admin@katuwang.test     | Katuwang Admin |
+| ADM-0001     | admin@katuwang.test     | Katuwang Admin (super admin — can open the audit log) |
+| ADM-0002     | staff.admin@katuwang.test | Staff Admin (regular admin) |
 
 ## Tutors
 

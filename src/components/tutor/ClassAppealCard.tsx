@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Gavel } from "lucide-react";
@@ -31,6 +32,7 @@ export default function ClassAppealCard({
   appeal: ClassAppealSummary | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
@@ -49,6 +51,7 @@ export default function ClassAppealCard({
       if (!res.ok) throw new Error(data.error || "Could not submit the appeal.");
       setOpen(false);
       setReason("");
+      toast.success("Appeal submitted to the admins.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit the appeal.");

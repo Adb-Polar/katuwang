@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { serializeSessionTestAttempt } from "@/lib/sessionTestSerialize";
+import { serializeSessionTestAttempt, SESSION_TEST_ATTEMPT_SELECT } from "@/lib/sessionTestSerialize";
 
 // ─── GET: One of the Learner's Own Session-Test Attempts ──────────────────
 export async function GET(
@@ -21,7 +21,7 @@ export async function GET(
       where: { id: attemptId },
       include: {
         items: { include: { question: { include: { options: true } } } },
-        sessionTest: { select: { id: true, title: true, instructions: true } },
+        sessionTest: { select: SESSION_TEST_ATTEMPT_SELECT },
       },
     });
 
@@ -31,7 +31,7 @@ export async function GET(
     }
 
     return NextResponse.json(
-      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED" }),
+      serializeSessionTestAttempt(attempt, { reveal: attempt.status === "SUBMITTED", shuffled: true }),
     );
   } catch (error) {
     console.error("Error fetching session-test attempt:", error);

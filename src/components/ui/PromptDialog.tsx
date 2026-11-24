@@ -1,5 +1,6 @@
 "use client";
 
+import RequiredMark from "./RequiredMark";
 import { useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import CharCount from "./CharCount";
@@ -69,6 +70,7 @@ export default function PromptDialog({
         <label className="form-control mt-3">
           <span className="label-text text-2xs font-semibold text-base-content/70 pb-1">
             {noteLabel}
+            {noteRequired && <RequiredMark />}
           </span>
           <textarea
             value={note}

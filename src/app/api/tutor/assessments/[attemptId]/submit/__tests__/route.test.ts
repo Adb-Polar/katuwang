@@ -9,6 +9,7 @@ const {
   certFindUnique,
   certUpsert,
   getSettingMock,
+  getAssessmentConfigMock,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   attemptFindUnique: vi.fn(),
@@ -17,10 +18,11 @@ const {
   certFindUnique: vi.fn(),
   certUpsert: vi.fn(),
   getSettingMock: vi.fn(),
+  getAssessmentConfigMock: vi.fn(),
 }));
 
 vi.mock("next-auth", () => ({ getServerSession: getServerSessionMock }));
-vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock }));
+vi.mock("@/lib/settings", () => ({ getSetting: getSettingMock, getAssessmentConfig: getAssessmentConfigMock }));
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     assessmentAttempt: { findUnique: attemptFindUnique },
@@ -100,6 +102,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   certFindUnique.mockResolvedValue(null);
   getSettingMock.mockResolvedValue(false);
+  getAssessmentConfigMock.mockResolvedValue({ timeLimitMinutes: 0 });
   attemptUpdate.mockImplementation(({ data }: { data: Record<string, unknown> }) => ({
     ...fakeAttempt(),
     ...data,
@@ -119,6 +122,45 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
     attemptFindUnique.mockResolvedValue(fakeAttempt({ status: "PASSED" }));
     const res = await POST(post({ answers: [{ questionId: "q1", optionId: "q1a" }] }), params());
     expect(res.status).toBe(409);
+  });
+
+  it("discards answers that arrive after the time limit plus grace, failing the attempt", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    getAssessmentConfigMock.mockResolvedValue({ timeLimitMinutes: 10 });
+    const startedElevenMinutesAgo = new Date(Date.now() - 11 * 60 * 1000);
+    attemptFindUnique.mockResolvedValue({ ...fakeAttempt({ passPercent: 80 }), startedAt: startedElevenMinutesAgo });
+
+    const res = await POST(
+      post({ answers: [
+        { questionId: "q1", optionId: "q1a" },
+        { questionId: "q2", optionId: "q2a" },
+      ] }),
+      params()
+    );
+
+    expect(res.status).toBe(200);
+    expect(attemptUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: "FAILED", correctCount: 0, scorePercent: 0 }) })
+    );
+  });
+
+  it("still counts answers submitted inside the grace window", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    getAssessmentConfigMock.mockResolvedValue({ timeLimitMinutes: 10 });
+    const tenSecondsPastDeadline = new Date(Date.now() - (10 * 60 + 10) * 1000);
+    attemptFindUnique.mockResolvedValue({ ...fakeAttempt({ passPercent: 80 }), startedAt: tenSecondsPastDeadline });
+
+    await POST(
+      post({ answers: [
+        { questionId: "q1", optionId: "q1a" },
+        { questionId: "q2", optionId: "q2a" },
+      ] }),
+      params()
+    );
+
+    expect(attemptUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ status: "PASSED", scorePercent: 100 }) })
+    );
   });
 
   it("grades both-correct as 100% PASSED and, with auto-certify on, certifies the topic", async () => {
@@ -145,6 +187,7 @@ describe("POST /api/tutor/assessments/[attemptId]/submit", () => {
   it("PASSED with auto-certify off creates a PENDING certification carrying the score", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     getSettingMock.mockResolvedValue(false);
+  getAssessmentConfigMock.mockResolvedValue({ timeLimitMinutes: 0 });
     attemptFindUnique.mockResolvedValue(fakeAttempt({ passPercent: 50 }));
 
     const res = await POST(

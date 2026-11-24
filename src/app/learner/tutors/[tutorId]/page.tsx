@@ -1,3 +1,4 @@
+import { gradeLabel } from "@/lib/gradeLevels";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { User } from "lucide-react";
@@ -12,7 +13,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import AnonymousIdBadge from "@/components/ui/AnonymousIdBadge";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
-import ReportButton from "@/components/learner/ReportButton";
+import ReportButton from "@/components/reports/ReportButton";
 import TutorProfileClassTabs, {
   type TutorProfileClass,
 } from "@/components/learner/TutorProfileClassTabs";
@@ -43,6 +44,7 @@ export default async function LearnerTutorProfilePage({
       anonymousId: true,
       firstName: true,
       lastName: true,
+      gradeLevel: true,
       section: true,
       tutorProfile: {
         select: {
@@ -128,6 +130,20 @@ export default async function LearnerTutorProfilePage({
         })),
     );
 
+  const completedSessionCount = allClasses
+    .flatMap((c) => c.sessions)
+    .filter((s) => s.status === "COMPLETED").length;
+  // Grade and section help a learner judge fit and are not identifying on
+  // their own; the real name stays behind the admin `showTutorRealNames` toggle.
+  const tutorDetails: { label: string; value: string }[] = [
+    ...(showRealNames ? [{ label: "Name", value: `${tutor.firstName} ${tutor.lastName}` }] : []),
+    { label: "Grade level", value: gradeLabel(tutor.gradeLevel) },
+    { label: "Section", value: tutor.section },
+    { label: "Verified topics", value: String(certifiedTopics.length) },
+    { label: "Active classes", value: String(activeClasses.length) },
+    { label: "Sessions completed", value: String(completedSessionCount) },
+  ];
+
   return (
     <div className="space-y-6">
       <BackLink href="/learner/classes">Back to classes</BackLink>
@@ -156,20 +172,22 @@ export default async function LearnerTutorProfilePage({
         }
       />
 
-      {showRealNames && (
-        <section className="card kt-card">
-          <div className="card-body gap-2">
-            <h2 className="card-title text-sm font-bold">Tutor</h2>
-            <div className="flex items-center gap-2 text-xs text-base-content/80">
-              <User className="h-4 w-4 text-primary shrink-0" />
-              <span className="font-semibold">
-                {tutor.firstName} {tutor.lastName}
-              </span>
-              <span className="text-base-content/50">· Section {tutor.section}</span>
-            </div>
-          </div>
-        </section>
-      )}
+      <section className="card kt-card">
+        <div className="card-body gap-3">
+          <h2 className="card-title text-sm font-bold flex items-center gap-2">
+            <User className="h-4 w-4 text-primary shrink-0" />
+            Tutor details
+          </h2>
+          <dl className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {tutorDetails.map((detail) => (
+              <div key={detail.label} className="rounded-lg border border-base-300 bg-base-200/40 px-3 py-2">
+                <dt className="text-2xs font-semibold uppercase tracking-wide text-base-content/60">{detail.label}</dt>
+                <dd className="text-sm font-semibold mt-0.5 break-words">{detail.value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
 
       <section className="card kt-card">
         <div className="card-body gap-3">

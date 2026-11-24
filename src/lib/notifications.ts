@@ -41,7 +41,9 @@ export type NotificationType =
   // admin recommends a specific class to a learner (learner-facing). NOT the
   // same as the chatbot's learner-initiated "recommend classes" feature in
   // src/lib/chatbot/recommend.ts — see docs/reference/decisions.md.
-  | "CLASS_RECOMMENDED_BY_ADMIN";
+  | "CLASS_RECOMMENDED_BY_ADMIN"
+  // public "contact administrator" form (admin-facing)
+  | "CONTACT_MESSAGE_NEW";
 
 /** Creates one notification for a single user. Meant to be called inside a `$transaction`. */
 export async function notify(

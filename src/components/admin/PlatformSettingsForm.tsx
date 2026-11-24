@@ -71,6 +71,7 @@ interface AssessmentConfig {
   questionCount: number;
   passPercent: number;
   minBankSize: number;
+  timeLimitMinutes: number;
 }
 
 const ASSESSMENT_FIELDS: {
@@ -101,6 +102,13 @@ const ASSESSMENT_FIELDS: {
     min: 1,
     max: 200,
   },
+  {
+    key: "timeLimitMinutes",
+    label: "Time limit (minutes)",
+    description: "Minutes a tutor has to finish an attempt; it auto-submits when time runs out. 0 = untimed.",
+    min: 0,
+    max: 240,
+  },
 ];
 
 export default function PlatformSettingsForm() {
@@ -117,6 +125,7 @@ export default function PlatformSettingsForm() {
     questionCount: "",
     passPercent: "",
     minBankSize: "",
+    timeLimitMinutes: "",
   });
   const [savingField, setSavingField] = useState<keyof AssessmentConfig | null>(null);
 
@@ -131,6 +140,7 @@ export default function PlatformSettingsForm() {
           questionCount: String(c.questionCount),
           passPercent: String(c.passPercent),
           minBankSize: String(c.minBankSize),
+          timeLimitMinutes: String(c.timeLimitMinutes),
         });
       })
       .catch(() => {});
@@ -187,6 +197,7 @@ export default function PlatformSettingsForm() {
         questionCount: String(data.questionCount),
         passPercent: String(data.passPercent),
         minBankSize: String(data.minBankSize),
+        timeLimitMinutes: String(data.timeLimitMinutes),
       });
       setSuccess(`${meta.label} saved.`);
       setTimeout(() => setSuccess(""), 4000);
@@ -245,7 +256,7 @@ export default function PlatformSettingsForm() {
 
           {!loading && <div className="divide-y divide-base-200">{assessmentToggles.map(renderToggle)}</div>}
 
-          <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="border-t border-base-200 pt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {ASSESSMENT_FIELDS.map((f) => (
               <label key={f.key} className="flex flex-col gap-1">
                 <span className="text-xs font-semibold text-base-content">{f.label}</span>

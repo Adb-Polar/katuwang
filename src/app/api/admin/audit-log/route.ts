@@ -16,6 +16,10 @@ export async function GET(req: NextRequest) {
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
+    // The audit log shows every admin's actions, so only a super admin may read it.
+    if (!session.user.isSuperAdmin) {
+      return NextResponse.json({ error: "Only a super admin can view the audit log." }, { status: 403 });
+    }
 
     const { searchParams } = new URL(req.url);
     const action = searchParams.get("action")?.trim() || "";

@@ -95,7 +95,10 @@ export async function POST(req: NextRequest) {
       include: ATTEMPT_INCLUDE,
     });
     if (inProgress) {
-      return NextResponse.json(serializeAttempt(inProgress, { reveal: false }), { status: 200 });
+      const { timeLimitMinutes } = await getAssessmentConfig();
+      return NextResponse.json(serializeAttempt(inProgress, { reveal: false, shuffled: true, timeLimitMinutes }), {
+        status: 200,
+      });
     }
 
     const certification = await prisma.topicCertification.findUnique({
@@ -158,7 +161,10 @@ export async function POST(req: NextRequest) {
       });
     });
 
-    return NextResponse.json(serializeAttempt(attempt, { reveal: false }), { status: 201 });
+    return NextResponse.json(
+      serializeAttempt(attempt, { reveal: false, shuffled: true, timeLimitMinutes: config.timeLimitMinutes }),
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error starting assessment:", error);
     return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });

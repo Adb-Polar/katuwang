@@ -1,10 +1,12 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreVertical, Pencil, Eye, EyeOff, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import FeedbackBanner from "@/components/ui/FeedbackBanner";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
 
@@ -20,6 +22,7 @@ export default function ClassManageMenu({
   hasEnrollments: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +37,7 @@ export default function ClassManageMenu({
         const res = await fetch(`/api/tutor/classes/${classId}`, { method: "DELETE" });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to delete class.");
+        toast.success("Class deleted.");
         router.push("/tutor/classes");
         return;
       }
@@ -45,6 +49,7 @@ export default function ClassManageMenu({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast.success(pendingAction === "cancel" ? "Class cancelled." : "Class marked as completed.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -65,6 +70,7 @@ export default function ClassManageMenu({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast.success(published ? "Class unpublished." : "Class published.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -78,7 +84,7 @@ export default function ClassManageMenu({
 
   return (
     <>
-      {error && <span className="text-2xs text-error">{error}</span>}
+      <FeedbackBanner variant="error" message={error || null} />
 
       <div className="dropdown dropdown-end">
         <div tabIndex={0} role="button" className="btn btn-outline btn-sm text-xs gap-1.5 cursor-pointer">

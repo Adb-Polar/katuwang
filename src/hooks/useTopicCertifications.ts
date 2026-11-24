@@ -1,3 +1,4 @@
+import { useToast } from "@/components/ui/Toast";
 import { useCallback, useState } from "react";
 
 import { useFetchList } from "./useFetchList";
@@ -15,6 +16,7 @@ export interface TopicCertification {
 }
 
 export function useTopicCertifications() {
+  const toast = useToast();
   const { data, loading, error, setError, refetch } = useFetchList<TopicCertification>(
     "/api/tutor/topic-certifications",
     "Could not retrieve topic certifications."
@@ -38,6 +40,7 @@ export function useTopicCertifications() {
         });
         const json = await res.json();
         if (!res.ok) throw new Error(json.error || "Failed to request assessment.");
+        toast.success("Assessment requested.");
         refetch();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to request assessment.");
@@ -45,7 +48,7 @@ export function useTopicCertifications() {
         setRequesting(null);
       }
     },
-    [refetch, setError]
+    [refetch, setError, toast]
   );
 
   return { certifications: data, loading, error, setError, refetch, statusFor, requestAssessment, requesting };

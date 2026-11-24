@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { ASSESSMENT_DEFAULTS, type ResolvedTopicConfig } from "@/lib/assessmentConfig";
+import { DEFAULT_ALLOWED_EMAIL_DOMAINS, isValidDomain, parseDomainList } from "@/lib/emailDomains";
 
 export const PLATFORM_SETTING_KEYS = [
   "requireCertificationForClassCreation",
@@ -44,7 +45,14 @@ export const ASSESSMENT_SETTING_KEYS = {
   questionCount: "assessmentQuestionCount",
   passPercent: "assessmentPassPercent",
   minBankSize: "assessmentMinBankSize",
+  timeLimitMinutes: "assessmentTimeLimitMinutes",
 } as const;
+
+/** 0 is a real value here (untimed), unlike the other fields where it means "unset". */
+function readTimeLimit(raw: string | undefined): number {
+  const n = Number.parseInt(raw ?? "", 10);
+  return Number.isFinite(n) && n >= 0 ? n : ASSESSMENT_DEFAULTS.timeLimitMinutes;
+}
 
 /** Resolve the live global assessment config, falling back to ASSESSMENT_DEFAULTS. */
 export async function getAssessmentConfig(): Promise<ResolvedTopicConfig> {
@@ -60,5 +68,18 @@ export async function getAssessmentConfig(): Promise<ResolvedTopicConfig> {
     questionCount: read(ASSESSMENT_SETTING_KEYS.questionCount, ASSESSMENT_DEFAULTS.questionCount),
     passPercent: read(ASSESSMENT_SETTING_KEYS.passPercent, ASSESSMENT_DEFAULTS.passPercent),
     minBankSize: read(ASSESSMENT_SETTING_KEYS.minBankSize, ASSESSMENT_DEFAULTS.minBankSize),
+    timeLimitMinutes: readTimeLimit(byKey.get(ASSESSMENT_SETTING_KEYS.timeLimitMinutes)),
   };
+}
+
+// ─── Email-domain allowlist ────────────────────────────────────────────────
+// One comma-separated `PlatformSetting` row. A missing or empty row falls back
+// to the defaults so registration can never be locked out by a blank list.
+
+export const ALLOWED_EMAIL_DOMAINS_KEY = "allowedEmailDomains";
+
+export async function getAllowedEmailDomains(): Promise<string[]> {
+  const row = await prisma.platformSetting.findUnique({ where: { key: ALLOWED_EMAIL_DOMAINS_KEY } });
+  const stored = parseDomainList(row?.value ?? "").filter(isValidDomain);
+  return stored.length > 0 ? stored : DEFAULT_ALLOWED_EMAIL_DOMAINS;
 }

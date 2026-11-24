@@ -1,5 +1,6 @@
 "use client";
 
+import { useToast } from "@/components/ui/Toast";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -74,6 +75,7 @@ export default function EditClassForm({
   suspendedUntil?: string | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const { topicsFor } = useSubjectCatalog();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
@@ -137,6 +139,7 @@ export default function EditClassForm({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast.success("Class details saved.");
       router.push(backHref);
       router.refresh();
     } catch (err) {

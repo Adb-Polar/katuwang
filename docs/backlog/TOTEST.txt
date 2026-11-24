@@ -872,3 +872,50 @@ Security-review fixes (Changes.md Part 57)
     "sees ->" text are readable on the dark background (contrast).
  [] / with registrationOpen turned off in /admin/settings: Create account still
     lands on a register page that explains it is closed (no dead end).
+
+UI / General / Tutor / Learner / Admin batch (Changes.md Part 84)
+ [] Run the migration on the real DB first (npx prisma db push), then re-seed or
+    set users.isSuperAdmin = 1 for the admin who should see the audit log.
+ [] Dark mode: toggle in the top bar on each portal, on /login and on the landing
+    page; reload keeps the choice; no light flash on reload; charts recolour.
+    Skim every page in dark for unreadable text or invisible buttons.
+ [] Learner + tutor sidebar say "Overview"; no Profile item; clicking the avatar
+    opens the profile in all three portals (admin: /admin/profile, change password works).
+ [] Every action shows a toast: create/edit/delete class, add/reschedule/cancel/complete
+    session, publish/unpublish, appeal, accept request, enroll, leave class, post/cancel request.
+ [] New class form: past dates cannot be picked; choosing a time that overlaps one of
+    your sessions shows the clash (class code + time) at once and disables Schedule;
+    two rows overlapping each other are flagged; "Duration" updates as you type.
+ [] Reschedule a session to its own current time -> no false "already booked" error.
+ [] Learner: enroll in a class that overlaps one you are in -> blocked, message names
+    the class and the date/time in YOUR time zone (server may run in UTC).
+ [] Learner tutor profile + Find Tutors show grade level and section, never the name
+    (unless showTutorRealNames is on).
+ [] Session test: two learners (and PRE vs POST for one learner) see different question
+    and option orders; reloading mid-attempt keeps the same order; tutor results still
+    line up per question.
+ [] Timed session test (set a limit in the test builder): countdown shows, turns red
+    under a minute, auto-submits at 0:00. Same for the tutor certification quiz with
+    Settings -> Time limit (minutes) > 0.
+ [] While taking a test, text cannot be selected, copied or right-clicked; after
+    submitting, the review can be copied normally.
+ [] Register with asa@qwqe, a@test.123 and a domain not on the list -> rejected with the
+    accepted domains listed. Add a domain in Settings -> Accepted email domains -> it works.
+ [] Google sign-in (needs GOOGLE_CLIENT_ID/SECRET + redirect URI
+    {NEXTAUTH_URL}/api/auth/callback/google): registered email signs in and lands on the
+    right portal (try an admin too); unregistered Google email is refused with a clear
+    message and NO account is created; a banned/suspended account is refused.
+ [] /contact while signed out: send a message -> appears in /admin/contact-messages,
+    admins get a notification; resolve with a note; re-open. 4th message within an hour
+    from one IP is throttled.
+ [] Suspended/banned login shows the "Contact an administrator" button.
+ [] Tutor: Students -> open a learner -> Report this learner -> shows in /tutor/reports
+    and in admin Abuse Reports (Learner reports filter); admin resolve notifies the tutor
+    with a link to /tutor/reports. A second open report on the same learner is refused.
+ [] Admin (staff.admin@katuwang.test): no Audit Log in the sidebar, /admin/audit-log
+    redirects to Access Denied, no "View audit log" links. Super admin (admin@katuwang.test) sees all.
+ [] Admin dashboard: no "Recent activity"; charts respond to Period / Grade / Subject;
+    custom range needs both dates; URL keeps the filters on reload; Export CSV lists them;
+    /admin/reports redirects to /admin.
+ [] Phone width (375px): Overview pages, new class form (date/start/end) and the admin
+    filter bar have no horizontal scroll.
