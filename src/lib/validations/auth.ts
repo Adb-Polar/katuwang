@@ -2,7 +2,7 @@ import { z } from "zod";
 import { GradeLevel } from "@prisma/client";
 import { passwordField } from "@/lib/validations/password";
 import { personNameField } from "@/lib/validations/personNameField";
-import { SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
+import { LRN, SECTION_NAME } from "@/lib/validations/textRules";
 
 /**
  * Shared registration fields validation schema.
@@ -26,10 +26,10 @@ export const commonRegisterSchema = z.object({
   gradeLevel: z.nativeEnum(GradeLevel, {
     message: "Invalid grade level.",
   }),
+  // Stored in the `studentIdNumber` column; the value is the learner's LRN.
   studentIdNumber: z.string().trim()
-    .min(1, "Student ID Number is required.")
-    .max(191, "Student ID Number cannot exceed 191 characters.")
-    .regex(STUDENT_ID.regex, `Student ID Number: ${STUDENT_ID.message}`),
+    .min(1, "LRN is required.")
+    .regex(LRN.regex, `LRN: ${LRN.message}`),
   adviserTeacherName: personNameField("Adviser Teacher's Name", 191),
   section: z.string().trim().min(1, "Section is required.").max(50, "Section cannot exceed 50 characters.")
     .regex(SECTION_NAME.regex, `Section: ${SECTION_NAME.message}`),

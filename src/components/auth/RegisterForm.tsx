@@ -11,7 +11,7 @@ import { Eye, EyeOff } from "lucide-react";
 import AuthHeading from "./AuthHeading";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
-import { PERSON_NAME, SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
+import { LRN, LRN_LENGTH, PERSON_NAME, SECTION_NAME } from "@/lib/validations/textRules";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
 
 type RegisterType = "LEARNER" | "TUTOR";
@@ -162,18 +162,18 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
           </FormField>
         </div>
 
-        <FormField size="md" label="Student ID Number" required>
+        <FormField size="md" label="LRN (Learner Reference Number)" required>
           <input
             type="text"
             name="studentIdNumber"
             inputMode="numeric"
-            pattern={STUDENT_ID.pattern}
-            title={STUDENT_ID.message}
+            pattern={LRN.pattern}
+            title={LRN.message}
             value={form.studentIdNumber}
             onChange={handleChange}
             required
-            maxLength={191}
-            placeholder="Enter your Student ID Number"
+            maxLength={LRN_LENGTH}
+            placeholder="12-digit LRN"
             className="input input-bordered w-full"
           />
         </FormField>

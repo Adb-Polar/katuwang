@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { LOCATION_TEXT, PERSON_NAME, SECTION_NAME, STUDENT_ID } from "@/lib/validations/textRules";
+import { LOCATION_TEXT, LRN, PERSON_NAME, SECTION_NAME } from "@/lib/validations/textRules";
 import { registerSchema } from "@/lib/validations/auth";
 import { updateProfileSchema } from "@/lib/validations/profile";
 import { classDetailsSchema } from "@/lib/validations/class";
@@ -11,7 +11,7 @@ describe("text rules", () => {
   it.each([
     [PERSON_NAME, ["Juan", "Ma. Cristina", "O'Brien-Dela Cruz", "Peña", "José", "Ñoño"], [...JUNK, "12345", "Juan2", ".Juan", "-", "A\u0347\u033d\u0351ngelica"]],
     [SECTION_NAME, ["Rizal", "7-A", "STEM 1", "Sampaguita"], [...JUNK, "<b>7-A</b>", "-A"]],
-    [STUDENT_ID, ["123456789012", "2024-00123"], [...JUNK, "abc", "12a4", "-123"]],
+    [LRN, ["123456789012", "000000000001"], [...JUNK, "abc", "12a4", "-123", "2024-00123", "12345678901", "1234567890123", "1234 5678 9012"]],
     [LOCATION_TEXT, ["Bldg. 2", "Rm 101", "Annex B/3", "#4", "Science Lab"], [...JUNK, "<b>", "Room;DROP"]],
   ])("%#: accepts real values and rejects junk", (rule, good, bad) => {
     for (const value of good) expect(rule.regex.test(value), value).toBe(true);
@@ -19,9 +19,9 @@ describe("text rules", () => {
   });
 
   it("each client pattern compiles under the browser's v flag and matches the server regex", () => {
-    for (const rule of [PERSON_NAME, SECTION_NAME, STUDENT_ID, LOCATION_TEXT]) {
+    for (const rule of [PERSON_NAME, SECTION_NAME, LRN, LOCATION_TEXT]) {
       const browser = new RegExp(`^(?:${rule.pattern})$`, "v");
-      for (const value of ["Juan", "7-A", "2024-001", "Bldg. 2/#3", "<x>", "@@"]) {
+      for (const value of ["Juan", "7-A", "2024-001", "123456789012", "Bldg. 2/#3", "<x>", "@@"]) {
         expect(browser.test(value), `${rule.pattern} / ${value}`).toBe(rule.regex.test(value));
       }
     }
@@ -39,7 +39,9 @@ describe("schemas apply the text rules", () => {
     ["firstName", "12345", "First name:"],
     ["lastName", "<script>", "Last name:"],
     ["adviserTeacherName", "<img src=x>", "Adviser Teacher's Name:"],
-    ["studentIdNumber", "abc!@#", "Student ID Number:"],
+    ["studentIdNumber", "abc!@#", "LRN:"],
+    ["studentIdNumber", "12345678901", "LRN:"],
+    ["studentIdNumber", "1234567890123", "LRN:"],
     ["section", "!!!@@@", "Section:"],
   ])("register rejects %s = %j", (field, value, prefix) => {
     const result = registerSchema.safeParse({ ...base, [field]: value });

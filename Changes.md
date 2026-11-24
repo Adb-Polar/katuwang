@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [97](#part-97) | **Student ID field is now a 12-digit LRN** | The registration "Student ID Number" input is labelled "LRN (Learner Reference Number)" and accepts exactly 12 digits (no hyphens, spaces or letters). Validation only — stored values are untouched. | See Part 97 below. |
 | [96](#part-96) | **Cleanup script for existing user names** | `pnpm names:cleanup` previews (and with `--apply` saves) the Part 95 name rules for users already in the database: fixes casing and whitespace, strips Zalgo marks, and lists names it cannot repair. Names now also always start with a capital letter. | See Part 96 below. |
 | [95](#part-95) | **Name normalization + Zalgo rejection** | Names are cleaned when saved: all-lowercase or all-uppercase names are title-cased (`alejandro d beato` → `Alejandro D Beato`), whitespace is collapsed, accents are stored composed, and stacked/decorative combining marks (Zalgo text) are rejected. Applies to register (first, last, adviser) and create-admin. | See Part 95 below. |
 | [94](#part-94) | **Backend request queue (load shedding)** | A burst of sign-ins, report downloads or searches now waits in a bounded queue instead of freezing the server; when the queue is full the client gets `503` + `Retry-After` ("The server is busy right now"). | See Part 94 below. New `src/lib/requestQueue.ts` + `src/lib/password.ts`; three lanes (`password`, `report`, `read`). |
@@ -4091,6 +4092,23 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-97"></a>
+## Part 97 — Student ID field is now a 12-digit LRN (2026-11-24)
+
+Input validation only. The `studentIdNumber` column, API field name and every stored
+value are unchanged; existing accounts with an older-format ID are not affected.
+
+- `src/lib/validations/textRules.ts`: `STUDENT_ID` (digits and hyphens, any length)
+  replaced by `LRN` — exactly `LRN_LENGTH` (12) digits.
+- `src/lib/validations/auth.ts`: `studentIdNumber` uses the `LRN` rule; messages read
+  "LRN is required." / "LRN: Enter exactly 12 digits."
+- `RegisterForm.tsx`: label "LRN (Learner Reference Number)", `maxLength` 12,
+  placeholder "12-digit LRN". `RegistrationApprovalTable.tsx`: label "LRN:".
+
+**Tests.** `textRules.test.ts` (11-digit, 13-digit, hyphenated and spaced values
+rejected), `RegisterForm.test.tsx` (placeholder + `maxLength`); fixtures in five test
+files moved from `001-234` to a 12-digit value.
 
 <a id="part-96"></a>
 ## Part 96 — Cleanup script for existing user names (2026-11-24)

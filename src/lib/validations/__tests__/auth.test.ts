@@ -4,7 +4,7 @@ import { registerSchema } from "@/lib/validations/auth";
 function baseLearner(overrides: Record<string, unknown> = {}) {
   return {
     type: "LEARNER",
-    studentIdNumber: "001-234",
+    studentIdNumber: "123456789012",
     adviserTeacherName: "Maria Santos",
     firstName: "Juan",
     lastName: "Dela Cruz",
@@ -32,8 +32,8 @@ describe("registerSchema", () => {
         expect(registerSchema.safeParse(baseLearner({ type, [field]: value })).success).toBe(false);
       }
     }
-    const parsed = registerSchema.parse(baseLearner({ type, studentIdNumber: "  001-234  ", adviserTeacherName: "  Maria Santos  " }));
-    expect(parsed.studentIdNumber).toBe("001-234");
+    const parsed = registerSchema.parse(baseLearner({ type, studentIdNumber: "  123456789012  ", adviserTeacherName: "  Maria Santos  " }));
+    expect(parsed.studentIdNumber).toBe("123456789012");
     expect(parsed.adviserTeacherName).toBe("Maria Santos");
   });
 

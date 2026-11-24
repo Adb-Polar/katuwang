@@ -32,11 +32,11 @@ describe("GET /api/admin/registrations", () => {
 
   it.each(["STUDENT_TUTOR", "STUDENT_LEARNER"])("returns student details only through the admin queue for %s", async role => {
     getServerSessionMock.mockResolvedValue(admin);
-    findManyMock.mockResolvedValue([{ id: "U1", role, studentIdNumber: "001-234", adviserTeacherName: "Maria Santos" }, { id: "old", role, studentIdNumber: null, adviserTeacherName: null }]);
+    findManyMock.mockResolvedValue([{ id: "U1", role, studentIdNumber: "123456789012", adviserTeacherName: "Maria Santos" }, { id: "old", role, studentIdNumber: null, adviserTeacherName: null }]);
     countMock.mockResolvedValue(2);
     const res = await GET(makeRequest());
     expect(res.status).toBe(200);
-    expect((await res.json()).users[0]).toMatchObject({ studentIdNumber: "001-234", adviserTeacherName: "Maria Santos" });
+    expect((await res.json()).users[0]).toMatchObject({ studentIdNumber: "123456789012", adviserTeacherName: "Maria Santos" });
     expect(findManyMock).toHaveBeenCalledWith(expect.objectContaining({ select: expect.objectContaining({ studentIdNumber: true, adviserTeacherName: true }) }));
   });
 

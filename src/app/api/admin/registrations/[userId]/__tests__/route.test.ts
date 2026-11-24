@@ -69,7 +69,7 @@ describe("PATCH /api/admin/registrations/[userId]", () => {
   it.each(["STUDENT_TUTOR", "STUDENT_LEARNER"])("preserves %s school details on approval, including legacy nulls", async role => {
     getServerSessionMock.mockResolvedValue(admin);
     for (const details of [
-      { studentIdNumber: "001-234", adviserTeacherName: "Maria Santos" },
+      { studentIdNumber: "123456789012", adviserTeacherName: "Maria Santos" },
       { studentIdNumber: null, adviserTeacherName: null },
     ]) {
       const stored = { id: "U1", anonymousId: "STU-0001", role, status: "PENDING", ...details };

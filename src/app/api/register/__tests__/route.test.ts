@@ -47,7 +47,7 @@ function makeRequest(body: unknown) {
 
 const validLearner = {
   type: "LEARNER",
-  studentIdNumber: "001-234",
+  studentIdNumber: "123456789012",
   adviserTeacherName: "Maria Santos",
   firstName: "Juan",
   lastName: "Dela Cruz",
@@ -67,11 +67,11 @@ describe("POST /api/register", () => {
     userFindUnique.mockResolvedValue(null);
     userCreate.mockResolvedValue({ id: "U1", anonymousId: "STU-0001", role: type === "TUTOR" ? "STUDENT_TUTOR" : "STUDENT_LEARNER" });
     transactionMock.mockImplementation(async cb => cb({ user: { create: userCreate } }));
-    const res = await POST(makeRequest({ ...validLearner, type, studentIdNumber: " 001-234 ", adviserTeacherName: " Maria Santos " }));
+    const res = await POST(makeRequest({ ...validLearner, type, studentIdNumber: " 123456789012 ", adviserTeacherName: " Maria Santos " }));
     expect(res.status).toBe(201);
     expect((await res.json()).pendingApproval).toBe(requireApproval);
     const data = userCreate.mock.calls[0][0].data;
-    expect(data.studentIdNumber).toBe("001-234");
+    expect(data.studentIdNumber).toBe("123456789012");
     expect(data.adviserTeacherName).toBe("Maria Santos");
     expect(data.status).toBe(requireApproval ? "PENDING" : undefined);
   });

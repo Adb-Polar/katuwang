@@ -20,7 +20,7 @@ describe("student registration forms", () => {
     const id = host.querySelector<HTMLInputElement>('[name="studentIdNumber"]')!;
     const adviser = host.querySelector<HTMLInputElement>('[name="adviserTeacherName"]')!;
     expect(id.type).toBe("text"); expect(id.required).toBe(true);
-    expect(id.placeholder).toBe("Enter your Student ID Number");
+    expect(id.placeholder).toBe("12-digit LRN"); expect(id.maxLength).toBe(12);
     expect(adviser.required).toBe(true); expect(adviser.placeholder).toBe("Enter your adviser's full name");
     // Native constraints and the shared ValidatedForm also catch whitespace.
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(id, "   ");

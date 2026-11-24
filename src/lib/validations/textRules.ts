@@ -26,10 +26,12 @@ export const SECTION_NAME = rule(
   "Use letters, numbers, spaces or hyphens only."
 );
 
-/** School-issued student ID (LRN or school number): digits, optionally grouped by hyphens. */
-export const STUDENT_ID = rule(
-  "\\d[\\d\\-]*",
-  "Use numbers and hyphens only."
+export const LRN_LENGTH = 12;
+
+/** DepEd Learner Reference Number: exactly 12 digits. */
+export const LRN = rule(
+  `\\d{${LRN_LENGTH}}`,
+  `Enter exactly ${LRN_LENGTH} digits.`
 );
 
 /** Building or room, e.g. "Bldg. 2", "Rm 101", "Annex B/3", "#4". */

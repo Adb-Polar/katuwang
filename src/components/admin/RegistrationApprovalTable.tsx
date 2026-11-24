@@ -46,7 +46,7 @@ interface PendingUser {
 function StudentRegistrationDetails({ user }: { user: PendingUser }) {
   return (
     <dl className="mt-2 space-y-1 text-sm text-(--kt-muted) whitespace-normal break-words">
-      <div><dt className="inline font-medium">Student ID number: </dt><dd className="inline">{user.studentIdNumber?.trim() || "Not provided"}</dd></div>
+      <div><dt className="inline font-medium">LRN: </dt><dd className="inline">{user.studentIdNumber?.trim() || "Not provided"}</dd></div>
       <div><dt className="inline font-medium">Adviser teacher: </dt><dd className="inline">{user.adviserTeacherName?.trim() || "Not provided"}</dd></div>
     </dl>
   );

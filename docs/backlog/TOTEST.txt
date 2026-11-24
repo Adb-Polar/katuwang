@@ -1336,3 +1336,5 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Name cleanup (Part 96): `pnpm names:cleanup` against the local DB lists the expected before -> after names and writes nothing (re-running shows the same list).
  [ ] Name cleanup (Part 96): `pnpm names:cleanup --apply` updates them; a second dry run reports 0 to update; /admin/users shows the cleaned names (STU-0337 reads "Angelica Santos").
  [ ] Names (Part 96): /register with first name "alejandro D" is stored as "Alejandro D".
+ [ ] LRN (Part 97): /register/learner and /register/tutor show "LRN (Learner Reference Number)"; the field stops at 12 characters; 11 digits, letters or hyphens are blocked with "Enter exactly 12 digits."; a 12-digit LRN registers.
+ [ ] LRN (Part 97): /admin registration approvals shows "LRN:" and still displays older accounts' existing IDs unchanged.
