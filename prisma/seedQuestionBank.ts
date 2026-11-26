@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 import { loadQuestionBank } from "./questionBankData";
 import { applySubjectCatalog } from "./seedSubjectCatalog";
+import { SEED_TRANSACTION_TIMEOUT_MS } from "./seedTransaction";
 
 export interface QuestionSeedOptions {
   db?: PrismaClient;
@@ -81,7 +82,7 @@ export async function seedQuestionBankDatabase(options: QuestionSeedOptions = {}
     };
     if (operationKey && !options.dryRun) await tx.platformSetting.create({ data: { key: operationKey, value: JSON.stringify({ revision: bank.revision, completedAt: new Date().toISOString(), importedQuestions: pending.length, retiredQuestions: retiring.length }) } });
     return result;
-  }, { timeout: 180000, isolationLevel: "Serializable" });
+  }, { timeout: SEED_TRANSACTION_TIMEOUT_MS, isolationLevel: "Serializable" });
   return result;
 }
 

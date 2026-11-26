@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [103](#part-103) | **Catalog seed no longer times out on a remote database** | `pnpm seed` and the essentials seed failed against the production database with a transaction timeout after three minutes. The import now writes topics in bulk and finishes in about a fifth of the database calls; the result is identical. Seed transactions also get a 10-minute limit, adjustable with `SEED_TRANSACTION_TIMEOUT_MS`. | See Part 103 below. |
 | [102](#part-102) | **Render deploys apply migrations automatically** | Deploying to Render now applies any pending database migrations as the first step of the build, so new code never runs against an old schema. A failed migration stops the deploy and the previous version stays live. Local `pnpm build` is unaffected. | See Part 102 below. |
 | [101](#part-101) | **Contact an administrator (`feat/ui-ux-batch`)** | A public `/contact` form lets anyone write to the administrators without signing in, including people who are suspended, banned, declined or still pending. It is linked from the login page, the account-status pages and the public footer. Admins read and close messages in a new "Contact messages" inbox with an open-count badge. A forced sign-out now explains itself on the login page. **Schema change: migration `20261126020000_add_contact_messages`.** | See Part 101 below. |
 | [100](#part-100) | **Tutors can report learners (`feat/ui-ux-batch`)** | A tutor can report a learner who has joined one of their classes, from that learner's student page, choosing from learner-conduct reasons. "My reports" in the tutor portal shows each report and its outcome. Admins review them in Abuse reports with a "Learner reports" filter; the tutor is notified of the decision. Learners stay anonymous to the tutor. **Schema change: migration `20261126010000_add_learner_reports`.** | See Part 100 below. |
@@ -4096,6 +4097,41 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-103"></a>
+## Part 103 — Catalog seed no longer times out on a remote database (2026-11-26)
+
+### Symptom
+`pnpm exec tsx prisma/seedEssentials.ts` against the production Aiven database failed with
+Prisma `P2028` ("expired transaction… timeout 180000 ms"). The ID counters were saved; the
+catalog rolled back, so no subjects or topics were written.
+
+### Root cause
+`applySubjectCatalog` (`prisma/seedSubjectCatalog.ts`) ran one statement at a time inside a
+single interactive transaction: an upsert per subject and per topic, about 1,100 statements.
+Each is a network round trip, so a remote database took longer than the 180 s limit.
+
+### Fix
+- Topics are written in bulk from the snapshot the function already loads: one `createMany`
+  per subject for topics the database lacks, and an `update` by id only for topics whose
+  name, order, grade levels or curriculum differ. About 230 statements on an empty database,
+  about 200 on a re-run.
+- Behaviour is unchanged: ids are kept, a disabled subject or topic stays disabled, topics no
+  longer in the catalog are deactivated, name matching ignores case.
+- New `prisma/seedTransaction.ts`: `SEED_TRANSACTION_TIMEOUT_MS`, 10 minutes by default and
+  overridable by an environment variable of the same name. Used by the catalog seed, the
+  question bank seed and the curriculum rebuild, which each hard-coded 180000.
+
+### Verification (local scratch MariaDB)
+- A fresh database seeded with the old and the new code holds an identical catalog
+  (row-for-row comparison of subjects and topics); a re-run changes nothing and keeps every id.
+- A catalog topic edited by hand (name case, order, grade levels) is restored with its id; a
+  disabled topic stays disabled; a topic not in the catalog is deactivated.
+- The normally skipped integration tests `seedCurriculum.integration.test.ts` and
+  `seedQuestionBank.integration.test.ts` pass on their disposable local databases.
+- Full sequence on a fresh database: 47 subjects, 292 topics, 1 super admin, 5,840 questions,
+  23,360 options. tsc clean, lint 0 errors, 1808 tests passed.
+- **Not verified:** the timing against the production database, which this session cannot reach.
 
 <a id="part-102"></a>
 ## Part 102 — Render deploys apply migrations automatically (2026-11-26)

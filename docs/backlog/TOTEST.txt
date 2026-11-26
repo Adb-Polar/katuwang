@@ -1391,3 +1391,8 @@ Migrations on Render deploy (Changes.md Part 102)
  [ ] First Render deploy of this branch: the build log shows "[migrate-on-deploy] Applying pending migrations…" followed by the three new migrations (add_assessment_time_limits, add_learner_reports, add_contact_messages), then the Next.js build; the site then loads /contact and an admin can open Contact messages.
  [ ] A second deploy with no new migrations logs "No pending migrations to apply." and builds normally.
  [ ] Local `pnpm build` logs "Skipping migrations (not a Render build)." and does not touch the database.
+
+Catalog seed on a remote database (Changes.md Part 103)
+ [ ] Against the production database: `pnpm exec tsx prisma/seedEssentials.ts` finishes without a P2028 timeout and reports 47 subjects / 292 topics; `pnpm seed` run again reports reusedTopics 292 and changes nothing.
+ [ ] `pnpm seed:questions` finishes against the production database (5,840 questions). If it times out, re-run with SEED_TRANSACTION_TIMEOUT_MS=1800000.
+ [ ] After seeding, /register shows the subject list and an admin sees Subjects & topics populated.

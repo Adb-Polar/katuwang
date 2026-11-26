@@ -5,6 +5,7 @@ import { Prisma, type GradeLevel, type PrismaClient } from "@prisma/client";
 import { SUBJECT_CATALOG } from "../src/lib/subjectCatalog";
 import { qualificationQuestionWhere } from "../src/lib/qualificationBank";
 import { applySubjectCatalog } from "./seedSubjectCatalog";
+import { SEED_TRANSACTION_TIMEOUT_MS } from "./seedTransaction";
 import { loadQuestionBank } from "./questionBankData";
 import { curriculumDemoRecipe, DEMO_TAG, isSeedEmail, REBUILD_REVISION, seedId } from "./curriculumDemoData";
 import { archivedSeedQuestions, matchesArchivedSeedQuestion } from "./archivedSeedQuestions";
@@ -324,5 +325,5 @@ export async function rebuildCurriculumData(db: PrismaClient, input: {
     await tx.auditLog.create({ data: { adminId: input.adminId, action: "CURRICULUM_SEED_REBUILT", targetType: "SEED_DATA_REBUILD", targetId: input.operationId,
       reason: JSON.stringify({ reason: input.reason, revision: REBUILD_REVISION, backupSha256, created: summary.created, preserved: plan.preserved }) } });
     return summary;
-  }, { timeout: 180000, maxWait: 10000, isolationLevel: "Serializable" });
+  }, { timeout: SEED_TRANSACTION_TIMEOUT_MS, maxWait: 10000, isolationLevel: "Serializable" });
 }
