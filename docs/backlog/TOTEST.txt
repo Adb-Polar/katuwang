@@ -1386,3 +1386,8 @@ Contact an administrator (Changes.md Part 101)
  [ ] "Mark as handled" shows a toast and moves the message to the Handled tab with who handled it and when; "Reopen" brings it back.
  [ ] Sending six messages within an hour from one connection: the sixth is refused with "Too many requests".
  [ ] Dark mode: the inbox is readable; the /contact page stays in the light public theme.
+
+Migrations on Render deploy (Changes.md Part 102)
+ [ ] First Render deploy of this branch: the build log shows "[migrate-on-deploy] Applying pending migrations…" followed by the three new migrations (add_assessment_time_limits, add_learner_reports, add_contact_messages), then the Next.js build; the site then loads /contact and an admin can open Contact messages.
+ [ ] A second deploy with no new migrations logs "No pending migrations to apply." and builds normally.
+ [ ] Local `pnpm build` logs "Skipping migrations (not a Render build)." and does not touch the database.

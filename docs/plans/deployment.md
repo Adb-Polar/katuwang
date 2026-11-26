@@ -55,8 +55,12 @@ connections.
    - **Branch:** `production` (see §8) or `main`
    - **Auto-Deploy:** On
 4. Add environment variables (§5).
-5. Add a **pre-deploy command** for migrations: `pnpm exec prisma migrate deploy`
-   (Render supports a dedicated "Pre-Deploy Command" field).
+5. Migrations need no setting: on Render, `pnpm build` applies pending migrations before
+   `next build` (`scripts/migrate-on-deploy.mjs`, which only acts when Render's `RENDER=true`
+   is present). A failed migration fails the build, so the previous version stays live.
+   `DATABASE_URL` must be set on the service. A Pre-Deploy Command of
+   `pnpm exec prisma migrate deploy`, if already configured, is harmless: the second run finds
+   nothing to apply.
 6. First deploy. Watch the log for a successful `next start` and an open port.
 7. Add the custom domain (§7) under **Settings → Custom Domains**; copy the
    CNAME / A record Render shows and set it at the registrar.
@@ -318,8 +322,8 @@ guard, not instead of it.
   only, never generates or prompts.
 - **Never** `prisma db push` or `prisma migrate dev` against the production DB.
 - Order on every release: pull code → `migrate deploy` → `pnpm build` →
-  restart. (Render: put `migrate deploy` in the Pre-Deploy Command so a failed
-  migration aborts the release.)
+  restart. (Render: this order is built into `pnpm build` since Changes.md Part 102, so a
+  failed migration aborts the release. Other hosts still run `pnpm db:deploy` by hand.)
 - Note: some recent local schema changes (session pre/post-tests, subjects/
   topics) were applied locally via `db push` and may not have a committed
   migration file yet. **Before the first production deploy, reconcile

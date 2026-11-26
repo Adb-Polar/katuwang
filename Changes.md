@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [102](#part-102) | **Render deploys apply migrations automatically** | Deploying to Render now applies any pending database migrations as the first step of the build, so new code never runs against an old schema. A failed migration stops the deploy and the previous version stays live. Local `pnpm build` is unaffected. | See Part 102 below. |
 | [101](#part-101) | **Contact an administrator (`feat/ui-ux-batch`)** | A public `/contact` form lets anyone write to the administrators without signing in, including people who are suspended, banned, declined or still pending. It is linked from the login page, the account-status pages and the public footer. Admins read and close messages in a new "Contact messages" inbox with an open-count badge. A forced sign-out now explains itself on the login page. **Schema change: migration `20261126020000_add_contact_messages`.** | See Part 101 below. |
 | [100](#part-100) | **Tutors can report learners (`feat/ui-ux-batch`)** | A tutor can report a learner who has joined one of their classes, from that learner's student page, choosing from learner-conduct reasons. "My reports" in the tutor portal shows each report and its outcome. Admins review them in Abuse reports with a "Learner reports" filter; the tutor is notified of the decision. Learners stay anonymous to the tutor. **Schema change: migration `20261126010000_add_learner_reports`.** | See Part 100 below. |
 | [99](#part-99) | **Time limits for tests and quizzes (`feat/ui-ux-batch`)** | A tutor can give a session test a time limit (1–180 minutes) that applies to its pre-test and post-test; admins can set one for the tutor certification quiz. The learner or tutor sees a countdown that survives a refresh, and the quiz submits itself at zero. A late hand-in is still graded and marked as late. **Schema change: three nullable columns, migration `20261126000000_add_assessment_time_limits`.** | See Part 99 below. |
@@ -4095,6 +4096,30 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-102"></a>
+## Part 102 — Render deploys apply migrations automatically (2026-11-26)
+
+Nothing in the repository ran migrations on deploy: `build` was `next build`, there is no
+`render.yaml`, and `docs/plans/deployment.md` only recommended a Pre-Deploy Command in the
+Render dashboard. Parts 99–101 add three migrations, so a deploy without that setting would
+have run the new code against the old schema.
+
+- `scripts/migrate-on-deploy.mjs` (new): runs the project's `prisma migrate deploy` when
+  `RENDER=true` (set by Render in every build). Anywhere else it prints a skip line and exits
+  0, so a local `pnpm build` cannot migrate whatever `DATABASE_URL` points at. Exits 1 when
+  `DATABASE_URL` is missing; passes on Prisma's exit code otherwise.
+- `package.json`: `build` is now `node scripts/migrate-on-deploy.mjs && next build`.
+  `db:deploy` is unchanged for manual use.
+- `docs/plans/deployment.md` updated.
+
+`prisma migrate deploy` applies committed migrations the database has not recorded and
+nothing else; it does not reset or rewrite data, and a second run is a no-op.
+
+**Verified locally** (scratch MariaDB only): no `RENDER` → skipped; `RENDER=true` without
+`DATABASE_URL` → exit 1; up-to-date database → "No pending migrations"; empty database → all
+45 migrations applied; unreachable database → exit 1. **Not verified:** a real Render build,
+which also needs Render's builder to reach the cloud database.
 
 <a id="part-101"></a>
 ## Part 101 — Contact an administrator (2026-11-26)
