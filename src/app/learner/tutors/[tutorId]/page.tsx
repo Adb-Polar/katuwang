@@ -10,7 +10,7 @@ import AnonymousIdText from "@/components/ui/AnonymousIdText";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import WeeklyTimetable from "@/components/schedule/WeeklyTimetable";
 import RequestTopicButton from "@/components/learner/RequestTopicButton";
-import ReportButton from "@/components/learner/ReportButton";
+import ReportButton from "@/components/reports/ReportButton";
 import UserAvatar from "@/components/profile/UserAvatar";
 import TutorProfileClassTabs, {
   type TutorProfileClass,

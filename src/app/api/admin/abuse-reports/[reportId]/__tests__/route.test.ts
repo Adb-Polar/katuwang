@@ -99,6 +99,26 @@ describe("PATCH /api/admin/abuse-reports/[reportId]", () => {
     );
   });
 
+  it("sends a learner reporter to their reports in the learner portal", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    reportFindUnique.mockResolvedValue({ ...pendingReport, reporter: { role: "STUDENT_LEARNER" } });
+    await PATCH(req({ decision: "RESOLVE" }), params);
+    expect(notificationCreate.mock.calls[0][0].data.link).toBe("/learner/reports");
+  });
+
+  it("names the learner and links a tutor reporter to the tutor portal", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    reportFindUnique.mockResolvedValue({
+      id: "r1", status: "PENDING", reporterId: "T1", targetType: "LEARNER", class: null, reportedTutorProfile: null,
+      reportedLearner: { anonymousId: "STU-0007" }, reporter: { role: "STUDENT_TUTOR" },
+    });
+    await PATCH(req({ decision: "DISMISS" }), params);
+    const { data } = notificationCreate.mock.calls[0][0];
+    expect(data).toMatchObject({ userId: "T1", type: "REPORT_REVIEWED", link: "/tutor/reports" });
+    expect(data.message).toContain("learner STU-0007");
+    expect(auditCreate.mock.calls[0][0].data.reason).toBe("learner STU-0007");
+  });
+
   it("DISMISS records a dismissal", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     const res = await PATCH(req({ decision: "DISMISS" }), params);

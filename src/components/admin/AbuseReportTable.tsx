@@ -24,17 +24,22 @@ const PAGE_SIZE = ADMIN_PAGE_SIZE;
 
 interface Report {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  targetType: "TUTOR" | "CLASS" | "LEARNER";
   violations: string[];
   details: string | null;
   status: "PENDING" | "RESOLVED" | "DISMISSED";
   resolutionNote: string | null;
   createdAt: string;
   reviewedAt: string | null;
-  reporter: { anonymousId: string };
+  reporter: { anonymousId: string; role?: string };
   class: { id: string; code: string; subject: string; status: string } | null;
   tutor: { id: string; anonymousId: string } | null;
+  learner: { id: string; anonymousId: string } | null;
 }
+
+const TARGET_NOUN: Record<Report["targetType"], string> = { TUTOR: "Tutor", CLASS: "Class", LEARNER: "Learner" };
+/** Tutors file the learner reports; learners file the rest. */
+const reporterRole = (r: Report) => (r.reporter.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER");
 
 type Tab = "pending" | "resolved" | "dismissed";
 const TAB_STATUS: Record<Tab, string> = {
@@ -45,7 +50,7 @@ const TAB_STATUS: Record<Tab, string> = {
 
 export default function AbuseReportTable() {
   const [tab, setTab] = useState<Tab>("pending");
-  const [targetFilter, setTargetFilter] = useState<"" | "TUTOR" | "CLASS">("");
+  const [targetFilter, setTargetFilter] = useState<"" | Report["targetType"]>("");
   const [success, setSuccess] = useState("");
   const [resolveTarget, setResolveTarget] = useState<Report | null>(null);
   const [dismissTarget, setDismissTarget] = useState<Report | null>(null);
@@ -75,10 +80,16 @@ export default function AbuseReportTable() {
   );
 
   const targetName = (r: Report) =>
-    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
+    r.targetType === "TUTOR" ? (r.tutor?.anonymousId ?? "—") : r.targetType === "LEARNER" ? (r.learner?.anonymousId ?? "—") : `${r.class?.subject ? subjectDisplayLabel(r.class.subject) : "—"} · ${r.class?.code ?? "—"}`;
 
   const targetDetails = (r: Report) => r.targetType === "TUTOR" ? (
     r.tutor ? <AnonymousIdText id={r.tutor.anonymousId} role="TUTOR" /> : "—"
+  ) : r.targetType === "LEARNER" ? (
+    r.learner ? (
+      <Link href={`/admin/users/${r.learner.id}`} className="hover:underline">
+        <AnonymousIdText id={r.learner.anonymousId} role="LEARNER" />
+      </Link>
+    ) : "—"
   ) : r.class ? (
     <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
       {r.class.code} · {subjectDisplayLabel(r.class.subject)}
@@ -135,12 +146,13 @@ export default function AbuseReportTable() {
             <select
               aria-label="Filter by report target"
               value={targetFilter}
-              onChange={(e) => setTargetFilter(e.target.value as "" | "TUTOR" | "CLASS")}
+              onChange={(e) => setTargetFilter(e.target.value as "" | Report["targetType"])}
               className="select select-bordered w-full sm:w-auto focus:select-primary"
             >
               <option value="">All targets</option>
               <option value="TUTOR">Tutor reports</option>
               <option value="CLASS">Class reports</option>
+              <option value="LEARNER">Learner reports</option>
             </select>
           </div>
 
@@ -154,11 +166,11 @@ export default function AbuseReportTable() {
               {reports.map((r) => (
                 <article key={r.id} className="space-y-2 border-b border-(--kt-border) py-4 last:border-b-0">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-sm text-(--kt-muted)">{r.targetType === "TUTOR" ? "Tutor report" : "Class report"}</span>
+                    <span className="text-sm text-(--kt-muted)">{TARGET_NOUN[r.targetType]} report</span>
                     <span className="text-sm text-(--kt-muted)">{formatDateTime(tab === "pending" ? r.createdAt : r.reviewedAt ?? r.createdAt)}</span>
                   </div>
                   <div className="font-medium">{targetDetails(r)}</div>
-                  <p className="text-sm text-(--kt-muted)">Reported by <AnonymousIdText id={r.reporter.anonymousId} role="LEARNER" /></p>
+                  <p className="text-sm text-(--kt-muted)">Reported by <AnonymousIdText id={r.reporter.anonymousId} role={reporterRole(r)} /></p>
                   <p>{r.violations.map(violationLabel).join(", ")}</p>
                   {r.details && <p className="text-sm text-(--kt-muted) whitespace-normal break-words">{r.details}</p>}
                   {tab !== "pending" && <p className="text-sm text-(--kt-muted)">Admin note: {r.resolutionNote || "No note"}</p>}
@@ -194,20 +206,18 @@ export default function AbuseReportTable() {
                   {reports.map((r) => (
                     <tr key={r.id} className="align-top">
                       <td>
-                        <div className="text-sm text-(--kt-muted)">{r.targetType === "TUTOR" ? "Tutor" : "Class"}</div>
+                        <div className="text-sm text-(--kt-muted)">{TARGET_NOUN[r.targetType]}</div>
                         <div className="whitespace-nowrap font-medium">
-                          {r.targetType === "TUTOR" ? (
-                            r.tutor ? (
-                              <AnonymousIdText id={r.tutor.anonymousId} role="TUTOR" />
+                          {r.targetType === "CLASS" ? (
+                            r.class ? (
+                              <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
+                                {r.class.code}
+                              </Link>
                             ) : (
                               "—"
                             )
-                          ) : r.class ? (
-                            <Link href={`/admin/classes/${r.class.id}`} className="text-primary hover:underline">
-                              {r.class.code}
-                            </Link>
                           ) : (
-                            "—"
+                            targetDetails(r)
                           )}
                         </div>
                         {r.targetType === "CLASS" && r.class && (
@@ -215,7 +225,7 @@ export default function AbuseReportTable() {
                         )}
                       </td>
                       <td>
-                        <AnonymousIdText id={r.reporter.anonymousId} role="LEARNER" />
+                        <AnonymousIdText id={r.reporter.anonymousId} role={reporterRole(r)} />
                       </td>
                       <td className="max-w-xs whitespace-normal">
                         <p>{r.violations.map(violationLabel).join(", ")}</p>

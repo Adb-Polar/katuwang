@@ -11,7 +11,7 @@ import type { ReportViolationType } from "@prisma/client";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
-import { REPORT_VIOLATIONS } from "@/lib/reportViolations";
+import { REPORT_VIOLATIONS, type ReportTarget } from "@/lib/reportViolations";
 
 const DETAILS_MAX = 1000;
 
@@ -19,9 +19,12 @@ export default function ReportButton({
   targetType,
   targetId,
   targetLabel,
+  endpoint = "/api/learner/reports",
 }: {
-  targetType: "TUTOR" | "CLASS";
+  targetType: ReportTarget;
   targetId: string;
+  /** Where the report is filed: learners use the default, tutors "/api/tutor/reports". */
+  endpoint?: string;
   /** Anonymised label shown in the modal heading, e.g. "TUT-0007" or "MATH · C-0231". */
   targetLabel: string;
 }) {
@@ -36,7 +39,7 @@ export default function ReportButton({
   const options = REPORT_VIOLATIONS[targetType];
   const isOther = checked.has("OTHER");
 
-  const noun = targetType === "TUTOR" ? "tutor" : "class";
+  const noun = { TUTOR: "tutor", CLASS: "class", LEARNER: "learner" }[targetType];
 
   const reset = () => {
     setChecked(new Set());
@@ -60,7 +63,7 @@ export default function ReportButton({
     if (!checked.size) return reportFieldError(e.currentTarget, "Violations", "Select at least one issue to report.");
     setSubmitting(true);
     try {
-      const res = await fetch("/api/learner/reports", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

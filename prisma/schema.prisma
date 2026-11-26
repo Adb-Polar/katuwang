@@ -55,6 +55,7 @@ model User {
   passwordResetTokens      PasswordResetToken[]
   resolvedQuestionRequests QuestionRequest[]     @relation("ResolvedQuestionRequests")
   reportsFiled             Report[]              @relation("ReportsFiled")
+  reportsAgainstLearner    Report[]              @relation("ReportsAgainstLearner")
   reviewedReports          Report[]              @relation("ReviewedReports")
   sessionTestAttempts      SessionTestAttempt[]  @relation("LearnerSessionTestAttempts")
   topicRequests            TopicRequest[]        @relation("LearnerTopicRequests")
@@ -544,6 +545,7 @@ model Report {
   targetType             ReportTargetType
   reportedTutorProfileId String?
   classId                String?
+  reportedLearnerId      String? // set when a tutor reports a learner (targetType LEARNER)
   details                String?           @db.Text
   status                 ReportStatus      @default(PENDING)
   resolutionNote         String?           @db.Text
@@ -553,6 +555,7 @@ model Report {
   violations             ReportViolation[]
   class                  TutorClass?       @relation(fields: [classId], references: [id], onDelete: Cascade)
   reportedTutorProfile   TutorProfile?     @relation("ReportsReceived", fields: [reportedTutorProfileId], references: [id], onDelete: Cascade)
+  reportedLearner        User?             @relation("ReportsAgainstLearner", fields: [reportedLearnerId], references: [id], onDelete: Cascade)
   reporter               User              @relation("ReportsFiled", fields: [reporterId], references: [id], onDelete: Cascade)
   reviewedBy             User?             @relation("ReviewedReports", fields: [reviewedById], references: [id])
 
@@ -561,6 +564,7 @@ model Report {
   @@index([classId], map: "reports_classId_fkey")
   @@index([reportedTutorProfileId], map: "reports_reportedTutorProfileId_fkey")
   @@index([reviewedById], map: "reports_reviewedById_fkey")
+  @@index([reportedLearnerId])
   @@map("reports")
 }
 
@@ -707,6 +711,7 @@ enum ClassAppealStatus {
 enum ReportTargetType {
   TUTOR
   CLASS
+  LEARNER
 }
 
 enum ReportStatus {
@@ -729,6 +734,10 @@ enum ReportViolationType {
   SCHEDULE_ABUSE
   INAPPROPRIATE_CONTENT
   OTHER
+  // Learner-conduct reasons (tutor reports). Appended last: no table rebuild in MySQL.
+  DISRUPTIVE_BEHAVIOR
+  REPEATED_ABSENCE
+  ACADEMIC_DISHONESTY
 }
 
 enum SessionStatus {

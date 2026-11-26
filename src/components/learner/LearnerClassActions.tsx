@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { clearClassBrowserCache } from "@/lib/classBrowserCache";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
-import ReportButton from "@/components/learner/ReportButton";
+import ReportButton from "@/components/reports/ReportButton";
 import { useToast } from "@/components/ui/Toast";
 
 export default function LearnerClassActions({

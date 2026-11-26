@@ -8,7 +8,7 @@ import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 interface MyReport {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  targetType: "TUTOR" | "CLASS" | "LEARNER";
   target: { anonymousId?: string | null; code?: string | null; subject?: string | null };
   violations: string[];
   details: string | null;
@@ -37,6 +37,9 @@ function ReportTarget({ r }: { r: MyReport }) {
   if (r.targetType === "TUTOR") {
     return <span className="kt-id kt-id--tutor">{r.target.anonymousId ?? "Unknown tutor"}</span>;
   }
+  if (r.targetType === "LEARNER") {
+    return <span className="kt-id kt-id--learner">{r.target.anonymousId ?? "Unknown learner"}</span>;
+  }
   return (
     <>
       {r.target.subject ? subjectDisplayLabel(r.target.subject) : "Class"}
@@ -45,7 +48,16 @@ function ReportTarget({ r }: { r: MyReport }) {
   );
 }
 
-export default function MyReportsList() {
+const TARGET_NOUN: Record<MyReport["targetType"], string> = { TUTOR: "Tutor", CLASS: "Class", LEARNER: "Learner" };
+
+export default function MyReportsList({
+  endpoint = "/api/learner/reports",
+  emptyMessage = "You haven't reported anyone. If a tutor or class breaks the rules, use Report on their page and you'll see what happens to it here.",
+}: {
+  /** Learners use the default; tutors pass "/api/tutor/reports". */
+  endpoint?: string;
+  emptyMessage?: string;
+}) {
   const [reports, setReports] = useState<MyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -55,7 +67,7 @@ export default function MyReportsList() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/learner/reports");
+        const res = await fetch(endpoint);
         if (!res.ok) throw new Error("Could not load your reports.");
         const data = await res.json();
         if (!cancelled) setReports(data.reports ?? []);
@@ -68,7 +80,7 @@ export default function MyReportsList() {
     return () => {
       cancelled = true;
     };
-  }, [retryKey]);
+  }, [retryKey, endpoint]);
 
   if (loading) {
     return <p role="status" className="text-sm text-(--kt-muted)">Loading your reports…</p>;
@@ -82,7 +94,7 @@ export default function MyReportsList() {
       {!error && reports.length === 0 ? (
         <section className="card kt-card">
           <p className="kt-card-body text-(--kt-muted)">
-            You haven&apos;t reported anyone. If a tutor or class breaks the rules, use Report on their page and you&apos;ll see what happens to it here.
+            {emptyMessage}
           </p>
         </section>
       ) : !error ? (
@@ -93,7 +105,7 @@ export default function MyReportsList() {
                 <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1">
                   <div className="min-w-0">
                     <p className="text-sm text-(--kt-muted)">
-                      {r.targetType === "TUTOR" ? "Tutor" : "Class"} report · {formatDate(r.createdAt)}
+                      {TARGET_NOUN[r.targetType]} report · {formatDate(r.createdAt)}
                     </p>
                     <h3 className="font-serif text-xl font-medium leading-snug break-words"><ReportTarget r={r} /></h3>
                   </div>

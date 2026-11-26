@@ -1,7 +1,7 @@
 import type { ReportViolationType } from "@prisma/client";
 
-// Single source of truth for the report checklist: which reasons a learner can
-// tick for each target, the label shown next to each checkbox, and the label the
+// Single source of truth for the report checklist: which reasons a reporter can
+// tick for each target (learners report tutors and classes; tutors report learners), the label shown next to each checkbox, and the label the
 // admin queue renders. `OTHER` always appears last and reveals the free-text box.
 
 export interface ViolationOption {
@@ -31,19 +31,39 @@ const CLASS_VIOLATIONS: ViolationOption[] = [
   { value: "OTHER", label: "Other (describe below)" },
 ];
 
-export const REPORT_VIOLATIONS: Record<"TUTOR" | "CLASS", ViolationOption[]> = {
+/** What a tutor can report a learner for. */
+const LEARNER_VIOLATIONS: ViolationOption[] = [
+  { value: "DISRUPTIVE_BEHAVIOR", label: "Disrupts sessions or other learners" },
+  { value: "HARASSMENT_OR_BULLYING", label: "Harassment, bullying or intimidation" },
+  { value: "ANONYMITY_BREACH", label: "Asked for my real name, contact details or socials" },
+  { value: "DISCRIMINATION", label: "Discriminatory or hateful remarks" },
+  { value: "INAPPROPRIATE_CONTENT", label: "Inappropriate or explicit content" },
+  { value: "ACADEMIC_DISHONESTY", label: "Cheating on a test or copying work" },
+  { value: "REPEATED_ABSENCE", label: "Enrolls, then repeatedly does not attend" },
+  { value: "OTHER", label: "Other (describe below)" },
+];
+
+export type ReportTarget = "TUTOR" | "CLASS" | "LEARNER";
+
+export const REPORT_VIOLATIONS: Record<ReportTarget, ViolationOption[]> = {
   TUTOR: TUTOR_VIOLATIONS,
   CLASS: CLASS_VIOLATIONS,
+  LEARNER: LEARNER_VIOLATIONS,
 };
 
-// Every value that may legitimately arrive in a report body — the union of both
-// lists. Used as the Zod enum source.
+export const LEARNER_VIOLATION_VALUES = LEARNER_VIOLATIONS.map((v) => v.value) as [
+  ReportViolationType,
+  ...ReportViolationType[],
+];
+
+// Every value that may legitimately arrive in a learner's report body — the union of the
+// tutor and class lists. Used as the Zod enum source.
 export const ALL_VIOLATION_VALUES = Array.from(
   new Set([...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS].map((v) => v.value))
 ) as [ReportViolationType, ...ReportViolationType[]];
 
 export const VIOLATION_LABEL: Record<ReportViolationType, string> = Object.fromEntries(
-  [...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS].map((v) => [v.value, v.label])
+  [...TUTOR_VIOLATIONS, ...CLASS_VIOLATIONS, ...LEARNER_VIOLATIONS].map((v) => [v.value, v.label])
 ) as Record<ReportViolationType, string>;
 
 /** Human label for a violation value, falling back to the raw value if unknown. */

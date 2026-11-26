@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ALL_VIOLATION_VALUES } from "@/lib/reportViolations";
+import { ALL_VIOLATION_VALUES, LEARNER_VIOLATION_VALUES } from "@/lib/reportViolations";
 
 const DETAILS_MAX = 1000;
 const NOTE_MAX = 500;
@@ -30,6 +30,34 @@ export const createReportSchema = z
   );
 
 export type CreateReportInput = z.infer<typeof createReportSchema>;
+
+// A tutor files a report against one of their learners. Same body shape as a
+// learner's report, so the report dialog is shared.
+export const createLearnerReportSchema = z
+  .object({
+    targetType: z.literal("LEARNER", { message: "Invalid report target." }),
+    // the learner's User id
+    targetId: z.string().trim().min(1, "Missing report target."),
+    violations: z
+      .array(z.enum(LEARNER_VIOLATION_VALUES, { message: "Invalid reason." }))
+      .min(1, "Select at least one reason.")
+      .max(LEARNER_VIOLATION_VALUES.length, "Too many reasons selected."),
+    details: z
+      .string()
+      .trim()
+      .max(DETAILS_MAX, `Description cannot exceed ${DETAILS_MAX} characters.`)
+      .optional()
+      .or(z.literal("")),
+  })
+  .refine(
+    (d) => !d.violations.includes("OTHER") || (d.details?.trim().length ?? 0) >= 10,
+    {
+      message: "Describe the issue in at least 10 characters when you choose Other.",
+      path: ["details"],
+    }
+  );
+
+export type CreateLearnerReportInput = z.infer<typeof createLearnerReportSchema>;
 
 // An admin resolves or dismisses a pending report.
 export const reviewReportSchema = z.object({

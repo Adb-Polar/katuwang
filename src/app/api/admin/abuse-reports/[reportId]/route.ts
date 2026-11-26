@@ -28,6 +28,8 @@ export async function PATCH(
         targetType: true,
         class: { select: { code: true, subject: true } },
         reportedTutorProfile: { select: { user: { select: { anonymousId: true } } } },
+        reportedLearner: { select: { anonymousId: true } },
+        reporter: { select: { role: true } },
       },
     });
 
@@ -55,7 +57,11 @@ export async function PATCH(
     const targetLabel =
       report.targetType === "TUTOR"
         ? `tutor ${report.reportedTutorProfile?.user.anonymousId ?? "—"}`
-        : `${report.class?.subject ?? "—"} · ${report.class?.code ?? "—"}`;
+        : report.targetType === "LEARNER"
+          ? `learner ${report.reportedLearner?.anonymousId ?? "—"}`
+          : `${report.class?.subject ?? "—"} · ${report.class?.code ?? "—"}`;
+    // The reporter's own list of reports: tutors and learners keep it in different places.
+    const reporterLink = report.reporter?.role === "STUDENT_TUTOR" ? "/tutor/reports" : "/learner/reports";
 
     const updated = await prisma.$transaction(async (tx) => {
       const row = await tx.report.update({
@@ -85,7 +91,7 @@ export async function PATCH(
         resolved
           ? `An admin reviewed your report about ${targetLabel} and took action.${resolutionNote ? ` Note: ${resolutionNote}` : ""}`
           : `An admin reviewed your report about ${targetLabel} and closed it without action.${resolutionNote ? ` Note: ${resolutionNote}` : ""}`,
-        "/learner/reports"
+        reporterLink
       );
 
       return row;

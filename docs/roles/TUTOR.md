@@ -222,6 +222,15 @@ Register a new tutor account. No auth required. `403 { error: "Registration is c
 **409** → `{ error: "An account with this email already exists." }`.
 **500** → `{ error }`.
 
+### Reporting a learner (2026-11-26)
+
+- On a student's page (`/tutor/students/[studentId]`) "Report this learner" opens a checklist of learner-conduct reasons with an optional description. Only administrators see the report; the learner is not told.
+- `/tutor/reports` ("My reports") lists the tutor's reports and each outcome.
+
+`POST /api/tutor/reports` — body `{ "targetType": "LEARNER", "targetId": "<learner user id>", "violations": ["DISRUPTIVE_BEHAVIOR", …], "details": "optional, required (10+ chars) with OTHER" }`. `401` not a tutor; `400` invalid; `404` not a learner; `403` the learner never joined one of the tutor's classes; `409` a report about that learner is still pending; `201` → `{ id, status, createdAt }`.
+
+`GET /api/tutor/reports` → `{ reports: [{ id, targetType: "LEARNER", target: { anonymousId }, violations, details, status, resolutionNote, reviewedAt, createdAt }] }`.
+
 ### Time limits (2026-11-26)
 
 - A session test's details take an optional **time limit** of 1–180 minutes (`timeLimitMinutes` on `POST`/`PATCH …/test`; `null` clears it). It applies to the pre-test and the post-test alike. Each learner's attempt keeps the limit it started with.

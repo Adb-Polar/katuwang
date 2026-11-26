@@ -68,6 +68,27 @@ describe("GET /api/admin/abuse-reports", () => {
     );
   });
 
+  it("returns a tutor's report with the reported learner and the reporter's role", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    reportFindMany.mockResolvedValue([
+      {
+        id: "r2", targetType: "LEARNER", status: "PENDING", violations: [{ type: "DISRUPTIVE_BEHAVIOR" }],
+        reporter: { anonymousId: "TUT-0002", role: "STUDENT_TUTOR" }, class: null, reportedTutorProfile: null,
+        reportedLearner: { id: "L1", anonymousId: "STU-0007" },
+      },
+    ]);
+    const json = await (await GET(req("http://localhost/api/admin/abuse-reports?targetType=LEARNER"))).json();
+    expect(reportFindMany.mock.calls[0][0].where).toEqual({ status: "PENDING", targetType: "LEARNER" });
+    expect(json.reports[0]).toMatchObject({
+      targetType: "LEARNER",
+      learner: { id: "L1", anonymousId: "STU-0007" },
+      tutor: null,
+      reporter: { anonymousId: "TUT-0002", role: "STUDENT_TUTOR" },
+      violations: ["DISRUPTIVE_BEHAVIOR"],
+    });
+    expect(json.reports[0]).not.toHaveProperty("reportedLearner");
+  });
+
   it("filters by target type when given", async () => {
     getServerSessionMock.mockResolvedValue(admin);
     await GET(req("http://localhost/api/admin/abuse-reports?targetType=CLASS"));

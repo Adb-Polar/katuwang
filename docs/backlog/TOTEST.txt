@@ -1366,3 +1366,12 @@ Time limits (Changes.md Part 99)
  [ ] Changing a test's limit after a learner has started does not change that learner's countdown.
  [ ] /admin/settings -> Assessment -> "Time limit (minutes)" = 2 -> a tutor's next certification quiz shows a 2-minute countdown and auto-submits; 0 removes the limit.
  [ ] Dark mode: the countdown bar is readable in both themes.
+
+Tutor reports a learner (Changes.md Part 100)
+ [ ] As a tutor open Students -> a learner -> "Report this learner": the dialog lists learner-conduct reasons; submitting with none selected is blocked; "Other" needs a description of at least 10 characters.
+ [ ] After submitting, the button is replaced by "Report sent to the admins."; reporting the same learner again while it is pending is refused with a clear message.
+ [ ] Tutor sidebar -> My reports lists the report as Pending with the learner's STU ID only (no name).
+ [ ] As an admin, Abuse reports shows it as a Learner report from the TUT ID; the "Learner reports" filter shows only these; the learner's ID links to their user page.
+ [ ] Resolve it with a note -> the tutor gets a notification that opens My reports, where the report is Resolved with the note. Dismiss works the same way.
+ [ ] The reported learner sees nothing about the report anywhere in their portal.
+ [ ] Learner reports of tutors and classes still work as before (Report buttons on a tutor profile and a class page, "My reports" tab under Notifications).

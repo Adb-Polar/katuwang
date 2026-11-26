@@ -12,6 +12,21 @@ Format: newest first.
 
 ---
 
+## Tutors can report learners (2026-11-26)
+
+**Decision:** Reporting now runs both ways. A tutor can report a learner who has joined one of
+their classes (`ReportTargetType.LEARNER`, `Report.reportedLearnerId`). The rules of the
+2026-09-10 entry "Learner reports for tutors & classes" carry over unchanged: the reporter
+needs a real relationship (an enrollment in one of the tutor's classes), one pending report
+per target, admins only resolve or dismiss, and enforcement stays on the Users page.
+
+**Why:** Requested by the project owner on 2026-11-26 ("tutor should be able to report
+learners").
+
+**Implication for agents:** The reported learner is never told about a report or who filed
+it, and the tutor only ever sees the learner's anonymous ID. New report reasons go in
+`src/lib/reportViolations.ts`; append new enum values at the end of `ReportViolationType`.
+
 ## Tutor grade level and section are shown to learners (2026-11-26)
 
 **Decision:** The learner-facing tutor profile and the Find Tutors cards always show the

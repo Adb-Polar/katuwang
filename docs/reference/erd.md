@@ -75,6 +75,7 @@ REJECTED REJECTED
         ReportTargetType {
             TUTOR TUTOR
 CLASS CLASS
+LEARNER LEARNER
         }
 
 
@@ -101,6 +102,9 @@ SPAM_OR_DUPLICATE SPAM_OR_DUPLICATE
 SCHEDULE_ABUSE SCHEDULE_ABUSE
 INAPPROPRIATE_CONTENT INAPPROPRIATE_CONTENT
 OTHER OTHER
+DISRUPTIVE_BEHAVIOR DISRUPTIVE_BEHAVIOR
+REPEATED_ABSENCE REPEATED_ABSENCE
+ACADEMIC_DISHONESTY ACADEMIC_DISHONESTY
         }
 
 
@@ -547,6 +551,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     ReportTargetType targetType
     String reportedTutorProfileId "❓"
     String classId "❓"
+    String reportedLearnerId "❓"
     String details "❓"
     ReportStatus status
     String resolutionNote "❓"
@@ -710,6 +715,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     "reports" |o--|| "ReportStatus" : "enum:status"
     "reports" }o--|o "tutor_classes" : "class"
     "reports" }o--|o "tutor_profiles" : "reportedTutorProfile"
+    "reports" }o--|o "users" : "reportedLearner"
     "reports" }o--|| "users" : "reporter"
     "reports" }o--|o "users" : "reviewedBy"
     "report_violations" |o--|| "ReportViolationType" : "enum:type"

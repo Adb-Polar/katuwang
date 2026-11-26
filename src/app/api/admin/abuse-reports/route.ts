@@ -57,7 +57,8 @@ export async function GET(req: NextRequest) {
         where,
         include: {
           violations: { select: { type: true } },
-          reporter: { select: { anonymousId: true } },
+          reporter: { select: { anonymousId: true, role: true } },
+          reportedLearner: { select: { id: true, anonymousId: true } },
           class: { select: { id: true, code: true, subject: true, status: true } },
           reportedTutorProfile: {
             select: { user: { select: { id: true, anonymousId: true } } },
@@ -70,10 +71,11 @@ export async function GET(req: NextRequest) {
       prisma.report.count({ where }),
     ]);
 
-    const reports = rows.map(({ violations, reportedTutorProfile, ...r }) => ({
+    const reports = rows.map(({ violations, reportedTutorProfile, reportedLearner, ...r }) => ({
       ...r,
       violations: violations.map((v) => v.type),
       tutor: reportedTutorProfile?.user ?? null,
+      learner: reportedLearner ?? null,
     }));
 
     return NextResponse.json({ reports, total, page, pageSize });

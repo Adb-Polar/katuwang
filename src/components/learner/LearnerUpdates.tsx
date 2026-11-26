@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import NotificationList from "@/components/notifications/NotificationList";
-import MyReportsList from "./MyReportsList";
+import MyReportsList from "@/components/reports/MyReportsList";
 
 export default function LearnerUpdates() {
   const router = useRouter();

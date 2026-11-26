@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import { gradeNumber } from "@/lib/gradeLevels";
+import ReportButton from "@/components/reports/ReportButton";
 
 export const metadata = {
   title: "Student Profile | Katuwang",
@@ -69,6 +70,9 @@ export default async function TutorStudentProfilePage({
           <p className="text-sm text-(--kt-muted)">
             Learners appear to tutors only by their ID — no real name, email or contact details.
           </p>
+        </div>
+        <div className="sm:ml-auto shrink-0">
+          <ReportButton targetType="LEARNER" targetId={studentId} targetLabel={learner.anonymousId} endpoint="/api/tutor/reports" />
         </div>
       </section>
 

@@ -43,6 +43,7 @@ Source: `src/app/admin/**`, `src/app/api/admin/**`, `src/components/admin/**`
 ## Abuse Reports (`/admin/abuse-reports`)
 
 - Learners report a **tutor** or a **class** from a checklist of common violations plus an optional "Other" free-text message (a learner can only report a tutor whose class they joined, or a class they're enrolled in). The queue has Pending / Resolved / Dismissed tabs plus a **target filter** (All / Tutor reports / Class reports); each row shows the target (tutor `TUT-XXXX` or a link to the class), the reporter as `STU-XXXX` only (never a real name), the ticked reasons, and any free-text detail.
+- Tutors report a **learner** who has joined one of their classes (since 2026-11-26). These appear in the same queue as "Learner" reports, filed by a `TUT-` ID; filter with "Learner reports" (`?targetType=LEARNER`). Each row carries `learner { id, anonymousId }` and the reporter's `role`.
 - **Resolve** (confirm dialog, optional note) → the report is `RESOLVED`, an audit row is written (`REPORT_RESOLVED`, target `REPORT`), and the reporter gets a `REPORT_REVIEWED` notification. Use this once you've acted on it.
 - **Dismiss** (optional note) → the report is `DISMISSED`, audit `REPORT_DISMISSED`, reporter gets `REPORT_REVIEWED`.
 - This screen does **not** suspend or ban anyone — apply enforcement from the Users or Classes pages. A report can only be reviewed once.

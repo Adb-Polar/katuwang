@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getActiveServerSession } from "@/lib/serverSession";
-import type { Prisma, ReportViolationType } from "@prisma/client";
+import type { Prisma, ReportTargetType, ReportViolationType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { createReportSchema } from "@/lib/validations/report";
 import { notifyMany } from "@/lib/notifications";
 
 interface ReportRow {
   id: string;
-  targetType: "TUTOR" | "CLASS";
+  // A learner only ever files TUTOR or CLASS reports; the wider type is the column's.
+  targetType: ReportTargetType;
   details: string | null;
   status: string;
   resolutionNote: string | null;

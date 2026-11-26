@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [100](#part-100) | **Tutors can report learners (`feat/ui-ux-batch`)** | A tutor can report a learner who has joined one of their classes, from that learner's student page, choosing from learner-conduct reasons. "My reports" in the tutor portal shows each report and its outcome. Admins review them in Abuse reports with a "Learner reports" filter; the tutor is notified of the decision. Learners stay anonymous to the tutor. **Schema change: migration `20261126010000_add_learner_reports`.** | See Part 100 below. |
 | [99](#part-99) | **Time limits for tests and quizzes (`feat/ui-ux-batch`)** | A tutor can give a session test a time limit (1–180 minutes) that applies to its pre-test and post-test; admins can set one for the tutor certification quiz. The learner or tutor sees a countdown that survives a refresh, and the quiz submits itself at zero. A late hand-in is still graded and marked as late. **Schema change: three nullable columns, migration `20261126000000_add_assessment_time_limits`.** | See Part 99 below. |
 | [98](#part-98) | **UI/UX batch, phases 1–4 and 7 (`feat/ui-ux-batch`)** | Toast confirmations for every action that used to succeed silently; asterisks on required fields; learner/tutor "Dashboard" renamed Overview with the Profile entry moved to the avatar; dark mode; Overview pages use the full width. Schedule forms take start + end time, block past dates and name the clashing session before submit. Enrollment conflicts name the class. Admin-managed email-domain allowlist. Audit log is super-admin only. Analytics merged into the admin dashboard with cards and filters. Post-tests are shuffled per attempt and quiz text cannot be copied. Learners see a tutor's grade, section and activity. No schema change. | See Part 98 below. |
 | [97](#part-97) | **Student ID field is now a 12-digit LRN** | The registration "Student ID Number" input is labelled "LRN (Learner Reference Number)" and accepts exactly 12 digits (no hyphens, spaces or letters). Validation only — stored values are untouched. | See Part 97 below. |
@@ -4093,6 +4094,41 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-100"></a>
+## Part 100 — Tutors can report learners (2026-11-26)
+
+Plan: `docs/plans/ui-ux-batch.md`, Phase B. Schema change approved by the owner on 2026-11-26.
+
+**Schema.** Migration `prisma/migrations/20261126010000_add_learner_reports`:
+`ReportTargetType` gains `LEARNER`; `reports.reportedLearnerId` (nullable FK to `users`,
+cascade, indexed); `ReportViolationType` gains `DISRUPTIVE_BEHAVIOR`, `REPEATED_ABSENCE`,
+`ACADEMIC_DISHONESTY`, appended after the existing values so no rows are rewritten.
+**Applied to the local development database only; the cloud database needs `pnpm db:deploy`.**
+
+**Code.**
+- `src/lib/reportViolations.ts`: `LEARNER` reason list (three new reasons plus harassment,
+  anonymity breach, discrimination, inappropriate content, other).
+  `validations/report.ts`: `createLearnerReportSchema`.
+- `GET`/`POST /api/tutor/reports`. The learner must be, or have been, enrolled in one of the
+  tutor's classes (`403` otherwise); one pending report per learner (`409`); every active
+  admin and super admin gets `REPORT_NEW`.
+- `ReportButton` and `MyReportsList` moved from `components/learner/` to `components/reports/`
+  and take an `endpoint`. The button is on `/tutor/students/[studentId]`; new `/tutor/reports`
+  page and "My reports" sidebar entry.
+- Admin: `GET /api/admin/abuse-reports` returns `learner` and the reporter's `role`;
+  `AbuseReportTable` shows learner targets (linked to the user page), tutor reporters in the
+  tutor colour, and a "Learner reports" filter. The review route names the learner and sends
+  the reporter to `/tutor/reports` or `/learner/reports` according to their role.
+- Double-blind kept: the tutor's routes select only the learner's `anonymousId`, and the
+  learner is not told who reported them.
+
+**Tests.** tsc clean, lint 0 errors, **1775 passed**, 107 skipped. New: `api/tutor/reports`
+route test (19 cases: 401/403/404/409/400/201/500, standing query, de-duplicated reasons,
+privacy of the list). Extended: admin abuse-report list and review tests.
+Browser, local DB: a tutor reported an enrolled learner; a second report was refused (409); a
+learner outside the tutor's classes was refused (403); the admin resolved it with a note; the
+tutor's list and notification showed the outcome.
 
 <a id="part-99"></a>
 ## Part 99 — Time limits for tests and quizzes (2026-11-26)
