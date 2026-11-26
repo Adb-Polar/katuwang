@@ -8,6 +8,7 @@ export const ASSESSMENT_DEFAULTS = {
   questionCount: 5, // questions served per attempt
   passPercent: 80, // % correct required to pass
   minBankSize: 5, // active questions a topic needs before it is assessable
+  timeLimitMinutes: 0, // minutes allowed per attempt; 0 = untimed
 } as const;
 
 export const OPTION_COUNT_MIN = 2;
@@ -17,4 +18,6 @@ export type ResolvedTopicConfig = {
   questionCount: number;
   passPercent: number;
   minBankSize: number;
+  /** 0 = untimed. */
+  timeLimitMinutes: number;
 };

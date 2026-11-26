@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { attemptDeadline, wasSubmittedLate } from "@/lib/attemptDeadline";
 import { seededShuffle } from "@/lib/seededShuffle";
 
 // ─── Attempt (learner's run) ───────────────────────────────────────────────
@@ -32,6 +33,12 @@ export interface SerializedSessionTestAttempt {
   scorePercent?: number;
   startedAt: string;
   submittedAt: string | null;
+  /** Minutes allowed for this attempt; null = untimed. */
+  timeLimitMinutes: number | null;
+  /** When the time runs out (ISO); null = untimed. */
+  deadlineAt: string | null;
+  /** Handed in after the deadline and its grace period. Still graded. */
+  submittedLate: boolean;
   answersRevealed: boolean;
   items: SerializedSessionTestItem[];
 }
@@ -86,6 +93,9 @@ export function serializeSessionTestAttempt(
       : {}),
     startedAt: attempt.startedAt.toISOString(),
     submittedAt: attempt.submittedAt ? attempt.submittedAt.toISOString() : null,
+    timeLimitMinutes: attempt.timeLimitMinutes,
+    deadlineAt: attemptDeadline(attempt)?.toISOString() ?? null,
+    submittedLate: wasSubmittedLate(attempt),
     answersRevealed: reveal && revealAnswers,
     items,
   };
@@ -115,6 +125,7 @@ export interface SerializedSessionTest {
   sessionId: string;
   title: string;
   instructions: string | null;
+  timeLimitMinutes: number | null;
   status: string;
   publishedAt: string | null;
   pretestClosedAt: string | null;
@@ -130,6 +141,7 @@ export function serializeSessionTest(test: SessionTestWithQuestions): Serialized
     sessionId: test.sessionId,
     title: test.title,
     instructions: test.instructions,
+    timeLimitMinutes: test.timeLimitMinutes,
     status: test.status,
     publishedAt: test.publishedAt ? test.publishedAt.toISOString() : null,
     pretestClosedAt: test.pretestClosedAt ? test.pretestClosedAt.toISOString() : null,

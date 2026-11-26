@@ -36,6 +36,7 @@ export default async function TutorSessionTestBuilderPage({
               id: serialized.id,
               title: serialized.title,
               instructions: serialized.instructions,
+              timeLimitMinutes: serialized.timeLimitMinutes,
               status: serialized.status as "DRAFT" | "PUBLISHED" | "CLOSED",
               pretestClosedAt: serialized.pretestClosedAt,
               posttestOpenedAt: serialized.posttestOpenedAt,

@@ -128,6 +128,7 @@ This page also has a **My Account** section (added 2026-09-14) to change your ow
 first self-service account surface admins have had, since this page previously covered only
 platform-wide settings. (`POST /api/admin/profile/password`, `401` on a wrong current password.)
 
+- **Assessment time limit** (2026-11-26) — "Time limit (minutes)" in the Assessment settings: minutes a tutor has per certification-quiz attempt, 0 for none, at most 180 (`assessmentTimeLimitMinutes`, `PATCH /api/admin/assessment-configs`).
 - **Allowed email domains** (2026-11-26) — a comma-separated list such as `school.edu.ph, deped.gov.ph`. When it has entries, `POST /api/register` and admin invitations reject any other domain and name the approved ones; empty accepts every domain. Existing accounts are not affected. Stored as the `allowedEmailDomains` platform setting (`PATCH /api/admin/settings` with `{ key: "allowedEmailDomains", value: "…" }`).
 
 ## Dashboard & Analytics (`/admin`)

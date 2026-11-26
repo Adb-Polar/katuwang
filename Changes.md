@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [99](#part-99) | **Time limits for tests and quizzes (`feat/ui-ux-batch`)** | A tutor can give a session test a time limit (1–180 minutes) that applies to its pre-test and post-test; admins can set one for the tutor certification quiz. The learner or tutor sees a countdown that survives a refresh, and the quiz submits itself at zero. A late hand-in is still graded and marked as late. **Schema change: three nullable columns, migration `20261126000000_add_assessment_time_limits`.** | See Part 99 below. |
 | [98](#part-98) | **UI/UX batch, phases 1–4 and 7 (`feat/ui-ux-batch`)** | Toast confirmations for every action that used to succeed silently; asterisks on required fields; learner/tutor "Dashboard" renamed Overview with the Profile entry moved to the avatar; dark mode; Overview pages use the full width. Schedule forms take start + end time, block past dates and name the clashing session before submit. Enrollment conflicts name the class. Admin-managed email-domain allowlist. Audit log is super-admin only. Analytics merged into the admin dashboard with cards and filters. Post-tests are shuffled per attempt and quiz text cannot be copied. Learners see a tutor's grade, section and activity. No schema change. | See Part 98 below. |
 | [97](#part-97) | **Student ID field is now a 12-digit LRN** | The registration "Student ID Number" input is labelled "LRN (Learner Reference Number)" and accepts exactly 12 digits (no hyphens, spaces or letters). Validation only — stored values are untouched. | See Part 97 below. |
 | [96](#part-96) | **Cleanup script for existing user names** | `pnpm names:cleanup` previews (and with `--apply` saves) the Part 95 name rules for users already in the database: fixes casing and whitespace, strips Zalgo marks, and lists names it cannot repair. Names now also always start with a capital letter. | See Part 96 below. |
@@ -772,7 +773,6 @@ auth redirect, no 404/500).
 
 UI + one additive API field only. No schema change, no migration. No thesis
 divergence, so `docs/reference/decisions.md` / `feature-checklist.md` untouched.
-Not committed.
 - Not committed.
 
 <a id="part-12"></a>
@@ -4093,6 +4093,46 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-99"></a>
+## Part 99 — Time limits for tests and quizzes (2026-11-26)
+
+Plan: `docs/plans/ui-ux-batch.md`, Phase A. Schema change approved by the owner on 2026-11-26.
+
+**Schema.** Migration `prisma/migrations/20261126000000_add_assessment_time_limits`: nullable
+`timeLimitMinutes` on `session_tests`, `session_test_attempts` and `assessment_attempts`. NULL =
+untimed, so existing tests and attempts behave as before. The attempt columns are a snapshot
+taken at start, so editing a test or the platform setting never changes a running attempt.
+**Applied to the local development database only. The cloud database still needs
+`pnpm db:deploy`.** `docs/reference/erd.md` regenerated (three added lines).
+
+**Setting.** `assessmentTimeLimitMinutes` joins the global assessment config
+(`getAssessmentConfig()`, `PATCH /api/admin/assessment-configs`, "Time limit (minutes)" on
+`/admin/settings`); 0 = no limit, max 180.
+
+**Code.**
+- `src/lib/attemptDeadline.ts`: `attemptDeadline`, `wasSubmittedLate` (30 s grace for the
+  auto-submit and network delay), `formatCountdown`.
+- `SessionTestBuilder` and `validations/sessionTest.ts`: optional "Time limit (minutes)",
+  1–180, `null` clears it. Editable only while the test is a draft, like the other details.
+- Start routes copy the limit onto the attempt; both serializers return `timeLimitMinutes`,
+  `deadlineAt` and `submittedLate`.
+- `src/components/quiz/QuizCountdown.tsx` in `SessionTestRunner` and `AssessmentQuizRunner`:
+  counts down to the server's deadline, turns to a warning in the last minute, announces it
+  once to screen readers, and submits the chosen answers at zero. Opening an attempt after its
+  deadline submits it straight away.
+- A late submission is **accepted and graded**, and shown with "submitted after its time
+  limit". Nothing is rejected, so a slow connection cannot cost a learner the attempt. The
+  deadline is therefore a deterrent enforced by the page, with the lateness recorded
+  (`submittedAt` against `startedAt + timeLimitMinutes`); it is not a hard server cut-off.
+
+**Tests.** tsc clean, lint 0 errors, **1753 passed**, 107 skipped. New:
+`attemptDeadline.test.ts`, `QuizCountdown.test.tsx`; extended: learner test start, tutor test
+create/update, tutor assessment start, assessment-configs route, `assessmentConfig.test.ts`.
+Browser, local DB: a 1-minute pre-test showed the countdown, kept its remaining time across a
+refresh, auto-submitted at 61 s and was graded (1 of 6).
+
+Not committed.
 
 <a id="part-98"></a>
 ## Part 98 — UI/UX batch, phases 1–4 and 7 (2026-11-26)

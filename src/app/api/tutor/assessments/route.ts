@@ -161,6 +161,7 @@ export async function POST(req: NextRequest) {
           certificationEligible: true,
           questionCount: questionIds.length,
           passPercent: config.passPercent,
+          timeLimitMinutes: config.timeLimitMinutes || null,
           items: {
             create: questionIds.map((questionId, position) => ({ questionId, position })),
           },

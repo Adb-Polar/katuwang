@@ -46,6 +46,7 @@ export const ASSESSMENT_SETTING_KEYS = {
   questionCount: "assessmentQuestionCount",
   passPercent: "assessmentPassPercent",
   minBankSize: "assessmentMinBankSize",
+  timeLimitMinutes: "assessmentTimeLimitMinutes",
 } as const;
 
 /** Resolve the live global assessment config, falling back to ASSESSMENT_DEFAULTS. */
@@ -62,6 +63,7 @@ export async function getAssessmentConfig(): Promise<ResolvedTopicConfig> {
     questionCount: read(ASSESSMENT_SETTING_KEYS.questionCount, ASSESSMENT_DEFAULTS.questionCount),
     passPercent: read(ASSESSMENT_SETTING_KEYS.passPercent, ASSESSMENT_DEFAULTS.passPercent),
     minBankSize: read(ASSESSMENT_SETTING_KEYS.minBankSize, ASSESSMENT_DEFAULTS.minBankSize),
+    timeLimitMinutes: read(ASSESSMENT_SETTING_KEYS.timeLimitMinutes, ASSESSMENT_DEFAULTS.timeLimitMinutes),
   };
 }
 

@@ -65,9 +65,9 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { title, instructions } = result.data;
+    const { title, instructions, timeLimitMinutes } = result.data;
     const test = await prisma.sessionTest.create({
-      data: { sessionId, title, instructions: instructions || null },
+      data: { sessionId, title, instructions: instructions || null, timeLimitMinutes: timeLimitMinutes ?? null },
     });
 
     return NextResponse.json(test, { status: 201 });
@@ -106,7 +106,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { title, instructions } = result.data;
+    const { title, instructions, timeLimitMinutes } = result.data;
     const updated = await prisma.$transaction(async tx => {
       await lockSessionTestRow(tx, owned.test!.id);
       const current = await tx.sessionTest.findUnique({ where: { id: owned.test!.id }, select: { status: true } });
@@ -117,6 +117,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
         data: {
           ...(title !== undefined ? { title } : {}),
           ...(instructions !== undefined ? { instructions: instructions || null } : {}),
+          ...(timeLimitMinutes !== undefined ? { timeLimitMinutes } : {}),
         },
       });
     }, { isolationLevel: "ReadCommitted", timeout: 15_000 });

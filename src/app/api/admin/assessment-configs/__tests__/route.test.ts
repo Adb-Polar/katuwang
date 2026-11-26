@@ -52,7 +52,7 @@ describe("/api/admin/assessment-configs (global)", () => {
     ]);
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ questionCount: 7, passPercent: 75, minBankSize: 9 });
+    expect(await res.json()).toEqual({ questionCount: 7, passPercent: 75, minBankSize: 9, timeLimitMinutes: 0 });
   });
 
   it("PATCH 401 for a non-admin", async () => {
@@ -72,6 +72,22 @@ describe("/api/admin/assessment-configs (global)", () => {
     getServerSessionMock.mockResolvedValue(admin);
     const res = await PATCH(req({}));
     expect(res.status).toBe(400);
+  });
+
+  it("PATCH saves the quiz time limit, and 0 to switch it off", async () => {
+    getServerSessionMock.mockResolvedValue(admin);
+    expect((await PATCH(req({ timeLimitMinutes: 20 }))).status).toBe(200);
+    expect((await PATCH(req({ timeLimitMinutes: 0 }))).status).toBe(200);
+    expect(upsertMock.mock.calls.map((c) => (c[0] as { create: { key: string; value: string } }).create)).toEqual([
+      { key: "assessmentTimeLimitMinutes", value: "20" },
+      { key: "assessmentTimeLimitMinutes", value: "0" },
+    ]);
+  });
+
+  it.each([-1, 181, 1.5])("PATCH 400 for the time limit %s", async (timeLimitMinutes) => {
+    getServerSessionMock.mockResolvedValue(admin);
+    expect((await PATCH(req({ timeLimitMinutes }))).status).toBe(400);
+    expect(upsertMock).not.toHaveBeenCalled();
   });
 
   it("PATCH upserts only the provided keys and writes an audit row", async () => {

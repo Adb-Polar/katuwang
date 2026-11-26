@@ -7,6 +7,7 @@ import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
 import { QuizQuestionList, QuizResult, QuizSubmitBar, type QuizListItem, type QuizListOption } from "@/components/quiz/QuizQuestionList";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import QuizCountdown from "@/components/quiz/QuizCountdown";
 
 export type SessionTestRunnerOption = QuizListOption;
 export type SessionTestRunnerItem = QuizListItem;
@@ -19,6 +20,8 @@ export interface SessionTestRunnerAttempt {
   totalQuestions: number;
   correctCount?: number;
   scorePercent?: number;
+  deadlineAt?: string | null;
+  submittedLate?: boolean;
   answersRevealed?: boolean;
   items: SessionTestRunnerItem[];
 }
@@ -118,6 +121,8 @@ export default function SessionTestRunner({
     : null;
 
   const doSubmit = async () => {
+    // The countdown and the button can both fire; only one submit goes out.
+    if (submitting) return;
     setConfirmOpen(false);
     setSubmitting(true);
     setError("");
@@ -178,6 +183,10 @@ export default function SessionTestRunner({
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
+      {submitted && attempt.submittedLate && (
+        <FeedbackBanner variant="warning" message="This attempt was submitted after its time limit. It was still graded." />
+      )}
+      {!submitted && attempt.deadlineAt && <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={doSubmit} />}
 
       <QuizQuestionList
         items={attempt.items}

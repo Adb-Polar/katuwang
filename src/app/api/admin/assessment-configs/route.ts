@@ -36,11 +36,12 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const { questionCount, passPercent, minBankSize } = result.data;
+    const { questionCount, passPercent, minBankSize, timeLimitMinutes } = result.data;
     const updates: { key: string; value: number }[] = [
       ...(questionCount !== undefined ? [{ key: ASSESSMENT_SETTING_KEYS.questionCount, value: questionCount }] : []),
       ...(passPercent !== undefined ? [{ key: ASSESSMENT_SETTING_KEYS.passPercent, value: passPercent }] : []),
       ...(minBankSize !== undefined ? [{ key: ASSESSMENT_SETTING_KEYS.minBankSize, value: minBankSize }] : []),
+      ...(timeLimitMinutes !== undefined ? [{ key: ASSESSMENT_SETTING_KEYS.timeLimitMinutes, value: timeLimitMinutes }] : []),
     ];
 
     await prisma.$transaction([

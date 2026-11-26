@@ -440,6 +440,7 @@ model AssessmentAttempt {
   passPercent    Int
   startedAt      DateTime                @default(now())
   submittedAt    DateTime?
+  timeLimitMinutes Int? // snapshot of the platform quiz limit when this attempt started
   certifications TopicCertification[] @relation("CertificationQualification")
   items          AssessmentAttemptItem[]
   tutorProfile   TutorProfile            @relation(fields: [tutorProfileId], references: [id], onDelete: Cascade)
@@ -578,6 +579,7 @@ model SessionTest {
   sessionId       String                @unique
   title           String
   instructions    String?               @db.Text
+  timeLimitMinutes Int? // null = untimed; applies to both the pre-test and the post-test
   status          SessionTestStatus     @default(DRAFT)
   publishedAt     DateTime?
   pretestClosedAt DateTime?
@@ -618,6 +620,7 @@ model SessionTestAttempt {
   scorePercent   Int                      @default(0)
   startedAt      DateTime                 @default(now())
   submittedAt    DateTime?
+  timeLimitMinutes Int? // snapshot of the test's limit when this attempt started
   items          SessionTestAttemptItem[]
   learner        User                     @relation("LearnerSessionTestAttempts", fields: [learnerId], references: [id], onDelete: Cascade)
   sessionTest    SessionTest              @relation(fields: [sessionTestId], references: [id], onDelete: Cascade)

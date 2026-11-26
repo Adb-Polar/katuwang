@@ -143,6 +143,24 @@ describe("POST /api/tutor/assessments", () => {
     expect(attemptCreate).not.toHaveBeenCalled();
   });
 
+  it("snapshots the platform quiz time limit onto the attempt, or null when untimed", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });
+    questionCount.mockResolvedValue(12);
+    pickQuestionIdsMock.mockResolvedValue(["q1", "q2", "q3", "q4", "q5"]);
+    attemptCreate.mockResolvedValue(fakeAttempt(["q1", "q2", "q3", "q4", "q5"]));
+
+    platformSettingFindMany.mockResolvedValue([{ key: "assessmentTimeLimitMinutes", value: "20" }]);
+    questionCount.mockResolvedValueOnce(12).mockResolvedValueOnce(5);
+    await POST(post(validBody));
+    platformSettingFindMany.mockResolvedValue([]);
+    questionCount.mockResolvedValueOnce(12).mockResolvedValueOnce(5);
+    await POST(post(validBody));
+
+    expect(attemptCreate.mock.calls[0][0].data.timeLimitMinutes).toBe(20);
+    expect(attemptCreate.mock.calls[1][0].data.timeLimitMinutes).toBeNull();
+  });
+
   it("201 creates an attempt with the picked questions when the bank is ready", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     tutorProfileFindUnique.mockResolvedValue({ id: "tp1" });

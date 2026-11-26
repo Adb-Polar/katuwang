@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { attemptDeadline, wasSubmittedLate } from "@/lib/attemptDeadline";
 
 /** Attempt with everything the detail views need, as fetched by the routes. */
 export type AttemptWithItems = Prisma.AssessmentAttemptGetPayload<{
@@ -32,6 +33,12 @@ export interface SerializedAttempt {
   scorePercent?: number;
   startedAt: string;
   submittedAt: string | null;
+  /** Minutes allowed for this attempt; null = untimed. */
+  timeLimitMinutes: number | null;
+  /** When the time runs out (ISO); null = untimed. */
+  deadlineAt: string | null;
+  /** Handed in after the deadline and its grace period. Still graded. */
+  submittedLate: boolean;
   items: SerializedAttemptItem[];
 }
 
@@ -80,6 +87,9 @@ export function serializeAttempt(
     ...(reveal ? { correctCount: attempt.correctCount, scorePercent: attempt.scorePercent } : {}),
     startedAt: attempt.startedAt.toISOString(),
     submittedAt: attempt.submittedAt ? attempt.submittedAt.toISOString() : null,
+    timeLimitMinutes: attempt.timeLimitMinutes,
+    deadlineAt: attemptDeadline(attempt)?.toISOString() ?? null,
+    submittedLate: wasSubmittedLate(attempt),
     items,
   };
 }

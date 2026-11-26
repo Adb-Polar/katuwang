@@ -149,6 +149,32 @@ describe("POST /test/[kind]/start — the §2 ladder", () => {
     expect(res.status).toBe(201);
   });
 
+  it("copies the test's time limit onto the new attempt and returns its deadline", async () => {
+    const startedAt = new Date("2026-12-01T01:00:00.000Z");
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", timeLimitMinutes: 15, pretestClosedAt: new Date(), posttestOpenedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
+    sessionTestAttemptCreate.mockImplementation(async ({ data }) => ({
+      id: "at-post", kind: "POST", status: "IN_PROGRESS", totalQuestions: 1, correctCount: 0, scorePercent: 0,
+      startedAt, submittedAt: null, timeLimitMinutes: data.timeLimitMinutes,
+      sessionTest: { id: "st1", title: "t", instructions: null }, items: [],
+    }));
+    const res = await POST(req(), ctx("POST"));
+    expect(res.status).toBe(201);
+    expect(sessionTestAttemptCreate.mock.calls[0][0].data.timeLimitMinutes).toBe(15);
+    expect(await res.json()).toMatchObject({ timeLimitMinutes: 15, deadlineAt: "2026-12-01T01:15:00.000Z", submittedLate: false });
+  });
+
+  it("starts an untimed attempt when the test has no limit", async () => {
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "PUBLISHED", timeLimitMinutes: null, pretestClosedAt: new Date(), posttestOpenedAt: new Date(), questions: [{ questionId: "q1", position: 0 }] });
+    sessionTestAttemptCreate.mockImplementation(async ({ data }) => ({
+      id: "at-post", kind: "POST", status: "IN_PROGRESS", totalQuestions: 1, correctCount: 0, scorePercent: 0,
+      startedAt: new Date(), submittedAt: null, timeLimitMinutes: data.timeLimitMinutes,
+      sessionTest: { id: "st1", title: "t", instructions: null }, items: [],
+    }));
+    const json = await (await POST(req(), ctx("POST"))).json();
+    expect(json.timeLimitMinutes).toBeNull();
+    expect(json.deadlineAt).toBeNull();
+  });
+
   it("409 per the gating table — no new starts once the session is CANCELLED", async () => {
     classSessionFindUnique.mockResolvedValue({ id: "s1", classId: "c1", status: "CANCELLED" });
     const res = await POST(req(), ctx("PRE"));

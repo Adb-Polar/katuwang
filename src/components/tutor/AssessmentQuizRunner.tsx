@@ -7,6 +7,7 @@ import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
 import { QuizQuestionList, QuizResult, QuizSubmitBar, type QuizListItem } from "@/components/quiz/QuizQuestionList";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import QuizCountdown from "@/components/quiz/QuizCountdown";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 
 export type QuizItem = QuizListItem;
@@ -21,6 +22,8 @@ export interface QuizAttempt {
   passPercent: number;
   correctCount?: number;
   scorePercent?: number;
+  deadlineAt?: string | null;
+  submittedLate?: boolean;
   submittedAt: string | null;
   items: QuizItem[];
 }
@@ -41,6 +44,8 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
   const allAnswered = answeredCount === attempt.items.length;
 
   const doSubmit = async () => {
+    // The countdown and the button can both fire; only one submit goes out.
+    if (submitting) return;
     setConfirmOpen(false);
     setSubmitting(true);
     setError("");
@@ -99,6 +104,10 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
       )}
 
       <FeedbackBanner variant="error" message={error || null} />
+      {submitted && attempt.submittedLate && (
+        <FeedbackBanner variant="warning" message="This attempt was submitted after its time limit. It was still graded." />
+      )}
+      {!submitted && attempt.deadlineAt && <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={doSubmit} />}
 
       <QuizQuestionList
         items={attempt.items}

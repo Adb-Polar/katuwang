@@ -101,6 +101,8 @@ export async function POST(_req: NextRequest, { params }: Ctx) {
           learnerId: session.user.id,
           kind,
           totalQuestions: test.questions.length,
+          // Snapshot: a later edit of the test must not change a running attempt.
+          timeLimitMinutes: test.timeLimitMinutes,
           items: {
             create: test.questions.map((q) => ({ questionId: q.questionId, position: q.position })),
           },

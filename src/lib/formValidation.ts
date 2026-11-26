@@ -26,7 +26,7 @@ const FIELD_LABELS: Record<string, string[]> = {
   preferredSlots: ["Preferred times"], violations: ["Violations"], details: ["Describe the issue"],
   prompt: ["Question prompt", "Question"], options: ["Options", "Answer choices"], reason: ["Reason", "Why should this moderation"],
   durationDays: ["Duration"], resolutionNote: ["Note for the tutor"], status: ["Status"],
-  title: ["Title"], instructions: ["Instructions"], description: ["Description"], note: ["Note"],
+  title: ["Title"], instructions: ["Instructions"], timeLimitMinutes: ["Time limit"], description: ["Description"], note: ["Note"],
 };
 
 /** Returns false for non-field errors, which should remain in the general banner. */

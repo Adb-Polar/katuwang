@@ -1357,3 +1357,12 @@ UI/UX batch (Changes.md Part 98)
  [ ] Post-test: two learners (or one learner, pre vs post) see the questions and the options in different orders; refreshing mid-test keeps the same order; the submitted review is in the tutor's order.
  [ ] Quiz copy protection: during a pre/post-test and a tutor certification quiz, text cannot be selected, Ctrl+C copies nothing and right-click shows no menu; after submitting, the review text can be selected.
  [ ] Tutor profile (learner view): shows grade level, section, certified subjects, classes offered, sessions completed and tutor since; no name, email or contact unless "show tutor real names" is on. Find Tutors cards show grade and section.
+
+Time limits (Changes.md Part 99)
+ [ ] Session test builder: a draft test accepts a time limit of 1 to 180 minutes; 0, 181 and 2.5 are refused; clearing the field removes the limit; the field is read-only once the test is published.
+ [ ] Timed pre-test: the learner sees "Time left" counting down; refreshing the page does not reset it; it turns orange in the last minute; at 0:00 the test submits itself with the answers chosen so far and shows the result.
+ [ ] Timed post-test: same behaviour; an untimed test (no limit) shows no countdown.
+ [ ] Opening a timed attempt after its deadline (start, close the tab, come back later) submits it immediately.
+ [ ] Changing a test's limit after a learner has started does not change that learner's countdown.
+ [ ] /admin/settings -> Assessment -> "Time limit (minutes)" = 2 -> a tutor's next certification quiz shows a 2-minute countdown and auto-submits; 0 removes the limit.
+ [ ] Dark mode: the countdown bar is readable in both themes.

@@ -479,6 +479,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     Int passPercent
     DateTime startedAt
     DateTime submittedAt "❓"
+    Int timeLimitMinutes "❓"
     }
 
 
@@ -567,6 +568,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     String sessionId
     String title
     String instructions "❓"
+    Int timeLimitMinutes "❓"
     SessionTestStatus status
     DateTime publishedAt "❓"
     DateTime pretestClosedAt "❓"
@@ -596,6 +598,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     Int scorePercent
     DateTime startedAt
     DateTime submittedAt "❓"
+    Int timeLimitMinutes "❓"
     }
 
 

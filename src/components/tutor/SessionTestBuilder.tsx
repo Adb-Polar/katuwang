@@ -18,6 +18,7 @@ import { displayPrompt } from "@/lib/questionText";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import Pagination from "@/components/ui/Pagination";
 import QuestionFormModal from "@/components/quiz/QuestionFormModal";
+import { MAX_TIME_LIMIT_MINUTES, MIN_TIME_LIMIT_MINUTES } from "@/lib/attemptDeadline";
 
 interface BuilderQuestion {
   questionId: string;
@@ -38,6 +39,7 @@ export interface SessionTestBuilderProps {
     id: string;
     title: string;
     instructions: string | null;
+    timeLimitMinutes: number | null;
     status: "DRAFT" | "PUBLISHED" | "CLOSED";
     pretestClosedAt: string | null;
     posttestOpenedAt: string | null;
@@ -100,6 +102,7 @@ function CreateTestPanel({
 }) {
   const [title, setTitle] = useState(`${sessionTopic} check-in`);
   const [instructions, setInstructions] = useState("");
+  const [timeLimit, setTimeLimit] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -110,7 +113,7 @@ function CreateTestPanel({
       const res = await fetch(`/api/tutor/classes/${classId}/sessions/${sessionId}/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
+        body: JSON.stringify({ title, instructions: instructions.trim() || undefined, timeLimitMinutes: timeLimitValue(timeLimit) }),
       });
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
@@ -137,7 +140,7 @@ function CreateTestPanel({
           </div>
           <FeedbackBanner variant="error" message={error || null} />
           <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void create(e.currentTarget); }}>
-            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} editable />
+            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} timeLimit={timeLimit} setTimeLimit={setTimeLimit} editable />
             <div className="flex justify-end">
               <button type="submit" disabled={busy} className="btn btn-primary">
                 {busy && <span className="loading loading-spinner loading-sm" />}
@@ -181,14 +184,21 @@ function TestPageHeader({
   );
 }
 
-/** Title + instructions, shared by the create form and the builder's details section. */
+/** An empty time-limit field means "no limit", sent as null so a saved limit can be cleared. */
+const timeLimitValue = (input: string) => (input.trim() === "" ? null : Number(input));
+
+/** Title, instructions and time limit, shared by the create form and the builder's details section. */
 function TestFields({
   title,
   setTitle,
   instructions,
   setInstructions,
+  timeLimit,
+  setTimeLimit,
   editable,
 }: {
+  timeLimit: string;
+  setTimeLimit: (v: string) => void;
   title: string;
   setTitle: (v: string) => void;
   instructions: string;
@@ -219,6 +229,24 @@ function TestFields({
         />
         <CharCount value={instructions} max={2000} />
       </FormField>
+      <FormField
+        size="md"
+        label="Time limit (minutes)"
+        hint="Optional. Applies to the pre-test and the post-test; the test submits itself when time runs out. Leave empty for no limit."
+      >
+        <input
+          type="number"
+          inputMode="numeric"
+          min={MIN_TIME_LIMIT_MINUTES}
+          max={MAX_TIME_LIMIT_MINUTES}
+          step={1}
+          value={timeLimit}
+          onChange={(e) => setTimeLimit(e.target.value)}
+          disabled={!editable}
+          placeholder="No limit"
+          className="input input-bordered w-full sm:max-w-40"
+        />
+      </FormField>
     </>
   );
 }
@@ -247,6 +275,7 @@ function BuilderBody({
 
   const [title, setTitle] = useState(test.title);
   const [instructions, setInstructions] = useState(test.instructions ?? "");
+  const [timeLimit, setTimeLimit] = useState(test.timeLimitMinutes ? String(test.timeLimitMinutes) : "");
   const [items, setItems] = useState<BuilderQuestion[]>(test.questions);
   const [savedIds, setSavedIds] = useState<string[]>(test.questions.map((q) => q.questionId));
   const [status, setStatus] = useState(test.status);
@@ -295,7 +324,7 @@ function BuilderBody({
       const res = await fetch(`/api/tutor/classes/${classId}/sessions/${sessionId}/test`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, instructions: instructions.trim() || undefined }),
+        body: JSON.stringify({ title, instructions: instructions.trim() || undefined, timeLimitMinutes: timeLimitValue(timeLimit) }),
       });
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
@@ -404,7 +433,7 @@ function BuilderBody({
         <div className="kt-card-body gap-5">
           <h2 id="test-details" className={sectionTitle}>Test details</h2>
           <ValidatedForm className="space-y-4" onSubmit={(e) => { e.preventDefault(); void saveMeta(e.currentTarget); }}>
-            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} editable={editable} />
+            <TestFields title={title} setTitle={setTitle} instructions={instructions} setInstructions={setInstructions} timeLimit={timeLimit} setTimeLimit={setTimeLimit} editable={editable} />
             {editable && (
               <div className="flex justify-end">
                 <button type="submit" disabled={busy} className="btn btn-outline">

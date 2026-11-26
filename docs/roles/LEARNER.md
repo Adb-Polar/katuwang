@@ -44,6 +44,7 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
   (`DELETE /api/classes/[classId]/enroll`)
 
 - **Schedule conflict** — enrolling is refused (`409`) when a session overlaps one in a class the learner is already in; the message names that class, its code and the date and time.
+- **Timed tests** — when the tutor set a time limit, the test shows a countdown that a refresh does not reset and submits itself at zero with the answers chosen so far. A late hand-in is still graded and marked as late.
 - **Post-tests** are shown in a different question and option order for each attempt, and quiz text cannot be selected or copied while a test is being taken.
 
 ## Session Pre/Post-Tests (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`)

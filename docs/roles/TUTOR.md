@@ -222,6 +222,11 @@ Register a new tutor account. No auth required. `403 { error: "Registration is c
 **409** → `{ error: "An account with this email already exists." }`.
 **500** → `{ error }`.
 
+### Time limits (2026-11-26)
+
+- A session test's details take an optional **time limit** of 1–180 minutes (`timeLimitMinutes` on `POST`/`PATCH …/test`; `null` clears it). It applies to the pre-test and the post-test alike. Each learner's attempt keeps the limit it started with.
+- The tutor certification quiz uses the admin's platform limit, if one is set. The quiz shows a countdown and submits itself when time runs out; attempts return `timeLimitMinutes`, `deadlineAt` and `submittedLate`.
+
 ### `GET /api/tutor/schedule`
 
 The tutor's own upcoming `SCHEDULED` sessions in classes that are not cancelled or completed, for the schedule forms' overlap warnings. Requires `role === "STUDENT_TUTOR"` (`401`).

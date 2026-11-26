@@ -128,6 +128,28 @@ describe("POST /test", () => {
     );
   });
 
+  it("stores the time limit, or null when none is given", async () => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    sessionTestCreate.mockResolvedValue({ id: "st1" });
+    await POST(req("POST", { title: "Fractions check-in", timeLimitMinutes: 20 }), ctx());
+    await POST(req("POST", { title: "Fractions check-in" }), ctx());
+    expect(sessionTestCreate.mock.calls[0][0].data.timeLimitMinutes).toBe(20);
+    expect(sessionTestCreate.mock.calls[1][0].data.timeLimitMinutes).toBeNull();
+  });
+
+  it.each([0, 181, 2.5, -5, "soon"])("400 for the time limit %s", async (timeLimitMinutes) => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    const res = await POST(req("POST", { title: "Fractions check-in", timeLimitMinutes }), ctx());
+    expect(res.status).toBe(400);
+    expect(sessionTestCreate).not.toHaveBeenCalled();
+  });
+
+  it.each([1, 180])("accepts the boundary time limit %i", async (timeLimitMinutes) => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    sessionTestCreate.mockResolvedValue({ id: "st1" });
+    expect((await POST(req("POST", { title: "Fractions check-in", timeLimitMinutes }), ctx())).status).toBe(201);
+  });
+
   it("400 for an invalid title", async () => {
     getServerSessionMock.mockResolvedValue(tutor);
     const res = await POST(req("POST", { title: "x" }), ctx());
@@ -149,6 +171,29 @@ describe("PATCH /test", () => {
     sessionTestUpdate.mockResolvedValue({ id: "st1", title: "New title" });
     const res = await PATCH(req("PATCH", { title: "New title" }), ctx());
     expect(res.status).toBe(200);
+  });
+});
+
+describe("PATCH /test time limit", () => {
+  beforeEach(() => {
+    getServerSessionMock.mockResolvedValue(tutor);
+    sessionTestFindUnique.mockResolvedValue({ id: "st1", status: "DRAFT", questions: [], _count: { attempts: 0 } });
+    sessionTestUpdate.mockResolvedValue({ id: "st1" });
+  });
+
+  it("sets a limit", async () => {
+    await PATCH(req("PATCH", { timeLimitMinutes: 30 }), ctx());
+    expect(sessionTestUpdate.mock.calls.at(-1)![0].data).toEqual({ timeLimitMinutes: 30 });
+  });
+
+  it("clears a limit with null", async () => {
+    await PATCH(req("PATCH", { timeLimitMinutes: null }), ctx());
+    expect(sessionTestUpdate.mock.calls.at(-1)![0].data).toEqual({ timeLimitMinutes: null });
+  });
+
+  it("leaves the limit alone when it is not sent", async () => {
+    await PATCH(req("PATCH", { title: "New title" }), ctx());
+    expect(sessionTestUpdate.mock.calls.at(-1)![0].data).toEqual({ title: "New title" });
   });
 });
 
