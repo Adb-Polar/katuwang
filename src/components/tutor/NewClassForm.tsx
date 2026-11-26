@@ -5,6 +5,7 @@ import { reportServerFieldErrors } from "@/lib/formValidation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ClassScheduleFields, { ClassScheduleSubmitPayload } from "@/components/tutor/ClassScheduleFields";
+import { useToast } from "@/components/ui/Toast";
 
 /**
  * Full-page "schedule a tutoring class" form. Replaces the old cramped modal on
@@ -19,6 +20,7 @@ export default function NewClassForm({
   tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -36,6 +38,7 @@ export default function NewClassForm({
       if (!res.ok) throw new Error(data.error || "Failed to create class.");
 
       // Land on the class we just made.
+      toast("Class created.", "success", { awaitNavigation: true });
       router.push(`/tutor/classes/${data.id}`);
       router.refresh();
     } catch (err) {

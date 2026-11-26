@@ -8,7 +8,9 @@ import { reinstateExpiredClasses } from "@/lib/moderation";
 import { hasClassStarted } from "@/lib/classQueries";
 import { isStudentEligibleForClass } from "@/lib/gradeLevels";
 import { notify } from "@/lib/notifications";
-import { hasLearnerSessionOverlap } from "@/lib/classSessions";
+import { findLearnerSessionConflict } from "@/lib/classSessions";
+import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { formatDateTime } from "@/lib/datetime";
 
 // ─── POST: Enroll in a Class ──────────────────────────────────────────────────
 export async function POST(
@@ -98,9 +100,12 @@ export async function POST(
           { status: 409 }
         );
       }
-      if (await hasLearnerSessionOverlap(session.user.id, classId, existingClass.sessions, tx)) {
+      const conflict = await findLearnerSessionConflict(session.user.id, classId, existingClass.sessions, tx);
+      if (conflict) {
         return NextResponse.json(
-          { error: "Schedule conflict: a session in this class overlaps a session in a class you are already enrolled in." },
+          {
+            error: `Schedule conflict: a session in this class overlaps your ${subjectDisplayLabel(conflict.subject)} class (${conflict.classCode}) on ${formatDateTime(conflict.scheduledAt)}.`,
+          },
           { status: 409 }
         );
       }

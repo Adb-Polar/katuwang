@@ -13,6 +13,7 @@ import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import FormField from "@/components/ui/FormField";
 import { LRN, LRN_LENGTH, PERSON_NAME, SECTION_NAME } from "@/lib/validations/textRules";
 import { GRADE_LEVELS } from "@/lib/gradeLevels";
+import { EMAIL_INPUT_MESSAGE, EMAIL_INPUT_PATTERN } from "@/lib/validations/email";
 
 type RegisterType = "LEARNER" | "TUTOR";
 
@@ -238,6 +239,8 @@ export default function RegisterForm({ type }: { type: RegisterType }) {
             value={form.email}
             onChange={handleChange}
             required
+            pattern={EMAIL_INPUT_PATTERN}
+            title={EMAIL_INPUT_MESSAGE}
             placeholder="you@example.com"
             className="input input-bordered w-full"
           />

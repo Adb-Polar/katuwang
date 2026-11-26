@@ -11,12 +11,14 @@ const {
   sendMailMock,
   generateAnonymousIdMock,
   userCountMock,
+  platformSettingFindUnique,
 } = vi.hoisted(() => ({
   getServerSessionMock: vi.fn(),
   userFindManyMock: vi.fn(),
   userFindFirstMock: vi.fn(),
   userCreateMock: vi.fn(),
   userCountMock: vi.fn(),
+  platformSettingFindUnique: vi.fn(),
   tokenCreateMock: vi.fn(),
   auditLogCreateMock: vi.fn(),
   sendMailMock: vi.fn(),
@@ -40,6 +42,7 @@ vi.mock("@/lib/prisma", () => ({
     auditLog: {
       create: auditLogCreateMock,
     },
+    platformSetting: { findUnique: platformSettingFindUnique },
     $transaction: async (fn: (tx: unknown) => Promise<unknown>) =>
       fn({
         user: { create: userCreateMock },
@@ -131,6 +134,15 @@ describe("GET /api/admin/admins", () => {
 describe("POST /api/admin/admins", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("returns 400 when the email domain is not on the allowlist", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "super-1", role: "SUPER_ADMIN" } });
+    platformSettingFindUnique.mockResolvedValueOnce({ key: "allowedEmailDomains", value: "school.edu.ph" });
+    const res = await POST(makePostRequest({ firstName: "Test", lastName: "Admin", email: "test@example.com" }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("@school.edu.ph");
+    expect(userCreateMock).not.toHaveBeenCalled();
   });
 
   it("returns 401 when unauthenticated", async () => {

@@ -153,4 +153,26 @@ describe("GET /api/learner/tutors", () => {
     expect(json.showTutorRealNames).toBe(false);
     expect(json.tutors[0]).not.toHaveProperty("name");
   });
+
+  it("returns grade level and section even while real names are hidden", async () => {
+    getServerSessionMock.mockResolvedValue(learner);
+    findManyMock.mockResolvedValue([
+      {
+        id: "u1",
+        anonymousId: "TUT-0148",
+        gradeLevel: "GRADE_10",
+        section: "Rizal",
+        tutorProfile: { topicCertifications: [], _count: { classes: 0 }, classes: [] },
+      },
+    ]);
+    const json = await (await GET(req("http://localhost/api/learner/tutors"))).json();
+    const { select } = findManyMock.mock.calls[0][0];
+    expect(select).toMatchObject({ gradeLevel: true, section: true });
+    expect(json.tutors[0]).toMatchObject({ gradeLevel: "GRADE_10", section: "Rizal" });
+    expect(json.tutors[0]).not.toHaveProperty("name");
+    for (const field of ["email", "contactInfo", "studentIdNumber", "adviserTeacherName"]) {
+      expect(select).not.toHaveProperty(field);
+      expect(json.tutors[0]).not.toHaveProperty(field);
+    }
+  });
 });

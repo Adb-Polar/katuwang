@@ -5,6 +5,7 @@ import { useFetchList } from "@/hooks/useFetchList";
 import LoadErrorState from "@/components/ui/LoadErrorState";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import LoadingRow from "@/components/ui/LoadingRow";
+import AllowedEmailDomainsField from "@/components/admin/AllowedEmailDomainsField";
 
 interface Setting {
   key: string;
@@ -251,8 +252,9 @@ export default function PlatformSettingsForm() {
   };
 
   const generalToggles = settings.filter(
-    (s) => s.key !== "profilePictureRequirement" && (SETTING_META[s.key]?.group ?? "General") === "General"
+    (s) => typeof s.value === "boolean" && (SETTING_META[s.key]?.group ?? "General") === "General"
   );
+  const allowedEmailDomains = String(settings.find((s) => s.key === "allowedEmailDomains")?.value ?? "");
   const assessmentToggles = settings.filter((s) => SETTING_META[s.key]?.group === "Assessment");
   const profilePicSetting = settings.find((s) => s.key === "profilePictureRequirement");
   const profilePicValue = String(profilePicSetting?.value ?? "OPTIONAL");
@@ -292,6 +294,16 @@ export default function PlatformSettingsForm() {
                   <option value="ALL_USERS">Tutors + learner enrollment</option>
                 </select>
               </div>
+              <AllowedEmailDomainsField
+                key={allowedEmailDomains}
+                value={allowedEmailDomains}
+                onError={setError}
+                onSaved={(message) => {
+                  setSuccess(message);
+                  refetch();
+                  setTimeout(() => setSuccess(""), 4000);
+                }}
+              />
             </div>
           )}
         </div>

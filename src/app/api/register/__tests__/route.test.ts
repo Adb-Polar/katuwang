@@ -87,6 +87,39 @@ describe("POST /api/register", () => {
     expect(userCreate).not.toHaveBeenCalled();
   });
 
+  describe("email domain allowlist", () => {
+    const allowOnly = (domains: string) =>
+      platformSettingFindUnique.mockImplementation(({ where }: { where: { key: string } }) =>
+        where.key === "allowedEmailDomains" ? { key: where.key, value: domains } : null);
+
+    it("rejects an address outside the approved domains before any database write", async () => {
+      allowOnly("school.edu.ph, deped.gov.ph");
+      const res = await POST(makeRequest({ ...validLearner, email: "juan@gmail.com" }));
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json.error).toBe("Use an email address from an approved domain: @school.edu.ph, @deped.gov.ph.");
+      expect(json.fieldErrors).toEqual([{ path: ["email"], message: json.error }]);
+      expect(userFindUnique).not.toHaveBeenCalled();
+      expect(userCreate).not.toHaveBeenCalled();
+    });
+
+    it("accepts an address on an approved domain, ignoring case", async () => {
+      allowOnly("school.edu.ph");
+      userFindUnique.mockResolvedValue(null);
+      userCreate.mockResolvedValue({ id: "U1", anonymousId: "STU-0001", role: "STUDENT_LEARNER" });
+      transactionMock.mockImplementation(async (cb) => cb({ user: { create: userCreate } }));
+      const res = await POST(makeRequest({ ...validLearner, email: "Juan@School.EDU.ph" }));
+      expect(res.status).toBe(201);
+    });
+
+    it.each(["user@test.123", "asa@qwqe"])("rejects the malformed address %s", async (email) => {
+      const res = await POST(makeRequest({ ...validLearner, email }));
+      expect(res.status).toBe(400);
+      expect((await res.json()).fieldErrors).toEqual(expect.arrayContaining([expect.objectContaining({ path: ["email"] })]));
+      expect(userCreate).not.toHaveBeenCalled();
+    });
+  });
+
   afterEach(() => vi.unstubAllEnvs());
   beforeEach(() => {
     vi.clearAllMocks();

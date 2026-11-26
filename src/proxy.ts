@@ -16,7 +16,8 @@ export default withAuth(
     }
 
     // Role-based route guards
-    if (pathname.startsWith("/admin/admins") && token?.role !== "SUPER_ADMIN") {
+    const superAdminOnly = pathname.startsWith("/admin/admins") || pathname.startsWith("/admin/audit-log");
+    if (superAdminOnly && token?.role !== "SUPER_ADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
 

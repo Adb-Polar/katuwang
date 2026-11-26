@@ -21,6 +21,8 @@ Every class is assigned a unique human-friendly **code** (`C-0001`, `C-0002`, �
 - **View own classes** — list all classes the tutor has created, optionally filtered by status; includes each class's topics, all of its sessions, and the roster of enrolled learners (learners are shown only by anonymized info: ID, grade level, section — never real name/email).
   (`GET /api/tutor/classes`)
 - **Create a class** — the "Schedule Class" button opens a dedicated full page (`/tutor/classes/new`), not a modal. Choose a subject, one or more topics (validated against the subject's predefined topic list), description, max student capacity, a location (building/room) and/or a meeting link, and **one or more initial sessions** (each with a topic drawn from the class's topics, a date/time, and a duration). On success you land on the new class's detail page.
+  - Each session takes a date, a **start time and an end time**; the form shows the resulting length (15 minutes to 4 hours) and still sends `duration` in minutes. The date picker starts at today, and the form says before submit when a time has passed or overlaps one of the tutor's own sessions, naming it (`GET /api/tutor/schedule`). Add-session and reschedule use the same fields. The server checks are unchanged.
+  - Every action here (create, edit, publish, cancel, complete, delete, add / reschedule a session) confirms with a toast.
   - Every session's topic must be one of the class's selected topics.
   - A class needs a way for learners to actually attend it — a building/room, a meeting link, or both; rejected if neither is provided.
   - Blocked from scheduling any session in the past.
@@ -219,6 +221,12 @@ Register a new tutor account. No auth required. `403 { error: "Registration is c
 **403** → registration closed.
 **409** → `{ error: "An account with this email already exists." }`.
 **500** → `{ error }`.
+
+### `GET /api/tutor/schedule`
+
+The tutor's own upcoming `SCHEDULED` sessions in classes that are not cancelled or completed, for the schedule forms' overlap warnings. Requires `role === "STUDENT_TUTOR"` (`401`).
+
+**200** → `{ sessions: [{ id, scheduledAt, duration, label }] }` where `label` is `"<Subject> · <class code>"`.
 
 ### `GET /api/tutor/classes`
 List the authenticated tutor's own classes. Requires `role === "STUDENT_TUTOR"` (else `401`); `404` if no `TutorProfile` exists.

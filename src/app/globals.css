@@ -43,6 +43,46 @@
   --noise: 0;
 }
 
+/*
+  Dark counterpart for the three portals, switched with the top-bar toggle (data-theme on <html>).
+  Same hues as the light palette, lightness inverted. Public pages stay light: PublicShell pins
+  data-theme="katuwang-public" on its own wrapper.
+*/
+@plugin "daisyui/theme" {
+  name: "katuwang-dark";
+  default: false;
+  prefersdark: false;
+  color-scheme: "dark";
+  --color-base-100: oklch(23% 0.015 230);
+  --color-base-200: oklch(18.5% 0.014 230);
+  --color-base-300: oklch(33% 0.018 230);
+  --color-base-content: oklch(93% 0.008 225);
+  --color-primary: oklch(74% 0.1 222);
+  --color-primary-content: oklch(19% 0.03 222);
+  --color-secondary: oklch(74% 0.13 30);
+  --color-secondary-content: oklch(19% 0.03 30);
+  --color-accent: oklch(46% 0.13 300);
+  --color-accent-content: oklch(95% 0.03 300);
+  --color-neutral: oklch(88% 0.01 230);
+  --color-neutral-content: oklch(21% 0.02 230);
+  --color-info: oklch(72% 0.1 230);
+  --color-info-content: oklch(19% 0.03 230);
+  --color-success: oklch(72% 0.13 152);
+  --color-success-content: oklch(19% 0.03 152);
+  --color-warning: oklch(79% 0.14 60);
+  --color-warning-content: oklch(21% 0.03 60);
+  --color-error: oklch(70% 0.17 25);
+  --color-error-content: oklch(19% 0.03 25);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.25rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
 @theme inline {
   /* Two fonts, both IBM Plex (loaded in app/layout.tsx): Serif for headings and IDs, Sans for
      everything else. There is no monospace face — font-mono maps to Plex Sans, with tabular
@@ -106,6 +146,16 @@
      the gap between them is now deliberately small. */
   --kt-muted: oklch(46% 0.02 230); /* ~6.5:1 on base-200 */
   --kt-faint: oklch(52% 0.02 230); /* ~5:1 */
+}
+
+/* The fixed-lightness tokens above assume a light surface; these are their dark equivalents. */
+[data-theme="katuwang-dark"] {
+  --kt-shadow-card: 0 1px 2px oklch(0% 0 0 / 0.3), 0 1px 3px oklch(0% 0 0 / 0.35);
+  --kt-shadow-pop: 0 8px 24px oklch(0% 0 0 / 0.5), 0 2px 6px oklch(0% 0 0 / 0.35);
+  --kt-tutor-text: oklch(80% 0.12 300);
+  --kt-warning-text: color-mix(in oklch, var(--color-warning) 85%, white);
+  --kt-muted: oklch(76% 0.015 230);
+  --kt-faint: oklch(70% 0.015 230);
 }
 
 body { background: var(--color-base-200); }
@@ -224,6 +274,7 @@ b, strong { font-weight: var(--font-weight-bold); }
   .kt-alert--success { border-left-color: var(--color-success); background: var(--kt-tint-success); }
   .kt-alert--warning { border-left-color: var(--color-warning); background: var(--kt-tint-warning); }
   .kt-alert--error { border-left-color: var(--color-error); background: var(--kt-tint-error); }
+  .kt-toast { max-width: min(24rem, calc(100vw - 2rem)); white-space: normal; box-shadow: var(--kt-shadow-pop); }
 
   .kt-sidebar { background: var(--color-base-100); border-right: 1px solid var(--kt-border); }
   .kt-nav-label {
@@ -344,6 +395,13 @@ b, strong { font-weight: var(--font-weight-bold); }
       min-width: 2.75rem;
     }
   }
+/* Required marker for hand-written labels that wrap their control (FormField adds its own).
+   Driven by the control's `required` attribute so the asterisk cannot drift from validation. */
+label:has(> :is(input, select, textarea):required:not([type="checkbox"], [type="radio"])) > span:first-child::after {
+  content: " *";
+  color: var(--color-error);
+}
+
 /* Keep invalid controls visible while their field-level feedback is shown. */
 input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"] {
   border-color: var(--color-error);

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ReactNode, SyntheticEvent } from "react";
 import { displayPrompt } from "@/lib/questionText";
 
 export interface QuizListOption {
@@ -17,6 +17,8 @@ export interface QuizListItem {
   isCorrect?: boolean | null;
   explanation?: string | null;
 }
+
+const blockEvent = (event: SyntheticEvent) => event.preventDefault();
 
 /**
  * The questions of a quiz (tutor topic assessment, learner pre/post-test): one card of numbered questions, answers as
@@ -36,8 +38,13 @@ export function QuizQuestionList({
   /** Strips a "[topic]" prefix from bank prompts; any leading bracket when omitted. */
   topic?: string;
 }) {
+  // While the quiz is being taken its text cannot be selected, copied, cut, dragged out or
+  // reached through the context menu. This is a deterrent, not a guarantee (a screenshot still
+  // works); the graded review afterwards is ordinary selectable text.
+  const guard = submitted ? {} : { onCopy: blockEvent, onCut: blockEvent, onContextMenu: blockEvent, onDragStart: blockEvent };
+
   return (
-    <ol className="kt-card">
+    <ol className={`kt-card ${submitted ? "" : "select-none"}`} data-copy-protected={submitted ? undefined : "true"} {...guard}>
       {items.map((item) => {
         const chosen = answers[item.questionId] ?? item.selectedOptionId;
         return (

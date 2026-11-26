@@ -9,6 +9,7 @@ import BrandMark from "@/components/ui/BrandMark";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import GlobalSearch from "@/components/layout/GlobalSearch";
 import ChatWidget from "@/components/chatbot/ChatWidget";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export interface NavItem {
   label: string;
@@ -272,6 +273,7 @@ export default function PortalLayout({
 
           <div className="flex-1" />
 
+          <ThemeToggle />
           <NotificationBell unreadCount={unreadCount} notificationsHref={notificationsHref} />
           {profileHref ? (
             <Link

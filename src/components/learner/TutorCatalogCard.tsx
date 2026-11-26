@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import { formatDayMonth, formatTime, formatWeekday } from "@/lib/datetime";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { gradeLabel } from "@/lib/gradeLevels";
 
 const MAX_TOPICS = 3;
 const MAX_SUBJECTS = 2;
@@ -11,7 +12,8 @@ export interface TutorCatalogItem {
   anonymousId: string;
   /** Only present when the school shows tutor names (`showTutorRealNames`). */
   name?: string;
-  section?: string;
+  gradeLevel?: string;
+  section?: string | null;
   subjects: string[];
   verifiedTopics: { subject: string; topic: string }[];
   verifiedTopicCount: number;
@@ -33,6 +35,10 @@ export default function TutorCatalogCard({ tutor }: { tutor: TutorCatalogItem })
   const subjects = tutor.subjects.slice(0, MAX_SUBJECTS).map(subjectDisplayLabel);
   const moreSubjects = tutor.subjects.length - subjects.length;
 
+  const placement = [tutor.gradeLevel ? gradeLabel(tutor.gradeLevel) : null, tutor.section ? `Section ${tutor.section}` : null]
+    .filter(Boolean)
+    .join(", ");
+
   return (
     <Link
       href={`/learner/tutors/${tutor.id}`}
@@ -41,10 +47,9 @@ export default function TutorCatalogCard({ tutor }: { tutor: TutorCatalogItem })
     >
       <span className="flex flex-col gap-1">
         <span className="kt-id kt-id--tutor text-lg leading-snug">{tutor.name || tutor.anonymousId}</span>
-        {tutor.name && (
+        {(tutor.name || placement) && (
           <span className="text-sm text-(--kt-muted)">
-            {tutor.anonymousId}
-            {tutor.section && ` · ${tutor.section}`}
+            {[tutor.name ? tutor.anonymousId : null, placement].filter(Boolean).join(" · ")}
           </span>
         )}
         {tutor.subjects.length > 0 && (

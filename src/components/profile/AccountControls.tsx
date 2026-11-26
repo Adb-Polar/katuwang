@@ -48,10 +48,10 @@ export default function AccountControls() {
         <form onSubmit={deleteAccount} className="max-w-sm space-y-4 pt-2">
           <p className="text-sm">Confirm with your password, then type <strong>DELETE</strong>.</p>
           <FeedbackBanner variant="error" message={error || null} />
-          <FormField size="md" label="Password">
+          <FormField size="md" label="Password" required>
             <input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} className="input input-bordered w-full" required />
           </FormField>
-          <FormField size="md" label="Type DELETE">
+          <FormField size="md" label="Type DELETE" required>
             <input type="text" value={confirm} onChange={(event) => setConfirm(event.target.value)} className="input input-bordered w-full" required />
           </FormField>
           <button type="submit" className="btn btn-error" disabled={busy || confirm !== "DELETE" || !password}>{busy ? "Deleting…" : "Permanently delete my account"}</button>

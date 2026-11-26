@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [98](#part-98) | **UI/UX batch, phases 1–4 and 7 (`feat/ui-ux-batch`)** | Toast confirmations for every action that used to succeed silently; asterisks on required fields; learner/tutor "Dashboard" renamed Overview with the Profile entry moved to the avatar; dark mode; Overview pages use the full width. Schedule forms take start + end time, block past dates and name the clashing session before submit. Enrollment conflicts name the class. Admin-managed email-domain allowlist. Audit log is super-admin only. Analytics merged into the admin dashboard with cards and filters. Post-tests are shuffled per attempt and quiz text cannot be copied. Learners see a tutor's grade, section and activity. No schema change. | See Part 98 below. |
 | [97](#part-97) | **Student ID field is now a 12-digit LRN** | The registration "Student ID Number" input is labelled "LRN (Learner Reference Number)" and accepts exactly 12 digits (no hyphens, spaces or letters). Validation only — stored values are untouched. | See Part 97 below. |
 | [96](#part-96) | **Cleanup script for existing user names** | `pnpm names:cleanup` previews (and with `--apply` saves) the Part 95 name rules for users already in the database: fixes casing and whitespace, strips Zalgo marks, and lists names it cannot repair. Names now also always start with a capital letter. | See Part 96 below. |
 | [95](#part-95) | **Name normalization + Zalgo rejection** | Names are cleaned when saved: all-lowercase or all-uppercase names are title-cased (`alejandro d beato` → `Alejandro D Beato`), whitespace is collapsed, accents are stored composed, and stacked/decorative combining marks (Zalgo text) are rejected. Applies to register (first, last, adviser) and create-admin. | See Part 95 below. |
@@ -4092,6 +4093,91 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-98"></a>
+## Part 98 — UI/UX batch, phases 1–4 and 7 (2026-11-26)
+
+Plan: `docs/plans/ui-ux-batch.md`. Branch `feat/ui-ux-batch`, from `27f99ff`
+(`feat/request-queue`). **No schema change and no migration in this part.** Still open in
+the plan: assessment duration, tutor-reports-learner and the contact-administrator form
+(all three need schema changes), and Google sign-in (deferred by the user).
+
+**Feedback (toasts).** New `src/components/ui/Toast.tsx` (`ToastProvider` in the root layout,
+`useToast()`). Actions that succeeded with no message now confirm: create / edit / delete /
+publish / cancel / complete a class, accept a class request, add / reschedule / cancel /
+complete / delete a session, submit an appeal, open a post-test, request questions, enroll,
+leave a class, send a class request. An action that redirects passes
+`{ awaitNavigation: true }` so the toast starts its 4.5 s on the destination page instead of
+expiring during a slow navigation. Existing inline `FeedbackBanner` messages are unchanged.
+
+**Required fields.** `FormField` already drew the asterisk; the gaps are closed:
+hand-written labels on the login, verify-email, forgot/reset-password forms, the delete-account
+form and "Answer choices". A CSS rule in `globals.css` marks any label that wraps a
+`required` input, select or textarea, so the asterisk follows the validation attribute.
+
+**Navigation.** Learner and tutor "Dashboard" is now "Overview"; the "Profile" sidebar entry
+is gone (the top-bar avatar opens the profile); the admin avatar opens `/admin/settings`.
+
+**Dark mode.** Second DaisyUI theme `katuwang-dark` and dark values for the fixed `--kt-*`
+tokens. `ThemeToggle` in the portal top bar stores the choice in `localStorage` (`kt-theme`);
+an inline script in `app/layout.tsx` applies it before first paint. Public pages stay light
+(`PublicShell` pins its own theme). Charts re-read their colours on a theme switch
+(`useThemeColors` is now a `useSyncExternalStore` over `src/lib/theme.ts`).
+
+**Overview layout.** `/tutor` and `/learner` put the week in a two-thirds column with
+Getting started, a new Quick actions card, Reports / Certificates beside it. DOM order is
+still the reading order.
+
+**Scheduling.** `SessionFormFields` and `ClassScheduleFields` replace the Duration select with
+Start time + End time and show the computed length; the API still receives
+`{ scheduledAt, duration }`. Date inputs carry `min` = today (PHT). New
+`GET /api/tutor/schedule` + `useBusySessions()` let the form say, while typing, that a time
+has passed or which session it overlaps (other classes and other rows of the same form);
+`ValidatedForm` refuses to submit while a `[data-blocking-error]` is shown. Helpers:
+`src/lib/sessionTimes.ts`, `src/lib/sessionOverlap.ts` (`rangesOverlap`, now shared with
+`classSessions.ts`). Server checks are unchanged and remain the source of truth.
+
+**Enrollment conflict.** `hasLearnerSessionOverlap` → `findLearnerSessionConflict`, returning
+the clashing class; the 409 reads "Schedule conflict: a session in this class overlaps your
+<Subject> class (<code>) on <date, time>."
+
+**Email.** `src/lib/validations/email.ts`. Malformed addresses (`user@test.123`, `asa@qwqe`)
+were already rejected by the server; the register form now rejects them in the browser too.
+New string setting `allowedEmailDomains` (`getAllowedEmailDomains()`), edited on
+`/admin/settings`, enforced in `POST /api/register` and `POST /api/admin/admins`. Empty list =
+any domain. Existing accounts are not affected.
+
+**Admin.** Audit log is super-admin only: `GET /api/admin/audit-log` (403), the page, the
+`proxy.ts` guard, the nav entry (now under Administration), `AuditLogLink`, the `audit-log`
+export scope of `GET /api/admin/report` (403) and "Recent moderation history" on
+`/admin/users/[id]`. `/admin` now carries the analytics: `StatCard`s on top, "Recent activity"
+removed, `ReportsView` embedded; `/admin/reports` redirects to `/admin#analytics` and its nav
+entry is gone. `GET /api/admin/reports` takes `from`, `to`, `role`, `gradeLevel`, `subject`
+(`src/lib/validations/analytics.ts`); with a range, breakdowns count records created inside
+it and the trend is per day (≤ 92 days) or per month. No filter = previous behaviour.
+
+**Assessments.** An in-progress post-test is served in a per-attempt random order, questions
+and options (`src/lib/seededShuffle.ts`, seeded by the attempt id, nothing stored; results and
+grading still use the tutor's order). `QuizQuestionList` blocks select / copy / cut / context
+menu / drag while a quiz is being taken, for both the pre/post-tests and the tutor
+certification quiz. This is a deterrent: a screenshot still works.
+
+**Tutor profile.** `/learner/tutors/[tutorId]` shows grade level, section, certified
+subjects, classes offered, sessions completed and "tutor since" (`src/lib/tutorPublicFacts.ts`);
+`GET /api/learner/tutors` returns `gradeLevel` and `section` for the cards. First and last
+name are now selected from the database only when `showTutorRealNames` is on.
+
+**Tests.** tsc clean, lint 0 errors, **1715 passed** (1579 before), 107 skipped (DB
+integration suites, need `TEST_DATABASE_URL`). New files: `Toast.test.tsx`,
+`QuizQuestionList.test.tsx`, `sessionTimes.test.ts`, `sessionOverlap.test.ts`,
+`seededShuffle.test.ts`, `tutorPublicFacts.test.ts`, `validations/email.test.ts`,
+`api/tutor/schedule` route test; extended: `ClassScheduleFields`, enroll, register, admins,
+settings, admin reports, admin report, audit-log, learner tutors, `sessionTestSerialize`.
+Checked in a browser against a local MariaDB with dev-factory data: create class with a
+conflict then a free slot, toast after redirect, learner enrollment conflict, admin vs super
+admin on the audit log, filtered dashboard, tutor profile; light and dark.
+
+Not committed.
 
 <a id="part-97"></a>
 ## Part 97 — Student ID field is now a 12-digit LRN (2026-11-24)

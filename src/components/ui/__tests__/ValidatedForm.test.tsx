@@ -182,7 +182,8 @@ describe("inline form validation", () => {
     await act(async () => { reportServerFieldErrors(host.querySelector("form")!, {
       fieldErrors: [{path: [name], message: "Correct this session field."}],
     }); });
-    const target = host.querySelector(`[name="${name}"]`)!;
+    // A server "duration" error belongs to the end time, which is what sets the duration.
+    const target = host.querySelector(`[name="${name === "duration" ? "endTime" : name}"]`)!;
     expect(document.activeElement).toBe(target);
     expect(target.getAttribute("aria-invalid")).toBe("true");
     expect(target.closest("[data-form-field]")!.querySelector('[role="alert"]')!.textContent).toBe("Correct this session field.");
@@ -197,7 +198,8 @@ describe("inline form validation", () => {
     await submit();
     expect(save).not.toHaveBeenCalled();
     expect(host.querySelectorAll('[role="alert"]')).toHaveLength(2);
-    expect(host.querySelector('option[value="60"]')!.textContent).toBe("1hr");
+    // The end time waits for a start time, so it adds no third error.
+    expect(host.querySelector<HTMLInputElement>('input[name="endTime"]')!.disabled).toBe(true);
   });
 
   it("keeps session dialog validation isolated from the surrounding edit-class form", async () => {

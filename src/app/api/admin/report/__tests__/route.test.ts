@@ -55,14 +55,26 @@ describe("GET /api/admin/report", () => {
   });
 
   it("flags truncated exports", async () => {
+    m.session.mockResolvedValue({ user: { id: "S1", role: "SUPER_ADMIN" } });
     m.count.mockResolvedValue(6000);
     const csv = await (await GET(req("format=csv&scope=audit-log"))).text();
     expect(csv).toContain("Showing the first 5000 of 6000 records");
     expect(m.findMany.mock.calls[0][0].take).toBe(5000);
   });
 
-  it.each(["classes", "enrollments", "session-tests", "certifications", "audit-log"])("%s export renders", async (scope) => {
+  it.each(["classes", "enrollments", "session-tests", "certifications"])("%s export renders", async (scope) => {
     expect((await GET(req(`format=csv&scope=${scope}`))).status).toBe(200);
+  });
+
+  it("refuses the audit-log export to a standard admin", async () => {
+    const res = await GET(req("format=csv&scope=audit-log"));
+    expect(res.status).toBe(403);
+    expect(m.findMany).not.toHaveBeenCalled();
+  });
+
+  it("renders the audit-log export for the super admin", async () => {
+    m.session.mockResolvedValue({ user: { id: "S1", role: "SUPER_ADMIN" } });
+    expect((await GET(req("format=csv&scope=audit-log"))).status).toBe(200);
   });
 
   it("500 when the database fails", async () => {

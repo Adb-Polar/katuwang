@@ -110,3 +110,109 @@ describe("grade-first class scheduling", () => {
     expect(submit.mock.calls[0][0]).toMatchObject({ gradeLevel: "GRADE_7", subject: "MATH", topics: ["Numbers"], sessions: [{ topic: "Numbers", scheduledAt: "2099-01-10T07:00:00.000Z", duration: 60 }] });
   });
 });
+
+describe("start and end time scheduling", () => {
+  // 3:00 PM–4:30 PM PHT on 10 Jan 2099
+  const busy = [{ id: "s9", scheduledAt: "2099-01-10T07:00:00.000Z", duration: 90, label: "Chemistry 3 · C-0002" }];
+  const row = (index = 0) => host.querySelectorAll<HTMLElement>("[data-session-row]")[index];
+  const dateInput = (index = 0) => row(index).querySelector<HTMLInputElement>('input[type="date"]')!;
+  const timeInputs = (index = 0) => row(index).querySelectorAll<HTMLInputElement>('input[type="time"]');
+  const warning = (index = 0) => row(index).querySelector("[data-blocking-error]")?.textContent ?? null;
+  const submitForm = () => act(async () => host.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
+      ok: true,
+      json: async () => (url === "/api/tutor/schedule" ? { sessions: busy } : { subjects: catalog }),
+    })));
+  });
+
+  async function startSession(date: string, start: string) {
+    await render(); await choose(); await addSession();
+    await change(dateInput(), date);
+    await change(timeInputs()[0], start);
+    await change(host.querySelector<HTMLInputElement>('input[name="building"]')!, "QA Classroom");
+  }
+
+  it("has no duration input; the end time starts one hour after the start", async () => {
+    await startSession("2099-01-11", "15:00");
+    expect(host.querySelector('select[data-session-control="duration"]')).toBeNull();
+    expect(timeInputs()[1].value).toBe("16:00");
+    expect(row().querySelector("[data-session-length]")!.textContent).toBe("Length: 1 hr");
+  });
+
+  it("keeps the end time locked until a start time is chosen", async () => {
+    await render(); await choose(); await addSession();
+    expect(timeInputs()[1].disabled).toBe(true);
+    await change(timeInputs()[0], "15:00");
+    expect(timeInputs()[1].disabled).toBe(false);
+  });
+
+  it("shows the length for the chosen end time and submits it as the duration", async () => {
+    await startSession("2099-01-11", "15:00");
+    await change(timeInputs()[1], "16:30");
+    expect(row().querySelector("[data-session-length]")!.textContent).toBe("Length: 1 hr 30 min");
+    await submitForm();
+    expect(submit.mock.calls[0][0].sessions).toEqual([{ topic: "Numbers", scheduledAt: "2099-01-11T07:00:00.000Z", duration: 90 }]);
+  });
+
+  it.each([
+    ["14:00", "End time must be after the start time."],
+    ["15:10", "A session must be at least 15 minutes long."],
+    ["19:01", "A session cannot be longer than 4 hours."],
+  ])("rejects the end time %s without submitting", async (end, message) => {
+    await startSession("2099-01-11", "15:00");
+    await change(timeInputs()[1], end);
+    expect(warning()).toBe(message);
+    await submitForm();
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it("clears the end-time error as soon as the end time is corrected", async () => {
+    await startSession("2099-01-11", "15:00");
+    await change(timeInputs()[1], "14:00");
+    await change(timeInputs()[1], "15:45");
+    expect(warning()).toBeNull();
+    await submitForm();
+    expect(submit.mock.calls[0][0].sessions[0].duration).toBe(45);
+  });
+
+  it("does not offer dates before today", async () => {
+    await render(); await choose(); await addSession();
+    expect(dateInput().min).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(new Date(`${dateInput().min}T00:00:00+08:00`).getTime()).toBeLessThanOrEqual(Date.now());
+  });
+
+  it("flags a past date and time before the form is submitted", async () => {
+    await startSession("2020-01-01", "15:00");
+    expect(warning()).toBe("This date and time has already passed.");
+    await submitForm();
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it("names the existing session a new one overlaps, before the form is submitted", async () => {
+    await startSession("2099-01-10", "16:00");
+    expect(warning()).toContain("Chemistry 3 · C-0002");
+    await submitForm();
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it("accepts a session that starts when the existing one ends", async () => {
+    await startSession("2099-01-10", "16:30");
+    expect(warning()).toBeNull();
+    await submitForm();
+    expect(submit).toHaveBeenCalledOnce();
+  });
+
+  it("flags two sessions of the same class that overlap each other", async () => {
+    await startSession("2099-01-11", "15:00");
+    await addSession();
+    await change(dateInput(1), "2099-01-11");
+    await change(timeInputs(1)[0], "15:30");
+    expect(warning(0)).toContain("Session 2 of this class");
+    expect(warning(1)).toContain("Session 1 of this class");
+    await change(timeInputs(1)[0], "16:00");
+    expect(warning(0)).toBeNull();
+    expect(warning(1)).toBeNull();
+  });
+});

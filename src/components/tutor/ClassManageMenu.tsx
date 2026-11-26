@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreVertical, Pencil, Eye, EyeOff, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
 
@@ -20,6 +21,7 @@ export default function ClassManageMenu({
   hasEnrollments: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,6 +36,7 @@ export default function ClassManageMenu({
         const res = await fetch(`/api/tutor/classes/${classId}`, { method: "DELETE" });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to delete class.");
+        toast("Class deleted.", "success", { awaitNavigation: true });
         router.push("/tutor/classes");
         return;
       }
@@ -45,6 +48,7 @@ export default function ClassManageMenu({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast(pendingAction === "cancel" ? "Class cancelled." : "Class marked as completed.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -65,6 +69,7 @@ export default function ClassManageMenu({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast(published ? "Class unpublished." : "Class published.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

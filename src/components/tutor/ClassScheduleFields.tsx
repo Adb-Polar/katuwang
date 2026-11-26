@@ -16,6 +16,17 @@ import FormField from "@/components/ui/FormField";
 import CharCount from "@/components/ui/CharCount";
 import { LOCATION_TEXT } from "@/lib/validations/textRules";
 import { parseLocalDateAndTime, combineDateAndTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
+import { useBusySessions } from "@/hooks/useBusySessions";
+import {
+  DEFAULT_SESSION_MINUTES,
+  addMinutesToTime,
+  formatSessionLength,
+  scheduleProblem,
+  sessionLengthError,
+  sessionMinutes,
+  todayInSchoolZone,
+  type BusySession,
+} from "@/lib/sessionTimes";
 
 export interface SessionRowValue {
   key: string;
@@ -24,6 +35,30 @@ export interface SessionRowValue {
   time?: string;
   scheduledAt?: string;
   duration: number;
+  /** Only set while the typed end time is not a valid session length. */
+  endDraft?: string;
+}
+
+const rowDate = (row: SessionRowValue) => row.date || parseLocalDateAndTime(row.scheduledAt).date;
+const rowTime = (row: SessionRowValue) => row.time || parseLocalDateAndTime(row.scheduledAt).time;
+
+/**
+ * Applies a typed end time. The stored duration stays valid at all times: an end time that
+ * is not an allowed session length is held as a draft and reported, never stored.
+ */
+function withEndTime(row: SessionRowValue, start: string, end: string): SessionRowValue {
+  const minutes = sessionMinutes(start, end);
+  return minutes !== null && !sessionLengthError(start, end)
+    ? { ...row, duration: minutes, endDraft: undefined }
+    : { ...row, endDraft: end };
+}
+
+/** The other rows of this form as busy time, so two sessions of the same class cannot overlap. */
+function siblingSessions(rows: SessionRowValue[], ownKey: string): BusySession[] {
+  return rows.flatMap((row, index) => {
+    const scheduledAt = row.key === ownKey ? null : combineDateAndTime(rowDate(row), rowTime(row));
+    return scheduledAt ? [{ id: row.key, scheduledAt, duration: row.duration, label: `Session ${index + 1} of this class` }] : [];
+  });
 }
 
 export interface ClassScheduleFormValues {
@@ -165,6 +200,10 @@ export default function ClassScheduleFields({
     ? subjectTopics.filter((t) => t.toLowerCase().includes(q))
     : subjectTopics;
 
+  const busySessions = useBusySessions();
+  const [now] = useState(() => new Date());
+  const today = todayInSchoolZone(now);
+
   const addSessionRow = () => {
     setSessionRows((prev) => [
       ...prev,
@@ -174,7 +213,7 @@ export default function ClassScheduleFields({
         date: "",
         time: "",
         scheduledAt: "",
-        duration: 60,
+        duration: DEFAULT_SESSION_MINUTES,
       },
     ]);
   };
@@ -185,12 +224,15 @@ export default function ClassScheduleFields({
 
   const updateSessionRow = (
     key: string,
-    field: "topic" | "date" | "time" | "scheduledAt" | "duration",
-    value: string | number
+    field: "topic" | "date" | "time" | "scheduledAt" | "endTime",
+    value: string
   ) => {
     setSessionRows((prev) =>
-      prev.map((r) => {
-        if (r.key !== key) return r;
+      prev.map((row) => {
+        if (row.key !== key) return row;
+        if (field === "endTime") return withEndTime(row, rowTime(row), value);
+        // A pending end-time draft is re-checked against the new start time.
+        const r = field === "time" && row.endDraft !== undefined ? withEndTime(row, value, row.endDraft) : row;
         const updated = { ...r, [field]: value };
         if (field === "date" || field === "time") {
           const d = field === "date" ? String(value) : r.date || "";
@@ -401,7 +443,18 @@ export default function ClassScheduleFields({
           <p className="text-sm text-(--kt-muted)">Pick a subject and at least one topic first.</p>
         ) : (
           <div className="space-y-4">
-            {sessionRows.map((row, i) => (
+            {sessionRows.map((row, i) => {
+              const startTime = rowTime(row);
+              const endTime = row.endDraft ?? addMinutesToTime(startTime, row.duration);
+              const lengthError = row.endDraft === undefined ? "" : sessionLengthError(startTime, row.endDraft);
+              const problem =
+                lengthError ||
+                scheduleProblem(
+                  { date: rowDate(row), time: startTime, duration: row.duration },
+                  [...busySessions, ...siblingSessions(sessionRows, row.key)],
+                  now
+                );
+              return (
               <fieldset
                 key={row.key}
                 data-session-row
@@ -409,7 +462,7 @@ export default function ClassScheduleFields({
               >
                 <legend className="px-2 font-serif text-lg font-medium">Session {i + 1}</legend>
                 <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="text-sm text-(--kt-muted)">Its topic, date, start time and length.</p>
+                  <p className="text-sm text-(--kt-muted)">Its topic, date, and start and end time.</p>
                   <button
                     type="button"
                     data-validation-change
@@ -420,7 +473,7 @@ export default function ClassScheduleFields({
                     <Trash2 className="h-4 w-4" /> Remove
                   </button>
                 </div>
-                <div className={page ? "grid gap-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_9rem_8rem]" : "grid gap-3"}>
+                <div className={page ? "grid gap-4 md:grid-cols-2 xl:grid-cols-[1.3fr_1fr_8.5rem_8.5rem]" : "grid gap-3"}>
                   <label data-control-field className="min-w-0 space-y-1.5">
                     <span className="block text-[0.9rem] font-medium">Topic</span>
                     <select
@@ -443,6 +496,7 @@ export default function ClassScheduleFields({
                     <input
                       data-session-control="scheduledAt"
                       type="date"
+                      min={today}
                       value={row.date ?? parseLocalDateAndTime(row.scheduledAt).date}
                       onChange={(e) => updateSessionRow(row.key, "date", e.target.value)}
                       required
@@ -459,24 +513,33 @@ export default function ClassScheduleFields({
                   </label>
                   </div>
                   <label data-control-field className="min-w-0 space-y-1.5">
-                    <span className="block text-[0.9rem] font-medium">Duration</span>
-                    <select
+                    <span className="block text-[0.9rem] font-medium">End time</span>
+                    <input
                       data-session-control="duration"
-                      value={row.duration}
-                      onChange={(e) => updateSessionRow(row.key, "duration", Number(e.target.value))}
-                      className={`select select-bordered ${rowSelectCls} w-full`}
-                    >
-                      <option value={30}>30m</option>
-                      <option value={45}>45m</option>
-                      <option value={60}>1hr</option>
-                      <option value={90}>1hr 30m</option>
-                      <option value={120}>2hr</option>
-                    </select>
+                      type="time"
+                      required
+                      disabled={!startTime}
+                      value={endTime}
+                      onChange={(e) => updateSessionRow(row.key, "endTime", e.target.value)}
+                      className={`input input-bordered ${rowInputCls} w-full min-w-0`}
+                    />
                     <span data-control-feedback className="block" />
                   </label>
                 </div>
+                {startTime && !lengthError && (
+                  <p data-session-length className="mt-3 text-sm text-(--kt-muted)">
+                    Length: {formatSessionLength(row.duration)}
+                    {endTime <= startTime ? " (ends the next day)" : ""}
+                  </p>
+                )}
+                {problem && (
+                  <p data-blocking-error role="status" className="mt-3 text-[0.85rem] text-error">
+                    {problem}
+                  </p>
+                )}
               </fieldset>
-            ))}
+              );
+            })}
             {sessionRows.length === 0 && (
               <p className="text-sm text-(--kt-muted)">No sessions yet. Add one to set its date and time.</p>
             )}

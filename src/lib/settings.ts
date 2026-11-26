@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { ASSESSMENT_DEFAULTS, type ResolvedTopicConfig } from "@/lib/assessmentConfig";
+import { parseAllowedEmailDomains } from "@/lib/validations/email";
 
 export const PLATFORM_SETTING_KEYS = [
   "requireCertificationForClassCreation",
@@ -80,3 +81,15 @@ export async function getProfilePictureRequirement(db: Prisma.TransactionClient 
   return "OPTIONAL";
 }
 
+
+// ─── Allowed sign-up email domains ──────────────────────────────────────────
+// A comma-separated list in one PlatformSetting row. Empty = any domain.
+
+export const ALLOWED_EMAIL_DOMAINS_KEY = "allowedEmailDomains";
+
+export async function getAllowedEmailDomains(
+  db: Pick<Prisma.TransactionClient, "platformSetting"> = prisma
+): Promise<string[]> {
+  const row = await db.platformSetting.findUnique({ where: { key: ALLOWED_EMAIL_DOMAINS_KEY } });
+  return parseAllowedEmailDomains(row?.value);
+}

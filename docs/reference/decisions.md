@@ -12,6 +12,61 @@ Format: newest first.
 
 ---
 
+## Tutor grade level and section are shown to learners (2026-11-26)
+
+**Decision:** The learner-facing tutor profile and the Find Tutors cards always show the
+tutor's grade level and section, plus certified subjects, classes offered, sessions
+completed and "tutor since". Before this, section was shown only while `showTutorRealNames`
+was on.
+
+**Thesis text says otherwise:** double-blind anonymity (RA 10173) — peers see each other by
+anonymous ID only; CLAUDE.md says peer-facing queries "should only select `id` and
+`anonymousId`".
+
+**Why:** Requested by the project owner on 2026-11-26 ("display the necessary information of
+tutors… like their section grade level"). The risk that grade + section can narrow down who
+a tutor is was raised and the owner chose to include section anyway.
+
+**Implication for agents:** Grade level and section are allowed in learner-facing tutor
+data. Real name, email, contact info, LRN and adviser name are still never exposed; names
+remain behind `showTutorRealNames`. Add new tutor-facing-to-learner fields through
+`src/lib/tutorPublicFacts.ts`, not ad hoc.
+
+## Audit log is super-admin only (2026-11-26)
+
+**Decision:** Only `SUPER_ADMIN` can read audit-log entries: the page, its API, the CSV/PDF
+export scope, the per-user "Recent moderation history" and the "View audit log" links.
+Standard admins still write to it through their actions.
+
+**Why:** Project owner, 2026-11-26. The log names which administrator did what.
+
+**Implication for agents:** Guard any new audit-log read with `requireSuperAdminSession()` /
+`isSuperAdminRole()`. Do not add audit entries to admin-visible pages.
+
+## Analytics lives on the admin dashboard (2026-11-26)
+
+**Decision:** `/admin` is the single dashboard: stat cards, "Needs attention", then the
+analytics charts with period / role / grade / subject filters. `/admin/reports` redirects
+there; "Recent activity" was removed from the dashboard.
+
+**Why:** Project owner, 2026-11-26 ("combine dashboard and analytic page", "remove recent
+activity").
+
+**Implication for agents:** Do not recreate a separate analytics page or a recent-activity
+feed. `GET /api/admin/reports` is the charts' data source; `GET /api/admin/report` (singular)
+is the PDF/CSV export.
+
+## Sign-up email domains can be restricted; Google sign-in is deferred (2026-11-26)
+
+**Decision:** Admins can list allowed email domains (`allowedEmailDomains` platform setting,
+empty = any). It applies to new registrations and admin invitations, never to existing
+accounts. Google sign-in was requested and then explicitly deferred by the owner on the
+same day; it is not built.
+
+**Implication for agents:** Do not add an OAuth provider or make `User.password` optional
+without a new go-ahead. A Google account cannot supply role, grade level, section or
+consent, so a first sign-in would need an onboarding step — design that first.
+
 ## Reports are generated on demand, peer reports stay double-blind (2026-11-19)
 
 **Decision:** PDF/CSV reports for all three portals are built per request and never stored (no `GeneratedReport` table). Learner and tutor reports carry anonymous IDs only; the learner report has no class/cohort averages and lists certificates without the tutor's name. Admin exports include real names and emails.

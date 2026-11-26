@@ -1,19 +1,6 @@
-import PageHeader from "@/components/ui/PageHeader";
-import ReportsView from "@/components/admin/ReportsView";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "Analytics | Katuwang",
-};
-
+/** Analytics now lives on the admin dashboard; this keeps old links and bookmarks working. */
 export default function AdminReportsPage() {
-  return (
-    <div className="space-y-6">
-      <PageHeader
-        eyebrow="Admin Portal"
-        title="Analytics"
-        subtitle="Breakdown of users, classes, certifications, and enrollment activity."
-      />
-      <ReportsView />
-    </div>
-  );
+  redirect("/admin#analytics");
 }

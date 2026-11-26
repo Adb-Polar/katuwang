@@ -128,23 +128,28 @@ This page also has a **My Account** section (added 2026-09-14) to change your ow
 first self-service account surface admins have had, since this page previously covered only
 platform-wide settings. (`POST /api/admin/profile/password`, `401` on a wrong current password.)
 
-## Reports & Analytics (`/admin/reports`)
+- **Allowed email domains** (2026-11-26) — a comma-separated list such as `school.edu.ph, deped.gov.ph`. When it has entries, `POST /api/register` and admin invitations reject any other domain and name the approved ones; empty accepts every domain. Existing accounts are not affected. Stored as the `allowedEmailDomains` platform setting (`PATCH /api/admin/settings` with `{ key: "allowedEmailDomains", value: "…" }`).
 
-Read-only platform breakdown dashboard, aggregated via Prisma `groupBy`:
+## Dashboard & Analytics (`/admin`)
 
-- Users by role, by grade level, and by account status.
-- Classes by subject and by status.
-- Certifications by status.
-- Total enrollments, enrollments in the last 30 days, and a zero-filled daily enrollment series over that same window (charted in `ReportsView.tsx`).
+One page (since 2026-11-26; `/admin/reports` redirects here):
 
-**Generate a report** (card on the same page, added 2026-11-19): pick a report — platform overview, users registered, classes created, enrollments, session tests (pre/post), topic certifications or audit log — and a date range (PHT, default last 90 days, max 366), then download PDF or CSV. Exports include real names/emails; capped at 5,000 rows with a note when truncated.
+- **Stat cards** — learners, tutors, scheduled classes, and items waiting for a decision.
+- **Needs attention** — one row per review queue, linking to it.
+- **Analytics**, aggregated via Prisma `groupBy` and charted in `ReportsView.tsx`:
+  - Enrollment cards (records, current, withdrawn, new in the period) and an enrollment trend.
+  - Users by role, by grade level, and by account status; classes by subject and by status; certifications by status.
+  - **Filters:** period (all time, last 7 / 30 / 90 days, last 12 months, or a custom range of up to 366 days), user role, grade level, subject. With a period, every chart counts records created inside it; the trend is per day up to 92 days and per month beyond. With no filter the breakdowns are all-time and the trend covers the last 30 days.
+
+**Generate a report** (card on the same page, added 2026-11-19): pick a report — platform overview, users registered, classes created, enrollments, session tests (pre/post), topic certifications or (super admin only) audit log — and a date range (PHT, default last 90 days, max 366), then download PDF or CSV. Exports include real names/emails; capped at 5,000 rows with a note when truncated.
 (`GET /api/admin/report?format=pdf|csv&scope=…&from=YYYY-MM-DD&to=YYYY-MM-DD`)
 
-(`GET /api/admin/reports`)
+(`GET /api/admin/reports?from=&to=&role=&gradeLevel=&subject=`)
 
-## Audit Log (`/admin/audit-log`)
+## Audit Log (`/admin/audit-log`) — super admin only
 
-- **View moderation action history** — the most recent 200 `AuditLog` entries, each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp. Covers every write action across the portal: user registration approve/decline and status changes, class status changes, class appeal decisions, abuse report resolve/dismiss, topic request status changes, certification approve/reject, question bank create/update/retire/delete, question request resolutions, global assessment config updates, and subject/topic create/update/delete.
+- **View moderation action history** — paginated `AuditLog` entries, each showing which admin performed the action, the action type, target type/ID, optional reason, and timestamp. Covers every write action across the portal.
+- Since 2026-11-26 only `SUPER_ADMIN` can read it: the page and nav entry, `GET /api/admin/audit-log` (`403` for a standard admin), the `audit-log` export scope, the "View audit log" links, and "Recent moderation history" on a user's page. Standard admins' actions are still recorded.
   (`GET /api/admin/audit-log`)
 
 ## Notifications (`/admin/notifications`)

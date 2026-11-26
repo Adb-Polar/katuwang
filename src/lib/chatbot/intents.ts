@@ -284,7 +284,7 @@ export const INTENTS: Intent[] = [
     keywords: ["moderate", "suspend", "ban", "class", "request", "report"],
     patterns: [/\b(suspend|ban|moderate|remove)\b.*\b(class|request|user)\b/],
     response: {
-      text: "Class Moderation is under Classes, class requests under Class Requests, and every moderation action is recorded in the Audit Log.",
+      text: "Class Moderation is under Classes, class requests under Class Requests, and every moderation action is recorded in the Audit Log (super admin only).",
     },
     link: { href: "/admin/classes", label: "Classes" },
   },
@@ -294,8 +294,8 @@ export const INTENTS: Intent[] = [
     roles: [ADMIN],
     keywords: ["report", "analytics", "stats", "dashboard", "usage", "chart"],
     patterns: [/\b(reports?|analytics|statistics)\b/],
-    response: { text: "Open Reports for aggregate stats — users, classes, certifications, and enrolment trends." },
-    link: { href: "/admin/reports", label: "Analytics" },
+    response: { text: "The Dashboard has the analytics: users, classes, certifications, and enrolment trends, with filters for period, role, grade and subject." },
+    link: { href: "/admin", label: "Dashboard" },
   },
   {
     id: "nav_admin_settings",
@@ -332,7 +332,7 @@ export const INTENTS: Intent[] = [
     roles: [ADMIN],
     keywords: ["audit", "log", "history", "action", "moderation"],
     patterns: [/\baudit log\b/, /\bmoderation history\b/],
-    response: { text: "Open Audit Log for a full history of moderation actions taken by administrators." },
+    response: { text: "The Audit Log holds the full history of moderation actions. Only the super admin can open it." },
     link: { href: "/admin/audit-log", label: "Audit Log" },
   },
   {

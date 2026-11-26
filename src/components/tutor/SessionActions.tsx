@@ -12,8 +12,15 @@ import SessionFormFields from "@/components/tutor/SessionFormFields";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { SessionSummary } from "@/components/classes/SessionsList";
 import { parseLocalDateAndTime, combineDateAndTime } from "@/lib/datetime";
+import { useToast } from "@/components/ui/Toast";
 
 type PendingAction = "cancel" | "complete" | "delete" | null;
+
+const SESSION_ACTION_TOASTS = {
+  cancel: "Session cancelled.",
+  complete: "Session marked as completed.",
+  delete: "Session deleted.",
+} as const;
 
 export default function SessionActions({
   classId,
@@ -25,6 +32,7 @@ export default function SessionActions({
   classTopics: string[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [pendingAction, setPendingAction] = useState<PendingAction>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -68,6 +76,7 @@ export default function SessionActions({
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to update session.");
       }
+      toast(SESSION_ACTION_TOASTS[pendingAction]);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -101,6 +110,7 @@ export default function SessionActions({
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to reschedule session.");
       setIsRescheduling(false);
+      toast("Session rescheduled.");
       router.refresh();
     } catch (err) {
       setRescheduleError(err instanceof Error ? err.message : "Failed to reschedule session.");
@@ -169,7 +179,7 @@ export default function SessionActions({
             <FeedbackBanner variant="error" message={rescheduleError || null} />
 
             <ValidatedForm onSubmit={handleReschedule} className="space-y-5 mt-4">
-              <SessionFormFields topics={classTopics} topic={topic} date={rescheduleDate} time={rescheduleTime} duration={duration}
+              <SessionFormFields topics={classTopics} topic={topic} date={rescheduleDate} time={rescheduleTime} duration={duration} excludeSessionId={session.id}
                 onTopic={setTopic} onDate={setRescheduleDate} onTime={setRescheduleTime} onDuration={setDuration} />
 
               <div className="modal-action pt-2">

@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { seededShuffle } from "@/lib/seededShuffle";
 
 // ─── Attempt (learner's run) ───────────────────────────────────────────────
 
@@ -38,31 +39,39 @@ export interface SerializedSessionTestAttempt {
 /**
  * Shapes a learner's session-test attempt for a detail view. When `reveal` is
  * false (an in-progress attempt), correct-answer flags, explanations, per-item
- * grades and the score are stripped — the keys are absent, not nulled.
+ * grades and the score are stripped — the keys are absent, not nulled — and a
+ * post-test's questions and options come back in a per-attempt random order.
  */
 export function serializeSessionTestAttempt(
   attempt: SessionTestAttemptWithItems,
   { reveal, revealAnswers = true }: { reveal: boolean; revealAnswers?: boolean },
 ): SerializedSessionTestAttempt {
-  const items = [...attempt.items]
-    .sort((a, b) => a.position - b.position)
-    .map((item) => {
-      const showAnswers = reveal && revealAnswers;
-      const options = [...item.question.options]
-        .sort((a, b) => a.position - b.position)
-        .map((o) => ({ id: o.id, text: o.text, ...(showAnswers ? { isCorrect: o.isCorrect } : {}) }));
+  // An in-progress post-test is shown in a per-attempt random order (questions and options),
+  // so it cannot be answered from memory of the pre-test or by copying a neighbour. The order
+  // is derived from the attempt id, so resuming shows the same order and nothing is stored.
+  // Stored positions are untouched: grading is by id, and results are read in the tutor's order.
+  const randomized = attempt.kind === "POST" && !reveal;
+  const showAnswers = reveal && revealAnswers;
+  const authored = [...attempt.items].sort((a, b) => a.position - b.position);
+  const ordered = randomized ? seededShuffle(authored, attempt.id) : authored;
 
-      return {
-        position: item.position,
-        questionId: item.questionId,
-        prompt: item.question.prompt,
-        options,
-        selectedOptionId: item.selectedOptionId,
-        ...(showAnswers
-          ? { isCorrect: item.isCorrect, explanation: item.question.explanation }
-          : {}),
-      };
-    });
+  const items = ordered.map((item, index) => {
+    const authoredOptions = [...item.question.options].sort((a, b) => a.position - b.position);
+    const options = (randomized ? seededShuffle(authoredOptions, `${attempt.id}:${item.questionId}`) : authoredOptions)
+      .map((o) => ({ id: o.id, text: o.text, ...(showAnswers ? { isCorrect: o.isCorrect } : {}) }));
+
+    return {
+      // The number the learner sees: the shown order while randomized, else the tutor's.
+      position: randomized ? index : item.position,
+      questionId: item.questionId,
+      prompt: item.question.prompt,
+      options,
+      selectedOptionId: item.selectedOptionId,
+      ...(showAnswers
+        ? { isCorrect: item.isCorrect, explanation: item.question.explanation }
+        : {}),
+    };
+  });
 
   return {
     id: attempt.id,

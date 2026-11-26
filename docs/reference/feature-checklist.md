@@ -37,7 +37,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Profile management | ✅ | `/learner/profile`, `/tutor/profile`, `ProfileEditForm`/`ProfileView` |
 | Admin approval of new registrations (optional gate) | ✅ | `AccountStatus.PENDING`, `/admin/registrations`, `requireRegistrationApproval` platform setting |
 | Account moderation (suspend/ban) | ✅ | `AccountStatus` (`SUSPENDED`/`BANNED`), `statusExpiresAt`, `/admin/users` |
-| Double-blind anonymity (no real names across peer boundary) | ✅ | peer-facing DTOs expose only `id`/`anonymousId`; `showTutorRealNames` admin toggle exists as an override |
+| Double-blind anonymity (no real names across peer boundary) | ✅ | peer-facing DTOs expose only `id`/`anonymousId`; `showTutorRealNames` admin toggle exists as an override Since 2026-11-26 learners also see a tutor's grade level and section (decisions.md). |
 | Privacy Policy page | ✅ | landed 2026-09-14 (Changes.md Part 73): static `/privacy-policy`, linked from the registration consent checkbox |
 
 ## 2. Session Management Module

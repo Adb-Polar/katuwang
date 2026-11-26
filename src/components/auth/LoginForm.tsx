@@ -124,7 +124,7 @@ export default function LoginForm() {
         <ValidatedForm onSubmit={handleSubmit} className="lp-form">
           <div data-form-field="Email Address" className="form-control w-full">
             <label htmlFor="login-email" className="label py-1">
-              <span className="label-text">Email address</span>
+              <span className="label-text">Email address<span className="text-error ml-0.5" aria-hidden="true">*</span></span>
             </label>
             <input
               id="login-email"
@@ -145,7 +145,7 @@ export default function LoginForm() {
           <div data-form-field="Password" className="form-control w-full">
             <div className="flex items-center justify-between">
               <label htmlFor="login-password" className="label py-1">
-                <span className="label-text">Password</span>
+                <span className="label-text">Password<span className="text-error ml-0.5" aria-hidden="true">*</span></span>
               </label>
               <Link href="/forgot-password" className="lp-link text-sm">
                 Forgot password?

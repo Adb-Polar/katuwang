@@ -134,7 +134,7 @@ export default function QuestionFormModal({
           />
         </FormField>
 
-        <FormField size="md" label="Answer choices" hint="Pick the correct answer with the circle beside it.">
+        <FormField size="md" label="Answer choices" required hint="Pick the correct answer with the circle beside it.">
           <div className="space-y-2">
             {options.map((o, i) => (
               <div key={i} data-control-field>

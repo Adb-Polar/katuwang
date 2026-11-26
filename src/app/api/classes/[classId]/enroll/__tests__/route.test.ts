@@ -72,6 +72,7 @@ vi.mock("@/lib/prisma", () => ({
 vi.mock("@/lib/updateTopicRequest", () => ({ updateTopicRequest: (_tx: unknown, id: string, data: Record<string, unknown>) => topicRequestUpdateMany({ where: { id }, data }) }));
 
 import { POST, DELETE } from "@/app/api/classes/[classId]/enroll/route";
+import { formatDateTime } from "@/lib/datetime";
 
 function makeRequest(method: string) {
   return new NextRequest("http://localhost/api/classes/c1/enroll", { method });
@@ -266,11 +267,17 @@ describe("POST /api/classes/[classId]/enroll", () => {
     getServerSessionMock.mockResolvedValue(learner);
     tutorClassFindUnique.mockResolvedValue(futureClass);
     enrollmentFindUnique.mockResolvedValue(null);
-    classSessionFindMany.mockResolvedValue(futureClass.sessions);
+    classSessionFindMany.mockResolvedValue(
+      futureClass.sessions.map((s) => ({ ...s, class: { code: "C-0007", subject: "SCIENCE" } }))
+    );
     enrollmentCreate.mockResolvedValue({ id: "unexpected-enrollment" });
     const res = await POST(makeRequest("POST"), makeParams());
     expect(res.status).toBe(409);
-    expect((await res.json()).error).toMatch(/schedule conflict/i);
+    const { error } = await res.json();
+    expect(error).toMatch(/schedule conflict/i);
+    // The learner is told which enrolled class clashes, and when.
+    expect(error).toContain("C-0007");
+    expect(error).toContain(formatDateTime(futureClass.sessions[0].scheduledAt));
     expect(enrollmentCreate).not.toHaveBeenCalled();
     expect(notificationCreate).not.toHaveBeenCalled();
     expect(topicRequestUpdateMany).not.toHaveBeenCalled();

@@ -15,6 +15,7 @@ import MatchCriteriaFields, {
   EMPTY_CRITERIA,
   criteriaToBody,
 } from "@/components/learner/MatchCriteriaFields";
+import { useToast } from "@/components/ui/Toast";
 
 export default function RequestTopicButton({
   tutorId,
@@ -29,6 +30,7 @@ export default function RequestTopicButton({
   verifiedTopicsHint?: string[];
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [criteria, setCriteria] = useState<MatchCriteriaValue>({
     ...EMPTY_CRITERIA,
@@ -57,6 +59,7 @@ export default function RequestTopicButton({
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Could not send your request.");
       setOpen(false);
+      toast("Class request sent.", "success", { awaitNavigation: true });
       router.push("/learner/tutors?tab=requests");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not send your request.");

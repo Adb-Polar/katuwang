@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUDIT_PAGE_SIZE } from "@/lib/pagination";
-import { getActiveServerSession } from "@/lib/serverSession";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { isAdminRole } from "@/lib/permissions";
+import { requireSuperAdminSession } from "@/lib/permissions";
 
 const DEFAULT_PAGE_SIZE = AUDIT_PAGE_SIZE;
 const SORTABLE = new Set(["createdAt", "action", "targetType"]);
@@ -11,11 +10,9 @@ const SORTABLE = new Set(["createdAt", "action", "targetType"]);
 // ─── GET: Admin Moderation Action History (filtered / sorted / paginated) ─────
 export async function GET(req: NextRequest) {
   try {
-    const session = await getActiveServerSession();
-
-    if (!session || !isAdminRole(session.user.role)) {
-      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-    }
+    // The log names which admin did what, so only the super admin may read it.
+    const auth = await requireSuperAdminSession();
+    if (!auth.authorized) return auth.response;
 
     const { searchParams } = new URL(req.url);
     const action = searchParams.get("action")?.trim() || "";

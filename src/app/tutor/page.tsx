@@ -124,70 +124,105 @@ export default async function TutorDashboard() {
         </Link>
       </nav>
 
-      <section aria-labelledby="this-week" className="kt-card">
-        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
-          <h2 id="this-week" className="font-serif text-xl font-medium">
-            This week
-          </h2>
-          <Link href="/tutor/classes" className="link link-hover text-primary text-sm">
-            My classes
-          </Link>
-        </div>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+        <section aria-labelledby="this-week" className="kt-card">
+          <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
+            <h2 id="this-week" className="font-serif text-xl font-medium">
+              This week
+            </h2>
+            <Link href="/tutor/classes" className="link link-hover text-primary text-sm">
+              My classes
+            </Link>
+          </div>
 
-        {days.length > 0 ? (
-          <WeekDayRail days={days} now={now} hrefFor={tutorClassHref} />
-        ) : laterDays.length > 0 ? (
-          <>
-            <p className="px-5 pt-5 text-(--kt-muted)">Nothing scheduled in the next 7 days. Your next sessions:</p>
-            <WeekDayRail days={laterDays} now={now} hrefFor={tutorClassHref} />
-          </>
-        ) : (
-          <p className="px-5 py-6">
-            No sessions scheduled.{" "}
-            <Link href="/tutor/classes/new" className="link text-primary">
-              Create a class
-            </Link>{" "}
-            to start teaching.
-          </p>
-        )}
-      </section>
-
-      {!onboardingComplete && (
-        <section aria-labelledby="getting-started" className="kt-card">
-          <h2 id="getting-started" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
-            Getting started
-          </h2>
-          <ol className="px-5 py-4 space-y-3">
-            {steps.map((step) => (
-              <li key={step.label} className="flex items-center gap-3">
-                {step.done ? (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 text-success shrink-0" aria-hidden="true" />
-                    <span className="text-(--kt-muted) line-through">{step.label}</span>
-                    <span className="sr-only">(done)</span>
-                  </>
-                ) : (
-                  <>
-                    <Circle className="h-5 w-5 text-(--kt-muted) shrink-0" aria-hidden="true" />
-                    <Link href={step.href} className="link text-primary">
-                      {step.label}
-                    </Link>
-                  </>
-                )}
-              </li>
-            ))}
-          </ol>
+          {days.length > 0 ? (
+            <WeekDayRail days={days} now={now} hrefFor={tutorClassHref} />
+          ) : laterDays.length > 0 ? (
+            <>
+              <p className="px-5 pt-5 text-(--kt-muted)">Nothing scheduled in the next 7 days. Your next sessions:</p>
+              <WeekDayRail days={laterDays} now={now} hrefFor={tutorClassHref} />
+            </>
+          ) : (
+            <p className="px-5 py-6">
+              No sessions scheduled.{" "}
+              <Link href="/tutor/classes/new" className="link text-primary">
+                Create a class
+              </Link>{" "}
+              to start teaching.
+            </p>
+          )}
         </section>
-      )}
-      <section aria-labelledby="tutor-reports" className="kt-card">
-        <div className="px-5 py-4 border-b border-(--kt-border)">
-          <h2 id="tutor-reports" className="font-serif text-xl font-medium">Reports</h2>
-          <p className="text-sm text-(--kt-muted)">Your classes, sessions, learner gains and quiz record for a date range. Learners appear by anonymous ID only.</p>
+
+        <div className="flex flex-col gap-8">
+          {!onboardingComplete && (
+            <section aria-labelledby="getting-started" className="kt-card">
+              <h2 id="getting-started" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+                Getting started
+              </h2>
+              <ol className="px-5 py-4 space-y-3">
+                {steps.map((step) => (
+                  <li key={step.label} className="flex items-center gap-3">
+                    {step.done ? (
+                      <>
+                        <CheckCircle2 className="h-5 w-5 text-success shrink-0" aria-hidden="true" />
+                        <span className="text-(--kt-muted) line-through">{step.label}</span>
+                        <span className="sr-only">(done)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Circle className="h-5 w-5 text-(--kt-muted) shrink-0" aria-hidden="true" />
+                        <Link href={step.href} className="link text-primary">
+                          {step.label}
+                        </Link>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ol>
+            </section>
+          )}
+          <section aria-labelledby="tutor-quick-actions" className="kt-card">
+            <h2 id="tutor-quick-actions" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+              Quick actions
+            </h2>
+            <ul className="px-5 py-4 space-y-3">
+            <li>
+              <Link href="/tutor/classes/new" className="link link-hover text-primary">
+                Create a class
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Schedule sessions for a topic you are certified in.</p>
+            </li>
+            <li>
+              <Link href="/tutor/requests" className="link link-hover text-primary">
+                Review class requests
+              </Link>
+              <p className="text-sm text-(--kt-muted)">See what learners are asking for.</p>
+            </li>
+            <li>
+              <Link href="/tutor/assessments" className="link link-hover text-primary">
+                Take a topic assessment
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Get certified to teach more topics.</p>
+            </li>
+            <li>
+              <Link href="/tutor/students" className="link link-hover text-primary">
+                View your students
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Rosters and progress, by anonymous ID.</p>
+            </li>
+            </ul>
+          </section>
+          <section aria-labelledby="tutor-reports" className="kt-card">
+            <div className="px-5 py-4 border-b border-(--kt-border)">
+              <h2 id="tutor-reports" className="font-serif text-xl font-medium">Reports</h2>
+              <p className="text-sm text-(--kt-muted)">Your classes, sessions, learner gains and quiz record for a date range. Learners appear by anonymous ID only.</p>
+            </div>
+            <div className="px-5 py-4">
+              <ReportDownloadButtons endpoint="/api/tutor/report" params={{ scope: "summary" }} label="Download tutoring summary" />
+            </div>
+          </section>
         </div>
-        <div className="px-5 py-4">
-          <ReportDownloadButtons endpoint="/api/tutor/report" params={{ scope: "summary" }} label="Download tutoring summary" />
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

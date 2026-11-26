@@ -5,10 +5,13 @@ import { prisma } from "@/lib/prisma";
 import {
   updatePlatformSettingSchema,
   updateProfilePictureRequirementSchema,
+  updateAllowedEmailDomainsSchema,
 } from "@/lib/validations/admin";
 import {
   PLATFORM_SETTING_KEYS,
   PROFILE_PICTURE_REQUIREMENT_KEY,
+  ALLOWED_EMAIL_DOMAINS_KEY,
+  getAllowedEmailDomains,
   getSetting,
   getProfilePictureRequirement,
 } from "@/lib/settings";
@@ -29,6 +32,11 @@ export async function GET() {
     settings.push({
       key: PROFILE_PICTURE_REQUIREMENT_KEY,
       value: await getProfilePictureRequirement(),
+    });
+
+    settings.push({
+      key: ALLOWED_EMAIL_DOMAINS_KEY,
+      value: (await getAllowedEmailDomains()).join(", "),
     });
 
     return NextResponse.json(settings);
@@ -63,6 +71,23 @@ export async function PATCH(req: NextRequest) {
         where: { key: PROFILE_PICTURE_REQUIREMENT_KEY },
         update: { value: result.data.value },
         create: { key: PROFILE_PICTURE_REQUIREMENT_KEY, value: result.data.value },
+      });
+
+      return NextResponse.json({ key: updated.key, value: updated.value });
+    }
+
+    if (body?.key === ALLOWED_EMAIL_DOMAINS_KEY) {
+      const result = updateAllowedEmailDomainsSchema.safeParse(body);
+      if (!result.success) {
+        const errorMsg = result.error.issues[0]?.message || "Invalid domain list.";
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
+      }
+
+      const value = result.data.value.join(", ");
+      const updated = await prisma.platformSetting.upsert({
+        where: { key: ALLOWED_EMAIL_DOMAINS_KEY },
+        update: { value },
+        create: { key: ALLOWED_EMAIL_DOMAINS_KEY, value },
       });
 
       return NextResponse.json({ key: updated.key, value: updated.value });

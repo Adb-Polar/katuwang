@@ -8,6 +8,7 @@ import { BadgeCheck } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import type { TopicAssessmentStatus } from "@/lib/assessmentStatus";
+import { useToast } from "@/components/ui/Toast";
 
 export interface TaughtTopic {
   subject: string;
@@ -40,6 +41,7 @@ export default function TopicCertificationList({
   onRequested: (key: string) => void;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const certByKey = new Map(initialCertifications.map((c) => [keyOf(c.subject, c.topic), c]));
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -83,6 +85,7 @@ export default function TopicCertificationList({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to send request.");
       onRequested(key);
+      toast("Question request sent to the admins.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send request.");

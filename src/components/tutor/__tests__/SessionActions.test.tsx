@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({ refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 let root: Root;
 let host: HTMLDivElement;
+// The form also reads the tutor's schedule to flag overlaps; these tests count the mutations only.
+const mutationCalls = () => vi.mocked(fetch).mock.calls.filter(([url]) => url !== "/api/tutor/schedule");
 const parentSubmit = vi.fn((event: { preventDefault(): void }) => event.preventDefault());
 beforeEach(async () => {
   vi.clearAllMocks();
@@ -28,7 +30,7 @@ describe("rescheduling inside the class editor", () => {
     expect(dialog.closest("form")).toBeNull();
     await act(async () => dialog.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
     expect(parentSubmit).not.toHaveBeenCalled();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(mutationCalls()).toHaveLength(1);
     expect(fetch).toHaveBeenCalledWith("/api/tutor/classes/c1/sessions/s1", expect.objectContaining({ method: "PATCH" }));
     expect(mocks.refresh).toHaveBeenCalledOnce();
   });
@@ -37,6 +39,6 @@ describe("rescheduling inside the class editor", () => {
     dialog.querySelector<HTMLInputElement>('input[type="date"]')!.value = "";
     await act(async () => dialog.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
     expect(parentSubmit).not.toHaveBeenCalled();
-    expect(fetch).not.toHaveBeenCalled();
+    expect(mutationCalls()).toHaveLength(0);
   });
 });

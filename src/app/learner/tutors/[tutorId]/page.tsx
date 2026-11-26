@@ -15,6 +15,7 @@ import UserAvatar from "@/components/profile/UserAvatar";
 import TutorProfileClassTabs, {
   type TutorProfileClass,
 } from "@/components/learner/TutorProfileClassTabs";
+import { tutorPublicFacts } from "@/lib/tutorPublicFacts";
 
 export const metadata = {
   title: "Tutor Profile | Katuwang",
@@ -42,10 +43,12 @@ export default async function LearnerTutorProfilePage({
     select: {
       anonymousId: true,
       image: true,
-      firstName: true,
-      lastName: true,
+      // Names leave the database only when an administrator has switched them on.
+      firstName: showRealNames,
+      lastName: showRealNames,
       section: true,
       gradeLevel: true,
+      createdAt: true,
       tutorProfile: {
         select: {
           topicCertifications: {
@@ -135,7 +138,15 @@ export default async function LearnerTutorProfilePage({
     );
 
   const realName = showRealNames ? `${tutor.firstName} ${tutor.lastName}` : null;
-  const sectionLine = realName && tutor.section ? `Section ${tutor.section}` : null;
+  const sectionLine = tutor.section ? `Section ${tutor.section}` : null;
+  const facts = tutorPublicFacts({
+    gradeLevel: tutor.gradeLevel,
+    section: tutor.section,
+    certifiedSubjects: certifiedTopics.map((c) => c.subject),
+    publishedClassCount: allClasses.length,
+    completedSessionCount: allClasses.flatMap((c) => c.sessions).filter((s) => s.status === "COMPLETED").length,
+    tutorSince: tutor.createdAt,
+  });
   const canRequestTopic = isStudentEligibleForTutor(me?.gradeLevel, tutor.gradeLevel);
 
   return (
@@ -173,6 +184,14 @@ export default async function LearnerTutorProfilePage({
                 {tutor.anonymousId}
               </h1>
             )}
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 pt-2 text-sm" data-block="tutor-facts">
+              {facts.map((f) => (
+                <div key={f.label} className="contents">
+                  <dt className="text-(--kt-muted)">{f.label}</dt>
+                  <dd className="font-medium">{f.value}</dd>
+                </div>
+              ))}
+            </dl>
             <p className="text-sm text-(--kt-muted)">
               {realName
                 ? "Real names are shown here because an administrator has enabled it."

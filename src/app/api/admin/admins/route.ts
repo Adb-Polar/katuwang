@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { Role, GradeLevel, AccountStatus } from "@prisma/client";
 import { requireSuperAdminSession } from "@/lib/permissions";
 import { createAdminAccountSchema } from "@/lib/validations/admin";
+import { getAllowedEmailDomains } from "@/lib/settings";
+import { emailDomainNotAllowedMessage, isEmailDomainAllowed } from "@/lib/validations/email";
 import { escapeHtml } from "@/lib/html";
 import { normalizeContactInfo } from "@/lib/contactInfo";
 import { generateAnonymousId } from "@/lib/idGenerator";
@@ -147,6 +149,12 @@ export async function POST(req: NextRequest) {
     }
 
     const data = result.data;
+
+    const allowedDomains = await getAllowedEmailDomains();
+    if (!isEmailDomainAllowed(data.email, allowedDomains)) {
+      const message = emailDomainNotAllowedMessage(allowedDomains);
+      return NextResponse.json({ error: message, fieldErrors: [{ path: ["email"], message }] }, { status: 400 });
+    }
 
     // Same PH-mobile rule as learner/tutor contact info, so the column holds one shape.
     const contact = normalizeContactInfo(data.contactInfo ?? "");

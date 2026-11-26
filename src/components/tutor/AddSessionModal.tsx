@@ -11,9 +11,11 @@ import { Plus } from "lucide-react";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import SessionFormFields from "@/components/tutor/SessionFormFields";
 import { combineDateAndTime } from "@/lib/datetime";
+import { useToast } from "@/components/ui/Toast";
 
 export default function AddSessionModal({ classId, classTopics }: { classId: string; classTopics: string[] }) {
   const router = useRouter();
+  const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [topic, setTopic] = useState(classTopics[0] ?? "");
   const [sessionDate, setSessionDate] = useState("");
@@ -48,6 +50,7 @@ export default function AddSessionModal({ classId, classTopics }: { classId: str
       setIsOpen(false);
       setSessionDate("");
       setSessionTime("");
+      toast("Session added.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to add session.");

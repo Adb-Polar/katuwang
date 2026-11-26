@@ -1338,3 +1338,22 @@ Allowed-character rules for identity/location fields (Changes.md 2026-11-19)
  [ ] Names (Part 96): /register with first name "alejandro D" is stored as "Alejandro D".
  [ ] LRN (Part 97): /register/learner and /register/tutor show "LRN (Learner Reference Number)"; the field stops at 12 characters; 11 digits, letters or hyphens are blocked with "Enter exactly 12 digits."; a 12-digit LRN registers.
  [ ] LRN (Part 97): /admin registration approvals shows "LRN:" and still displays older accounts' existing IDs unchanged.
+
+UI/UX batch (Changes.md Part 98)
+ [ ] Toasts: as a tutor create a class, edit it, publish/unpublish, add a session, reschedule, cancel and delete a session, delete the class -> each shows a toast at the bottom right; "Class created." is still visible after the redirect to the class page.
+ [ ] Toasts: as a learner enroll in a class, leave it, and send a class request from a tutor profile -> a toast confirms each.
+ [ ] Required fields: /login, /forgot-password, /reset-password, /verify-email, /register, schedule-class form, add-session modal, report dialog -> every required field has a red asterisk and optional ones do not.
+ [ ] Navigation: learner and tutor sidebars read "Overview" (no "Dashboard", no "Profile"); clicking the top-bar avatar opens the profile; the admin avatar opens Settings.
+ [ ] Dark mode: toggle the moon/sun button in each portal -> every page is readable (tables, modals, badges, charts, toasts); reload keeps the choice with no light flash; the landing, login and register pages stay light.
+ [ ] Overview: /tutor and /learner at desktop width show the week beside Getting started / Quick actions with no large empty area; at phone width they stack with no sideways scroll.
+ [ ] Schedule class: the date picker does not offer days before today; start 15:00 fills end 16:00 and shows "Length: 1 hr"; end 16:30 shows "1 hr 30 min"; end 14:00 shows "End time must be after the start time." and the form will not submit.
+ [ ] Schedule class: pick a date and time that overlaps one of your own sessions -> the row names that class and its time before you submit; two rows of the same form that overlap flag each other.
+ [ ] Add session / Reschedule modals: same start/end behaviour; rescheduling a session does not report it as clashing with itself.
+ [ ] Enrollment conflict: enroll in a class whose session overlaps one you are in -> the error names the other class, its code and the date/time.
+ [ ] Email allowlist: /admin/settings -> "Allowed email domains" = school.edu.ph -> registering with @gmail.com is rejected with the approved domain named; a @school.edu.ph address registers; clearing the list accepts any domain again; "test.123" is refused as a domain.
+ [ ] Register: typing asa@qwqe or user@test.123 as the email is blocked in the browser with "Enter a full email address…".
+ [ ] Audit log: a standard admin has no "Audit log" in the sidebar, /admin/audit-log sends them to Access Denied, the report dropdown has no "Audit log", and a user page has no "Recent moderation history"; the super admin sees all four.
+ [ ] Admin dashboard: cards on top, no "Recent activity", analytics below; /admin/reports redirects to it; Period / User role / Grade level / Subject change the charts and cards; "Custom range" waits for both dates; a range over 92 days charts per month; "Clear filters" restores all-time.
+ [ ] Post-test: two learners (or one learner, pre vs post) see the questions and the options in different orders; refreshing mid-test keeps the same order; the submitted review is in the tutor's order.
+ [ ] Quiz copy protection: during a pre/post-test and a tutor certification quiz, text cannot be selected, Ctrl+C copies nothing and right-click shows no menu; after submitting, the review text can be selected.
+ [ ] Tutor profile (learner view): shows grade level, section, certified subjects, classes offered, sessions completed and tutor since; no name, email or contact unless "show tutor real names" is on. Find Tutors cards show grade and section.

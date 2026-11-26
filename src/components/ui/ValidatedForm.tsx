@@ -96,6 +96,15 @@ export default function ValidatedForm({ onSubmit, children, ...props }: Componen
         show(invalid);
         return;
       }
+      // A child that renders its own persistent error (e.g. a schedule conflict) marks it with
+      // data-blocking-error; the message is already on screen, so only stop the submit.
+      const blocking = event.currentTarget.querySelector<HTMLElement>("[data-blocking-error]");
+      if (blocking) {
+        event.preventDefault();
+        setFailures([]);
+        blocking.scrollIntoView?.({ block: "center", behavior: "smooth" });
+        return;
+      }
       setFailures([]);
       onSubmit?.(event);
     }}>

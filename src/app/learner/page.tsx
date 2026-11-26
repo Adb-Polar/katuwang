@@ -70,35 +70,70 @@ export default async function LearnerDashboard() {
         </Link>
       </nav>
 
-      <section aria-labelledby="this-week" className="kt-card">
-        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
-          <h2 id="this-week" className="font-serif text-xl font-medium">
-            This week
-          </h2>
-          <Link href="/learner/my-classes" className="link link-hover text-primary text-sm">
-            My classes
-          </Link>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start">
+        <section aria-labelledby="this-week" className="kt-card">
+          <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
+            <h2 id="this-week" className="font-serif text-xl font-medium">
+              This week
+            </h2>
+            <Link href="/learner/my-classes" className="link link-hover text-primary text-sm">
+              My classes
+            </Link>
+          </div>
+
+          {days.length > 0 ? (
+            <WeekDayRail days={days} now={now} hrefFor={learnerClassHref} />
+          ) : laterDays.length > 0 ? (
+            <>
+              <p className="px-5 pt-5 text-(--kt-muted)">Nothing scheduled in the next 7 days. Your next sessions:</p>
+              <WeekDayRail days={laterDays} now={now} hrefFor={learnerClassHref} />
+            </>
+          ) : (
+            <p className="px-5 py-6">
+              No sessions yet.{" "}
+              <Link href="/learner/classes" className="link text-primary">
+                Browse classes
+              </Link>{" "}
+              to enroll in one.
+            </p>
+          )}
+        </section>
+
+        <div className="flex flex-col gap-8">
+          <section aria-labelledby="learner-quick-actions" className="kt-card">
+            <h2 id="learner-quick-actions" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
+              Quick actions
+            </h2>
+            <ul className="px-5 py-4 space-y-3">
+            <li>
+              <Link href="/learner/classes" className="link link-hover text-primary">
+                Browse classes
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Find a class for the topic you need help with.</p>
+            </li>
+            <li>
+              <Link href="/learner/tutors" className="link link-hover text-primary">
+                Find tutors
+              </Link>
+              <p className="text-sm text-(--kt-muted)">See who is certified in your subjects.</p>
+            </li>
+            <li>
+              <Link href="/learner/match" className="link link-hover text-primary">
+                Auto match
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Tell us when you are free and get matched.</p>
+            </li>
+            <li>
+              <Link href="/learner/progress" className="link link-hover text-primary">
+                My progress
+              </Link>
+              <p className="text-sm text-(--kt-muted)">Your pre-test and post-test results.</p>
+            </li>
+            </ul>
+          </section>
+          <CertificateList preview />
         </div>
-
-        {days.length > 0 ? (
-          <WeekDayRail days={days} now={now} hrefFor={learnerClassHref} />
-        ) : laterDays.length > 0 ? (
-          <>
-            <p className="px-5 pt-5 text-(--kt-muted)">Nothing scheduled in the next 7 days. Your next sessions:</p>
-            <WeekDayRail days={laterDays} now={now} hrefFor={learnerClassHref} />
-          </>
-        ) : (
-          <p className="px-5 py-6">
-            No sessions yet.{" "}
-            <Link href="/learner/classes" className="link text-primary">
-              Browse classes
-            </Link>{" "}
-            to enroll in one.
-          </p>
-        )}
-      </section>
-
-      <CertificateList preview />
+      </div>
     </div>
   );
 }

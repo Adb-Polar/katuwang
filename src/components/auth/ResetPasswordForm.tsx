@@ -109,7 +109,7 @@ export default function ResetPasswordForm() {
         <ValidatedForm onSubmit={handleSubmit} className="lp-form">
           <div data-form-field="New Password" className="form-control w-full">
             <label className="label py-1">
-              <span className="label-text">New Password</span>
+              <span className="label-text">New Password<span className="text-error ml-0.5" aria-hidden="true">*</span></span>
             </label>
             <div className="relative">
               <input
@@ -138,7 +138,7 @@ export default function ResetPasswordForm() {
 
           <div data-form-field="Confirm Password" className="form-control w-full">
             <label className="label py-1">
-              <span className="label-text">Confirm Password</span>
+              <span className="label-text">Confirm Password<span className="text-error ml-0.5" aria-hidden="true">*</span></span>
             </label>
             <input
               type={showPassword ? "text" : "password"}

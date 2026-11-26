@@ -6,6 +6,7 @@ import { clearClassBrowserCache } from "@/lib/classBrowserCache";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import ReportButton from "@/components/learner/ReportButton";
+import { useToast } from "@/components/ui/Toast";
 
 export default function LearnerClassActions({
   classId,
@@ -24,6 +25,7 @@ export default function LearnerClassActions({
   canReport?: boolean;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [confirmUnenroll, setConfirmUnenroll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -38,6 +40,7 @@ export default function LearnerClassActions({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to enroll.");
       clearClassBrowserCache();
+      toast("You are enrolled in this class.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to enroll.");
@@ -54,6 +57,7 @@ export default function LearnerClassActions({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to unenroll.");
       clearClassBrowserCache();
+      toast("You have left the class.", "success", { awaitNavigation: true });
       router.push("/learner/my-classes");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to unenroll.");

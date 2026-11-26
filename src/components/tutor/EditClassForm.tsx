@@ -25,6 +25,7 @@ import AddSessionModal from "@/components/tutor/AddSessionModal";
 import { getClassStatusBadge, ClassLifecycleStatus } from "@/components/classes/classStatus";
 import ClassModerationPanel from "@/components/classes/ClassModerationPanel";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
+import { useToast } from "@/components/ui/Toast";
 
 export default function EditClassForm({
   classId,
@@ -74,6 +75,7 @@ export default function EditClassForm({
   suspendedUntil?: string | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const backHref = `/tutor/classes/${classId}`;
   const [topics, setTopics] = useState<string[]>(currentTopics);
   const [form, setForm] = useState({
@@ -135,6 +137,7 @@ export default function EditClassForm({
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) return;
       if (!res.ok) throw new Error(data.error || "Failed to update class.");
+      toast("Class details saved.", "success", { awaitNavigation: true });
       router.push(backHref);
       router.refresh();
     } catch (err) {

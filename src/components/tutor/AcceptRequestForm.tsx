@@ -13,6 +13,7 @@ import { parseLocalDateAndTime } from "@/lib/datetime";
 import { useSubjectCatalog } from "@/hooks/useSubjectCatalog";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
 import ClassScheduleFields, { ClassScheduleSubmitPayload, SessionRowValue } from "@/components/tutor/ClassScheduleFields";
+import { useToast } from "@/components/ui/Toast";
 
 interface RequestSlot {
   date?: string | null;
@@ -72,6 +73,7 @@ export default function AcceptRequestForm({
   tutorGradeLevel?: string | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const { topicsFor, loading: catalogLoading, error: catalogLoadError, retry: retryCatalog } = useSubjectCatalog(request.gradeLevel ?? undefined);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -113,6 +115,7 @@ export default function AcceptRequestForm({
       const data = await res.json();
       if (!res.ok && reportServerFieldErrors(validationForm, data)) { setSubmitting(false); return; }
       if (!res.ok) throw new Error(data.error || "Could not accept this request.");
+      toast("Request accepted and class created.", "success", { awaitNavigation: true });
       router.push(`/tutor/classes/${data.classId}`);
       router.refresh();
     } catch (err) {

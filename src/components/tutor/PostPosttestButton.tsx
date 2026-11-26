@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/Toast";
 
 export default function PostPosttestButton({ classId, sessionId }: { classId: string; sessionId: string }) {
   const router = useRouter();
+  const toast = useToast();
   const [confirming, setConfirming] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -22,6 +24,7 @@ export default function PostPosttestButton({ classId, sessionId }: { classId: st
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to post the post-test.");
       setConfirming(false);
+      toast("Post-test is now open to learners.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to post the post-test.");

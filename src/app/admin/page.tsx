@@ -3,13 +3,10 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import PageHeader from "@/components/ui/PageHeader";
-import AnonymousIdText from "@/components/ui/AnonymousIdText";
-import { formatDateTime, SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
-import { formatAuditReason } from "@/lib/auditLogDisplay";
+import StatCard from "@/components/ui/StatCard";
+import ReportsView from "@/components/admin/ReportsView";
+import { SCHOOL_TIME_ZONE_LABEL } from "@/lib/datetime";
 import { Metadata } from "next";
-import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels";
-
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 export const metadata : Metadata = {
   title: "Admin Dashboard | Katuwang",
@@ -29,7 +26,6 @@ export default async function AdminDashboard() {
     openQuestionRequestCount,
     openTopicRequestCount,
     openClassAppealCount,
-    recentLogs,
   ] =
     await Promise.all([
       prisma.user.count({ where: { role: "STUDENT_LEARNER" } }),
@@ -41,18 +37,6 @@ export default async function AdminDashboard() {
       prisma.questionRequest.count({ where: { status: "OPEN" } }),
       prisma.topicRequest.count({ where: { status: "OPEN", expiresAt: { gt: new Date() } } }),
       prisma.classAppeal.count({ where: { status: "PENDING" } }),
-      prisma.auditLog.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 8,
-        select: {
-          id: true,
-          action: true,
-          targetType: true,
-          reason: true,
-          createdAt: true,
-          admin: { select: { anonymousId: true } },
-        },
-      }),
     ]);
 
   const queues = [
@@ -66,19 +50,14 @@ export default async function AdminDashboard() {
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader eyebrow="Admin Portal" title="Dashboard" subtitle={`What needs a decision, and what admins did last. Times are in ${SCHOOL_TIME_ZONE_LABEL}.`} />
+      <PageHeader eyebrow="Admin Portal" title="Dashboard" subtitle={`What needs a decision, and how the platform is being used. Times are in ${SCHOOL_TIME_ZONE_LABEL}.`} />
 
-      <nav aria-label="Platform numbers" className="flex flex-wrap gap-x-6 gap-y-2 -mt-4">
-        <Link href="/admin/users" className="link link-hover text-primary">
-          {plural(learnerCount, "learner", "learners")}
-        </Link>
-        <Link href="/admin/users" className="link link-hover text-primary">
-          {plural(tutorCount, "tutor", "tutors")}
-        </Link>
-        <Link href="/admin/classes" className="link link-hover text-primary">
-          {plural(activeClassCount, "scheduled class", "scheduled classes")}
-        </Link>
-      </nav>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Learners" value={learnerCount} href="/admin/users" />
+        <StatCard label="Tutors" value={tutorCount} href="/admin/users" />
+        <StatCard label="Scheduled classes" value={activeClassCount} href="/admin/classes" />
+        <StatCard label="Waiting for a decision" value={queues.reduce((sum, q) => sum + q.value, 0) - flaggedAccountCount} hint="Across the queues below" />
+      </div>
 
       <section aria-labelledby="needs-attention" className="kt-card">
         <h2 id="needs-attention" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">
@@ -101,39 +80,12 @@ export default async function AdminDashboard() {
         </ul>
       </section>
 
-      <section aria-labelledby="recent-activity" className="kt-card">
-        <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-(--kt-border)">
-          <h2 id="recent-activity" className="font-serif text-xl font-medium">
-            Recent activity
-          </h2>
-          <Link href="/admin/audit-log" className="link link-hover text-primary text-sm">
-            Full audit log
-          </Link>
+      <section aria-labelledby="analytics" className="flex flex-col gap-6">
+        <div>
+          <h2 id="analytics" className="font-serif text-2xl font-medium">Analytics</h2>
+          <p className="text-sm text-(--kt-muted)">Users, classes, certifications and enrollment activity.</p>
         </div>
-        {recentLogs.length === 0 ? (
-          <p className="px-5 py-6 text-(--kt-muted)">No admin actions logged yet.</p>
-        ) : (
-          <ul>
-            {recentLogs.map((log) => {
-              const summary = formatAuditReason(log.reason);
-              return (
-                <li key={log.id} className="px-5 py-4 border-b border-(--kt-border) last:border-b-0">
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
-                    <p className="min-w-0 break-words font-medium">
-                      {auditActionDisplayLabel(log.action)}
-                      <span className="font-normal text-(--kt-muted)"> · {statusDisplayLabel(log.targetType)}</span>
-                    </p>
-                    <p className="shrink-0 text-sm text-(--kt-muted)">{formatDateTime(log.createdAt)}</p>
-                  </div>
-                  {summary && <p className="mt-1 break-words text-sm text-(--kt-muted)">{summary}</p>}
-                  <p className="mt-1 text-sm text-(--kt-muted)">
-                    by <AnonymousIdText id={log.admin.anonymousId} role="ADMIN" />
-                  </p>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <ReportsView />
       </section>
     </div>
   );

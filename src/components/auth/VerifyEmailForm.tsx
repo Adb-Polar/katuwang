@@ -49,7 +49,7 @@ export default function VerifyEmailForm({ initialEmail = "" }: { initialEmail?: 
         <>
           <form onSubmit={handleSubmit} className="lp-form">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="verification-email" className="text-sm font-medium">Email address</label>
+              <label htmlFor="verification-email" className="text-sm font-medium">Email address<span className="text-error ml-0.5" aria-hidden="true">*</span></label>
               <input
                 id="verification-email"
                 type="email"
@@ -61,7 +61,7 @@ export default function VerifyEmailForm({ initialEmail = "" }: { initialEmail?: 
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="verification-code" className="text-sm font-medium">Verification code</label>
+              <label htmlFor="verification-code" className="text-sm font-medium">Verification code<span className="text-error ml-0.5" aria-hidden="true">*</span></label>
               <input
                 id="verification-code"
                 type="text"

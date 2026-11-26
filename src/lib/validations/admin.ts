@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { allowedEmailDomainsSchema } from "@/lib/validations/email";
 import { personNameField } from "@/lib/validations/personNameField";
 
 export const updateUserStatusSchema = z.object({
@@ -112,6 +113,10 @@ export const updateProfilePictureRequirementSchema = z.object({
 export type UpdateProfilePictureRequirementInput = z.infer<
   typeof updateProfilePictureRequirementSchema
 >;
+
+export const updateAllowedEmailDomainsSchema = z.object({
+  value: allowedEmailDomainsSchema,
+});
 
 export const createAdminAccountSchema = z.object({
   firstName: personNameField("First name", 50),

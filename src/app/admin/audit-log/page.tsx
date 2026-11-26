@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { getActiveServerSession } from "@/lib/serverSession";
+import { isSuperAdminRole } from "@/lib/permissions";
 import PageHeader from "@/components/ui/PageHeader";
 import AuditLogTable from "@/components/admin/AuditLogTable";
 
@@ -10,6 +13,10 @@ export default async function AdminAuditLogPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const session = await getActiveServerSession();
+  if (!session) redirect("/login");
+  if (!isSuperAdminRole(session.user.role)) redirect("/unauthorized");
+
   const { q } = await searchParams;
 
   return (

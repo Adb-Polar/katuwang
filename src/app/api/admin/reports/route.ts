@@ -1,11 +1,36 @@
 import { isAdminRole } from "@/lib/permissions";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
-import { parseLocalDateAndTime } from "@/lib/datetime";
+import { DAY_MS, parseLocalDateAndTime } from "@/lib/datetime";
+import {
+  DAILY_BUCKET_MAX_DAYS,
+  DEFAULT_TREND_DAYS,
+  adminAnalyticsQuerySchema,
+  schoolDayStart,
+} from "@/lib/validations/analytics";
 
-// ─── GET: Platform Breakdown Counts for Admin Reports ─────────────────────────
-export async function GET() {
+const FILTER_KEYS = ["from", "to", "role", "gradeLevel", "subject"] as const;
+
+const dayKey = (date: Date) => parseLocalDateAndTime(date).date;
+
+/** Zero-filled enrolment counts, one bucket per school day or per month. */
+function bucketEnrollments(rows: { enrolledAt: Date }[], start: Date, days: number, bucket: "day" | "month") {
+  const keyOf = (date: Date) => (bucket === "day" ? dayKey(date) : dayKey(date).slice(0, 7));
+  const counts = new Map<string, number>();
+  for (let i = 0; i < days; i++) counts.set(keyOf(new Date(start.getTime() + i * DAY_MS)), 0);
+  for (const row of rows) {
+    const key = keyOf(new Date(row.enrolledAt));
+    if (counts.has(key)) counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return Array.from(counts, ([date, count]) => ({ date, count }));
+}
+
+// ─── GET: Platform breakdown counts for the admin dashboard ───────────────────
+// Optional filters: from/to (school dates, inclusive), role, gradeLevel, subject.
+// With no date range the breakdowns are all-time and the trend covers the last 30 days.
+export async function GET(req: NextRequest) {
   try {
     const session = await getActiveServerSession();
 
@@ -13,10 +38,46 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const DAYS = 30;
+    const params = req.nextUrl.searchParams;
+    const raw = Object.fromEntries(FILTER_KEYS.flatMap((key) => (params.get(key) ? [[key, params.get(key)!]] : [])));
+    const parsed = adminAnalyticsQuerySchema.safeParse(raw);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || "Invalid filters." }, { status: 400 });
+    }
+    const { from, to, role, gradeLevel, subject } = parsed.data;
+
+    const hasRange = Boolean(from && to);
     const today = parseLocalDateAndTime(new Date()).date;
-    const since = new Date(`${today}T00:00:00+08:00`);
-    since.setUTCDate(since.getUTCDate() - (DAYS - 1));
+    const trendStart = hasRange
+      ? schoolDayStart(from!)
+      : new Date(schoolDayStart(today).getTime() - (DEFAULT_TREND_DAYS - 1) * DAY_MS);
+    const trendEnd = new Date(schoolDayStart(hasRange ? to! : today).getTime() + DAY_MS);
+    const trendDays = Math.round((trendEnd.getTime() - trendStart.getTime()) / DAY_MS);
+    const range = hasRange ? { gte: trendStart, lt: trendEnd } : undefined;
+
+    const userWhere: Prisma.UserWhereInput = {
+      ...(role ? { role } : {}),
+      ...(gradeLevel ? { gradeLevel } : {}),
+      ...(range ? { createdAt: range } : {}),
+    };
+    const classWhere: Prisma.TutorClassWhereInput = {
+      ...(subject ? { subject } : {}),
+      ...(gradeLevel ? { gradeLevel } : {}),
+      ...(range ? { createdAt: range } : {}),
+    };
+    const certificationWhere: Prisma.TopicCertificationWhereInput = {
+      ...(subject ? { subject } : {}),
+      ...(gradeLevel ? { tutorProfile: { user: { gradeLevel } } } : {}),
+      ...(range ? { requestedAt: range } : {}),
+    };
+    const enrollmentScope: Prisma.ClassEnrollmentWhereInput = {
+      ...(subject ? { class: { subject } } : {}),
+      ...(gradeLevel ? { learner: { gradeLevel } } : {}),
+    };
+    const enrollmentWhere: Prisma.ClassEnrollmentWhereInput = {
+      ...enrollmentScope,
+      ...(range ? { enrolledAt: range } : {}),
+    };
 
     const [
       usersByRole,
@@ -27,38 +88,30 @@ export async function GET() {
       certificationsByStatus,
       totalEnrollments,
       currentEnrollments,
-      recentEnrollmentRows,
+      trendRows,
+      subjectRows,
     ] = await Promise.all([
-      prisma.user.groupBy({ by: ["role"], _count: { _all: true } }),
-      prisma.user.groupBy({ by: ["gradeLevel"], _count: { _all: true } }),
-      prisma.user.groupBy({ by: ["status"], _count: { _all: true } }),
-      prisma.tutorClass.groupBy({ by: ["subject"], _count: { _all: true } }),
-      prisma.tutorClass.groupBy({ by: ["status"], _count: { _all: true } }),
-      prisma.topicCertification.groupBy({ by: ["status"], _count: { _all: true } }),
-      prisma.classEnrollment.count(),
-      prisma.classEnrollment.count({ where: { withdrawnAt: null } }),
+      prisma.user.groupBy({ by: ["role"], where: userWhere, _count: { _all: true } }),
+      prisma.user.groupBy({ by: ["gradeLevel"], where: userWhere, _count: { _all: true } }),
+      prisma.user.groupBy({ by: ["status"], where: userWhere, _count: { _all: true } }),
+      prisma.tutorClass.groupBy({ by: ["subject"], where: classWhere, _count: { _all: true } }),
+      prisma.tutorClass.groupBy({ by: ["status"], where: classWhere, _count: { _all: true } }),
+      prisma.topicCertification.groupBy({ by: ["status"], where: certificationWhere, _count: { _all: true } }),
+      prisma.classEnrollment.count({ where: enrollmentWhere }),
+      prisma.classEnrollment.count({ where: { withdrawnAt: null, ...enrollmentWhere } }),
       prisma.classEnrollment.findMany({
-        where: { enrolledAt: { gte: since } },
+        where: { ...enrollmentScope, enrolledAt: { gte: trendStart, lt: trendEnd } },
         select: { enrolledAt: true },
       }),
+      // Not narrowed by the filters, so the subject picker always offers every choice.
+      prisma.tutorClass.findMany({ distinct: ["subject"], select: { subject: true }, orderBy: { subject: "asc" } }),
     ]);
 
-    // Bucket the last 30 days of enrollments into a zero-filled daily series.
-    const dayKey = (d: Date) => parseLocalDateAndTime(d).date;
-
-    const byDay = new Map<string, number>();
-    for (let i = 0; i < DAYS; i++) {
-      const d = new Date(since);
-      d.setUTCDate(since.getUTCDate() + i);
-      byDay.set(dayKey(d), 0);
-    }
-    for (const row of recentEnrollmentRows) {
-      const key = dayKey(new Date(row.enrolledAt));
-      if (byDay.has(key)) byDay.set(key, (byDay.get(key) ?? 0) + 1);
-    }
-    const enrollmentsByDay = Array.from(byDay, ([date, count]) => ({ date, count }));
+    const bucket = trendDays > DAILY_BUCKET_MAX_DAYS ? "month" : "day";
 
     return NextResponse.json({
+      filters: { from: from ?? null, to: to ?? null, role: role ?? null, gradeLevel: gradeLevel ?? null, subject: subject ?? null },
+      subjectOptions: subjectRows.map((r) => r.subject),
       usersByRole: usersByRole.map((r) => ({ role: r.role, count: r._count._all })),
       usersByGradeLevel: usersByGradeLevel.map((r) => ({ gradeLevel: r.gradeLevel, count: r._count._all })),
       usersByStatus: usersByStatus.map((r) => ({ status: r.status, count: r._count._all })),
@@ -69,8 +122,11 @@ export async function GET() {
         total: totalEnrollments,
         current: currentEnrollments,
         withdrawn: totalEnrollments - currentEnrollments,
-        last30Days: recentEnrollmentRows.length,
-        byDay: enrollmentsByDay,
+        // Enrolments inside the charted period: the chosen range, or the last 30 days.
+        inRange: trendRows.length,
+        last30Days: trendRows.length,
+        bucket,
+        byDay: bucketEnrollments(trendRows, trendStart, trendDays, bucket),
       },
     });
   } catch (error) {

@@ -121,3 +121,78 @@ it.each(["BANK", "TUTOR"])("withholds %s answer feedback while preserving the ag
   expect(result.items[0]).not.toHaveProperty("explanation");
   expect(result.items[0].options.every((o) => !("isCorrect" in o))).toBe(true);
 });
+
+describe("post-test order", () => {
+  const QUESTIONS = 8;
+  const OPTIONS = 4;
+  const attempt = (overrides: Record<string, unknown> = {}) =>
+    ({
+      ...baseAttempt,
+      id: "post-attempt-1",
+      kind: "POST",
+      totalQuestions: QUESTIONS,
+      items: Array.from({ length: QUESTIONS }, (_, q) => ({
+        id: `i${q}`,
+        attemptId: "post-attempt-1",
+        questionId: `q${q}`,
+        position: q,
+        selectedOptionId: null,
+        isCorrect: null,
+        question: {
+          id: `q${q}`,
+          prompt: `Question ${q}`,
+          explanation: null,
+          options: Array.from({ length: OPTIONS }, (_, o) => ({
+            id: `q${q}o${o}`, questionId: `q${q}`, text: `Option ${o}`, isCorrect: o === 0, position: o,
+          })),
+        },
+      })),
+      ...overrides,
+    }) as unknown as SessionTestAttemptWithItems;
+
+  const questionOrder = (a: SessionTestAttemptWithItems, reveal = false) =>
+    serializeSessionTestAttempt(a, { reveal }).items.map((item) => item.questionId);
+  const inAuthoredOrder = Array.from({ length: QUESTIONS }, (_, q) => `q${q}`);
+
+  it("shuffles the questions of an in-progress post-test", () => {
+    const order = questionOrder(attempt());
+    expect(order).not.toEqual(inAuthoredOrder);
+    expect([...order].sort()).toEqual(inAuthoredOrder);
+  });
+
+  it("shuffles the options of each question without losing any", () => {
+    const items = serializeSessionTestAttempt(attempt(), { reveal: false }).items;
+    const authored = (q: string) => Array.from({ length: OPTIONS }, (_, o) => `${q}o${o}`);
+    expect(items.some((item) => item.options.map((o) => o.id).join() !== authored(item.questionId).join())).toBe(true);
+    for (const item of items) expect(item.options.map((o) => o.id).sort()).toEqual(authored(item.questionId));
+  });
+
+  it("numbers the shuffled questions 1..n in the order shown", () => {
+    const items = serializeSessionTestAttempt(attempt(), { reveal: false }).items;
+    expect(items.map((item) => item.position)).toEqual(Array.from({ length: QUESTIONS }, (_, i) => i));
+  });
+
+  it("shows a resumed attempt in the same order", () => {
+    expect(questionOrder(attempt())).toEqual(questionOrder(attempt()));
+  });
+
+  it("gives different learners' attempts different orders", () => {
+    expect(questionOrder(attempt())).not.toEqual(questionOrder(attempt({ id: "post-attempt-2" })));
+  });
+
+  it("still hides the answer key while shuffled", () => {
+    const items = serializeSessionTestAttempt(attempt(), { reveal: false }).items;
+    expect(items.every((item) => item.options.every((o) => !("isCorrect" in o)))).toBe(true);
+  });
+
+  it("keeps the pre-test in the tutor's order", () => {
+    expect(questionOrder(attempt({ kind: "PRE" }))).toEqual(inAuthoredOrder);
+  });
+
+  it("shows a submitted post-test in the tutor's order, for review beside the pre-test", () => {
+    const submitted = attempt({ status: "SUBMITTED", submittedAt: new Date("2026-09-01T01:00:00Z") });
+    const serialized = serializeSessionTestAttempt(submitted, { reveal: true });
+    expect(serialized.items.map((item) => item.questionId)).toEqual(inAuthoredOrder);
+    expect(serialized.items[0].options.map((o) => o.id)).toEqual(["q0o0", "q0o1", "q0o2", "q0o3"]);
+  });
+});

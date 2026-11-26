@@ -1,6 +1,6 @@
 import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, BarChart3, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
@@ -16,9 +16,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Class appeals", href: "/admin/class-appeals", icon: <Gavel className="w-4 h-4" />, group: "Review" },
   { label: "Abuse reports", href: "/admin/abuse-reports", icon: <Flag className="w-4 h-4" />, group: "Review" },
   { label: "Notifications", href: "/admin/notifications", icon: <Bell className="w-4 h-4" />, group: "Review" },
-  { label: "Audit log", href: "/admin/audit-log", icon: <History className="w-4 h-4" />, group: "Review" },
   { label: "Chatbot", href: "/admin/chatbot", icon: <MessageCircleQuestion className="w-4 h-4" />, group: "Review" },
-  { label: "Analytics", href: "/admin/reports", icon: <BarChart3 className="w-4 h-4" />, group: "Review" },
   { label: "Question bank", href: "/admin/assessment/question-bank", icon: <FileQuestion className="w-4 h-4" />, group: "Assessment" },
   { label: "Requests", href: "/admin/assessment/requests", icon: <ClipboardList className="w-4 h-4" />, group: "Assessment" },
   { label: "Results", href: "/admin/assessment/results", icon: <ClipboardCheck className="w-4 h-4" />, group: "Assessment" },
@@ -55,6 +53,12 @@ export default async function AdminLayout({
     ? [
         ...ADMIN_NAV_ITEMS,
         {
+          label: "Audit log",
+          href: "/admin/audit-log",
+          icon: <History className="w-4 h-4" />,
+          group: "Administration",
+        },
+        {
           label: "Admins",
           href: "/admin/admins",
           icon: <ShieldAlert className="w-4 h-4" />,
@@ -76,6 +80,7 @@ export default async function AdminLayout({
       unreadCount={unreadCount}
       notificationsHref="/admin/notifications"
       helpHref="/admin/help"
+      profileHref="/admin/settings"
       defaultExpandedGroups={["Main menu", "Review"]}
       chatbotEnabled={chatbotEnabled}
     >

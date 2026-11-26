@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { withQueue } from "@/lib/requestQueue";
-import { isAdminRole } from "@/lib/permissions";
+import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
 import { getActiveServerSession } from "@/lib/serverSession";
 import { parseReportQuery } from "@/lib/reports/query";
 import { buildAdminReport, type AdminReportScope } from "@/lib/reports/admin";
@@ -20,6 +20,11 @@ async function handleGet(req: NextRequest) {
     const scope = query.scope ?? "overview";
     if (!(ADMIN_REPORT_SCOPES as readonly string[]).includes(scope)) {
       return NextResponse.json({ error: "Invalid report scope." }, { status: 400 });
+    }
+
+    // The audit log is super-admin only, on screen and as an export.
+    if (scope === "audit-log" && !isSuperAdminRole(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden. Super Admin access required." }, { status: 403 });
     }
 
     const model = await buildAdminReport(scope as AdminReportScope, query.range);

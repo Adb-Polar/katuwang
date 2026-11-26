@@ -80,7 +80,10 @@ async function handleGet(req: NextRequest) {
           id: true,
           anonymousId: true,
           image: true,
-          ...(showRealNames ? { firstName: true, lastName: true, section: true } : {}),
+          // Grade and section are shown to learners by decision; names only when switched on.
+          gradeLevel: true,
+          section: true,
+          ...(showRealNames ? { firstName: true, lastName: true } : {}),
           tutorProfile: {
             select: {
               topicCertifications: {
@@ -131,8 +134,10 @@ async function handleGet(req: NextRequest) {
         id: u.id,
         anonymousId: u.anonymousId,
         image: u.image ?? null,
+        gradeLevel: u.gradeLevel,
+        section: u.section,
         ...(showRealNames && "firstName" in u
-          ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(), section: u.section }
+          ? { name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() }
           : {}),
         verifiedTopicCount: certs.length,
         verifiedTopics: certs,

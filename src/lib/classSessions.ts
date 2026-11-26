@@ -1,14 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import type { Prisma } from "@prisma/client";
 import { MINUTE_MS } from "@/lib/datetime";
+import { rangesOverlap } from "@/lib/sessionOverlap";
 
-/** Call while holding the learner's account lock to serialize enrollment attempts. */
-export async function hasLearnerSessionOverlap(
+export interface LearnerSessionConflict {
+  classCode: string;
+  subject: string;
+  scheduledAt: Date;
+}
+
+/**
+ * The first session, in a class the learner is already enrolled in, that overlaps one of
+ * `sessions`; null when the schedule is clear.
+ * Call while holding the learner's account lock to serialize enrollment attempts.
+ */
+export async function findLearnerSessionConflict(
   learnerId: string,
   classId: string,
   sessions: { status: string; scheduledAt: Date; duration: number }[],
   db: Pick<Prisma.TransactionClient, "classSession"> = prisma,
-): Promise<boolean> {
+): Promise<LearnerSessionConflict | null> {
   const enrolledSessions = await db.classSession.findMany({
     where: {
       status: "SCHEDULED",
@@ -19,16 +30,16 @@ export async function hasLearnerSessionOverlap(
         enrollments: { some: { learnerId, withdrawnAt: null } },
       },
     },
-    select: { scheduledAt: true, duration: true },
+    orderBy: { scheduledAt: "asc" },
+    select: { scheduledAt: true, duration: true, class: { select: { code: true, subject: true } } },
   });
-  return sessions.filter(s => s.status === "SCHEDULED").some(candidate => {
-    const start = candidate.scheduledAt.getTime();
-    const end = start + candidate.duration * MINUTE_MS;
-    return enrolledSessions.some(other => {
-      const otherStart = other.scheduledAt.getTime();
-      return start < otherStart + other.duration * MINUTE_MS && end > otherStart;
-    });
-  });
+  const candidates = sessions.filter((s) => s.status === "SCHEDULED");
+  const conflict = enrolledSessions.find((other) =>
+    candidates.some((candidate) => rangesOverlap(candidate.scheduledAt, candidate.duration, other.scheduledAt, other.duration))
+  );
+  return conflict
+    ? { classCode: conflict.class.code, subject: conflict.class.subject, scheduledAt: conflict.scheduledAt }
+    : null;
 }
 
 /**
@@ -53,22 +64,15 @@ export async function hasSessionOverlap(
     select: { scheduledAt: true, duration: true },
   });
 
-  return otherSessions.some((s) => {
-    const sStart = s.scheduledAt.getTime();
-    const sEnd = sStart + s.duration * MINUTE_MS;
-    return start.getTime() < sEnd && end.getTime() > sStart;
-  });
+  const minutes = (end.getTime() - start.getTime()) / MINUTE_MS;
+  return otherSessions.some((s) => rangesOverlap(start, minutes, s.scheduledAt, s.duration));
 }
 
 /** Checks a batch of not-yet-created sessions against each other for overlaps. */
 export function hasInternalOverlap(sessions: { scheduledAt: Date; duration: number }[]): boolean {
   for (let i = 0; i < sessions.length; i++) {
-    const aStart = sessions[i].scheduledAt.getTime();
-    const aEnd = aStart + sessions[i].duration * MINUTE_MS;
     for (let j = i + 1; j < sessions.length; j++) {
-      const bStart = sessions[j].scheduledAt.getTime();
-      const bEnd = bStart + sessions[j].duration * MINUTE_MS;
-      if (aStart < bEnd && aEnd > bStart) return true;
+      if (rangesOverlap(sessions[i].scheduledAt, sessions[i].duration, sessions[j].scheduledAt, sessions[j].duration)) return true;
     }
   }
   return false;

@@ -10,7 +10,7 @@ import { auditActionDisplayLabel, statusDisplayLabel } from "@/lib/displayLabels
 import { formatAuditReason } from "@/lib/auditLogDisplay";
 import { gradeSection } from "@/lib/gradeLevels";
 import UserAvatarModerationCard from "@/components/admin/UserAvatarModerationCard";
-import { isAdminRole } from "@/lib/permissions";
+import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
 
 export const metadata = { title: "User Detail | Katuwang" };
 
@@ -64,7 +64,9 @@ export default async function AdminUserDetailPage({
 
   const idRole = user.role === "STUDENT_TUTOR" ? "TUTOR" : "LEARNER";
 
-  const auditEntries = await prisma.auditLog.findMany({
+  // Moderation history comes from the audit log, which only the super admin may read.
+  const canSeeAuditLog = isSuperAdminRole(session.user.role);
+  const auditEntries = !canSeeAuditLog ? [] : await prisma.auditLog.findMany({
     where: { targetId: id },
     orderBy: { createdAt: "desc" },
     take: 10,
@@ -174,32 +176,34 @@ export default async function AdminUserDetailPage({
         </section>
       </div>
 
-      <section className="card kt-card">
-        <div className="card-body gap-3 p-6">
-          <h2 className="font-serif text-xl font-medium">Recent moderation history</h2>
-          {auditEntries.length === 0 ? (
-            <p className="text-(--kt-muted)">No audit-log entries reference this account.</p>
-          ) : (
-            <ul className="divide-y divide-(--kt-border)">
-              {auditEntries.map((a) => {
-                const summary = formatAuditReason(a.reason);
-                return (
-                  <li key={a.id} className="py-3">
-                    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-                      <span className="font-medium">{auditActionDisplayLabel(a.action)}</span>
-                      <span className="text-sm text-(--kt-muted) shrink-0">{formatDateTime(a.createdAt)}</span>
-                    </div>
-                    {summary && <p className="mt-1 break-words text-sm text-(--kt-muted)">{summary}</p>}
-                    <p className="mt-1 text-sm text-(--kt-muted)">
-                      by <AnonymousIdText id={a.admin.anonymousId} role="ADMIN" />
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-      </section>
+      {canSeeAuditLog && (
+        <section className="card kt-card">
+          <div className="card-body gap-3 p-6">
+            <h2 className="font-serif text-xl font-medium">Recent moderation history</h2>
+            {auditEntries.length === 0 ? (
+              <p className="text-(--kt-muted)">No audit-log entries reference this account.</p>
+            ) : (
+              <ul className="divide-y divide-(--kt-border)">
+                {auditEntries.map((a) => {
+                  const summary = formatAuditReason(a.reason);
+                  return (
+                    <li key={a.id} className="py-3">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                        <span className="font-medium">{auditActionDisplayLabel(a.action)}</span>
+                        <span className="text-sm text-(--kt-muted) shrink-0">{formatDateTime(a.createdAt)}</span>
+                      </div>
+                      {summary && <p className="mt-1 break-words text-sm text-(--kt-muted)">{summary}</p>}
+                      <p className="mt-1 text-sm text-(--kt-muted)">
+                        by <AnonymousIdText id={a.admin.anonymousId} role="ADMIN" />
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

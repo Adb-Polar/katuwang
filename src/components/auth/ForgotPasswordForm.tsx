@@ -56,7 +56,7 @@ export default function ForgotPasswordForm() {
       {(step === "email" || step === "verify") && (
         <ValidatedForm onSubmit={e => { e.preventDefault(); void request(step === "email" ? "lookup" : "verify"); }} className="lp-form">
           <label className="form-control flex flex-col w-full gap-2 text-sm font-medium">
-            {step === "email" ? "Primary Email Address" : "Verification code"}
+            <span>{step === "email" ? "Primary Email Address" : "Verification code"}<span className="text-error ml-0.5" aria-hidden="true">*</span></span>
             {step === "email" ? <input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required disabled={loading} /> :
               <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))} inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" minLength={8} maxLength={8} className="input input-bordered w-full tracking-[0.2em]" required disabled={loading} />}
           </label>

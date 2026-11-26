@@ -1,6 +1,12 @@
-import Link from "next/link";
+"use client";
 
-/** "View audit log" link that opens the admin audit log filtered to one target id. */
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+
+/**
+ * "View audit log" link that opens the audit log filtered to one target id.
+ * The audit log is super-admin only, so other admins get no link.
+ */
 export default function AuditLogLink({
   targetId,
   children = "View audit log",
@@ -10,6 +16,9 @@ export default function AuditLogLink({
   children?: React.ReactNode;
   className?: string;
 }) {
+  const { data: session } = useSession();
+  if (session?.user?.role !== "SUPER_ADMIN") return null;
+
   return (
     <Link
       href={`/admin/audit-log?q=${targetId}`}

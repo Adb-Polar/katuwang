@@ -34,14 +34,15 @@ describe("GET /api/admin/audit-log", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 401 when the session user is not an admin", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role: "STUDENT_LEARNER" } });
+  it.each(["STUDENT_LEARNER", "STUDENT_TUTOR", "ADMIN"])("returns 403 for a %s: the audit log is super-admin only", async (role) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "u1", role } });
     const res = await GET(makeRequest());
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
+    expect(auditLogFindMany).not.toHaveBeenCalled();
   });
 
   it("returns a paginated payload ordered by newest first by default", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "SUPER_ADMIN" } });
     auditLogFindMany.mockResolvedValue([
       {
         id: "a1",
@@ -65,7 +66,7 @@ describe("GET /api/admin/audit-log", () => {
   });
 
   it("applies action / targetType / q filters and a sortable column", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "SUPER_ADMIN" } });
     auditLogFindMany.mockResolvedValue([]);
 
     await GET(makeRequest("?action=CLASS_STATUS_CHANGE&targetType=CLASS&q=spam&sort=action&dir=asc"));
@@ -87,7 +88,7 @@ describe("GET /api/admin/audit-log", () => {
   });
 
   it("ignores an unknown sort column, falling back to createdAt", async () => {
-    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "SUPER_ADMIN" } });
     auditLogFindMany.mockResolvedValue([]);
 
     await GET(makeRequest("?sort=reason"));

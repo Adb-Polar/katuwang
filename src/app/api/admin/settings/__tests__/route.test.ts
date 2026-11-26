@@ -117,6 +117,32 @@ describe("PATCH /api/admin/settings", () => {
     expect(json).toEqual({ key: "profilePictureRequirement", value: "TUTORS_ONLY" });
   });
 
+  it("saves a normalized allowedEmailDomains list", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    platformSettingUpsert.mockImplementation(async ({ create }) => create);
+
+    const res = await PATCH(makeRequest({ key: "allowedEmailDomains", value: " @School.edu.ph\ngmail.com, gmail.com " }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ key: "allowedEmailDomains", value: "school.edu.ph, gmail.com" });
+  });
+
+  it("clears the allowlist with an empty value", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+    platformSettingUpsert.mockImplementation(async ({ create }) => create);
+
+    const res = await PATCH(makeRequest({ key: "allowedEmailDomains", value: "" }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).value).toBe("");
+  });
+
+  it.each(["test.123", "qwqe", "school.edu.ph, not a domain!"])("rejects the allowedEmailDomains value %s", async (value) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
+
+    const res = await PATCH(makeRequest({ key: "allowedEmailDomains", value }));
+    expect(res.status).toBe(400);
+    expect(platformSettingUpsert).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid profilePictureRequirement setting value", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "admin1", role: "ADMIN" } });
 

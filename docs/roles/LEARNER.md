@@ -43,6 +43,9 @@ The two lists are separate sidebar pages, both backed by `GET /api/classes` (pag
 - **Unenroll from a class** — leave a class the learner is currently enrolled in, as long as it's still `SCHEDULED` (can't unenroll from a completed/cancelled class). Unenrolling is whole-class regardless of individual session states — you can't unenroll from just one session, since later sessions build on earlier ones.
   (`DELETE /api/classes/[classId]/enroll`)
 
+- **Schedule conflict** — enrolling is refused (`409`) when a session overlaps one in a class the learner is already in; the message names that class, its code and the date and time.
+- **Post-tests** are shown in a different question and option order for each attempt, and quiz text cannot be selected or copied while a test is being taken.
+
 ## Session Pre/Post-Tests (`/learner/classes/[classId]/sessions/[sessionId]/test/[kind]`)
 
 For a session with a published test, a short diagnostic quiz is taken
@@ -153,7 +156,7 @@ UI copy calls this feature "class request" (changed 2026-09-06); the underlying 
 
 ## Privacy & Identity
 
-- By default, learners never see a tutor's real name, email, or contact info — only the tutor's `anonymousId`. An admin can flip the platform-wide `showTutorRealNames` setting to surface the tutor's real name and section (never email/contact info) alongside the anonymous ID.
+- By default, learners never see a tutor's real name, email, or contact info — only the tutor's `anonymousId`, plus (since 2026-11-26, see decisions.md) grade level, section, certified subjects, classes offered, sessions completed and "tutor since". An admin can flip the platform-wide `showTutorRealNames` setting to surface the tutor's real name and section (never email/contact info) alongside the anonymous ID.
 - A learner's own real identity is visible only to themself and to admins (for moderation); tutors only ever see the learner's `anonymousId`, grade level, and section on their class roster.
 
 ## API Reference
@@ -321,7 +324,7 @@ Browsable tutors for the Find Tutors page. Requires `role === "STUDENT_LEARNER"`
 
 **Query params** (all optional): `q` (matches `anonymousId`, `contains`), `subjects` (comma-separated subject slugs — restricts to tutors `CERTIFIED` in **every** listed subject; `subject`, singular, is still accepted as a legacy one-value alias), `page` (default `1`), `pageSize` (default `12`, max `48`).
 
-**200** → `{ tutors: [{ id, anonymousId, name?, section?, verifiedTopicCount, subjects: string[], verifiedClasses: [{code, subject}], publishedClassCount, nextSessionAt }], total, page, pageSize }`. `name`/`section` are present only when `showTutorRealNames` is enabled. `verifiedClasses` lists the tutor's published, `SCHEDULED` classes that cover at least one of their certified topics.
+**200** → `{ tutors: [{ id, anonymousId, gradeLevel, section, name?, verifiedTopicCount, subjects: string[], verifiedClasses: [{code, subject}], publishedClassCount, nextSessionAt }], total, page, pageSize }`. `name`/`section` are present only when `showTutorRealNames` is enabled. `verifiedClasses` lists the tutor's published, `SCHEDULED` classes that cover at least one of their certified topics.
 **401** → not a learner.
 **500** → `{ error }`.
 

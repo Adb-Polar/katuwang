@@ -10,6 +10,7 @@ import FormField from "@/components/ui/FormField";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import CharCount from "@/components/ui/CharCount";
 import { formatDate } from "@/lib/datetime";
+import { useToast } from "@/components/ui/Toast";
 
 const REASON_MAX = 500;
 
@@ -34,6 +35,7 @@ export default function ClassAppealCard({
   appeal: ClassAppealSummary | null;
 }) {
   const router = useRouter();
+  const toast = useToast();
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
@@ -53,6 +55,7 @@ export default function ClassAppealCard({
       if (!res.ok) throw new Error(data.error || "Could not submit the appeal.");
       setOpen(false);
       setReason("");
+      toast("Appeal submitted.");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not submit the appeal.");

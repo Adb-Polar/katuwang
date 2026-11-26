@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { busyResponse } from "@/lib/requestQueue";
 import { registerSchema } from "@/lib/validations/auth";
 import { normalizeContactInfo } from "@/lib/contactInfo";
-import { getSetting } from "@/lib/settings";
+import { getAllowedEmailDomains, getSetting } from "@/lib/settings";
+import { emailDomainNotAllowedMessage, isEmailDomainAllowed } from "@/lib/validations/email";
 import { registerAccount } from "@/lib/registration";
 import { sendMail, renderVerificationEmail } from "@/lib/mail";
 import { rateLimit, rateLimitEnabled, clientIp, tooManyRequests } from "@/lib/rateLimit";
@@ -46,6 +47,12 @@ export async function POST(req: NextRequest) {
     }
 
     const data = result.data;
+
+    const allowedDomains = await getAllowedEmailDomains();
+    if (!isEmailDomainAllowed(data.email, allowedDomains)) {
+      const message = emailDomainNotAllowedMessage(allowedDomains);
+      return NextResponse.json({ error: message, fieldErrors: [{ path: ["email"], message }] }, { status: 400 });
+    }
 
     // Same PH-mobile rule as profile edits, so the column holds one shape.
     const contact = normalizeContactInfo(data.contactInfo ?? "");
