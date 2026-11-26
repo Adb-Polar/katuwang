@@ -26,6 +26,7 @@ const FIELD_LABELS: Record<string, string[]> = {
   preferredSlots: ["Preferred times"], violations: ["Violations"], details: ["Describe the issue"],
   prompt: ["Question prompt", "Question"], options: ["Options", "Answer choices"], reason: ["Reason", "Why should this moderation"],
   durationDays: ["Duration"], resolutionNote: ["Note for the tutor"], status: ["Status"],
+  name: ["Your name"], category: ["What is it about"], message: ["Message"],
   title: ["Title"], instructions: ["Instructions"], timeLimitMinutes: ["Time limit"], description: ["Description"], note: ["Note"],
 };
 

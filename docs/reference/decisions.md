@@ -12,6 +12,21 @@ Format: newest first.
 
 ---
 
+## Public contact form for reaching an administrator (2026-11-26)
+
+**Decision:** `/contact` and `POST /api/contact` are public. Anyone can send the
+administrators a name, a reply email and a message without signing in. Messages are stored in
+`contact_messages` and handled in `/admin/contact-messages`; replies go out by email, outside
+the app.
+
+**Why:** Requested by the project owner on 2026-11-26. The people who most need to reach an
+administrator (suspended, banned, declined, pending, locked out) cannot sign in.
+
+**Implication for agents:** Keep this route public and rate-limited; do not put it behind the
+session or the sign-up domain allowlist. It collects a real name and email from the sender by
+their own choice, visible to administrators only; never show contact messages in the learner
+or tutor portals, and keep sender details out of notifications and audit rows.
+
 ## Tutors can report learners (2026-11-26)
 
 **Decision:** Reporting now runs both ways. A tutor can report a learner who has joined one of

@@ -154,6 +154,13 @@ One page (since 2026-11-26; `/admin/reports` redirects here):
 - Since 2026-11-26 only `SUPER_ADMIN` can read it: the page and nav entry, `GET /api/admin/audit-log` (`403` for a standard admin), the `audit-log` export scope, the "View audit log" links, and "Recent moderation history" on a user's page. Standard admins' actions are still recorded.
   (`GET /api/admin/audit-log`)
 
+## Contact Messages (`/admin/contact-messages`)
+
+- Messages from the public `/contact` form, which needs no sign-in (people who are suspended, banned, declined, pending or locked out). Each shows the sender's name, reply email, category, time and message.
+- **Open** tab: oldest first, with the count on the sidebar entry. Reply by email (the address is a `mailto:` link), then **Mark as handled**. **Handled** tab: most recent first, with who handled it; **Reopen** returns a message to Open.
+- Every change is audited (`CONTACT_MESSAGE_HANDLED` / `CONTACT_MESSAGE_REOPENED`) with the category only. New messages raise a `CONTACT_MESSAGE_NEW` notification for every active admin.
+  (`GET /api/admin/contact-messages?status=OPEN|HANDLED&page=`, `PATCH /api/admin/contact-messages/[messageId]` with `{ "status": "HANDLED" | "OPEN" }`; public `POST /api/contact` with `{ name, email, category, message }`, 5 per hour per IP)
+
 ## Notifications (`/admin/notifications`)
 
 - A **Notifications** sidebar item (bell icon, under "Review") shows an unread-count badge, and the topbar bell shows a red dot when you have unread notifications — clicking it opens a dropdown of the 8 most recent. Both refresh on navigation.

@@ -1375,3 +1375,14 @@ Tutor reports a learner (Changes.md Part 100)
  [ ] Resolve it with a note -> the tutor gets a notification that opens My reports, where the report is Resolved with the note. Dismiss works the same way.
  [ ] The reported learner sees nothing about the report anywhere in their portal.
  [ ] Learner reports of tutors and classes still work as before (Report buttons on a tutor profile and a class page, "My reports" tab under Notifications).
+
+Contact an administrator (Changes.md Part 101)
+ [ ] Signed out, open /contact from the login page: all four fields show an asterisk; submitting empty marks each field; an email like asa@qwqe is refused; a message under 20 characters is refused.
+ [ ] A valid message shows "Your message was sent…" with the reply address.
+ [ ] Sign in with a suspended account -> the error offers "Contact an administrator", which opens /contact with "My account was suspended or banned" preselected. Same for a banned account.
+ [ ] While signed in, have an admin suspend the account -> within a few minutes the next page load returns to /login with "You were signed out because your account is no longer active" and the contact link.
+ [ ] /unauthorized, /account-declined and /pending-approval each link to /contact; the public footer shows "Contact an administrator".
+ [ ] As an admin: the sidebar "Contact messages" shows the number of open messages; the inbox lists the oldest first with name, email (opens the mail app), category, time and the message.
+ [ ] "Mark as handled" shows a toast and moves the message to the Handled tab with who handled it and when; "Reopen" brings it back.
+ [ ] Sending six messages within an hour from one connection: the sixth is refused with "Too many requests".
+ [ ] Dark mode: the inbox is readable; the /contact page stays in the light public theme.

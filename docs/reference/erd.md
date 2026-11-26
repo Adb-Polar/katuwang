@@ -186,6 +186,22 @@ FAILED FAILED
 ADMIN_APPROVAL ADMIN_APPROVAL
         }
 
+
+
+        ContactCategory {
+            ACCOUNT_ACCESS ACCOUNT_ACCESS
+SUSPENSION_OR_BAN SUSPENSION_OR_BAN
+REGISTRATION REGISTRATION
+OTHER OTHER
+        }
+
+
+
+        ContactMessageStatus {
+            OPEN OPEN
+HANDLED HANDLED
+        }
+
   "users" {
     String id "🗝️"
     String anonymousId
@@ -656,6 +672,19 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     DateTime updatedAt
     }
 
+
+  "contact_messages" {
+    String id "🗝️"
+    String name
+    String email
+    ContactCategory category
+    String message
+    ContactMessageStatus status
+    String handledById "❓"
+    DateTime handledAt "❓"
+    DateTime createdAt
+    }
+
     "users" |o--|| "Role" : "enum:role"
     "users" |o--|| "GradeLevel" : "enum:gradeLevel"
     "users" |o--|| "AccountStatus" : "enum:status"
@@ -736,4 +765,7 @@ ADMIN_APPROVAL ADMIN_APPROVAL
     "completion_certificates" }o--|| "users" : "learner"
     "completion_certificates" }o--|| "users" : "tutor"
     "completion_certificates" }o--|| "tutor_classes" : "class"
+    "contact_messages" |o--|| "ContactCategory" : "enum:category"
+    "contact_messages" |o--|| "ContactMessageStatus" : "enum:status"
+    "contact_messages" }o--|o "users" : "handledBy"
 ```

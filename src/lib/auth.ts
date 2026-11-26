@@ -82,7 +82,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (user.status === "BANNED") {
-          throw new Error("Your account has been banned.");
+          throw new Error("Your account has been banned. Contact an administrator for details.");
         }
 
         // Verification is checked before approval/pending status — a user who

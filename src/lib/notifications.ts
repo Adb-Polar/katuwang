@@ -33,6 +33,8 @@ export type NotificationType =
   // abuse reports — filed (admin-facing), reviewed (reporter-facing)
   | "REPORT_NEW"
   | "REPORT_REVIEWED"
+  // public contact form (admin-facing)
+  | "CONTACT_MESSAGE_NEW"
   // session pre/post tests (learner-facing)
   | "SESSION_PRETEST_OPEN"
   | "SESSION_POSTTEST_OPEN"

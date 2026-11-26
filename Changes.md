@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [101](#part-101) | **Contact an administrator (`feat/ui-ux-batch`)** | A public `/contact` form lets anyone write to the administrators without signing in, including people who are suspended, banned, declined or still pending. It is linked from the login page, the account-status pages and the public footer. Admins read and close messages in a new "Contact messages" inbox with an open-count badge. A forced sign-out now explains itself on the login page. **Schema change: migration `20261126020000_add_contact_messages`.** | See Part 101 below. |
 | [100](#part-100) | **Tutors can report learners (`feat/ui-ux-batch`)** | A tutor can report a learner who has joined one of their classes, from that learner's student page, choosing from learner-conduct reasons. "My reports" in the tutor portal shows each report and its outcome. Admins review them in Abuse reports with a "Learner reports" filter; the tutor is notified of the decision. Learners stay anonymous to the tutor. **Schema change: migration `20261126010000_add_learner_reports`.** | See Part 100 below. |
 | [99](#part-99) | **Time limits for tests and quizzes (`feat/ui-ux-batch`)** | A tutor can give a session test a time limit (1–180 minutes) that applies to its pre-test and post-test; admins can set one for the tutor certification quiz. The learner or tutor sees a countdown that survives a refresh, and the quiz submits itself at zero. A late hand-in is still graded and marked as late. **Schema change: three nullable columns, migration `20261126000000_add_assessment_time_limits`.** | See Part 99 below. |
 | [98](#part-98) | **UI/UX batch, phases 1–4 and 7 (`feat/ui-ux-batch`)** | Toast confirmations for every action that used to succeed silently; asterisks on required fields; learner/tutor "Dashboard" renamed Overview with the Profile entry moved to the avatar; dark mode; Overview pages use the full width. Schedule forms take start + end time, block past dates and name the clashing session before submit. Enrollment conflicts name the class. Admin-managed email-domain allowlist. Audit log is super-admin only. Analytics merged into the admin dashboard with cards and filters. Post-tests are shuffled per attempt and quiz text cannot be copied. Learners see a tutor's grade, section and activity. No schema change. | See Part 98 below. |
@@ -4094,6 +4095,45 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-101"></a>
+## Part 101 — Contact an administrator (2026-11-26)
+
+Plan: `docs/plans/ui-ux-batch.md`, Phase C. Schema change approved by the owner on 2026-11-26.
+This completes the batch; only Google sign-in remains, deferred by the owner.
+
+**Schema.** Migration `prisma/migrations/20261126020000_add_contact_messages`: table
+`contact_messages` (`name`, `email`, `category`, `message`, `status`, `handledById` → users
+`ON DELETE SET NULL`, `handledAt`, `createdAt`) with enums `ContactCategory` and
+`ContactMessageStatus`. The sender is not linked to a user row because they may have no
+usable account. **Applied to the local development database only; the cloud database needs
+`pnpm db:deploy`** (this and the two migrations from Parts 99 and 100).
+
+**Public side.**
+- `POST /api/contact` (no session): Zod-validated (`validations/contact.ts`: name, email,
+  category, message of 20–2000 characters), limited to 5 messages per hour per IP (`429` with
+  `Retry-After`), queued in the `read` lane, and notifies every active admin and super admin
+  (`CONTACT_MESSAGE_NEW`). The notification text carries the category only. The sign-up
+  email-domain allowlist deliberately does not apply here.
+- `/contact` page (`ContactForm`), with `?about=` preselecting the category.
+- Links: login page footer, under a suspended or banned sign-in error, `/unauthorized`,
+  `/account-declined`, `/pending-approval`, and the public footer.
+- `auth.ts`: the banned message now also says "Contact an administrator for details."
+- Fix: the route guard sends a mid-session suspended or banned user to
+  `/login?reason=account-inactive`, which the login form ignored. It now shows why they were
+  signed out, with the contact link.
+
+**Admin side.** `/admin/contact-messages` (`ContactMessageInbox`): Open and Handled tabs,
+oldest open message first, `mailto:` reply link, "Mark as handled" / "Reopen", pagination, and
+a sidebar entry with the open count. `GET /api/admin/contact-messages`,
+`PATCH /api/admin/contact-messages/[messageId]` (`409` if already in that state). Each change
+writes an audit row (`CONTACT_MESSAGE_HANDLED` / `_REOPENED`) holding the category only.
+
+**Tests.** tsc clean, lint 0 errors, **1808 passed**, 107 skipped. New: `api/contact` route
+test, `api/admin/contact-messages` route test, `LoginForm.test.tsx`.
+Browser, local DB: logged-out submit with validation errors then success; the message, badge
+and notification in the admin inbox; mark as handled; the sixth message in an hour from one
+address returned 429; the forced-sign-out banner on the login page.
 
 <a id="part-100"></a>
 ## Part 100 — Tutors can report learners (2026-11-26)

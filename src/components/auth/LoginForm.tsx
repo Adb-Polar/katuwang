@@ -27,6 +27,8 @@ export default function LoginForm() {
   const [error, setError] = useState("");
 
   // Derive success message from registration redirect query parameters
+  // Set by the route guard when a signed-in account stops being active.
+  const accountInactive = params.get("reason") === "account-inactive";
   const isRegistered = params.get("registered") === "true";
   const isPending = params.get("pending") === "true";
   const id = params.get("id");
@@ -110,7 +112,16 @@ export default function LoginForm() {
 
       <div className="space-y-3 mb-6 empty:hidden">
         <FeedbackBanner variant="success" message={successMsg || null} />
+        <FeedbackBanner variant="warning" message={!error && accountInactive ? "You were signed out because your account is no longer active. It may have been suspended or banned." : null} />
         <FeedbackBanner variant="error" message={error || null} />
+        {(accountInactive || /suspended|banned/i.test(error)) && (
+          <p className="text-sm">
+            <Link className="lp-link" href="/contact?about=SUSPENSION_OR_BAN">
+              Contact an administrator
+            </Link>{" "}
+            to ask about your account.
+          </p>
+        )}
       </div>
 
       {success ? (
@@ -194,6 +205,11 @@ export default function LoginForm() {
         New to Katuwang?{" "}
         <Link className="lp-link" href="/register">
           Create an account
+        </Link>
+        <br />
+        Trouble signing in?{" "}
+        <Link className="lp-link" href="/contact">
+          Contact an administrator
         </Link>
       </p>
     </div>

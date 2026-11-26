@@ -21,6 +21,12 @@ export default function UnauthorizedPage() {
       <Link href="/dashboard" className="btn btn-primary w-full">
         Go to your portal
       </Link>
+      <p className="lp-form-foot">
+        Think this is a mistake?{" "}
+        <Link href="/contact" className="lp-link">
+          Contact an administrator
+        </Link>
+      </p>
     </AuthLayout>
   );
 }

@@ -33,8 +33,11 @@ export default async function AccountDeclinedPage({
       )}
 
       <p className="text-(--lp-muted)">
-        If you think this was a mistake, contact your school administrator. You may register again with corrected
-        details.
+        If you think this was a mistake,{" "}
+        <Link href="/contact?about=REGISTRATION" className="lp-link">
+          contact an administrator
+        </Link>
+        . You may register again with corrected details.
       </p>
 
       <p className="lp-form-foot flex flex-wrap gap-x-6 gap-y-2">

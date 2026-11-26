@@ -1,6 +1,6 @@
 import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert } from "lucide-react";
+import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert, Mail } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
@@ -15,6 +15,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { label: "Class requests", href: "/admin/topic-requests", icon: <Inbox className="w-4 h-4" />, group: "Main menu" },
   { label: "Class appeals", href: "/admin/class-appeals", icon: <Gavel className="w-4 h-4" />, group: "Review" },
   { label: "Abuse reports", href: "/admin/abuse-reports", icon: <Flag className="w-4 h-4" />, group: "Review" },
+  { label: "Contact messages", href: "/admin/contact-messages", icon: <Mail className="w-4 h-4" />, group: "Review" },
   { label: "Notifications", href: "/admin/notifications", icon: <Bell className="w-4 h-4" />, group: "Review" },
   { label: "Chatbot", href: "/admin/chatbot", icon: <MessageCircleQuestion className="w-4 h-4" />, group: "Review" },
   { label: "Question bank", href: "/admin/assessment/question-bank", icon: <FileQuestion className="w-4 h-4" />, group: "Assessment" },
@@ -44,9 +45,10 @@ export default async function AdminLayout({
 
   const isSuperAdmin = isSuperAdminRole(session.user.role);
 
-  const [unreadCount, chatbotEnabled] = await Promise.all([
+  const [unreadCount, chatbotEnabled, openContactCount] = await Promise.all([
     prisma.notification.count({ where: { userId: session.user.id, readAt: null } }),
     getSetting("chatbotEnabled"),
+    prisma.contactMessage.count({ where: { status: "OPEN" } }),
   ]);
 
   const baseNavItems: NavItem[] = isSuperAdmin
@@ -68,7 +70,11 @@ export default async function AdminLayout({
     : ADMIN_NAV_ITEMS;
 
   const navItems: NavItem[] = baseNavItems.map((item) =>
-    item.href === "/admin/notifications" ? { ...item, badge: unreadCount } : item
+    item.href === "/admin/notifications"
+      ? { ...item, badge: unreadCount }
+      : item.href === "/admin/contact-messages"
+        ? { ...item, badge: openContactCount }
+        : item
   );
 
   return (

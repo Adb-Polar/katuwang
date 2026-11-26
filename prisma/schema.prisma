@@ -56,6 +56,7 @@ model User {
   resolvedQuestionRequests QuestionRequest[]     @relation("ResolvedQuestionRequests")
   reportsFiled             Report[]              @relation("ReportsFiled")
   reportsAgainstLearner    Report[]              @relation("ReportsAgainstLearner")
+  handledContactMessages   ContactMessage[]      @relation("HandledContactMessages")
   reviewedReports          Report[]              @relation("ReviewedReports")
   sessionTestAttempts      SessionTestAttempt[]  @relation("LearnerSessionTestAttempts")
   topicRequests            TopicRequest[]        @relation("LearnerTopicRequests")
@@ -851,4 +852,35 @@ enum CertificateEmailStatus {
 enum QualificationApprovalMethod {
   QUALIFIED_REVIEW
   ADMIN_APPROVAL
+}
+
+enum ContactCategory {
+  ACCOUNT_ACCESS
+  SUSPENSION_OR_BAN
+  REGISTRATION
+  OTHER
+}
+
+enum ContactMessageStatus {
+  OPEN
+  HANDLED
+}
+
+/// A message to the administrators from the public contact form. The sender may be
+/// logged out, suspended or banned, so it is not tied to a user account.
+model ContactMessage {
+  id          String               @id @default(cuid())
+  name        String
+  email       String
+  category    ContactCategory
+  message     String               @db.Text
+  status      ContactMessageStatus @default(OPEN)
+  handledById String?
+  handledAt   DateTime?
+  createdAt   DateTime             @default(now())
+  handledBy   User?                @relation("HandledContactMessages", fields: [handledById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([handledById])
+  @@map("contact_messages")
 }

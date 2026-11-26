@@ -19,8 +19,11 @@ export default function PendingApprovalPage() {
         before you can sign in.
       </AuthHeading>
       <p className="text-(--lp-muted)">
-        Approvals are usually handled within a school day. Try signing in again later, or reach out to your
-        school administrator if it has been longer than expected.
+        Approvals are usually handled within a school day. Try signing in again later, or{" "}
+        <Link href="/contact?about=REGISTRATION" className="lp-link">
+          contact an administrator
+        </Link>{" "}
+        if it has been longer than expected.
       </p>
       <p className="lp-form-foot">
         <Link href="/login" className="lp-link">

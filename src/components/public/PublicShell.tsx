@@ -36,7 +36,10 @@ export function PublicFooter() {
     <footer className="lp-footer">
       <div className="lp-wrap">
         <span>Katuwang · Taysan Resettlement Integrated School, Legazpi City, Albay</span>
-        <Link href="/privacy-policy">Privacy policy</Link>
+        <span className="flex flex-wrap gap-x-5 gap-y-1">
+          <Link href="/contact">Contact an administrator</Link>
+          <Link href="/privacy-policy">Privacy policy</Link>
+        </span>
       </div>
     </footer>
   );
