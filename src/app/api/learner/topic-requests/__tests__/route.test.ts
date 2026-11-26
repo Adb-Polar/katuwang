@@ -126,6 +126,16 @@ describe("POST /api/learner/topic-requests", () => {
     expect(notificationCreateMock).not.toHaveBeenCalled();
   });
 
+  it("stores the requested grade level, not the learner's own grade", async () => {
+    getServerSessionMock.mockResolvedValue(learner); // learner is GRADE_9
+    createMock.mockResolvedValue({ ...dbRow, gradeLevel: "GRADE_8" });
+    const res = await POST(makeRequest({ ...validBody, topics: ["Percentages"], gradeLevel: "GRADE_8" }));
+    expect(res.status).toBe(201);
+    expect(createMock).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ gradeLevel: "GRADE_8" }) })
+    );
+  });
+
   it("400 when directedTutorId does not resolve to a real tutor", async () => {
     getServerSessionMock.mockResolvedValue(learner);
     userFindFirstMock.mockResolvedValue(null);

@@ -237,7 +237,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
 
           {showForm && (
             <ValidatedForm onSubmit={submit} className="space-y-6">
-              <MatchCriteriaFields gradeLocked gradeRequired value={criteria} onChange={setCriteria} />
+              <MatchCriteriaFields gradeRequired value={criteria} onChange={setCriteria} />
               <FormField size="md" label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={note}
@@ -273,7 +273,7 @@ export default function TopicRequestManager({ defaultGrade }: { defaultGrade: st
               <p className="text-sm text-(--kt-muted)">
                 {subjectDisplayLabel(editingRequest.subject)} · still open, so you can change it.
               </p>
-              <MatchCriteriaFields gradeLocked gradeRequired value={editCriteria} onChange={setEditCriteria} />
+              <MatchCriteriaFields gradeRequired value={editCriteria} onChange={setEditCriteria} />
               <FormField size="md" label="Note" hint="Optional — anything a tutor should know.">
                 <textarea
                   value={editNote}

@@ -90,7 +90,7 @@ only — no pass/fail, no grade impact.
 
 UI copy calls this feature "class request" (changed 2026-09-06); the underlying Prisma model, API routes, and page route are unchanged and still say `TopicRequest`/`topic-requests` in code — see the API Reference below and `docs/reference/decisions.md`.
 
-- **Post a class request** — when nothing fits, record what you want to learn: subject, topics (validated against the subject's topic list), grade level, optional preferred time windows, and an optional note. A request is either:
+- **Post a class request** — when nothing fits, record what you want to learn: subject, topics (validated against the subject's topic list), grade level (prefilled from your profile but changeable — you can ask for a subject at any grade level, and the subject/topic lists follow the grade you pick), optional preferred time windows, and an optional note. A request is either:
   - **Public** (default) — every tutor certified in at least one of your requested topics can see it.
   - **Directed** — submit with `directedTutorId` (or use "Request a topic from this tutor" on a tutor's profile page) so only that one tutor sees it. That tutor gets a notification.
   (`GET`/`POST /api/learner/topic-requests`)
@@ -276,7 +276,7 @@ Create a topic request. `403` when `matchingEnabled` is off.
 {
   "subject": "string (subject slug, e.g. \"MATH\")",
   "topics": ["string (1–10, each in SUBJECT_TOPICS[subject])"],
-  "gradeLevel": "GradeLevel enum (required)",
+  "gradeLevel": "GradeLevel enum (required — the grade the request is for; need not be the learner's own)",
   "preferredSlots": [{ "day": "MONDAY", "startTime": "15:00", "endTime": "17:00" }],
   "note": "string (≤500 chars, optional)",
   "directedTutorId": "string (optional — the tutor's User id; omit for a public request)"

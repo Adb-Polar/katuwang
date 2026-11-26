@@ -80,7 +80,7 @@ export default function ProfileView({
   const gradeSection = [gradeLevel ? gradeText : null, section ? `Section ${section}` : null].filter(Boolean).join(" · ");
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8">
       {/* The page is about you: your name is the h1, on the one tinted band (in your role's colour). */}
       <section
         aria-labelledby="account-name"
@@ -107,78 +107,85 @@ export default function ProfileView({
         </div>
       </section>
 
-      <section className="card kt-card" aria-labelledby="your-details">
-        <div className="kt-card-body gap-6">
-          <div>
-            <h2 id="your-details" className={sectionTitle}>Your details</h2>
-            <p className="text-sm text-(--kt-muted)">
-              {nameIsShown
-                ? "Your school shows tutors' real names to learners. Your email and contact info stay between you and administrators."
-                : "Only you and administrators can see your real name, email and contact info."}
-            </p>
-          </div>
-          <Group title="Set by your school" note="Only an administrator can change these.">
-            <Row label="Real name">{fullName}</Row>
-            <Row label="Email">{email}</Row>
-          </Group>
-          <Group
-            title="You can change"
-            note="Keep these up to date."
-            action={<Link href={editHref} className="btn btn-outline">Edit details</Link>}
-          >
-            <Row label="Grade level" empty={!gradeLevel}>{gradeText}</Row>
-            <Row label="Section" empty={!section}>{section || "Not set"}</Row>
-            <Row label="Contact info" empty={!contactInfo}>{contactInfo || "Not set"}</Row>
-          </Group>
-        </div>
-      </section>
-
-      {certifiedTopics && (
-        <section className="card kt-card">
-          <div className="kt-card-body gap-4">
-            <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      {/* Wide screens: details on the left, account settings beside them, so the page fills its width. */}
+      <div className="grid gap-8 items-start xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="space-y-8">
+          <section className="card kt-card" aria-labelledby="your-details">
+            <div className="kt-card-body gap-6">
               <div>
-                <h2 className={sectionTitle}>Topics you&apos;re certified in</h2>
+                <h2 id="your-details" className={sectionTitle}>Your details</h2>
                 <p className="text-sm text-(--kt-muted)">
-                  {topicCount > 0 &&
-                    `${topicCount} topic${topicCount === 1 ? "" : "s"} in ${topicsBySubject.size} subject${topicsBySubject.size === 1 ? "" : "s"}. `}
-                  Learners see these on your profile.
+                  {nameIsShown
+                    ? "Your school shows tutors' real names to learners. Your email and contact info stay between you and administrators."
+                    : "Only you and administrators can see your real name, email and contact info."}
                 </p>
               </div>
-              {topicCount > 0 && (
-                <Link href="/tutor/assessments" className="btn btn-outline">Add a topic</Link>
-              )}
+              <Group title="Set by your school" note="Only an administrator can change these.">
+                <Row label="Real name">{fullName}</Row>
+                <Row label="Email">{email}</Row>
+              </Group>
+              <Group
+                title="You can change"
+                note="Keep these up to date."
+                action={<Link href={editHref} className="btn btn-outline">Edit details</Link>}
+              >
+                <Row label="Grade level" empty={!gradeLevel}>{gradeText}</Row>
+                <Row label="Section" empty={!section}>{section || "Not set"}</Row>
+                <Row label="Contact info" empty={!contactInfo}>{contactInfo || "Not set"}</Row>
+              </Group>
             </div>
-            {topicsBySubject.size === 0 ? (
-              <p className="text-(--kt-muted)">
-                None yet. Pass a topic assessment from the{" "}
-                <Link href="/tutor/assessments" className="link link-primary">Assessments page</Link> to add one.
-              </p>
-            ) : (
-              <dl className="border-t border-(--kt-border)">
-                {Array.from(topicsBySubject.entries()).map(([subject, topics]) => (
-                  <div
-                    key={subject}
-                    className="grid gap-x-6 gap-y-1 py-3 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[13rem_1fr] sm:items-baseline"
-                  >
-                    <dt className="font-semibold">{subjectDisplayLabel(subject)}</dt>
-                    <dd>
-                      <ul className="space-y-2 leading-snug">
-                        {topics.map((t) => (
-                          <li key={t}>{t}</li>
-                        ))}
-                      </ul>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </div>
-        </section>
-      )}
+          </section>
 
-      <RecoveryEmailSettings />
-      <AccountControls />
+          {certifiedTopics && (
+            <section className="card kt-card">
+              <div className="kt-card-body gap-4">
+                <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+                  <div>
+                    <h2 className={sectionTitle}>Topics you&apos;re certified in</h2>
+                    <p className="text-sm text-(--kt-muted)">
+                      {topicCount > 0 &&
+                        `${topicCount} topic${topicCount === 1 ? "" : "s"} in ${topicsBySubject.size} subject${topicsBySubject.size === 1 ? "" : "s"}. `}
+                      Learners see these on your profile.
+                    </p>
+                  </div>
+                  {topicCount > 0 && (
+                    <Link href="/tutor/assessments" className="btn btn-outline">Add a topic</Link>
+                  )}
+                </div>
+                {topicsBySubject.size === 0 ? (
+                  <p className="text-(--kt-muted)">
+                    None yet. Pass a topic assessment from the{" "}
+                    <Link href="/tutor/assessments" className="link link-primary">Assessments page</Link> to add one.
+                  </p>
+                ) : (
+                  <dl className="border-t border-(--kt-border)">
+                    {Array.from(topicsBySubject.entries()).map(([subject, topics]) => (
+                      <div
+                        key={subject}
+                        className="grid gap-x-6 gap-y-1 py-3 border-b border-(--kt-border) last:border-b-0 sm:grid-cols-[13rem_1fr] sm:items-baseline"
+                      >
+                        <dt className="font-semibold">{subjectDisplayLabel(subject)}</dt>
+                        <dd>
+                          <ul className="space-y-2 leading-snug">
+                            {topics.map((t) => (
+                              <li key={t}>{t}</li>
+                            ))}
+                          </ul>
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </div>
+            </section>
+          )}
+
+        </div>
+        <div className="space-y-8">
+          <RecoveryEmailSettings />
+          <AccountControls />
+        </div>
+      </div>
     </div>
   );
 }

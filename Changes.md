@@ -5897,3 +5897,28 @@ New `/learner/search` and `/admin/search` (`?q=&scope=`), plan in `docs/plans/se
 - `GET /api/search` takes `limit` (1–30, default 6). Scope lists and helpers moved to `src/lib/searchScopes.ts`.
 Checks: tsc clean; new tests for `limit` and the scope helpers; page and dropdown browser-checked at 1000px and
 375px on a temporary page with mocked results (no database in this session).
+### Full-width public pages (2026-11-26)
+
+The landing page sat in a 68rem centred column, leaving wide empty margins on desktop. `.lp-wrap`
+(`src/components/public/public.css`) now spans the viewport with fluid gutters (`clamp(1.5rem, 5vw, 6rem)`, capped at
+120rem for ultrawide screens); this also widens the shared public header and footer on auth and privacy pages.
+`src/components/landing/landing.css`: hero heading and lead scale with the viewport, and the illustration is capped at
+36rem and aligned to the right edge. Checks: browser-checked at 1850px, 1280px and 390px, no horizontal scroll.
+
+### Profile page uses the full width (2026-11-26)
+
+`ProfileView` (`src/components/profile/ProfileView.tsx`, learner and tutor `/profile`) was capped at `max-w-3xl`,
+leaving the right half of the page empty on desktop. The cap is gone: the name band spans the page, and from the `xl`
+breakpoint the details (and a tutor's certified topics) sit in a left column with recovery email and account deletion
+in a right column. Below `xl` it stacks as before. Checks: tsc, lint and the ProfileView tests pass; browser-checked on
+a temporary page at 1672px, 1100px and 390px.
+
+### Class requests for any grade level (2026-11-26)
+
+The "Ask for a class" form (`/learner/tutors?tab=requests`) locked Grade level to the learner's profile grade, and
+`POST /api/learner/topic-requests` ignored the submitted grade in favour of the session's. Learners can now request a
+subject at any grade: `TopicRequestManager` no longer passes `gradeLocked` (create and edit forms; the field is still
+prefilled from the profile), and the route validates the subject/topics against, and stores, the submitted
+`gradeLevel`. The edit route (`PATCH .../[id]`) already used the submitted grade. In line with the existing any-grade
+policy (`LEARNER_GRADE_ACCESS = "ANY_GRADE"`). `docs/roles/LEARNER.md` updated. Checks: tsc, lint, topic-request route
+tests (new case: a Grade 9 learner posting a Grade 8 request) pass; not browser-checked (no database in this session).

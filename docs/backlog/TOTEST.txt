@@ -1396,3 +1396,6 @@ Catalog seed on a remote database (Changes.md Part 103)
  [ ] Against the production database: `pnpm exec tsx prisma/seedEssentials.ts` finishes without a P2028 timeout and reports 47 subjects / 292 topics; `pnpm seed` run again reports reusedTopics 292 and changes nothing.
  [ ] `pnpm seed:questions` finishes against the production database (5,840 questions). If it times out, re-run with SEED_TRANSACTION_TIMEOUT_MS=1800000.
  [ ] After seeding, /register shows the subject list and an admin sees Subjects & topics populated.
+ [ ] Landing page on a wide desktop: content reaches near both edges, header/footer line up with it; login, register and privacy pages still look right under the wider header.
+ [ ] /learner/profile and /tutor/profile on a wide desktop: name band full width, details left, recovery email + delete account right; stacks to one column on a narrow window and on a phone.
+ [ ] Ask for a class: Grade level is editable and prefilled with your grade; picking another grade reloads Subject/Topics for that grade; post a request for a different grade and confirm it saves with that grade and a tutor certified in the topic sees it; edit an open request to another grade.

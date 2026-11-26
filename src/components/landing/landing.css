@@ -19,12 +19,13 @@
 
 /* Hero */
 .lp-hero { padding-block: 7rem; display: grid; grid-template-columns: 3fr 2fr; gap: 4rem; align-items: center; }
-.lp-hero-copy { max-width: 44rem; display: flex; flex-direction: column; gap: 1.5rem; }
-.lp-lead { font-size: 1.15rem; color: var(--lp-muted); max-width: 32rem; }
+.lp-hero h1 { font-size: clamp(2.4rem, 4.4vw, 5rem); }
+.lp-hero-copy { max-width: 60rem; display: flex; flex-direction: column; gap: 1.5rem; }
+.lp-lead { font-size: clamp(1.15rem, 1.4vw, 1.4rem); color: var(--lp-muted); max-width: 40rem; }
 .lp-ctas { display: flex; gap: 0.75rem; flex-wrap: wrap; }
 
 /* Illustration: flat shapes, page tokens only */
-.lp-art { margin: 0; }
+.lp-art { margin: 0; width: 100%; max-width: 36rem; justify-self: end; }
 .lp-art svg { width: 100%; height: auto; display: block; }
 .lp-art .art-bg { fill: var(--lp-band); }
 .lp-art .art-table { fill: var(--lp-table); }

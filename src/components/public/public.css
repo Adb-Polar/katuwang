@@ -56,7 +56,8 @@
 }
 .kt-public .card { box-shadow: none; }
 
-.lp-wrap { max-width: 68rem; margin: 0 auto; padding-inline: 1.5rem; width: 100%; }
+/* Fills the viewport with fluid gutters; the cap only stops ultrawide screens stretching it. */
+.lp-wrap { max-width: 120rem; margin: 0 auto; padding-inline: clamp(1.5rem, 5vw, 6rem); width: 100%; }
 .lp-muted { color: var(--lp-muted); }
 
 .lp-btn {

@@ -127,25 +127,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: errorMsg, fieldErrors: result.error.issues.map(({ path, message }) => ({ path, message })) }, { status: 400 });
     }
 
-    const studentGrade =
-      (session.user as { gradeLevel?: GradeLevel | null }).gradeLevel ??
-      (await prisma.user?.findUnique?.({
-        where: { id: session.user.id },
-        select: { gradeLevel: true },
-      }))?.gradeLevel ??
-      result.data.gradeLevel ??
-      null;
-
-    if (!studentGrade) {
-      return NextResponse.json({ error: "Grade level is required." }, { status: 400 });
-    }
+    // The grade a request is for is the learner's choice (any-grade policy), not their profile grade.
+    const requestGrade = result.data.gradeLevel;
+    const learnerGrade = (session.user as { gradeLevel?: GradeLevel | null }).gradeLevel ?? requestGrade;
 
     const { subject, topics, preferredSlots, note, directedTutorId } = result.data;
 
-    if (!(await subjectExists(subject, { gradeLevel: studentGrade }))) {
+    if (!(await subjectExists(subject, { gradeLevel: requestGrade }))) {
       return NextResponse.json({ error: "Invalid subject." }, { status: 400 });
     }
-    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel: studentGrade })))).some((ok) => !ok)) {
+    if ((await Promise.all(topics.map((t) => topicExists(subject, t, { gradeLevel: requestGrade })))).some((ok) => !ok)) {
       return NextResponse.json(
         { error: `One or more topics are not valid for ${subject}.` },
         { status: 400 }
@@ -161,7 +152,7 @@ export async function POST(req: NextRequest) {
       if (!directedTutor || !directedTutor.tutorProfile) {
         return NextResponse.json({ error: "The selected tutor could not be found." }, { status: 400 });
       }
-      if (!isStudentEligibleForTutor(studentGrade, directedTutor.gradeLevel)) {
+      if (!isStudentEligibleForTutor(learnerGrade, directedTutor.gradeLevel)) {
         return NextResponse.json(
           { error: "This tutor is not available for requests." },
           { status: 403 }
@@ -188,7 +179,7 @@ export async function POST(req: NextRequest) {
           lastSubmittedAt: submittedAt,
           expiresAt: requestDeadline(submittedAt),
           subject: subject,
-          gradeLevel: studentGrade,
+          gradeLevel: requestGrade,
           note: note || null,
           directedTutorProfileId,
           topics: { create: [...new Set(topics)].map((topic) => ({ topic })) },
