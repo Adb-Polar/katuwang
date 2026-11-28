@@ -112,7 +112,7 @@ General:
 - **`requireEmailVerification`** (added 2026-09-14) — see User Management above. Defaults to `false`.
 
 Assessment:
-- **`autoCertifyOnAssessmentPass`** — when off (default), a tutor who passes an assessment gets a `PENDING` `TopicCertification` for an admin to approve on the Certifications screen; when on, passing goes straight to `CERTIFIED`. Defaults to `false`.
+- **`autoCertifyOnAssessmentPass`** — when off (default), a tutor who passes an assessment gets a `PENDING` `TopicCertification` for an admin to approve on the Tutor certifications screen; when on, passing goes straight to `CERTIFIED`. Defaults to `false`.
 - **`chatbotEnabled`** — see Chatbot assistant below. Defaults to `true`.
 - **`sessionTestsEnabled`** — when disabled, a tutor cannot create or publish a session test and a learner cannot start a pre/post attempt; already-collected results stay fully readable regardless. Defaults to `true`.
 
@@ -171,7 +171,7 @@ One page (since 2026-11-26; `/admin/reports` redirects here):
 
 ## Chatbot assistant
 
-- The same floating **intent-based** help widget shown to learners and tutors also appears in the admin portal (nav help for Registrations, Certifications, Question Bank, moderation, Reports, Settings; plus general FAQs). Rule/keyword matching — not a generative AI.
+- The same floating **intent-based** help widget shown to learners and tutors also appears in the admin portal (nav help for Registrations, Tutor certifications, Question Bank, moderation, Reports, Settings; plus general FAQs). Rule/keyword matching — not a generative AI.
 - **Toggle:** *Settings → Chatbot assistant* (`chatbotEnabled`, default ON). When off, the widget is hidden everywhere and `POST /api/chatbot` returns `403`.
 - **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`).
   (`POST /api/chatbot` — not admin-gated)

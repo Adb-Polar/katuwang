@@ -280,7 +280,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
       {
         title: "Review tutor certifications",
         steps: [
-          "Open Certifications (only needed when “Auto-certify tutors who pass an assessment” is off).",
+          "Open Tutor certifications (only needed when “Auto-certify tutors who pass an assessment” is off).",
           "Each pending row is a tutor who passed a topic quiz.",
           "Confirm to certify them for that topic, or Reject with a note.",
         ],

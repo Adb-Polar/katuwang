@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [105](#part-105) | **Sidebar: "Certifications" renamed "Tutor certifications" (`feat/ui-ux-batch`)** | The Assessment entry for approving tutors' topic certifications read too close to "Certificates" (learners' completion certificates). It now matches its page title. Chatbot link and help text follow. No schema change. | See Part 105 below. |
 | [104](#part-104) | **Per-chart analytics filters (`feat/ui-ux-batch`)** | The admin dashboard's single "Filter the charts" panel is gone. Each chart now has its own filter row with only the filters that apply to it (the field a chart groups by is never offered), its own Clear button, and loads on its own. The enrollment stat cards and trend share one row (period, grade level, subject). No schema change. | See Part 104 below. |
 | [103](#part-103) | **Catalog seed no longer times out on a remote database** | `pnpm seed` and the essentials seed failed against the production database with a transaction timeout after three minutes. The import now writes topics in bulk and finishes in about a fifth of the database calls; the result is identical. Seed transactions also get a 10-minute limit, adjustable with `SEED_TRANSACTION_TIMEOUT_MS`. | See Part 103 below. |
 | [102](#part-102) | **Render deploys apply migrations automatically** | Deploying to Render now applies any pending database migrations as the first step of the build, so new code never runs against an old schema. A failed migration stops the deploy and the previous version stays live. Local `pnpm build` is unaffected. | See Part 102 below. |
@@ -4098,6 +4099,19 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-105"></a>
+## Part 105 — Sidebar: "Certifications" renamed "Tutor certifications" (2026-11-28)
+
+The admin sidebar had "Certificates" (Main menu, learners' completion certificates) and "Certifications"
+(Assessment, approving tutors' topic certifications) side by side with the same icon. The Assessment entry
+is now **Tutor certifications**, matching the page title; "Certificates" stays.
+
+- `src/app/admin/layout.tsx` — nav label.
+- `src/lib/chatbot/intents.ts` — the admin "review certifications" reply and its link label.
+- `src/lib/help/helpContent.ts`, `docs/roles/ADMIN.md` — wording.
+
+**Verification.** Chatbot tests (68) pass; `pnpm exec tsc --noEmit` clean.
 
 <a id="part-104"></a>
 ## Part 104 — Per-chart analytics filters (2026-11-28)

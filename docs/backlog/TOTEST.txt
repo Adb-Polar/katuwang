@@ -1407,3 +1407,6 @@ Per-chart analytics filters (Changes.md Part 104)
  [ ] Custom range: picking only one date shows "Choose both a start and an end date…" and keeps the previous numbers; picking both updates the chart. A range over 92 days charts the enrollment trend by month.
  [ ] Subject picker lists every subject that has classes; filter rows wrap cleanly on a phone; dark mode readable.
 
+Sidebar rename (Changes.md Part 105)
+ [ ] Admin sidebar → Assessment shows "Tutor certifications" (opens /admin/assessment/certifications, highlighted when active); Main menu still shows "Certificates". Admin chatbot "approve certifications" links to "Tutor certifications".
+

@@ -263,8 +263,8 @@ export const INTENTS: Intent[] = [
     roles: [ADMIN],
     keywords: ["certify", "review", "tutor", "pending", "approve"],
     patterns: [/\b(review|approve|reject)\b.*\bcertif/],
-    response: { text: "Open Certifications to review tutors' pending topic certifications." },
-    link: { href: "/admin/assessment/certifications", label: "Certifications" },
+    response: { text: "Open Tutor certifications to review tutors' pending topic certifications." },
+    link: { href: "/admin/assessment/certifications", label: "Tutor certifications" },
   },
   {
     id: "nav_admin_question_bank",
