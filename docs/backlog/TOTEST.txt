@@ -1438,3 +1438,6 @@ Wide-screen pass + admin chatbot (Changes.md Part 109) — check each on a wide 
  [ ] Session test editor: details left, questions right; create-test step fine. Session test results: two charts side by side.
  [ ] Learner pre/post test and tutor topic assessment: on desktop the timer and Submit stay visible on the right while scrolling the questions; on a phone the timer sticks at the top and Submit is under the questions; submitting with unanswered questions still asks to confirm; after submit, "Back to class"/"Back to assessments" shows.
 
+Search dropdown in dark mode (Changes.md Part 110)
+ [ ] Dark mode: open the top-bar search's scope list (admin and learner) — every choice is readable on a dark list; light mode still looks normal. Spot-check another dropdown (e.g. a filter select) in dark mode.
+

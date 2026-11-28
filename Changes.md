@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [110](#part-110) | **Search scope dropdown readable in dark mode (`feat/ui-ux-batch`)** | In dark mode the top-bar search's Tutor / Student / Class list showed light text on a white popup, so the unselected choices were nearly invisible. Dropdown options now use the theme's surface and text colours. CSS only. | See Part 110 below. |
 | [109](#part-109) | **Wide-screen pass across all portals + no chat widget for admins (`feat/ui-ux-batch`)** | Pages that stopped at a narrow column now use the full width on wide screens, mostly as two columns that stack on smaller screens: tutor My reports, Help (all portals), edit profile, class pages (learner + tutor), new/edit class, class request detail, session test editor and results, and the learner test / tutor assessment quiz pages (timer and Submit stay in view beside the questions). The floating chatbot no longer appears in the admin portal. No schema change. | See Part 109 below. |
 | [108](#part-108) | **Admin search picker is Tutor / Student / Class (`feat/ui-ux-batch`)** | The admin top-bar search offered Everything, Tutor code, Subject, Topic and Class code. It now offers only **Tutor**, **Student** and **Class**: tutors and students are searched separately by name, email or ID, and Class matches code, subject or topic. Learner search is unchanged. No schema change. | See Part 108 below. |
 | [107](#part-107) | **Tutor's student page fills wide screens (`feat/ui-ux-batch`)** | `/tutor/students/[id]` no longer stops at a narrow column. On wide screens the classes list sits beside two new cards: **At a glance** (active classes, sessions tested, average pre→post change) and **Session test results** (the learner's pre/post scores in your classes, linking to each test). Stacks to one column on smaller screens. No schema change. | See Part 107 below. |
@@ -4103,6 +4104,14 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-110"></a>
+## Part 110 — Search scope dropdown readable in dark mode (2026-11-28)
+
+The scope `<select>` in `GlobalSearch` has a transparent background, so in dark mode Chrome drew its native popup
+white while the options inherited the light `text-base-content` colour. `src/app/globals.css` now gives every
+`option` `background-color: var(--color-base-100)` and `color: var(--color-base-content)`, which follows the
+light/dark theme and also covers any other native select. No behaviour change.
 
 <a id="part-109"></a>
 ## Part 109 — Wide-screen pass across all portals + no chat widget for admins (2026-11-28)
