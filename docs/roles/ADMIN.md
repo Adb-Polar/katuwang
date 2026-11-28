@@ -141,12 +141,12 @@ One page (since 2026-11-26; `/admin/reports` redirects here):
 - **Analytics**, aggregated via Prisma `groupBy` and charted in `ReportsView.tsx`:
   - Enrollment cards (records, current, withdrawn, new in the period) and an enrollment trend.
   - Users by role, by grade level, and by account status; classes by subject and by status; certifications by status.
-  - **Filters:** period (all time, last 7 / 30 / 90 days, last 12 months, or a custom range of up to 366 days), user role, grade level, subject. With a period, every chart counts records created inside it; the trend is per day up to 92 days and per month beyond. With no filter the breakdowns are all-time and the trend covers the last 30 days.
+  - **Filters, per chart** (since 2026-11-28): each chart has its own filter row and Clear button, offering only the filters that apply to it — never the field it groups by. Enrollments (cards + trend): period, grade level, subject. Users by role: period, grade. Users by grade level: period, role. Users by status: period, role, grade. Classes by subject: period, grade. Classes by status and certifications by status: period, grade, subject. Period is all time, last 7 / 30 / 90 days, last 12 months, or a custom range of up to 366 days; with a period a chart counts records created inside it, and the enrollment trend is per day up to 92 days and per month beyond. With no period the enrollment trend covers the last 30 days.
 
 **Generate a report** (card on the same page, added 2026-11-19): pick a report — platform overview, users registered, classes created, enrollments, session tests (pre/post), topic certifications or (super admin only) audit log — and a date range (PHT, default last 90 days, max 366), then download PDF or CSV. Exports include real names/emails; capped at 5,000 rows with a note when truncated.
 (`GET /api/admin/report?format=pdf|csv&scope=…&from=YYYY-MM-DD&to=YYYY-MM-DD`)
 
-(`GET /api/admin/reports?from=&to=&role=&gradeLevel=&subject=`)
+(`GET /api/admin/reports?chart=<id>&from=&to=&role=&gradeLevel=&subject=` — one chart per request; filters the chart does not take are ignored)
 
 ## Audit Log (`/admin/audit-log`) — super admin only
 

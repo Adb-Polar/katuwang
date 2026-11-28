@@ -111,7 +111,7 @@ expansion) landed the same day (Part 30).
 | Classes by subject/status breakdown | ✅ | same route |
 | Certification status breakdown | ✅ | same route |
 | Enrollment trend (rolling 30-day daily series) | ✅ | same route, zero-filled daily buckets |
-| Visual charts/report UI | ✅ | `/admin/reports`, `ReportsView.tsx` |
+| Visual charts/report UI | ✅ | `/admin` dashboard, `ReportsView.tsx`; each chart has its own filters (Changes.md Part 104) |
 | Downloadable reports (PDF + CSV, date range) — all 3 portals | ✅ | `src/lib/reports/*`; `GET /api/{learner,tutor,admin}/report`; on demand, not stored (`decisions.md`, 2026-11-19) |
 | Admin audit log of moderation actions | ✅ | `AuditLog` model, `/admin/audit-log`, `AuditLogTable.tsx` (not one of the 6 named modules, but supports the platform's governance/security scope) |
 

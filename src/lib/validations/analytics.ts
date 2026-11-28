@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { GradeLevel } from "@prisma/client";
 import { DAY_MS, parseLocalDateAndTime } from "@/lib/datetime";
+import { ANALYTICS_CHART_IDS } from "@/lib/analyticsCharts";
 
 export const MAX_ANALYTICS_RANGE_DAYS = 366;
 /** Longer ranges are charted per month, so the trend stays readable. */
@@ -18,9 +19,10 @@ const dateOnly = z
   // Round-trips, so "2026-02-31" (which Date would roll into March) is rejected.
   .refine((value) => parseLocalDateAndTime(schoolDayStart(value)).date === value, "Enter a real calendar date.");
 
-/** `GET /api/admin/reports` filters. A date range needs both ends; every filter is optional. */
+/** `GET /api/admin/reports` query: which chart, plus its filters. A date range needs both ends; every filter is optional. */
 export const adminAnalyticsQuerySchema = z
   .object({
+    chart: z.enum(ANALYTICS_CHART_IDS, { message: "Choose a chart." }),
     from: dateOnly.optional(),
     to: dateOnly.optional(),
     role: z.enum(["STUDENT_LEARNER", "STUDENT_TUTOR"], { message: "Invalid role filter." }).optional(),

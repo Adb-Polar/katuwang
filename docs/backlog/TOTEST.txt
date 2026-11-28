@@ -1399,3 +1399,11 @@ Catalog seed on a remote database (Changes.md Part 103)
  [ ] Landing page on a wide desktop: content reaches near both edges, header/footer line up with it; login, register and privacy pages still look right under the wider header.
  [ ] /learner/profile and /tutor/profile on a wide desktop: name band full width, details left, recovery email + delete account right; stacks to one column on a narrow window and on a phone.
  [ ] Ask for a class: Grade level is editable and prefilled with your grade; picking another grade reloads Subject/Topics for that grade; post a request for a different grade and confirm it saves with that grade and a tutor certified in the topic sees it; edit an open request to another grade.
+
+Per-chart analytics filters (Changes.md Part 104)
+ [ ] /admin: the "Filter the charts" panel is gone; the Enrollments card shows Period, Grade level and Subject only, with the four stat cards and the trend inside it.
+ [ ] Each bar chart shows only its own filters: Users by role (Period, Grade), Users by grade level (Period, Role), Users by status (Period, Role, Grade), Classes by subject (Period, Grade), Classes by status and Certifications by status (Period, Grade, Subject).
+ [ ] Changing a filter on one chart updates only that chart; the others keep their own filters and numbers. "Clear" appears only on a filtered chart and resets just that chart.
+ [ ] Custom range: picking only one date shows "Choose both a start and an end date…" and keeps the previous numbers; picking both updates the chart. A range over 92 days charts the enrollment trend by month.
+ [ ] Subject picker lists every subject that has classes; filter rows wrap cleanly on a phone; dark mode readable.
+

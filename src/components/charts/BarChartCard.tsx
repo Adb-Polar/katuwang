@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import DataTable from "./DataTable";
 import { useThemeColors } from "./useThemeColors";
@@ -35,12 +36,15 @@ export default function BarChartCard({
   labelKey,
   color,
   labelFormatter = labelize,
+  toolbar,
 }: {
   title: string;
   rows: Breakdown[];
   labelKey: string;
   color: string;
   labelFormatter?: (value: string) => string;
+  /** Controls shown under the title, e.g. the chart's own filters. */
+  toolbar?: ReactNode;
 }) {
   const c = useThemeColors();
   const allBars = rows.map((r) => ({ name: labelFormatter(String(r[labelKey])), count: r.count }));
@@ -59,6 +63,7 @@ export default function BarChartCard({
     <div className="card kt-card">
       <div className="card-body gap-2 p-5">
         <h2 className="font-serif text-xl font-medium leading-tight">{title}</h2>
+        {toolbar}
         {isRanked ? (
           <>
             <div className="w-full" style={{ height: data.length * RANKED_ROW_HEIGHT + 32 }}>

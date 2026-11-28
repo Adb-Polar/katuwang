@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [104](#part-104) | **Per-chart analytics filters (`feat/ui-ux-batch`)** | The admin dashboard's single "Filter the charts" panel is gone. Each chart now has its own filter row with only the filters that apply to it (the field a chart groups by is never offered), its own Clear button, and loads on its own. The enrollment stat cards and trend share one row (period, grade level, subject). No schema change. | See Part 104 below. |
 | [103](#part-103) | **Catalog seed no longer times out on a remote database** | `pnpm seed` and the essentials seed failed against the production database with a transaction timeout after three minutes. The import now writes topics in bulk and finishes in about a fifth of the database calls; the result is identical. Seed transactions also get a 10-minute limit, adjustable with `SEED_TRANSACTION_TIMEOUT_MS`. | See Part 103 below. |
 | [102](#part-102) | **Render deploys apply migrations automatically** | Deploying to Render now applies any pending database migrations as the first step of the build, so new code never runs against an old schema. A failed migration stops the deploy and the previous version stays live. Local `pnpm build` is unaffected. | See Part 102 below. |
 | [101](#part-101) | **Contact an administrator (`feat/ui-ux-batch`)** | A public `/contact` form lets anyone write to the administrators without signing in, including people who are suspended, banned, declined or still pending. It is linked from the login page, the account-status pages and the public footer. Admins read and close messages in a new "Contact messages" inbox with an open-count badge. A forced sign-out now explains itself on the login page. **Schema change: migration `20261126020000_add_contact_messages`.** | See Part 101 below. |
@@ -4097,6 +4098,38 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-104"></a>
+## Part 104 — Per-chart analytics filters (2026-11-28)
+
+### Why
+One global filter (period, user role, grade level, subject) drove every chart on `/admin`, so two
+charts could not be compared under different filters, and filters that made no sense for a chart
+(role on classes, subject on users) were still offered. Plan: `docs/plans/per-chart-analytics-filters.md`.
+
+### What changed
+- **`src/lib/analyticsCharts.ts`** (new, client-safe): `ANALYTICS_CHART_FILTERS` lists the filters each
+  chart takes, plus the period list, `periodRange`, `isFiltered` and `analyticsChartQuery` (moved out of `ReportsView`).
+  - Enrollments: period, grade level, subject · Users by role: period, grade · Users by grade: period, role ·
+    Users by status: period, role, grade · Classes by subject: period, grade · Classes by status and
+    Certifications by status: period, grade, subject.
+- **`GET /api/admin/reports`** now requires `chart=<id>` and runs only that chart's queries. Filters the chart
+  does not take are ignored. Breakdowns return `{ chart, rows }`; `enrollments` returns `{ chart, enrollments }`;
+  charts that take a subject also return `subjectOptions`. Dropped the unused `filters` echo and `last30Days`.
+  Missing or unknown chart → 400 "Choose a chart."
+- **UI:** `ReportsView` no longer has the global panel. New `src/components/admin/analytics/`:
+  `ChartFilters` (compact filter row, custom range, Clear), `useAnalyticsChart` (one chart's fetch, keeps the last
+  data while reloading), `BreakdownChartCard`, `EnrollmentAnalytics` (stat cards + trend in one card).
+  `BarChartCard` gained an optional `toolbar` slot under its title. The enrollments card now comes before
+  "Generate a report" so its stat cards sit next to its trend.
+
+### Tests
+- `src/app/api/admin/reports/__tests__/route.test.ts` rewritten per chart (auth, chart validation, filter
+  applicability, date ranges, enrolment buckets, subject options).
+- New `src/lib/__tests__/analyticsCharts.test.ts` (query only carries applicable filters; custom range waits for both dates).
+
+**Verification.** `pnpm test`: 208 files / 1,825 tests passing (22 files skipped, as before). `pnpm exec tsc --noEmit` clean.
+`pnpm lint` 0 errors. Not checked in a browser yet — see TOTEST.
 
 <a id="part-103"></a>
 ## Part 103 — Catalog seed no longer times out on a remote database (2026-11-26)
