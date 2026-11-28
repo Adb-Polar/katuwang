@@ -138,7 +138,7 @@ export default function LandingPage({ signedIn }: { signedIn: boolean }) {
             </div>
             <div className="lp-join-tutor">
               <h2>Good at a subject?</h2>
-              <p className="lp-muted">Grades 9–12 can apply, pass a topic test, and earn service hours.</p>
+              <p className="lp-muted">Grades 7–12 can apply, pass a topic test, and earn service hours.</p>
               <Link href="/register/tutor" className="lp-link">
                 Apply as a tutor →
               </Link>

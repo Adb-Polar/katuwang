@@ -22,7 +22,7 @@ const ROLES = [
     href: "/register/tutor",
     role: "Tutor",
     question: "Good at a subject?",
-    body: "Grades 9–12 can apply, pass a topic test, and earn service hours.",
+    body: "Grades 7–12 can apply, pass a topic test, and earn service hours.",
     colour: "text-[var(--lp-tutor)]",
     rule: "border-l-accent",
   },

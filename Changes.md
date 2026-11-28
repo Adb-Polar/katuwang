@@ -8,6 +8,7 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [111](#part-111) | **Tutor sign-up copy says Grades 7–12 (`feat/ui-ux-batch`)** | The tutor sign-up page, the register chooser and the landing page said "Grades 9–12 can apply". Any grade 7–12 student can register as a tutor (registration never checked the grade), so the text now says Grades 7–12. Copy only. | See Part 111 below. |
 | [110](#part-110) | **Search scope dropdown readable in dark mode (`feat/ui-ux-batch`)** | In dark mode the top-bar search's Tutor / Student / Class list showed light text on a white popup, so the unselected choices were nearly invisible. Dropdown options now use the theme's surface and text colours. CSS only. | See Part 110 below. |
 | [109](#part-109) | **Wide-screen pass across all portals + no chat widget for admins (`feat/ui-ux-batch`)** | Pages that stopped at a narrow column now use the full width on wide screens, mostly as two columns that stack on smaller screens: tutor My reports, Help (all portals), edit profile, class pages (learner + tutor), new/edit class, class request detail, session test editor and results, and the learner test / tutor assessment quiz pages (timer and Submit stay in view beside the questions). The floating chatbot no longer appears in the admin portal. No schema change. | See Part 109 below. |
 | [108](#part-108) | **Admin search picker is Tutor / Student / Class (`feat/ui-ux-batch`)** | The admin top-bar search offered Everything, Tutor code, Subject, Topic and Class code. It now offers only **Tutor**, **Student** and **Class**: tutors and students are searched separately by name, email or ID, and Class matches code, subject or topic. Learner search is unchanged. No schema change. | See Part 108 below. |
@@ -4104,6 +4105,14 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-111"></a>
+## Part 111 — Tutor sign-up copy says Grades 7–12 (2026-11-28)
+
+Replaced "Grades 9–12 can apply" with "Grades 7–12 can apply" in `src/components/auth/RegisterForm.tsx` (tutor
+sign-up subheading), `src/app/register/page.tsx` (tutor card on the chooser) and
+`src/components/landing/LandingPage.tsx`. Registration already accepted any grade from 7 to 12 for tutors, so no
+validation changed. Teaching is still limited to classes at or below the tutor's own grade (Part 86).
 
 <a id="part-110"></a>
 ## Part 110 — Search scope dropdown readable in dark mode (2026-11-28)

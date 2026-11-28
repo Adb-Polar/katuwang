@@ -33,7 +33,7 @@ const ROLE_COPY: Record<RegisterType, { heading: React.ReactNode; subheading: st
         Sign up as a <span className="text-(--lp-tutor)">tutor</span>
       </>
     ),
-    subheading: "Grades 9–12 can apply. You’ll pass a topic test before teaching it.",
+    subheading: "Grades 7–12 can apply. You’ll pass a topic test before teaching it.",
     buttonLabel: "Create Tutor Account",
   },
 };
