@@ -16,8 +16,9 @@ import { PAGE_RESULTS_PER_GROUP, QUICK_RESULTS_PER_GROUP } from "@/lib/searchSco
 import { statusDisplayLabel, subjectDisplayLabel } from "@/lib/displayLabels";
 
 
-// Learners choose an entity; admins can also narrow the search to one field.
-const SEARCH_SCOPES = ["all", "tutor", "class", "tutorCode", "subject", "topic", "classCode"] as const;
+// Learners choose tutor or class; admins choose tutor, student or class. "all" and the
+// single-field scopes remain for the tutor portal and older links.
+const SEARCH_SCOPES = ["all", "tutor", "student", "class", "tutorCode", "subject", "topic", "classCode"] as const;
 type SearchScope = (typeof SEARCH_SCOPES)[number];
 
 /**
@@ -35,6 +36,7 @@ function classOrFor(
   ];
   switch (scope) {
     case "tutor":
+    case "student":
     case "tutorCode":
       return null;
     case "class":
@@ -95,7 +97,8 @@ async function handleGet(req: NextRequest) {
     const scope: SearchScope =
       scopeParam && SEARCH_SCOPES.includes(scopeParam) ? scopeParam : "all";
 
-    const subjectSlugs = scope === "tutor" || scope === "tutorCode" ? [] : await resolveSubjectSlugs(q);
+    const searchesPeople = scope === "tutor" || scope === "student" || scope === "tutorCode";
+    const subjectSlugs = searchesPeople ? [] : await resolveSubjectSlugs(q);
     const classOr = classOrFor(scope, q, subjectSlugs);
     const wantTopics = scope === "all" || scope === "topic";
     const wantTutors = scope === "all" || scope === "tutor" || scope === "tutorCode";
@@ -265,20 +268,24 @@ async function handleGet(req: NextRequest) {
           })),
         });
     } else {
-      // ADMIN
+      // ADMIN — "class" also matches topics; "tutor" / "student" search that role's accounts.
+      const adminClassOr = scope === "class" ? classOrFor("all", q, subjectSlugs) : classOr;
+      const accountRole =
+        scope === "tutor" ? "STUDENT_TUTOR" : scope === "student" ? "STUDENT_LEARNER" : null;
+      const wantAccounts = accountRole !== null || scope === "all" || scope === "tutorCode";
       const [classes, users] = await Promise.all([
-        classOr
+        adminClassOr
           ? prisma.tutorClass.findMany({
-              where: { OR: classOr },
+              where: { OR: adminClassOr },
               select: { id: true, code: true, subject: true, status: true },
               take: perGroup,
               orderBy: { createdAt: "desc" },
             })
           : Promise.resolve([]),
-        wantTutors
+        wantAccounts
           ? prisma.user.findMany({
               where: {
-                role: { notIn: ["ADMIN", "SUPER_ADMIN"] },
+                role: accountRole ?? { notIn: ["ADMIN", "SUPER_ADMIN"] },
                 OR:
                   scope === "tutorCode"
                     ? [{ anonymousId: { contains: q } }]
@@ -309,7 +316,7 @@ async function handleGet(req: NextRequest) {
       if (users.length)
         groups.push({
           kind: "tutor",
-          label: "Accounts",
+          label: scope === "tutor" ? "Tutors" : scope === "student" ? "Students" : "Accounts",
           items: users.map((u) => ({
             id: u.id,
             title: u.anonymousId,

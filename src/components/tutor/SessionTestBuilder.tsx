@@ -127,7 +127,7 @@ function CreateTestPanel({
   };
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <TestPageHeader classId={classId} sessionTopic={sessionTopic} classSubject={classSubject} status="No test yet" />
       <section className="card kt-card" aria-labelledby="create-test">
         <div className="kt-card-body gap-5">
@@ -398,7 +398,7 @@ function BuilderBody({
     : "Pre-test open";
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <TestPageHeader
         classId={classId}
         sessionTopic={sessionTopic}
@@ -428,6 +428,8 @@ function BuilderBody({
       <FeedbackBanner variant="success" message={notice || null} />
       <FeedbackBanner variant="error" message={error || null} />
 
+      {/* Wide screens: test details on the left, questions beside them. */}
+      <div className="grid gap-6 items-start xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       {/* ── Meta ── */}
       <section className="card kt-card" aria-labelledby="test-details">
         <div className="kt-card-body gap-5">
@@ -538,6 +540,7 @@ function BuilderBody({
           )}
         </div>
       </section>
+      </div>
 
       {showBank && (
         <AddFromBankModal

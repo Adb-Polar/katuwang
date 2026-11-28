@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { keepCodesTogether, readableSubjects } from "@/lib/displayLabels";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import {
   NotificationRow,
   notificationKind,
+  notificationLinkLabel,
   notificationWhen,
 } from "@/components/notifications/notificationMeta";
 
@@ -117,6 +119,12 @@ export default function NotificationList() {
                         {unread && <span className="text-primary font-medium"> · New</span>}
                       </span>
                       <span className={`block break-words ${unread ? "font-medium" : ""}`}>{keepCodesTogether(readableSubjects(n.message))}</span>
+                      {n.link && (
+                        <span className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                          {notificationLinkLabel(n.type)}
+                          <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
+                        </span>
+                      )}
                     </span>
                   </button>
                 </li>

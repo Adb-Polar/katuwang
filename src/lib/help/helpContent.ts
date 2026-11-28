@@ -365,7 +365,7 @@ export const HELP_CONTENT: Record<HelpRole, HelpEntry> = {
         category: "Settings",
         question: "What does the “Chatbot assistant” setting do?",
         answer:
-          "It turns the floating help assistant on or off in every portal. The assistant handles navigation help, FAQs and (for learners) class recommendations — it is not free-form chat.",
+          "It turns the floating help assistant on or off in the learner and tutor portals (it isn't shown in the admin portal). The assistant handles navigation help, FAQs and (for learners) class recommendations — it is not free-form chat.",
       },
       {
         category: "Analytics",

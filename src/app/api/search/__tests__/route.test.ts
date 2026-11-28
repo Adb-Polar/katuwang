@@ -92,6 +92,35 @@ describe("GET /api/search", () => {
     expect(json.groups[0].items[0]).toMatchObject({ title: "C-0231 · Araling Panlipunan", subtitle: "Scheduled" });
   });
 
+  it.each([
+    ["tutor", "STUDENT_TUTOR", "Tutors"],
+    ["student", "STUDENT_LEARNER", "Students"],
+  ])("admin scope=%s: searches only that role's accounts, no classes or topics", async (scope, role, label) => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
+    const json = await (await GET(req("maria", scope))).json();
+    expect(classFindMany).not.toHaveBeenCalled();
+    expect(userFindMany.mock.calls[0][0].where.role).toBe(role);
+    expect(userFindMany.mock.calls[0][0].where.OR).toEqual(
+      expect.arrayContaining([{ anonymousId: { contains: "maria" } }, { email: { contains: "maria" } }]),
+    );
+    expect(json.groups.map((g: { label: string }) => g.label)).toEqual([label]);
+    expect(json.groups[0].items[0].href).toBe("/admin/users/u1");
+  });
+
+  it("admin scope=class: matches code, subject and topic, without accounts or the topic catalog", async () => {
+    getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
+    resolveSubjectSlugsMock.mockResolvedValue(["MATH"]);
+    const json = await (await GET(req("math", "class"))).json();
+    expect(userFindMany).not.toHaveBeenCalled();
+    expect(classFindMany.mock.calls[0][0].where.OR).toEqual([
+      { code: { contains: "math" } },
+      { subject: { contains: "math" } },
+      { subject: { in: ["MATH"] } },
+      { topics: { some: { topic: { contains: "math" } } } },
+    ]);
+    expect(json.groups.map((g: { kind: string }) => g.kind)).toEqual(["class"]);
+  });
+
   it("limit: defaults to the dropdown size and is capped for the results page", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
     await GET(req("linear"));

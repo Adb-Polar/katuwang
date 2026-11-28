@@ -4,6 +4,7 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { prisma } from "@/lib/prisma";
 import { createClassRecommendationSchema } from "@/lib/validations/classRecommendation";
 import { notify } from "@/lib/notifications";
+import { classRecommendationMessage } from "@/lib/classRecommendation";
 
 // ─── GET: List Recommendations Issued for a Class ─────────────────────────────
 export async function GET(
@@ -55,7 +56,20 @@ export async function POST(
 
     const tutorClass = await prisma.tutorClass.findUnique({
       where: { id: classId },
-      select: { id: true, subject: true, code: true },
+      select: {
+        id: true,
+        subject: true,
+        code: true,
+        gradeLevel: true,
+        tutorProfile: { select: { user: { select: { anonymousId: true } } } },
+        topics: { select: { topic: true }, orderBy: { topic: "asc" } },
+        sessions: {
+          where: { status: "SCHEDULED", scheduledAt: { gte: new Date() } },
+          orderBy: { scheduledAt: "asc" },
+          take: 1,
+          select: { scheduledAt: true },
+        },
+      },
     });
 
     if (!tutorClass) {
@@ -101,7 +115,14 @@ export async function POST(
         tx,
         learnerId,
         "CLASS_RECOMMENDED_BY_ADMIN",
-        `An administrator recommended a ${tutorClass.subject} class (${tutorClass.code}) for you.`,
+        classRecommendationMessage({
+          subject: tutorClass.subject,
+          code: tutorClass.code,
+          gradeLevel: tutorClass.gradeLevel,
+          tutorAnonymousId: tutorClass.tutorProfile?.user.anonymousId ?? null,
+          topics: tutorClass.topics.map((t) => t.topic),
+          nextSessionAt: tutorClass.sessions[0]?.scheduledAt ?? null,
+        }),
         `/learner/classes/${classId}`
       );
 

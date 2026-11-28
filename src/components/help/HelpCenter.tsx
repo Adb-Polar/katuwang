@@ -42,7 +42,7 @@ export default function HelpCenter({ role, chatAvailable = false }: { role: Help
   const nothing = guides.length === 0 && faqGroups.length === 0;
 
   return (
-    <div className="space-y-10 max-w-3xl">
+    <div className="space-y-10">
       <label className="input input-bordered flex items-center gap-2 w-full sm:max-w-md">
         <Search aria-hidden="true" className="h-4 w-4 shrink-0 text-(--kt-muted)" />
         <input
@@ -61,6 +61,8 @@ export default function HelpCenter({ role, chatAvailable = false }: { role: Help
         </p>
       )}
 
+      {/* Wide screens: guides and questions side by side. */}
+      <div className="grid gap-10 items-start xl:grid-cols-2">
       {guides.length > 0 && (
         <section aria-labelledby="help-guides" className="space-y-3">
           <h2 id="help-guides" className={sectionTitle}>How to…</h2>
@@ -113,6 +115,7 @@ export default function HelpCenter({ role, chatAvailable = false }: { role: Help
           </div>
         </section>
       )}
+      </div>
 
       <p className="border-t border-(--kt-border) pt-6 text-(--kt-muted)">
         Still stuck? {chatAvailable ? "Ask the chat helper in the bottom corner, or talk" : "Talk"} to a Katuwang administrator or your school coordinator.

@@ -1410,3 +1410,31 @@ Per-chart analytics filters (Changes.md Part 104)
 Sidebar rename (Changes.md Part 105)
  [ ] Admin sidebar → Assessment shows "Tutor certifications" (opens /admin/assessment/certifications, highlighted when active); Main menu still shows "Certificates". Admin chatbot "approve certifications" links to "Tutor certifications".
 
+Class recommendation notification (Changes.md Part 106)
+ [ ] As an admin, recommend a class (with a note) to a learner. The learner's notification reads "…recommended the <Subject> class (C-XXXX) for you — Grade N, tutor TUT-XXXX, topics: …. Next session: <date, time PHT>." and does NOT contain the admin's note.
+ [ ] Recommend a class with no upcoming sessions → message ends "No upcoming session is scheduled yet."
+ [ ] /learner/notifications: the recommendation row shows "View class →"; clicking it opens /learner/classes/<id> and marks it read. Other linked notifications show "Open →"; ones with no link show no cue.
+ [ ] Bell dropdown still shows the full message and opens the class.
+
+Tutor student page layout (Changes.md Part 107)
+ [ ] /tutor/students/<id> on a wide desktop: ID band full width; "Classes with you" left, "At a glance" and "Session test results" right. On a laptop/phone width it stacks to one column.
+ [ ] Session test results lists only sessions from your classes where the learner submitted a test, newest first, with pre/post % ("—" for a missing one); the topic opens that session's test page. Learner with no tests → "No session tests taken in your classes yet." and Avg. change "—".
+ [ ] Active classes excludes classes the learner withdrew from.
+
+Admin search picker (Changes.md Part 108)
+ [ ] Admin top-bar search: picker lists only Tutor, Student, Class (Tutor selected first); placeholder changes with the choice.
+ [ ] Tutor: a tutor's name, email or TUT code finds them (group "Tutors"); a learner's name does not. Student: same for learners (group "Students"). Clicking opens /admin/users/<id>.
+ [ ] Class: "math", a topic name and a class code each find classes; no accounts appear. Clicking opens Classes filtered to that code.
+ [ ] /admin/search results page shows the same three choices; an empty Tutor search offers "Search students instead". Old link /admin/search?q=x&scope=all opens as Tutor.
+
+Wide-screen pass + admin chatbot (Changes.md Part 109) — check each on a wide desktop AND a phone/narrow window
+ [ ] Admin portal: no floating chat button on any page; Help & FAQs doesn't mention a chat helper. Learner and tutor portals still show it (when the setting is on).
+ [ ] Tutor /tutor/reports fills the width.
+ [ ] Help & FAQs (each portal): guides and questions side by side; search still filters both.
+ [ ] Edit profile (learner, tutor): photo + details left, password right; stacks on narrow.
+ [ ] Class page (learner, tutor): sessions left; About / roster / extras right. Admin class page unchanged.
+ [ ] Tutor new class and edit class: form uses the width; edit class shows details and sessions side by side; Save still works.
+ [ ] Class request detail (learner and tutor): details left, history right.
+ [ ] Session test editor: details left, questions right; create-test step fine. Session test results: two charts side by side.
+ [ ] Learner pre/post test and tutor topic assessment: on desktop the timer and Submit stay visible on the right while scrolling the questions; on a phone the timer sticks at the top and Submit is under the questions; submitting with unanswered questions still asks to confirm; after submit, "Back to class"/"Back to assessments" shows.
+

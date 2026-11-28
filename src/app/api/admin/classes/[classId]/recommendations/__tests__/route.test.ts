@@ -109,7 +109,15 @@ describe("POST /api/admin/classes/[classId]/recommendations", () => {
 
   it("creates the recommendation and notifies the learner", async () => {
     getServerSessionMock.mockResolvedValue({ user: { id: "A1", role: "ADMIN" } });
-    classFindUnique.mockResolvedValue({ id: "c1", subject: "MATH", code: "C-0001" });
+    classFindUnique.mockResolvedValue({
+      id: "c1",
+      subject: "MATH",
+      code: "C-0001",
+      gradeLevel: "GRADE_9",
+      tutorProfile: { user: { anonymousId: "TUT-0002" } },
+      topics: [{ topic: "Fractions" }],
+      sessions: [],
+    });
     userFindFirst.mockResolvedValue({ id: "L1" });
     recommendationFindUnique.mockResolvedValue(null);
     recommendationCreate.mockResolvedValue({ id: "R1", classId: "c1", learnerId: "L1" });
@@ -123,9 +131,19 @@ describe("POST /api/admin/classes/[classId]/recommendations", () => {
     );
     expect(notificationCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ userId: "L1", type: "CLASS_RECOMMENDED_BY_ADMIN" }),
+        data: {
+          userId: "L1",
+          type: "CLASS_RECOMMENDED_BY_ADMIN",
+          message:
+            "An administrator recommended the MATH class (C-0001) for you — Grade 9, tutor TUT-0002, topics: Fractions. No upcoming session is scheduled yet.",
+          link: "/learner/classes/c1",
+        },
       })
     );
+    // The admin's note stays among admins.
+    expect(notificationCreate.mock.calls[0][0].data.message).not.toContain("Good fit");
+    // Only the next upcoming scheduled session is fetched for the message.
+    expect(classFindUnique.mock.calls[0][0].select.sessions).toMatchObject({ where: { status: "SCHEDULED" }, take: 1 });
   });
 
   it("500 when the lookup throws", async () => {

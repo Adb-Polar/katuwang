@@ -56,7 +56,7 @@ export default async function TopicRequestDetail({ id, back }: { id: string; bac
   const [firstTopic, ...otherTopics] = request.topics.map((t) => t.topic);
 
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8">
       <div className="space-y-3">
         <BackLink href={back}>Back to requests</BackLink>
         <PageHeader
@@ -66,6 +66,8 @@ export default async function TopicRequestDetail({ id, back }: { id: string; bac
         />
       </div>
 
+      {/* Wide screens: the request on the left, its history beside it. */}
+      <div className="grid gap-8 items-start xl:grid-cols-2">
       <section className="card kt-card" aria-labelledby="request-details">
         <div className="kt-card-body gap-2">
           <h2 id="request-details" className="font-serif text-2xl font-medium leading-tight">What was asked</h2>
@@ -123,6 +125,7 @@ export default async function TopicRequestDetail({ id, back }: { id: string; bac
           </ol>
         </div>
       </section>
+      </div>
     </div>
   );
 }

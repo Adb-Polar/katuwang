@@ -120,7 +120,7 @@ export default function SessionTestResults({
   const pct = (n: number | null | undefined) => (n == null ? "—" : `${n}%`);
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
       <div className="space-y-3">
         {backControl}
         <PageHeader
@@ -148,6 +148,8 @@ export default function SessionTestResults({
         </p>
       </div>
 
+      {/* Wide screens: the two charts side by side. */}
+      <div className="grid gap-6 items-start xl:grid-cols-2">
       <RateBarChart
         title="Correct answers per question, before and after"
         data={questionRateData}
@@ -159,6 +161,7 @@ export default function SessionTestResults({
       />
 
       <DeltaBar title="Change per learner (post − pre)" rows={deltaRows} />
+      </div>
 
       <section aria-labelledby="per-learner" className="kt-card">
         <h2 id="per-learner" className="font-serif text-xl font-medium px-5 py-4 border-b border-(--kt-border)">Each learner</h2>

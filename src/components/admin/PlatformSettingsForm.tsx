@@ -58,7 +58,7 @@ const SETTING_META: Record<string, { label: string; description: string; group: 
   chatbotEnabled: {
     label: "Chatbot assistant",
     description:
-      "When enabled, the in-app help assistant (navigation help, FAQs, and class recommendations) appears in every portal. When off, the widget is hidden and its API rejects requests.",
+      "When enabled, the in-app help assistant (navigation help, FAQs, and class recommendations) appears in the learner and tutor portals (never in the admin portal). When off, the widget is hidden and its API rejects requests.",
     group: "General",
   },
   sessionTestsEnabled: {

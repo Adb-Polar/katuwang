@@ -154,7 +154,7 @@ export default function EditClassForm({
     : <span className={`font-medium ${tone === "success" ? "text-success" : "text-base-content"}`}>{label}</span>;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <CatalogLoadState loading={catalogLoading} error={catalogLoadError} retry={retryCatalog} />
 
       <div className="space-y-3">
@@ -197,7 +197,7 @@ export default function EditClassForm({
 
       <ValidatedForm id="edit-class-form" onSubmit={handleSubmit} className="space-y-6">
         <fieldset disabled={locked} className="contents">
-          <div className="space-y-6">
+          <div className="grid gap-6 items-start xl:grid-cols-2">
           <section aria-labelledby="edit-details" className="card kt-card">
             <div className="kt-card-body gap-5">
               <h2 id="edit-details" className={sectionTitle}>Details</h2>

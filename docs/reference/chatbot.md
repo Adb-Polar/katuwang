@@ -17,7 +17,7 @@ Everything runs inside the app — one API route plus pure functions.
 
 | Layer | Path | Role |
 |---|---|---|
-| Widget | `src/components/chatbot/ChatWidget.tsx` | Floating launcher + chat panel, mounted in every portal by `PortalLayout` when `chatbotEnabled` is true. Transcript held in React state + `localStorage`. |
+| Widget | `src/components/chatbot/ChatWidget.tsx` | Floating launcher + chat panel, mounted by `PortalLayout` in the learner and tutor portals when `chatbotEnabled` is true; never in the admin portal (2026-11-28). Transcript held in React state + `localStorage`. |
 | | `src/components/chatbot/ChatMessage.tsx` | Renders one bubble: text, deep-link buttons, class cards, suggestion chips. |
 | | `src/components/chatbot/chatbotClient.ts` | `askChatbot(message)` → `POST /api/chatbot`. |
 | API | `src/app/api/chatbot/route.ts` | Auth, `chatbotEnabled` gate, Zod validation, loads the learner's grade level, calls `getBotReply`. |

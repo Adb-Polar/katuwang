@@ -2,7 +2,6 @@ import { getActiveServerSession } from "@/lib/serverSession";
 import { redirect } from "next/navigation";
 import { LayoutDashboard, Users, UserCheck, CalendarClock, BadgeCheck, FileQuestion, Inbox, History, Settings, ClipboardList, ClipboardCheck, Bell, Gavel, Flag, Tags, HelpCircle, MessageCircleQuestion, ListChecks, ShieldAlert, Mail } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { getSetting } from "@/lib/settings";
 import { isAdminRole, isSuperAdminRole } from "@/lib/permissions";
 import PortalLayout, { NavItem } from "@/components/layout/PortalLayout";
 
@@ -45,9 +44,8 @@ export default async function AdminLayout({
 
   const isSuperAdmin = isSuperAdminRole(session.user.role);
 
-  const [unreadCount, chatbotEnabled, openContactCount] = await Promise.all([
+  const [unreadCount, openContactCount] = await Promise.all([
     prisma.notification.count({ where: { userId: session.user.id, readAt: null } }),
-    getSetting("chatbotEnabled"),
     prisma.contactMessage.count({ where: { status: "OPEN" } }),
   ]);
 
@@ -88,7 +86,6 @@ export default async function AdminLayout({
       helpHref="/admin/help"
       profileHref="/admin/settings"
       defaultExpandedGroups={["Main menu", "Review"]}
-      chatbotEnabled={chatbotEnabled}
     >
       {children}
     </PortalLayout>

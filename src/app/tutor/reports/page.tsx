@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function TutorReportsPage() {
   return (
-    <div className="flex flex-col gap-6 max-w-3xl">
+    <div className="flex flex-col gap-6">
       <PageHeader
         eyebrow="Tutor Portal"
         title="My reports"

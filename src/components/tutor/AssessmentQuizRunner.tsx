@@ -5,7 +5,7 @@ import Link from "next/link";
 import FeedbackBanner from "@/components/ui/FeedbackBanner";
 import BackLink from "@/components/ui/BackLink";
 import PageHeader from "@/components/ui/PageHeader";
-import { QuizQuestionList, QuizResult, QuizSubmitBar, type QuizListItem } from "@/components/quiz/QuizQuestionList";
+import { QuizLayout, QuizQuestionList, QuizResult, QuizSubmitBar, type QuizListItem } from "@/components/quiz/QuizQuestionList";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import QuizCountdown from "@/components/quiz/QuizCountdown";
 import { subjectDisplayLabel } from "@/lib/displayLabels";
@@ -72,7 +72,7 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
   const practiceOnly = attempt.certificationEligible === false;
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6">
       <div className="space-y-3">
         <BackLink href="/tutor/assessments">Back to assessments</BackLink>
         <PageHeader
@@ -107,29 +107,30 @@ export default function AssessmentQuizRunner({ attempt: initial }: { attempt: Qu
       {submitted && attempt.submittedLate && (
         <FeedbackBanner variant="warning" message="This attempt was submitted after its time limit. It was still graded." />
       )}
-      {!submitted && attempt.deadlineAt && <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={doSubmit} />}
-
-      <QuizQuestionList
-        items={attempt.items}
-        answers={answers}
-        onAnswer={(questionId, optionId) => setAnswers((prev) => ({ ...prev, [questionId]: optionId }))}
-        submitted={submitted}
-        topic={attempt.topic}
-      />
-
-      {submitted ? (
-        <div className="flex justify-end">
-          <Link href="/tutor/assessments" className="btn btn-outline">Back to assessments</Link>
-        </div>
-      ) : (
-        <QuizSubmitBar
-          answered={answeredCount}
-          total={attempt.items.length}
-          submitting={submitting}
-          label="Submit assessment"
-          onSubmit={() => (allAnswered ? doSubmit() : setConfirmOpen(true))}
+      <QuizLayout
+        timer={!submitted && attempt.deadlineAt && <QuizCountdown deadlineAt={attempt.deadlineAt} onExpire={doSubmit} />}
+        action={submitted ? (
+            <div className="flex justify-end">
+              <Link href="/tutor/assessments" className="btn btn-outline">Back to assessments</Link>
+            </div>
+          ) : (
+            <QuizSubmitBar
+              answered={answeredCount}
+              total={attempt.items.length}
+              submitting={submitting}
+              label="Submit assessment"
+              onSubmit={() => (allAnswered ? doSubmit() : setConfirmOpen(true))}
+            />
+        )}
+      >
+        <QuizQuestionList
+          items={attempt.items}
+          answers={answers}
+          onAnswer={(questionId, optionId) => setAnswers((prev) => ({ ...prev, [questionId]: optionId }))}
+          submitted={submitted}
+          topic={attempt.topic}
         />
-      )}
+      </QuizLayout>
 
       <ConfirmDialog
         open={confirmOpen}

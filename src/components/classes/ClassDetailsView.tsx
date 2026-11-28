@@ -104,14 +104,13 @@ export default function ClassDetailsView({
   // The tutor's Manage menu sits beside the title; learners and admins keep their buttons after the facts.
   const headerActions = audience === "tutor" ? actions : undefined;
 
-  const main = (
-    <div className="min-w-0 space-y-6">
-      {sessions && (
-        <section className="card kt-card">
-          <div className="kt-card-body gap-1">{sessions}</div>
-        </section>
-      )}
-
+  const sessionsCard = sessions && (
+    <section className="card kt-card">
+      <div className="kt-card-body gap-1">{sessions}</div>
+    </section>
+  );
+  const details = (
+    <>
       {description && (
         <section className="card kt-card">
           <div className="kt-card-body gap-2">
@@ -128,6 +127,12 @@ export default function ClassDetailsView({
       )}
 
       {belowRoster}
+    </>
+  );
+  const main = (
+    <div className="min-w-0 space-y-6">
+      {sessionsCard}
+      {details}
     </div>
   );
 
@@ -219,7 +224,11 @@ export default function ClassDetailsView({
           <div className="min-w-0 space-y-6">{sidebarExtra}</div>
         </div>
       ) : (
-        <div className="max-w-3xl">{main}</div>
+        // Wide screens: sessions on the left, description / roster / extras beside them.
+        <div className="grid gap-6 items-start xl:grid-cols-2">
+          <div className="min-w-0 space-y-6">{sessionsCard}</div>
+          <div className="min-w-0 space-y-6">{details}</div>
+        </div>
       )}
     </div>
   );

@@ -132,6 +132,11 @@ platform-wide settings. (`POST /api/admin/profile/password`, `401` on a wrong cu
 - **Assessment time limit** (2026-11-26) — "Time limit (minutes)" in the Assessment settings: minutes a tutor has per certification-quiz attempt, 0 for none, at most 180 (`assessmentTimeLimitMinutes`, `PATCH /api/admin/assessment-configs`).
 - **Allowed email domains** (2026-11-26) — a comma-separated list such as `school.edu.ph, deped.gov.ph`. When it has entries, `POST /api/register` and admin invitations reject any other domain and name the approved ones; empty accepts every domain. Existing accounts are not affected. Stored as the `allowedEmailDomains` platform setting (`PATCH /api/admin/settings` with `{ key: "allowedEmailDomains", value: "…" }`).
 
+## Top-bar search (`/admin/search`)
+
+- One box in the top bar with a **Tutor / Student / Class** picker (since 2026-11-28; it used to offer Everything, Tutor code, Subject, Topic, Class code). Tutor and Student match that role's accounts by name, email or anonymous ID and open the user's page; Class matches class code, subject or topic and opens Classes filtered to that code. An empty Tutor result offers "Search students instead" and vice versa.
+  (`GET /api/search?q=&scope=tutor|student|class`)
+
 ## Dashboard & Analytics (`/admin`)
 
 One page (since 2026-11-26; `/admin/reports` redirects here):
@@ -171,7 +176,7 @@ One page (since 2026-11-26; `/admin/reports` redirects here):
 
 ## Chatbot assistant
 
-- The same floating **intent-based** help widget shown to learners and tutors also appears in the admin portal (nav help for Registrations, Tutor certifications, Question Bank, moderation, Reports, Settings; plus general FAQs). Rule/keyword matching — not a generative AI.
+- **No chat widget in the admin portal** (since 2026-11-28 — see `docs/reference/decisions.md`). The floating help widget appears only for learners and tutors; admins use Help & FAQs. The **Chatbot** page still reviews what learners and tutors asked that it could not answer.
 - **Toggle:** *Settings → Chatbot assistant* (`chatbotEnabled`, default ON). When off, the widget is hidden everywhere and `POST /api/chatbot` returns `403`.
 - **Unmatched queries** are logged to the `chatbot_misses` table (`message`, `role`, `userId`, `createdAt`).
   (`POST /api/chatbot` — not admin-gated)
@@ -274,7 +279,7 @@ List, or create, a `ClassRecommendation` directing this class at a specific lear
 ```json
 { "learnerId": "string (a STUDENT_LEARNER user id)", "note": "string (≤500 chars, optional)" }
 ```
-- Creates the row and sends the learner a `CLASS_RECOMMENDED_BY_ADMIN` notification linking to the class, in the same transaction.
+- Creates the row and sends the learner a `CLASS_RECOMMENDED_BY_ADMIN` notification linking to the class, in the same transaction. Since 2026-11-28 the message names the class's grade, tutor anonymous ID, up to three topics and next scheduled session; the admin's note is never included.
 
 **GET 200** → `{ recommendations: [{ id, note, createdAt, dismissedAt, learner: { anonymousId, gradeLevel, section } }] }`.
 **POST 201** → the created `ClassRecommendation`.

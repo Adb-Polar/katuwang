@@ -1,10 +1,8 @@
 /** Scope choices for the top-bar search box and the search results page. Values match `/api/search?scope=`. */
 export const ADMIN_SCOPES = [
-  { value: "all", label: "Everything", placeholder: "Classes, tutors, topics…" },
-  { value: "tutorCode", label: "Tutor code", placeholder: "e.g. TUT-0007" },
-  { value: "subject", label: "Subject", placeholder: "e.g. Mathematics" },
-  { value: "topic", label: "Topic", placeholder: "e.g. Fractions" },
-  { value: "classCode", label: "Class code", placeholder: "e.g. CUR-0086" },
+  { value: "tutor", label: "Tutor", placeholder: "Name, email or TUT code…" },
+  { value: "student", label: "Student", placeholder: "Name, email or STU code…" },
+  { value: "class", label: "Class", placeholder: "Subject, topic or class code…" },
 ] as const;
 export const LEARNER_SCOPES = [
   { value: "tutor", label: "Tutor", placeholder: "Name or TUT code…" },
@@ -36,7 +34,9 @@ export function fallbackScope(audience: SearchAudience, scope: Scope): { scope: 
       ? { scope: "class", label: "Search classes instead" }
       : { scope: "tutor", label: "Search tutors instead" };
   }
-  return scope === "all" ? null : { scope: "all", label: "Search everything instead" };
+  if (scope === "tutor") return { scope: "student", label: "Search students instead" };
+  if (scope === "student") return { scope: "tutor", label: "Search tutors instead" };
+  return null;
 }
 
 export function searchPageHref(audience: SearchAudience, q: string, scope: Scope): string {

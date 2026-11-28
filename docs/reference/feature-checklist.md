@@ -95,7 +95,7 @@ Legend: ✅ implemented · ⚠️ partial · ❌ not implemented
 | Navigation help intents | ✅ | Per-role deep links into every portal section, including Help & FAQs, global search, and admin moderation queues |
 | FAQ knowledge base | 🟡 | `faq.ts` — 26 entries, each grounded in a role doc or codebase fact; the `/admin/chatbot` review page (below) now closes the grow-from-misses loop, still pending real TRIS stakeholder interviews |
 | Session recommendation intent (learner) | ✅ | `recommend.ts` — extracts subject/topic from the message and ranks live classes via the existing `rankMatches` engine; falls back to "post a topic request" |
-| Chat UI widget | ✅ | `src/components/chatbot/ChatWidget.tsx` — floating launcher in every portal, `localStorage` transcript, quick-reply chips, class cards |
+| Chat UI widget | ✅ | `src/components/chatbot/ChatWidget.tsx` — floating launcher in the learner and tutor portals (removed from admin 2026-11-28, see `decisions.md`), `localStorage` transcript, quick-reply chips, class cards |
 | Admin on/off toggle | ✅ | `chatbotEnabled` platform setting (default ON) on `/admin/settings`; route 403s + widget hides when off |
 | Unmatched-query logging | ✅ | `chatbot_misses` table (`ChatbotMiss` model), surfaced at `/admin/chatbot` — grouped by normalised wording, role-filterable, sortable (Changes.md Part 30) |
 

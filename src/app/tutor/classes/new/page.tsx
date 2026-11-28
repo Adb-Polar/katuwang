@@ -31,7 +31,7 @@ export default async function NewClassPage() {
   const tutorGradeLevel = tutorUser?.gradeLevel ?? session?.user?.gradeLevel ?? null;
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
       <div className="space-y-3">
         <BackLink href="/tutor/classes">Back to your classes</BackLink>
         <PageHeader

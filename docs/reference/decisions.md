@@ -499,3 +499,16 @@ certification. When enabled, exact certified subject/topic checks apply to
 browsing, saving and reopening linked tests. This aligns the bank with the
 owner-authorized class-creation mode; it does not grant certifications or change
 the separate approved-content/evidence requirements for qualification quizzes.
+
+## No chat widget in the admin portal (2026-11-28)
+
+**What:** The floating chatbot widget is shown only in the learner and tutor portals. `src/app/admin/layout.tsx`
+no longer passes `chatbotEnabled`, and the admin Help page no longer mentions the chat helper. The admin
+**Chatbot** page (unanswered-question review) and the `chatbotEnabled` setting stay.
+
+**Why:** The project owner asked to remove it from the admin portal (2026-11-28). Admins have the Help page and
+the full sidebar; the assistant is aimed at students.
+
+**Implication for agents:** Don't re-add `ChatWidget` to the admin layout. The ADMIN-role intents in
+`src/lib/chatbot/intents.ts` are now unreachable from the UI; leave them unless asked to clean them up.
+

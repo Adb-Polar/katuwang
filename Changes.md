@@ -8,6 +8,10 @@
 
 | # | Feature | Brief description | Brief implementation details |
 |---|---------|------------------|-----------------------------|
+| [109](#part-109) | **Wide-screen pass across all portals + no chat widget for admins (`feat/ui-ux-batch`)** | Pages that stopped at a narrow column now use the full width on wide screens, mostly as two columns that stack on smaller screens: tutor My reports, Help (all portals), edit profile, class pages (learner + tutor), new/edit class, class request detail, session test editor and results, and the learner test / tutor assessment quiz pages (timer and Submit stay in view beside the questions). The floating chatbot no longer appears in the admin portal. No schema change. | See Part 109 below. |
+| [108](#part-108) | **Admin search picker is Tutor / Student / Class (`feat/ui-ux-batch`)** | The admin top-bar search offered Everything, Tutor code, Subject, Topic and Class code. It now offers only **Tutor**, **Student** and **Class**: tutors and students are searched separately by name, email or ID, and Class matches code, subject or topic. Learner search is unchanged. No schema change. | See Part 108 below. |
+| [107](#part-107) | **Tutor's student page fills wide screens (`feat/ui-ux-batch`)** | `/tutor/students/[id]` no longer stops at a narrow column. On wide screens the classes list sits beside two new cards: **At a glance** (active classes, sessions tested, average pre→post change) and **Session test results** (the learner's pre/post scores in your classes, linking to each test). Stacks to one column on smaller screens. No schema change. | See Part 107 below. |
+| [106](#part-106) | **Class recommendation notifications say more and show a "View class" link (`feat/ui-ux-batch`)** | When an admin recommends a class, the learner's notification now names the grade, the tutor's anonymous ID, up to three topics and the next scheduled session, and the row shows a visible "View class →" cue (other linked notifications show "Open →"). The admin's note stays admin-only. No schema change. | See Part 106 below. |
 | [105](#part-105) | **Sidebar: "Certifications" renamed "Tutor certifications" (`feat/ui-ux-batch`)** | The Assessment entry for approving tutors' topic certifications read too close to "Certificates" (learners' completion certificates). It now matches its page title. Chatbot link and help text follow. No schema change. | See Part 105 below. |
 | [104](#part-104) | **Per-chart analytics filters (`feat/ui-ux-batch`)** | The admin dashboard's single "Filter the charts" panel is gone. Each chart now has its own filter row with only the filters that apply to it (the field a chart groups by is never offered), its own Clear button, and loads on its own. The enrollment stat cards and trend share one row (period, grade level, subject). No schema change. | See Part 104 below. |
 | [103](#part-103) | **Catalog seed no longer times out on a remote database** | `pnpm seed` and the essentials seed failed against the production database with a transaction timeout after three minutes. The import now writes topics in bulk and finishes in about a fifth of the database calls; the result is identical. Seed transactions also get a 10-minute limit, adjustable with `SEED_TRANSACTION_TIMEOUT_MS`. | See Part 103 below. |
@@ -4099,6 +4103,94 @@ Implemented a comprehensive, end-to-end grade restriction system enforcing acade
 - All 113 test files and 874 tests passing (`pnpm exec vitest run`).
 - `pnpm exec tsc --noEmit` clean (0 errors).
 - `pnpm lint` clean (0 errors).
+
+<a id="part-109"></a>
+## Part 109 — Wide-screen pass across all portals + no chat widget for admins (2026-11-28)
+
+### Empty space on wide screens
+Searched every portal page and shared page component for a width cap (`max-w-3xl` / `max-w-4xl`). Each one now
+fills the width; two-column splits use the `xl` breakpoint and stack below it.
+
+| Page | Change |
+|---|---|
+| Tutor My reports (`src/app/tutor/reports/page.tsx`) | cap removed (full-width list) |
+| Help & FAQs, all portals (`HelpCenter`) | cap removed; How-to guides and Questions side by side |
+| Edit profile, learner + tutor (`ProfileEditView`) | photo + details left, password right (profile page's 3:2 split) |
+| Class page, learner + tutor (`ClassDetailsView`, no-sidebar case) | sessions left; description, roster and extras right. Admin class page already had a sidebar |
+| Schedule a class (`tutor/classes/new`) | cap removed; the form's page variant already lays sessions out across the width |
+| Edit class (`EditClassForm`) | details and sessions side by side |
+| Class request detail, learner + tutor (`TopicRequestDetail`) | "What was asked" left, History right |
+| Session test editor (`SessionTestBuilder`) | test details left, questions right (2:3); create-test step uncapped |
+| Session test results (`SessionTestResults`) | cap removed; the two charts side by side |
+| Learner pre/post test + tutor topic assessment (`SessionTestRunner`, `AssessmentQuizRunner`) | new `QuizLayout` (`QuizQuestionList.tsx`): questions left, a 20rem column on the right with the timer and Submit, kept in view while scrolling. Narrow screens keep the timer on top (sticky) and Submit below the questions |
+
+Left narrow on purpose: answer explanations and FAQ answers (`max-w-prose`), modals, small inline forms
+(delete account, recovery email), and the "class not found" empty state.
+
+### Chatbot widget removed from the admin portal
+`src/app/admin/layout.tsx` no longer passes `chatbotEnabled` to `PortalLayout`; the admin Help page no longer offers
+the chat helper. The admin **Chatbot** misses page and the setting stay. Setting text, help FAQ, `ADMIN.md`,
+`chatbot.md`, `feature-checklist.md` updated; logged in `decisions.md`.
+
+**Verification.** `pnpm test`: 210 files / 1,835 tests passing. `tsc --noEmit` clean, `pnpm lint` 0 errors.
+Layouts not yet checked in a browser — see TOTEST.
+
+<a id="part-108"></a>
+## Part 108 — Admin search picker is Tutor / Student / Class (2026-11-28)
+
+- `src/lib/searchScopes.ts`: `ADMIN_SCOPES` is now `tutor` (default), `student`, `class`. An old link with another
+  scope (e.g. `?scope=all`) opens as Tutor. An empty Tutor search offers "Search students instead" and vice versa;
+  Class offers nothing.
+- `GET /api/search`: new `student` scope. For admins, `tutor`/`student` search only `STUDENT_TUTOR`/`STUDENT_LEARNER`
+  accounts by anonymous ID, first/last name or email (groups "Tutors"/"Students"), with no classes or topic catalog;
+  `class` matches class code, subject (name or slug) and topic, with no accounts. The older scopes still work for
+  the tutor portal and old links.
+- Tests: `src/lib/__tests__/searchScopes.test.ts` updated; two admin scope tests added to `src/app/api/search/__tests__/route.test.ts`.
+- `docs/roles/ADMIN.md`: new "Top-bar search" section.
+
+<a id="part-107"></a>
+## Part 107 — Tutor's student page fills wide screens (2026-11-28)
+
+### Why
+`/tutor/students/[studentId]` was capped at `max-w-3xl`, leaving the right half of a desktop screen empty.
+
+### What changed
+- `src/app/tutor/students/[studentId]/page.tsx`: cap removed; the ID band spans the width. Below it, the same
+  two-column grid as the profile page (`xl:grid-cols-[3fr_2fr]`): "Classes with you" left, and on the right:
+  - **At a glance** — active (not withdrawn) classes with you, sessions with a submitted test, and the average
+    post-minus-pre change in points over sessions where both were taken ("—" when none).
+  - **Session test results** — one row per session: topic (links to `/tutor/classes/[id]/sessions/[id]/test`),
+    class code and date, pre % and post % ("—" if not taken). Only submitted attempts in this tutor's classes.
+- New `src/lib/studentTestSummary.ts` (`studentSessionResults`, `averageGain`) + `src/lib/__tests__/studentTestSummary.test.ts`.
+- Privacy unchanged: still only the learner's anonymous ID, grade and section.
+
+**Verification.** New unit tests pass (4); `tsc --noEmit` clean; eslint clean on the changed files.
+
+<a id="part-106"></a>
+## Part 106 — Class recommendation notifications say more and show a "View class" link (2026-11-28)
+
+### Why
+The learner saw only "An administrator recommended a Arts class (C-0010) for you." The row already opened
+the class on click, but nothing showed it was clickable, and the learner had to open it to learn anything.
+
+### What changed
+- **New `src/lib/classRecommendation.ts`** — `classRecommendationMessage()` builds the text: subject and code,
+  grade, tutor anonymous ID (never a real name — RA 10173), up to three topics ("and N more"), and the next
+  scheduled session in PHT, or "No upcoming session is scheduled yet." Also fixes "a Arts" → "the Arts class".
+  Example: *An administrator recommended the Arts class (C-0010) for you — Grade 8, tutor TUT-0002, topics:
+  Color theory, Drawing. Next session: Dec 1, 2026, 3:00 PM.*
+- **`POST /api/admin/classes/[classId]/recommendations`** loads the grade, tutor's anonymous ID, topics and next
+  upcoming `SCHEDULED` session for that message. The link (`/learner/classes/[id]`) is unchanged.
+- **The admin's note is not included**: the form says it is "shown only to you and other admins, not the learner".
+- **Notifications page** (`NotificationList`): rows with a link now show "View class →" for recommendations and
+  "Open →" for other linked notifications (`notificationLinkLabel` in `notificationMeta.tsx`).
+- Existing notifications keep their old text; only new recommendations get the longer message.
+
+### Tests
+New `src/lib/__tests__/classRecommendation.test.ts`; the recommendation route test now checks the full message,
+the link, that the note is not in it, and that only the next scheduled session is fetched.
+
+**Verification.** `pnpm test`: 209 files / 1,828 tests passing. `tsc --noEmit` clean, `pnpm lint` 0 errors.
 
 <a id="part-105"></a>
 ## Part 105 — Sidebar: "Certifications" renamed "Tutor certifications" (2026-11-28)

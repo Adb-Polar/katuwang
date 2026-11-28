@@ -161,3 +161,21 @@ export function QuizSubmitBar({
     </div>
   );
 }
+
+/**
+ * Quiz page body. Wide screens: questions on the left, the timer and submit action beside them and kept in view.
+ * Narrow screens: the timer stays on top (the aside becomes `contents`, so its sticky timer still sticks) and the
+ * action sits under the questions.
+ */
+export function QuizLayout({ timer, action, children }: { timer?: ReactNode; action: ReactNode; children: ReactNode }) {
+  return (
+    <div className="grid gap-6 items-start xl:grid-cols-[minmax(0,1fr)_20rem]">
+      <aside className="contents xl:order-last xl:sticky xl:top-6 xl:block xl:space-y-4">
+        {timer}
+        <div className="hidden xl:block">{action}</div>
+      </aside>
+      <div className="min-w-0">{children}</div>
+      <div className="xl:hidden">{action}</div>
+    </div>
+  );
+}

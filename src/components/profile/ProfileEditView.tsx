@@ -43,12 +43,15 @@ export default function ProfileEditView({
   profilePictureLocked?: boolean;
 }) {
   return (
-    <div className="space-y-8 max-w-3xl">
+    <div className="space-y-8">
       <div className="space-y-3">
         <BackLink href={backHref}>Back to profile</BackLink>
         <PageHeader eyebrow={eyebrow} title="Edit your details" />
       </div>
 
+      {/* Wide screens: photo and details on the left, password beside them (same split as the profile page). */}
+      <div className="grid gap-8 items-start xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="space-y-8">
       <EditSection id="edit-photo" title="Photo" note="A PNG, JPG or WebP image, up to 2MB.">
         <ProfilePictureUpload initialImage={image} locked={profilePictureLocked} />
       </EditSection>
@@ -61,10 +64,12 @@ export default function ProfileEditView({
           initialGradeLevel={gradeLevel}
         />
       </EditSection>
+        </div>
 
       <EditSection id="edit-password" title="Password" note="You'll be signed out after changing it.">
         <ChangePasswordForm endpoint={`${endpoint}/password`} />
       </EditSection>
+      </div>
     </div>
   );
 }

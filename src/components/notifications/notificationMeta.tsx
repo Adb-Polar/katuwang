@@ -37,6 +37,12 @@ export function notificationKind(type: string): NotificationKind {
   return "Update";
 }
 
+/** Visible cue on a notification that opens a page, so it is clear the row is clickable. */
+export function notificationLinkLabel(type: string): string {
+  if (type === "CLASS_RECOMMENDED_BY_ADMIN") return "View class";
+  return "Open";
+}
+
 export const TYPE_ICON: Record<string, ReactNode> = {
   TOPIC_REQUEST_DIRECTED: REQUEST,
   TOPIC_REQUEST_ACCEPTED: REQUEST,
